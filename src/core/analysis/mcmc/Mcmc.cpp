@@ -591,7 +591,7 @@ void Mcmc::initializeSampler( bool prior_only )
     {
         // a flag if we failed to find a valid starting value
         bool failed = false;
-        
+                
         ln_probability = 0.0;
         for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
         {

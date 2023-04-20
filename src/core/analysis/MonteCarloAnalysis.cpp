@@ -203,11 +203,10 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
         ss << "This simulation runs " << replicates << " independent replicate" << (replicates > 1 ? "s" : "") << ".\n";
         ss << runs[0]->getStrategyDescription();
         RBOUT( ss.str() );
-        
+                
         // Print progress bar (68 characters wide)
         progress.start();
     }
-    
     
     // Run the chain
     for (size_t k=1; k<=generations; ++k)
@@ -469,6 +468,12 @@ void MonteCarloAnalysis::resetReplicates( void )
         throw RbException("Bug: No template sampler found!");
     }
     
+    // SH: to be safe, we disable parallel computation in the initialization
+    // If we don't do this reset, then the number of cores used for the likelihood computation stays at the original value, even though
+    // not all processes will be evaluating this replicate. Thus, the internal likelihood might think there are 2 cores to compute
+    // the likelihood while only 1 is actually available.
+    m->setActivePID( pid, 1 );
+    
     std::vector< size_t > replicate_indices_start = std::vector<size_t>(num_processes,0);
     std::vector< size_t > replicate_indices_end   = std::vector<size_t>(num_processes,0);
     
@@ -505,7 +510,7 @@ void MonteCarloAnalysis::resetReplicates( void )
         replicate_pid_end   += active_PID;
 
         int number_processes_per_replicate = int(replicate_pid_end) - int(replicate_pid_start) + 1;
-
+        
         if ( pid >= replicate_pid_start && pid <= replicate_pid_end )
         {
             no_sampler_set = false;
@@ -518,7 +523,7 @@ void MonteCarloAnalysis::resetReplicates( void )
             {
                 runs[i] = m->clone();
             }
-            
+
             runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );
             //            runs[i]->setMasterSampler( i == 0 );
         }
@@ -606,7 +611,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
 #endif
 {
-    
     // get the current generation
     size_t gen = 0;
     for (size_t i=0; i<replicates; ++i)
@@ -792,6 +796,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
     } while ( finished == false && converged == false);
 
     
+    std::cout << pid << ": finished MCMC!" << std::endl;
 #ifdef RB_MPI
     // wait until all replicates complete
     MPI_Barrier( analysis_comm );
@@ -1014,7 +1019,7 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
  */
 void MonteCarloAnalysis::setActivePIDSpecialized(size_t a, size_t n)
 {
-    
+
 #ifdef RB_MPI
     MPI_Comm analysis_comm;
     MPI_Comm_split(MPI_COMM_WORLD, active_PID, pid, &analysis_comm);

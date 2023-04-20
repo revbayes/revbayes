@@ -582,6 +582,7 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
     
     stored_clades          = active_clades;
     stored_backbone_clades = active_backbone_clades;
+
 }
 
 

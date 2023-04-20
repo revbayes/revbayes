@@ -884,7 +884,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // That means we should probabily call this function as a job,
     // where a job is defined as computing the lnProbability for a subset of the data (block)
     // Sebastian: this call is very slow; a lot of work happens in nextCycle()
-    
 
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us
@@ -894,7 +893,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         dirty_nodes = std::vector<bool>(num_nodes, true);
         pmat_dirty_nodes = std::vector<bool>(num_nodes, true);
     }
-
+    
     // update transition probability matrices
     this->updateTransitionProbabilityMatrices();
 
@@ -909,7 +908,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
-
+    
     // only necessary if the root is actually dirty
     if ( dirty_nodes[root_index] == true )
     {
@@ -923,7 +922,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             const TopologyNode &right = root.getChild(1);
             size_t right_index = right.getIndex();
             fillLikelihoodVector( right, right_index );
-
+            
             computeRootLikelihood( root_index, left_index, right_index );
             scale(root_index, left_index, right_index);
 
@@ -948,11 +947,13 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         {
             throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
         }
-
+        
+//        std::cout << "sum root (" << pid << "," << num_processes << ")" << std::endl;
         // sum the partials up
         this->lnProb = sumRootLikelihood();
 
     }
+//    std::cout << "final lnProb = " << this->lnProb << std::endl;
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( in_mcmc_mode == false )
@@ -1444,13 +1445,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
         success = recursivelyDrawStochasticCharacterMap(left,  character_histories, start_states, end_states, site, use_simmap_default);
         success &= recursivelyDrawStochasticCharacterMap(right, character_histories, start_states, end_states, site, use_simmap_default);
 
-        if (n_draws != 0) {
+        if (n_draws != 0)
+        {
             std::cout << "Warning: numerical instability in P(t)=exp(Qt) caused stochastic mapping to fail (attempt: " << n_draws << "/" << max_draws << ")\n";
         }
         n_draws++;
     }
 
-    if (n_draws == max_draws) {
+    if (n_draws == max_draws)
+    {
         throw RbException("Stochastic mapping failed due to numerical instability.");
     }
 
@@ -2907,6 +2910,7 @@ template <class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setActivePIDSpecialized(size_t a, size_t n)
 {
 
+//    std::cout << "Active = " << a << "\t\t#procs = " << n << std::endl;
     // we need to recompress the data
     this->compress();
 }
@@ -3894,7 +3898,9 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::sumRootLikeliho
 
     std::vector<double> site_likelihoods = std::vector<double>(pattern_block_size,0.0);
     computeRootLikelihoods( site_likelihoods );
-
+    
+//    std::cout << "computed root likelihoods" << std::endl;
+    
     double sum_partial_probs = 0.0;
 
     for (size_t site = 0; site < pattern_block_size; ++site)

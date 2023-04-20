@@ -64,53 +64,6 @@
 
 using namespace RevBayesCore;
 
-using std::string;
-
-double Mcmcmc::heatForChain(int i) const
-{
-    return chain_heats[i];
-}
-
-bool Mcmcmc::isColdChain(int i) const
-{
-    return heatForChain(i) == 1.0;
-}
-
-double Mcmcmc::heatForIndex(int i) const
-{
-    // Can we just maintain a sorted list of chain heats that is always valid?
-    std::vector<double> tmp_chain_heats = chain_heats;
-    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-    return tmp_chain_heats[i];
-}
-
-int Mcmcmc::heatIndexForChain(int j) const
-{
-    std::vector<double> tmp_chain_heats = chain_heats;
-    std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-
-    return std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
-}
-
-int Mcmcmc::chainForHeatIndex(int i) const
-{
-    return std::find(chain_heats.begin(), chain_heats.end(), heatForIndex(i)) - chain_heats.begin();
-/*
-    // 1. Start with [0 .. num_chains-1]
-    std::vector<int> tmp_heat_ranks;
-    for(int i=0;i<num_chains;i++)
-        tmp_heat_ranks.push_back(i);
-
-    // 2. Chains with greater heat come first.
-    sort(tmp_heat_ranks.begin(),
-         tmp_heat_ranks.end(),
-         [&](int j, int k) { return chain_heats[j] > chain_heats[k];} );
-
-    // 3. Get the chain index for heat index i;
-    return tmp_heat_ranks[i];
-*/
-}
-
 Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor> &mn, std::string sT, size_t nc, size_t si, double dt, size_t ntries, bool th, double tht, std::string sm, std::string smo) : MonteCarloSampler( ),
     num_chains(nc),
     schedule_type(sT),
@@ -259,17 +212,23 @@ void Mcmcmc::addMonitor(const Monitor &m)
     
 }
 
-
-double Mcmcmc::computeBeta(double d, size_t idx)
+int Mcmcmc::chainForHeatIndex(int i) const
 {
-    
-    return 1.0 / (1.0+delta*idx);
-}
+    return std::find(chain_heats.begin(), chain_heats.end(), heatForIndex(i)) - chain_heats.begin();
+/*
+    // 1. Start with [0 .. num_chains-1]
+    std::vector<int> tmp_heat_ranks;
+    for(int i=0;i<num_chains;i++)
+        tmp_heat_ranks.push_back(i);
 
+    // 2. Chains with greater heat come first.
+    sort(tmp_heat_ranks.begin(),
+         tmp_heat_ranks.end(),
+         [&](int j, int k) { return chain_heats[j] > chain_heats[k];} );
 
-Mcmcmc* Mcmcmc::clone(void) const
-{
-    return new Mcmcmc(*this);
+    // 3. Get the chain index for heat index i;
+    return tmp_heat_ranks[i];
+*/
 }
 
 
@@ -286,6 +245,19 @@ void Mcmcmc::checkpoint( void ) const
         
     }
     
+}
+
+
+Mcmcmc* Mcmcmc::clone(void) const
+{
+    return new Mcmcmc(*this);
+}
+
+
+double Mcmcmc::computeBeta(double d, size_t idx)
+{
+    
+    return 1.0 / (1.0+delta*idx);
 }
 
 
@@ -396,6 +368,27 @@ std::string Mcmcmc::getStrategyDescription( void ) const
     return description;
 }
 
+double Mcmcmc::heatForChain(int i) const
+{
+    return chain_heats[i];
+}
+
+double Mcmcmc::heatForIndex(int i) const
+{
+    // Can we just maintain a sorted list of chain heats that is always valid?
+    std::vector<double> tmp_chain_heats = chain_heats;
+    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
+    return tmp_chain_heats[i];
+}
+
+int Mcmcmc::heatIndexForChain(int j) const
+{
+    std::vector<double> tmp_chain_heats = chain_heats;
+    std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
+
+    return std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
+}
+
 
 void Mcmcmc::initializeChains(void)
 {
@@ -481,6 +474,11 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
         
     }
     
+}
+
+bool Mcmcmc::isColdChain(int i) const
+{
+    return heatForChain(i) == 1.0;
 }
 
 
@@ -1102,10 +1100,9 @@ void Mcmcmc::resetCounters( void )
         {
             num_attempted_swaps[i][j] = 0;
             num_accepted_swaps[i][j] = 0;
-//            std::cout << "num_attempted_swaps[" << i << "][" << j << "]=" << num_attempted_swaps[i][j] << ", num_accepted_swaps[" << i << "][" << j << "]=" << num_accepted_swaps[i][j] << "; ";
         }
     }
-//    std::cout << std::endl;
+    
 }
 
 
@@ -1279,11 +1276,9 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         if ( chains[j] != NULL )
         {
             results[j] = chains[j]->getModelLnProbability(likelihood_only);
-//            std::cout << "results[" << j << "]=" << results[j] << ", ";
         }
         
     }
-//    std::cout << std::endl;
     
 #ifdef RB_MPI
     if ( active_PID != pid )
@@ -1698,7 +1693,6 @@ void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
     double lnPj = chain_values[j];
     double lnPk = chain_values[k];
     double lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
-    //        std::cout << "bj=" << bj << ", bk=" << bk << ", lnPj=" << lnPj << ", lnPk=" << lnPk << ", lnR=" << lnR << std::endl;
 
     // determine whether we accept or reject the chain swap
     double u = GLOBAL_RNG->uniform01();
@@ -1802,8 +1796,6 @@ void Mcmcmc::tune( void )
         
         for (size_t i = 1; i < num_chains; ++i)
         {
-//            std::cout << ", num_accepted_swaps[" << i - 1 << "][" << i << "]=" << num_accepted_swaps[i - 1][i] << ", num_accepted_swaps[" << i << "][" << i - 1 << "]=" << num_accepted_swaps[i][i - 1] << std::endl;
-//            std::cout << ", num_attempted_swaps[" << i - 1 << "][" << i << "]=" << num_attempted_swaps[i - 1][i] << ", num_attempted_swaps[" << i << "][" << i - 1 << "]=" << num_attempted_swaps[i][i - 1] << std::endl;
             
             size_t num_attempted_swaps_neighbor = num_attempted_swaps[i - 1][i] + num_attempted_swaps[i][i - 1];
             if ( num_attempted_swaps_neighbor > 2 ) {
@@ -1820,7 +1812,6 @@ void Mcmcmc::tune( void )
                     heats_diff[i - 1] /= (2.0 - rate / tune_heat_target);
                 }
                 
-//                std::cout << "rate=" << rate << ", heats_diff[" << i - 1 << "]=" << heats_diff[i - 1] << std::endl;
             }
         }
         
@@ -1842,7 +1833,7 @@ void Mcmcmc::tune( void )
             {
                 colderChainIdx = hotterChainIdx;
             }
-//            std::cout << "chain_heats[" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
+
         }
         
         // if the heat of a given hot chain is smaller than the minimum bound
@@ -1856,7 +1847,6 @@ void Mcmcmc::tune( void )
             for (; k < num_chains; ++k)
             {
                 chain_heats[hotterChainIdx] = chain_heats[colderChainIdx] / pow(rho, k + 1 - j);
-//                std::cout << "chain_heats[k" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
             }
         }
         

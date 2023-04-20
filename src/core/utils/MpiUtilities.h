@@ -4,6 +4,8 @@
 #include <mpi.h>
 #endif
 
+#define DEBUG_MPI_MCA
+
 #include <sstream>
 
 namespace RevBayesCore {
