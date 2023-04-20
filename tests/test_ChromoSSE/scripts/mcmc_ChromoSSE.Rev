@@ -22,7 +22,7 @@ chromo_data = readCharacterDataDelimited("data/aristolochia_chromosome_count.tsv
 # some useful variables
 ana_events = 2
 rho_bd = 1.0
-mcmc_iterations = 2
+mcmc_iterations = 10
 sample_freq = 1
 mi = 1
 
@@ -115,7 +115,6 @@ chromotree.clamp(psi)
 chromotree.clampCharData(chromo_data)
 
 chromotree.lnProbability()
-#q()
 
 # set up monitors and run MCMC
 monitors[1] = mnFile(filename="output/mcmc_ChromoSSE.out", printgen=sample_freq, clado_demipoly, clado_fission, clado_fusion, clado_no_change, clado_polyploid, delta, delta_l, eta, gamma, gamma_l, root_frequencies, turnover)
@@ -123,7 +122,7 @@ monitors[2] = mnScreen(printgen=sample_freq)
 
 mymodel = model(chromotree)
 
-mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 mymcmc.run(generations=mcmc_iterations)
 
 setOption("useScaling","true")
