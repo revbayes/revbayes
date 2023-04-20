@@ -77,7 +77,7 @@ else
 endif
 
 if get_option('beagle')
-  add_project_arguments(['-DRB_BEAGLE','-DRB_BEAGLE_DEBUG'], language : 'cpp')
+  add_project_arguments(['-DRB_BEAGLE','-DRB_BEAGLE_DEBUG','-DRB_USE_EIGEN3'], language : 'cpp')
   hmsbeagle = dependency('hmsbeagle-1')
   eigen = dependency('eigen3')
   beagle = [hmsbeagle,eigen]
