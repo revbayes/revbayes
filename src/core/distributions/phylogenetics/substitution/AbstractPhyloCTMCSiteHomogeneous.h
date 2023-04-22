@@ -1584,24 +1584,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     }
 
     // now sample a character history for the branch leading to this node
-    double start_age;
-    double end_age;
-    if (RbMath::isFinite( node.getAge() ) == true)
-    {
-        start_age = node.getParent().getAge();
-        end_age = node.getAge();
-    }
-    else
-    {
-        double branch_length = node.getBranchLength();
-        if (branch_length < 0.0)
-        {
-            branch_length = 1.0;
-        }
-        start_age = branch_length;
-        end_age = 0.0;
-    }
-
+    auto [start_age, end_age] = getStartEndAge(node);
 
     // simulate stochastic map
     transition_states.push_back(end_state);
@@ -4165,16 +4148,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
     }
 
-    double end_age = node->getAge();
-
-    // if the tree is not a time tree, then the age will be not a number
-    if ( RbMath::isFinite(end_age) == false )
-    {
-        // we assume by default that the end is at time 0
-        end_age = 0.0;
-    }
-    double start_age = end_age + node->getBranchLength();
-
+    auto [start_age, end_age] = getStartEndAge(*node);
 
     // second, get the clock rate for the branch
     double rate = 1.0;
@@ -4290,15 +4264,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     // we rescale the rate by the inverse of the proportion of invariant sites
     rate /= ( 1.0 - getPInv() );
     
-    double end_age = node->getAge();
-    
-    // if the tree is not a time tree, then the age will be not a number
-    if ( RbMath::isFinite(end_age) == false )
-    {
-        // we assume by default that the end is at time 0
-        end_age = 0.0;
-    }
-    double start_age = end_age + node->getBranchLength();
+    auto [start_age, end_age] = getStartEndAge(*node);
     
     // first, get the rate matrix for this branch
     RateMatrix_JC jc(this->num_chars);
