@@ -2411,6 +2411,8 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void )
 {
 
+	return;
+
     bool do_mask = this->dag_node != NULL && this->dag_node->isClamped() && gap_match_clamped;
     std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
     std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
