@@ -1,0 +1,31 @@
+#NEXUS
+
+Begin data;
+Dimensions ntax=23 nchar=3;
+Format datatype=Standard missing=? gap=- labels="01";
+Matrix
+    Alouatta_palliata	100
+    Aotus_trivirgatus	100
+    Callicebus_donacophilus	100
+    Cebus_albifrons	100
+    Cheirogaleus_major	010
+    Chlorocebus_aethiops	010
+    Colobus_guereza	010
+    Daubentonia_madagascariensis	010
+    Galago_senegalensis	010
+    Hylobates_lar	001
+    Lemur_catta	010
+    Lepilemur_hubbardorum	010
+    Loris_tardigradus	001
+    Macaca_mulatta	011
+    Microcebus_murinus	010
+    Nycticebus_coucang	001
+    Otolemur_crassicaudatus	010
+    Pan_paniscus	010
+    Perodicticus_potto	010
+    Propithecus_coquereli	010
+    Saimiri_sciureus	100
+    Tarsius_syrichta	001
+    Varecia_variegata_variegata	010
+    ;
+End;

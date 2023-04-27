@@ -105,21 +105,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     RbOrderedSet<DagNode*> affected;
     tree->initiateGetAffectedNodes( affected );
     
-    double oldLnLike = 0.0;
-    bool check_likelihood_shortcuts = rng->uniform01() < 0.001;
-//    check_likelihood_shortcuts = true;
-    if ( check_likelihood_shortcuts == true )
-    {
-//        tree->touch();
-//        tree->keep();
-        for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
-        {
-            (*it)->touch();
-            oldLnLike += (*it)->getLnProbability();
-//            (*it)->keep();
-        }
-    }
-    
     // pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
     size_t node_idx = 0;
@@ -337,43 +322,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
                 }
             }
         }
-    }
-    
-    if ( check_likelihood_shortcuts == true )
-    {
-        tree->touch();
-        if ( rates == NULL )
-        {
-            rates_vec[node_idx]->touch();
-        }
-        else
-        {
-            rates->touch();
-        }
-        for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-        {
-            size_t childIdx = node->getChild(i).getIndex();
-            if ( rates == NULL )
-            {
-                rates_vec[childIdx]->touch();
-            }
-        }
-        
-        double ln_prob_ratio = 0;
-        double new_ln_like = 0;
-        for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
-        {
-
-            double tmp = (*it)->getLnProbabilityRatio();
-            ln_prob_ratio += tmp;
-            new_ln_like += (*it)->getLnProbability();
-        }
-    
-        if ( RbMath::isFinite(ln_prob_ratio) && fabs(ln_prob_ratio) > 1E-2 )
-        {            
-            throw RbException("Likelihood shortcut computation failed in rate-age-proposal.");
-        }
-        
     }
     
     double hastings_ratio = backward - forward + jacobian;

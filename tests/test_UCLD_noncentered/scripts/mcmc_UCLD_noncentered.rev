@@ -1,0 +1,57 @@
+seed(1234)
+
+mvi = 0
+
+data = readDiscreteCharacterData("data/Ascarina.nex")
+
+taxa = data.taxa()
+num_species = data.ntaxa()
+num_branches = 2 * num_species - 2
+
+Q := fnJC(4)
+
+lambda ~ dnExponential(10)
+mu     ~ dnExponential(10)
+rho   <- 1
+
+moves[++mvi] = mvScaleBactrian(lambda,weight=1)
+moves[++mvi] = mvScaleBactrian(mu,weight=1)
+
+psi ~ dnBDP(lambda=lambda,mu=mu,rho=rho,rootAge=10,taxa=taxa)
+
+moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=10.0)
+moves[++mvi] = mvNodeTimeScale(psi, weight=10.0)
+
+moves[++mvi] = mvNNI(psi,weight=2.0)
+moves[++mvi] = mvFNPR(psi,weight=2.0)
+
+# branch lengths
+# here we put a very diffuse prior on the mean rate, and we follow BEAST in a mean 1/3 exponential on the branch-rate SD
+log_clock_mean ~ dnNormal(ln(0.02),3)
+clock_mean := exp(log_clock_mean)
+moves[++mvi] = mvSlideBactrian(log_clock_mean,sigma=0.1,weight=2.0,tune=true)
+
+branch_rate_log_sd ~ dnExponential(3)
+moves[++mvi] = mvScaleBactrian(branch_rate_log_sd, lambda=1.0, weight=2.0)
+
+for(i in 1:num_branches) {
+  log_branch_rates[i] ~ dnNormal(0,branch_rate_log_sd)
+  moves[++mvi] = mvScale(log_branch_rates[i], lambda=0.1, weight=1)
+  branch_rates[i] := exp(log_clock_mean + log_branch_rates[i])
+}
+
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=branch_rates)
+seq.clamp(data)
+
+my_model = model(Q)
+
+monitors[1] = mnModel(filename="output/UCLD_noncentered.log",printgen=1, separator = TAB)
+monitors[2] = mnFile(psi,filename="output/UCLD_noncentered.trees",printgen=10,separator=TAB)
+monitors[3] = mnScreen(log_clock_mean,printgen=10)
+
+my_mcmc = mcmc(my_model,monitors,moves)
+
+my_mcmc.burnin(100,20)
+my_mcmc.run(100)
+
+q()
