@@ -669,6 +669,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     }
     std::vector<std::string> input_taxa   = v->getSpeciesNames();
     std::vector<std::string> current_taxa = value->getSpeciesNames();
+//    std::vector<std::string> current_taxa = v->getSpeciesNames();
 
     // check that the number of taxa match
     if ( input_taxa.size() != num_taxa )
@@ -909,6 +910,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
         updateTree();
         tree_dirty = false;
     }
+    
+    
+    // MJL added 230307
+    if ( restorer == this->dag_node )
+    {
+        // update the tree
+        updateTree();
+        tree_dirty = false;
+
+        // make sure we update the likelihood
+//        probability_dirty = true;
+
+    }
 
     if ( restorer != this->dag_node )
     {
@@ -979,6 +993,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateSSETree(v
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
 {
+
 	// Warning: simulating tree under uniform model.
 	RBOUT("Warning: simulating tree under uniform model.");
 
@@ -1096,6 +1111,17 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
         // update the tree
         tree_dirty = true;
 //        updateTree();
+
+        // make sure we update the likelihood
+        probability_dirty = true;
+
+    }
+    
+    // MJL added 230307
+    if ( affecter == this->dag_node )
+    {
+        // update the tree
+        tree_dirty = true;
 
         // make sure we update the likelihood
         probability_dirty = true;
