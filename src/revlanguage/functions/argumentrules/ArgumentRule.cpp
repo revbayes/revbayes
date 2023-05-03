@@ -192,19 +192,19 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
     }
     
     
-    for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
+    for ( auto& argTypeSpec: argTypeSpecs )
     {
         if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() == true )
         {
-            if ( the_var->getRevObject().isType( *it ) )
+            if ( the_var->getRevObject().isType( argTypeSpec ) )
             {
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
                 return Argument( valueVar, arg.getLabel(), false );
             }
-            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
+            else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, once ) != -1 )
             {
                 // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
+                RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
 
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,the_var->getName() ) );
                 return Argument( valueVar, arg.getLabel(), false );
@@ -213,10 +213,10 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
         } // if (by-value)
         else
         {
-            if ( the_var->getRevObject().isType( *it ) )
+            if ( the_var->getRevObject().isType( argTypeSpec ) )
             {
                 // For now, change the required type of the incoming variable wrapper
-                the_var->setRequiredTypeSpec( *it );
+                the_var->setRequiredTypeSpec( argTypeSpec );
             
                 if ( isEllipsis() == false )
                 {
@@ -228,17 +228,17 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 }
             
             }
-            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+            else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, once ) != -1  && argTypeSpec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
             {
                 // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
+                RevObject* converted_object = the_var->getRevObject().convertTo( argTypeSpec );
                 
                 RevPtr<RevVariable> the_new_var = NULL;
                 if ( the_var->getRevObject().isConstant() == true )
                 {
                     the_new_var = the_var;
                     the_new_var->replaceRevObject( converted_object );
-                    the_new_var->setRequiredTypeSpec( *it );
+                    the_new_var->setRequiredTypeSpec( argTypeSpec );
                 }
                 else
                 {
@@ -259,7 +259,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 // Fit by type conversion function
             
                 const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
-                const TypeSpec& typeTo   = *it;
+                const TypeSpec& typeTo   = argTypeSpec;
             
                 // create the function name
                 std::string function_name = "_" + typeFrom.getType() + "2" + typeTo.getType();
@@ -288,7 +288,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                     delete func;
                 
                     conversionVar->setHiddenVariableState( true );
-                    conversionVar->setRequiredTypeSpec( *it );
+                    conversionVar->setRequiredTypeSpec( argTypeSpec );
                 
                     return Argument( conversionVar, arg.getLabel(), evalType == BY_CONSTANT_REFERENCE );
                 
@@ -399,9 +399,9 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         return -1;
     }
 
-    for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
+    for ( auto& argTypeSpec: argTypeSpecs )
     {
-        if ( the_var->getRevObject().isType( *it ) )
+        if ( the_var->getRevObject().isType( argTypeSpec ) )
         {
             return 0.0;
         }
@@ -410,10 +410,10 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         // make sure that we only perform type casting when the variable will not be part of a model graph
         if ( once == true || the_var->getRevObject().isConstant() == true )
         {
-            penalty = the_var->getRevObject().isConvertibleTo( *it, once );
+            penalty = the_var->getRevObject().isConvertibleTo( argTypeSpec, once );
         }
         
-        if ( penalty != -1 && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+        if ( penalty != -1 && (argTypeSpec).isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
             return penalty;
         }
@@ -424,17 +424,17 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
 
 //        else if ( once == true &&
 ////                 !var->isAssignable() &&
-//                  the_var->getRevObject().isConvertibleTo( *it, true ) != -1 &&
-//                  (*it).isDerivedOf( the_var->getRequiredTypeSpec() )
+//                  the_var->getRevObject().isConvertibleTo( argTypeSpec, true ) != -1 &&
+//                  (argTypeSpec).isDerivedOf( the_var->getRequiredTypeSpec() )
 //                )
 //        {
-//            return the_var->getRevObject().isConvertibleTo( *it, true );
+//            return the_var->getRevObject().isConvertibleTo( argTypeSpec, true );
 //        }
         else if ( nodeType != STOCHASTIC )
         {
             
             const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
-            const TypeSpec& typeTo   = *it;
+            const TypeSpec& typeTo   = argTypeSpec;
             
             // create the function name
             std::string function_name = "_" + typeFrom.getType() + "2" + typeTo.getType();
