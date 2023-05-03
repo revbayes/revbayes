@@ -51,6 +51,11 @@ namespace RevBayesCore {
         virtual std::vector<double>      getRootFrequencies(int mixture_component) const = 0;
         virtual std::vector<double>      componentProbs() const = 0;
 
+        // This is a hack to satisfy ModelVector<T>, which incorrectly assumes that these exist for all T.
+        bool                             operator==(const MixtureModel&) const {return false;}
+        bool                             operator!=(const MixtureModel&) const {return true;}
+        bool                             operator<=(const MixtureModel&) const {return false;}
+
         // virtual std::vector<int>            get_emitted_letters() const;                                          //!<Find out what alphet letter each state emits, for markov modulated models.
 
     protected:
