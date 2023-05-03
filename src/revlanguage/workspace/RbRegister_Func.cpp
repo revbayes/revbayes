@@ -135,6 +135,7 @@
 
 #include "Func_GammaRateModel.h"
 #include "Func_InvModel.h"
+#include "Func_MixtureModel.h"
 #include "Func_ConvertRateMatrix.h"
 #include "Func_ConvertVectorRateMatrix.h"
 
@@ -332,6 +333,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         addFunction( new Func_GammaRateModel()                              );
         addFunction( new Func_InvModel()                                    );
+        addFunction( new Func_MixtureModel()                                );
 
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
