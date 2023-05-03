@@ -109,7 +109,7 @@ RevBayesCore::MarkovEventsDistribution<valueType>::MarkovEventsDistribution(cons
 }
 
 template <class valueType>
-RevBayesCore::MarkovEventsDistribution<valueType>::~MarkovEventsDistribution<valueType>( void )
+RevBayesCore::MarkovEventsDistribution<valueType>::~MarkovEventsDistribution( void )
 {
 }
 
