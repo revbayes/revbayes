@@ -308,6 +308,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 		throw RbException("Tried to set lambda twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	lambda_var   = param;
 	lambda_times = times;
@@ -319,6 +322,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 	// flag for update
 	lambda_dirty = true;
 	probability_dirty = true;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector<double> >* param)
@@ -346,6 +350,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 	{
 		throw RbException("Tried to set mu twice.");
 	}
+
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
 
 	// set the value
 	mu_var   = param;
@@ -386,6 +393,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 		throw RbException("Tried to set phi twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	phi_var   = param;
 	phi_times = times;
@@ -424,6 +434,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 	{
 		throw RbException("Tried to set delta twice.");
 	}
+
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
 
 	// set the value
 	delta_var   = param;
@@ -582,6 +595,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 		throw RbException("Tried to set eta twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	eta_var   = param;
 	eta_times = times;
@@ -620,6 +636,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 	{
 		throw RbException("Tried to set omega twice.");
 	}
+
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
 
 	// set the value
 	omega_var   = param;
@@ -1295,6 +1314,28 @@ std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeter
 	return std_object;
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::checkTimesAreAscending(const RbVector<double> &obj) {
+
+	bool isValid = true;
+	for(size_t i = 0; i < obj.size(); ++i) {
+		if ( std::fabs(obj[i] - 0.0) < std::numeric_limits<double>::epsilon() ) {
+			isValid = false;
+			break;
+		}
+		if ( i != obj.size() - 1 ) {
+			if (obj[i] > obj[i + 1]) {
+				isValid = false;
+				break;
+			}
+		}
+	}
+
+	if (!isValid) {
+		throw RbException("Problem with rate change times. Please make sure that times are in ascending order, and that there is no time that is zero. The first element of the time vector should be the start age of the youngest epoch, etc.");
+	}
+
+}
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool force)
 {
 	if ( force or tree_dirty )
@@ -1435,6 +1476,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 		}
 		else if ( lambda_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(lambda_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( lambda_var->getValue() );
 			std::vector<double>                times  = RbToStd( lambda_times->getValue() );
@@ -1470,6 +1515,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 		}
 		else if ( mu_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(mu_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( mu_var->getValue() );
 			std::vector<double>                times  = RbToStd( mu_times->getValue() );
@@ -1504,6 +1553,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 		}
 		else if ( phi_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(phi_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( phi_var->getValue() );
 			std::vector<double>                times  = RbToStd( phi_times->getValue() );
@@ -1537,6 +1590,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 		}
 		else if ( delta_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(delta_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( delta_var->getValue() );
 			std::vector<double>                times  = RbToStd( delta_times->getValue() );
@@ -1707,6 +1764,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 		}
 		else if ( eta_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(eta_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector< std::vector<double> > > params = RbToStd( eta_var->getValue() );
 			std::vector<double>                               times  = RbToStd( eta_times->getValue() );
@@ -1739,6 +1800,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 		}
 		else if ( omega_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(omega_times->getValue());
+
 			// create empty vectors
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega_var->getValue() );
 			std::vector<double>                                      times  = RbToStd( omega_times->getValue() );
