@@ -83,8 +83,6 @@ double ConstantRateBirthDeathProcess::rateIntegral(double t_low, double t_high) 
 void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition sim_condition )
 {
 
-	return;
-
     if ( sim_condition == SimulationCondition::MCMC )
     {
         if ( starting_tree == NULL )

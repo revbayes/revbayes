@@ -687,8 +687,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     	param_taxa.push_back( taxa[i].getName() );
     }
     std::vector<std::string> input_taxa   = v->getSpeciesNames();
-//    std::vector<std::string> current_taxa = value->getSpeciesNames();
-    std::vector<std::string> current_taxa = v->getSpeciesNames();
+    std::vector<std::string> current_taxa = value->getSpeciesNames();
+//    std::vector<std::string> current_taxa = v->getSpeciesNames();
 
     // check that the number of taxa match
     if ( input_taxa.size() != num_taxa )
@@ -1012,8 +1012,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateSSETree(v
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
 {
-
-	return;
 
 	// Warning: simulating tree under uniform model.
 	RBOUT("Warning: simulating tree under uniform model.");
