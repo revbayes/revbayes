@@ -16,6 +16,7 @@
 #include "RlMemberFunction.h"
 #include "RlMixtureModel.h"
 #include "RlSimplex.h"
+#include "RlTree.h"
 #include "ArgumentRules.h"
 #include "ConstantNode.h"
 #include "DagNode.h"
@@ -169,5 +170,12 @@ void MixtureModel::initMethods(void)
     ArgumentRules* rootFrequenciesArgRules = new ArgumentRules();
     rootFrequenciesArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "rootFrequencies", Simplex::getClassTypeSpec(), rootFrequenciesArgRules) );
+
+    // add method for call "getTransitionProbabilities" as a function
+    ArgumentRules* getTransitionProbArgRules = new ArgumentRules();
+    getTransitionProbArgRules->push_back( new ArgumentRule( "tree", Tree::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    getTransitionProbArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    getTransitionProbArgRules->push_back( new ArgumentRule( "rate", RealPos::getClassTypeSpec(), "The rate of the process (or duration of the process assuming rate=1).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberFunction<MixtureModel, ModelVector<ModelVector<ModelVector<RealPos> > > >( "getTransitionProbabilities", this, getTransitionProbArgRules   ) );
 }
 

@@ -7,6 +7,7 @@
 #include <optional>
 
 //#include "MatrixReal.h"
+#include "MemberObject.h"  // For member functions.
 #include "Cloneable.h"
 #include "TransitionProbabilityMatrix.h"
 
@@ -25,7 +26,7 @@ namespace RevBayesCore {
      * @since 2022-09-22, version 1.0
      */
 
-    class MixtureModel: public Cloneable
+    class MixtureModel: public Cloneable, public MemberObject< RbVector<RbVector<RbVector<double>>> >
     {
         int n_mixture_components = 0;
         int n_states = 0;
@@ -47,6 +48,8 @@ namespace RevBayesCore {
         virtual std::optional<double>    rate() const = 0;
         virtual void                     scale(double f) = 0;
         void                             setRate(double r);
+
+        virtual void                     executeMethod( const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<RbVector<double>>> &retValue) const;       //!< Execute the member-method
 
         virtual std::vector<double>      getRootFrequencies(int mixture_component) const = 0;
         virtual std::vector<double>      componentProbs() const = 0;
