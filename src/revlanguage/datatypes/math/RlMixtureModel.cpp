@@ -15,6 +15,7 @@
 #include "RealPos.h"
 #include "RlMemberFunction.h"
 #include "RlMixtureModel.h"
+#include "RlSimplex.h"
 #include "ArgumentRules.h"
 #include "ConstantNode.h"
 #include "DagNode.h"
@@ -75,6 +76,48 @@ MixtureModel* MixtureModel::clone() const
 /* Map calls to member methods */
 RevPtr<RevVariable> MixtureModel::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
+    if (name == "nComponents")
+    {
+        found = true;
+
+        int s = dag_node->getValue().getNumberOfComponents();
+        return new RevVariable( new Natural( s ) );
+    }
+    else if (name == "nStates")
+    {
+        found = true;
+
+        int s = dag_node->getValue().getNumberOfStates();
+        return new RevVariable( new Natural( s ) );
+    }
+    else if (name == "weights")
+    {
+        found = true;
+
+        auto weights = dag_node->getValue().componentProbs();
+        return new RevVariable( new Simplex( weights ) );
+    }
+    else if (name == "rate")
+    {
+        found = true;
+
+        auto rate = dag_node->getValue().rate();
+        if (not rate)
+            throw RbException()<<"Cannot call .rate() on this mixture model: the rate is not defined.";
+
+        return new RevVariable( new RealPos( *rate ) );
+    }
+    else if (name == "rootFrequencies")
+    {
+        found = true;
+
+        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        int i = index.getValue() - 1;
+        
+        auto weights = dag_node->getValue().getRootFrequencies(i);
+        return new RevVariable( new Simplex( weights ) );
+    }
+
     ; // do nothing for now
     return ModelObject<RevBayesCore::MixtureModel>::executeMethod( name, args, found );
 }
@@ -104,21 +147,27 @@ const TypeSpec& MixtureModel::getTypeSpec(void) const {
     return type_spec;
 }
 
-void MixtureModel::initMethods(void) {
-    
-    
-    // member functions
-    ArgumentRules* mixtureModelArgRules = new ArgumentRules();
-//    mixtureModelArgRules->push_back( new ArgumentRule( "rate", RealPos::getClassTypeSpec(), "The rate of the process (or duration of the process assuming rate=1).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//    mixtureModelArgRules->push_back( new ArgumentRule( "startAge", RealPos::getClassTypeSpec(), "The start age of the process.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
-//    mixtureModelArgRules->push_back( new ArgumentRule( "endAge", RealPos::getClassTypeSpec(), "The end age of the process.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.0) ) );
+void MixtureModel::initMethods(void)
+{
+    // add method for call "nComponents" as a function
+    ArgumentRules* nComponentsArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "nComponents", Natural::getClassTypeSpec(), nComponentsArgRules) );
 
-    // what methods would we WANT to add?
-    // - number of states?
-    // - number of components?
-    // - equilibrium frequencies for component m?
-    // - etc.
-    // methods.addFunction( new MemberFunction<MixtureModel, ModelVector<ModelVector<RealPos> > >( "getTransitionProbabilities", this, mixtureModelArgRules   ) );
-    
+    // add method for call "nStates" as a function
+    ArgumentRules* nStatesArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "nStates", Natural::getClassTypeSpec(), nStatesArgRules) );
+
+    // add method for call "weights" as a function
+    ArgumentRules* nWeightsArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "weights", Simplex::getClassTypeSpec(), nWeightsArgRules) );
+
+    // add method for call "weights" as a function
+    ArgumentRules* rateArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "rate", RealPos::getClassTypeSpec(), rateArgRules) );
+
+    // add method for call "rootFrequencies" as a function
+    ArgumentRules* rootFrequenciesArgRules = new ArgumentRules();
+    rootFrequenciesArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "rootFrequencies", Simplex::getClassTypeSpec(), rootFrequenciesArgRules) );
 }
 
