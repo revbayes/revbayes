@@ -8,6 +8,8 @@
 #include "MatrixReal.h"
 #include "MixtureModel.h"
 #include "RbException.h"
+#include "TypedDagNode.h"
+#include "Tree.h"
 
 using namespace RevBayesCore;
 
@@ -50,6 +52,40 @@ void MixtureModel::setRate(double r)
     }
     else
         throw RbException()<<"Cannot set rate to "<<r<<" because the rate is not defined for this model.";
+}
+
+void MixtureModel::executeMethod( const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<RbVector<double>>> &rv) const
+{
+
+    if (n == "getTransitionProbabilities")
+    {
+        // clear old values
+        rv.clear();
+
+        auto& tree = dynamic_cast<const TypedDagNode<Tree> *>( args[0] )->getValue();
+        int node = dynamic_cast<const TypedDagNode<long> *>( args[1] )->getValue() - 1; // Natural
+        double rate = dynamic_cast<const TypedDagNode<double> *>( args[2] )->getValue();
+
+        if (node < 0 or node >= tree.getNumberOfNodes())
+            throw RbException()<<"MixtureModel.getTransitionProbabilities(tree,node,rate): node "<<node<<" is out of range.  Tree only has "<<tree.getNumberOfNodes()<<" nodes.";
+
+        auto Ps = calculateTransitionProbabilities( tree, node, rate );
+
+        for(auto& P: Ps)
+        {
+            RbVector<RbVector<double>> matrix;
+            for (size_t i = 0; i < P.getNumberOfStates(); i++)
+            {
+                RbVector<double> row;
+                for (size_t j =0; j < P.getNumberOfStates(); j++)
+                {
+                    row.push_back(P[i][j]);
+                }
+                matrix.push_back(row);
+            }
+            rv.push_back(matrix);
+        }
+    }
 }
 
 namespace RevBayesCore
