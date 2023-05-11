@@ -58,7 +58,7 @@ void DelimitedCharacterDataWriter::writeData(std::string const &fileName, const 
             {
                 if ( !data.isCharacterExcluded( i ) )
                 {
-                    outStream << taxon.getStringRepresentation( i );
+                    outStream << taxon.getStringRepresentation( i ) << del;
                 }
                 
             }
