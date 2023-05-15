@@ -194,7 +194,10 @@ void RevBayesCore::normalize_rows(TransitionProbabilityMatrix& M)
             assert(std::isnan(M[i][j]) or M[i][j]>=0);
             row_sum += M[i][j];
         }
-        for (size_t j=0; j<M.getNumberOfStates(); j++)
-            M[i][j] /= row_sum;
+        if (std::isfinite(row_sum) and row_sum > 0)
+        {
+            for (size_t j=0; j<M.getNumberOfStates(); j++)
+                M[i][j] /= row_sum;
+        }
     }
 }
