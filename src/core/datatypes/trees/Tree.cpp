@@ -1296,6 +1296,11 @@ bool Tree::isUltrametric( void ) const
 
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
+    // If reindex is false, then makeInternalNodesBifurcating will either
+    // * do nothing (if no sampled ancestors)
+    // * crash ( if there are sampled ancestors)
+    assert(reindex);
+
     // delegate the call to the nodes which will make the tree bifurcating recursively.
     getRoot().makeBifurcating( as_fossils );
 
@@ -1780,8 +1785,8 @@ void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reind
 
 void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
-	// reset parent/child relationships
-	reverseParentChild( n.getParent() );
+    // reset parent/child relationships
+    reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
     // if we have a trifurcation at the root, we need to change it into a bifurcation
@@ -1789,15 +1794,15 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     {
         // first, we make the root bifurcating
         makeRootBifurcating(n.getClade(), reindex);
-        
+
         // second, we make all other nodes bifurcating
         makeInternalNodesBifurcating(reindex, true);
         
     } // end-if we do not want to make the tree bifurcating
 
 
-	// set the new root
-	setRoot( &n.getParent(), reindex );
+    // set the new root
+    setRoot( &n.getParent(), reindex );
 
 }
 
