@@ -1571,6 +1571,21 @@ bool TopologyNode::isRoot( void ) const
 }
 
 
+bool TopologyNode::isTipSampledAncestor() const
+{
+    /*
+     * Only return true for tips that are sampled ancestors,
+     * not for other nodes which might have the sampled_ancestor
+     * flag set, including:
+     *   - parents of those tips (which should have the same time)
+     *   - nodes with 1 child.
+     */
+
+    // Should we check that the branch length is 0?
+
+    return sampled_ancestor and isTip();
+}
+
 bool TopologyNode::isSampledAncestor(  bool propagate ) const
 {
 
@@ -1821,9 +1836,21 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    if ( sampled_ancestor == true && propagate == true )
+    // Sometimes the `sampled_ancestor` flag is set to `true` for nodes with 1 child.
+    // For those nodes we want to set the age directly, not modify the parent.
+    if ( isTipSampledAncestor() and propagate == true )
     {
+        // The parent should be a bifurcating node.
+        assert(parent->getNumberOfChildren() == 2);
+
+        // We can get away with doing nothing to the nothing to current node
+        // because we'll handle the current node while processing the parent.
         parent->setAge(a);
+
+        // These will be true AFTER the parent->setAge( ) call fixes them up.
+        assert(getAge() == parent->getAge());
+        assert(branch_length == 0);
+
         return;
     }
 
@@ -1837,7 +1864,7 @@ void TopologyNode::setAge(double a, bool propagate)
 
     // we need to recompute my branch-length
     recomputeBranchLength();
-    
+
     // fire tree change event
     // we need to also flag this node as dirty (instead of only its children) as
     // 1) this node can be a tip, and
@@ -1848,10 +1875,9 @@ void TopologyNode::setAge(double a, bool propagate)
     }
 
     // we also need to recompute the branch lengths of my children
-    for (std::vector<TopologyNode *>::iterator it = children.begin(); it != children.end(); ++it)
+    for (auto& child: children)
     {
-        TopologyNode *child = *it;
-        if ( child->isSampledAncestor() )
+        if ( child->isTipSampledAncestor() )
         {
             child->setAge(a, false);
         }
