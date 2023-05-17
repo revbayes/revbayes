@@ -134,6 +134,10 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
         size_t time_index = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue() - 1;
 
         // get relevant layer
+        if (relationship == "within" && type == "categorical") {
+            
+            ;
+        }
         const std::vector<RevBayesCore::RegionalFeatureLayer>& y = this->dag_node->getValue().getLayers(relationship, type, time_index);
         return new RevVariable( new ModelVector<RlRegionalFeatureLayer>( y ) );
         

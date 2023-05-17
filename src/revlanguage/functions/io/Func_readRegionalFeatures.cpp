@@ -91,8 +91,6 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     size_t header_offset = 0;
     if (header) header_offset = 1;
     
-    std::cout << filename << "\n";
-    
     RevBayesCore::DelimitedDataReader* rdr = new RevBayesCore::DelimitedDataReader(filename, delimiter, 0);
     const std::vector<std::vector<std::string> >&data = rdr->getChars();
 
@@ -101,6 +99,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     std::vector<std::string> featurePath;
     std::vector<std::string> featureRelationship;
     std::vector<std::string> featureType;
+    // do we add a description field?
 
     size_t nRow = data.size();
     size_t nCol = data[0].size();
@@ -191,36 +190,34 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     for (auto it = s_rel.begin(); it != s_rel.end(); it++) {
         // categorical/quantitative
         for (auto jt = s_type.begin(); jt != s_type.end(); jt++) {
+            
             // time_index
             auto tmp_unique = uniqueFeatureIndex[*it][*jt];
-            std::set<size_t> s1;
-            std::set<size_t> s2;
+            
+            // no need to relationship/type-combo features for layer exists
+            // across all timeslices if no relationship/type-combo layers
+            // are defined, e.g. if user provides NO within/categorical features
+            if (tmp_unique.size() == 0) {
+                continue;
+            }
+            
+            // MJL 230516: seems like this code checks that every relationship/
+            // type combo exists, when we probably shouldn't require it
+            // ... verify at some point
             for (auto kt = uniqueTimeIndex.begin(); kt != uniqueTimeIndex.end(); kt++) {
                 if (tmp_unique.find(*kt) == tmp_unique.end())
                     throw RbException() << "Missing entry in readRegionalFeatures: relationship=" << *it << " type=" << *jt << " time_index=" << *kt << "\n";
             }
             
+            // check that layer exists across all timeslices
+            std::set<size_t> s1;
+            std::set<size_t> s2;
             for (auto kt = tmp_unique.begin(); kt != tmp_unique.end(); kt++) {
                 s2 = s1;
                 s1 = kt->second;
                 
                 if (kt != tmp_unique.begin()) {
-                    /*
-                    std::stringstream ss;
-                    ss << "r=" << *it << " t=" << *jt << " t=" << kt->first << "\n  s1=[";
-                    for (std::set<size_t>::iterator ii = s1.begin(); ii != s1.end(); ii++) {
-                        if (ii != s1.begin()) { ss << ","; }
-                        ss << *ii;
-                    }
-                    ss << "]\n  s2=[";
-                    for (std::set<size_t>::iterator ii = s2.begin(); ii != s2.end(); ii++) {
-                        if (ii != s2.begin()) { ss << ","; }
-                        ss << *ii;
-                    }
-                    ss << "]\n";
-                    std::cout << ss.str() << "\n";
-                    */
-                    
+                  
                     // does set of feature_index match between time slices?
                     if (s1 != s2)
                         throw RbException() << "Missing entry in readRegionalFeatures: relationship=" << *it << " type=" << *jt << " time_index=" << kt->first << "\n";
