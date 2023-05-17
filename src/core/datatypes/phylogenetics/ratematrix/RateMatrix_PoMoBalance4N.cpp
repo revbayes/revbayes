@@ -133,7 +133,7 @@ void RateMatrix_PoMoBalance4N::buildRateMatrix(void)
 // TODO: implement variable time_generations that would be passed in by user
 //  and will define if we want to measure time in generations (0N by default)
 
-bool time_generations = true;
+bool time_generations = false;
 
 if (time_generations) {
     //mutations
