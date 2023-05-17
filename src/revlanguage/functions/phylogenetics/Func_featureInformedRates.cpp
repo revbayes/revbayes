@@ -53,7 +53,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<doubl
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > > >* cf = static_cast<const ModelVector<ModelVector<ModelVector<Natural> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > > >* cf = static_cast<const ModelVector<ModelVector<ModelVector<Integer> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = static_cast<const ModelVector<ModelVector<ModelVector<Real> > >&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
@@ -79,7 +79,7 @@ const ArgumentRules& Func_featureInformedRates::getArgumentRules( void ) const
     {
         
         argumentRules.push_back( new ArgumentRule( "categoricalFeatures",
-                                                  ModelVector<ModelVector<ModelVector<Natural> > >::getClassTypeSpec(),
+                                                  ModelVector<ModelVector<ModelVector<Integer> > >::getClassTypeSpec(),
                                                   "Vector of layers for categorical regional features.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));

@@ -6,6 +6,7 @@
 //
 
 #include <algorithm>
+#include <limits.h>
 #include <ostream>
 #include <set>
 #include <string>
@@ -88,6 +89,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     const std::string& filename = static_cast<RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     const std::string& delimiter = static_cast<RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     const bool& header = static_cast<RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string& nonexistent_region_token = static_cast<RlString&>( args[3].getVariable()->getRevObject() ).getValue();
     size_t header_offset = 0;
     if (header) header_offset = 1;
     
@@ -237,21 +239,37 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
         RevBayesCore::DelimitedDataReader* row_rdr = new RevBayesCore::DelimitedDataReader(feature_path, delimiter, header_offset);
         std::vector<std::vector<std::string> > row_dat = row_rdr->getChars();
         
+        
         if (feature_relationship == "within" && feature_type == "categorical") {
             for (size_t k = 0; k < row_dat[0].size(); k++) {
-                long val = std::stoi( row_dat[0][k] );
+                long val = 0;
+                if (row_dat[0][k] == nonexistent_region_token) {
+                    val = -1;
+                } else {
+                    val = std::stoi( row_dat[0][k] );
+                }
                 within_categorical[time_index][feature_index].push_back(val);
             }
         } else if (feature_relationship == "within" && feature_type == "quantitative") {
             for (size_t k = 0; k < row_dat[0].size(); k++) {
-                double val = std::stod(row_dat[0][k] );
+                double val = 0.0;
+                if (row_dat[0][k] == nonexistent_region_token) {
+                    val = NAN;
+                } else {
+                    val = std::stod(row_dat[0][k] );
+                }
                 within_quantitative[time_index][feature_index].push_back(val);
             }
         } else if (feature_relationship == "between" && feature_type == "categorical") {
             for (size_t j = 0; j < row_dat.size(); j++) {
                 between_categorical[time_index][feature_index].push_back( std::vector<long>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
-                    long val = std::stoi( row_dat[j][k] );
+                    long val = 0;
+                    if (row_dat[0][k] == nonexistent_region_token) {
+                        val = -1;
+                    } else {
+                        val = std::stoi( row_dat[j][k] );
+                    }
                     between_categorical[time_index][feature_index][j].push_back(val);
                 }
             }
@@ -259,7 +277,12 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
             for (size_t j = 0; j < row_dat.size(); j++) {
                 between_quantitative[time_index][feature_index].push_back( std::vector<double>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
-                    double val = std::stod( row_dat[j][k] );
+                    double val = 0.0;
+                    if (row_dat[0][k] == nonexistent_region_token) {
+                        val = NAN;
+                    } else {
+                        val = std::stod(row_dat[j][k] );
+                    }
                     between_quantitative[time_index][feature_index][j].push_back(val);
                 }
             }
@@ -290,7 +313,9 @@ const ArgumentRules& Func_readRegionalFeatures::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "," ) ) );
        
         argumentRules.push_back( new ArgumentRule( "header", RlBoolean::getClassTypeSpec(), "Do the summary file and the data files have headers?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "nonexistent_region_token", RlString::getClassTypeSpec(), "What string token represents a non-existent region (for null rate assignments)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("NA") ) );
        
+        
         rules_set = true;
         
     }

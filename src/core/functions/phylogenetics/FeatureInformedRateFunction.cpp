@@ -6,6 +6,7 @@
 #include "TypedDagNode.h"
 
 #include <cmath>
+#include <climits>
 #include <cstddef>
 
 namespace RevBayesCore { class DagNode; }
@@ -79,7 +80,8 @@ void FeatureInformedRateFunction::update( void )
         double cp_i = std::exp(cp[i]);
         for (size_t j = 0; j < numDim1; j++) {
             for (size_t k = 0; k < numDim2; k++) {
-                if (std::isnan(cf[i][j][k]) == false) {
+//                if (std::isnan(cf[i][j][k]) == false) {
+                if (cf[i][j][k] >= 0) {
                     rates[j][k] *= cp_i;
                 }
             }
@@ -105,7 +107,8 @@ void FeatureInformedRateFunction::update( void )
         double cp_i = std::exp(cp[i]);
         for (size_t j = 0; j < numDim1; j++) {
             for (size_t k = 0; k < numDim2; k++) {
-                if (std::isnan(cf[i][j][k])) {
+//                if (std::isnan(cf[i][j][k])) {
+                if (cf[i][j][k] < 0) {
                     rates[j][k] = null_rate->getValue();
                 }
             }
