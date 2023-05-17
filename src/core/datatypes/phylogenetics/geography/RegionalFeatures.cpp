@@ -200,7 +200,8 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
     // do not use stddev if it equals zero
     stddev = std::sqrt( stddev / n_elem );
     if (stddev == 0.0) {
-        throw RbException("RegionalFeatures::normalizeWithinQuantitative can only standardize data if stddev != 0 (i.e. features must contain variation.)");
+        stddev = 1.0;
+//        throw RbException("RegionalFeatures::normalizeWithinQuantitative can only standardize data if stddev != 0 (i.e. features must contain variation.)");
     }
     
     // standardize all values
@@ -274,7 +275,8 @@ void RegionalFeatures::normalizeBetweenQuantitative(void) {
     
     stddev = std::sqrt( stddev / n_elem );
     if (stddev == 0.0) {
-        throw RbException("RegionalFeatures::normalizeBetweenQuantitative can only standardize data if stddev != 0 (i.e. features must contain variation.)");
+        stddev = 1.0;
+//        throw RbException("RegionalFeatures::normalizeBetweenQuantitative can only standardize data if stddev != 0 (i.e. features must contain variation.)");
     }
     
     
@@ -307,7 +309,6 @@ const std::vector<std::vector<RegionalFeatureLayer> >& RegionalFeatures::getLaye
 }
 const std::vector<RegionalFeatureLayer>& RegionalFeatures::getLayers(std::string feature_relationship, std::string feature_type, size_t time_index)
 {
-    
     return feature_layers[feature_relationship][feature_type][time_index];
 }
 const RegionalFeatureLayer& RegionalFeatures::getLayers(std::string feature_relationship, std::string feature_type, size_t time_index, size_t feature_index)
