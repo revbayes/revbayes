@@ -5,6 +5,7 @@
 #include "RbVectorImpl.h"
 #include "TypedDagNode.h"
 
+#include <climits>
 #include <cmath>
 #include <climits>
 #include <cstddef>
