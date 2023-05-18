@@ -322,7 +322,6 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
  */
 std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
 {
-
     // create the newick string
     std::stringstream o;
 
@@ -337,94 +336,50 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         o.precision( std::numeric_limits<double>::digits10 );
     }
 
-    std::vector<std::string> fossil_comments;
-
     // ensure we have an updated copy of branch_length variables
     if ( not isRoot() )
     {
         recomputeBranchLength();
     }
 
-    // test whether this is a internal or external node
-    if ( isTip() )
+    // 1. Write out the child newicks if there are any.
+    if (not isTip())
     {
-        // this is a tip so we just return the name of the node
-        o << taxon.getName();
-
-    }
-    else
-    {
-        std::string fossil_name = "";
-
         o << "(";
-        size_t j = 0;
         for (size_t i=0; i< children.size(); i++)
         {
-            if ( RbSettings::userSettings().getCollapseSampledAncestors()
-                    && children[i]->isSampledAncestor()
-                    && (children[i]->getName() < fossil_name || fossil_name == "" ) )
+            if (i > 0)
             {
-                fossil_name = children[i]->getName();
-                fossil_comments = children[i]->getNodeParameters();
+                o << ",";
             }
-            else
-            {
-                if (j > 0)
-                {
-                    o << ",";
-                }
-                j++;
-                o << children[i]->buildNewickString( simmap, round );
-            }
+            o << children[i]->buildNewickString( simmap, round );
         }
-
-        o << ")" << fossil_name;
-
+        o << ")";
     }
 
-    if ( ( node_comments.size() + fossil_comments.size() > 0 || RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
+    // 2. Write out the node name is there is any.
+    if (children.size() < 2)
+        o << taxon.getName();
+
+    // 3. Write out node comments if there are any and (simmap == false)
+    if ( ( node_comments.size() > 0 or RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
     {
         o << "[&";
-
-        bool needsComma = false;
 
         // first let us print the node index, we must increment by 1 to match RevLanguage indexing
         if ( RbSettings::userSettings().getPrintNodeIndex() == true )
         {
             o << "index=" << getIndex() + 1;
-            needsComma = true;
+            if (node_comments.size() > 0)
+                o<<",";
         }
 
-        for (size_t i = 0; i < node_comments.size(); ++i)
-        {
-            if ( needsComma == true )
-            {
-                o << ",";
-            }
-            o << node_comments[i];
-            needsComma = true;
-        }
-
-        for (size_t i = 0; i < fossil_comments.size(); ++i)
-        {
-            if ( needsComma == true )
-            {
-                o << ",";
-            }
-            o << fossil_comments[i];
-            needsComma = true;
-        }
-
-        //Finally let's print the species name (always)
-//        if ( needsComma == true )
-//        {
-//            o << ",";
-//        }
-//        o << "&species=" << getSpeciesName();
+        StringUtilities::join(o, node_comments, ",");
 
         o << "]";
     }
 
+    // 4a. Write ":" + branch length + branch_comments if (simmap == false)
     if ( simmap == false )
     {
         double br = getBranchLength();
@@ -433,44 +388,49 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         {
             o << ":" << br;
         }
+
+        if ( branch_comments.size() > 0 )
+        {
+            o << "[&";
+            for (size_t i = 0; i < branch_comments.size(); ++i)
+            {
+                if ( i > 0 )
+                {
+                    o << ",";
+                }
+                o << branch_comments[i];
+            }
+            o << "]";
+        }
     }
+    // 4b. Write ":" + simmap comment if (simmap == true)
     else
     {
         if ( isRoot() == false )
         {
-            bool found = false;
-            for (size_t i = 0; i < node_comments.size(); ++i)
+            // Find the simmap comment
+            optional<string> simmap_comment;
+            for (auto& node_comment: node_comments)
             {
-                if ( node_comments[i].substr(0, 18) == "character_history=" )
+                if ( node_comment.substr(0, 18) == "character_history=" )
                 {
-                    o << ":" << node_comments[i].substr(18, node_comments[i].length());
-                    found = true;
+                    simmap_comment = node_comment.substr(18);
                     break;
                 }
             }
-            if ( found == false )
-            {
+
+            // Print the simmap comment
+            if ( simmap_comment )
+                o << ":" << simmap_comment.value();
+            else
                 throw RbException("Error while writing SIMMAP newick string: no character history found for node.");
-            }
         }
     }
 
-    if ( branch_comments.size() > 0 && simmap == false )
-    {
-        o << "[&";
-        for (size_t i = 0; i < branch_comments.size(); ++i)
-        {
-            if ( i > 0 )
-            {
-                o << ",";
-            }
-            o << branch_comments[i];
-        }
-        o << "]";
-    }
-
+    // 5. Write ";" if we're done with the tree.
     if ( isRoot() )
     {
+        // FIXME - move to caller?
         o << ";";
     }
 
