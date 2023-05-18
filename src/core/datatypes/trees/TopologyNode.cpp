@@ -24,10 +24,14 @@
 #include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
 #include "RbConstants.h" // IWYU pragma: keep
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
 
 using boost::optional;
+
+using std::string;
+using std::vector;
 
 /** Default constructor (interior node, no name). Give the node an optional index ID */
 TopologyNode::TopologyNode() {}
@@ -531,7 +535,6 @@ std::string TopologyNode::computeNewick( bool round )
 /* Build newick string */
 std::string TopologyNode::computePlainNewick( void ) const
 {
-
     // test whether this is a internal or external node
     if ( isTip() )
     {
@@ -540,38 +543,20 @@ std::string TopologyNode::computePlainNewick( void ) const
     }
     else
     {
-        std::string fossil = "";
-        std::string newick = "(";
-        std::vector<std::string> child_newick;
+        // Can we do this unconditionally?
+        // That is, do we ever have taxon names for non-sampled ancestors?
+        string node_name;
+        if (sampled_ancestor and getNumberOfChildren() == 1)
+            node_name = taxon.getName();
+
+        std::vector<std::string> child_newicks;
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
-        {
-            const TopologyNode& child = getChild( i );
-            if ( RbSettings::userSettings().getCollapseSampledAncestors()
-                    && child.isSampledAncestor()
-                    && (child.getName() < fossil || fossil == "") )
-            {
-                fossil = child.getName();
-            }
-            else
-            {
-                child_newick.push_back( child.computePlainNewick() );
-            }
-        }
-        sort(child_newick.begin(), child_newick.end());
-        for (std::vector<std::string>::iterator it = child_newick.begin(); it != child_newick.end(); ++it)
-        {
-            if ( it != child_newick.begin() )
-            {
-                newick += ",";
-            }
-            newick += *it;
-        }
-        newick += ")";
-        newick += fossil;
+            child_newicks.push_back( getChild(i).computePlainNewick() );
 
-        return newick;
+        sort(child_newicks.begin(), child_newicks.end());
+
+        return "(" + StringUtilities::join(child_newicks, ",") + ")" + node_name;
     }
-
 }
 
 
@@ -736,35 +721,13 @@ std::string TopologyNode::fillCladeIndices(std::map<std::string,size_t> &clade_i
     }
     else
     {
-        std::string fossil = "";
-        newick = "(";
-        std::vector<std::string> child_newick;
+        std::vector<std::string> child_newicks;
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
-        {
-            const TopologyNode& child = getChild( i );
-            if ( RbSettings::userSettings().getCollapseSampledAncestors()
-                && child.isSampledAncestor()
-                && (child.getName() < fossil || fossil == "") )
-            {
-                fossil = child.getName();
-            }
-            else
-            {
-                child_newick.push_back( child.fillCladeIndices(clade_index_map) );
-            }
-        }
-        sort(child_newick.begin(), child_newick.end());
-        for (std::vector<std::string>::iterator it = child_newick.begin(); it != child_newick.end(); ++it)
-        {
-            if ( it != child_newick.begin() )
-            {
-                newick += ",";
-            }
-            newick += *it;
-        }
-        newick += ")";
-        newick += fossil;
+            child_newicks.push_back( getChild(i).fillCladeIndices(clade_index_map) );
 
+        sort(child_newicks.begin(), child_newicks.end());
+
+        newick = "(" + StringUtilities::join(child_newicks, ",") + ")";
     }
 
     // now insert the newick string for this node/clade with the index of this node
