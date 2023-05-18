@@ -316,26 +316,8 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
 }
 
 
-/*
- * Build newick string.
- * If simmap = true build a newick string compatible with SIMMAP and phytools.
- */
-std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
+std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 {
-    // create the newick string
-    std::stringstream o;
-
-    std::fixed(o);
-    // depending on the value of round, get standard precision or maximum
-    if (round)
-    {
-        o.precision( 6 );
-    }
-    else
-    {
-        o.precision( std::numeric_limits<double>::digits10 );
-    }
-
     // ensure we have an updated copy of branch_length variables
     if ( not isRoot() )
     {
@@ -352,7 +334,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
             {
                 o << ",";
             }
-            o << children[i]->buildNewickString( simmap, round );
+            children[i]->buildNewick(o, simmap);
         }
         o << ")";
     }
@@ -433,6 +415,31 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         // FIXME - move to caller?
         o << ";";
     }
+
+    return o;
+}
+
+/*
+ * Build newick string.
+ * If simmap = true build a newick string compatible with SIMMAP and phytools.
+ */
+std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
+{
+    // create the newick string
+    std::stringstream o;
+
+    std::fixed(o);
+    // depending on the value of round, get standard precision or maximum
+    if (round)
+    {
+        o.precision( 6 );
+    }
+    else
+    {
+        o.precision( std::numeric_limits<double>::digits10 );
+    }
+
+    buildNewick(o, simmap);
 
     return o.str();
 }

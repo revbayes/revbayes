@@ -180,7 +180,8 @@ namespace RevBayesCore {
         bool serial_speciation = false;
 
         // helper methods
-        virtual std::string                         buildNewickString(bool simmap, bool round);                                                     //!< compute the newick string for a tree rooting at this node
+        std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
 
         // protected members
         bool                                        use_ages = true;
