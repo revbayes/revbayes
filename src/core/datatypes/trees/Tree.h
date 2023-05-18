@@ -130,6 +130,7 @@ namespace RevBayesCore {
         void                                                printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing without rounding
         void                                                printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing with rounding (mainly checkpointing) 
         void                                                pruneTaxa(const RbBitSet& bs);
+        void                                                collapseSampledAncestors();
         void                                                renumberNodes(const Tree &reference);                                                               //!< Change node ids to be as in reference
         void                                                reroot(const Clade& o, bool make_bifurcating, bool reindex);                                                        //!< Re-root the tree with the given outgroup
         void                                                reroot(const std::string& outgroup, bool make_bifurcating, bool reindex);                                                  //!< Re-root the tree with the given outgroup

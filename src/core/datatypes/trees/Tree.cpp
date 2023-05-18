@@ -1447,6 +1447,19 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
     o << s;
 }
 
+void Tree::collapseSampledAncestors()
+{
+    for(auto& node: nodes)
+    {
+        if (node->isTipSampledAncestor())
+        {
+            node->getParent().setTaxon(node->getTaxon());
+            node->getParent().removeChild(node);
+        }
+    }
+    setRoot(root, true);
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
