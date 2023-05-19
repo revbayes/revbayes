@@ -632,10 +632,12 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
         {
             max_value[event_type] = v;
         }
-        sum_value[event_type] += v;
-        ln_sum_value[event_type] += std::log(v);
-        prod_value[event_type] *= v;
-        n_value[event_type] += 1;
+        if (v > 0.0) {
+            sum_value[event_type] += v;
+            ln_sum_value[event_type] += std::log(v);
+            prod_value[event_type] *= v;
+            n_value[event_type] += 1;
+        }
 
     }
     
@@ -1106,7 +1108,24 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
     std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
     for (std::map<std::vector<unsigned>, double>::iterator jt = eventMap.begin(); jt != eventMap.end(); jt++) {
         const std::vector<unsigned>& idx = jt->first;
-        clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
+        // if the speciation rate for the state is zero
+        // and does not involve state change, set outcome prob
+        // equal to 1.0 (no change only)
+        if (speciation_rate_sum_per_state[ idx[0] ] == 0 && (idx[0] == idx[1]) && (idx[0]==idx[2])) {
+            clado_prob_event_map[ idx ] = 1.0;
+        }
+        // otherwise if speciation rate is zero but
+        // does involve state change, set outcome prob
+        // equal to 0.0 (change impossible)
+        else if (speciation_rate_sum_per_state[ idx[0] ] == 0) {
+            clado_prob_event_map[ idx ] = 0.0;
+        }
+        // lastly, if speciation rate for state is non-zero
+        // compute the probability as the rate of the particular
+        // event divided by the sum of rates departing the state
+        else {
+            clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
+        }
     }
     cladogenetic_probability_matrix.setEventMap(clado_prob_event_map);
     
