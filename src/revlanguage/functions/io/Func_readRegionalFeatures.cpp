@@ -265,7 +265,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
                 between_categorical[time_index][feature_index].push_back( std::vector<long>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
                     long val = 0;
-                    if (row_dat[0][k] == nonexistent_region_token) {
+                    if (row_dat[j][k] == nonexistent_region_token) {
                         val = -1;
                     } else {
                         val = std::stoi( row_dat[j][k] );
@@ -278,7 +278,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
                 between_quantitative[time_index][feature_index].push_back( std::vector<double>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
                     double val = 0.0;
-                    if (row_dat[0][k] == nonexistent_region_token) {
+                    if (row_dat[j][k] == nonexistent_region_token) {
                         val = NAN;
                     } else {
                         val = std::stod(row_dat[j][k] );
