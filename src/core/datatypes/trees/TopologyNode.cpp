@@ -169,7 +169,6 @@ void TopologyNode::addBranchParameter(const std::string &n, double p)
 
 }
 
-
 void TopologyNode::addBranchParameter(const std::string &n, const std::string &p)
 {
 
@@ -217,6 +216,77 @@ void TopologyNode::addBranchParameters(std::string const &n, const std::vector<s
 
     }
 
+}
+
+
+bool TopologyNode::hasNodeComment(const std::string& comment) const
+{
+    for(auto& node_comment: node_comments)
+        if (node_comment == comment)
+            return true;
+    return false;
+}
+
+std::optional<std::string> TopologyNode::getNodeParameter(const std::string& name) const
+{
+    for(auto& node_comment: node_comments)
+    {
+        if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
+        {
+            return node_comment.substr(name.size()+1);
+        }
+    }
+
+    // Not found
+    return {};
+}
+
+bool TopologyNode::setNodeParameter(const std::string& name, const std::string& value)
+{
+    // value probably better not have any commas in it.
+
+    for(auto& node_comment: node_comments)
+    {
+        if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
+        {
+            node_comment = name + "=" + value;
+            return true;
+        }
+    }
+
+    node_comments.push_back(name + "=" + value);
+    return false;
+}
+
+std::optional<std::string> TopologyNode::eraseNodeParameter(const std::string& name)
+{
+    // 1. Find the index of the parameter, if it exists.
+    std::optional<int> found_index;
+    for(int i=0;i<node_comments.size();i++)
+    {
+        auto& node_comment = node_comments[i];
+        if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    // 2. If it doesn't exist, then we're done.
+    if (not found_index) return {};
+
+    // 3. Save the parameter value.
+    string value = node_comments[*found_index].substr(name.size()+1);
+
+    // 4. Move the comment to the end of the array and pop it.
+    if (*found_index < node_comments.size()-1)
+    {
+        std::swap(node_comments[*found_index], node_comments.back());
+    }
+    node_comments.pop_back();
+
+    // 5. Return the saved value.
+    return value;
 }
 
 
@@ -1968,3 +2038,4 @@ void TopologyNode::setTree(Tree *t)
     }
 
 }
+

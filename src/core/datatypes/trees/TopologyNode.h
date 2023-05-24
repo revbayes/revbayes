@@ -81,6 +81,13 @@ namespace RevBayesCore {
         void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
+
+        bool                                        hasNodeComment(const std::string& comment) const;                                   //!< Checks for a comment -- maybe not of the form key=value.
+        bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
+        std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
+        std::optional<std::string>                  eraseNodeParameter(const std::string& name);                                        //!< Erases a node parameter if present, returning the value.
+
+
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
         void                                        clearNodeParameters(void);
