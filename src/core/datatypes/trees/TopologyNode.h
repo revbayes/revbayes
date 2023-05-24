@@ -69,13 +69,16 @@ namespace RevBayesCore {
         bool                                        equals(const TopologyNode& node) const;                                             //!< Test whether this is the same node
 
         // public methods
+        void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
+
         void                                        addBranchParameter(const std::string &n, double p);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
-        void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
+
         void                                        addNodeParameter(const std::string &n, double p);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
+        void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters

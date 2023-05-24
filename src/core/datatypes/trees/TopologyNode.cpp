@@ -266,9 +266,14 @@ void TopologyNode::addNodeParameter(const std::string &n, const std::string &p)
         std::cerr << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
     }
 
+    addNodeParameter_(n,p);
+}
+
+
+void TopologyNode::addNodeParameter_(const std::string &n, const std::string &p)
+{
     std::string comment = n + "=" + p;
     node_comments.push_back( comment );
-
 }
 
 
