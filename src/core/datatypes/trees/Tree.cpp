@@ -1172,21 +1172,8 @@ void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
     Tree* bl_tree = converter.convertFromNewick( s );
-    if ( bl_tree->isUltrametric() == true )
-    {
-        Tree *tree = TreeUtilities::convertTree( *bl_tree );
-        
-        *this = *tree;
-
-        delete bl_tree;
-        delete tree;
-    }
-    else
-    {
-        *this = *bl_tree;
-
-        delete bl_tree;
-    }
+    *this = *bl_tree;
+    delete bl_tree;
 }
 
 

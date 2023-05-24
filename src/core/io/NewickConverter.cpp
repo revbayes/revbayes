@@ -77,12 +77,6 @@ Tree* NewickConverter::convertFromNewick(std::string const &n)
     // hence, tell the root to use branch lengths and not ages (with recursive call)
     root->setUseAges(false, true);
     
-    // if this tree is ultrametric, then we should use ages and transform so!
-    if ( t->isUltrametric() == true )
-    {
-        root->setUseAges(true, true);
-    }
-
     // return the tree, the caller is responsible for destruction
     return t;
 }
