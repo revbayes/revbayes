@@ -1378,6 +1378,60 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
 } 
 
 
+bool Tree::tryReadIndicesFromParameters(bool remove)
+{
+    // This routine assumes that the nodes array already contains the tree nodes
+    // and that they have valid indices.
+
+    // If we want to allow for nodes NOT having valid indices, we could do
+    // `setupIndices( not *has_indices )` instead of conditionally doing orderNodesByIndex().
+
+    std::optional<bool> has_indices;
+    for (auto& node: nodes)
+    {
+        // 1. Get the index as a string, optionally erasing it from the parameters.
+        std::optional<std::string> value;
+        if (remove)
+            value = node->eraseNodeParameter("index");
+        else
+            value = node->getNodeParameter("index");
+
+        // 2. Does this node have an index?
+        bool has_index = value.has_value();
+
+        // 3. Complain if some nodes have indices and some do not.
+        if (not has_indices)
+            has_indices = has_index;
+
+        if (has_index != *has_indices)
+            throw RbException()<<"readIndexFromParameter: some nodes have an index parameter, and some do not!";
+
+        // 4. Set the index if there is one.
+        if (value)
+            node->setIndex( stoi(*value) - 1 );
+    }
+
+    // 5.If the tree is empty, set has_indices to false.
+    if (not has_indices)
+        has_indices = false;
+
+    // 6. If we set the indices, sort nodes by index.
+    if (*has_indices)
+        orderNodesByIndex();
+
+    // 7. Did we successfully set indices from parameters?
+    return *has_indices;
+}
+
+
+void Tree::writeIndicesToParameters()
+{
+    for (auto& node: nodes)
+    {
+        node->setNodeParameter("index",std::to_string(node->getIndex()+1));
+    }
+}
+
 
 // method to order nodes by their existing index
 // used when reading in tree with existing node indexes we need to keep

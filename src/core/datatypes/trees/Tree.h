@@ -64,10 +64,12 @@ namespace RevBayesCore {
         // public Tree methods
         void                                                addBranchParameter(const std::string &n, const std::vector<double> &p, bool io);
         void                                                addNodeParameter(const std::string &n, const std::vector<double> &p, bool io);
-		void                                                addNodeParameter(const std::string &n, const std::vector<std::string> &p, bool io);
+        void                                                addNodeParameter(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                                clearParameters(void);                                                                              //!< Clear both the current node and branch parameters
         void                                                clearBranchParameters(void);
-		void                                                clearNodeParameters(void);
+        void                                                clearNodeParameters(void);
+        bool                                                tryReadIndicesFromParameters(bool remove=false);
+        void                                                writeIndicesToParameters();
 
         void                                                collapseNegativeBranchLengths(double length);                                                       //!< Don't allow parents to be younger than their children (TimeTrees only)
         bool                                                containsClade(const TopologyNode &n, bool unrooted) const;
