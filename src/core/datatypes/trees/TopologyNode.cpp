@@ -157,7 +157,7 @@ void TopologyNode::addBranchParameter(const std::string &n, double p)
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal branch parameter with name '" << n << "'.\n";
+        throw RbException() << "Illegal branch parameter with name '" << n << "'.";
     }
 
     std::stringstream o;
@@ -174,7 +174,7 @@ void TopologyNode::addBranchParameter(const std::string &n, const std::string &p
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal branch parameter with name '" << n << "'.\n";
+        throw RbException() << "Illegal branch parameter with name '" << n << "'.\n";
     }
 
     std::string comment = n + "=" + p;
@@ -318,7 +318,7 @@ void TopologyNode::addNodeParameter(const std::string &n, double p)
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
+        throw RbException() << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
     }
 
     std::stringstream o;
@@ -336,7 +336,7 @@ void TopologyNode::addNodeParameter(const std::string &n, const std::string &p)
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
+        throw RbException() << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
     }
 
     addNodeParameter_(n,p);
