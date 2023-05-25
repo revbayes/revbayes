@@ -241,12 +241,14 @@ std::optional<std::string> TopologyNode::getNodeParameter(const std::string& nam
     return {};
 }
 
+// If the parameter is already set, modify the existing comment instead of appending a new one.
 bool TopologyNode::setNodeParameter(const std::string& name, const std::string& value)
 {
     // value probably better not have any commas in it.
 
     for(auto& node_comment: node_comments)
     {
+        // If this command starts with '<name>=', then set the value here.
         if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
         {
             node_comment = name + "=" + value;
@@ -254,6 +256,7 @@ bool TopologyNode::setNodeParameter(const std::string& name, const std::string& 
         }
     }
 
+    // Otherwise append a new comment to the end.
     node_comments.push_back(name + "=" + value);
     return false;
 }
