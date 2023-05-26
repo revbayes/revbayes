@@ -150,7 +150,6 @@ namespace RevBayesCore {
         bool                                        isSampledAncestor(bool propagate=false) const;                                      //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTipSampledAncestor() const;                                                       //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
         void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.

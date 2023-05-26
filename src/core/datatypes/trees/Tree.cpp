@@ -1252,35 +1252,6 @@ bool Tree::isRooted(void) const
 }
 
 
-bool Tree::isUltrametric( void ) const
-{
-
-    if ( root->doesUseAges() == true )
-    {
-        double tip_age = getTipNode( 0 ).getAge();
-        for (size_t i = 1; i < getNumberOfTips(); ++i)
-        {
-
-            if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
-            {
-                return false;
-            }
-
-        }
-        
-    }
-    else
-    {
-
-        double d = 0;
-        return root->isUltrametric(d);
-
-    }
-
-    return true;
-}
-
-
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
     // If reindex is false, then makeInternalNodesBifurcating will either

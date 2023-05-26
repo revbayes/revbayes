@@ -124,7 +124,6 @@ namespace RevBayesCore {
         bool                                                isBroken(void) const;                                                                               //!< Is this tree ultrametric?
         bool                                                isNegativeConstraint(void) const;                                                                   //!< Is this tree used as a negative constraint?
         bool                                                isRooted(void) const;                                                                               //!< Is the Tree rooted
-        bool                                                isUltrametric(void) const;                                                                          //!< Is this tree ultrametric?
         void                                                makeInternalNodesBifurcating(bool reindex, bool fossils_only);                                                         //!< Make all the internal nodes bifurcating.
         void                                                makeRootBifurcating(const Clade& o, bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
