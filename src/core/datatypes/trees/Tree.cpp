@@ -1251,6 +1251,24 @@ bool Tree::isRooted(void) const
     return rooted;
 }
 
+bool Tree::isTimeTree(void) const
+{
+    bool any_node_times = false;
+    bool all_node_times = true;
+
+    for(auto& node: nodes)
+    {
+        if (not std::isnan(node->getAge()))
+            any_node_times = true;
+        else
+            all_node_times = false;
+    }
+
+    if (any_node_times and not all_node_times)
+        throw RbException()<<"isTimeTree: only some nodes have node times!";
+
+    return all_node_times;
+}
 
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
