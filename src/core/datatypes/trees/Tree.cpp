@@ -1172,8 +1172,18 @@ void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
     Tree* bl_tree = converter.convertFromNewick( s );
-    *this = *bl_tree;
-    delete bl_tree;
+    if (isTimeTree())
+    {
+        auto time_tree = TreeUtilities::convertTree(*bl_tree, false);
+        delete bl_tree;
+        *this = *time_tree;
+        delete time_tree;
+    }
+    else
+    {
+        *this = *bl_tree;
+        delete bl_tree;
+    }
 }
 
 
@@ -1330,7 +1340,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
             tmp->setParent (new_child);
             //  tmp->setBranchLength(newBl) ;
         }
-    
+
         root->addChild(new_child);
         new_child->setParent( root );
         new_child->setAge(new_age);
