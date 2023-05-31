@@ -38,7 +38,8 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	num_states(num_states_),
 	use_origin(use_origin_),
 	zero_indexed(zero_indexed_),
-	root_frequency(root_frequency_)
+	root_frequency(root_frequency_),
+	dirty_nodes( std::vector<bool>(5, true) )
 {
 	try {
 		// create the pointer
@@ -66,6 +67,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 
     // simulate the tree
     simulateTree();
+
+    // resize vectors for this number of nodes
+    resizeVectors(value->getNumberOfNodes());
 
     // update the kernel
     updateRootFrequency(true);
@@ -261,12 +265,49 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::dumpModel(std::st
 	tp_ptr->writeStateToFile(file_name);
 }
 
+/**
+ * Resize various vectors depending on the current number of nodes.
+ */
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::resizeVectors(size_t num_nodes)
+{
+    dirty_nodes = std::vector<bool>(num_nodes, true);
+}
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
 {
+
+	// mark tree as dirty
 	tree_dirty = true;
+
+	// mark nodes dirty
+    recursivelyFlagNodeDirty( n );
+
+	// update the newick string to tensorphylo
 	updateTree();
+
 }
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::recursivelyFlagNodeDirty( const RevBayesCore::TopologyNode &n ) {
+
+    // we need to flag this node and all ancestral nodes for recomputation
+    size_t index = n.getIndex();
+
+    // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
+    if ( dirty_nodes[index] == false )
+    {
+        // the root doesn't have an ancestor
+        if ( n.isRoot() == false )
+        {
+            recursivelyFlagNodeDirty( n.getParent() );
+        }
+
+        // set the flag
+        dirty_nodes[index] = true;
+
+    }
+
+}
+
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getCharacterData() const
 {
@@ -908,6 +949,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
     }
 
     // clear all flags
+    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
+    {
+        (*it) = false;
+    }
+
     probability_dirty    = false;
     tree_dirty           = false;
     root_frequency_dirty = false;
@@ -967,7 +1013,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
         tree_dirty = false;
     }
     
-    
     // MJL added 230307
     if ( restorer == this->dag_node )
     {
@@ -979,6 +1024,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 //        probability_dirty = true;
 
     }
+
+    // reset the flags
+    // NOTE: we don't want to mark anything as clean because tensorphylo still needs to recompute
+    // partial likelihoods for these nodes. we only set as clean when we accept the move
+//    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+//    {
+//        (*it) = false;
+//    }
 
     if ( restorer != this->dag_node )
     {
@@ -1186,6 +1239,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
     if ( affecter != this->dag_node )
     {
+
+    	// mark all nodes as dirty
+        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+        {
+            (*it) = true;
+        }
+
+        // mark the affecting parameter as dirty
         if ( affecter == root_frequency )
 		{
 			root_frequency_dirty = true;
@@ -1436,7 +1497,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		var += ";";
 
 		// set the tree
-		tp_ptr->setTree(var);
+		tp_ptr->setTree(var, dirty_nodes);
 
 	}
 }
