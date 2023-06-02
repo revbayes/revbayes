@@ -54,6 +54,7 @@ template <class variableType> class StochasticNode;
         TopologyNode*                                       stored_node_B;
         bool                                                picked_root_branch;
         bool                                                picked_uncle;
+        bool                                                failed;
         
     };
     

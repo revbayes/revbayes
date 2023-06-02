@@ -1812,6 +1812,7 @@ double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double
  */
 void StateDependentSpeciationExtinctionProcess::redrawValue( void )
 {
+
     size_t attempts = 0;    
     //while (attempts < 100000)
     while (attempts < 10000)
