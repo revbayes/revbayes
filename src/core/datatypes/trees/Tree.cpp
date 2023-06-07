@@ -20,6 +20,7 @@
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
@@ -1366,13 +1367,17 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
 
 bool Tree::tryReadIndicesFromParameters(bool remove)
 {
-    // This routine assumes that the nodes array already contains the tree nodes
-    // and that they have valid indices.
+    // This routine assumes that the nodes array already contains the tree nodes.
 
     // If we want to allow for nodes NOT having valid indices, we could do
     // `setupIndices( not *has_indices )` instead of conditionally doing orderNodesByIndex().
 
     std::optional<bool> has_indices;
+
+    std::vector<TopologyNode*> nodes2(nodes.size(), nullptr);
+
+    std::optional<std::string> failure;
+
     for (auto& node: nodes)
     {
         // 1. Get the index as a string, optionally erasing it from the parameters.
@@ -1382,28 +1387,65 @@ bool Tree::tryReadIndicesFromParameters(bool remove)
         else
             value = node->getNodeParameter("index");
 
-        // 2. Does this node have an index?
-        bool has_index = value.has_value();
+        try
+        {
+            // 2. Does this node have an index?
+            bool has_index = value.has_value();
 
-        // 3. Complain if some nodes have indices and some do not.
-        if (not has_indices)
-            has_indices = has_index;
+            // 3. Complain if some nodes have indices and some do not.
+            if (not has_indices)
+                has_indices = has_index;
 
-        if (has_index != *has_indices)
-            throw RbException()<<"readIndexFromParameter: some nodes have an index parameter, and some do not!";
+            if (has_index != *has_indices)
+                throw RbException()<<"readIndexFromParameter: Some nodes have an index parameter, and some do not!";
 
-        // 4. Set the index if there is one.
-        if (value)
-            node->setIndex( stoi(*value) - 1 );
+            // 4. Set the index if there is one.
+            if (value)
+            {
+                int index = stoi(*value) - 1;
+
+                if (index < 0)
+                    throw RbException()<<"tryReadIndicesFromParameters: Negative node index "<<index;
+                else if (index >= nodes2.size())
+                    throw RbException()<<"tryReadIndicesFromParameters: Tree only has "<<nodes.size()<<" nodes, but got index "<<index;
+                else if (nodes2[index] != nullptr)
+                    throw RbException()<<"tryReadIndicesFromParameters: Node index "<<index<<" used twice!";
+
+                nodes2[index] = node;
+            }
+        }
+        // NB - If remove == true, then we can't quit.  We have to finish erasing the "index" parameter from all nodes.
+        catch (RbException& e)
+        {
+            failure = e.getMessage();
+        }
+    }
+
+    if (failure)
+    {
+        RBOUT(*failure + ".  Ignoring indices.");
+
+        has_indices = false;
     }
 
     // 5.If the tree is empty, set has_indices to false.
     if (not has_indices)
         has_indices = false;
 
-    // 6. If we set the indices, sort nodes by index.
+    // 6. If we set the indices
     if (*has_indices)
-        orderNodesByIndex();
+    {
+        nodes = nodes2;
+
+        for(int i=0;i < nodes.size(); i++)
+            nodes[i]->setIndex(i);
+    }
+    else
+    {
+        // We assume the nodes have valid indices that we can fall back on if reading indices fails.
+        for(int i=0;i<nodes.size();i++)
+            assert(nodes[i]->getIndex() == i);
+    }
 
     // 7. Did we successfully set indices from parameters?
     return *has_indices;
