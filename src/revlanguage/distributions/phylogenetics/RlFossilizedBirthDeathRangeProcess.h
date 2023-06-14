@@ -34,7 +34,7 @@ namespace RevLanguage {
         static const TypeSpec&                              getClassTypeSpec(void);                                                             //!< Get class type spec
 
     protected:
-        FossilizedBirthDeathRangeProcess<rlType>( void );
+        FossilizedBirthDeathRangeProcess( void );
         
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
     
