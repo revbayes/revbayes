@@ -283,7 +283,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEve
     recursivelyFlagNodeDirty( n );
 
 	// update the newick string to tensorphylo
-	updateTree();
+	updateTree(); // TODO: move me somewhere later
 
 }
 
@@ -1237,7 +1237,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
     }
 
-    if ( affecter != this->dag_node )
+    if ( affecter != this->dag_node and affecter != age )
     {
 
     	// mark all nodes as dirty
