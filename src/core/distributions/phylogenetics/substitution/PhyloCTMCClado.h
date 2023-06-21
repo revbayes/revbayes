@@ -1492,7 +1492,7 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
     
     double p_inv = this->p_inv->getValue();
     double oneMinusPInv = 1.0 - p_inv;
-    std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
+    std::vector< size_t >::const_iterator patterns = this->data_pattern_counts.begin();
     if ( p_inv > 0.0 )
     {
         for (size_t site = 0; site < this->data_num_patterns; ++site, ++patterns)

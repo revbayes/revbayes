@@ -165,7 +165,8 @@ namespace RevBayesCore {
         virtual void                                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
         virtual void                                                        computeMarginalRootLikelihood();
         virtual std::vector< std::vector< double > >*                       sumMarginalLikelihoods(size_t node_index);
-        virtual void                                                        computeRootLikelihoods( std::vector< double > &rv ) const;
+        
+        virtual void                                                        computeRootLikelihoods( std::vector<double> &rv, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t num_patterns, size_t mixture_offset, const std::vector< size_t >& pattern_counts, const std::vector< std::vector< std::vector<double> > >& scaling_factors ) const;
         virtual void                                                        computeRootLikelihoodsPerSiteMixture( MatrixReal &rv ) const;
         virtual void                                                        computeRootLikelihoodsPerSiteRate( MatrixReal &rv ) const;
         virtual double                                                      sumRootLikelihood( void );
@@ -209,7 +210,8 @@ namespace RevBayesCore {
         std::vector<std::vector<unsigned long> >                            bias_char_matrix;
         std::vector<std::vector<bool> >                                     data_gap_matrix;
         std::vector<std::vector<bool> >                                     bias_gap_matrix;
-        std::vector<size_t>                                                 pattern_counts;
+        std::vector<size_t>                                                 data_pattern_counts;
+        std::vector<size_t>                                                 bias_pattern_counts;
         std::vector<bool>                                                   site_invariant;
         std::vector<std::vector<size_t> >                                   invariant_site_index;
         size_t                                                              data_num_patterns;
@@ -338,7 +340,8 @@ data_char_matrix(),
 bias_char_matrix(),
 data_gap_matrix(),
 bias_gap_matrix(),
-pattern_counts(),
+data_pattern_counts(),
+bias_pattern_counts(),
 site_invariant( data_num_sites, false ),
 invariant_site_index( data_num_sites ),
 data_num_patterns( data_num_sites ),
@@ -439,8 +442,13 @@ sampled_site_matrix_component( 0 )
 
     }
     bias_per_node_site_log_scaling_factors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(bias_num_sites, 0.0) ) );
-    bias_num_patterns = bias_num_sites;
-    bias_site_pattern = std::vector<size_t>(bias_num_sites, 0);
+    bias_num_patterns   = bias_num_sites;
+    bias_site_pattern   = std::vector<size_t>(bias_num_sites, 0);
+    bias_pattern_counts = std::vector<size_t>(bias_num_sites, 1);
+    for (size_t i=0; i<bias_num_sites; ++i)
+    {
+        bias_site_pattern[i] = i;
+    }
     
     bias_active_likelihood_offset   =  num_nodes * num_site_mixtures * bias_num_sites * num_chars;
     bias_node_offset                =              num_site_mixtures * bias_num_sites * num_chars;
@@ -494,7 +502,8 @@ data_char_matrix( n.data_char_matrix ),
 bias_char_matrix( n.bias_char_matrix ),
 data_gap_matrix( n.data_gap_matrix ),
 bias_gap_matrix( n.bias_gap_matrix ),
-pattern_counts( n.pattern_counts ),
+data_pattern_counts( n.data_pattern_counts ),
+bias_pattern_counts( n.bias_pattern_counts ),
 site_invariant( n.site_invariant ),
 invariant_site_index( n.invariant_site_index ),
 data_num_patterns( n.data_num_patterns ),
@@ -614,9 +623,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::bootstrap( void )
     {
         double u = rng->uniform01() * data_num_sites;
         size_t pattern_index = 0;
-        while ( u > double(pattern_counts[pattern_index]) )
+        while ( u > double(data_pattern_counts[pattern_index]) )
         {
-            u -= double(pattern_counts[pattern_index]);
+            u -= double(data_pattern_counts[pattern_index]);
             ++pattern_index;
         }
 
@@ -624,7 +633,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::bootstrap( void )
 
     }
 
-    pattern_counts = bootstrapped_pattern_counts;
+    data_pattern_counts = bootstrapped_pattern_counts;
 
 }
 
@@ -725,7 +734,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     data_ambiguous_char_matrix.clear();
     data_char_matrix.clear();
     data_gap_matrix.clear();
-    pattern_counts.clear();
+    data_pattern_counts.clear();
     data_num_patterns = 0;
 
     // resize the matrices
@@ -790,7 +799,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 {
                     // we have already seen this pattern
                     // increase the frequency counter
-                    pattern_counts[ index->second ]++;
+                    data_pattern_counts[ index->second ]++;
 
                     // obviously this site isn't unique nor the first encounter
                     unique[site] = false;
@@ -801,7 +810,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 else
                 {
                     // create a new pattern frequency counter for this pattern
-                    pattern_counts.push_back(1);
+                    data_pattern_counts.push_back(1);
                     
                     // insert this pattern with the corresponding index in the map
                     patterns.insert( std::pair<std::string,size_t>(pattern,data_num_patterns) );
@@ -825,7 +834,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     {
         // we do not compress
         data_num_patterns = data_num_sites;
-        pattern_counts     = std::vector<size_t>(data_num_sites,1);
+        data_pattern_counts     = std::vector<size_t>(data_num_sites,1);
         index_of_site_pattern = std::vector<size_t>(data_num_sites,1);
         for (size_t i = 0; i < data_num_sites; ++i)
         {
@@ -864,7 +873,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             for (size_t patternIndex = 0; patternIndex < data_pattern_block_size; ++patternIndex)
             {
                 // set the counts for this patter
-                process_pattern_counts[patternIndex] = pattern_counts[patternIndex+data_pattern_block_start];
+                process_pattern_counts[patternIndex] = data_pattern_counts[patternIndex+data_pattern_block_start];
 
                 charType &c = static_cast<charType &>( taxon.getCharacter(site_indices[index_of_site_pattern[patternIndex+data_pattern_block_start]]) );
                 data_gap_matrix[node_index][patternIndex] = c.isGapState();
@@ -899,7 +908,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     bool allow_ambiguous_as_invariant = true;
 
     // now copy back the pattern count vector
-    pattern_counts = process_pattern_counts;
+    data_pattern_counts = process_pattern_counts;
 
     // reset the vector if a site is invariant
     site_invariant.resize( data_pattern_block_size );
@@ -1209,6 +1218,458 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
     } // end-for over all mixtures (=rate categories)
 
 }
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoods( std::vector<double> &rv, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t num_patterns, size_t mixture_offset, const std::vector< size_t >& pattern_counts, const std::vector< std::vector< std::vector<double> > >& scaling_factors ) const
+{
+    // get the root node
+    const TopologyNode &root = tau->getValue().getRoot();
+
+    // get the index of the root node
+    size_t node_index = root.getIndex();
+
+    // get the pointers to the partial likelihoods of the left and right subtree
+    double*   p_node  = likelihoods + this->active_likelihood[node_index] * likelihood_offset  + node_index*node_offset;
+
+    // create a vector for the per mixture likelihoods
+    // we need this vector to sum over the different mixture likelihoods
+    std::vector<double> per_mixture_Likelihoods = std::vector<double>(num_patterns,0.0);
+
+    std::vector<double> site_mixture_probs = getMixtureProbs();
+
+    // get pointer the likelihood
+    double*   p_mixture     = p_node;
+    // iterate over all mixture categories
+    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+    {
+
+        // get pointers to the likelihood for this mixture category
+        double*   p_site_mixture     = p_mixture;
+        // iterate over all sites
+
+        for (size_t site = 0; site < num_patterns; ++site)
+        {
+            // temporary variable storing the likelihood
+            double tmp = 0.0;
+            // get the pointers to the likelihoods for this site and mixture category
+            double* p_site_j   = p_site_mixture;
+            // iterate over all starting states
+            for (size_t i=0; i<num_chars; ++i)
+            {
+                // add the probability of starting from this state
+                tmp += *p_site_j;
+
+                // increment pointers
+                ++p_site_j;
+            }
+            // add the likelihood for this mixture category
+            per_mixture_Likelihoods[site] += tmp * site_mixture_probs[mixture];
+
+            // increment the pointers to the next site
+            p_site_mixture+=this->site_offset;
+
+        } // end-for over all sites (=patterns)
+
+        // increment the pointers to the next mixture category
+        p_mixture+=mixture_offset;
+
+    } // end-for over all mixtures
+
+    double prob_invariant = getPInv();
+    double oneMinusPInv = 1.0 - prob_invariant;
+    std::vector< size_t >::const_iterator patterns = pattern_counts.begin();
+    if ( prob_invariant > 0.0 )
+    {
+        // get the mean root frequency vector
+        std::vector<double> f;
+        if (this->branch_heterogeneous_substitution_matrices == true)
+        {
+            f = this->getRootFrequencies(0);
+        }
+        else
+        {
+            std::vector<std::vector<double> > ff;
+            getRootFrequencies(ff);
+
+            std::vector<double> matrix_probs(num_matrices, 1.0/num_matrices);
+
+            if (site_matrix_probs != NULL)
+            {
+                matrix_probs = site_matrix_probs->getValue();
+            }
+
+            f = std::vector<double>(ff[0].size(), 0.0);
+
+            for (size_t matrix = 0; matrix < ff.size(); matrix++)
+            {
+                // get the root frequencies
+                const std::vector<double> &fm = ff[matrix];
+
+                for (size_t i = 0; i < fm.size(); i++)
+                {
+                    f[i] += fm[i] * matrix_probs[matrix];
+                }
+            }
+        }
+
+        for (size_t site = 0; site < num_patterns; ++site, ++patterns)
+        {
+           
+            if ( RbSettings::userSettings().getUseScaling() == true )
+            {
+                if ( this->site_invariant[site] == true )
+                {
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(scaling_factors[this->active_likelihood[node_index]][node_index][site]) ) * *patterns;
+                }
+                else
+                {
+                    rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
+                    rv[site] -= scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
+                }
+
+            }
+            else // no scaling
+            {
+
+                if ( this->site_invariant[site] == true )
+                {
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
+                }
+                else
+                {
+                    rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
+                }
+
+            }
+
+        }
+        
+    }
+    else // prob_invariant == 0.0
+    {
+
+        for (size_t site = 0; site < num_patterns; ++site, ++patterns)
+        {
+            rv[site] = log( per_mixture_Likelihoods[site] ) * *patterns;
+
+            if ( RbSettings::userSettings().getUseScaling() == true )
+            {
+                rv[site] -= scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
+            }
+
+        }
+
+    }
+
+}
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodsPerSiteMixture( MatrixReal &rv ) const
+{
+    // get the root node
+    const TopologyNode &root = tau->getValue().getRoot();
+
+    // get the index of the root node
+    size_t node_index = root.getIndex();
+
+    // get the pointers to the partial likelihoods of the left and right subtree
+    double*   p_node  = this->data_partial_likelihoods + this->active_likelihood[node_index] * this->data_active_likelihood_offset  + node_index*this->data_node_offset;
+
+    // create a vector for the per mixture likelihoods
+    // we need this vector to sum over the different mixture likelihoods
+    std::vector<std::vector<double> > per_site_mixture_Likelihoods = std::vector<std::vector<double> >(data_pattern_block_size, std::vector<double>(num_site_mixtures, 0.0));
+
+    std::vector<double> site_mixture_probs = getMixtureProbs();
+
+    // get pointer the likelihood
+    double*   p_mixture     = p_node;
+    // iterate over all mixture categories
+    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+    {
+
+        // get pointers to the likelihood for this mixture category
+        double*   p_site_mixture     = p_mixture;
+        // iterate over all sites
+
+        for (size_t site = 0; site < data_pattern_block_size; ++site)
+        {
+            // temporary variable storing the likelihood
+            double tmp = 0.0;
+            // get the pointers to the likelihoods for this site and mixture category
+            double* p_site_j   = p_site_mixture;
+            // iterate over all starting states
+            for (size_t i=0; i<num_chars; ++i)
+            {
+                // add the probability of starting from this state
+                tmp += *p_site_j;
+
+                // increment pointers
+                ++p_site_j;
+            }
+            // add the likelihood for this mixture category
+            per_site_mixture_Likelihoods[site][mixture] += tmp * site_mixture_probs[mixture];
+
+            // increment the pointers to the next site
+            p_site_mixture+=this->site_offset;
+
+        } // end-for over all sites (=patterns)
+
+        // increment the pointers to the next mixture category
+        p_mixture+=this->data_mixture_offset;
+
+    } // end-for over all mixtures
+
+    double prob_invariant = getPInv();
+    double oneMinusPInv = 1.0 - prob_invariant;
+    std::vector< size_t >::const_iterator patterns = data_pattern_counts.begin();
+    if ( prob_invariant > 0.0 )
+    {
+        // get the root frequency vector(s)
+        std::vector<std::vector<double> > ff;
+        std::vector<double> f;
+        if (this->branch_heterogeneous_substitution_matrices == true)
+        {
+            f = this->getRootFrequencies(0);
+            ff.push_back(f);
+        }
+        else
+        {
+            getRootFrequencies(ff);
+        }
+
+        size_t num_site_matrices = num_site_mixtures / num_site_rates;
+        std::vector<double> matrix_probs(num_site_matrices, 1.0/num_site_matrices);
+
+        if (site_matrix_probs != NULL)
+        {
+            matrix_probs = site_matrix_probs->getValue();
+        }
+
+        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
+        {
+            for (size_t matrix = 0; matrix < num_site_matrices; ++matrix)
+            {
+                // the first rate category is the invariant
+                if ( this->site_invariant[site] == true )
+                {
+                    double ftotal = 0.0;
+                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                    {
+                        ftotal += f[this->invariant_site_index[site][c]];
+                    }
+
+                    rv[site][matrix] = log( prob_invariant * ftotal * matrix_probs[matrix] ) * *patterns;
+                }
+                else
+                {
+                    rv[site][matrix] = RbConstants::Double::neginf;
+                }
+
+                // the remaining variant rate categories
+                for (size_t site_rate_index = 1; site_rate_index < num_site_rates + 1; ++site_rate_index)
+                {
+                    rv[site][site_rate_index * num_site_matrices + matrix] = log( oneMinusPInv * per_site_mixture_Likelihoods[site][site_rate_index * num_site_matrices + matrix] ) * *patterns;
+
+                    if ( RbSettings::userSettings().getUseScaling() == true )
+                    {
+                        rv[site][site_rate_index * num_site_matrices + matrix] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+    else
+    {
+
+        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
+        {
+            for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
+            {
+                rv[site][mixture] = log( per_site_mixture_Likelihoods[site][mixture] ) * *patterns;
+
+                if ( RbSettings::userSettings().getUseScaling() == true )
+                {
+                    rv[site][mixture] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
+                }
+            }
+
+        }
+
+    }
+
+}
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodsPerSiteRate( MatrixReal &rv ) const
+{
+    // get the root node
+    const TopologyNode &root = tau->getValue().getRoot();
+
+    // get the index of the root node
+    size_t node_index = root.getIndex();
+
+    // get the pointers to the partial likelihoods of the left and right subtree
+    double*   p_node  = this->data_partial_likelihoods + this->active_likelihood[node_index] * this->data_active_likelihood_offset  + node_index*this->data_node_offset;
+
+    size_t num_site_matrices = num_site_mixtures/num_site_rates;
+
+    // create a vector for the per mixture likelihoods
+    // we need this vector to sum over the different mixture likelihoods
+    std::vector<std::vector<double> > per_site_rate_Likelihoods = std::vector<std::vector<double> >(data_pattern_block_size, std::vector<double>(num_site_rates, 0.0));
+
+    std::vector<double> site_mixture_probs = getMixtureProbs();
+
+    // get pointer the likelihood
+    double*   p_mixture     = p_node;
+    // iterate over all mixture categories
+    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+    {
+        size_t site_rate_index = mixture / num_site_matrices;
+
+        // get pointers to the likelihood for this mixture category
+        double*   p_site_mixture     = p_mixture;
+        // iterate over all sites
+
+        for (size_t site = 0; site < data_pattern_block_size; ++site)
+        {
+            // temporary variable storing the likelihood
+            double tmp = 0.0;
+            // get the pointers to the likelihoods for this site and mixture category
+            double* p_site_j   = p_site_mixture;
+            // iterate over all starting states
+            for (size_t i=0; i<num_chars; ++i)
+            {
+                // add the probability of starting from this state
+                tmp += *p_site_j;
+
+                // increment pointers
+                ++p_site_j;
+            }
+            // add the likelihood for this mixture category
+            per_site_rate_Likelihoods[site][site_rate_index] += tmp * site_mixture_probs[mixture];
+
+            // increment the pointers to the next site
+            p_site_mixture+=this->site_offset;
+
+        } // end-for over all sites (=patterns)
+
+        // increment the pointers to the next mixture category
+        p_mixture+=this->data_mixture_offset;
+
+    } // end-for over all mixtures (=rate categories)
+
+    double prob_invariant = getPInv();
+    double oneMinusPInv = 1.0 - prob_invariant;
+    std::vector< size_t >::const_iterator patterns = data_pattern_counts.begin();
+    if ( prob_invariant > 0.0 )
+    {
+        // get the mean root frequency vector
+        std::vector<double> f;
+        if (this->branch_heterogeneous_substitution_matrices == true)
+        {
+            f = this->getRootFrequencies(0);
+        }
+        else
+        {
+            std::vector<std::vector<double> > ff;
+            getRootFrequencies(ff);
+
+            std::vector<double> matrix_probs(num_matrices, 1.0/num_matrices);
+
+            if (site_matrix_probs != NULL)
+            {
+                matrix_probs = site_matrix_probs->getValue();
+            }
+
+            f = std::vector<double>(ff[0].size(), 0.0);
+
+            for (size_t matrix = 0; matrix < ff.size(); matrix++)
+            {
+                // get the root frequencies
+                const std::vector<double> &fm = ff[matrix];
+
+                for (size_t i = 0; i < fm.size(); i++)
+                {
+                    f[i] += fm[i] * matrix_probs[matrix];
+                }
+            }
+        }
+
+        size_t num_site_rates_withInv = num_site_rates + 1;
+
+        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
+        {
+            // the first rate category is the invariant
+            if ( this->site_invariant[site] == true )
+            {
+                double ftotal = 0.0;
+                for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
+                {
+                    ftotal += f[this->invariant_site_index[site][c]];
+                }
+
+                rv[site][0] = log( prob_invariant * ftotal ) * *patterns;
+            }
+            else
+            {
+                rv[site][0] = RbConstants::Double::neginf;
+            }
+
+            // the remaining variant rate categories
+            for (size_t site_rate_index = 1; site_rate_index < num_site_rates_withInv; ++site_rate_index)
+            {
+                rv[site][site_rate_index] = log( oneMinusPInv * per_site_rate_Likelihoods[site][site_rate_index - 1] ) * *patterns;
+
+                if ( RbSettings::userSettings().getUseScaling() == true )
+                {
+                    rv[site][site_rate_index] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
+                }
+
+            }
+
+        }
+
+    }
+    else
+    {
+
+        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
+        {
+            for (size_t site_rate_index = 0; site_rate_index < num_site_rates; ++site_rate_index)
+            {
+                rv[site][site_rate_index] = log( per_site_rate_Likelihoods[site][site_rate_index] ) * *patterns;
+
+                if ( RbSettings::userSettings().getUseScaling() == true )
+                {
+                    rv[site][site_rate_index] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
+                }
+            }
+
+        }
+
+    }
+
+}
+
 
 
 /**
@@ -1777,7 +2238,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // get the per site likelihood
         RbVector<double> tmp = RbVector<double>(data_num_patterns, 0.0);
-        computeRootLikelihoods( tmp );
+        computeRootLikelihoods( tmp, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_pattern_block_size, data_mixture_offset, data_pattern_counts, data_per_node_site_log_scaling_factors );
 
         // if we are not in MCMC mode, then we need to (temporarily) free memory
         if ( delete_partial_likelihoods == true )
@@ -1798,7 +2259,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
             for (size_t i=0; i<data_num_sites; ++i)
             {
                 size_t pattern_index = data_site_pattern[i];
-                rv[i] = tmp[pattern_index] / pattern_counts[pattern_index];
+                rv[i] = tmp[pattern_index] / data_pattern_counts[pattern_index];
             }
         }
         else
@@ -1872,7 +2333,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
             for (size_t j=0; j<num_site_rates_withInv; ++j)
             {
-                siteRateConditionalProb[i][j] = exp(tmp[pattern_index][j] / pattern_counts[pattern_index]);
+                siteRateConditionalProb[i][j] = exp(tmp[pattern_index][j] / data_pattern_counts[pattern_index]);
                 siteLikelihoods += siteRateConditionalProb[i][j];
             }
             for (size_t j=0; j<num_site_rates_withInv; ++j)
@@ -1990,7 +2451,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
             size_t pattern_index = data_site_pattern[i];
             for (size_t j=0; j<num_site_rates_withInv; ++j)
             {
-                rv[i][j] = tmp[pattern_index][j] / pattern_counts[pattern_index];
+                rv[i][j] = tmp[pattern_index][j] / data_pattern_counts[pattern_index];
             }
         }
 
@@ -2047,7 +2508,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
             size_t pattern_index = data_site_pattern[i];
             for (size_t j=0; j<num_site_mixture_withInv; ++j)
             {
-                rv[i][j] = tmp[pattern_index][j] / pattern_counts[pattern_index];
+                rv[i][j] = tmp[pattern_index][j] / data_pattern_counts[pattern_index];
             }
         }
 
@@ -3563,474 +4024,35 @@ std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneo
 
 
 
-
-template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoods( std::vector<double> &rv ) const
-{
-    // get the root node
-    const TopologyNode &root = tau->getValue().getRoot();
-
-    // get the index of the root node
-    size_t node_index = root.getIndex();
-
-    // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = data_partial_likelihoods + this->active_likelihood[node_index] * this->data_active_likelihood_offset  + node_index*this->data_node_offset;
-
-    // create a vector for the per mixture likelihoods
-    // we need this vector to sum over the different mixture likelihoods
-    std::vector<double> per_mixture_Likelihoods = std::vector<double>(data_pattern_block_size,0.0);
-
-    std::vector<double> site_mixture_probs = getMixtureProbs();
-
-    // get pointer the likelihood
-    double*   p_mixture     = p_node;
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-    {
-
-        // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
-        // iterate over all sites
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site)
-        {
-            // temporary variable storing the likelihood
-            double tmp = 0.0;
-            // get the pointers to the likelihoods for this site and mixture category
-            double* p_site_j   = p_site_mixture;
-            // iterate over all starting states
-            for (size_t i=0; i<num_chars; ++i)
-            {
-                // add the probability of starting from this state
-                tmp += *p_site_j;
-
-                // increment pointers
-                ++p_site_j;
-            }
-            // add the likelihood for this mixture category
-            per_mixture_Likelihoods[site] += tmp * site_mixture_probs[mixture];
-
-            // increment the pointers to the next site
-            p_site_mixture+=this->site_offset;
-
-        } // end-for over all sites (=patterns)
-
-        // increment the pointers to the next mixture category
-        p_mixture+=this->data_mixture_offset;
-
-    } // end-for over all mixtures
-
-    double prob_invariant = getPInv();
-    
-    double oneMinusPInv = 1.0 - prob_invariant;
-    std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
-    if ( prob_invariant > 0.0 )
-    {
-        // get the mean root frequency vector
-        std::vector<double> f;
-        if (this->branch_heterogeneous_substitution_matrices == true)
-        {
-            f = this->getRootFrequencies(0);
-        }
-        else
-        {
-            std::vector<std::vector<double> > ff;
-            getRootFrequencies(ff);
-
-            std::vector<double> matrix_probs(num_matrices, 1.0/num_matrices);
-
-            if (site_matrix_probs != NULL)
-            {
-                matrix_probs = site_matrix_probs->getValue();
-            }
-
-            f = std::vector<double>(ff[0].size(), 0.0);
-
-            for (size_t matrix = 0; matrix < ff.size(); matrix++)
-            {
-                // get the root frequencies
-                const std::vector<double> &fm = ff[matrix];
-
-                for (size_t i = 0; i < fm.size(); i++)
-                {
-                    f[i] += fm[i] * matrix_probs[matrix];
-                }
-            }
-        }
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
-        {
-
-           
-            if ( RbSettings::userSettings().getUseScaling() == true )
-            {
-                if ( this->site_invariant[site] == true )
-                {
-                    double ftotal = 0.0;
-                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
-                    {
-                        ftotal += f[this->invariant_site_index[site][c]];
-                    }
-
-                    rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site]) ) * *patterns;
-                }
-                else
-                {
-                    rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                    rv[site] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
-                }
-
-            }
-            else // no scaling
-            {
-
-                if ( this->site_invariant[site] == true )
-                {
-                    double ftotal = 0.0;
-                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
-                    {
-                        ftotal += f[this->invariant_site_index[site][c]];
-                    }
-                    
-                    rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                }
-                else
-                {
-                    rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                }
-
-            }
-
-        }
-        
-    }
-    else
-    {
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
-        {
-            rv[site] = log( per_mixture_Likelihoods[site] ) * *patterns;
-
-            if ( RbSettings::userSettings().getUseScaling() == true )
-            {
-                rv[site] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
-            }
-
-        }
-
-    }
-
-}
-
-
-template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodsPerSiteMixture( MatrixReal &rv ) const
-{
-    // get the root node
-    const TopologyNode &root = tau->getValue().getRoot();
-
-    // get the index of the root node
-    size_t node_index = root.getIndex();
-
-    // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->data_partial_likelihoods + this->active_likelihood[node_index] * this->data_active_likelihood_offset  + node_index*this->data_node_offset;
-
-    // create a vector for the per mixture likelihoods
-    // we need this vector to sum over the different mixture likelihoods
-    std::vector<std::vector<double> > per_site_mixture_Likelihoods = std::vector<std::vector<double> >(data_pattern_block_size, std::vector<double>(num_site_mixtures, 0.0));
-
-    std::vector<double> site_mixture_probs = getMixtureProbs();
-
-    // get pointer the likelihood
-    double*   p_mixture     = p_node;
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-    {
-
-        // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
-        // iterate over all sites
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site)
-        {
-            // temporary variable storing the likelihood
-            double tmp = 0.0;
-            // get the pointers to the likelihoods for this site and mixture category
-            double* p_site_j   = p_site_mixture;
-            // iterate over all starting states
-            for (size_t i=0; i<num_chars; ++i)
-            {
-                // add the probability of starting from this state
-                tmp += *p_site_j;
-
-                // increment pointers
-                ++p_site_j;
-            }
-            // add the likelihood for this mixture category
-            per_site_mixture_Likelihoods[site][mixture] += tmp * site_mixture_probs[mixture];
-
-            // increment the pointers to the next site
-            p_site_mixture+=this->site_offset;
-
-        } // end-for over all sites (=patterns)
-
-        // increment the pointers to the next mixture category
-        p_mixture+=this->data_mixture_offset;
-
-    } // end-for over all mixtures
-
-    double prob_invariant = getPInv();
-    double oneMinusPInv = 1.0 - prob_invariant;
-    std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
-    if ( prob_invariant > 0.0 )
-    {
-        // get the root frequency vector(s)
-        std::vector<std::vector<double> > ff;
-        std::vector<double> f;
-        if (this->branch_heterogeneous_substitution_matrices == true)
-        {
-            f = this->getRootFrequencies(0);
-            ff.push_back(f);
-        }
-        else
-        {
-            getRootFrequencies(ff);
-        }
-
-        size_t num_site_matrices = num_site_mixtures / num_site_rates;
-        std::vector<double> matrix_probs(num_site_matrices, 1.0/num_site_matrices);
-
-        if (site_matrix_probs != NULL)
-        {
-            matrix_probs = site_matrix_probs->getValue();
-        }
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
-        {
-            for (size_t matrix = 0; matrix < num_site_matrices; ++matrix)
-            {
-                // the first rate category is the invariant
-                if ( this->site_invariant[site] == true )
-                {
-                    double ftotal = 0.0;
-                    for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
-                    {
-                        ftotal += f[this->invariant_site_index[site][c]];
-                    }
-
-                    rv[site][matrix] = log( prob_invariant * ftotal * matrix_probs[matrix] ) * *patterns;
-                }
-                else
-                {
-                    rv[site][matrix] = RbConstants::Double::neginf;
-                }
-
-                // the remaining variant rate categories
-                for (size_t site_rate_index = 1; site_rate_index < num_site_rates + 1; ++site_rate_index)
-                {
-                    rv[site][site_rate_index * num_site_matrices + matrix] = log( oneMinusPInv * per_site_mixture_Likelihoods[site][site_rate_index * num_site_matrices + matrix] ) * *patterns;
-
-                    if ( RbSettings::userSettings().getUseScaling() == true )
-                    {
-                        rv[site][site_rate_index * num_site_matrices + matrix] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
-                    }
-
-                }
-
-            }
-
-        }
-
-    }
-    else
-    {
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
-        {
-            for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
-            {
-                rv[site][mixture] = log( per_site_mixture_Likelihoods[site][mixture] ) * *patterns;
-
-                if ( RbSettings::userSettings().getUseScaling() == true )
-                {
-                    rv[site][mixture] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
-                }
-            }
-
-        }
-
-    }
-
-}
-
-
-template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodsPerSiteRate( MatrixReal &rv ) const
-{
-    // get the root node
-    const TopologyNode &root = tau->getValue().getRoot();
-
-    // get the index of the root node
-    size_t node_index = root.getIndex();
-
-    // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->data_partial_likelihoods + this->active_likelihood[node_index] * this->data_active_likelihood_offset  + node_index*this->data_node_offset;
-
-    size_t num_site_matrices = num_site_mixtures/num_site_rates;
-
-    // create a vector for the per mixture likelihoods
-    // we need this vector to sum over the different mixture likelihoods
-    std::vector<std::vector<double> > per_site_rate_Likelihoods = std::vector<std::vector<double> >(data_pattern_block_size, std::vector<double>(num_site_rates, 0.0));
-
-    std::vector<double> site_mixture_probs = getMixtureProbs();
-
-    // get pointer the likelihood
-    double*   p_mixture     = p_node;
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-    {
-        size_t site_rate_index = mixture / num_site_matrices;
-
-        // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
-        // iterate over all sites
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site)
-        {
-            // temporary variable storing the likelihood
-            double tmp = 0.0;
-            // get the pointers to the likelihoods for this site and mixture category
-            double* p_site_j   = p_site_mixture;
-            // iterate over all starting states
-            for (size_t i=0; i<num_chars; ++i)
-            {
-                // add the probability of starting from this state
-                tmp += *p_site_j;
-
-                // increment pointers
-                ++p_site_j;
-            }
-            // add the likelihood for this mixture category
-            per_site_rate_Likelihoods[site][site_rate_index] += tmp * site_mixture_probs[mixture];
-
-            // increment the pointers to the next site
-            p_site_mixture+=this->site_offset;
-
-        } // end-for over all sites (=patterns)
-
-        // increment the pointers to the next mixture category
-        p_mixture+=this->data_mixture_offset;
-
-    } // end-for over all mixtures (=rate categories)
-
-    double prob_invariant = getPInv();
-    double oneMinusPInv = 1.0 - prob_invariant;
-    std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
-    if ( prob_invariant > 0.0 )
-    {
-        // get the mean root frequency vector
-        std::vector<double> f;
-        if (this->branch_heterogeneous_substitution_matrices == true)
-        {
-            f = this->getRootFrequencies(0);
-        }
-        else
-        {
-            std::vector<std::vector<double> > ff;
-            getRootFrequencies(ff);
-
-            std::vector<double> matrix_probs(num_matrices, 1.0/num_matrices);
-
-            if (site_matrix_probs != NULL)
-            {
-                matrix_probs = site_matrix_probs->getValue();
-            }
-
-            f = std::vector<double>(ff[0].size(), 0.0);
-
-            for (size_t matrix = 0; matrix < ff.size(); matrix++)
-            {
-                // get the root frequencies
-                const std::vector<double> &fm = ff[matrix];
-
-                for (size_t i = 0; i < fm.size(); i++)
-                {
-                    f[i] += fm[i] * matrix_probs[matrix];
-                }
-            }
-        }
-
-        size_t num_site_rates_withInv = num_site_rates + 1;
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
-        {
-            // the first rate category is the invariant
-            if ( this->site_invariant[site] == true )
-            {
-                double ftotal = 0.0;
-                for ( size_t c = 0; c < this->invariant_site_index[site].size(); c++ )
-                {
-                    ftotal += f[this->invariant_site_index[site][c]];
-                }
-
-                rv[site][0] = log( prob_invariant * ftotal ) * *patterns;
-            }
-            else
-            {
-                rv[site][0] = RbConstants::Double::neginf;
-            }
-
-            // the remaining variant rate categories
-            for (size_t site_rate_index = 1; site_rate_index < num_site_rates_withInv; ++site_rate_index)
-            {
-                rv[site][site_rate_index] = log( oneMinusPInv * per_site_rate_Likelihoods[site][site_rate_index - 1] ) * *patterns;
-
-                if ( RbSettings::userSettings().getUseScaling() == true )
-                {
-                    rv[site][site_rate_index] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
-                }
-
-            }
-
-        }
-
-    }
-    else
-    {
-
-        for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
-        {
-            for (size_t site_rate_index = 0; site_rate_index < num_site_rates; ++site_rate_index)
-            {
-                rv[site][site_rate_index] = log( per_site_rate_Likelihoods[site][site_rate_index] ) * *patterns;
-
-                if ( RbSettings::userSettings().getUseScaling() == true )
-                {
-                    rv[site][site_rate_index] -= data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] * *patterns;
-                }
-            }
-
-        }
-
-    }
-
-}
-
-
-
 template<class charType>
 double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::sumRootLikelihood( void )
 {
 
-
+    // first, we compute the likelihoods for the data
     std::vector<double> site_likelihoods = std::vector<double>(data_pattern_block_size,0.0);
-    computeRootLikelihoods( site_likelihoods );
+    computeRootLikelihoods( site_likelihoods, data_partial_likelihoods, data_active_likelihood_offset, data_node_offset, data_pattern_block_size, data_mixture_offset, data_pattern_counts, data_per_node_site_log_scaling_factors );
 
     double sum_partial_probs = 0.0;
 
     for (size_t site = 0; site < data_pattern_block_size; ++site)
     {
         sum_partial_probs += site_likelihoods[site];
+    }
+    
+    // second, we compute the likelihoods for the data
+    if ( ascertainment_bias_correction == AbstractAscertainmentBias::VARIABLE )
+    {
+        std::vector<double> bias_site_likelihoods = std::vector<double>(bias_num_sites,0.0);
+        computeRootLikelihoods( bias_site_likelihoods, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_sites, bias_mixture_offset, bias_pattern_counts, bias_per_node_site_log_scaling_factors );
+
+        double bias_sum_partial_probs = 0.0;
+
+        for (size_t site = 0; site < bias_num_sites; ++site)
+        {
+            bias_sum_partial_probs += exp(bias_site_likelihoods[site]);
+        }
+        
+        sum_partial_probs -= log( bias_sum_partial_probs ) * data_num_sites;
     }
 
 #ifdef RB_MPI

@@ -1245,7 +1245,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::sumRootLikelihood( void )
     // sum the log-likelihoods for all sites together
     double sumPartialProbs = 0.0;
 
-    std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
+    std::vector< size_t >::const_iterator patterns = this->data_pattern_counts.begin();
     for (size_t site = 0; site < data_pattern_block_size; ++site, ++patterns)
     {
         if ( RbSettings::userSettings().getUseScaling() )
