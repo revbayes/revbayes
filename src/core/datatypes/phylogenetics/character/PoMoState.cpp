@@ -41,11 +41,115 @@ PoMoState::PoMoState(size_t n, size_t vps, const std::string &s, const std::stri
 }
 
 
+void PoMoState::addState(const std::string &symbol)
+{
+    ++num_observed_states;
+    
+    std::string labels = getStateLabels();
+    size_t pos = labels.find(symbol);
+    
+    state.set( pos );
+    index_single_state = pos;
+}
+
+
 
 PoMoState* PoMoState::clone( void ) const
 {
     
     return new PoMoState( *this );
+}
+
+
+const std::string& PoMoState::getChromosome( void ) const
+{
+    return chromosome;
+}
+
+
+std::string PoMoState::getDataType( void ) const
+{
+    
+    return "PoMo";
+}
+
+
+RbBitSet PoMoState::getState(void) const
+{
+    
+    return state;
+}
+
+
+std::string PoMoState::getStateLabels( void ) const
+{
+    
+    static std::string labels = "A C G T ";
+    std::string acgt( "ACGT" );
+    std::vector< size_t > frequencies;
+    int stepSize = 100 / virtual_population_size;
+    for (size_t i = 1; i < virtual_population_size; ++i)
+    {
+        frequencies.push_back(i*stepSize);
+    }
+    for ( size_t k = 0; k < acgt.size(); ++k )
+    {
+        char ch = acgt[k];
+        
+        for ( size_t j = k+1; j < acgt.size(); ++j )
+        {
+            char ch2 = acgt[j];
+            for (size_t i = 0; i < virtual_population_size-1; ++i)
+            {
+                labels += ch + boost::lexical_cast<std::string>(frequencies[i]) + ch2 + boost::lexical_cast<std::string>(frequencies[virtual_population_size - 2 - i]) + " ";
+            }
+        }
+    }
+    
+    return labels;
+}
+
+
+size_t PoMoState::getPosition( void ) const
+{
+    return position;
+}
+
+
+std::string PoMoState::getStringValue(void) const
+{
+    
+    if ( isMissingState() )
+    {
+        return "?";
+    }
+    
+    if ( isGapState() )
+    {
+        return "-";
+    }
+    
+    return string_value;
+}
+
+
+bool PoMoState::isGapState( void ) const
+{
+    return is_gap;
+}
+
+
+bool PoMoState::isMissingState( void ) const
+{
+    return is_missing;
+}
+
+
+const std::string& PoMoState::nexusSeparator(void) const
+{
+    static std::string sep = " ";
+    
+    return sep;
 }
 
 
@@ -95,7 +199,8 @@ void PoMoState::populateWeightedStatesForMonoallelicState(size_t ind_first, int 
         }
         
     }
-    else  {
+    else
+    {
         throw RbException( "PoMo string state not correct. We found "+ StringUtilities::to_string(ind_first)  );
     }
     
@@ -105,7 +210,6 @@ void PoMoState::populateWeightedStatesForMonoallelicState(size_t ind_first, int 
         {
             weights[i] = 1e-8;
         }
-        //    std::cout << weights[i] << " ";
     }
     
     
@@ -113,282 +217,9 @@ void PoMoState::populateWeightedStatesForMonoallelicState(size_t ind_first, int 
 }
 
 
-void PoMoState::setState(const std::string &symbol)
-{
-    /* Example with only ten states:
-     A C G T A10C90 A20C80 A30C70...A90C10 A10G90 A20G80...A10T90...C10G90...C10T90...G10T90
-     The preferred format is that of counts: e.g.:
-     0,1,4,0
-     meaning 0 A, 1 C, 4 G, 0 T were sampled at that position.
-     */
-    size_t index = 0;
-    size_t virtMinus1 = virtual_population_size-1;
-    
-    std::vector<std::string> counts;
-    StringUtilities::stringSplit(symbol, ",", counts);
-    
-    if (counts.size() != num_raw_states)
-        throw RbException( "PoMo string state not correctly formatted. We found "+ symbol +", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." );
-    
-    
-    //    //Checking if we have the preferred format, i.e. counts.
-    //    if ( symbol.find(",") != std::string::npos ) {
-    //        std::stringstream ss(symbol);
-    //        std::vector<int> vect;
-    //        int j;
-    //        while (ss >> j)
-    //        {
-    //            vect.push_back(j);
-    //            if (ss.peek() == ',' || ss.peek() == ' ')
-    //                ss.ignore();
-    //        }
-    //    }
-    
-    // We have the counts, now we create the state.
-    // code borrowed in part from IQ-Tree
-    int sum = 0;
-    int count = 0;
-    size_t id1 = -1;
-    size_t id2 = -1;
-    int num = 0;
-    // Sum over elements and count non-zero elements.
-    for (size_t i = 0; i < num_raw_states; ++i)
-    {
-        int allele_count = StringUtilities::asIntegerNumber( counts[i] );
-        if ( allele_count > 0 )
-        {
-            // determines the nucleotide or allele type.
-            if (id1 == -1)
-            {
-                id1 = i;
-                num = allele_count;
-            }
-            else if (id2 == -1)
-            {
-                id2 = i;
-            }
-            else
-            {
-                throw RbException("We current only support biallelic states in the PoMo framework.");
-            }
-            count++;
-            sum += allele_count;
-        }
-    }
-    
-    if ( count == 1 ) // monoallelic state
-    {
-        index = id1 ; //+ 1;
-        state.reset();
-        state.set(id1);
-        populateWeightedStatesForMonoallelicState(id1, sum);
-    }
-    else if ( count == 2 ) //biallelic state
-    {
-        std::cout << "BIALLELIC STATE" <<std::endl;
-        int basicIndex = num_raw_states * id1;
-        for (size_t i=0; i<id1; ++i) {
-            basicIndex -= i;
-        }
-        basicIndex *= virtMinus1;
-        basicIndex += num_raw_states;
-        
-        if ( id2 > num_raw_states )
-        {
-            throw RbException( "PoMo string state not correct. We found "+ symbol  );
-        }
-        
-        std::cout << "basicIndex: "<<basicIndex <<std::endl;
-        
-        state.reset();
-        // index corresponds to the closest place where the pomo state is.
-        // In case the virtual population size is inferior to the counts in the state, or the reverse,
-        // we have to do some maths.
-        // We have to get the closest numbers to the observed counts.
-        // Basically, the lowest count has to be >=1, and as close as possible
-        // to the observed count.
-        if (sum != virtual_population_size)
-        {
-            double obs_proportion = (double) (sum - num) / (double)sum ;
-            size_t corrected_num = 0;
-            std::cout<< "obs_proportion*virtual_population_size: " << obs_proportion*virtual_population_size <<std::endl;
-            // A minima we decide there must be at least
-            // one sample from the least frequent allele
-            if  (obs_proportion*virtual_population_size <= 1.0)
-            {
-                corrected_num = virtual_population_size - 1;
-            }
-            else
-            {
-                corrected_num = virtual_population_size - (size_t)round(obs_proportion*virtual_population_size);
-            }
-            std::cout << "corrected_num: " << corrected_num << " vs num: " << num << std::endl;
-            index = basicIndex + virtual_population_size - corrected_num - 1;
-        }
-        else
-        {
-            index = basicIndex + virtual_population_size - num - 1;
-        }
-        
-        std::cout << "index: "<<index <<std::endl;
-        
-        // Let's try PoMo state averaging.
-        // Basically all cells in the weight matrix that contain only id1, only id2, or a combination of both should have a non-zero weight.
-        double n = (double)sum;
-        double p = (double)num/(double)sum;
-        
-        std::vector<double> prob (virtual_population_size );
-        for (size_t j =0; j <= virtMinus1; ++j)
-        {
-            prob[j] = RbMath::choose(sum, num) *  pow( ( (double)j/double(virtual_population_size)) , num) * pow( ( (double)(virtual_population_size - j)/double(virtual_population_size) ) , (double)(sum-num)) ;
-            if (prob[j] < 1e-8)
-            {
-                prob[j] = 0.0;
-            }
-            //RbStatistics::Binomial::pdf(n, (double)j/double(virtual_population_size), (double)(virtual_population_size));
-        }
-        
-        for (size_t j=0; j < virtMinus1; ++j)
-        {
-            weights[j+basicIndex] = prob[j+1];
-            state.set( j+num_raw_states );
-        }
-        
-    }
-    else if ( count == 0 )
-    {
-        setGapState( true ); //We say we have a gap
-    }
-    
-    index_single_state = index;
-    num_observed_states = 1;
-    
-    std::cout << "stringvalue: " << string_value <<std::endl;
-    for (size_t i =0; i < weights.size(); ++i)
-    {
-        std::cout << weights[i] << " ";
-    }
-    std::cout << "\n\n "<<std::endl;
-}
-
-
-std::string PoMoState::getDataType( void ) const
-{
-    
-    return "PoMo";
-}
-
-
-std::string PoMoState::getStateLabels( void ) const
-{
-    
-    static std::string labels = "A C G T ";
-    std::string acgt( "ACGT" );
-    std::vector< size_t > frequencies;
-    int stepSize = 100 / virtual_population_size;
-    for (size_t i = 1; i < virtual_population_size; ++i)
-    {
-        frequencies.push_back(i*stepSize);
-    }
-    for ( size_t k = 0; k < acgt.size(); ++k )
-    {
-        char ch = acgt[k];
-        
-        for ( size_t j = k+1; j < acgt.size(); ++j )
-        {
-            char ch2 = acgt[j];
-            for (size_t i = 0; i < virtual_population_size-1; ++i)
-            {
-                labels += ch + boost::lexical_cast<std::string>(frequencies[i]) + ch2 + boost::lexical_cast<std::string>(frequencies[virtual_population_size - 2 - i]) + " ";
-            }
-        }
-    }
-    
-    return labels;
-}
-
-std::string PoMoState::getStringValue(void) const
-{
-    
-    if ( isMissingState() )
-    {
-        return "?";
-    }
-    
-    if ( isGapState() )
-    {
-        return "-";
-    }
-    
-    return string_value;
-}
-
-void PoMoState::setVirtualPopulationSize(size_t ps)
-{
-    if (ps >= 100)
-    {
-        throw RbException( "The virtual population size should be < 100 and should be a divisor of 100." );
-    }
-    if (100 % ps != 0)
-    {
-        throw RbException( "The virtual population size should be a divisor of 100." );
-    }
-    virtual_population_size = ps;
-}
-
 void PoMoState::setChromosome(std::string chr)
 {
     chromosome = chr;
-}
-
-void PoMoState::setPosition(size_t pos)
-{
-    position = pos;
-}
-
-const std::string& PoMoState::getChromosome( void ) const
-{
-    return chromosome;
-}
-
-size_t PoMoState::getPosition( void ) const
-{
-    return position;
-}
-
-
-void PoMoState::addState(const std::string &symbol)
-{
-    ++num_observed_states;
-    
-    std::string labels = getStateLabels();
-    size_t pos = labels.find(symbol);
-    
-    state.set( pos );
-    index_single_state = pos;
-}
-
-
-RbBitSet PoMoState::getState(void) const
-{
-    // we need to clear the bits first
-    //    RbBitSet bs = RbBitSet( state.size());
-    //  bs.set(index_single_state);
-    
-    return state;
-    //    return bs;
-}
-
-
-bool PoMoState::isGapState( void ) const
-{
-    return is_gap;
-}
-
-
-bool PoMoState::isMissingState( void ) const
-{
-    return is_missing;
 }
 
 
@@ -404,12 +235,183 @@ void PoMoState::setMissingState( bool tf )
 }
 
 
-void PoMoState::setToFirstState(void)
+void PoMoState::setPosition(size_t pos)
 {
+    position = pos;
+}
+
+
+
+/**
+ * Setting the PoMo state from  counts.
+ *
+ * Example with only ten states and DNA:
+ * A C G T A10C90 A20C80 A30C70...A90C10 A10G90 A20G80...A10T90...C10G90...C10T90...G10T90
+ * The preferred format is that of counts: e.g.:
+ *    0,1,4,0
+ * meaning 0 A, 1 C, 4 G, 0 T were sampled at that position.
+ */
+void PoMoState::setState(const std::string &symbol)
+{
+    // store for internal use
+    string_value = symbol;
+        
+    std::vector<std::string> counts_string;
+    StringUtilities::stringSplit(symbol, ",", counts_string);
+    
+    if (counts_string.size() != num_raw_states)
+    {
+        throw RbException( "PoMo string state not correctly formatted. We found "+ symbol +", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." );
+    }
+    
+    std::vector<size_t> counts = std::vector<size_t>(num_raw_states, 0);
+    for (size_t i = 0; i<num_raw_states; ++i)
+    {
+        counts[i] = StringUtilities::asIntegerNumber( counts_string[i] );
+    }
+    
+    setState( counts );
+}
+
+
+
+/**
+ * Setting the PoMo state from  counts.
+ *
+ * Example with only ten states and DNA:
+ * A C G T A10C90 A20C80 A30C70...A90C10 A10G90 A20G80...A10T90...C10G90...C10T90...G10T90
+ * The preferred format is that of counts: e.g.:
+ *    0,1,4,0
+ * meaning 0 A, 1 C, 4 G, 0 T were sampled at that position.
+ */
+void PoMoState::setState(const std::vector<size_t> &counts)
+{
+    size_t virt_pop_size_minus_1 = virtual_population_size-1;
+    
+    if (counts.size() != num_raw_states)
+    {
+        throw RbException( "PoMo string state not correctly formatted. We expected " + StringUtilities::toString(num_raw_states) + " counts but received " + StringUtilities::toString(counts.size()) + "." );
+    }
+    
+    // We have the counts, now we create the state.
+    size_t total_num_samples        = 0;
+    size_t count_observed_alleles   = 0;
+    size_t index_first_allele       = -1;
+    size_t index_second_allele      = -1;
+    size_t count_first_allele       = 0;
+    // Sum over elements and count non-zero elements.
+    for (size_t i = 0; i < num_raw_states; ++i)
+    {
+        size_t allele_count = counts[i];
+        if ( allele_count > 0 )
+        {
+            // determines the nucleotide or allele type.
+            if (index_first_allele == -1)
+            {
+                index_first_allele = i;
+                count_first_allele = allele_count;
+            }
+            else if (index_second_allele == -1)
+            {
+                index_second_allele = i;
+            }
+            else
+            {
+                throw RbException("We current only support biallelic states in the PoMo framework.");
+            }
+            ++count_observed_alleles;
+            total_num_samples += allele_count;
+        }
+    }
+    
+    size_t state_index = 0;
+    if ( count_observed_alleles == 1 ) // monoallelic state
+    {
+        state_index = index_first_allele;
+        state.clear();
+        state.set(index_first_allele);
+//        populateWeightedStatesForMonoallelicState(index_first_allele, total_num_samples);
+    }
+    else if ( count_observed_alleles == 2 ) //biallelic state
+    {
+        size_t basic_index = num_raw_states * index_first_allele;
+        for (size_t i=0; i<index_first_allele; ++i)
+        {
+            basic_index -= i;
+        }
+        basic_index *= virt_pop_size_minus_1;
+        basic_index += num_raw_states;
+        
+        if ( index_second_allele > num_raw_states )
+        {
+            throw RbException( "PoMo string state not correct. The second allele could not be determined." );
+        }
+        
+        state.clear();
+        // index corresponds to the closest place where the pomo state is.
+        // In case the virtual population size is smaller to the counts in the state, or the reverse,
+        // we have to do some maths.
+        // We have to get the closest numbers to the observed counts.
+        // Basically, the lowest count has to be >=1, and as close as possible
+        // to the observed count.
+        if (total_num_samples != virtual_population_size)
+        {
+            double obs_proportion_second_allele = (double) (total_num_samples - count_first_allele) / (double)total_num_samples ;
+            size_t virtual_pop_sample_count = (size_t)round((1.0-obs_proportion_second_allele)*virtual_population_size);
+            if ( virtual_pop_sample_count == virtual_population_size )
+            {
+                state_index = index_first_allele;
+            }
+            else if ( virtual_pop_sample_count == 0 )
+            {
+                state_index = index_second_allele;
+            }
+            else
+            {
+                state_index = basic_index + virtual_population_size - virtual_pop_sample_count - 1;
+            }
+        }
+        else
+        {
+            state_index = basic_index + virtual_population_size - count_first_allele - 1;
+        }
+        state.set(state_index);
+        
+        
+//        // Let's try PoMo state averaging.
+//        // Basically all cells in the weight matrix that contain only id1, only id2, or a combination of both should have a non-zero weight.
+//        double n = (double)total_num_samples;
+//        double p = (double)count_first_allele/(double)total_num_samples;
+//
+//        std::vector<double> prob (virtual_population_size );
+//        for (size_t j =0; j <= virt_pop_size_minus_1; ++j)
+//        {
+//            prob[j] = RbMath::choose(total_num_samples, count_first_allele) *  pow( ( (double)j/double(virtual_population_size)) , count_first_allele) * pow( ( (double)(virtual_population_size - j)/double(virtual_population_size) ) , (double)(total_num_samples-count_first_allele)) ;
+//            if (prob[j] < 1e-8)
+//            {
+//                prob[j] = 0.0;
+//            }
+//            //RbStatistics::Binomial::pdf(n, (double)j/double(virtual_population_size), (double)(virtual_population_size));
+//        }
+//
+//        for (size_t j=0; j < virt_pop_size_minus_1; ++j)
+//        {
+//            weights[j+basic_index] = prob[j+1];
+//            state.set( j+num_raw_states );
+//        }
+        
+    }
+    else if ( count_observed_alleles == 0 )
+    {
+        setGapState( true ); // We say we have a gap
+    }
+    
+    index_single_state = state_index;
     num_observed_states = 1;
     index_single_state = 0;
     state.reset();
     state.set( 0 );
+    
 }
 
 
@@ -420,6 +422,30 @@ void PoMoState::setStateByIndex(size_t index)
     index_single_state = index;
     state.reset();
     state.set( index );
+    
+}
+
+
+void PoMoState::setToFirstState(void)
+{
+    num_observed_states = 1;
+    index_single_state = 0;
+    state.clear();
+    state.set( 0 );
+}
+
+
+void PoMoState::setVirtualPopulationSize(size_t ps)
+{
+    if (ps >= 100)
+    {
+        throw RbException( "The virtual population size should be < 100 and should be a divisor of 100." );
+    }
+    if (100 % ps != 0)
+    {
+        throw RbException( "The virtual population size should be a divisor of 100." );
+    }
+    virtual_population_size = ps;
 }
 
 const std::vector<double>& PoMoState::getWeights( void ) const

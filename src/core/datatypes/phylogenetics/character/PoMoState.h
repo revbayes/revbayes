@@ -44,17 +44,19 @@ namespace RevBayesCore {
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
         RbBitSet                        getState(void) const;                               //!< Get the state (as the bitset)
         void                            setToFirstState(void);                              //!< Set this character state to the first (lowest) possible state
+        void                            setState(const std::vector<size_t> &counts);        //!< Compute the internal state value for this character.
         void                            setState(const std::string &symbol);                //!< Compute the internal state value for this character.
         void                            setStateByIndex(size_t index);                      //!< Set the discrete observation
         
         std::string                     getDataType(void) const;                            //!< Get the datatype as a common string.
         std::string                     getStateLabels(void) const;                         //!< Get valid state labels
         std::string                     getStringValue(void) const;                         //!< Get a representation of the character as a string
+        virtual const std::string&      nexusSeparator(void) const;                         //!< Get the separator for printing in nexus format
         void                            setVirtualPopulationSize(size_t populationSize);    //!< Set the virtual population size for the state space
         void                            setChromosome(std::string chromosome);              //!< Set the chromosome for the state
         void                            setPosition(size_t position);                       //!< Set the position for the state
-        const std::string&              getChromosome( void ) const;                              //!< Get the chromosome for the state
-        size_t                          getPosition( void ) const;                                //!< Get the position for the state
+        const std::string&              getChromosome( void ) const;                        //!< Get the chromosome for the state
+        size_t                          getPosition( void ) const;                          //!< Get the position for the state
         
         const std::vector<double>&      getWeights( void ) const;                            //!< Get the weight of the state
         bool                            isWeighted( void ) const;
