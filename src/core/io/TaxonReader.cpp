@@ -30,7 +30,7 @@ TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : Deli
     std::vector<std::string>& line = chars[0];
     std::map<std::string, int> column_map;
 
-    std::string arr[] = {"taxon", "species", "age", "min_age", "max_age", "status", "count"};
+    std::string arr[] = {"taxon", "species", "age", "min_age", "max_age", "status", "count","ploidy"};
     std::vector<std::string> fields (arr, arr + sizeof(arr) / sizeof(arr[0]) );
     
     for (size_t i = 0 ; i < line.size() ; ++i)
@@ -56,12 +56,13 @@ TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : Deli
         }
     }
     
-    std::map<std::string,int>::iterator speciesit = column_map.find("species");
-    std::map<std::string,int>::iterator ageit = column_map.find("age");
-    std::map<std::string,int>::iterator minit = column_map.find("min_age");
-    std::map<std::string,int>::iterator maxit = column_map.find("max_age");
-    std::map<std::string,int>::iterator statusit = column_map.find("status");
-    std::map<std::string,int>::iterator countit = column_map.find("count");
+    std::map<std::string,int>::iterator speciesit   = column_map.find("species");
+    std::map<std::string,int>::iterator ageit       = column_map.find("age");
+    std::map<std::string,int>::iterator minit       = column_map.find("min_age");
+    std::map<std::string,int>::iterator maxit       = column_map.find("max_age");
+    std::map<std::string,int>::iterator statusit    = column_map.find("status");
+    std::map<std::string,int>::iterator countit     = column_map.find("count");
+    std::map<std::string,int>::iterator ploidyit    = column_map.find("ploidy");
 
     if ( column_map.find("taxon") == column_map.end())
     {
@@ -192,6 +193,11 @@ TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : Deli
         else
         {
             taxon.setExtinct( taxon.getMinAge() > 0.0 );
+        }
+        
+        if ( ploidyit != column_map.end() )
+        {
+            taxon.setPloidy( line[ column_map["ploidy"] ] );
         }
     }
 
