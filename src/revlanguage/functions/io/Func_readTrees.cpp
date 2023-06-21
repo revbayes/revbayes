@@ -174,7 +174,7 @@ const ArgumentRules& Func_readTrees::getArgumentRules( void ) const
         tree_options.push_back( "non-clock" );
         argument_rules.push_back( new OptionRule( "treetype", new RlString("clock"), tree_options, "The type of trees." ) );
         
-        argumentRules.push_back( new ArgumentRule( "unroot_nonclock", RlBoolean::getClassTypeSpec(), "Remove a degree-2 root node and set the tree unrooted, if treetype is non-clock.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argument_rules.push_back( new ArgumentRule( "unroot_nonclock", RlBoolean::getClassTypeSpec(), "Remove a degree-2 root node and set the tree unrooted, if treetype is non-clock.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }

@@ -27,7 +27,7 @@ namespace RevBayesCore {
     public:
         CountsFileWriter();
         
-        void                    writeData(const std::string& fn, const AbstractHomologousDiscreteCharacterData& d);
+        void                    writeData(const path& fn, const AbstractHomologousDiscreteCharacterData& d);
         
         
     };

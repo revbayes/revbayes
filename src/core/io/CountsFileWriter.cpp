@@ -32,7 +32,7 @@ CountsFileWriter::CountsFileWriter( void )
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  * \param[in]   data        The character data object which is written out.
  */
-void CountsFileWriter::writeData(const std::string& file_name, const AbstractHomologousDiscreteCharacterData& data)
+void CountsFileWriter::writeData(const path& file_name, const AbstractHomologousDiscreteCharacterData& data)
 {
     
     size_t num_tips  = data.getNumberOfTaxa();
@@ -40,13 +40,10 @@ void CountsFileWriter::writeData(const std::string& file_name, const AbstractHom
     const std::vector<Taxon> &taxa = data.getTaxa();
     
     // the filestream object
-    std::fstream out_stream;
-    
-    RbFileManager f = RbFileManager(file_name);
-    f.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( f.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( file_name );
+
+    // the filestream object
+    std::ofstream out_stream( file_name.string() );
     
     out_stream << "COUNTSFILE NPOP " << num_tips << " NSITES " << num_sites << std::endl;
     out_stream << "CHROM POS";

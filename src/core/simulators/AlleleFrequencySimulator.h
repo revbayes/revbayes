@@ -39,7 +39,7 @@ class MatrixReal;
         bool                                            isVariable(std::vector<int>& site_pattern) const;
         bool                                            simulateAlignment(const TopologyNode& n, long states, const std::vector<long>& ps, const std::vector<long>& s, std::vector<int>& site_pattern, bool& monomorphic ) const;
         long                                            simulateAlongBranch(double ps, long root_start_state, double branch_length ) const;
-        void                                            writeCountsFile(const Tree* t, const std::string& fn, const std::vector<std::vector<int> >& taxa, const std::vector<long>& s) const;
+        void                                            writeCountsFile(const Tree* t, const path& fn, const std::vector<std::vector<int> >& taxa, const std::vector<long>& s) const;
         
         double                                          generation_time;
         std::vector<double>                             mutation_rates;

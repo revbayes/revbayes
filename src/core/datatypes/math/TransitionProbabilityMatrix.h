@@ -125,7 +125,7 @@ namespace RevBayesCore {
 
     inline size_t TransitionProbabilityMatrix::size(void) const {
 
-        return nElements;
+        return num_states;
     }
 
 

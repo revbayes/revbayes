@@ -290,7 +290,8 @@ namespace RevBayesCore {
         virtual void                                                        scale(size_t i, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
         virtual void                                                        scale(size_t i, size_t l, size_t r, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
         virtual void                                                        scale(size_t i, size_t l, size_t r, size_t m, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset, std::vector< std::vector< std::vector<double> > >& scaling_factors);
-        virtual void                                                        simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
+        virtual void                                                        simulate(const TopologyNode& node, std::vector< charType > &t, bool inv, size_t site_mixture_index);
+
         virtual void                                                        updateTransitionProbabilityMatrix(size_t node_idx);
 
         
@@ -972,7 +973,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             
             if ( c < 0 || c >= this->num_chars )
             {
-                throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
+                throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds! Site was " << (data_gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
             }
             invariant_site_index[i].push_back(c);
 
@@ -3437,7 +3438,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             // Don't divide by zero or NaN.
             if (not (max > 0)) continue;
 
-            this->scaling_factors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
+            this->data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = -log(max);
 
             // compute the per site probabilities
             for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -3511,7 +3512,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             // Don't divide by zero or NaN.
             if (not (max > 0)) continue;
 
-            this->scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] - log(max);
+            this->data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->data_per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->data_per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site] - log(max);
 
             // compute the per site probabilities
             for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -3580,7 +3581,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             // Don't divide by zero or NaN.
             if (not (max > 0)) continue;
 
-            this->scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site] - log(max);
+            this->data_per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->data_per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->data_per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site] + this->data_per_node_site_log_scaling_factors[this->active_likelihood[middle]][middle][site] - log(max);
 
             // compute the per site probabilities
             for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -3731,9 +3732,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
         else
         {
             // recursively simulate the sequences
-//            std::stringstream ss;
-//            ss << "Node" << child.getIndex();
-//            taxon.setTaxon( Taxon(ss.str()) );
             simulate( child, site_pattern, invariant, site_mixture_index );
         }
 

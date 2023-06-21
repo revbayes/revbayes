@@ -13,7 +13,7 @@
 using namespace RevBayesCore;
 
 
-VCFReader::VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data) : DelimitedDataReader(fn, "", 0, read_data)
+VCFReader::VCFReader(const path &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data) : DelimitedDataReader(fn, "", 0, read_data)
 {
     filename            = fn;
     ploidy              = p;
@@ -50,7 +50,7 @@ void VCFReader::mapSpeciesNames(const RbVector<Taxon> &taxa_list, std::vector<st
 }
 
 
-void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, const RbVector<Taxon>& taxa_list )
+void VCFReader::computeMonomorphicVariableStatistics( const path& fn, const RbVector<Taxon>& taxa_list )
 {
     size_t NUM_ORG_STATES = 2;
 
@@ -72,12 +72,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     var_in_both        = std::vector< std::vector<size_t> >( NUM_SPECIES, std::vector<size_t>(NUM_SPECIES, 0) );
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException( "Could not open file ") << filename;
     }
+    
     
     
     // read file
@@ -90,7 +90,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     size_t samples_start_column = 0;
     size_t NUM_SAMPLES = 0;
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmp_chars.clear();
@@ -238,20 +238,18 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     };
     
     
-    f_in.closeFile( readStream );
+    readStream.close();
     
     
     
     
     // write the results of monomorphic in A but variable in B
-    std::ofstream out_stream_mono_in_A_var_in_B;
-    std::string out_filename_mono_in_A_var_in_B = fn + "_mono_in_A_var_in_B.csv";
+    std::string out_filename_mono_in_A_var_in_B = fn.string() + "_mono_in_A_var_in_B.csv";
     
-    RbFileManager f_out_mono_in_A_var_in_B = RbFileManager(out_filename_mono_in_A_var_in_B);
-    f_out_mono_in_A_var_in_B.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_mono_in_A_var_in_B.open( f_out_mono_in_A_var_in_B.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_mono_in_A_var_in_B );
+
+    // the filestream object
+    std::ofstream out_stream_mono_in_A_var_in_B( out_filename_mono_in_A_var_in_B );
     
     // write the file header
     out_stream_mono_in_A_var_in_B << "";
@@ -272,7 +270,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_mono_in_A_var_in_B << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_mono_in_A_var_in_B );
+    out_stream_mono_in_A_var_in_B.close( );
     
     
     
@@ -281,14 +279,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     
     
     // write the results of monomorphic in both and equal state
-    std::ofstream out_stream_mono_in_both_equal;
-    std::string out_filename_mono_in_both_equal = fn + "_mono_in_both_equal.csv";
+    std::string out_filename_mono_in_both_equal = fn.size() + "_mono_in_both_equal.csv";
     
-    RbFileManager f_out_mono_in_both_equal = RbFileManager(out_filename_mono_in_both_equal);
-    f_out_mono_in_both_equal.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_mono_in_both_equal.open( f_out_mono_in_both_equal.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_mono_in_both_equal );
+
+    // the filestream object
+    std::ofstream out_stream_mono_in_both_equal( out_filename_mono_in_both_equal );
     
     // write the file header
     out_stream_mono_in_both_equal << "";
@@ -309,7 +305,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_mono_in_both_equal << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_mono_in_both_equal );
+    out_stream_mono_in_both_equal.close(  );
     
     
     
@@ -318,14 +314,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     
     
     // write the results of monomorphic in both and different state
-    std::ofstream out_stream_mono_in_both_diff;
-    std::string out_filename_mono_in_both_diff = fn + "_mono_in_both_diff.csv";
+    std::string out_filename_mono_in_both_diff = fn.string() + "_mono_in_both_diff.csv";
     
-    RbFileManager f_out_mono_in_both_diff = RbFileManager(out_filename_mono_in_both_diff);
-    f_out_mono_in_both_diff.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_mono_in_both_diff.open( f_out_mono_in_both_diff.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_mono_in_both_diff );
+
+    // the filestream object
+    std::ofstream out_stream_mono_in_both_diff( out_filename_mono_in_both_diff );
     
     // write the file header
     out_stream_mono_in_both_diff << "";
@@ -346,7 +340,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_mono_in_both_diff << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_mono_in_both_diff );
+    out_stream_mono_in_both_diff.close(  );
     
     
     
@@ -355,14 +349,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     
     
     // write the results of monomorphic in both and different state
-    std::ofstream out_stream_var_in_both;
-    std::string out_filename_var_in_both = fn + "_var_in_both.csv";
+    std::string out_filename_var_in_both = fn.string() + "_var_in_both.csv";
     
-    RbFileManager f_out_var_in_both = RbFileManager(out_filename_var_in_both);
-    f_out_var_in_both.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_var_in_both.open( f_out_var_in_both.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_var_in_both );
+
+    // the filestream object
+    std::ofstream out_stream_var_in_both( out_filename_var_in_both );
     
     // write the file header
     out_stream_var_in_both << "";
@@ -383,7 +375,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_var_in_both << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_var_in_both );
+    out_stream_var_in_both.close(  );
 
 }
 
@@ -426,21 +418,17 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     // the filestream object
-    std::ofstream out_stream;
-    
-    RbFileManager f_out = RbFileManager(out_filename);
-    f_out.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( f_out.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename );
+
+    // the filestream object
+    std::ofstream out_stream( out_filename );
     
     
     // read file
@@ -463,7 +451,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     size_t samples_start_column = 0;
     size_t NUM_SAMPLES = 0;
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmpChars.clear();
@@ -692,8 +680,8 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     
     
     
-    f_in.closeFile( readStream );
-    f_out.closeFile( out_stream );
+    readStream.close(  );
+    out_stream.close(  );
 
 }
 
@@ -704,21 +692,17 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
     
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     // the filestream object
-    std::ofstream out_stream;
-    
-    RbFileManager f_out = RbFileManager(out_filename);
-    f_out.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( f_out.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename );
+
+    // the filestream object
+    std::ofstream out_stream( out_filename );
     
     
     // read file
@@ -748,7 +732,7 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
     std::vector< PLOIDY > ploidy_of_sample;
 
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmpChars.clear();
@@ -1130,8 +1114,8 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
     
     
     
-    f_in.closeFile( readStream );
-    f_out.closeFile( out_stream );
+    readStream.close(  );
+    out_stream.close(  );
 
 }
 
@@ -1162,11 +1146,10 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const s
     std::vector<size_t> indices_of_taxa;
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     // read file
@@ -1189,7 +1172,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const s
     
     size_t genome_index = 1;
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmpChars.clear();
@@ -1333,7 +1316,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const s
     
     
     
-    f_in.closeFile( readStream );
+    readStream.close(  );
 
     return sfs;
 }
