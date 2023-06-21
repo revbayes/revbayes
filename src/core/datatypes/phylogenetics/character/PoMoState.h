@@ -1,19 +1,3 @@
-/**
- * @file
- * This file contains the declaration of PoMoState, which is
- * the class for the DNA data types plus two-state polymorphic states in RevBayes.
- * Instead of the usual coding by bitfields, we choose coding by ints.
- *
- * @brief Declaration of PoMoState
- *
- * (c) Copyright 2009-
- * @date Last modified: $Date: 2012-05-24 09:58:04 +0200 (Thu, 24 May 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- *
- * $Id: PoMoState.h 1568 2012-05-24 07:58:04Z hoehna $
- */
-
 #ifndef PoMoState_H
 #define PoMoState_H
 
@@ -29,16 +13,10 @@ namespace RevBayesCore {
     class PoMoState : public DiscreteCharacterState {
         
     public:
-        //        PoMoState(size_t n);                                                                          //!< Default constructor
-        //        PoMoState(size_t n, size_t vps);                                                              //!< Constructor with virtual population size
-        //        PoMoState(size_t n, const std::string &s);                                                    //!< Constructor with an observation
         PoMoState(size_t n=4, size_t vps = 10, const std::string &s = "", const std::string &chromosome = "",
                   size_t position = 0, const std::vector<double> &weights = std::vector<double>());                                                   //!< Constructor that sets all fields
-        //        PoMoState(const std::string &s, const std::string &chromosome,
-        //                  size_t position, size_t n, size_t vps);
-        //        PoMoState(const PoMoState& t);                                                //!< Copy constructor
         
-        PoMoState*                       clone(void) const;                                 //!< Get a copy of this object
+        PoMoState*                      clone(void) const;                                 //!< Get a copy of this object
         
         // Discrete character observation functions
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
@@ -83,7 +61,7 @@ namespace RevBayesCore {
         size_t                          position;                                           //!< The position of the state in the chromosome
         std::vector<double>             weights;                                            //!< Weights are used when the "average" option is used
         bool                            weighted;
-        std::string                     string_value;                           //!< The string description of the state.
+        std::string                     string_value;                                       //!< The string description of the state.
     };
     
 }
