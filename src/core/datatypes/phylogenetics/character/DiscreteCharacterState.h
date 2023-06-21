@@ -32,11 +32,12 @@ namespace RevBayesCore {
         virtual void                            operator-=(int i);                              //!< Decrement
 
         virtual bool                            isAmbiguous(void) const;
+        virtual bool                            isStateIncludedInAscertainmentBiasCorrection(void) const;  //!< Is the currently set state included in ascertainment bias correction
         virtual std::string                     getStringValue(void) const;
         virtual std::string                     getStateDescription(void) const;                //!< Get a description of the current state
         virtual std::vector<std::string>        getStateDescriptions(void) const;               //!< Get all possible state labels as a vector
         virtual size_t                          getNumberObservedStates(void) const;            //!< How many states are in the set of current states
-        virtual size_t                          getNumberOfStates(void) const;
+        virtual size_t                          getNumberOfStates(void) const;                  //!< Get the size of the state space, i.e., the number of possible states
         virtual size_t                          getStateIndex(void) const;                      //!< Get the index of the current state
         virtual bool                            isStateSet(size_t index) const;                 //!< Is this state part of the current set?
 
