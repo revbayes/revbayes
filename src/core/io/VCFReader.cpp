@@ -666,8 +666,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 
                 std::string chromosome = "";
                 size_t chrom_pos = 0;
-                const std::vector<double> weights;
-                PoMoState this_state = PoMoState( NUM_ORG_STATES, this_samples_indices.size(), pomo_string, chromosome, chrom_pos, weights );
+                PoMoState this_state = PoMoState( NUM_ORG_STATES, this_samples_indices.size(), pomo_string, chromosome, chrom_pos );
                 
                 out_stream << " " << this_state.getStringValue();
                 

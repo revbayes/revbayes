@@ -40,7 +40,7 @@ namespace RevBayesCore {
         bool                            isAmbiguous(void) const override;
         size_t                          getStateIndex(void) const override;                 //!< Get the index of the current state
 
-        DnaState*                       clone(void) const;                                  //!< Get a copy of this object
+        DnaState*                       clone(void) const ;                                  //!< Get a copy of this object
 
         // Discrete character observation functions
 
