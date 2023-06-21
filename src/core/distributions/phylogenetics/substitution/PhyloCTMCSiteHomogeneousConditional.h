@@ -33,11 +33,11 @@ namespace RevBayesCore {
 
     protected:
 
-        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r);
-        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
-        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
-        virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx);
+        virtual void                                        computeRootLikelihood( size_t root, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+        virtual void                                        computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset);
+        virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset,  size_t node_offset, size_t pattern_block_size, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<unsigned long> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix);
 
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r);
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r, size_t m);
@@ -114,17 +114,20 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
 
 
 template<class charType>
-RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::~PhyloCTMCSiteHomogeneousConditional( void ) {
+RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::~PhyloCTMCSiteHomogeneousConditional( void )
+{
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 
 }
 
 
 template<class charType>
-RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>* RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::clone( void ) const {
+RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>* RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::clone( void ) const
+{
 
     return new PhyloCTMCSiteHomogeneousConditional<charType>( *this );
 }
+
 
 template<class charType>
 RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const PhyloCTMCSiteHomogeneousConditional &n) :
@@ -148,6 +151,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
 
 }
 
+
 template<class charType>
 std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::getIncludedSiteIndices( void )
 {
@@ -161,11 +165,11 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
-    std::vector<size_t> siteIndices;
-    size_t siteIndex = 0;
+    std::vector<size_t> site_indices;
+    size_t site_index = 0;
     size_t incompatible = 0;
 
-    std::map<std::string, size_t> maskIndices;
+    std::map<std::string, size_t> mask_indices;
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -176,21 +180,21 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
         std::string gapless(tips, ' ');
         std::vector<bool> mask(tips, false);
 
-        maskIndices[gapless] = 0;
+        mask_indices[gapless] = 0;
 
         correctionMaskCounts.push_back(0);
         maskObservationCounts.push_back(tips);
         correctionMaskMatrix.push_back(mask);
     }
 
-    this->num_sites = this->value->getNumberOfIncludedCharacters();
+    this->data_num_sites = this->value->getNumberOfIncludedCharacters();
 
-    for (size_t i = 0; i < this->num_sites; ++i)
+    for (size_t i = 0; i < this->data_num_sites; ++i)
     {
-        while ( this->value->isCharacterExcluded(siteIndex) )
+        while ( this->value->isCharacterExcluded(site_index) )
         {
-            siteIndex++;
-            if ( siteIndex >= this->value->getNumberOfCharacters()  )
+            site_index++;
+            if ( site_index >= this->value->getNumberOfCharacters()  )
             {
                 throw RbException( "The character matrix cannot set to this variable because it does not have enough included characters." );
             }
@@ -208,16 +212,16 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
             if ( (*it)->isTip() )
             {
                 AbstractDiscreteTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
-                DiscreteCharacterState &c = taxon.getCharacter(siteIndex);
+                DiscreteCharacterState &c = taxon.getCharacter(site_index);
 
                 bool gap = c.isGapState();
                 // if we treat unknown characters as gaps and this is an unknown character then we change it
                 // because we might then have a pattern more
-                if ( this->treatAmbiguousAsGaps && (c.isAmbiguous() || c.isMissingState()) )
+                if ( this->treat_ambiguous_as_gaps && (c.isAmbiguous() || c.isMissingState()) )
                 {
                     gap = true;
                 }
-                else if ( this->treatUnknownAsGap && (c.getNumberOfStates() == c.getNumberObservedStates() || c.isMissingState()) )
+                else if ( this->treat_unknown_as_gap && (c.getNumberOfStates() == c.getNumberObservedStates() || c.isMissingState()) )
                 {
                     gap = true;
                 }
@@ -247,19 +251,19 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
         }
         else
         {
-            siteIndices.push_back(siteIndex);
+            site_indices.push_back(site_index);
 
             if (coding != AscertainmentBias::ALL)
             {
                 // increase the count for this mask
-                std::map<std::string, size_t>::iterator it = maskIndices.find(mask);
-                if (it != maskIndices.end())
+                std::map<std::string, size_t>::iterator it = mask_indices.find(mask);
+                if (it != mask_indices.end())
                 {
                     correctionMaskCounts[it->second]++;
                 }
                 else
                 {
-                    maskIndices[mask] = correctionMaskCounts.size();
+                    mask_indices[mask] = correctionMaskCounts.size();
 
                     correctionMaskCounts.push_back(1);
                     maskObservationCounts.push_back(tips - numGap);
@@ -268,17 +272,17 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
             }
         }
 
-        siteIndex++;
+        site_index++;
     }
 
     // test if there were additional sites that we did not use
-    while ( siteIndex < this->value->getNumberOfCharacters() )
+    while ( site_index < this->value->getNumberOfCharacters() )
     {
-        if ( !this->value->isCharacterExcluded(siteIndex)  )
+        if ( !this->value->isCharacterExcluded(site_index)  )
         {
             throw RbException( "The character matrix cannot set to this variable because it has too many included characters." );
         }
-        siteIndex++;
+        site_index++;
     }
 
     // warn if we have to exclude some incompatible characters.
@@ -294,9 +298,9 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
         }
 
         // resize our datset to account for the newly excluded characters
-        this->num_sites = siteIndices.size();
-        this->site_pattern.clear();
-        this->site_pattern.resize(this->num_sites);
+        this->data_num_sites = site_indices.size();
+        this->data_site_pattern.clear();
+        this->data_site_pattern.resize(this->data_num_sites);
     }
 
     // readjust the number of correction sites to account for masked sites
@@ -305,7 +309,7 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
         numCorrectionMasks = correctionMaskCounts.size();
     }
 
-    return siteIndices;
+    return site_indices;
 }
 
 
@@ -403,11 +407,12 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 }
 
 
+
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right);
+    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right, likelihoods, likelihood_offset, node_offset, pattern_block_size, mixture_offset);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -416,11 +421,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLik
 }
 
 
+
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right, middle);
+    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right, middle, likelihoods, likelihood_offset, node_offset, pattern_block_size, mixture_offset);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -429,11 +435,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLik
 }
 
 
+
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right);
+    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, likelihoods, likelihood_offset, node_offset, pattern_block_size, mixture_offset);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -442,11 +449,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
 }
 
 
+
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, middle);
+    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, middle, likelihoods, likelihood_offset, node_offset, pattern_block_size, mixture_offset);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -456,12 +464,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
 
 
 
-
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset,  size_t node_offset, size_t pattern_block_size, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<unsigned long> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(node, node_index);
+    PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(node, node_index, likelihoods, likelihood_offset, node_offset, pattern_block_size, mixture_offset, ambiguous_char_matrix, char_matrix, gap_matrix);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -469,10 +476,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLike
     }
 }
 
+
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorrection(const TopologyNode &node, size_t node_index)
 {
-    std::vector<double>::iterator p_node = correctionLikelihoods.begin() + this->activeLikelihood[node_index]*this->activeCorrectionOffset + node_index*correctionNodeOffset;
+    std::vector<double>::iterator p_node = correctionLikelihoods.begin() + this->active_likelihood[node_index]*this->activeCorrectionOffset + node_index*correctionNodeOffset;
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     
@@ -544,11 +552,11 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->activeLikelihood[middle]*activeCorrectionOffset + middle*correctionNodeOffset;
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->activeLikelihood[node_index]*activeCorrectionOffset + node_index*correctionNodeOffset;
-    
+    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->active_likelihood[left]       * activeCorrectionOffset + left       * correctionNodeOffset;
+    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->active_likelihood[right]      * activeCorrectionOffset + right      * correctionNodeOffset;
+    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->active_likelihood[middle]     * activeCorrectionOffset + middle     * correctionNodeOffset;
+    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->active_likelihood[node_index] * activeCorrectionOffset + node_index * correctionNodeOffset;
+
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
     // iterate over all mixture categories
@@ -614,14 +622,16 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
     }
 }
 
+
+
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::const_iterator   p_left  = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
-    std::vector<double>::iterator         p_node  = correctionLikelihoods.begin() + this->activeLikelihood[node_index]*activeCorrectionOffset + node_index*correctionNodeOffset;
-    
+    std::vector<double>::const_iterator   p_left  = correctionLikelihoods.begin() + this->active_likelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_right = correctionLikelihoods.begin() + this->active_likelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
+    std::vector<double>::iterator         p_node  = correctionLikelihoods.begin() + this->active_likelihood[node_index]*activeCorrectionOffset + node_index*correctionNodeOffset;
+
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
     // iterate over all mixture categories
@@ -676,14 +686,16 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
     }
 }
 
+
+
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCorrection( size_t root, size_t left, size_t right, size_t middle)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->activeLikelihood[root]*activeCorrectionOffset + root*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->activeLikelihood[middle]*activeCorrectionOffset + middle*correctionNodeOffset;
+    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->active_likelihood[root]*activeCorrectionOffset + root*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->active_likelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->active_likelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->active_likelihood[middle]*activeCorrectionOffset + middle*correctionNodeOffset;
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -751,9 +763,9 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCorrection( size_t root, size_t left, size_t right)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node  = correctionLikelihoods.begin() + this->activeLikelihood[root]*activeCorrectionOffset + root*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_left  = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
+    std::vector<double>::iterator         p_node  = correctionLikelihoods.begin() + this->active_likelihood[root]*activeCorrectionOffset + root*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_left  = correctionLikelihoods.begin() + this->active_likelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_right = correctionLikelihoods.begin() + this->active_likelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -820,7 +832,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
     // get the index of the root node
     size_t node_index = root.getIndex();
     
-    std::vector<double>::const_iterator p_node = correctionLikelihoods.begin() + this->activeLikelihood[node_index] * activeCorrectionOffset  + node_index*correctionNodeOffset;
+    std::vector<double>::const_iterator p_node = correctionLikelihoods.begin() + this->active_likelihood[node_index] * activeCorrectionOffset  + node_index*correctionNodeOffset;
     
     std::vector<double> perMaskCorrections = std::vector<double>(numCorrectionMasks, 0.0);
     
@@ -885,8 +897,6 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                 prob = RbConstants::Double::nan;
             }
 
-//            perMaskCorrections[mask] += prob * 0.25;
-//            perMaskMixtureCorrections[mask*this->num_site_mixtures + mixture] = (1.0 - prob) * 0.25;
             perMaskCorrections[mask] += prob * mixtureProbs[mixture];
             perMaskMixtureCorrections[mask*this->num_site_mixtures + mixture] = (1.0 - prob) * mixtureProbs[mixture];
         
@@ -1052,7 +1062,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
         total += perMaskMixtureCorrections[i];
 
     std::vector<size_t> perSiteRates;
-    for ( size_t i = 0; i < this->num_sites; ++i )
+    for ( size_t i = 0; i < this->data_num_sites; ++i )
     {
         // draw the state
         double u = rng->uniform01()*total;
@@ -1075,7 +1085,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
 
     // then sample site-patterns using rejection sampling,
     // rejecting those that match the unobservable ones.
-    for ( size_t i = 0; i < this->num_sites; i++ )
+    for ( size_t i = 0; i < this->data_num_sites; i++ )
     {
         size_t rateIndex = perSiteRates[i];
 
@@ -1142,7 +1152,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
     {
         if ( this->changed_nodes[index] == false )
         {
-            this->activeLikelihood[index] = (this->activeLikelihood[index] == 0 ? 1 : 0);
+            this->active_likelihood[index] = (this->active_likelihood[index] == 0 ? 1 : 0);
             this->changed_nodes[index] = true;
         }
     }
