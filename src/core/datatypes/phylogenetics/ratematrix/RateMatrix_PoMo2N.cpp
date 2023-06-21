@@ -201,17 +201,7 @@ void RateMatrix_PoMo2N::buildRateMatrix(void)
     diagonal[0] = m[0][2];
     diagonal[1] = m[1][N];
 
-
-    // fixations
-//    m[2][0]  = (N-1.0)*phi[0]/((N-1)*phi[0]+phi[1]);  //{(N-1)a0,1a1} -> {Na0}
-//    m[N][1]  = (N-1.0)*phi[1]/((N-1)*phi[1]+phi[0]);  //{1a0,(N-1)a1} -> {Na1}
-//    m[2][0]  = ((N-1.0)*phi[0]/((N-1)*phi[0]+phi[1])) / rescaling_factor_to_effective_population;  //{(N-1)a0,1a1} -> {Na0}
-//    m[N][1]  = ((N-1.0)*phi[1]/((N-1)*phi[1]+phi[0])) / rescaling_factor_to_effective_population;  //{1a0,(N-1)a1} -> {Na1}
-    m[2][0]  = ((N-1.0)/double(N)) / rescaling_factor_to_effective_population;  //{(N-1)a0,1a1} -> {Na0}
-    m[N][1]  = ((N-1.0)/double(N)) / rescaling_factor_to_effective_population;  //{1a0,(N-1)a1} -> {Na1}
-    diagonal[2] += m[2][0];
-    diagonal[N] += m[N][1];
-    
+       
 
     // the pomo rate matrix is entirely defined by fixations and mutations if N=2
     if (N>2)

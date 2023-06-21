@@ -235,6 +235,7 @@ void RateMatrix_revPoMoM2N::computeOffDiagonal( void )
     m[0][0] = -m[0][2];
     m[1][1] = -m[1][M];
 
+
     double cons = 1.0*harmonic_number_m/(N_eff*harmonic_number_n);
 //    double cons = 1.0/(N_eff*harmonic_number_n);
     

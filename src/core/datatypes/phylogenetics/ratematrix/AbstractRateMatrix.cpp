@@ -652,6 +652,7 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
     
 }
 
+
 /** Set the diagonal of the rate matrix such that each row sums to zero */
 void AbstractRateMatrix::setDiagonal(void)
 {

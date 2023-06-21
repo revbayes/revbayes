@@ -91,7 +91,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std:
     size_t n_sites = alignment[0].length();
 
     // defining the edge vector and matrix
-    //number of edges
+    // number of edges
     size_t n_edges = (n_alleles*n_alleles - n_alleles)/2;
   
     // vector and matrix of edges
@@ -146,7 +146,6 @@ void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std:
                     {
                         counts[index] += 1;
                     }
-
                 }
             }
 

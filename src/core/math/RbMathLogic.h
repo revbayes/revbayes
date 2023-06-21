@@ -44,6 +44,7 @@ namespace RevBayesCore {
         int                         min(int a, int b);                                                                  //!< Returns the min of two real numbers
         int                         sgn(double x);                                                                      //!< Returns the sign of a number
 
+
     }
     
 }

@@ -387,7 +387,6 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
 
 }
 
-
 void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, long thinning, long skip_first )
 {
     

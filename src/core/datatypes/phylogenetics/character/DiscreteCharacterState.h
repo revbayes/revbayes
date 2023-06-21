@@ -32,6 +32,7 @@ namespace RevBayesCore {
         virtual void                            operator-=(int i);                              //!< Decrement
 
         virtual bool                            isAmbiguous(void) const;
+
         virtual bool                            isStateIncludedInAscertainmentBiasCorrection(void) const;  //!< Is the currently set state included in ascertainment bias correction
         virtual std::string                     getStringValue(void) const;
         virtual std::string                     getStateDescription(void) const;                //!< Get a description of the current state
@@ -41,7 +42,9 @@ namespace RevBayesCore {
         virtual size_t                          getStateIndex(void) const;                      //!< Get the index of the current state
         virtual bool                            isStateSet(size_t index) const;                 //!< Is this state part of the current set?
 
+
         virtual DiscreteCharacterState*         clone(void) const = 0;
+
 
         virtual void                            addState(const std::string &symbol) = 0;        //!< Add a state to the set of current states
         virtual RbBitSet                        getState(void) const = 0;                       //!< Get the current state (as a bitset)
@@ -56,7 +59,10 @@ namespace RevBayesCore {
         void                                    setWeighted( bool tf );                         //!< Sets whether the state is weighted or not
 
     protected:
-                                                DiscreteCharacterState(size_t n);   //!< Constructor
+                                                DiscreteCharacterState(size_t n);               //!< Constructor
+        
+        bool                                    weighted;                                       //!< whether the current state is weighted
+        std::vector<double>                     weights;                                        //!< vector of weights for each state
     };
 
 }

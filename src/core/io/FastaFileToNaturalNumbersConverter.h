@@ -23,7 +23,6 @@ namespace RevBayesCore {
     public:
         FastaFileToNaturalNumbersConverter();
 
-
         void                    faconverter( const path &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const path &fo );
 
 

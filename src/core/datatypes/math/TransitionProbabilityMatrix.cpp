@@ -28,26 +28,27 @@ using namespace RevBayesCore;
 
 
 /** Construct rate matrix with n states */
-TransitionProbabilityMatrix::TransitionProbabilityMatrix(size_t n) : nElements( n*n )
+TransitionProbabilityMatrix::TransitionProbabilityMatrix(size_t n) :
+    num_elements( n*n )
 {
 
-    theMatrix = new double[ nElements ];
-    for ( size_t i = 0; i < nElements; ++i) 
+    theMatrix = new double[ num_elements ];
+    for ( size_t i = 0; i < num_elements; ++i) 
     {
         theMatrix[i] = 0.0;
     }
     
-    num_states = n;
+    num_rows = n;
 }
 
 /** Construct rate matrix with n states */
 TransitionProbabilityMatrix::TransitionProbabilityMatrix( const TransitionProbabilityMatrix &tpm ) :
-    num_states( tpm.num_states ),
-    nElements( tpm.nElements )
+    num_rows( tpm.num_rows ),
+    num_elements( tpm.num_elements )
 {
     
-    theMatrix = new double[ nElements ];
-    for ( size_t i = 0; i < nElements; ++i) 
+    theMatrix = new double[ num_elements ];
+    for ( size_t i = 0; i < num_elements; ++i)
     {
         theMatrix[i] = tpm.theMatrix[i];
     }
@@ -73,12 +74,12 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( const Trans
     
     if ( this != &tpm ) 
     {
-        nElements = tpm.nElements;
-        num_states = tpm.num_states;
+        num_elements    = tpm.num_elements;
+        num_rows        = tpm.num_rows;
         
         delete [] theMatrix;
-        theMatrix = new double[ nElements ];
-        for ( size_t i = 0; i < nElements; ++i) 
+        theMatrix = new double[ num_elements ];
+        for ( size_t i = 0; i < num_elements; ++i)
         {
             theMatrix[i] = tpm.theMatrix[i];
         }
@@ -91,25 +92,39 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( const Trans
 /** Construct rate matrix with n states */
 TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( TransitionProbabilityMatrix &&tpm )
 {
-    std::swap( nElements , tpm.nElements );
-    std::swap( num_states , tpm.num_states );
+    std::swap( num_elements , tpm.num_elements );
+    std::swap( num_rows , tpm.num_rows );
     std::swap( theMatrix, tpm.theMatrix );
 
     return *this;
 }
 
 
-void TransitionProbabilityMatrix::multiplyTo(const TransitionProbabilityMatrix& B, TransitionProbabilityMatrix& C) const
+/** Index operator (const) */
+const double* TransitionProbabilityMatrix::operator[]( const size_t i ) const
 {
-    assert(B.getNumberOfStates() == num_states);
-    assert(C.getNumberOfStates() == num_states);
 
-    for (size_t i=0; i<num_states; i++)
+    return theMatrix + i*num_rows;
+}
+
+
+/** Index operator */
+double* TransitionProbabilityMatrix::operator[]( const size_t i )
+{
+    
+    return theMatrix + i*num_rows;
+}
+
+TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B)
+{
+    
+    TransitionProbabilityMatrix C(num_rows);
+    for (size_t i=0; i<num_rows; i++)
     {
-        for (size_t j=0; j<num_states; j++)
+        for (size_t j=0; j<num_rows; j++)
         {
             double sum = 0.0;
-            for (size_t k=0; k<num_states; k++)
+            for (size_t k=0; k<num_rows; k++)
                 sum += (*this)[i][k] * B[k][j];
             C[i][j] = sum;
         }
@@ -134,7 +149,69 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const Trans
     return *this;
 }
 
-std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabilityMatrix& x) {
+
+double TransitionProbabilityMatrix::getElement(size_t i, size_t j) const
+{
+    
+    return *(theMatrix + num_rows*i + j);
+}
+
+
+double& TransitionProbabilityMatrix::getElement(size_t i, size_t j)
+{
+    
+    return *(theMatrix + num_rows*i + j);
+}
+
+
+const double* TransitionProbabilityMatrix::getElements( void ) const
+{
+    
+    return theMatrix;
+}
+
+
+double* TransitionProbabilityMatrix::getElements( void )
+{
+    
+    return theMatrix;
+}
+
+
+size_t TransitionProbabilityMatrix::getNumberOfStates( void ) const
+{
+    
+    return num_rows;
+}
+
+
+size_t TransitionProbabilityMatrix::size(void) const
+{
+    
+    return num_elements;
+}
+
+
+void TransitionProbabilityMatrix::multiplyTo(const TransitionProbabilityMatrix& B, TransitionProbabilityMatrix& C) const
+{
+    assert(B.getNumberOfStates() == num_states);
+    assert(C.getNumberOfStates() == num_states);
+
+    for (size_t i=0; i<num_states; i++)    {
+        for (size_t j=0; j<num_rows; j++)
+        {
+            double sum = 0.0;
+            for (size_t k=0; k<num_rows; k++)
+                sum += (*this)[i][k] * B[k][j];
+            C[i][j] = sum;
+        }
+    }
+}
+
+
+
+std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabilityMatrix& x)
+{
     
     std::streamsize previousPrecision = o.precision();
     std::ios_base::fmtflags previousFlags = o.flags();

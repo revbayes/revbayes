@@ -461,6 +461,7 @@ sampled_site_matrix_component( 0 )
     bias_node_offset                =              num_site_mixtures * bias_num_sites * num_chars;
     bias_mixture_offset             =                                  bias_num_sites * num_chars;
 
+
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do

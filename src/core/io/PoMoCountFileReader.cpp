@@ -47,7 +47,7 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
 
 	if (chars[start][0] != "COUNTSFILE" || chars[0].size() != 5)
     {
-            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.";
+        throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.";
 	}
 	else
     {
