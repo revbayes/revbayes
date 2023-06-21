@@ -10,14 +10,15 @@
 
 using namespace RevBayesCore;
 
-AlleleFrequencySimulator::AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r) :
+AlleleFrequencySimulator::AlleleFrequencySimulator(Tree* t, const std::vector<long>& ps, double gt, size_t ns, const std::vector<double>& mr, const std::vector<long>& s, double r, bool mg) :
 tree( t ),
 population_sizes( ps ),
 generation_time( gt ),
 num_sites( ns ),
 mutation_rates( mr ),
 samples_per_species( s ),
-root_branch( r )
+root_branch( r ),
+moran_generations( mg )
 {
     
 }
@@ -204,14 +205,16 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     double current_time = 0.0;
-    double per_generation_mutation_rate_0 = mutation_rates[0] * this_populuation_size / generation_time;
-    double per_generation_mutation_rate_1 = mutation_rates[1] * this_populuation_size / generation_time;
+    double this_populuation_size = population_sizes[node_index];
+    double this_generation_time = moran_generations ? generation_time / this_populuation_size : generation_time;
+    double per_generation_mutation_rate_0 = mutation_rates[0] / generation_time;
+    double per_generation_mutation_rate_1 = mutation_rates[1] / generation_time;
     
     long current_state = root_start_state;
     
     while ( current_time < branch_length )
     {
-        current_time += generation_time;
+        current_time += this_generation_time;
         
         // only perform drift if we are in a polymorphic state
         if ( current_state > 0 && current_state < this_populuation_size )
