@@ -1,24 +1,25 @@
 #include <sstream>
 #include <vector>
 
-#include "HomologousDiscreteCharacterData.h"
-#include "ArgumentRule.h"
-#include "PoMoCountFileReader.h"
-#include "Func_readPoMoCountFile.h"
-#include "RbException.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "RlString.h"
-#include "StringUtilities.h"
 #include "Argument.h"
+#include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "DiscreteTaxonData.h"
+#include "Func_readPoMoCountFile.h"
+#include "HomologousDiscreteCharacterData.h"
 #include "Integer.h"
 #include "Natural.h"
 #include "NaturalNumbersState.h"
+#include "OptionRule.h"
+#include "PoMoCountFileReader.h"
 #include "PoMoState.h"
+#include "RbException.h"
+#include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "RlString.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlFunction.h"
+#include "StringUtilities.h"
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 
@@ -43,15 +44,19 @@ RevPtr<RevVariable> Func_readPoMoCountFile::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-	RevBayesCore::TypedDagNode<long>* virtualPopulationSize = static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* n_states = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    const std::string& file_in      = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    long  virtual_population_size   = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& format       = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
 
-	RevBayesCore::PoMoCountFileReader* pcfr = new RevBayesCore::PoMoCountFileReader( fn.getValue(), virtualPopulationSize->getValue());
+    RevBayesCore::PoMoCountFileReader::FORMAT reader_format = RevBayesCore::PoMoCountFileReader::PoMo;
+    if ( format == "NaturalNumbers" )
+    {
+        reader_format = RevBayesCore::PoMoCountFileReader::NaturalNumbers;
+    }
+    
+	RevBayesCore::PoMoCountFileReader* pcfr = new RevBayesCore::PoMoCountFileReader( file_in, virtual_population_size, reader_format);
 
-	RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::PoMoState> *pomoAln = new RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::PoMoState>( *(pcfr->getMatrix() ) );
-
-	AbstractHomologousDiscreteCharacterData *rlPoMoAln = new AbstractHomologousDiscreteCharacterData( pomoAln );
+	AbstractHomologousDiscreteCharacterData *rlPoMoAln = new AbstractHomologousDiscreteCharacterData( pcfr->getMatrix() );
 
 	return new RevVariable( rlPoMoAln );
 }
@@ -64,17 +69,21 @@ const ArgumentRules& Func_readPoMoCountFile::getArgumentRules( void ) const
 	static ArgumentRules argument_rules = ArgumentRules();
 	static bool rules_set = false;
 
-	if ( rules_set == false )
-	{
-		argument_rules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "Relative or absolute name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-		argument_rules.push_back( new ArgumentRule( "virtualPopulationSize", Natural::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "numStates", Natural::getClassTypeSpec(), "The number of states (e.g. 4 for A,C,G and T).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
+    if ( rules_set == false )
+    {
+        argument_rules.push_back( new ArgumentRule( "countFile", RlString::getClassTypeSpec(), "A count file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "virtualPopulationSize", Natural::getClassTypeSpec(), "The number of (virtual or effective) individuals.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+            
+        std::vector<std::string> format_options;
+        format_options.push_back( "PoMo" );
+        format_options.push_back( "NaturalNumbers" );
+        argument_rules.push_back( new OptionRule( "format", new RlString("PoMo"), format_options, "The output data type format." ) );
+        
+        rules_set = true;
 
-		rules_set = true;
+    }
 
-	}
-
-	return argument_rules;
+    return argument_rules;
 }
 
 
