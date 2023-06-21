@@ -33,7 +33,8 @@
 using namespace RevBayesCore;
 
 /** Compares two doubles for equality */
-bool RbMath::compApproximatelyEqual(double a, double b) {
+bool RbMath::compApproximatelyEqual(double a, double b)
+{
     
     double epsilon = RbSettings::userSettings().getTolerance();
     return fabs(a - b) <= ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
@@ -41,14 +42,16 @@ bool RbMath::compApproximatelyEqual(double a, double b) {
 
 
 /** Compares two doubles for equality */
-bool RbMath::compApproximatelyEqual(double a, double b, double epsilon) {
+bool RbMath::compApproximatelyEqual(double a, double b, double epsilon)
+{
     
     return fabs(a - b) <= ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
 }
 
 
 /** Compares two doubles for equality */
-bool RbMath::compEssentiallyEqual(double a, double b) {
+bool RbMath::compEssentiallyEqual(double a, double b)
+{
     
     double epsilon = RbSettings::userSettings().getTolerance();
     return fabs(a - b) <= ( (fabs(a) > fabs(b) ? fabs(b) : fabs(a)) * epsilon);
@@ -56,14 +59,16 @@ bool RbMath::compEssentiallyEqual(double a, double b) {
 
 
 /** Compares two doubles for equality */
-bool RbMath::compEssentiallyEqual(double a, double b, double epsilon) {
+bool RbMath::compEssentiallyEqual(double a, double b, double epsilon)
+{
     
     return fabs(a - b) <= ( (fabs(a) > fabs(b) ? fabs(b) : fabs(a)) * epsilon);
 }
 
 
 /** Tests whether one number is greater than another */
-bool RbMath::compDefinitelyGreaterThan(double a, double b) {
+bool RbMath::compDefinitelyGreaterThan(double a, double b)
+{
     
     double epsilon = RbSettings::userSettings().getTolerance();
     return (a - b) > ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
@@ -71,14 +76,16 @@ bool RbMath::compDefinitelyGreaterThan(double a, double b) {
 
 
 /** Tests whether one number is greater than another */
-bool RbMath::compDefinitelyGreaterThan(double a, double b, double epsilon) {
+bool RbMath::compDefinitelyGreaterThan(double a, double b, double epsilon)
+{
     
     return (a - b) > ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
 }
 
 
 /** Tests whether one number is less than another */
-bool RbMath::compDefinitelyLessThan(double a, double b) {
+bool RbMath::compDefinitelyLessThan(double a, double b)
+{
     
     double epsilon = RbSettings::userSettings().getTolerance();
     return (b - a) > ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
@@ -86,9 +93,15 @@ bool RbMath::compDefinitelyLessThan(double a, double b) {
 
 
 /** Tests whether one number is less than another */
-bool RbMath::compDefinitelyLessThan(double a, double b, double epsilon) {
+bool RbMath::compDefinitelyLessThan(double a, double b, double epsilon)
+{
     
     return (b - a) > ( (fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+}
+
+double RbMath::fsign(double x, double y)
+{
+    return ((y >= 0) ? fabs(x) : -fabs(x));
 }
 
 
@@ -134,6 +147,14 @@ double RbMath::max(double x, double y)
 {
 
 	return (x < y) ? y : x;
+}
+
+
+/** Returns the maximum of two real numbers */
+int RbMath::max(int x, int y)
+{
+
+    return (x < y) ? y : x;
 }
 
 
