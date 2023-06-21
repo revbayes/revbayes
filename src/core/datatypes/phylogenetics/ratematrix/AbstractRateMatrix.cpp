@@ -649,6 +649,7 @@ void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  Trans
         // Handle roundoff-error.
         normalize_rows(p);
     }
+    
 }
 
 /** Set the diagonal of the rate matrix such that each row sums to zero */
