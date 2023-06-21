@@ -36,10 +36,12 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t virtualPop
 	}
 	while (chars[start][0] == "#");
 
-	if (chars[start][0] != "COUNTSFILE" || chars[0].size() != 5) {
+	if (chars[start][0] != "COUNTSFILE" || chars[0].size() != 5)
+    {
             throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.";
 	}
-	else {
+	else
+    {
         numberOfPopulations_ = StringUtilities::asIntegerNumber( chars[0][2] );
         numberOfSites_ = StringUtilities::asIntegerNumber( chars[0][4] );
 	}
@@ -90,7 +92,7 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t virtualPop
             }
 
 		//chromosomes.push_back(chars[i][0]);
-    //positions.push_back( StringUtilities::asIntegerNumber( chars[i][1] ) );
+        //positions.push_back( StringUtilities::asIntegerNumber( chars[i][1] ) );
 
 		std::string chromosome = chars[i][0];
 		size_t position = StringUtilities::asIntegerNumber( chars[i][1] );
@@ -119,7 +121,6 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t virtualPop
 	 	matrix_->addTaxonData(tax->second);
 	}
 
-	return ;
 }
 
 const size_t PoMoCountFileReader::getNumberOfPopulations( void )
