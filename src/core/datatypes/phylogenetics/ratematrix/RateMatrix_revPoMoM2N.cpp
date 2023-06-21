@@ -228,29 +228,27 @@ void RateMatrix_revPoMoM2N::computeOffDiagonal( void )
     // Mutations
     //m[0][1]   = N*mu[0]*rnm*gen;    //mutation 01
     //m[M][M-1] = N*mu[1]*rnm*gen;    //mutation 10
-    m[0][2]   = M*mu[0];    //mutation 01
-    m[1][M]   = M*mu[1];    //mutation 10
+    m[0][2]   = N_eff*mu[0];    //mutation 01
+    m[1][M]   = N_eff*mu[1];    //mutation 10
     
     // diagonal
     m[0][0] = -m[0][2];
     m[1][1] = -m[1][M];
 
-//    double cons = 1.0*harmonic_number_m/(N_eff*harmonic_number_n);
-    double cons = 1.0/(N_eff*harmonic_number_n);
-//    double cons = 1.0/(N_eff*N_eff);
+    double cons = 1.0*harmonic_number_m/(N_eff*harmonic_number_n);
+//    double cons = 1.0/(N_eff*harmonic_number_n);
     
-    m[2][3]   = (M-1.0)*cons/M;  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
-    m[2][0]   = (M-1.0)*cons/M;  //{(N-1)a0,1a1} -> {Na0,0a1}
+    m[2][3]   = (M-1.0)/M*cons;  //{(N-1)a0,1a1} -> {(N-2)a0,2a1}
+    m[2][0]   = (M-1.0)/M*cons;  //{(N-1)a0,1a1} -> {Na0,0a1}
     m[2][2]   = -m[2][3]-m[2][0];
     for (int v=2; v<(M-1); v++)
     {
-//    org:    m[n+1][2+n]  = (n*(N-n)/N) ; //{naj,(N-n)ai} -> {(n+1)aj,(N-n-1)ai}
-        m[v+1][v+2] = 1.0*v*(M-v)*cons/M;   //{(N-v)a0,va1} -> {(N-v-1)a0,(v+1)a1}
-        m[v+1][v]   = 1.0*v*(M-v)*cons/M;   //{(N-v)a0,va1} -> {(N-v+1)a0,(v-1)a1}
+        m[v+1][v+2] = 1.0*v*(M-v)/M*cons;   //{(N-v)a0,va1} -> {(N-v-1)a0,(v+1)a1}
+        m[v+1][v]   = 1.0*v*(M-v)/M*cons;   //{(N-v)a0,va1} -> {(N-v+1)a0,(v-1)a1}
         m[v+1][v+1] = -m[v+1][v+2]-m[v+1][v];
     }
-    m[M][1]   = (M-1.0)*cons/M;  //{1a0,(N-1)a1} -> {0a0,Na1}
-    m[M][M-1] = (M-1.0)*cons/M;  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
+    m[M][1]   = (M-1.0)/M*cons;  //{1a0,(N-1)a1} -> {0a0,Na1}
+    m[M][M-1] = (M-1.0)/M*cons;  //{1a0,(N-1)a1} -> {2a0,(N-2)a1}
     m[M][M]   = -m[M][1]-m[M][M-1];
 
     // set flags
