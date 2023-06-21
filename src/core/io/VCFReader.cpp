@@ -221,7 +221,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
                 StringUtilities::stringSplit(this_char_read, ":", format_tokens);
                 
                 std::string this_alleles = format_tokens[0];
-                std::vector<size_t> states = extractStateIndices(this_alleles, "binary");
+                std::vector<size_t> states = extractStateIndices(this_alleles);
                 
                 // get the current character
                 for ( size_t j=0; j<states.size(); ++j)
@@ -412,8 +412,8 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
 
 }
 
-void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, long thinning, long skip_first )
-//void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type )
+
+void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, long thinning, long skip_first )
 {
     
     // PoMo settings
@@ -472,6 +472,14 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     size_t lines_to_skip = 0;
     long   lines_read    = 0;
     bool   skipped_first = false;
+    
+    size_t ref_index = 0;
+    size_t alt_index = 0;
+    size_t chr_index = 0;
+    size_t pos_index = 0;
+    
+    size_t genome_index = 1;
+    
     std::vector<std::string> tmpChars;
     bool has_names_been_read = false;
     size_t samples_start_column = 0;
@@ -543,6 +551,27 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 throw RbException("Currently we have only implementations for haploid and diploid organisms.");
             }
             
+            
+            for (size_t j = 0; j < format_line.size(); ++j)
+            {
+                if ( format_line[j] == "REF" )
+                {
+                    ref_index = j;
+                }
+                if ( format_line[j] == "ALT" )
+                {
+                    alt_index = j;
+                }
+                if ( format_line[j] == "CHROM" || format_line[j] == "#CHROM" )
+                {
+                    chr_index = j;
+                }
+                if ( format_line[j] == "POS" )
+                {
+                    pos_index = j;
+                }
+            }
+            
             // create the lookup vector with the species to taxon columns positions
             for (size_t i=0; i<NUM_SAMPLES; ++i)
             {
@@ -605,15 +634,45 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
         
         if ( skipped_first == true && thinning == lines_read )
         {
+            
+            const std::string& current_chrom = tmpChars[chr_index];
+            if ( chr != "" && chr != current_chrom )
+            {
+                // skip this side
+                continue;
+            }
+                
+            if ( ref_genome != NULL )
+            {
+                size_t current_pos = StringUtilities::asIntegerNumber( tmpChars[pos_index] );
+                for ( ; genome_index < current_pos; ++genome_index )
+                {
+                    out_stream << chr << " " << genome_index;
+                    for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
+                    {
+                        if ( ploidy == DIPLOID )
+                        {
+                            out_stream << " " << indices_of_taxa_per_species[species_index].size()*2 << ",0";
+                        }
+                        else
+                        {
+                            out_stream << " " << indices_of_taxa_per_species[species_index].size() << ",0";
+                        }
+                    }
+                    out_stream << std::endl;
+                }
+                ++genome_index;
+            }
+            
             // reset the lines read so that we can check the thinning again
             lines_read = 0;
             
-            out_stream << "? ?";
+            out_stream << current_chrom << " " << tmpChars[pos_index];
             for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
             {
                 
                 // allocate the counts vector for the states
-                std::vector<double> counts (NUM_ORG_STATES+1, 0.0); // 0 1 ?
+                std::vector<double> counts (4+1, 0.0); // 0 1 2 3 ?
                 
                 const std::vector<size_t>& this_samples_indices = indices_of_taxa_per_species[species_index];
                 
@@ -627,7 +686,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                     StringUtilities::stringSplit(this_char_read, ":", format_tokens);
                     
                     std::string this_alleles = format_tokens[0];
-                    std::vector<size_t> states = extractStateIndices(this_alleles, type);
+                    std::vector<size_t> states = extractStateIndices(this_alleles);
                     
                     // get the current character
                     for ( size_t j=0; j<states.size(); ++j)
@@ -771,7 +830,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
         
         
         // allocate the counts vector for the states
-        std::vector<size_t> counts (2+1, 0.0); // 0 1 ?
+        std::vector<size_t> counts (4+1, 0.0); // 0 1 2 3 ?
         for (size_t k = 0; k < indices_of_taxa.size(); ++k)
         {
             
@@ -782,7 +841,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
             StringUtilities::stringSplit(this_char_read, ":", format_tokens);
                 
             std::string this_alleles = format_tokens[0];
-            std::vector<size_t> states = extractStateIndices(this_alleles, "binary");
+            std::vector<size_t> states = extractStateIndices(this_alleles);
             
             // get the current character
             for ( size_t j=0; j<states.size(); ++j)
@@ -794,7 +853,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
         
         // Now we have all the counts for this species
         // only add this site if it didn't include missing sites
-        if ( counts[2] == 0 )
+        if ( counts[4] == 0 && counts[2] == 0 && counts[3] == 0 )
         {
             size_t allele_count = counts[0];
             ++sfs[allele_count];
@@ -812,7 +871,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
 }
 
 
-std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const std::string& type)
+std::vector<size_t> VCFReader::extractStateIndices(std::string alleles)
 {
     
     std::vector<size_t> states;
@@ -832,11 +891,20 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
         {
             states.push_back( 1 );
         }
+        else if ( allele_tokens[0] == "2" )
+        {
+            states.push_back( 2 );
+        }
+        else if ( allele_tokens[0] == "3" )
+        {
+            states.push_back( 3 );
+        }
+
         else if ( allele_tokens[0] == "." )
         {
             if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
             {
-                states.push_back( 2 );
+                states.push_back( 4 );
             }
             else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
             {
@@ -857,7 +925,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
         {
             if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
             {
-                states.push_back( 2 );
+                states.push_back( 4 );
             }
             else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
             {
@@ -875,6 +943,14 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
         else if ( allele_tokens[1] == "1" )
         {
             states.push_back( 1 );
+        }
+        else if ( allele_tokens[1] == "2" )
+        {
+            states.push_back( 2 );
+        }
+        else if ( allele_tokens[1] == "3" )
+        {
+            states.push_back( 3 );
         }
         else
         {
@@ -902,11 +978,19 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, const st
         {
             states.push_back( 1 );
         }
+        else if ( this_allele == "2" )
+        {
+            states.push_back( 2 );
+        }
+        else if ( this_allele == "3" )
+        {
+            states.push_back( 3 );
+        }
         else if ( this_allele == "." )
         {
             if ( unkown_treatment == UNKOWN_TREATMENT::MISSING )
             {
-                states.push_back( 2 );
+                states.push_back( 4 );
             }
             else if ( unkown_treatment == UNKOWN_TREATMENT::REFERENCE )
             {
@@ -961,7 +1045,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
             taxa[i] = DiscreteTaxonData<BinaryState>( this_taxon );
         }
     }
-     else if ( ploidy == DIPLOID )
+    else if ( ploidy == DIPLOID )
     {
         taxa = std::vector< DiscreteTaxonData<BinaryState> >( 2*NUM_SAMPLES, DiscreteTaxonData<BinaryState>( Taxon("") ) );
         for (size_t i=0; i<NUM_SAMPLES; ++i)
@@ -977,6 +1061,31 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
         throw RbException("Currently we have only implementations for haploid and diploid organisms.");
     }
     
+    
+    size_t ref_index = 0;
+    size_t alt_index = 0;
+    size_t chr_index = 0;
+    size_t pos_index = 0;
+    for (size_t j = 0; j < format_line.size(); ++j)
+    {
+        if ( format_line[j] == "REF" )
+        {
+            ref_index = j;
+        }
+        if ( format_line[j] == "ALT" )
+        {
+            alt_index = j;
+        }
+        if ( format_line[j] == "CHROM" || format_line[j] == "#CHROM" )
+        {
+            chr_index = j;
+        }
+        if ( format_line[j] == "POS" )
+        {
+            pos_index = j;
+        }
+    }
+    
     BinaryState missing_state = BinaryState("0");
     missing_state.setMissingState( true );
     
@@ -984,7 +1093,8 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
     for (size_t i = start; i < chars.size(); ++i)
     {
         
-        bool is_missing = false;
+        bool is_missing   = false;
+        bool is_biallelic = true;
         for (size_t j = 0; j < NUM_SAMPLES; ++j)
         {
             
@@ -997,7 +1107,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
             std::vector<std::string> allele_tokens;
             StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
             
-            std::vector<size_t> state_indices = extractStateIndices(this_alleles, "binary");
+            std::vector<size_t> state_indices = extractStateIndices(this_alleles);
             
             // add the first character
             if ( state_indices[0] == 0 )
@@ -1008,10 +1118,15 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
             {
                 this_site[j] = BinaryState("1");
             }
-            else if ( state_indices[0] == 2 )
+            else if ( state_indices[0] == 4 )
             {
                 this_site[j] = missing_state;
                 is_missing = true;
+            }
+            else if ( state_indices[0] == 2 || state_indices[0] == 3 )
+            {
+                this_site[j] = missing_state;
+                is_biallelic = false;
             }
             else
             {
@@ -1029,10 +1144,15 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
                 {
                     this_site[j+NUM_SAMPLES] = BinaryState("1");
                 }
-                else if ( state_indices[1] == 2 )
+                else if ( state_indices[1] == 4 )
                 {
                     this_site[j+NUM_SAMPLES] = missing_state;
                     is_missing = true;
+                }
+                else if ( state_indices[1] == 2 || state_indices[1] == 3 )
+                {
+                    this_site[j] = missing_state;
+                    is_biallelic = false;
                 }
                 else
                 {
@@ -1043,7 +1163,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
             
         } // end-for over all samples for this site
         
-        if ( is_missing == false || skip_missing == false )
+        if ( ( is_missing == false || skip_missing == false ) && is_biallelic == true )
         {
             size_t actual_num_samples = (ploidy == DIPLOID ? 2*NUM_SAMPLES : NUM_SAMPLES);
             for (size_t j = 0; j < actual_num_samples; ++j)

@@ -35,13 +35,13 @@ namespace RevBayesCore {
         VCFReader*                                              clone(void) const;
         HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref );
         HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref );
-        void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type, long thinning, long skip );
+        void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref, long thinning, long skip );
         RbVector<long>                                          convertToSFS( const RbVector<Taxon>& taxa_list );
         void                                                    computeMonomorphicVariableStatistics( const std::string& fn, const RbVector<Taxon>& taxa_list);
 
     protected:
         void                                                    mapSpeciesNames(const RbVector<Taxon>& taxa_list, std::vector<std::string>& species_names, std::map<std::string, size_t>& species_names_to_index, std::vector< std::vector<size_t> >& indices_of_taxa_per_species );
-        std::vector<size_t>                                     extractStateIndices(std::string alleles, const std::string& type);
+        std::vector<size_t>                                     extractStateIndices(std::string alleles);
         
         std::string                                             filename;
         PLOIDY                                                  ploidy;
