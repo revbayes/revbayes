@@ -2,11 +2,18 @@
 #include "DiscreteTaxonData.h"
 #include "DistributionBinomial.h"
 #include "MatrixReal.h"
+#include "MpiUtilities.h"
 #include "ProgressBar.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "TransitionProbabilityMatrix.h"
 #include "Tree.h"
+
+#ifdef RB_MPI
+#include <mpi.h>
+#include <thread>
+#include <chrono>
+#endif
 
 using namespace RevBayesCore;
 
@@ -47,21 +54,41 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn,
     size_t root_index   = tree->getRoot().getIndex();
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
+    
+    // forward the rng for different processes
+#ifdef RB_MPI
+    for ( size_t i=active_PID; i<pid; ++i)
+    {
+        // we fast forward 7 times, just to be sure
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+        rng->uniform01();
+    }
+#endif
+    
+    size_t num_sites_this_process = num_sites;
+#ifdef RB_MPI
+    num_sites_this_process = num_sites / num_processes;
+#endif
+    
 
     // create a vector of taxon data
-    std::vector<std::vector<int> > taxa = std::vector<std::vector<int> >( num_sites, std::vector<int>() );
-    std::vector<bool> monomorphic =  std::vector<bool>( num_sites, true);
+    std::vector<std::vector<int> > taxa = std::vector<std::vector<int> >( num_sites_this_process, std::vector<int>() );
+    std::vector<bool> monomorphic =  std::vector<bool>( num_sites_this_process, true);
     
     // start the progress bar
-    ProgressBar progress = ProgressBar(num_sites, 0);
+    ProgressBar progress = ProgressBar(num_sites_this_process, 0);
     
     // Print progress bar (68 characters wide)
     progress.start();
     
     size_t num_attempts = 0;
     
-    std::vector<long> root_start_states =  std::vector<long>( num_sites, 0);
-    for ( size_t i = 0; i < num_sites; ++i )
+    for ( size_t i = 0; i < num_sites_this_process; ++i )
     {
         std::vector<int> site_pattern = std::vector<int>( num_tips, 0);
         bool mono = true;
@@ -104,19 +131,59 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const std::string& fn,
 
     
     size_t num_monomorphic = 0;
-    for ( size_t i = 0; i < num_sites; ++i )
+    for ( size_t i = 0; i < num_sites_this_process; ++i )
     {
         if ( monomorphic[i] == false )
         {
             ++num_monomorphic;
         }
     }
+#ifdef RB_MPI
+    MPI_Barrier( MPI_COMM_WORLD );
+
+    // we only need to send message if there is more than one process
+    if ( num_processes > 1 )
+    {
+
+        // send the number of monomorphic sites from the helpers to the master
+        if ( process_active == false )
+        {
+            // send from the workers the number of monomorphic sites to the master
+            MPI_Send(&num_monomorphic, 1, MPI_INT, active_PID, 0, MPI_COMM_WORLD);
+        }
+
+        // receive the number of monomorphic sites from the helpers
+        if ( process_active == true )
+        {
+            for (size_t i=active_PID+1; i<active_PID+num_processes; ++i)
+            {
+                int tmp = 0;
+                MPI_Status status;
+                MPI_Recv(&tmp, 1, MPI_INT, int(i), 0, MPI_COMM_WORLD, &status);
+                num_monomorphic += tmp;
+            }
+        }
+    }
+#endif
+    
+    
+#ifdef RB_MPI
+    // we only need to send message if there is more than one process
+    if ( process_active == true )
+    {
+#endif
     std::cerr << "#Monomorphic sites:\t\t" << (num_sites-num_monomorphic) << std::endl;
     std::cerr << "#Biallelic sites:\t\t" << num_monomorphic << std::endl;
-    std::cerr << "#Invariant sites:\t\t" << (num_attempts-num_sites) << std::endl;
-    
+#ifdef RB_MPI
+    }
+#endif
     
     writeCountsFile( fn, taxa );
+    
+    
+#ifdef RB_MPI
+    MpiUtilities::synchronizeRNG( MPI_COMM_WORLD );
+#endif
     
 }
 
@@ -287,8 +354,16 @@ void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std:
     std::fstream out_stream;
 
     RbFileManager f = RbFileManager(fn);
-    f.createDirectoryForFile();
-
+    
+#ifdef RB_MPI
+    if ( process_active == true )
+    {
+#endif
+        f.createDirectoryForFile();
+#ifdef RB_MPI
+    }
+#endif
+    
     // open the stream to the file
     out_stream.open( f.getFullFileName().c_str(), std::fstream::out );
     
@@ -297,6 +372,11 @@ void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std:
      CHROM POS Gorilla_beringei Gorilla_gorilla ...
      chr1 41275799 6,0,0,0 2,0,0,0 ...
      */
+    
+#ifdef RB_MPI
+    if ( process_active == false )
+    {
+#endif
     out_stream << "COUNTSFILE NPOP " << num_tips << " NSITES " << num_sites << std::endl;
     out_stream << "CHROM POS";
     for (size_t i=0; i<num_tips; ++i)
@@ -304,7 +384,23 @@ void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std:
         out_stream << " " << tree->getTipNode(i).getName();
     }
     out_stream << std::endl;
-    for (size_t site=0; site<num_sites; ++site)
+#ifdef RB_MPI
+    }
+#endif
+    
+    size_t num_sites_per_process = taxa.size();
+        
+    
+#ifdef RB_MPI
+    for (size_t writing_pid=active_PID; writing_pid<active_PID+num_processes; ++writing_pid)
+    {
+        if ( writing_pid == pid )
+        {
+            // advance to end of
+            out_stream.seekg(0, std::ios::end);
+            
+#endif
+    for (size_t site=0; site<num_sites_per_process; ++site)
     {
         
         out_stream << "? ?";
@@ -322,5 +418,12 @@ void AlleleFrequencySimulator::writeCountsFile(const std::string& fn, const std:
     
     // close the stream
     out_stream.close();
+            
+#ifdef RB_MPI
+        }
+        
+        MPI_Barrier( MPI_COMM_WORLD );
+    }
+#endif
 }
 
