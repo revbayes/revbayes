@@ -63,6 +63,9 @@
 /* Container types (in folder "datatypes/container") */
 #include "RlCorrespondenceAnalysis.h"
 
+/* Evolution types (in folder "datatypes/io") */
+#include "RlVCFReader.h"
+
 /* Container types (in folder "datatypes/math") */
 #include "WorkspaceVector.h"
 
@@ -138,9 +141,12 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
         addFunction( new Func_workspaceVector<Monitor>() );
         addFunction( new Func_workspaceVector<Move>() );
         addFunction( new Func_workspaceVector<StoppingRule>() );
+        
+        /* Add math types (in folder "datatypes/io") */
+        addType( new VCFReader()                                    );
 
         /* Add math types (in folder "datatypes/math") */
-        addType( new CorrespondenceAnalysis()                    );
+        addType( new CorrespondenceAnalysis()                       );
 
         /* Add inference types (in folder "datatypes/inference") (alphabetic order) */
         addType( new BootstrapAnalysis()                             );
