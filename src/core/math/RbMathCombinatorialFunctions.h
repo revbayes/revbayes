@@ -31,7 +31,9 @@ namespace RevBayesCore {
         double                      lnChoose(double n, double k);                                                   //!< Calculate the log factorial
         double                      lnFactorial(int n);                                                             //!< Calculate the log factorial
         double                      squaredHarmonicNumber(size_t n);                                                //!< Calculate the squared harmonic number
-        
+
+        double                      fastHarmonicNumber(size_t n);                                                   //!< Calculate the harmonic number using the digamma function
+
 		// These stirling functions all have problems with overflow
 		int                         stirlingSecond(int n, int k);                                                   //!< Calculate the Stirling number of the second kind
 		int                         bell(int n);                                                                    //!< Calculate the Bell number
