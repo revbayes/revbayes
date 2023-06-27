@@ -12,7 +12,7 @@
 #include "DnaState.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "NaturalNumbersState.h"
-#include "PoMoState4.h"
+#include "PoMoState.h"
 #include "PoMoStateConverter.h"
 #include "RbException.h"
 #include "StandardState.h"

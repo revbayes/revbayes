@@ -7,7 +7,6 @@
 
 #include "DiscreteTaxonData.h"
 #include "PoMoCountFileReader.h"
-#include "PoMoState4.h"
 #include "PoMoState.h"
 #include "Cloneable.h"
 #include "DelimitedDataReader.h"
@@ -78,14 +77,6 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
 		name_to_taxon_data.insert(std::pair< std::string, DiscreteTaxonData<PoMoState> >(names[i], tax) );
 	}
 
-    // Setting the taxon names in the data matrix
-    std::map<std::string, DiscreteTaxonData<PoMoState4> > name_to_taxon_data4;
-    for (size_t i = 0; i < names.size(); ++i )
-    {
-        DiscreteTaxonData<PoMoState4> tax (names[i]);
-        name_to_taxon_data4.insert(std::pair< std::string, DiscreteTaxonData<PoMoState4> >(names[i], tax) );
-    }
-
 
     // estimate the number of states
     size_t row=2;
@@ -111,10 +102,11 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
 
 	for (size_t i = 2; i < chars.size(); ++i)
 	{
-            if (chars[i].size() != numberOfFields)
-            {
-                throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: line "<<i<<" is not correct, it does not have "<<numberOfFields<<" space-separated fields.";
-            }
+            
+        if (chars[i].size() != numberOfFields)
+        {
+            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: line "<<i<<" is not correct, it does not have "<<numberOfFields<<" space-separated fields.";
+        }
 
 		const std::string& chromosome = chars[i][0];
 		size_t position = StringUtilities::asIntegerNumber( chars[i][1] );
@@ -135,9 +127,9 @@ Aborted (core dumped)
             */
             {
                 std::cout << "§1: " << chars[i][j] << " - " << chromosome << " - " << position << " - " << virtual_population_size  << "\n\n"; 
-                PoMoState4 pState (chars[i][j], chromosome, position, virtual_population_size );
+                PoMoState pState (4, virtual_population_size, chars[i][j], chromosome, position );
                 std::cout << "§2: " << names[j-2] << "\n\n"; 
-                name_to_taxon_data4.at(names[j-2]).addCharacter( pState);
+                name_to_taxon_data.at(names[j-2]).addCharacter( pState);
                 std::cout << "Reached here!\n\n";
 
             }
@@ -150,16 +142,9 @@ Aborted (core dumped)
 	}
 
 	// We have finished all lines, we fill up the data matrix
-    if (num_states == 4){
-    for (std::map<std::string, DiscreteTaxonData<PoMoState4> >::iterator tax = name_to_taxon_data4.begin(); tax != name_to_taxon_data4.end(); ++tax )
-        {
-            matrix->addTaxonData(tax->second);
-        }
-    } else {
-            for (std::map<std::string, DiscreteTaxonData<PoMoState> >::iterator tax = name_to_taxon_data.begin(); tax != name_to_taxon_data.end(); ++tax )
-        {
-            matrix->addTaxonData(tax->second);
-        }
+    for (std::map<std::string, DiscreteTaxonData<PoMoState> >::iterator tax = name_to_taxon_data.begin(); tax != name_to_taxon_data.end(); ++tax )
+    {
+        matrix->addTaxonData(tax->second);
     }
 
 
