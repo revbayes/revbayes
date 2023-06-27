@@ -17,7 +17,7 @@
 #ifndef revPoMoM2NRateMatrixFunction_H
 #define revPoMoM2NRateMatrixFunction_H
 
-#include "RateMatrix_revPoMoTwo4N.h"
+#include "RateMatrix_revPoMoM2N.h"
 #include "RbVector.h"
 #include "MatrixReal.h"
 #include "TypedDagNode.h"

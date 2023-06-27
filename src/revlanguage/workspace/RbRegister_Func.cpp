@@ -172,11 +172,7 @@
 #include "Func_orderedRateMatrix.h"
 #include "Func_PoMoKN.h"
 #include "Func_revPoMoKN.h"
-#include "Func_revPoMoTwo2N.h"
 #include "Func_revPoMoBalance4N.h"
-#include "Func_revPoMoTwo4N.h"
-#include "Func_revPoMoThree4N.h"
-#include "Func_revPoMoThree4.h"
 #include "Func_revPoMoNeutralM4N.h"
 #include "Func_revPoMoM2N.h"
 #include "Func_rtRev.h"
@@ -360,10 +356,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_PoMoKN()                                      );
         addFunction( new Func_revPoMoKN()                                   );
         addFunction( new Func_revPoMoBalance4N()                            );
-        addFunction( new Func_revPoMoTwo4N()                                );
-        addFunction( new Func_revPoMoTwo2N()                                );
-        addFunction( new Func_revPoMoThree4N()                              );
-        addFunction( new Func_revPoMoThree4()                               );
         addFunction( new Func_revPoMoNeutralM4N()                           );
         addFunction( new Func_revPoMoM2N()                                  );
         addFunction( new Func_rtRev()                                       );
