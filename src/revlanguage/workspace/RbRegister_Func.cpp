@@ -170,11 +170,8 @@
 #include "Func_mtRev.h"
 #include "Func_mtMam.h"
 #include "Func_orderedRateMatrix.h"
-#include "Func_reversiblePoMo.h"
 #include "Func_PoMoKN.h"
 #include "Func_revPoMoKN.h"
-#include "Func_revPoMo4N.h"
-#include "Func_revPoMo2N.h"
 #include "Func_revPoMoTwo2N.h"
 #include "Func_revPoMoBalance4N.h"
 #include "Func_revPoMoTwo4N.h"
@@ -360,11 +357,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_mtMam()                                       );
         addFunction( new Func_mtRev()                                       );
         addFunction( new Func_orderedRateMatrix()                           );
-        addFunction( new Func_reversiblePoMo()                              );
         addFunction( new Func_PoMoKN()                                      );
         addFunction( new Func_revPoMoKN()                                   );
-        addFunction( new Func_revPoMo4N()                                   );
-        addFunction( new Func_revPoMo2N()                                   );
         addFunction( new Func_revPoMoBalance4N()                            );
         addFunction( new Func_revPoMoTwo4N()                                );
         addFunction( new Func_revPoMoTwo2N()                                );
