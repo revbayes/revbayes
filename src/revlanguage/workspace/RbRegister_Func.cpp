@@ -173,7 +173,6 @@
 #include "Func_pomo.h"
 #include "Func_reversiblePoMo.h"
 #include "Func_PoMoKN.h"
-#include "Func_PoMo4N.h"
 #include "Func_PoMo2N.h"
 #include "Func_revPoMoKN.h"
 #include "Func_revPoMo4N.h"
@@ -366,7 +365,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomo()                                        );
         addFunction( new Func_reversiblePoMo()                              );
         addFunction( new Func_PoMoKN()                                      );
-        addFunction( new Func_PoMo4N()                                      );
         addFunction( new Func_PoMo2N()                                      );
         addFunction( new Func_revPoMoKN()                                   );
         addFunction( new Func_revPoMo4N()                                   );
