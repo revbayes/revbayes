@@ -48,10 +48,11 @@ namespace RevBayesCore {
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
         
     private:
+        size_t                          computeIndexBiallelic(size_t f, size_t s) const;    //!< Compute the basic index when this biallelic frequency starts
         void                            populateWeightedStatesForMonoallelicState(size_t id1, int sum); //!< Sets the weights of all the states compatible with a monoallelic state
-        void                            setStateFixed(size_t t, size_t c, size_t b, size_t f, size_t s);   //!< Compute the internal state value for this frequency as the fixed average.
+        void                            setStateFixed(size_t t, size_t c, size_t b);        //!< Compute the internal state value for this frequency as the fixed average.
         void                            setStateBinomial(size_t t, size_t c, size_t b);     //!< Compute the internal state value as weights from a binomial distribution.
-        void                            setStateBinomialForMonomorphic(size_t t, size_t f);     //!< Compute the internal state value as weights from a binomial distribution.
+        void                            setStateBinomialForMonomorphic(size_t t, size_t f); //!< Compute the internal state value as weights from a binomial distribution.
         void                            setStateSampled(size_t t, size_t c, size_t b);      //!< Compute the internal state value by sampling from a binomial distribution.
 
         bool                            is_gap;
