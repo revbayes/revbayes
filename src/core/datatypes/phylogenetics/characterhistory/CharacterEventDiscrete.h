@@ -15,7 +15,6 @@ namespace RevBayesCore {
     public:
         CharacterEventDiscrete(void);
         CharacterEventDiscrete(size_t i, size_t s, double a, size_t t=CharacterEventType::UNDEFINED);
-        CharacterEventDiscrete(const CharacterEventDiscrete& c);
         ~CharacterEventDiscrete(void);
 
         CharacterEventDiscrete*             clone(void) const;

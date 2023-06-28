@@ -18,12 +18,6 @@ CharacterEventDiscrete::CharacterEventDiscrete(size_t i, size_t s, double a, siz
 
 }
 
-CharacterEventDiscrete::CharacterEventDiscrete(const CharacterEventDiscrete& c) : CharacterEvent(c),
-    state(c.state)
-{
-
-}
-
 CharacterEventDiscrete::~CharacterEventDiscrete(void)
 {
 
@@ -54,5 +48,4 @@ void CharacterEventDiscrete::setState(size_t s)
 {
     state = s;
 }
-
 
