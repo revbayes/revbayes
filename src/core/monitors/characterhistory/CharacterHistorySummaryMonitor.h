@@ -1,11 +1,3 @@
-//
-//  CharacterHistorySummaryMonitor.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 12/3/18.
-//  Copyright © 2018 Michael Landis. All rights reserved.
-//
-
 #ifndef CharacterHistorySummaryMonitor_h
 #define CharacterHistorySummaryMonitor_h
 
