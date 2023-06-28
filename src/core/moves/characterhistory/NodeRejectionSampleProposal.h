@@ -44,6 +44,10 @@ namespace RevBayesCore {
 
     public:
         NodeRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!<  constructor
+        NodeRejectionSampleProposal( const NodeRejectionSampleProposal& p );                                                        //!<  constructor
+        virtual                                                    ~NodeRejectionSampleProposal(void);                              //!< Destructor
+        
+        NodeRejectionSampleProposal&                                operator=(const NodeRejectionSampleProposal& p);
 
         // Basic utility functions
         void                                                        assignNode(TopologyNode* nd);
@@ -127,8 +131,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
 
     addNode( ctmc );
 
-    nodeProposal = new PathRejectionSampleProposal<charType>(n, l, r);
-    leftProposal = new PathRejectionSampleProposal<charType>(n, l, r);
+    nodeProposal  = new PathRejectionSampleProposal<charType>(n, l, r);
+    leftProposal  = new PathRejectionSampleProposal<charType>(n, l, r);
     rightProposal = new PathRejectionSampleProposal<charType>(n, l, r);
     
     for (size_t i = 0; i < numCharacters; i++)
@@ -139,6 +143,97 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
 }
 
 
+/**
+ * Copy constructor
+ *
+ * Here we simply allocate and initialize the Proposal object.
+ */
+template<class charType>
+RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal( const NodeRejectionSampleProposal& p ) : Proposal(p),
+    ctmc( p.ctmc ),
+    q_map_site( p.q_map_site ),
+    q_map_sequence( p.q_map_sequence ),
+    numCharacters( p.numCharacters ),
+    numStates( p.numStates ),
+    node( p.node ),
+    nodeTpMatrix( p.nodeTpMatrix ),
+    leftTpMatrix( p.leftTpMatrix ),
+    rightTpMatrix( p.rightTpMatrix ),
+    lambda( p.lambda )
+{
+
+    addNode( ctmc );
+        
+    nodeProposal  = p.nodeProposal->clone();
+    leftProposal  = p.leftProposal->clone();
+    rightProposal = p.rightProposal->clone();
+    
+    for (size_t i = 0; i < numCharacters; i++)
+    {
+        allCharacters.insert(i);
+    }
+
+}
+
+
+/**
+  * Destructor
+  *
+  */
+ template<class charType>
+ RevBayesCore::NodeRejectionSampleProposal<charType>::~NodeRejectionSampleProposal( void )
+ {
+         
+     delete nodeProposal;
+     delete leftProposal;
+     delete rightProposal;
+
+ }
+
+
+/**
+ * Copy constructor
+ *
+ * Here we simply allocate and initialize the Proposal object.
+ */
+template<class charType>
+RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejectionSampleProposal<charType>::operator=( const NodeRejectionSampleProposal& p )
+{
+
+    if (this != &p)
+    {
+        delete nodeProposal;
+        delete leftProposal;
+        delete rightProposal;
+        
+        removeNode(ctmc);
+        
+        ctmc            = p.ctmc;
+        q_map_site      = p.q_map_site;
+        q_map_sequence  = p.q_map_sequence;
+        numCharacters   = p.numCharacters;
+        numStates       = p.numStates;
+        node            = p.node;
+        nodeTpMatrix    = p.nodeTpMatrix;
+        leftTpMatrix    = p.leftTpMatrix;
+        rightTpMatrix   = p.rightTpMatrix;
+        lambda          = p.lambda;
+    
+        addNode( ctmc );
+        
+        nodeProposal  = p.nodeProposal->clone();
+        leftProposal  = p.leftProposal->clone();
+        rightProposal = p.rightProposal->clone();
+    
+        for (size_t i = 0; i < numCharacters; i++)
+        {
+            allCharacters.insert(i);
+        }
+    }
+
+    
+    return *this;
+}
 
 
 template<class charType>
