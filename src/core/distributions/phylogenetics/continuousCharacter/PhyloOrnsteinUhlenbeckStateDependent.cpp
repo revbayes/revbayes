@@ -56,6 +56,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     addParameter( homogeneous_alpha );
     addParameter( homogeneous_sigma );
     addParameter( homogeneous_theta );
+    addParameter( character_states );
     
     
     // We don'e want tau to die before we die, or it can't remove us as listener
@@ -965,6 +966,11 @@ void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *
     else if (oldP == state_dependent_theta)
     {
         state_dependent_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+    }
+    
+    if (oldP == character_states)
+    {
+        character_states = static_cast<const StochasticNode< AbstractHomologousDiscreteCharacterData >* >( newP );
     }
     
     this->AbstractPhyloContinuousCharacterProcess::swapParameterInternal(oldP, newP);
