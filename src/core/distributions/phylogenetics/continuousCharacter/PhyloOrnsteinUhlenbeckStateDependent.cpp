@@ -282,7 +282,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
 //            CharacterEvent *event_left = *(h_left.begin());
 //            size_t state_begin_left  = static_cast<CharacterEventDiscrete*>(bh_left.getChildCharacters()[0])->getState();
             
-            size_t previous_state_left = state_begin_left;
+//            size_t previous_state_left = state_begin_left;
             double begin_time_left = left->getAge();
             
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_left.begin(); it!=hist_left.end(); ++it)
@@ -333,7 +333,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             
 //            size_t state_begin_right  = static_cast<CharacterEventDiscrete*>(bh_right.getChildCharacters()[0])->getState();
 
-            size_t previous_state_right = state_begin_right;
+//            size_t previous_state_right = state_begin_right;
             double begin_time_right = right.getAge();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_right.begin(); it!=hist_right.end(); ++it)
             {
