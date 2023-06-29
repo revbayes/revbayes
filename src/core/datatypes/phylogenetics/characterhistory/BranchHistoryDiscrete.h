@@ -20,7 +20,7 @@ namespace RevBayesCore {
         ~BranchHistoryDiscrete(void);
         
         // overloaded operators
-        BranchHistoryDiscrete& operator=(const BranchHistoryDiscrete& bh);
+        BranchHistoryDiscrete&                                          operator=(const BranchHistoryDiscrete& bh);
         
         // public methods
         BranchHistoryDiscrete*                                          clone(void) const;

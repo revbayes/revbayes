@@ -100,15 +100,18 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* qmap_site_tdn = NULL;
     RevBayesCore::TypedDagNode<RevBayesCore::RateGeneratorSequence>* qmap_seq_tdn = NULL;
     //    if (qmap_site != NULL ) {
-    if (qmap_site->getRevObject() != RevNullObject::getInstance()) {
+    if (qmap_site->getRevObject() != RevNullObject::getInstance())
+    {
         use_site = true;
         qmap_site_tdn = static_cast<const RateGenerator&>( qmap_site->getRevObject() ).getDagNode();
     }
-    else if (qmap_seq->getRevObject() != RevNullObject::getInstance()) {
+    else if (qmap_seq->getRevObject() != RevNullObject::getInstance())
+    {
         use_seq = true;
         qmap_seq_tdn = static_cast<const RateGeneratorSequence&>( qmap_seq->getRevObject() ).getDagNode();
     }
-    else {
+    else
+    {
         throw RbException("qmap_site or qmap_seq must be provided!");
     }
     
@@ -125,9 +128,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
             RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
             
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -136,9 +142,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::PathRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -150,9 +159,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -161,9 +173,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::PathRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -175,9 +190,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -186,9 +204,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::PathRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn);
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -200,9 +221,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
             
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -211,9 +235,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
             
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -222,9 +249,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::BiogeographicNodeRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicNodeRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -233,9 +263,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;
@@ -244,9 +277,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         {
             RevBayesCore::PathRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
             
-            if (use_site) {
+            if (use_site)
+            {
                 tmp_p->setRateGenerator( qmap_site_tdn );
-            } else if (use_seq) {
+            }
+            else if (use_seq)
+            {
                 tmp_p->setRateGenerator( qmap_seq_tdn );
             }
             p = tmp_p;

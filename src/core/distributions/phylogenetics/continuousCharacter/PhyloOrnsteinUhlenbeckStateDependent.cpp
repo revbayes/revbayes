@@ -707,7 +707,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<double> *
     // remove the old parameter first
     this->removeParameter( homogeneous_theta );
     this->removeParameter( state_dependent_theta );
-    homogeneous_theta      = NULL;
+    homogeneous_theta        = NULL;
     state_dependent_theta    = NULL;
     
     
@@ -732,7 +732,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<RbVector<
     // remove the old parameter first
     this->removeParameter( homogeneous_theta );
     this->removeParameter( state_dependent_theta );
-    homogeneous_theta      = NULL;
+    homogeneous_theta        = NULL;
     state_dependent_theta    = NULL;
     
     
@@ -871,7 +871,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* a
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == this->state_dependent_sigma )
+    if ( affecter == this->state_dependent_sigma && false )
     {
         
         const std::set<size_t> &indices = this->state_dependent_sigma->getTouchedElementIndices();

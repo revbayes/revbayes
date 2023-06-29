@@ -231,7 +231,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     }
     
     // collect phylogenetic info
-    std::vector<BranchHistory*> histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     TopologyNode &left_child  = node->getChild(0);
     TopologyNode &right_child = node->getChild(1);
@@ -241,12 +241,12 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     size_t right_index = right_child.getIndex();
     
     // states for conditional sampling probs
-    const std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& nodeParentState  = histories[ node_index  ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& leftChildState   = histories[ left_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& leftParentState  = histories[ left_index  ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& rightChildState  = histories[ right_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& rightParentState = histories[ right_index ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeParentState  = histories[ node_index  ].getParentCharacters();
+    const std::vector<CharacterEvent*>& leftChildState   = histories[ left_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& leftParentState  = histories[ left_index  ].getParentCharacters();
+    const std::vector<CharacterEvent*>& rightChildState  = histories[ right_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
     
     // get transition probabilities for all site-states
     std::set<size_t>::iterator it_s;
@@ -291,7 +291,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     }
     
     // gather branch history variables
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     TopologyNode &left_child  = node->getChild(0);
     TopologyNode &right_child = node->getChild(1);
@@ -300,12 +300,12 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     size_t left_index  = left_child.getIndex();
     size_t right_index = right_child.getIndex();
     
-    const std::vector<CharacterEvent*>& leftChildState      = histories[ left_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& rightChildState     = histories[ right_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& leftParentState     = histories[ left_index  ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& rightParentState    = histories[ right_index ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& nodeChildState      = histories[ node_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index  ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& leftChildState      = histories[ left_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& rightChildState     = histories[ right_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& leftParentState     = histories[ left_index  ].getParentCharacters();
+    const std::vector<CharacterEvent*>& rightParentState    = histories[ right_index ].getParentCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState      = histories[ node_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index  ].getParentCharacters();
     
 //    printCladogeneticState();
 //    std::cout << "\n";
@@ -335,13 +335,20 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
         
         // determine the area's cladogenetic state
         size_t s = 0;
-        if (A_j == 0 && L_i == 0 && R_i == 0) {
+        if (A_j == 0 && L_i == 0 && R_i == 0)
+        {
             s = 0;
-        } else if (A_j == 1 && L_i == 1 && R_i == 0) {
+        }
+        else if (A_j == 1 && L_i == 1 && R_i == 0)
+        {
             s = 1;
-        } else if (A_j == 1 && L_i == 0 && R_i == 1) {
+        }
+        else if (A_j == 1 && L_i == 0 && R_i == 1)
+        {
             s = 2;
-        } else {
+        }
+        else
+        {
             std::cout << "node_index = " << node->getIndex() << "\n";
             std::cout << "node = " << node_index << "\n";
             throw RbException("unknown allopatric state!");
@@ -367,7 +374,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     }
     
     // gather branch history variables
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     TopologyNode &left_child  = node->getChild(0);
     TopologyNode &right_child = node->getChild(1);
@@ -377,9 +384,9 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     size_t right_index = right_child.getIndex();
     
     // get some history states (will get more later)
-    const std::vector<CharacterEvent*>& rightParentState = histories[ right_index ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& nodeParentState  = histories[ node_index  ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeParentState  = histories[ node_index  ].getParentCharacters();
 
     // which branch is the trunk?
     std::string trunk_branch = "left";
@@ -387,7 +394,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     for (size_t i = 0; i < numCharacters; i++)
     {
         n_right_on += static_cast<CharacterEventDiscrete*>(rightParentState[i])->getState();
-        if (n_right_on > 1) {
+        if (n_right_on > 1)
+        {
             trunk_branch = "right";
             break;
         }
@@ -396,14 +404,17 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     // Retrieve history states depending on bud/trunk sampling
     size_t trunk_index = left_index;
     size_t bud_index = right_index;
-    if (trunk_branch == "left") {
+    if (trunk_branch == "left")
+    {
         ; // do nothing
     }
-    else if (trunk_branch == "right") {
+    else if (trunk_branch == "right")
+    {
         trunk_index = right_index;
         bud_index = left_index;
     }
-    else {
+    else
+    {
         throw RbException("trunk_branch state unknown");
     }
 
@@ -411,10 +422,10 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
 //    printCladogeneticState();
     
     // condition on for sampling
-    const std::vector<CharacterEvent*>& trunkChildState   = histories[ trunk_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& budChildState     = histories[ bud_index   ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& trunkParentState  = histories[ trunk_index ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& budParentState    = histories[ bud_index   ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& trunkChildState   = histories[ trunk_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& budChildState     = histories[ bud_index   ].getChildCharacters();
+    const std::vector<CharacterEvent*>& trunkParentState  = histories[ trunk_index ].getParentCharacters();
+    const std::vector<CharacterEvent*>& budParentState    = histories[ bud_index   ].getParentCharacters();
 
     const TransitionProbabilityMatrix& trunkTpMatrix = ( trunk_branch == "left" ? leftTpMatrix  : rightTpMatrix );
     const TransitionProbabilityMatrix& budTpMatrix   = ( trunk_branch == "left" ? rightTpMatrix : leftTpMatrix  );
@@ -755,7 +766,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::p
     //    double ln_prob_fwd = 0.0;
     
     // gather branch history variables
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     TopologyNode &left_child  = node->getChild(0);
     TopologyNode &right_child = node->getChild(1);
@@ -764,12 +775,12 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::p
     size_t left_index  = left_child.getIndex();
     size_t right_index = right_child.getIndex();
     
-    const std::vector<CharacterEvent*>& leftChildState      = histories[ left_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& rightChildState     = histories[ right_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& leftParentState     = histories[ left_index  ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& rightParentState    = histories[ right_index ]->getParentCharacters();
-    const std::vector<CharacterEvent*>& nodeChildState      = histories[ node_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& leftChildState      = histories[ left_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& rightChildState     = histories[ right_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& leftParentState     = histories[ left_index  ].getParentCharacters();
+    const std::vector<CharacterEvent*>& rightParentState    = histories[ right_index ].getParentCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState      = histories[ node_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index ].getParentCharacters();
 
     std::cout << "L0 : ";
     for (size_t i = 0; i < numCharacters; i++) { std::cout << static_cast<CharacterEventDiscrete*>( leftParentState[i] )->getState(); }
@@ -823,15 +834,15 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     size_t right_index = right_child.getIndex();
     
     // gather branch history variables
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
-    const std::vector<CharacterEvent*>& leftChildState      = histories[ left_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& rightChildState     = histories[ right_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& leftChildState      = histories[ left_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& rightChildState     = histories[ right_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index ].getParentCharacters();
     
-    std::vector<CharacterEvent*>& leftParentState           = histories[ left_index  ]->getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState          = histories[ right_index ]->getParentCharacters();
-    std::vector<CharacterEvent*>& nodeChildState            = histories[ node_index ]->getChildCharacters();
+    std::vector<CharacterEvent*>& leftParentState           = histories[ left_index  ].getParentCharacters();
+    std::vector<CharacterEvent*>& rightParentState          = histories[ right_index ].getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState            = histories[ node_index ].getChildCharacters();
 
     // Sample cladogenetic states for trunk
     std::vector<size_t> trunk_areas;
@@ -857,9 +868,11 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
         // sample the state
         double u_state = GLOBAL_RNG->uniform01() * sum;
         size_t s = 0;
-        for (s = 0; s < state_probs.size(); s++) {
+        for (s = 0; s < state_probs.size(); s++)
+        {
             u_state -= state_probs[s];
-            if (u_state <= 0) {
+            if (u_state <= 0)
+            {
                 break;
             }
         }
@@ -913,7 +926,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     //      a bit of extra bookkeeping, so let's do 50-50 for now.
     
     double p_right = 0.5;
-    if (GLOBAL_RNG->uniform01() < p_right) {
+    if (GLOBAL_RNG->uniform01() < p_right)
+    {
         trunk_branch = "right";
     }
     
@@ -932,17 +946,17 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     }
     
     // gather branch history variables
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     // condition on for sampling
-    const std::vector<CharacterEvent*>& trunkChildState   = histories[ trunk_index  ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& budChildState     = histories[ bud_index    ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& nodeParentState   = histories[ node_index   ]->getParentCharacters();
+    const std::vector<CharacterEvent*>& trunkChildState   = histories[ trunk_index  ].getChildCharacters();
+    const std::vector<CharacterEvent*>& budChildState     = histories[ bud_index    ].getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeParentState   = histories[ node_index   ].getParentCharacters();
     
     // update
-    std::vector<CharacterEvent*>& trunkParentState        = histories[ trunk_index  ]->getParentCharacters();
-    std::vector<CharacterEvent*>& budParentState          = histories[ bud_index    ]->getParentCharacters();
-    std::vector<CharacterEvent*>& nodeChildState          = histories[ node_index   ]->getChildCharacters();
+    std::vector<CharacterEvent*>& trunkParentState        = histories[ trunk_index  ].getParentCharacters();
+    std::vector<CharacterEvent*>& budParentState          = histories[ bud_index    ].getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState          = histories[ node_index   ].getChildCharacters();
 
     
     const TransitionProbabilityMatrix& trunkTpMatrix = ( trunk_branch == "left" ? leftTpMatrix  : rightTpMatrix );
@@ -1050,10 +1064,10 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
     size_t node_index  = node->getIndex();
     
     // gather branch history variables
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     // states to update
-    std::vector<CharacterEvent*>& nodeParentState  = histories[ node_index ]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeParentState  = histories[ node_index ].getParentCharacters();
   
     // sample states
     std::set<size_t>::iterator it_s;
@@ -1062,7 +1076,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>:
         size_t site_index = *it_s;
         
         size_t s = 0;
-        if (GLOBAL_RNG->uniform01() < 0.5) {
+        if (GLOBAL_RNG->uniform01() < 0.5)
+        {
             s = 1;
         }
         static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
@@ -1364,12 +1379,12 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::u
     }
     size_t num_sites = c->getNumberOfSites();
     
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     // restore node state
-    std::vector<CharacterEvent*>& nodeChildState   = histories[node->getIndex()]->getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState  = histories[node->getChild(0).getIndex() ]->getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[node->getChild(1).getIndex()]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState   = histories[node->getIndex()].getChildCharacters();
+    std::vector<CharacterEvent*>& leftParentState  = histories[node->getChild(0).getIndex() ].getParentCharacters();
+    std::vector<CharacterEvent*>& rightParentState = histories[node->getChild(1).getIndex()].getParentCharacters();
     
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
@@ -1383,9 +1398,10 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::u
     }
     
     // restore subroot state if needed
-    if (node->isRoot()) {
+    if (node->isRoot())
+    {
         //        std::cout << "restore subrootState : ";
-        std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
         
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {

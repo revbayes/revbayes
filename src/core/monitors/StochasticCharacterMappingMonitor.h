@@ -34,7 +34,6 @@ namespace RevBayesCore {
         StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del);
 //        StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, const std::string &del);
         StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx);
-        StochasticCharacterMappingMonitor(const StochasticCharacterMappingMonitor &m);
         virtual ~StochasticCharacterMappingMonitor(void);
 
         StochasticCharacterMappingMonitor*              clone(void) const;                                                  //!< Clone the object
@@ -104,22 +103,6 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
 
     addVariable( tree );
     addVariable( ctmc );
-}
-
-
-/**
- * Copy constructor.
- */
-template<class characterType>
-StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor( const StochasticCharacterMappingMonitor &m) : VariableMonitor( m ),
-    tree( m.tree ),
-    cdbdp( m.cdbdp ),
-    ctmc( m.ctmc ),
-    include_simmaps( m.include_simmaps ),
-    use_simmap_default( m.use_simmap_default ),
-    index( m.index )
-{
-
 }
 
 

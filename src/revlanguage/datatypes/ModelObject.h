@@ -45,7 +45,7 @@ namespace RevLanguage {
         virtual const rbType&                   getValue(void) const;                                                       //!< Get the value (const)
         virtual rbType&                         getValue(void);                                                             //!< Get the value (non-const)
         void                                    setValue(rbType *x);                                                        //!< Set new constant value
-        virtual void                            printValue(std::ostream& o, bool user) const;                                          //!< Print value
+        virtual void                            printValue(std::ostream& o, bool user) const;                               //!< Print value
         virtual void                            printValue(std::ostream& o) const { printValue(o, true); };                 //!< Print value overload
 
         virtual std::string                     getGuiName(void) { return ""; }

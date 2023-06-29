@@ -14,7 +14,13 @@ namespace RevBayesCore { class BranchHistory; }
 using namespace RevBayesCore;
 
 
-CharacterHistoryDiscrete::CharacterHistoryDiscrete(Tree *t, size_t nc, size_t ns, bool rb ) : CharacterHistory(t, nc, rb),
+CharacterHistoryDiscrete::CharacterHistoryDiscrete( void ) : CharacterHistory(NULL, 0, false),
+    n_states( 0 )
+{
+        
+}
+
+CharacterHistoryDiscrete::CharacterHistoryDiscrete(const Tree *t, size_t nc, size_t ns, bool rb ) : CharacterHistory(t, nc, rb),
     n_states( ns )
 {
     
@@ -39,6 +45,20 @@ CharacterHistoryDiscrete::CharacterHistoryDiscrete(Tree *t, size_t nc, size_t ns
 CharacterHistoryDiscrete::~CharacterHistoryDiscrete()
 {
     
+}
+
+
+/**
+ * Index operator.
+ */
+BranchHistoryDiscrete& CharacterHistoryDiscrete::operator[](size_t i)
+{
+    if ( i > histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    return static_cast<BranchHistoryDiscrete &>(*histories[i]);
 }
 
 
@@ -88,7 +108,7 @@ CharacterEventDiscrete* CharacterHistoryDiscrete::pickRandomEvent( size_t &branc
 /**
  * Set the new tree.
  */
-void CharacterHistoryDiscrete::setTree(Tree *t)
+void CharacterHistoryDiscrete::setTree(const Tree *t)
 {
     
     tree = t;

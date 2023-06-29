@@ -626,12 +626,12 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::undoProposa
             throw RbException("Failed cast.");
         }
         size_t num_sites = p->getNumberOfSites();
-        const std::vector<BranchHistory*>& histories = p->getHistories();
+        CharacterHistoryDiscrete& histories = p->getHistories();
         
         // restore the parent states
-        std::vector<CharacterEvent*>& parentState     = histories[parent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& leftChildState  = histories[parent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& rightChildState = histories[parent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& parentState     = histories[parent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& leftChildState  = histories[parent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& rightChildState = histories[parent.getChild(1).getIndex()].getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_parent_node_states[site_index];
@@ -641,9 +641,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::undoProposa
         }
         
         // restore the grandparent states
-        std::vector<CharacterEvent*>& grandparentState           = histories[grandparent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& leftGrandparentChildState  = histories[grandparent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& rightGrandparentChildState = histories[grandparent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& grandparentState           = histories[grandparent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& leftGrandparentChildState  = histories[grandparent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& rightGrandparentChildState = histories[grandparent.getChild(1).getIndex()].getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_grandparent_node_states[site_index];
@@ -674,7 +674,7 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
         throw RbException("Failed cast.");
     }
     size_t num_sites = c->getNumberOfSites();
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     // get all the nodes
     TopologyNode& grandparent = parent->getParent();
@@ -688,17 +688,17 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
     TopologyNode* brother = &parent->getChild( 1 );
 
     // states to update
-    std::vector<CharacterEvent*>& nodeParentState        = histories[node->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& brotherParentState     = histories[brother->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& uncleParentState       = histories[uncle->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& parentChildState       = histories[parent->getIndex()]->getChildCharacters();
-    std::vector<CharacterEvent*>& parentParentState      = histories[parent->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& grandparentChildState  = histories[grandparent.getIndex()]->getChildCharacters();
+    std::vector<CharacterEvent*>& nodeParentState        = histories[node->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& brotherParentState     = histories[brother->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& uncleParentState       = histories[uncle->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& parentChildState       = histories[parent->getIndex()].getChildCharacters();
+    std::vector<CharacterEvent*>& parentParentState      = histories[parent->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& grandparentChildState  = histories[grandparent.getIndex()].getChildCharacters();
     
     // states for conditional sampling probs
-    const std::vector<CharacterEvent*>& nodeChildState    = histories[node->getIndex()]->getChildCharacters();
-    const std::vector<CharacterEvent*>& brotherChildState = histories[brother->getIndex()]->getChildCharacters();
-    const std::vector<CharacterEvent*>& uncleChildState   = histories[uncle->getIndex()]->getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState    = histories[node->getIndex()].getChildCharacters();
+    const std::vector<CharacterEvent*>& brotherChildState = histories[brother->getIndex()].getChildCharacters();
+    const std::vector<CharacterEvent*>& uncleChildState   = histories[uncle->getIndex()].getChildCharacters();
     
     // update the transition probs
     const RateGenerator& rm = rate_generator->getValue();
@@ -714,7 +714,7 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
         rm.calculateTransitionProbabilities(grandparent.getParent().getAge(), grandparent.getAge(),  c->getBranchRate( grandparent.getIndex() ), grandparent_tp_matrix);
         
         // get the state of the great-grandparent
-        const std::vector<CharacterEvent*>& greatGrandparentState = histories[grandparent.getIndex()]->getParentCharacters();
+        const std::vector<CharacterEvent*>& greatGrandparentState = histories[grandparent.getIndex()].getParentCharacters();
 
         // for each site...
         for (size_t site_index = 0; site_index < num_sites; ++site_index)

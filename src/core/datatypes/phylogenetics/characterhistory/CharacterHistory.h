@@ -10,8 +10,8 @@ namespace RevBayesCore {
     
     
     class Tree;
-class BranchHistory;
-class CharacterEvent;
+    class BranchHistory;
+    class CharacterEvent;
     
     class CharacterHistory : public Cloneable {
         
@@ -19,11 +19,12 @@ class CharacterEvent;
         
         virtual ~CharacterHistory(void);
         
-        virtual const BranchHistory&             operator[](size_t i) const;
+        virtual BranchHistory&                  operator[](size_t i);
+        virtual const BranchHistory&            operator[](size_t i) const;
 
         // pure virtual methods
         virtual CharacterHistory*               clone(void) const = 0;
-        virtual void                            setTree(Tree *t) = 0;
+        virtual void                            setTree(const Tree *t) = 0;
 
         void                                    addEvent(CharacterEvent *e, size_t bi);
         size_t                                  getNumberBranches(void) const;
@@ -34,11 +35,11 @@ class CharacterEvent;
         
         
     protected:
-        CharacterHistory(Tree *t, size_t nc, bool rb = false);
+        CharacterHistory(const Tree *t, size_t nc, bool rb = false);
         CharacterHistory(const CharacterHistory &ch);
         CharacterHistory&                       operator=(const CharacterHistory &ch);
 
-        Tree*                                   tree;
+        const Tree*                             tree;
         std::vector<BranchHistory*>             histories;
         size_t                                  n_branches;
         size_t                                  n_character;
@@ -47,7 +48,10 @@ class CharacterEvent;
         
         
     };
-    
+
+    // Global functions using the class
+    std::ostream&                       operator<<(std::ostream& o, const CharacterHistory& x);  //!< Overloaded output operator
+
 }
 
 #endif

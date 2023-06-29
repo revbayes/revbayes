@@ -13,7 +13,7 @@
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
-class BranchHistory;
+class CharacterHistoryDiscrete;
 class DagNode;
 class Simplex;
 template <class valueType> class RbVector;
@@ -38,11 +38,11 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         DECCladogeneticStateFunction*                           clone(void) const;                                                              //!< Create an independent clone
-        virtual double computeDataAugmentedCladogeneticLnProbability( const std::vector<BranchHistory*>& histories,
+        virtual double computeDataAugmentedCladogeneticLnProbability( CharacterHistoryDiscrete& histories,
                                                                      size_t node_index,
                                                                      size_t left_index,
                                                                      size_t right_index ) const;
-        virtual std::string simulateDataAugmentedCladogeneticState(std::vector<BranchHistory*>& histories,
+        virtual std::string simulateDataAugmentedCladogeneticState(CharacterHistoryDiscrete& histories,
                                                             size_t node_index, size_t left_index, size_t right_index) const;
 
         std::map< std::vector<unsigned>, double >               getEventMap(double t=0.0);

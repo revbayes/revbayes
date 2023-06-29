@@ -13,7 +13,7 @@ namespace RevBayesCore { class CharacterEvent; }
 using namespace RevBayesCore;
 
 
-CharacterHistory::CharacterHistory(Tree *t, size_t nc, bool rb ) :
+CharacterHistory::CharacterHistory(const Tree *t, size_t nc, bool rb ) :
     tree( t ),
     histories(),
     n_branches(),
@@ -88,6 +88,20 @@ CharacterHistory& CharacterHistory::operator=(const CharacterHistory &ch)
     }
     
     return *this;
+}
+
+
+/**
+ * Index operator.
+ */
+BranchHistory& CharacterHistory::operator[](size_t i)
+{
+    if ( i > histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    return *(histories[i]);
 }
 
 
@@ -206,3 +220,14 @@ void CharacterHistory::removeEvent( CharacterEvent *e, size_t branch_index)
     }
     assert( counted_events == n_events );
 }
+
+
+
+
+std::ostream& RevBayesCore::operator<<(std::ostream& o, const CharacterHistory& x)
+{
+    o << "character history";
+    
+    return o;
+}
+

@@ -11,7 +11,7 @@ namespace RevBayesCore { class BranchHistory; }
 using namespace RevBayesCore;
 
 
-CharacterHistoryContinuous::CharacterHistoryContinuous(Tree *t, size_t nc, bool rb ) : CharacterHistory( t, nc, rb )
+CharacterHistoryContinuous::CharacterHistoryContinuous(const Tree *t, size_t nc, bool rb ) : CharacterHistory( t, nc, rb )
 {
     
     if ( tree != NULL )
@@ -89,7 +89,7 @@ CharacterEventContinuous* CharacterHistoryContinuous::pickRandomEvent( size_t &b
 /**
  * Set the new tree.
  */
-void CharacterHistoryContinuous::setTree(Tree *t)
+void CharacterHistoryContinuous::setTree(const Tree *t)
 {
     
     tree = t;

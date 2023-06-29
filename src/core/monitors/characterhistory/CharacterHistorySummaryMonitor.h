@@ -189,7 +189,8 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
 
 /* Build newick string */
 template<class charType>
-std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterationSummaryTable( unsigned long gen, TopologyNode* n ) {
+std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterationSummaryTable( unsigned long gen, TopologyNode* n )
+{
     // create the newick string
     std::stringstream o;
     

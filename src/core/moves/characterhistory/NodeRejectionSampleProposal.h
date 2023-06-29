@@ -168,10 +168,14 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     leftProposal  = p.leftProposal->clone();
     rightProposal = p.rightProposal->clone();
     
-    for (size_t i = 0; i < numCharacters; i++)
-    {
-        allCharacters.insert(i);
-    }
+    sampledCharacters   =   p.sampledCharacters;
+    allCharacters       = p.allCharacters;
+
+    storedNodeState     = p.storedNodeState;
+    storedSubrootState  = p.storedSubrootState;;
+
+    storedLnProb        = p.storedLnProb;
+    proposedLnProb      = p.proposedLnProb;
 
 }
 
@@ -225,10 +229,16 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         leftProposal  = p.leftProposal->clone();
         rightProposal = p.rightProposal->clone();
     
-        for (size_t i = 0; i < numCharacters; i++)
-        {
-            allCharacters.insert(i);
-        }
+        
+        
+        sampledCharacters   = p.sampledCharacters;
+        allCharacters       = p.allCharacters;
+
+        storedNodeState     = p.storedNodeState;
+        storedSubrootState  = p.storedSubrootState;;
+
+        storedLnProb        = p.storedLnProb;
+        proposedLnProb      = p.proposedLnProb;
     }
 
     
@@ -445,7 +455,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
         throw RbException("Failed cast.");
     }
 
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
 
     // get local node and branch information
     TopologyNode &left_child  = node->getChild(0);
@@ -464,16 +474,16 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     double right_rate = c->getBranchRate( right_index );
 
     // states for conditional sampling probs
-    const std::vector<CharacterEvent*>& leftChildState  = histories[ left_index ]->getChildCharacters();
-    const std::vector<CharacterEvent*>& rightChildState = histories[ right_index ]->getChildCharacters();
+    const std::vector<CharacterEvent*>& leftChildState  = histories[ left_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& rightChildState = histories[ right_index ].getChildCharacters();
 
     // states to update
-    std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index ]->getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState  = histories[ left_index ]->getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index ].getChildCharacters();
+    std::vector<CharacterEvent*>& leftParentState  = histories[ left_index ].getParentCharacters();
+    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
 
     // we may also update this if it is the root state (not const)
-    std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
     
     // get parent age
     double parent_age = 0.0;
@@ -679,12 +689,12 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
     }
     size_t num_sites = p->getNumberOfSites();
     
-    const std::vector<BranchHistory*>& histories = p->getHistories();
+    CharacterHistoryDiscrete& histories = p->getHistories();
     
     // restore node state
-    std::vector<CharacterEvent*>& nodeChildState = histories[node->getIndex()]->getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState = histories[node->getChild(0).getIndex() ]->getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[node->getChild(1).getIndex()]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState = histories[node->getIndex()].getChildCharacters();
+    std::vector<CharacterEvent*>& leftParentState = histories[node->getChild(0).getIndex() ].getParentCharacters();
+    std::vector<CharacterEvent*>& rightParentState = histories[node->getChild(1).getIndex()].getParentCharacters();
     
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
@@ -697,7 +707,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
     // restore subroot state if needed
     if (node->isRoot()) {
         //        std::cout << "restore subrootState : ";
-        std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
         
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {

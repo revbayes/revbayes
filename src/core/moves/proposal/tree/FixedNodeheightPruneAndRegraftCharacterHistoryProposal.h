@@ -517,7 +517,7 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
             throw RbException("Failed cast.");
         }
         size_t num_sites = p->getNumberOfSites();
-        const std::vector<BranchHistory*>& histories = p->getHistories();
+        CharacterHistoryDiscrete& histories = p->getHistories();
         
 //        std::cout << "Probability before rejection: " << p->computeLnProbability() << std::endl;
         
@@ -540,9 +540,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         parent.setParent( &grandparent );
 
         // restore the grandparent states
-        std::vector<CharacterEvent*>& node_states_one  = histories[grandparent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& left_states_one  = histories[grandparent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& right_states_one = histories[grandparent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& node_states_one  = histories[grandparent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& left_states_one  = histories[grandparent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& right_states_one = histories[grandparent.getChild(1).getIndex()].getParentCharacters();
 //        std::cout << "Proposed states one: ";
 //        for (size_t site_index = 0; site_index < num_sites; ++site_index)
 //        {
@@ -552,9 +552,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
 //        std::cout << std::endl;
         
         // restore the new_grandparent states
-        std::vector<CharacterEvent*>& node_states_two  = histories[new_grandparent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& left_states_two  = histories[new_grandparent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& right_states_two = histories[new_grandparent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& node_states_two  = histories[new_grandparent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& left_states_two  = histories[new_grandparent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& right_states_two = histories[new_grandparent.getChild(1).getIndex()].getParentCharacters();
 //        std::cout << "Proposed states two: ";
 //        for (size_t site_index = 0; site_index < num_sites; ++site_index)
 //        {
@@ -564,9 +564,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
 //        std::cout << std::endl;
         
         // restore the parent states
-        std::vector<CharacterEvent*>& node_states_three  = histories[parent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& left_states_three  = histories[parent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& right_states_three = histories[parent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& node_states_three  = histories[parent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& left_states_three  = histories[parent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& right_states_three = histories[parent.getChild(1).getIndex()].getParentCharacters();
 //        std::cout << "Proposed states three: ";
 //        for (size_t site_index = 0; site_index < num_sites; ++site_index)
 //        {
@@ -663,7 +663,7 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
             throw RbException("Failed cast.");
         }
         size_t num_sites = c->getNumberOfSites();
-        const std::vector<BranchHistory*>& histories = c->getHistories();
+        CharacterHistoryDiscrete& histories = c->getHistories();
         
         TopologyNode &left_child  = node->getChild(0);
         TopologyNode &right_child = node->getChild(1);
@@ -682,13 +682,13 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         rm.calculateTransitionProbabilities(node_age, right_age, right_rate, right_tp_matrix);
         
         // states for conditional sampling probs
-        const std::vector<CharacterEvent*>& leftChildState  = histories[left_child.getIndex()]->getChildCharacters();
-        const std::vector<CharacterEvent*>& rightChildState = histories[right_child.getIndex()]->getChildCharacters();
+        const std::vector<CharacterEvent*>& leftChildState  = histories[left_child.getIndex()].getChildCharacters();
+        const std::vector<CharacterEvent*>& rightChildState = histories[right_child.getIndex()].getChildCharacters();
         
         // states to update
-        std::vector<CharacterEvent*>& nodeChildState   = histories[node->getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& leftParentState  = histories[left_child.getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& rightParentState = histories[right_child.getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& nodeChildState   = histories[node->getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& leftParentState  = histories[left_child.getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& rightParentState = histories[right_child.getIndex()].getParentCharacters();
         
         if ( node->isRoot() == false )
         {
@@ -696,7 +696,7 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
             double parent_age = node->getParent().getAge();
             rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, node_tp_matrix);
             
-            const std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()]->getParentCharacters();
+            const std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {

@@ -37,6 +37,7 @@
 #include "RbVectorImpl.h"
 #include "RealPos.h"
 #include "RlConstantNode.h"
+#include "RlCharacterHistory.h"
 #include "RlDistribution.h"
 #include "RnaState.h"
 #include "StringUtilities.h"
@@ -550,6 +551,9 @@ MethodTable Dist_phyloCTMCDASiteIID::getDistributionMethods( void ) const
     MethodTable methods = TypedDistribution<AbstractHomologousDiscreteCharacterData>::getDistributionMethods();
 
     // member functions
+    ArgumentRules* character_history_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_phyloCTMCDASiteIID, CharacterHistory >( "characterHistories", variable, character_history_arg_rules   ) );
+
     ArgumentRules* node_state_frequencies_arg_rules = new ArgumentRules();
     node_state_frequencies_arg_rules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new DistributionMemberFunction<Dist_phyloCTMCDASiteIID, Simplex >( "stateFrequencies", variable, node_state_frequencies_arg_rules   ) );

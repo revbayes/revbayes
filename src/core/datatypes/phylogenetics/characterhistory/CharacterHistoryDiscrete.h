@@ -19,16 +19,18 @@ namespace RevBayesCore {
         
     public:
         
-        CharacterHistoryDiscrete(Tree *t, size_t nc, size_t ns, bool rb = false);
+        CharacterHistoryDiscrete(void);
+        CharacterHistoryDiscrete(const Tree *t, size_t nc, size_t ns, bool rb = false);
         virtual ~CharacterHistoryDiscrete(void);
         
+        BranchHistoryDiscrete&                  operator[](size_t i);
         const BranchHistoryDiscrete&            operator[](size_t i) const;
         
         // public methods
         CharacterHistoryDiscrete*               clone(void) const;
         size_t                                  getNumberStates(void) const;
         CharacterEventDiscrete*                 pickRandomEvent(size_t &bi);
-        void                                    setTree(Tree *t);
+        void                                    setTree(const Tree *t);
         
         
     private:
