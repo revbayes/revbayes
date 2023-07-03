@@ -1313,7 +1313,8 @@ std::vector< std::pair<size_t, double> > JointAncestralStateTrace::parseSIMMAPFo
     std::string time = "";
     size_t k = character_history.size();
     
-    while (true) {
+    while (true)
+    {
         
         if ( k == (character_history.size() - 1) &&
             std::string(1, character_history[0]).compare("{") != 0 &&

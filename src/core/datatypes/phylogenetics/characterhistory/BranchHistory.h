@@ -65,7 +65,6 @@ class CharacterEvent;
     protected:
         //BranchHistory(void);
         BranchHistory(size_t nc, size_t idx);
-        BranchHistory(size_t nc, size_t idx, std::set<int> sc);
         BranchHistory(const BranchHistory& m);
 
         // container/element arguments

@@ -57,6 +57,7 @@ namespace RevBayesCore {
         void                    getTaxaInSubtree(TopologyNode& n, std::vector<TopologyNode*>& taxa );                                   //!< get taxa below specified node
         bool                    isConnectedNNI(const Tree& a, const Tree& b);                                                           //!< Check if the two trees are connected by a single NNI move
         void                    offsetTree(TopologyNode& n, double factor);                                                             //!< offset node and its children by a factor
+    std::vector< std::pair<size_t, double> > parseSIMMAPForNode(std::string character_history);
         void                    makeUltrametric(Tree& t);                                                                               //!< make the tree ultrametric by extending terminal branches
         void                    rescaleSubtree(TopologyNode& n, double factor, bool v=false);                                           //!< rescale tree ages below a node by a factor, except tips
         void                    rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor

@@ -34,6 +34,7 @@
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "boost/unordered_set.hpp"
+#include "boost/algorithm/string/trim.hpp"
 
 using namespace RevBayesCore;
 
@@ -1258,6 +1259,72 @@ void RevBayesCore::TreeUtilities::offsetTree(TopologyNode& node, double factor)
     }
 
 }
+
+
+/*
+ * Helper function that parses a SIMMAP character history for a single branch.
+ * These strings represent character histories for a single branch in the form
+ * {state_2,time_in_state_2:state_1,time_in_state_1} where the states are
+ * listed left to right from the tip to the root (backward time). We loop through
+ * the string from right to left to store events in forward time (root to tip).
+ * Returns vector of events: [<state_1, time_in_state_1>, <state_2, time_in_state_2>]
+ */
+std::vector< std::pair<size_t, double> > RevBayesCore::TreeUtilities::parseSIMMAPForNode(std::string character_history)
+{
+    
+    boost::trim(character_history);
+    
+    // Now parse the sampled SIMMAP string:
+    bool parsed_time = false;
+    std::vector< std::pair<size_t, double> > this_branch_map = std::vector< std::pair<size_t, double> >();
+    std::pair<size_t, double> this_event = std::pair<size_t, double>();
+    std::string state = "";
+    std::string time = "";
+    size_t k = character_history.size();
+    
+    while (true)
+    {
+        
+        if ( k == (character_history.size() - 1) &&
+            std::string(1, character_history[0]).compare("{") != 0 &&
+            std::string(1, character_history[k]).compare("}") != 0 )
+        {
+            throw RbException("Error while summarizing character maps: trace does not contain valid SIMMAP string.");
+        }
+        else if ( std::string(1, character_history[k]).compare(",") == 0 )
+        {
+            parsed_time = true;
+            this_event.second = std::atof( time.c_str() );
+        }
+        else if ( std::string(1, character_history[k]).compare(":") == 0 || k == 0 )
+        {
+            this_event.first = std::atoi( state.c_str() );
+            this_branch_map.push_back( this_event );
+            if (k == 0)
+            {
+                break;
+            }
+            else
+            {
+                state = "";
+                time = "";
+                parsed_time = false;
+            }
+        }
+        else if ( parsed_time == false )
+        {
+            time = std::string(1, character_history[k]) + time;
+        }
+        else
+        {
+            state = std::string(1, character_history[k]) + state;
+        }
+        k--;
+    }
+    
+    return this_branch_map;
+}
+
 
 
 /**
