@@ -228,8 +228,8 @@ void RateMatrix_revPoMoM2N::computeOffDiagonal( void )
     // Mutations
     //m[0][1]   = N*mu[0]*rnm*gen;    //mutation 01
     //m[M][M-1] = N*mu[1]*rnm*gen;    //mutation 10
-    m[0][2]   = M*mu[0];    //mutation 01
-    m[1][M]   = M*mu[1];    //mutation 10
+    m[0][2]   = N_eff*mu[0];    //mutation 01
+    m[1][M]   = N_eff*mu[1];    //mutation 10
     
     // diagonal
     m[0][0] = -m[0][2];

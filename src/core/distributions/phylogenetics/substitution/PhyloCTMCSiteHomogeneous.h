@@ -95,6 +95,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
     {
         // get the root frequencies
         const std::vector<double> &f                    = ff[mixture % ff.size()];
+        assert(f.size() == this->num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -163,6 +164,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
         
         // get the root frequencies
         const std::vector<double> &f                    = ff[mixture % ff.size()];
+        assert(f.size() == this->num_chars);
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -212,7 +214,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 {
 
     // compute the transition probability matrix
-    this->updateTransitionProbabilities( node_index );
+//    this->updateTransitionProbabilities( node_index );
+    size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left  = likelihoods + this->active_likelihood[left]       * likelihood_offset + left          * node_offset;
@@ -223,7 +226,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-        const double*    tp_begin                = this->transition_prob_matrices[mixture].theMatrix;
+//        const double*    tp_begin                = this->transition_prob_matrices[mixture].theMatrix;
+        const double* tp_begin = this->pmatrices[pmat_offset + mixture].theMatrix;
 
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture * mixture_offset;
@@ -274,7 +278,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 {
 
     // compute the transition probability matrix
-    this->updateTransitionProbabilities( node_index );
+//    this->updateTransitionProbabilities( node_index );
+    size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left      = likelihoods + this->active_likelihood[left]        * likelihood_offset + left          * node_offset;
@@ -286,7 +291,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-        const double*    tp_begin                = this->transition_prob_matrices[mixture].theMatrix;
+//        const double*    tp_begin                = this->transition_prob_matrices[mixture].theMatrix;
+        const double* tp_begin = this->pmatrices[pmat_offset + mixture].theMatrix;
 
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture * mixture_offset;
@@ -365,7 +371,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     }
     
     // compute the transition probabilities
-    this->updateTransitionProbabilities( node_index );
+//    this->updateTransitionProbabilities( node_index );
+    size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
     double* p_mixture = p_node;
 
@@ -373,7 +380,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-        const double* tp_begin = this->transition_prob_matrices[mixture].theMatrix;
+//         const double* tp_begin = this->transition_prob_matrices[mixture].theMatrix;
+        const double* tp_begin = this->pmatrices[pmat_offset + mixture].theMatrix;
 
         // get the pointer to the likelihoods for this site and mixture category
         double* p_site_mixture = p_mixture;
@@ -417,7 +425,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d;
@@ -447,7 +455,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 // add the probability
                                 tmp += *d * weights[i] ;

@@ -42,6 +42,8 @@ namespace RevBayesCore {
         int                         max(int a, int b);                                                                  //!< Returns the max of two real numbers
         double                      min(double a, double b);                                                            //!< Returns the min of two real numbers
         int                         min(int a, int b);                                                                  //!< Returns the min of two real numbers
+        int                         sgn(double x);                                                                      //!< Returns the sign of a number
+
 
     }
     

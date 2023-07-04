@@ -124,17 +124,17 @@ double RbStatistics::Binomial::pdf(double n, double p, double q, double x, bool 
         return((x == n) ? (asLog ? 0.0 : 1.0) : (asLog ? RbConstants::Double::neginf : 0.0) );
     
     if (x == 0) 
-        {
+    {
         if (n == 0) 
             return ( asLog ? 0.0 : 1.0);
         lc = (p < 0.1) ? -RbMath::binomialDeviance(n,n*q) - n*p : n*log(q);
         return( (asLog ? lc : exp(lc)) );
-        }
+    }
     if (x == n) 
-        {
+    {
         lc = (q < 0.1) ? -RbMath::binomialDeviance(n,n*p) - n*q : n*log(p);
         return ( (asLog ? lc : exp(lc) ) );
-        }
+    }
     if (x < 0 || x > n) 
         return ( asLog ? RbConstants::Double::neginf : 0.0 );
     

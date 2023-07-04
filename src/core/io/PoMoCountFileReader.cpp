@@ -7,7 +7,6 @@
 
 #include "DiscreteTaxonData.h"
 #include "PoMoCountFileReader.h"
-#include "PoMoState4.h"
 #include "PoMoState.h"
 #include "Cloneable.h"
 #include "DelimitedDataReader.h"
@@ -21,7 +20,7 @@
 using namespace RevBayesCore;
 
 
-PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps, FORMAT f) : DelimitedDataReader(fn, ""),
+PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMAT f) : DelimitedDataReader(fn, ""),
     virtual_population_size ( vps ),
     data_format( f )
 {
@@ -47,7 +46,7 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 
 	if (chars[start][0] != "COUNTSFILE" || chars[0].size() != 5)
     {
-		throw RbException( "File "+fn+" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.");
+        throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.";
 	}
 	else
     {
@@ -59,8 +58,8 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 	// The second line should look like this:
 	//CHROM  POS  Sheep    BlackSheep  RedSheep  Wolf     RedWolf
 	if (chars[start+1][0] != "CHROM" || chars[1][1] != "POS" || chars[1].size() != numberOfFields)
-    {
-		throw RbException( "File "+fn+" is not a proper PoMo Counts file: second line is not correct, it should be similar to \nCHROM POS Sheep BlackSheep RedSheep Wolf RedWolf\n.");
+        {
+            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: second line is not correct, it should be similar to \nCHROM POS Sheep BlackSheep RedSheep Wolf RedWolf\n.";
 	}
 	else
     {
@@ -77,14 +76,6 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 		DiscreteTaxonData<PoMoState> tax (names[i]);
 		name_to_taxon_data.insert(std::pair< std::string, DiscreteTaxonData<PoMoState> >(names[i], tax) );
 	}
-
-    // Setting the taxon names in the data matrix
-    std::map<std::string, DiscreteTaxonData<PoMoState4> > name_to_taxon_data4;
-    for (size_t i = 0; i < names.size(); ++i )
-    {
-        DiscreteTaxonData<PoMoState4> tax (names[i]);
-        name_to_taxon_data4.insert(std::pair< std::string, DiscreteTaxonData<PoMoState4> >(names[i], tax) );
-    }
 
 
     // estimate the number of states
@@ -111,10 +102,11 @@ PoMoCountFileReader::PoMoCountFileReader(const std::string &fn, const size_t vps
 
 	for (size_t i = 2; i < chars.size(); ++i)
 	{
-		if (chars[i].size() != numberOfFields)
+            
+        if (chars[i].size() != numberOfFields)
         {
-			throw RbException( "File "+fn+" is not a proper PoMo Counts file: line "+ i + " is not correct, it does not have "+ numberOfFields + " space-separated fields.");
-		}
+            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: line "<<i<<" is not correct, it does not have "<<numberOfFields<<" space-separated fields.";
+        }
 
 		const std::string& chromosome = chars[i][0];
 		size_t position = StringUtilities::asIntegerNumber( chars[i][1] );
@@ -135,9 +127,9 @@ Aborted (core dumped)
             */
             {
                 std::cout << "§1: " << chars[i][j] << " - " << chromosome << " - " << position << " - " << virtual_population_size  << "\n\n"; 
-                PoMoState4 pState (chars[i][j], chromosome, position, virtual_population_size );
+                PoMoState pState (4, virtual_population_size, chars[i][j], chromosome, position );
                 std::cout << "§2: " << names[j-2] << "\n\n"; 
-                name_to_taxon_data4.at(names[j-2]).addCharacter( pState);
+                name_to_taxon_data.at(names[j-2]).addCharacter( pState);
                 std::cout << "Reached here!\n\n";
 
             }
@@ -150,16 +142,9 @@ Aborted (core dumped)
 	}
 
 	// We have finished all lines, we fill up the data matrix
-    if (num_states == 4){
-    for (std::map<std::string, DiscreteTaxonData<PoMoState4> >::iterator tax = name_to_taxon_data4.begin(); tax != name_to_taxon_data4.end(); ++tax )
-        {
-            matrix->addTaxonData(tax->second);
-        }
-    } else {
-            for (std::map<std::string, DiscreteTaxonData<PoMoState> >::iterator tax = name_to_taxon_data.begin(); tax != name_to_taxon_data.end(); ++tax )
-        {
-            matrix->addTaxonData(tax->second);
-        }
+    for (std::map<std::string, DiscreteTaxonData<PoMoState> >::iterator tax = name_to_taxon_data.begin(); tax != name_to_taxon_data.end(); ++tax )
+    {
+        matrix->addTaxonData(tax->second);
     }
 
 

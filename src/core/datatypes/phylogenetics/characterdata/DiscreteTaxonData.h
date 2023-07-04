@@ -51,7 +51,7 @@ namespace RevBayesCore {
     private:
 
         std::vector<charType>                           sequence;
-        std::vector<bool>                               is_resolved;
+        RbBitSet                                        is_resolved;
 
     };
 

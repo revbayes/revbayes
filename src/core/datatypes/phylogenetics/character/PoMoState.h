@@ -1,19 +1,3 @@
-/**
- * @file
- * This file contains the declaration of PoMoState, which is
- * the class for the DNA data types plus two-state polymorphic states in RevBayes.
- * Instead of the usual coding by bitfields, we choose coding by ints.
- *
- * @brief Declaration of PoMoState
- *
- * (c) Copyright 2009-
- * @date Last modified: $Date: 2012-05-24 09:58:04 +0200 (Thu, 24 May 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- *
- * $Id: PoMoState.h 1568 2012-05-24 07:58:04Z hoehna $
- */
-
 #ifndef PoMoState_H
 #define PoMoState_H
 
@@ -29,16 +13,12 @@ namespace RevBayesCore {
     class PoMoState : public DiscreteCharacterState {
         
     public:
-        //        PoMoState(size_t n);                                                                          //!< Default constructor
-        //        PoMoState(size_t n, size_t vps);                                                              //!< Constructor with virtual population size
-        //        PoMoState(size_t n, const std::string &s);                                                    //!< Constructor with an observation
+        enum WEIGHTING { FIXED, BINOMIAL, SAMPLED };
+
         PoMoState(size_t n=4, size_t vps = 10, const std::string &s = "", const std::string &chromosome = "",
-                  size_t position = 0, const std::vector<double> &weights = std::vector<double>());                                                   //!< Constructor that sets all fields
-        //        PoMoState(const std::string &s, const std::string &chromosome,
-        //                  size_t position, size_t n, size_t vps);
-        //        PoMoState(const PoMoState& t);                                                //!< Copy constructor
+                  size_t position = 0);                                                   //!< Constructor that sets all fields
         
-        PoMoState*                       clone(void) const;                                 //!< Get a copy of this object
+        PoMoState*                      clone(void) const;                                 //!< Get a copy of this object
         
         // Discrete character observation functions
         void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
@@ -58,19 +38,23 @@ namespace RevBayesCore {
         const std::string&              getChromosome( void ) const;                        //!< Get the chromosome for the state
         size_t                          getPosition( void ) const;                          //!< Get the position for the state
         
-        const std::vector<double>       getWeights( void ) const;                            //!< Get the weight of the state
-        // bool                            isWeighted( void ) const;
-        // void                            setWeighted( bool tf );
+        const std::vector<double>&      getWeights( void ) const;                            //!< Get the weight of the state
+        bool                            isWeighted( void ) const;
+        void                            setWeighted( bool tf );
         bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
         bool                            isStateIncludedInAscertainmentBiasCorrection(void) const;  //!< Is the currently set state included in ascertainment bias correction
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
         
-        
     private:
+        size_t                          computeIndexBiallelic(size_t f, size_t s) const;    //!< Compute the basic index when this biallelic frequency starts
         void                            populateWeightedStatesForMonoallelicState(size_t id1, int sum); //!< Sets the weights of all the states compatible with a monoallelic state
-        
+        void                            setStateFixed(size_t t, size_t c, size_t b);        //!< Compute the internal state value for this frequency as the fixed average.
+        void                            setStateBinomial(size_t t, size_t c, size_t b);     //!< Compute the internal state value as weights from a binomial distribution.
+        void                            setStateBinomialForMonomorphic(size_t t, size_t f); //!< Compute the internal state value as weights from a binomial distribution.
+        void                            setStateSampled(size_t t, size_t c, size_t b);      //!< Compute the internal state value by sampling from a binomial distribution.
+
         bool                            is_gap;
         bool                            is_missing;
         size_t                          index_single_state;
@@ -82,9 +66,10 @@ namespace RevBayesCore {
         
         std::string                     chromosome;                                         //!< The chromosome on which the state lies
         size_t                          position;                                           //!< The position of the state in the chromosome
-        //std::vector<double>             weights_;                                           //!< Weights are used when the "average" option is used
-        //bool                                    weighted_;
-        std::string                     string_value;                           //!< The string description of the state.
+        std::vector<double>             weights;                                            //!< Weights are used when the "average" option is used
+        bool                            weighted;
+        WEIGHTING                       weighting;
+        std::string                     string_value;                                       //!< The string description of the state.
     };
     
 }

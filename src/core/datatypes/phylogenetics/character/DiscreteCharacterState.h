@@ -21,17 +21,18 @@ namespace RevBayesCore {
     public:
         virtual                                ~DiscreteCharacterState(void) {}
 
-        bool                                    operator==(const CharacterState& x) const;
+        virtual bool                            operator==(const CharacterState& x) const;
         bool                                    operator!=(const CharacterState& x) const;
-        bool                                    operator<(const CharacterState& x) const;
+        virtual bool                            operator<(const CharacterState& x) const;
         void                                    operator++();                                   //!< Increment
         void                                    operator++(int i);                              //!< Increment
-        void                                    operator+=(int i);                              //!< Increment
+        virtual void                            operator+=(int i);                              //!< Increment
         void                                    operator--();                                   //!< Decrement
         void                                    operator--(int i);                              //!< Decrement
-        void                                    operator-=(int i);                              //!< Decrement
+        virtual void                            operator-=(int i);                              //!< Decrement
 
-        bool                                    isAmbiguous(void) const;
+        virtual bool                            isAmbiguous(void) const;
+
         virtual bool                            isStateIncludedInAscertainmentBiasCorrection(void) const;  //!< Is the currently set state included in ascertainment bias correction
         virtual std::string                     getStringValue(void) const;
         virtual std::string                     getStateDescription(void) const;                //!< Get a description of the current state

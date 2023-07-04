@@ -59,6 +59,31 @@ VCFReader::VCFReader() : WorkspaceToCoreWrapperObject<RevBayesCore::VCFReader>()
     convert_to_nexus_arg_rules->push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(), "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
     methods.addFunction(new MemberProcedure( "convertToNexusFile", RevNullObject::getClassTypeSpec(), convert_to_nexus_arg_rules) );
+    
+    
+    
+    
+    ArgumentRules* convert_to_SFS_arg_rules = new ArgumentRules();
+    
+    convert_to_SFS_arg_rules->push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec(), "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    convert_to_SFS_arg_rules->push_back( new ArgumentRule( "chrom"    , RlString::getClassTypeSpec(),           "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+    convert_to_SFS_arg_rules->push_back( new ArgumentRule( "thinning" , Natural::getClassTypeSpec(),            "If thinning is larger than 1, then we only take the i-th entry of the VCF.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+    convert_to_SFS_arg_rules->push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(),            "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+
+    methods.addFunction(new MemberProcedure( "convertToSFS", ModelVector<Natural>::getClassTypeSpec(), convert_to_SFS_arg_rules) );
+    
+    
+    
+    
+    ArgumentRules* convert_to_CF_arg_rules = new ArgumentRules();
+    
+    convert_to_CF_arg_rules->push_back( new ArgumentRule( "file"     , RlString::getClassTypeSpec(),           "Relative or absolute base for the name of the statistics files.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    convert_to_CF_arg_rules->push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec(), "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    convert_to_CF_arg_rules->push_back( new ArgumentRule( "chrom"    , RlString::getClassTypeSpec(),           "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+    convert_to_CF_arg_rules->push_back( new ArgumentRule( "thinning" , Natural::getClassTypeSpec(),            "If thinning is larger than 1, then we only take the i-th entry of the VCF.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+    convert_to_CF_arg_rules->push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(),            "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+
+    methods.addFunction(new MemberProcedure( "convertToCountsFile", RevNullObject::getClassTypeSpec(), convert_to_CF_arg_rules) );
 
     
 }
@@ -91,6 +116,18 @@ void VCFReader::constructInternalObject( void )
     if ( ploidy_str == "haploid" )
     {
         ploidy_type = RevBayesCore::VCFReader::HAPLOID;
+    }
+    else if ( ploidy_str == "diploid" )
+    {
+        ploidy_type = RevBayesCore::VCFReader::DIPLOID;
+    }
+    else if ( ploidy_str == "mixed" )
+    {
+        ploidy_type = RevBayesCore::VCFReader::MIXED;
+    }
+    else
+    {
+        throw RbException("Unknown ploidy selection '" + ploidy_str + "'.");
     }
     
     const std::string& unkown_str       = static_cast<const RlString&>( unknown->getRevObject() ).getValue();
@@ -125,6 +162,31 @@ RevPtr<RevVariable> VCFReader::executeMethod(std::string const &name, const std:
         
         return NULL;
     }
+    else if (name == "convertToCountsFile")
+    {
+        found = true;
+        size_t arg_index = 0;
+        
+        const std::string& fn    = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        const std::string& chrom = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        
+        RevBayesCore::AbstractDiscreteTaxonData* ref_genome = NULL;
+        RevObject& tmp_ref = args[arg_index++].getVariable()->getRevObject();
+        if ( tmp_ref != RevNullObject::getInstance() )
+        {
+            ref_genome = static_cast<const AbstractDiscreteTaxonData&>( tmp_ref ).getValue().clone();
+        }
+
+        
+        long thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        long skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        value->convertToCountsFile( fn, taxa, "DNA", chrom, ref_genome, thinning, skip_first );
+        
+        return NULL;
+    }
     else if (name == "convertToNexusFile")
     {
         found = true;
@@ -149,6 +211,22 @@ RevPtr<RevVariable> VCFReader::executeMethod(std::string const &name, const std:
         value->convertToNexusFile( fn, "DNA", chrom, ref_genome, taxa, thinning, skip_first );
         
         return NULL;
+    }
+    else if (name == "convertToSFS")
+    {
+        found = true;
+        size_t arg_index = 0;
+        
+        const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        const std::string& chrom = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        
+        long thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        long skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        RevBayesCore::RbVector<long> sfs = value->convertToSFS( taxa, chrom, thinning, skip_first );
+                
+        return new RevVariable( new ModelVector<Natural>( sfs ) );
     }
     
     return WorkspaceToCoreWrapperObject<RevBayesCore::VCFReader>::executeMethod( name, args, found );
@@ -203,6 +281,7 @@ const MemberRules& VCFReader::getParameterRules(void) const
         std::vector<std::string> ploidy_options;
         ploidy_options.push_back( "diploid" );
         ploidy_options.push_back( "haploid" );
+        ploidy_options.push_back( "mixed" );
         argument_rules.push_back( new OptionRule( "ploidy", new RlString("diploid"), ploidy_options, "The ploidy type." ) );
         
         std::vector<std::string> unknown_options;

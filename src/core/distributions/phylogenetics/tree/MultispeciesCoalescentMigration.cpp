@@ -127,13 +127,13 @@ void MultispeciesCoalescentMigration::buildRandomBinaryTree(std::vector<Topology
         tips.erase(tips.begin()+index);
         
         // add a left child
-        TopologyNode* leftChild = new TopologyNode(0);
+        TopologyNode* leftChild = new TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         tips.push_back(leftChild);
         
         // add a right child
-        TopologyNode* rightChild = new TopologyNode(0);
+        TopologyNode* rightChild = new TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         tips.push_back(rightChild);

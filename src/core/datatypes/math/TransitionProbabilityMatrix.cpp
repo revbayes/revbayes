@@ -38,12 +38,12 @@ TransitionProbabilityMatrix::TransitionProbabilityMatrix(size_t n) :
         theMatrix[i] = 0.0;
     }
     
-    num_rows = n;
+    num_states = n;
 }
 
 /** Construct rate matrix with n states */
 TransitionProbabilityMatrix::TransitionProbabilityMatrix( const TransitionProbabilityMatrix &tpm ) :
-    num_rows( tpm.num_rows ),
+    num_states( tpm.num_states ),
     num_elements( tpm.num_elements )
 {
     
@@ -74,8 +74,8 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( const Trans
     
     if ( this != &tpm ) 
     {
-        num_elements    = tpm.num_elements;
-        num_rows        = tpm.num_rows;
+        num_elements        = tpm.num_elements;
+        num_states          = tpm.num_states;
         
         delete [] theMatrix;
         theMatrix = new double[ num_elements ];
@@ -93,89 +93,48 @@ TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( const Trans
 TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator=( TransitionProbabilityMatrix &&tpm )
 {
     std::swap( num_elements , tpm.num_elements );
-    std::swap( num_rows , tpm.num_rows );
+    std::swap( num_states , tpm.num_states );
     std::swap( theMatrix, tpm.theMatrix );
 
     return *this;
 }
 
 
-/** Index operator (const) */
-const double* TransitionProbabilityMatrix::operator[]( const size_t i ) const
+TransitionProbabilityMatrix TransitionProbabilityMatrix::operator*(const TransitionProbabilityMatrix& B) const
 {
+    TransitionProbabilityMatrix C(num_states);
 
-    return theMatrix + i*num_rows;
-}
-
-
-/** Index operator */
-double* TransitionProbabilityMatrix::operator[]( const size_t i )
-{
+    multiplyTo(B, C);
     
-    return theMatrix + i*num_rows;
+    return C;
 }
 
 TransitionProbabilityMatrix& TransitionProbabilityMatrix::operator*=(const TransitionProbabilityMatrix& B)
 {
-    
-    TransitionProbabilityMatrix C(num_rows);
-    for (size_t i=0; i<num_rows; i++)
-    {
-        for (size_t j=0; j<num_rows; j++)
+    TransitionProbabilityMatrix C = (*this) * B;
+
+    operator=( std::move(C) );
+
+    return *this;
+}
+
+
+void TransitionProbabilityMatrix::multiplyTo(const TransitionProbabilityMatrix& B, TransitionProbabilityMatrix& C) const
+{
+    assert(B.getNumberOfStates() == num_states);
+    assert(C.getNumberOfStates() == num_states);
+
+    for (size_t i=0; i<num_states; i++)    {
+        for (size_t j=0; j<num_states; j++)
         {
             double sum = 0.0;
-            for (size_t k=0; k<num_rows; k++)
+            for (size_t k=0; k<num_states; k++)
                 sum += (*this)[i][k] * B[k][j];
             C[i][j] = sum;
         }
     }
-    
-    for (size_t i=0; i<num_rows*num_rows; i++)
-        theMatrix[i] = C.theMatrix[i];
-    
-    return *this;
 }
 
-double TransitionProbabilityMatrix::getElement(size_t i, size_t j) const
-{
-    
-    return *(theMatrix + num_rows*i + j);
-}
-
-
-double& TransitionProbabilityMatrix::getElement(size_t i, size_t j)
-{
-    
-    return *(theMatrix + num_rows*i + j);
-}
-
-
-const double* TransitionProbabilityMatrix::getElements( void ) const
-{
-    
-    return theMatrix;
-}
-
-
-double* TransitionProbabilityMatrix::getElements( void )
-{
-    
-    return theMatrix;
-}
-
-
-size_t TransitionProbabilityMatrix::getNumberOfStates( void ) const
-{
-    
-    return num_rows;
-}
-
-
-size_t TransitionProbabilityMatrix::size(void) const
-{
-    
-    return num_elements;
-}
 
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabilityMatrix& x)
@@ -217,4 +176,29 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const TransitionProbabil
     return o;
 }
 
+void RevBayesCore::ensure_nonnegative(TransitionProbabilityMatrix& M)
+{
+    for (size_t i=0; i<M.getNumberOfStates(); i++)
+    {
+        for (size_t j=0; j<M.getNumberOfStates(); j++)
+            M[i][j] = std::max(0.0, M[i][j]);
+    }
+}
 
+void RevBayesCore::normalize_rows(TransitionProbabilityMatrix& M)
+{
+    for (size_t i=0; i<M.getNumberOfStates(); i++)
+    {
+        // This is going to complain about NaNs.
+        // If we have NaNs, then the rows sum to NaN anyway.
+
+        double row_sum = 0;
+        for (size_t j=0; j<M.getNumberOfStates(); j++)
+        {
+            assert(M[i][j]>=0);
+            row_sum += M[i][j];
+        }
+        for (size_t j=0; j<M.getNumberOfStates(); j++)
+            M[i][j] /= row_sum;
+    }
+}

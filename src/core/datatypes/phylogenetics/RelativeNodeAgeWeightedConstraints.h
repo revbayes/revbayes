@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "RbFileManager.h"
 #include "Cloneable.h"
 
 namespace RevBayesCore {
@@ -32,13 +33,13 @@ class RelativeNodeAgeWeightedConstraintsReader;
         const std::vector <std::pair<std::pair < std::pair<std::string, std::string>, std::pair<std::string, std::string> >, double > >& getConstraints( ) const;
 
         size_t                                    getNumberOfConstraints(void) const;
-        std::string                                     getFilename(void) const;
+        const path&                                       getFilename(void) const;
        // std::string                                     getDatatype(void) const;
     protected:
         std::vector < std::pair <std::pair < std::pair<std::string, std::string>, std::pair<std::string, std::string> >, double > >								        olderYoungerConstraints;
         
     private:
-        std::string                                     filename;
+        path                                            filename;
         
     };
     

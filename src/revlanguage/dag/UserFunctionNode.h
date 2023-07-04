@@ -4,6 +4,7 @@
 #include "DynamicNode.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RbFileManager.h"
 
 #include <vector>
 
@@ -44,7 +45,7 @@ namespace RevLanguage {
         virtual void                            printStructureInfo(std::ostream& o, bool verbose=false) const;      //!< Print structure info
         void                                    redraw(RevBayesCore::SimulationCondition c) {}                      //!< Redraw (or not)
         void                                    setMcmcMode(bool tf);                                               //!< Set the modus of the DAG node to MCMC mode.
-        void                                    setValueFromFile(const std::string &fn);                            //!< Set value from string.
+        void                                    setValueFromFile(const RevBayesCore::path &fn);                     //!< Set value from string.
         void                                    setValueFromString(const std::string &v);                           //!< Set value from string.
         void                                    update(void);                                                       //!< Update current value
         
@@ -437,7 +438,7 @@ void UserFunctionNode<valueType>::setMcmcMode(bool tf)
 
 
 template<class valueType>
-void UserFunctionNode<valueType>::setValueFromFile(const std::string &fn)
+void UserFunctionNode<valueType>::setValueFromFile(const RevBayesCore::path& fn)
 {
     
     //    *value = v;

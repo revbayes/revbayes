@@ -17,6 +17,7 @@
 #include "RevVariable.h"
 #include "RlFunction.h"
 #include "SyntaxElement.h"
+#include "SyntaxPipePlaceholder.h"
 #include "SyntaxLabeledExpr.h"
 #include "SyntaxVariable.h"
 
@@ -181,7 +182,14 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         
         const MethodTable& mt = the_member_object.getMethods();
         
-        Function* the_function = mt.getFunction( function_name, args, !dynamic ).clone();
+        const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
+
+        Function* the_function;
+        if (the_const_function)
+            the_function = the_const_function->clone();
+        else
+            throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
+
         the_function->processArguments(args, !dynamic);
         
         MemberMethod* theMemberMethod = dynamic_cast<MemberMethod*>( the_function );
@@ -219,7 +227,63 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
     return func_return_value;
 }
 
+std::pair<int,int> SyntaxFunctionCall::pipeAddArgPlaceholder(SyntaxElement* piped_arg)
+{
+    assert(piped_arg);
+    int n_placeholders = 0;
 
+    // 1. Check arguments of final fxncall for _
+    for(auto& argument: *arguments)
+    {
+        // If the argument is of the form `_` or `label = _`, the replace the `_` with piped_arg.
+        if (dynamic_cast<SyntaxPipePlaceholder*>(&argument->getExpression()))
+        {
+            n_placeholders++;
+            std::string label = argument->getLabel();
+            delete argument;
+            argument = new SyntaxLabeledExpr(label, piped_arg);
+        }
+    }
+
+    int n_fxncalls = 1;
+    if (base_variable)
+    {
+        // 2. Check if base_variable is _
+        if (dynamic_cast<SyntaxPipePlaceholder*>(base_variable))
+        {
+            n_placeholders++;
+            delete base_variable;
+            base_variable = piped_arg;
+        }
+        // 3. Check if base_variable is another function call
+        else if (auto sub_fxncall = dynamic_cast<SyntaxFunctionCall*>(base_variable))
+        {
+            auto tmp = sub_fxncall->pipeAddArgPlaceholder(piped_arg);
+            n_placeholders += tmp.first;
+            n_fxncalls += tmp.second;
+        }
+    }
+
+    return {n_placeholders, n_fxncalls};
+}
+
+void SyntaxFunctionCall::pipeAddArg(SyntaxElement* piped_arg)
+{
+    auto tmp = pipeAddArgPlaceholder(piped_arg);
+    int n_placeholders   = tmp.first;
+    int n_fxncalls = tmp.second;
+
+    if (n_placeholders > 1)
+        throw RbException()<<"Pipe placeholder may only occur once.";
+
+    if (n_placeholders == 0)
+    {
+        if (n_fxncalls > 1)
+            throw RbException()<<"Piping into expression with multiple function calls requires a pipe placeholder ('_') !";
+
+        arguments->push_front(new SyntaxLabeledExpr ("" , piped_arg));
+    }
+}
 
 /**
  * Is the expression constant?

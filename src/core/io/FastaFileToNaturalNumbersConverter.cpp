@@ -30,7 +30,7 @@ FastaFileToNaturalNumbersConverter::FastaFileToNaturalNumbersConverter( void )
 
 
 /** Read Count File and Write Natural Numbers file */
-void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const std::string &fo )
+void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const path &fo )
 {
   
     // getting the number of alleles and taxa
@@ -38,36 +38,30 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
     size_t n_taxa    = taxa.size();
 
     // open file
-    std::ifstream readStream;
-    RbFileManager fii = RbFileManager( fi );
-    if ( fii.openFile(readStream) == false )
-    {
-        throw RbException( "Could not open file \"" + fi + "\".");
-    }
+    std::ifstream readStream( fi.string() );
+    if ( not readStream )
+        throw RbException()<<"Could not open file "<<fi<<".";
 
     // some important quantities to parse the fasta file
-    std::vector<std::string> alignment;
-    std::vector<int>      ns_taxa(n_taxa,0);
-    std::vector<int>      aligment_index;
-    std::string              line,seq_name;
-    size_t                   index;
+    std::vector<std::string>    alignment;
+    std::vector<int>            ns_taxa(n_taxa,0);
+    std::vector<int>            aligment_index;
+    std::string                 line,seq_name;
+    size_t                      index;
 
     std::vector<size_t> length_taxa (n_taxa);
     for (size_t i =0; i<n_taxa; ++i)
     {
         length_taxa[i] = taxa[i].length();
     }
-
+  
     // going through the alingment lines
-    while (fii.safeGetline(readStream,line))
+    while (safeGetline(readStream,line))
     {
 
-        if (line.length() == 0)
-        {
-            break;
-        }
+        if (line.length() == 0) { break; }
 
-        for (size_t t =0; t<n_taxa; ++t)
+        for (size_t t=0; t<n_taxa; ++t)
         {
 
             seq_name = line.substr(1,length_taxa[t]);
@@ -76,20 +70,20 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
             // if the element is found keep the sequence (sitting in the next line) and save the taxa index
             if ( index < n_taxa )
             {
-                fii.safeGetline(readStream,line);
+                safeGetline(readStream,line);
                 alignment.push_back(line);
                 aligment_index.push_back(index);
                 ns_taxa[index] += 1;
                 break;
+
+                // if the sequence indentifier does not include a taxa names throw an error
             }
-            // if the sequence indentifier does not include a taxa names throw an error
             else
             {
                 throw RbException( "Sequence \"" + line + "\" does not belong to any of the taxa. Make sure every sequence starts with one of the taxa names.");
             }
 
         }
-      
     }
 
     // getting the number of sampled individuals and sites
@@ -143,7 +137,6 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
 
                 if (aligment_index[n]==t)
                 {
-          
                     allele = alignment[t].substr(s,1);
                     index  = getIndex(allele,alleles);
 
@@ -153,7 +146,6 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
                     {
                         counts[index] += 1;
                     }
-                    
                 }
             }
 
@@ -164,30 +156,22 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
     }
 
     // close the input file connection
-    fii.closeFile( readStream );
+    readStream.close();
 
-    // summarizing the
-    std::cout <<     "\n  Number of taxa                  " << n_taxa <<
-                     "\n  Number of sampled sequences     " << n_samples <<
-                     "\n  Number of alleles               " << n_alleles <<
-                     "\n  Number of sites                 " << n_sites <<
-                     "\n  Number of individuals           " << n_individuals <<
-                     "\n  Number of PoMo states           " << n_alleles*(1.0+(n_alleles-1.0)*(n_individuals-1.0)*0.5) << "\n\n";
 
     // the filestream object
-    std::fstream f_stream;
-    RbFileManager foo = RbFileManager(fo);
-    foo.createDirectoryForFile();
-    
+    createDirectoryForFile( fo );
+
     // open the stream to the file a write it
-    f_stream.open( foo.getFullFileName().c_str(), std::fstream::out );
+    std::ofstream NaturalNumbersStream( fo.string() );
+
     for (size_t i=0; i<n_taxa; ++i)
     {
-        f_stream << ctaxa[i] + "\n";
+        NaturalNumbersStream << ctaxa[i] + "\n";
     }
   
     // close the stream
-    f_stream.close();
+    NaturalNumbersStream.close();
 
 }
 

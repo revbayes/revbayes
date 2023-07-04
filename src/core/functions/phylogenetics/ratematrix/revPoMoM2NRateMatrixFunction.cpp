@@ -1,6 +1,5 @@
 #include "revPoMoM2NRateMatrixFunction.h"
 #include "RateMatrix_revPoMoM2N.h"
-#include "RateMatrix_PoMo2N.h"
 #include "RbException.h"
 
 using namespace RevBayesCore;

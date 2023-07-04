@@ -12,7 +12,7 @@
 #include "DnaState.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "NaturalNumbersState.h"
-#include "PoMoState4.h"
+#include "PoMoState.h"
 #include "PoMoStateConverter.h"
 #include "RbException.h"
 #include "StandardState.h"
@@ -106,8 +106,7 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData2( co
             
             std::string chromosome = "";
             size_t chrom_pos = 0;
-            const std::vector<double> weights;
-            PoMoState this_state = PoMoState( 2, virtual_population_size, pomo_string, chromosome, chrom_pos, weights );
+            PoMoState this_state = PoMoState( 2, virtual_population_size, pomo_string, chromosome, chrom_pos );
             tax.addCharacter( this_state );
         }
         data->addTaxonData(tax);
@@ -198,8 +197,7 @@ HomologousDiscreteCharacterData<PoMoState>* PoMoStateConverter::convertData4(  c
             
             std::string chromosome = "";
             size_t chrom_pos = 0;
-            const std::vector<double> weights;
-            PoMoState this_state = PoMoState( 2, virtual_population_size, pomo_string, chromosome, chrom_pos, weights );
+            PoMoState this_state = PoMoState( 2, virtual_population_size, pomo_string, chromosome, chrom_pos );
             tax.addCharacter( this_state);
         }
         data->addTaxonData(tax);

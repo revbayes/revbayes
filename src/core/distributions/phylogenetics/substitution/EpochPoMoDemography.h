@@ -1,7 +1,7 @@
 #ifndef EpochPoMoDemography_H
 #define EpochPoMoDemography_H
 
-#include "RateMatrix_PoMo2N.h"
+#include "RateMatrix_PoMoKN.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
@@ -59,7 +59,7 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*           epoch_times;
         const TypedDagNode< RbVector< double > >*           mu;
         
-        std::vector<RateMatrix_PoMo2N>                      rate_matrices;
+        std::vector<RateMatrix_PoMoKN>                      rate_matrices;
 
         // members (fixed)
         long                                                virtual_pop_size;

@@ -5,6 +5,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "PoMoState.h"
+#include "RbFileManager.h"
 
 #include <string>
 #include <vector>
@@ -33,7 +34,7 @@ namespace RevBayesCore {
         
         enum FORMAT { PoMo, NaturalNumbers };
 
-        PoMoCountFileReader(const std::string& fn, const size_t vps = 10, FORMAT f=FORMAT::PoMo);
+        PoMoCountFileReader(const path& fn, const size_t vps = 10, FORMAT f=FORMAT::PoMo);
         PoMoCountFileReader(const PoMoCountFileReader& r);
         virtual                                                 ~PoMoCountFileReader();
         

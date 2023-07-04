@@ -24,14 +24,13 @@ namespace RevBayesCore {
     public:
         TreeDiscreteCharacterData();                                                                                                    //!< Default constructor
         
-        
         // implemented methods of the Cloneable interface
         TreeDiscreteCharacterData*                              clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                                    initFromFile(const std::string &dir, const std::string &fn);            //!< Read and resurrect this object from a file in its default format.
+        void                                                    initFromFile(const path &dir, const std::string &fn);            //!< Read and resurrect this object from a file in its default format.
         void                                                    initFromString(const std::string &s);                                   //!< Serialize (resurrect) the object from a string value
-        virtual void                                            writeToFile(const std::string &dir, const std::string &fn) const;
+        virtual void                                            writeToFile(const path &dir, const std::string &fn) const;
 
         
         AbstractHomologousDiscreteCharacterData&                getCharacterData(void);

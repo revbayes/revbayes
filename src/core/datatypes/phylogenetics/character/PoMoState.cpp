@@ -10,28 +10,28 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "StringUtilities.h"
 #include "Cloneable.h"
+#include "DistributionBinomial.h"
+#include "RandomNumberGenerator.h"
+#include "RandomNumberFactory.h"
 
 using namespace RevBayesCore;
 
 
 
 /** Constructor that sets the observation and the other fields */
-PoMoState::PoMoState(size_t n, size_t vps, const std::string &s, const std::string &chr, size_t pos, const std::vector<double> &w) : DiscreteCharacterState( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
+PoMoState::PoMoState(size_t n, size_t vps, const std::string &s, const std::string &chr, size_t pos) : DiscreteCharacterState( n + size_t(RbMath::kchoose2(int(n)))*(vps-1) ),
     is_gap( false ),
     is_missing( false ),
     index_single_state( 0 ),
     num_observed_states( 0 ),
     virtual_population_size( vps ),
     num_raw_states( n ),
-    num_pomo_states( n + size_t(RbMath::kchoose2(n))*(virtual_population_size-1) ),
+    num_pomo_states( n + size_t(RbMath::kchoose2(int(n)))*(virtual_population_size-1) ),
     state( num_pomo_states ),
     chromosome( chr ),
     position( pos ),
     string_value(s)
 {
-    weights = w;
-    
-    setWeighted( weights.size() > 0 );
     
     if ( s != "" )
     {
@@ -58,6 +58,33 @@ PoMoState* PoMoState::clone( void ) const
 {
     
     return new PoMoState( *this );
+}
+
+
+/**
+ * Compute the index from which this biallelic state will start.
+ * Remember that the first k indices are used for the monomorphic raw states/
+ * Then, we sort the indices by the first allele index in ascending order of the frequency of the first allele.
+ *
+ * Example with only ten states and DNA:
+ * A C G T A10C90 A20C80 A30C70...A90C10 A10G90 A20G80...A10T90...C10G90...C10T90...G10T90
+ */
+size_t PoMoState::computeIndexBiallelic(size_t index_first_allele, size_t index_second_allele) const
+{
+    size_t basic_index = 0;
+    
+    // first, we move ahead the raw states
+    basic_index += num_raw_states;
+    
+    // second, we need to move over all the biallelic states with a smaller first index (f_i)
+    size_t first_allele_offset = num_raw_states * (num_raw_states-1) / 2;
+    first_allele_offset -= (num_raw_states-index_first_allele) * (num_raw_states-index_first_allele-1) / 2;
+    basic_index += first_allele_offset * (virtual_population_size-1);
+    
+    // third, we need to move over all biallelic states with a smaller second index
+    basic_index += (index_second_allele - index_first_allele - 1) * (virtual_population_size-1);
+    
+    return basic_index;
 }
 
 
@@ -148,8 +175,7 @@ bool PoMoState::isMissingState( void ) const
 bool PoMoState::isStateIncludedInAscertainmentBiasCorrection( void ) const
 {    
     size_t index = getStateIndex();
-//    return index < num_raw_states;
-    return index < 2;
+    return index < num_raw_states;
 }
 
 
@@ -161,68 +187,67 @@ const std::string& PoMoState::nexusSeparator(void) const
 }
 
 
-void PoMoState::populateWeightedStatesForMonoallelicState(size_t ind_first, int sum)
-{
-    // We do PoMo state averaging.
-    double n = (double)sum;
-    double p = 1.0;
-    
-    weights[ind_first] = 1.0;
-    state.set( ind_first );
-    int vps_minus_1 = virtual_population_size - 1;
-    
-    
-    std::vector<double> nd (vps_minus_1, 0.0);
-    std::vector<double> id (vps_minus_1, 0.0);
-    for (size_t i = 0; i < vps_minus_1; ++i)
-    {
-        nd[i] = (double)(i + 1) / (double)virtual_population_size;
-        id[i] = (double)(vps_minus_1 - i) / (double)virtual_population_size;
-    }
-    
-    if (ind_first < num_raw_states )
-    {
-        
-        for (size_t ind_second=0; ind_second<num_raw_states; ++ind_second)
-        {
-            if ( ind_first != ind_second )
-            {
-                size_t first  = (ind_first < ind_second ? ind_first : ind_second);
-                size_t second = (ind_first > ind_second ? ind_first : ind_second);
-                
-                size_t index = num_raw_states*first;
-                for (size_t i=0; i<first; ++i)
-                {
-                    ind_first -= i;
-                }
-                index *= vps_minus_1;
-                index += num_raw_states;
-                
-                for (size_t offset = 0; offset< vps_minus_1; ++offset)
-                {
-                    weights[ index + offset ] = pow(nd[offset], (double)sum);//RbStatistics::Binomial::pdf(n, p, (double)(numid1));
-                    state.set( index + offset );
-                }
-            }
-        }
-        
-    }
-    else
-    {
-        throw RbException( "PoMo string state not correct. We found "+ StringUtilities::to_string(ind_first)  );
-    }
-    
-    for (size_t i =0; i < weights.size(); ++i)
-    {
-        if (weights[i] < 1e-8)
-        {
-            weights[i] = 1e-8;
-        }
-    }
-    
-    
-    return;
-}
+//void PoMoState::setStateBinomialForMonomorphic(size_t total_samples, size_t index_first_allele)
+//{
+//    // We do PoMo state averaging.
+//    double n = (double)total_samples;
+//    double p = 1.0;
+//
+//    weights[index_first_allele] = 1.0;
+//    state.set( index_first_allele );
+//
+//    int vps_minus_1 = virtual_population_size - 1;
+//
+//
+//    std::vector<double> nd (vps_minus_1, 0.0);
+//    std::vector<double> id (vps_minus_1, 0.0);
+//    for (size_t i = 0; i < vps_minus_1; ++i)
+//    {
+//        nd[i] = (double)(i + 1) / (double)virtual_population_size;
+//        id[i] = (double)(vps_minus_1 - i) / (double)virtual_population_size;
+//    }
+//
+//    if (index_first_allele < num_raw_states )
+//    {
+//
+//        for (size_t ind_second=0; ind_second<num_raw_states; ++ind_second)
+//        {
+//            if ( index_first_allele != ind_second )
+//            {
+//                size_t first  = (index_first_allele < ind_second ? index_first_allele : ind_second);
+//                size_t second = (index_first_allele > ind_second ? index_first_allele : ind_second);
+//
+//                size_t index = num_raw_states*first;
+//                for (size_t i=0; i<first; ++i)
+//                {
+//                    index_first_allele -= i;
+//                }
+//                index *= vps_minus_1;
+//                index += num_raw_states;
+//
+//                for (size_t offset = 0; offset< vps_minus_1; ++offset)
+//                {
+//                    weights[ index + offset ] = pow(nd[offset], (double)total_samples);//RbStatistics::Binomial::pdf(n, p, (double)(numid1));
+//                    state.set( index + offset );
+//                }
+//            }
+//        }
+//
+//    }
+//    else
+//    {
+//        throw RbException( "PoMo string state not correct. We found "+ StringUtilities::to_string(index_first_allele)  );
+//    }
+//
+//    for (size_t i =0; i < weights.size(); ++i)
+//    {
+//        if (weights[i] < 1e-8)
+//        {
+//            weights[i] = 1e-8;
+//        }
+//    }
+//
+//}
 
 
 void PoMoState::setChromosome(std::string chr)
@@ -251,7 +276,8 @@ void PoMoState::setPosition(size_t pos)
 
 
 /**
- * Setting the PoMo state from  counts.
+ * Setting the PoMo state from counts string.
+ * This function converts the counts string into a counts vector and delegates the transformation.
  *
  * Example with only ten states and DNA:
  * A C G T A10C90 A20C80 A30C70...A90C10 A10G90 A20G80...A10T90...C10G90...C10T90...G10T90
@@ -292,7 +318,7 @@ void PoMoState::setState(const std::string &symbol)
 
 
 /**
- * Setting the PoMo state from  counts.
+ * Setting the PoMo state from counts vector.
  *
  * Example with only ten states and DNA:
  * A C G T A10C90 A20C80 A30C70...A90C10 A10G90 A20G80...A10T90...C10G90...C10T90...G10T90
@@ -362,78 +388,55 @@ void PoMoState::setState(const std::vector<size_t> &counts)
     size_t state_index = 0;
     if ( count_observed_alleles == 1 ) // monoallelic state
     {
-        state_index = index_first_allele;
         state.clear();
-        state.set(index_first_allele);
-//        populateWeightedStatesForMonoallelicState(index_first_allele, total_num_samples);
-    }
-    else if ( count_observed_alleles == 2 ) //biallelic state
-    {
-        size_t basic_index = num_raw_states * index_first_allele;
-        for (size_t i=0; i<index_first_allele; ++i)
+        
+        if ( weighting == FIXED )
         {
-            basic_index -= i;
+            state_index = index_first_allele;
         }
-        basic_index *= virt_pop_size_minus_1;
-        basic_index += num_raw_states;
+        else if ( weighting == BINOMIAL )
+        {
+            setStateBinomialForMonomorphic(total_num_samples, index_first_allele);
+        }
+        else if ( weighting == SAMPLED )
+        {
+//            setStateSampled();
+            state_index = index_first_allele;
+        }
+        else
+        {
+            throw RbException() << "Unknown weighting type in PoMo state.";
+        }
+    }
+    else if ( count_observed_alleles == 2 ) // biallelic state
+    {
         
         if ( index_second_allele >= num_raw_states )
         {
             throw RbException( "PoMo string state not correct. The second allele could not be determined." );
         }
         
+        size_t basic_index = computeIndexBiallelic(index_first_allele, index_second_allele);
+        
         state.clear();
-        // index corresponds to the closest place where the pomo state is.
-        // In case the virtual population size is smaller to the counts in the state, or the reverse,
-        // we have to do some maths.
-        // We have to get the closest numbers to the observed counts.
-        // Basically, the lowest count has to be >=1, and as close as possible
-        // to the observed count.
-        if (total_num_samples != virtual_population_size)
+        
+        
+        if ( weighting == FIXED )
         {
-            double obs_proportion_second_allele = (double) (total_num_samples - count_first_allele) / (double)total_num_samples ;
-            size_t virtual_pop_sample_count = (size_t)round((1.0-obs_proportion_second_allele)*virtual_population_size);
-            if ( virtual_pop_sample_count == virtual_population_size )
-            {
-                state_index = index_first_allele;
-            }
-            else if ( virtual_pop_sample_count == 0 )
-            {
-                state_index = index_second_allele;
-            }
-            else
-            {
-                state_index = basic_index + virtual_population_size - virtual_pop_sample_count - 1;
-            }
+            setStateFixed(total_num_samples, count_first_allele, basic_index);
+        }
+        else if ( weighting == BINOMIAL )
+        {
+            setStateBinomial(total_num_samples, count_first_allele, basic_index);
+        }
+        else if ( weighting == SAMPLED )
+        {
+            setStateSampled(total_num_samples, count_first_allele, basic_index);
         }
         else
         {
-            state_index = basic_index + virtual_population_size - count_first_allele - 1;
+            throw RbException() << "Unknown weighting type in PoMo state.";
         }
-        state.set(state_index);
-        
-        
-//        // Let's try PoMo state averaging.
-//        // Basically all cells in the weight matrix that contain only id1, only id2, or a combination of both should have a non-zero weight.
-//        double n = (double)total_num_samples;
-//        double p = (double)count_first_allele/(double)total_num_samples;
-//
-//        std::vector<double> prob (virtual_population_size );
-//        for (size_t j =0; j <= virt_pop_size_minus_1; ++j)
-//        {
-//            prob[j] = RbMath::choose(total_num_samples, count_first_allele) *  pow( ( (double)j/double(virtual_population_size)) , count_first_allele) * pow( ( (double)(virtual_population_size - j)/double(virtual_population_size) ) , (double)(total_num_samples-count_first_allele)) ;
-//            if (prob[j] < 1e-8)
-//            {
-//                prob[j] = 0.0;
-//            }
-//            //RbStatistics::Binomial::pdf(n, (double)j/double(virtual_population_size), (double)(virtual_population_size));
-//        }
-//
-//        for (size_t j=0; j < virt_pop_size_minus_1; ++j)
-//        {
-//            weights[j+basic_index] = prob[j+1];
-//            state.set( j+num_raw_states );
-//        }
         
     }
     else if ( count_observed_alleles == 0 )
@@ -441,8 +444,199 @@ void PoMoState::setState(const std::vector<size_t> &counts)
         setGapState( true ); // We say we have a gap
     }
     
+}
+
+/**
+ * Computing the PoMo state as weights from a binomial distribution.
+ *
+ */
+void PoMoState::setStateBinomial(size_t total_num_samples, size_t count_first_allele, size_t basic_index)
+{
+    // clear the weights
+    weights.clear();
+    
+    size_t virt_pop_size_minus_1 = virtual_population_size-1;
+        
+    // Let's try PoMo state averaging.
+    // Basically all cells in the weight matrix that contain only id1, only id2, or a combination of both should have a non-zero weight.
+    double n = (double)total_num_samples;
+
+    for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
+    {
+        double prob = RbStatistics::Binomial::pdf(n, double(j)/double(virtual_population_size), count_first_allele);
+        if (prob < 1e-8)
+        {
+            prob = 0.0;
+        }
+        weights[j+basic_index-1] = prob;
+        state.set( j+basic_index-1 );
+    }
+    
+    index_single_state = -1;
+    num_observed_states = 1;
+    
+}
+
+/**
+ * Computing the PoMo state as weights from a binomial distribution for an observed monomorphic states.
+ * That means we could either have a monomorphic frequency, or
+ * any possible biallelic state where the observe allele is part of the biallelic combination.
+ *
+ * For example, the true frequency could be A80C20 but we sampled 2 A, 0 C, 0 G, 0 T (all being the allele A).
+ *
+ */
+void PoMoState::setStateBinomialForMonomorphic(size_t total_samples, size_t index_first_allele)
+{
+    
+    // We do PoMo state averaging.
+    double n = (double)total_samples;
+    double p = 1.0;
+    
+    // we can directly set the weight for the monomorphic case
+    weights[index_first_allele] = 1.0;
+    state.set( index_first_allele );
+    
+    size_t virt_pop_size_minus_1 = virtual_population_size-1;
+
+    // iterate over all possible second alleles
+    for (size_t index_second_allele=0; index_second_allele<num_raw_states; ++index_second_allele)
+    {
+        
+        // first check that we don't have the same alleles
+        if ( index_first_allele == index_second_allele )
+        {
+            continue;
+        }
+        
+        // now get allele indices in a sorted order
+        size_t index_a = std::min(index_first_allele, index_second_allele);
+        size_t index_b = std::max(index_first_allele, index_second_allele);
+        
+        // compute the basic index (offset) for this biallelic combination
+        size_t basic_index = computeIndexBiallelic(index_a, index_b);
+        
+        // now iterate over all biallelic frequencies
+        for (size_t j=1; j < virtual_population_size; ++j)
+        {
+            // compute the PoMo frequency
+            // this depends on whether this observed allele has the lower index
+            double freq = 0.0;
+            if ( index_first_allele < index_second_allele )
+            {
+                freq = double(j) / virtual_population_size;
+            }
+            else
+            {
+                freq = 1.0 - double(j) / virtual_population_size;
+            }
+            
+            // compute the probability of binomially sampling the monomorphic state
+            double prob = pow(freq, n);
+            
+            // cap the probabilities (for numerical stability???)
+            if (prob < 1e-8)
+            {
+                prob = 0.0;
+            }
+            
+            // set the current weight
+            weights[j+basic_index-1] = prob;
+            state.set( j+basic_index-1 );
+            
+        } // end loop over all biallelic frequencies
+        
+    } // end loop over all biallelic combinations
+    
+    index_single_state = -1;
+    num_observed_states = 1;
+    
+}
+
+
+
+/**
+ * Setting the PoMo state from counts as the most closely matching frequency.
+ * Here we specifically try to match the frequency if possible by rounding but make sure that the internal PoMo state is not a monomorphic state.
+ * Internal monomorphic PoMo state could never generate biallelic observed states.
+ */
+void PoMoState::setStateFixed(size_t total_num_samples, size_t count_first_allele, size_t basic_index)
+{
+    
+    size_t state_index = 0;
+    
+    // index corresponds to the closest place where the PoMo state is.
+    // We have to get the closest numbers to the observed counts.
+    double obs_proportion_first_allele = std::fmax(1.0, double(count_first_allele) / double(total_num_samples) );
+    size_t virtual_pop_sample_count = (size_t)round(obs_proportion_first_allele*virtual_population_size);
+    // we want to make sure that we don't assume a monomorphic state due to mapping
+    // because a monomorphic PoMo frequency can never produce a biallelic observed state
+    if ( virtual_pop_sample_count == virtual_population_size )
+    {
+        --virtual_pop_sample_count;
+    }
+    else if ( virtual_pop_sample_count == 0 )
+    {
+        ++virtual_pop_sample_count;
+    }
+    else
+    {
+        state_index = basic_index + virtual_population_size - virtual_pop_sample_count - 1;
+    }
+       
+    // set the internal values
     index_single_state = state_index;
     num_observed_states = 1;
+    state.set(state_index);
+    
+}
+
+
+/**
+ * Computing the PoMo state as being sampled from a binomial distribution.
+ * That is, we compute the weight as the binomial probability of sampling the number of first alleles given the PoMo frequencies with the total number of samples as the number of trials.
+ * Then we randomly sample according to the weights.
+ *
+ */
+void PoMoState::setStateSampled(size_t total_num_samples, size_t count_first_allele, size_t basic_index)
+{
+            
+    size_t virt_pop_size_minus_1 = virtual_population_size-1;
+        
+    // Let's try PoMo state averaging.
+    // Basically all cells in the weight matrix that contain only id1, only id2, or a combination of both should have a non-zero weight.
+    double n = (double)total_num_samples;
+
+    std::vector<double> prob (virtual_population_size );
+    double max_prob = 0;
+    for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
+    {
+        prob[j] = RbStatistics::Binomial::pdf(n, (double)j/double(virtual_population_size), (double)(count_first_allele));
+        if ( prob[j] > max_prob )
+        {
+            max_prob = prob[j];
+        }
+    }
+    
+    // normalize the probabilities
+    for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
+    {
+        prob[j] /= max_prob;
+    }
+    
+    // sample the index
+    size_t sample_index = 1;
+    double u = GLOBAL_RNG->uniform01();
+    while (sample_index < virtual_population_size && u > prob[sample_index])
+    {
+        u -= prob[sample_index];
+        ++sample_index;
+    }
+    size_t state_index = basic_index + virtual_population_size - sample_index - 1;
+
+    
+    index_single_state = state_index;
+    num_observed_states = 1;
+    state.set(state_index);
     
 }
 
@@ -452,7 +646,7 @@ void PoMoState::setStateByIndex(size_t index)
     
     num_observed_states = 1;
     index_single_state = index;
-    state.clear();
+    state.reset();
     state.set( index );
     
 }
@@ -478,4 +672,19 @@ void PoMoState::setVirtualPopulationSize(size_t ps)
         throw RbException( "The virtual population size should be a divisor of 100." );
     }
     virtual_population_size = ps;
+}
+
+const std::vector<double>& PoMoState::getWeights( void ) const
+{
+    return weights;
+}
+
+bool PoMoState::isWeighted( void ) const
+{
+    return weighted;
+}
+
+void PoMoState::setWeighted( bool tf )
+{
+    weighted = tf;
 }

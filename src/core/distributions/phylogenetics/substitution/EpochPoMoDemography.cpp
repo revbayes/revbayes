@@ -123,11 +123,13 @@ double EpochPoMoDemography::computeLnProbability( void )
         }
         
         // compute the transition probability matrix
-        RateMatrix_PoMo2N& current_rate_matrix = rate_matrices[epoch];
+        RateMatrix_PoMoKN& current_rate_matrix = rate_matrices[epoch];
         
         // now set the values for this matrix
         current_rate_matrix.setMu( my_mu );
-        current_rate_matrix.setNeff( current_Ne );
+        
+        throw RbException("Sebastian: Currently unfinished implementation!");
+//        current_rate_matrix.setNeff( current_Ne );
         
         current_rate_matrix.update();
         
@@ -209,7 +211,7 @@ void EpochPoMoDemography::initialize( void )
     
     // get the number of epochs
     size_t num_epoch = ne->getValue().size();
-    rate_matrices = std::vector<RateMatrix_PoMo2N>( num_epoch, RateMatrix_PoMo2N(num_states, virtual_pop_size, false, true) );
+    rate_matrices = std::vector<RateMatrix_PoMoKN>( num_epoch, RateMatrix_PoMoKN(num_states, virtual_pop_size, false, true) );
     
     
 }

@@ -54,7 +54,7 @@ RevPtr<RevVariable> Func_write::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string& fn = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     bool  append = static_cast<const RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
     const std::string& separator = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
     
@@ -63,9 +63,7 @@ RevPtr<RevVariable> Func_write::execute( void )
         
         if ( fn != "" )
         {
-            
-            RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
-            fm.createDirectoryForFile();
+            RevBayesCore::createDirectoryForFile(fn);
             
             std::ofstream out_stream;
             
@@ -73,13 +71,13 @@ RevPtr<RevVariable> Func_write::execute( void )
             {
                 
                 // open the stream to the file
-                out_stream.open(fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+                out_stream.open( fn.string(), std::fstream::out | std::fstream::app);
             }
             else
             {
                 
                 // open the stream to the file
-                out_stream.open(fm.getFullFileName().c_str(), std::fstream::out);
+                out_stream.open( fn.string(), std::fstream::out);
             }
             
             // print the arguments

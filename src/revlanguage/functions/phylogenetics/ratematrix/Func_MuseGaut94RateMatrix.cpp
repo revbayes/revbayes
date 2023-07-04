@@ -46,7 +46,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MuseGaut94RateM
     RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr2< RevBayesCore::RateGenerator >( CodonMG94, om, bf );
+    return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( CodonMG94, om, bf );
 }
 
 

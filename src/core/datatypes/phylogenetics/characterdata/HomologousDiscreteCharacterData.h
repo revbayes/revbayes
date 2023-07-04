@@ -39,7 +39,7 @@ namespace RevBayesCore {
         HomologousDiscreteCharacterData<charType>*          clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                                initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
+        void                                                initFromFile( const path &dir, const std::string &fn );                     //!< Read and resurrect this object from a file in its default format.
         void                                                initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
 
         // CharacterData functions
@@ -1015,7 +1015,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxObservedSt
     int max;
     for (max = int(observed.size()) - 1; max >= 0; max--)
     {
-        if (observed.isSet(max))
+        if (observed.test(max))
         {
             break;
         }
@@ -1480,9 +1480,9 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::includeCharacter(s
  *
  */
 template<class charType>
-void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const std::string &dir, const std::string &fn)
+void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const RevBayesCore::path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
+    auto filepath = dir / (fn + ".nex");
     
     // get an instance of the NCL reader
     NclReader reader = NclReader();
@@ -1495,7 +1495,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
     myFileType += suffix;
     
     // read the content of the file now
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filepath, myFileType );
     
     if ( m_i.size() < 1 )
     {
@@ -1504,7 +1504,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
         {
             std::cerr << "NCL-Warning:\t\t" << *it << std::endl;
         }
-        throw RbException("Could not read character data matrix from file \"" + fm.getFullFileName() + "\".");
+        throw RbException()<<"Could not read character data matrix from file "<<filepath<<".";
     }
     
     HomologousDiscreteCharacterData<charType> *coreM = static_cast<HomologousDiscreteCharacterData<charType> *>( m_i[0] );

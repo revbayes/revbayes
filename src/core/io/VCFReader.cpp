@@ -13,7 +13,7 @@
 using namespace RevBayesCore;
 
 
-VCFReader::VCFReader(const std::string &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data) : DelimitedDataReader(fn, "", 0, read_data)
+VCFReader::VCFReader(const path &fn, PLOIDY p, UNKOWN_TREATMENT u, bool read_data) : DelimitedDataReader(fn, "", 0, read_data)
 {
     filename            = fn;
     ploidy              = p;
@@ -50,7 +50,7 @@ void VCFReader::mapSpeciesNames(const RbVector<Taxon> &taxa_list, std::vector<st
 }
 
 
-void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, const RbVector<Taxon>& taxa_list )
+void VCFReader::computeMonomorphicVariableStatistics( const path& fn, const RbVector<Taxon>& taxa_list )
 {
     size_t NUM_ORG_STATES = 2;
 
@@ -72,12 +72,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     var_in_both        = std::vector< std::vector<size_t> >( NUM_SPECIES, std::vector<size_t>(NUM_SPECIES, 0) );
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException( "Could not open file ") << filename;
     }
+    
     
     
     // read file
@@ -90,7 +90,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     size_t samples_start_column = 0;
     size_t NUM_SAMPLES = 0;
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmp_chars.clear();
@@ -130,31 +130,6 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
             }
             
             NUM_SAMPLES = sample_names.size();
-            std::vector< Taxon > taxa;
-            if ( ploidy == HAPLOID )
-            {
-                taxa = std::vector< Taxon >( NUM_SAMPLES, Taxon("") );
-                for (size_t i=0; i<NUM_SAMPLES; ++i)
-                {
-                    Taxon this_taxon = Taxon( sample_names[i] );
-                    taxa[i] = this_taxon;
-                }
-            }
-            else if ( ploidy == DIPLOID )
-            {
-                taxa = std::vector< Taxon >( 2*NUM_SAMPLES, Taxon("") );
-                for (size_t i=0; i<NUM_SAMPLES; ++i)
-                {
-                    Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
-                    taxa[i] = this_taxon_A;
-                    Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
-                    taxa[i+NUM_SAMPLES] = this_taxon_B;
-                }
-            }
-            else
-            {
-                throw RbException("Currently we have only implementations for haploid and diploid organisms.");
-            }
             
             // create the lookup vector with the species to taxon columns positions
             for (size_t i=0; i<NUM_SAMPLES; ++i)
@@ -221,7 +196,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
                 StringUtilities::stringSplit(this_char_read, ":", format_tokens);
                 
                 std::string this_alleles = format_tokens[0];
-                std::vector<size_t> states = extractStateIndices(this_alleles);
+                std::vector<size_t> states = extractStateIndices(this_alleles, ploidy);
                 
                 // get the current character
                 for ( size_t j=0; j<states.size(); ++j)
@@ -263,20 +238,18 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     };
     
     
-    f_in.closeFile( readStream );
+    readStream.close();
     
     
     
     
     // write the results of monomorphic in A but variable in B
-    std::ofstream out_stream_mono_in_A_var_in_B;
-    std::string out_filename_mono_in_A_var_in_B = fn + "_mono_in_A_var_in_B.csv";
+    std::string out_filename_mono_in_A_var_in_B = fn.string() + "_mono_in_A_var_in_B.csv";
     
-    RbFileManager f_out_mono_in_A_var_in_B = RbFileManager(out_filename_mono_in_A_var_in_B);
-    f_out_mono_in_A_var_in_B.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_mono_in_A_var_in_B.open( f_out_mono_in_A_var_in_B.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_mono_in_A_var_in_B );
+
+    // the filestream object
+    std::ofstream out_stream_mono_in_A_var_in_B( out_filename_mono_in_A_var_in_B );
     
     // write the file header
     out_stream_mono_in_A_var_in_B << "";
@@ -297,7 +270,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_mono_in_A_var_in_B << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_mono_in_A_var_in_B );
+    out_stream_mono_in_A_var_in_B.close( );
     
     
     
@@ -306,14 +279,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     
     
     // write the results of monomorphic in both and equal state
-    std::ofstream out_stream_mono_in_both_equal;
-    std::string out_filename_mono_in_both_equal = fn + "_mono_in_both_equal.csv";
+    std::string out_filename_mono_in_both_equal = fn.size() + "_mono_in_both_equal.csv";
     
-    RbFileManager f_out_mono_in_both_equal = RbFileManager(out_filename_mono_in_both_equal);
-    f_out_mono_in_both_equal.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_mono_in_both_equal.open( f_out_mono_in_both_equal.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_mono_in_both_equal );
+
+    // the filestream object
+    std::ofstream out_stream_mono_in_both_equal( out_filename_mono_in_both_equal );
     
     // write the file header
     out_stream_mono_in_both_equal << "";
@@ -334,7 +305,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_mono_in_both_equal << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_mono_in_both_equal );
+    out_stream_mono_in_both_equal.close(  );
     
     
     
@@ -343,14 +314,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     
     
     // write the results of monomorphic in both and different state
-    std::ofstream out_stream_mono_in_both_diff;
-    std::string out_filename_mono_in_both_diff = fn + "_mono_in_both_diff.csv";
+    std::string out_filename_mono_in_both_diff = fn.string() + "_mono_in_both_diff.csv";
     
-    RbFileManager f_out_mono_in_both_diff = RbFileManager(out_filename_mono_in_both_diff);
-    f_out_mono_in_both_diff.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_mono_in_both_diff.open( f_out_mono_in_both_diff.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_mono_in_both_diff );
+
+    // the filestream object
+    std::ofstream out_stream_mono_in_both_diff( out_filename_mono_in_both_diff );
     
     // write the file header
     out_stream_mono_in_both_diff << "";
@@ -371,7 +340,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_mono_in_both_diff << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_mono_in_both_diff );
+    out_stream_mono_in_both_diff.close(  );
     
     
     
@@ -380,14 +349,12 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     
     
     // write the results of monomorphic in both and different state
-    std::ofstream out_stream_var_in_both;
-    std::string out_filename_var_in_both = fn + "_var_in_both.csv";
+    std::string out_filename_var_in_both = fn.string() + "_var_in_both.csv";
     
-    RbFileManager f_out_var_in_both = RbFileManager(out_filename_var_in_both);
-    f_out_var_in_both.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream_var_in_both.open( f_out_var_in_both.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename_var_in_both );
+
+    // the filestream object
+    std::ofstream out_stream_var_in_both( out_filename_var_in_both );
     
     // write the file header
     out_stream_var_in_both << "";
@@ -408,7 +375,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const std::string& fn, con
     out_stream_var_in_both << std::endl;
     
     // close the stream
-    f_in.closeFile( out_stream_var_in_both );
+    out_stream_var_in_both.close(  );
 
 }
 
@@ -423,9 +390,11 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     }
     
     // we need to get a map of species names to all samples belonging to that species
-    std::vector<std::string> species_names;
-    std::map<std::string, size_t> species_names_to_index;
+    std::vector<std::string>           species_names;
+    std::map<std::string, size_t>      species_names_to_index;
     std::vector< std::vector<size_t> > indices_of_taxa_per_species;
+    std::vector< std::vector<PLOIDY> > ploidy_of_taxa_per_species;
+    std::vector<size_t>                num_samples_of_taxa_per_species;
     size_t species_index = 0;
     for (size_t i=0; i<taxa_list.size(); ++i)
     {
@@ -441,27 +410,25 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             ++species_index;
             
             indices_of_taxa_per_species.push_back( std::vector<size_t>() );
+            ploidy_of_taxa_per_species.push_back( std::vector<PLOIDY>() );
+            num_samples_of_taxa_per_species.push_back( 0 );
         }
     }
     
     
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     // the filestream object
-    std::ofstream out_stream;
-    
-    RbFileManager f_out = RbFileManager(out_filename);
-    f_out.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( f_out.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename );
+
+    // the filestream object
+    std::ofstream out_stream( out_filename );
     
     
     // read file
@@ -484,7 +451,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     size_t samples_start_column = 0;
     size_t NUM_SAMPLES = 0;
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmpChars.clear();
@@ -524,31 +491,6 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             }
             
             NUM_SAMPLES = sample_names.size();
-            std::vector< Taxon > taxa;
-            if ( ploidy == HAPLOID )
-            {
-                taxa = std::vector< Taxon >( NUM_SAMPLES, Taxon("") );
-                for (size_t i=0; i<NUM_SAMPLES; ++i)
-                {
-                    Taxon this_taxon = Taxon( sample_names[i] );
-                    taxa[i] = this_taxon;
-                }
-            }
-            else if ( ploidy == DIPLOID )
-            {
-                taxa = std::vector< Taxon >( 2*NUM_SAMPLES, Taxon("") );
-                for (size_t i=0; i<NUM_SAMPLES; ++i)
-                {
-                    Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
-                    taxa[i] = this_taxon_A;
-                    Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
-                    taxa[i+NUM_SAMPLES] = this_taxon_B;
-                }
-            }
-            else
-            {
-                throw RbException("Currently we have only implementations for haploid and diploid organisms.");
-            }
             
             
             for (size_t j = 0; j < format_line.size(); ++j)
@@ -602,7 +544,28 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 }
                 
                 std::vector<size_t>& this_species_taxa_indices = indices_of_taxa_per_species[species_index];
+                std::vector<PLOIDY>& this_species_taxa_ploidy  = ploidy_of_taxa_per_species[species_index];
                 this_species_taxa_indices.push_back( i + samples_start_column );
+                if ( ploidy == HAPLOID )
+                {
+                    this_species_taxa_ploidy.push_back( HAPLOID );
+                    num_samples_of_taxa_per_species[species_index] += 1;
+                }
+                else if ( ploidy == DIPLOID )
+                {
+                    this_species_taxa_ploidy.push_back( DIPLOID );
+                    num_samples_of_taxa_per_species[species_index] += 2;
+                }
+                else if ( ploidy == MIXED )
+                {
+                    this_species_taxa_ploidy.push_back( (taxa_list[taxon_index].getPloidy() == "diploid" ? DIPLOID : HAPLOID ) );
+                    num_samples_of_taxa_per_species[species_index] += (taxa_list[taxon_index].getPloidy() == "diploid" ? 2 : 1 );
+                }
+                else
+                {
+                    throw RbException("Currently we have only implementations for haploid and diploid organisms.");
+                }
+
                 
             }
             
@@ -649,14 +612,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                     out_stream << chr << " " << genome_index;
                     for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
                     {
-                        if ( ploidy == DIPLOID )
-                        {
-                            out_stream << " " << indices_of_taxa_per_species[species_index].size()*2 << ",0";
-                        }
-                        else
-                        {
-                            out_stream << " " << indices_of_taxa_per_species[species_index].size() << ",0";
-                        }
+                        out_stream << " " << num_samples_of_taxa_per_species[species_index] << ",0";
                     }
                     out_stream << std::endl;
                 }
@@ -674,6 +630,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 std::vector<double> counts (4+1, 0.0); // 0 1 2 3 ?
                 
                 const std::vector<size_t>& this_samples_indices = indices_of_taxa_per_species[species_index];
+                const std::vector<PLOIDY>& this_samples_ploidy  = ploidy_of_taxa_per_species[species_index];
                 
                 // iterate over all samples per species
                 for (size_t k = 0; k < this_samples_indices.size(); ++k)
@@ -685,7 +642,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                     StringUtilities::stringSplit(this_char_read, ":", format_tokens);
                     
                     std::string this_alleles = format_tokens[0];
-                    std::vector<size_t> states = extractStateIndices(this_alleles);
+                    std::vector<size_t> states = extractStateIndices(this_alleles, this_samples_ploidy[k]);
                     
                     // get the current character
                     for ( size_t j=0; j<states.size(); ++j)
@@ -709,8 +666,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 
                 std::string chromosome = "";
                 size_t chrom_pos = 0;
-                const std::vector<double> weights;
-                PoMoState this_state = PoMoState( NUM_ORG_STATES, this_samples_indices.size(), pomo_string, chromosome, chrom_pos, weights );
+                PoMoState this_state = PoMoState( NUM_ORG_STATES, this_samples_indices.size(), pomo_string, chromosome, chrom_pos );
                 
                 out_stream << " " << this_state.getStringValue();
                 
@@ -723,8 +679,8 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     
     
     
-    f_in.closeFile( readStream );
-    f_out.closeFile( out_stream );
+    readStream.close(  );
+    out_stream.close(  );
 
 }
 
@@ -735,21 +691,17 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
     
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     // the filestream object
-    std::ofstream out_stream;
-    
-    RbFileManager f_out = RbFileManager(out_filename);
-    f_out.createDirectoryForFile();
-    
-    // open the stream to the file
-    out_stream.open( f_out.getFullFileName().c_str(), std::fstream::out );
+    createDirectoryForFile( out_filename );
+
+    // the filestream object
+    std::ofstream out_stream( out_filename );
     
     
     // read file
@@ -779,7 +731,7 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
     std::vector< PLOIDY > ploidy_of_sample;
 
     
-    while (f_in.safeGetline(readStream,read_line))
+    while (safeGetline(readStream,read_line))
     {
         
         tmpChars.clear();
@@ -926,7 +878,7 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
             out_stream << "" << std::endl;
             out_stream << "Begin data;" << std::endl;
             out_stream << "Dimensions ntax=" << num_actual_taxa << " nchar=" << num_sites << ";" << std::endl;
-            out_stream << "Format datatype=DNA missing=? gap=- interleaved;" << std::endl;
+            out_stream << "Format datatype=DNA missing=? gap=- interleave;" << std::endl;
             out_stream << "Matrix" << std::endl;
             
             has_names_been_read = true;
@@ -1154,22 +1106,38 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
         ++genome_index;
     }
     
+    printSequencesToNexusFile(out_stream, taxa, ploidy_of_sample);
+
+    out_stream << ";" << std::endl;
+    out_stream << "End;" << std::endl;
     
     
-    f_in.closeFile( readStream );
-    f_out.closeFile( out_stream );
+    
+    readStream.close(  );
+    out_stream.close(  );
 
 }
 
 
 
-RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
+RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip_first )
 {
     // create the SFS object
     size_t NUM_SAMPLES = taxa_list.size();
+    std::vector<PLOIDY> taxa_ploidy = std::vector<PLOIDY>(taxa_list.size(), HAPLOID);
     if ( ploidy == DIPLOID )
     {
         NUM_SAMPLES = 2*taxa_list.size();
+        taxa_ploidy = std::vector<PLOIDY>(taxa_list.size(), DIPLOID);
+    }
+    else if ( ploidy == MIXED )
+    {
+        NUM_SAMPLES = 0;
+        for (size_t i=0; i<taxa_list.size(); ++i)
+        {
+            NUM_SAMPLES   += ( taxa_list[i].getPloidy() == "diploid" ? 2 : 1 );
+            taxa_ploidy[i] = ( taxa_list[i].getPloidy() == "diploid" ? DIPLOID : HAPLOID );
+        }
     }
     RbVector<long> sfs = RbVector<long>(NUM_SAMPLES+1, 0);
     
@@ -1177,24 +1145,33 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
     std::vector<size_t> indices_of_taxa;
     
     // open file
-    std::ifstream readStream;
-    RbFileManager f_in = RbFileManager(filename);
-    if ( f_in.openFile(readStream) == false )
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file " + filename );
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
     }
     
     // read file
     // bool firstLine = true;
     std::string read_line = "";
-    size_t lines_skipped = 0;
-    size_t lines_to_skip = 0;
     std::vector<std::string> tmpChars;
     bool has_names_been_read = false;
     size_t samples_start_column = 0;
     size_t NUM_SAMPLES_TOTAL = 0;
     
-    while (f_in.safeGetline(readStream,read_line))
+    size_t lines_skipped = 0;
+    size_t lines_to_skip = 0;
+    long   lines_read    = 0;
+    bool   skipped_first = false;
+    
+    size_t ref_index = 0;
+    size_t alt_index = 0;
+    size_t chr_index = 0;
+    size_t pos_index = 0;
+    
+    size_t genome_index = 1;
+    
+    while (safeGetline(readStream,read_line))
     {
         
         tmpChars.clear();
@@ -1253,6 +1230,26 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
                 
             }
             
+            for (size_t j = 0; j < format_line.size(); ++j)
+            {
+                if ( format_line[j] == "REF" )
+                {
+                    ref_index = j;
+                }
+                if ( format_line[j] == "ALT" )
+                {
+                    alt_index = j;
+                }
+                if ( format_line[j] == "CHROM" || format_line[j] == "#CHROM" )
+                {
+                    chr_index = j;
+                }
+                if ( format_line[j] == "POS" )
+                {
+                    pos_index = j;
+                }
+            }
+            
             has_names_been_read = true;
             
             // skip now
@@ -1261,49 +1258,70 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list )
         } // finished reading the header and species information
         
         
-        // allocate the counts vector for the states
-        std::vector<size_t> counts (4+1, 0.0); // 0 1 2 3 ?
-        for (size_t k = 0; k < indices_of_taxa.size(); ++k)
+        ++lines_read;
+        if ( skipped_first == false && lines_read > skip_first )
+        {
+            skipped_first = true;
+            lines_read = 0;
+        }
+        
+        if ( skipped_first == true && thinning == lines_read )
         {
             
-            size_t sample_index = indices_of_taxa[k];
-                
-            const std::string &this_char_read = tmpChars[sample_index];
-            std::vector<std::string> format_tokens;
-            StringUtilities::stringSplit(this_char_read, ":", format_tokens);
-                
-            std::string this_alleles = format_tokens[0];
-            std::vector<size_t> states = extractStateIndices(this_alleles);
-            
-            // get the current character
-            for ( size_t j=0; j<states.size(); ++j)
+            const std::string& current_chrom = tmpChars[chr_index];
+            if ( chr != "" && chr != current_chrom )
             {
-                size_t chIndex = states[j];
-                counts[chIndex]++;
+                // skip this side
+                continue;
             }
-        }
-        
-        // Now we have all the counts for this species
-        // only add this site if it didn't include missing sites
-        if ( counts[4] == 0 && counts[2] == 0 && counts[3] == 0 )
-        {
-            size_t allele_count = counts[0];
-            ++sfs[allele_count];
-        }
-        
+            
+            // reset the lines read so that we can check the thinning again
+            lines_read = 0;
+            
+            // allocate the counts vector for the states
+            std::vector<size_t> counts (4+1, 0.0); // 0 1 2 3 ?
+            for (size_t k = 0; k < indices_of_taxa.size(); ++k)
+            {
+                
+                size_t sample_index = indices_of_taxa[k];
+                
+                const std::string &this_char_read = tmpChars[sample_index];
+                std::vector<std::string> format_tokens;
+                StringUtilities::stringSplit(this_char_read, ":", format_tokens);
+                
+                std::string this_alleles = format_tokens[0];
+                std::vector<size_t> states = extractStateIndices(this_alleles, taxa_ploidy[k]);
+                
+                // get the current character
+                for ( size_t j=0; j<states.size(); ++j)
+                {
+                    size_t chIndex = states[j];
+                    counts[chIndex]++;
+                }
+            }
+            
+            // Now we have all the counts for this species
+            // only add this site if it didn't include missing sites
+            if ( counts[4] == 0 && counts[2] == 0 && counts[3] == 0 )
+            {
+                size_t allele_count = counts[0];
+                ++sfs[allele_count];
+            }
+            
+        } // end-if we don't skip the entry
         
     
     };
     
     
     
-    f_in.closeFile( readStream );
+    readStream.close(  );
 
     return sfs;
 }
 
 
-std::vector<size_t> VCFReader::extractStateIndices(std::string alleles)
+std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, PLOIDY this_ploidy)
 {
     
     std::vector<size_t> states;
@@ -1312,7 +1330,7 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles)
     std::vector<std::string> allele_tokens;
     StringUtilities::stringSplit(alleles, "|", allele_tokens);
     
-    if ( ploidy == DIPLOID )
+    if ( this_ploidy == DIPLOID )
     {
         // first allele
         if ( allele_tokens[0] == "0")
@@ -1539,7 +1557,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
             std::vector<std::string> allele_tokens;
             StringUtilities::stringSplit(this_alleles, "|", allele_tokens);
             
-            std::vector<size_t> state_indices = extractStateIndices(this_alleles);
+            std::vector<size_t> state_indices = extractStateIndices(this_alleles, ploidy);
             
             // add the first character
             if ( state_indices[0] == 0 )

@@ -5,6 +5,7 @@
 #include <vector>
 #include <iosfwd>
 #include <string> // IWYU pragma: keep
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -26,17 +27,17 @@ namespace RevBayesCore {
     class DelimitedDataReader {
         
     public:
-        DelimitedDataReader(const std::string &fn, const std::string& d="", size_t ns=0, bool read_data=true);
+        DelimitedDataReader(const path &fn, const std::string& d="", size_t ns=0, bool read_data=true);
         
         void                                                readData( size_t ls);
         const std::vector<std::vector<std::string> >&       getChars(void);
-        const std::string&                                  getFilename(void);
+        const path&                                         getFilename(void);
         
     
     protected:
         
         // protected member only accessible for derived classes
-        std::string                                         filename;
+        path                                                filename;
         std::string                                         delimiter;
         std::vector<std::vector<std::string> >              chars;
         

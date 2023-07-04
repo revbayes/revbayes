@@ -235,6 +235,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
 }
 
 
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilityMatrices( void )
+{
+    // doing nothing here as this function has only been implemented for the classes that
+    // do not have its own updateTransitionProbabilities function.
+    // making this an empty function for this class for now so no redundant computation would be incurred when
+    // updateTransitionProbabilityMatrices gets called in computeLnProbability in AbstractPhyloCTMCSiteHomogeneous
+}
+
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getStationaryFrequencies( std::vector<std::vector<double> >& rf ) const
 {
@@ -659,7 +667,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
                         for ( size_t i=0; i<val.size(); ++i )
                         {
                             // check whether we observed this state
-                            if ( val.isSet(i) == true )
+                            if ( val.test(i) == true )
                             {
                                 tmp += pij[c][i];
                             }
@@ -673,7 +681,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
 
                     for ( size_t i=1; i<val.size(); ++i )
                     {
-                        if ( val.isSet(i) == true )
+                        if ( val.test(i) == true )
                         {
                             // check whether we observed this state
                             p_site_mixture[dim + 1] += f[i];

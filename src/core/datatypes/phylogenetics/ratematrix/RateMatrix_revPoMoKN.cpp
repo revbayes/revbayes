@@ -146,6 +146,7 @@ void RateMatrix_revPoMoKN::calculateCijk(void)
 void RateMatrix_revPoMoKN::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = rate * (startAge - endAge);
+    
     if ( eigen_system->isComplex() == false )
     {
         tiProbsEigens(t, P);

@@ -99,12 +99,18 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
     //delegate to base class
     TypedFunction< Tree >::touch( toucher );
     
+    //reset flag
+    touchedTopology = false;
+    
     if ( toucher == brlen )
     {
         const std::set<size_t> &touchedIndices = toucher->getTouchedElementIndices();
         touchedNodeIndices.insert(touchedIndices.begin(), touchedIndices.end());
     }
-    
+    else if (toucher == tau)
+    {
+        touchedTopology = true;
+    }
 }
 
 
@@ -120,14 +126,13 @@ void TreeAssemblyFunction::update( void )
         }
         touchedNodeIndices.clear();
     }
-    else
+    else if (touchedTopology == false)
     {
         const std::vector<double> &v = brlen->getValue();
         for (size_t i = 0; i < v.size(); ++i)
         {
             value->getNode(i).setBranchLength( v[i] );
         }
-        
     }
 
 }

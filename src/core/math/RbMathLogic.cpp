@@ -173,3 +173,11 @@ int RbMath::min(int x, int y)
 }
 
 
+/** Returns the sign of a number */
+int RbMath::sgn(double x)
+{
+
+    return (0.0 < x) - (x < 0.0);
+}
+
+

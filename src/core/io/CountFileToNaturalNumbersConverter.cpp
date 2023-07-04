@@ -30,22 +30,21 @@ CountFileToNaturalNumbersConverter::CountFileToNaturalNumbersConverter( void )
 
 
 /** Read Count File and Write Natural Numbers file */
-void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, const size_t n_individuals, const std::string &fo )
+void CountFileToNaturalNumbersConverter::cfconverter( const path &fi, const size_t n_individuals, const path &fo )
 {
   
     // open file
-    std::ifstream readStream;
-    RbFileManager fii = RbFileManager( fi );
-    if ( fii.openFile(readStream) == false )
+    std::ifstream readStream( fi.string() );
+    if ( not readStream )
     {
-        throw RbException( "Could not open file \"" + fi + "\".");
+        throw RbException()<<"Could not open file "<<fi<<".";
     }
     
 
     // reading the count file 
     // first ignoring all the commented lines
     std::string line = "";
-    while (fii.safeGetline(readStream,line))
+    while (safeGetline(readStream,line))
     {
         if ( line.at(0) == '#' ) { continue; } 
         else { break; }
@@ -74,7 +73,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
 
  
     // getting the first count patter to determine the number of alleles
-    fii.safeGetline(readStream,line);
+    safeGetline(readStream,line);
     std::stringstream ss1(line);
 
     // again ignoring the first two elements
@@ -128,7 +127,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     // and now the lines
     size_t n_sites = 1; 
 
-    while (fii.safeGetline(readStream,line))
+    while (safeGetline(readStream,line))
     {
 
         std::stringstream ss2(line);
@@ -151,7 +150,7 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     }
     
     // close the input file connection
-    fii.closeFile( readStream );
+    readStream.close();
 
     // summarizing the 
     std::cout <<     "\n  Number of taxa                  " << n_taxa <<
@@ -169,11 +168,10 @@ void CountFileToNaturalNumbersConverter::cfconverter( const std::string &fi, con
     // the filestream object
     std::fstream f_stream;
     
-    RbFileManager foo = RbFileManager(fo);
-    foo.createDirectoryForFile();
+    createDirectoryForFile(fo);
     
     // open the stream to the file
-    f_stream.open( foo.getFullFileName().c_str(), std::fstream::out );
+    f_stream.open( fo.string(), std::fstream::out );
     
     f_stream << alignment;
   

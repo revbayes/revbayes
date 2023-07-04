@@ -26,7 +26,7 @@ using namespace RevBayesCore;
  *
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  */
-NexusWriter::NexusWriter( const std::string &fn ) :
+NexusWriter::NexusWriter( const path &fn ) :
     file_name( fn )
 {
     
@@ -49,11 +49,10 @@ void NexusWriter::closeStream( void )
  */
 void NexusWriter::openStream(bool reopen) 
 {
-    RbFileManager f = RbFileManager(file_name);
-    f.createDirectoryForFile();
+    createDirectoryForFile( file_name );
     
     // open the stream to the file
-    out_stream.open( f.getFullFileName().c_str(), std::fstream::out );
+    out_stream.open( file_name.string(), std::fstream::out );
     
     // write header line
     out_stream << "#NEXUS" << std::endl;

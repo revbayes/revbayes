@@ -30,17 +30,11 @@ DelimitedCharacterDataWriter::DelimitedCharacterDataWriter( void )
  * \param[in]   data        The character data object which is written out.
  * \param[in]   del         The text character to delimit columns.
  */
-void DelimitedCharacterDataWriter::writeData(std::string const &fileName, const HomologousCharacterData &data, std::string del)
+void DelimitedCharacterDataWriter::writeData(path const &fileName, const HomologousCharacterData &data, std::string del)
 {
+    createDirectoryForFile( fileName );
     
-    // the filestream object
-    std::fstream outStream;
-    
-    RbFileManager fm = RbFileManager(fileName);
-    fm.createDirectoryForFile();
-    
-    // open the stream to the file
-    outStream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    std::ofstream outStream( fileName.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)

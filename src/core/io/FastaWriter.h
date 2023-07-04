@@ -3,6 +3,7 @@
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "AbstractNonHomologousDiscreteCharacterData.h"
+#include "RbFileManager.h"
 
 #include <iostream>
 #include <fstream>
@@ -27,8 +28,8 @@ namespace RevBayesCore {
     public:
         FastaWriter();
         
-        void                    writeData(const std::string& fn, const AbstractHomologousDiscreteCharacterData& d);
-        void                    writeData(const std::string& fn, const AbstractNonHomologousDiscreteCharacterData& d);
+        void                    writeData(const path& fn, const AbstractHomologousDiscreteCharacterData& d);
+        void                    writeData(const path& fn, const AbstractNonHomologousDiscreteCharacterData& d);
         
         
     };

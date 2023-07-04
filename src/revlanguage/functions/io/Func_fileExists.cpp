@@ -37,12 +37,9 @@ RevPtr<RevVariable> Func_fileExists::execute( void )
     
     // get the information from the arguments for reading the file
     size_t arg_index = 0;
-    const std::string& fn   = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn   = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
-    // check that the file/path name exists
-    RevBayesCore::RbFileManager my_file_manager( fn );
-    
-    return new RevVariable( new RlBoolean( my_file_manager.testFile() ) );
+    return new RevVariable( new RlBoolean( RevBayesCore::exists(fn) ) );
 }
 
 

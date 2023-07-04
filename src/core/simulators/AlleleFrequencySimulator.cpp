@@ -642,7 +642,7 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
 }
 
 
-void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const std::string& fn, const std::vector<std::vector<int> >& taxa, const std::vector<long>& samples_per_species) const
+void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const path& file_name, const std::vector<std::vector<int> >& taxa, const std::vector<long>& samples_per_species) const
 {
     
     // first, get some variables/settings for the simulation
@@ -655,22 +655,19 @@ void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const std::stri
     }
 #endif
     
-    // the filestream object
-    std::fstream out_stream;
-
-    RbFileManager f = RbFileManager(fn);
-    
 #ifdef RB_MPI
     if ( process_active == true )
     {
 #endif
-        f.createDirectoryForFile();
+        createDirectoryForFile( file_name );
 #ifdef RB_MPI
     }
+    // all processes should wait until the directory is created
+    MPI_Barrier(MPI_COMM_WORLD);
 #endif
     
-    // open the stream to the file
-    out_stream.open( f.getFullFileName().c_str(), std::fstream::out );
+    // the filestream object
+    std::ofstream out_stream( file_name.string() );
     
     /*
      COUNTSFILE NPOP 12 NSITES 1000

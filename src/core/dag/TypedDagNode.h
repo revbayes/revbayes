@@ -2,14 +2,8 @@
 #define TypedDagNode_H
 
 #include "DagNode.h"
-#include "NexusWriter.h"
-#include "RbFileManager.h"
-#include "RbSettings.h"
 #include "RbUtil.h"
-#include "Simplex.h"
 #include "StringUtilities.h"
-#include "TraceNumeric.h"
-#include "TraceTree.h"
 
 #include <ostream>
 #include <string>
@@ -34,7 +28,7 @@ namespace RevBayesCore {
         virtual bool                                        isSimpleNumeric(void) const;                                                                                //!< Is this variable a simple numeric variable? Currently only integer and real number are.
         virtual void                                        printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const;           //!< Monitor/Print this variable
         virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const;  //!< Monitor/Print this variable
-        virtual void                                        writeToFile(const std::string &dir) const;                                                                  //!< Write the value of this node to a file within the given directory.
+        virtual void                                        writeToFile(const path &dir) const;                                                                         //!< Write the value of this node to a file within the given directory.
 
         // getters and setters
         virtual valueType&                                  getValue(void) = 0;
@@ -45,42 +39,46 @@ namespace RevBayesCore {
     };
     
 
+    class Tree;
+    class Simplex;
+    template <typename T> class RbVector;
+
     ///////////////////////
     // createTraceObject //
     ///////////////////////
     template<>
-    inline AbstractTrace*                                TypedDagNode<long>::createTraceObject(void) const { return new TraceNumericInteger(); }
+    AbstractTrace*                                          TypedDagNode<long>::createTraceObject(void) const;
 
     template<>
-    inline AbstractTrace*                                TypedDagNode<double>::createTraceObject(void) const { return new TraceNumeric(); }
+    AbstractTrace*                                          TypedDagNode<double>::createTraceObject(void) const;
 
     template<>
-    inline AbstractTrace*                                TypedDagNode<RbVector<double> >::createTraceObject(void) const { return new TraceNumericVector(); }
+    AbstractTrace*                                          TypedDagNode<RbVector<double> >::createTraceObject(void) const;
     
     template<>
-    inline AbstractTrace*                                TypedDagNode<Simplex>::createTraceObject(void) const { return new TraceSimplex(); }
+    AbstractTrace*                                          TypedDagNode<Simplex>::createTraceObject(void) const;
     
     template<>
-    inline AbstractTrace*                                TypedDagNode<Tree>::createTraceObject(void) const { return new TraceTree( getValue().isRooted() ); }
+    AbstractTrace*                                          TypedDagNode<Tree>::createTraceObject(void) const;
 
     
     /////////////////////
     // isSimpleNumeric //
     /////////////////////
     template<>
-    inline bool                                  TypedDagNode<long>::isSimpleNumeric(void) const { return true; } 
+    bool                                                    TypedDagNode<long>::isSimpleNumeric(void) const;
     
     template<>
-    inline bool                                  TypedDagNode<double>::isSimpleNumeric(void) const { return true; }
+    bool                                                    TypedDagNode<double>::isSimpleNumeric(void) const;
 
     template<>
-    inline bool                                  TypedDagNode<RbVector<long> >::isSimpleNumeric(void) const { return true; }
+    bool                                                    TypedDagNode<RbVector<long> >::isSimpleNumeric(void) const;
     
     template<>
-    inline bool                                  TypedDagNode<RbVector<double> >::isSimpleNumeric(void) const { return true; }
+    bool                                                    TypedDagNode<RbVector<double> >::isSimpleNumeric(void) const;
     
     template<>
-    inline bool                                  TypedDagNode<Simplex>::isSimpleNumeric(void) const { return true; }
+    bool                                                    TypedDagNode<Simplex>::isSimpleNumeric(void) const;
     
     
     
@@ -88,76 +86,16 @@ namespace RevBayesCore {
     // printValue //
     ////////////////
     template<>
-    inline void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple, bool flatten) const
-    {
-        std::stringstream ss;
+    void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple, bool flatten) const;
 
-        // if simple == FALSE, print with maximum precision allowed
-        if (!simple)
-        {
-            ss.precision(std::numeric_limits<double>::digits10);
-        }
-
-        // otherwise, use standard RB precision
-        else
-        {
-            ss.precision(RbSettings::userSettings().getOutputPrecision());
-        }
-        ss << getValue();
-        std::string s = ss.str();
-        if ( l > 0 )
-        {
-            StringUtilities::fillWithSpaces(s, l, left);
-        }
-        o << s;
-    }
-
+    template<>
+    void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
     
     template<>
-    inline void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
-    {
-        
-        std::stringstream ss;
-        ss << getValue();
-        std::string s = ss.str();
-        if ( l > 0 )
-        {
-            StringUtilities::fillWithSpaces(s, l, left);
-        }
-        o << s;
-    }
-    
+    void TypedDagNode<unsigned int>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
     
     template<>
-    inline void TypedDagNode<unsigned int>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
-    {
-        
-        std::stringstream ss;
-        ss << getValue();
-        std::string s = ss.str();
-        if ( l > 0 )
-        {
-            StringUtilities::fillWithSpaces(s, l, left);
-        }
-        o << s;
-    }
-    
-    
-    template<>
-    inline void TypedDagNode<std::string>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
-    {
-        
-        std::stringstream ss;
-//        ss << "\"" << getValue() << "\"";
-        ss << getValue();
-        std::string s = ss.str();
-        if ( l > 0 )
-        {
-            StringUtilities::fillWithSpaces(s, l, left);
-        }
-        o << s;
-    }
-    
+    void TypedDagNode<std::string>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
 }
 
 #include "Printable.h"
@@ -284,7 +222,7 @@ void RevBayesCore::TypedDagNode<valueType>::printValue(std::ostream &o, const st
 
 
 template<class valueType>
-void RevBayesCore::TypedDagNode<valueType>::writeToFile(const std::string &dir) const
+void RevBayesCore::TypedDagNode<valueType>::writeToFile(const path &dir) const
 {
 
     // delegate to the type specific write function

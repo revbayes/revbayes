@@ -315,7 +315,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                         const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
                         for (size_t k = 0; k < state.size(); k++)
                         {
-                            if (state.isSet(k) && k +1 > max)
+                            if (state.test(k) && k +1 > max)
                             {
                                 max = static_cast<int>(k)+1;
                             }
@@ -519,57 +519,60 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
         for (size_t i = 0; i < nChars; i++)
         {
-            RevBayesCore::RbBitSet observed(v.getNumberOfStates());
-            size_t max = 0;
-            for (size_t j = 0; j < nTaxa; j++)
+            // only set state number partition for previously included characters
+            if ( !v.isCharacterExcluded(i) )
             {
-                const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
-                if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
+                RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+                size_t max = 0;
+                for (size_t j = 0; j < nTaxa; j++)
                 {
-                    if (td.getCharacter(i).getNumberObservedStates() > 1)
+                    const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                    if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
                     {
-                        const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
-                        for (size_t k = 0; k < state.size(); k++)
+                        if (td.getCharacter(i).getNumberObservedStates() > 1)
                         {
-                            if (state.isSet(k) )
+                            const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
+                            for (size_t k = 0; k < state.size(); k++)
                             {
-                                observed.set(k);
-
-                                if ( k > max )
+                                if (state.test(k) )
                                 {
-                                    max = k;
+                                    observed.set(k);
+
+                                    if ( k > max )
+                                    {
+                                        max = k;
+                                    }
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        size_t k = td.getCharacter(i).getStateIndex();
-
-                        observed.set(k);
-
-                        if (k > max)
+                        else
                         {
-                            max = k;
+                            size_t k = td.getCharacter(i).getStateIndex();
+
+                            observed.set(k);
+
+                            if (k > max)
+                            {
+                                max = k;
+                            }
                         }
                     }
                 }
-            }
 
-            if ( observed.getNumberSetBits() != max + 1 )
-            {
-                warn = true;
+                if ( observed.count() != max + 1 )
+                {
+                    warn = true;
+                }
+                
+                if (max + 1 == n)
+                {
+                    v.includeCharacter(i);
+                }
+                else
+                {
+                    v.excludeCharacter(i);
+                }
             }
-
-            if ( max + 1 == n)
-            {
-                v.includeCharacter(i);
-            }
-            else
-            {
-                v.excludeCharacter(i);
-            }
-
         }
 
         if ( warn == true )
@@ -600,57 +603,61 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         for (size_t i = 0; i < nChars; i++)
         {
-            RevBayesCore::RbBitSet observed(v.getNumberOfStates());
-            size_t max = 0;
-            for (size_t j = 0; j < nTaxa; j++)
+            // only set state number partition for previously included characters
+            if ( !v.isCharacterExcluded(i) )
             {
-                const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
-                if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
+                RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+                size_t max = 0;
+                for (size_t j = 0; j < nTaxa; j++)
                 {
-                    if (td.getCharacter(i).getNumberObservedStates() > 1)
+                    const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                    if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
                     {
-                        const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
-                        for (size_t k = 0; k < state.size(); k++)
+                        if (td.getCharacter(i).getNumberObservedStates() > 1)
                         {
-                            if (state.isSet(k) )
+                            const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
+                            for (size_t k = 0; k < state.size(); k++)
                             {
-                                observed.set(k);
-
-                                if ( k > max )
+                                if (state.test(k) )
                                 {
-                                    max = k;
+                                    observed.set(k);
+
+                                    if ( k > max )
+                                    {
+                                        max = k;
+                                    }
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        size_t k = td.getCharacter(i).getStateIndex();
-
-                        observed.set(k);
-
-                        if (k > max)
+                        else
                         {
-                            max = k;
+                            size_t k = td.getCharacter(i).getStateIndex();
+
+                            observed.set(k);
+
+                            if (k > max)
+                            {
+                                max = k;
+                            }
                         }
                     }
                 }
-            }
 
-            if ( observed.getNumberSetBits() != max + 1 )
-            {
-                warn = true;
-            }
-
-            for (size_t x = 0; x < v.getNumberOfStates(); x++)
-            {
-                if ( max == x)
+                if ( observed.count() != max + 1 )
                 {
-                    matVec[x]->includeCharacter(i);
+                    warn = true;
                 }
-                else
+
+                for (size_t x = 0; x < v.getNumberOfStates(); x++)
                 {
-                    matVec[x]->excludeCharacter(i);
+                    if ( !v.isCharacterExcluded(i) && max == x ) // only consider previously included characters
+                    {
+                        matVec[x]->includeCharacter(i);
+                    }
+                    else
+                    {
+                        matVec[x]->excludeCharacter(i);
+                    }
                 }
             }
         }
