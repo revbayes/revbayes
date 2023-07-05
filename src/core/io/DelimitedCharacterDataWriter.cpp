@@ -52,7 +52,7 @@ void DelimitedCharacterDataWriter::writeData(path const &fileName, const Homolog
             {
                 if ( !data.isCharacterExcluded( i ) )
                 {
-                    outStream << taxon.getStringRepresentation( i );
+                    outStream << taxon.getStringRepresentation( i ) << del;
                 }
                 
             }

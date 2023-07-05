@@ -171,6 +171,7 @@
 #include "Func_mtMam.h"
 #include "Func_orderedRateMatrix.h"
 #include "Func_PoMoKN.h"
+#include "Func_PoMoBalance4N.h"
 #include "Func_revPoMoKN.h"
 #include "Func_revPoMoBalance4N.h"
 #include "Func_revPoMoM2N.h"
@@ -308,7 +309,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         addFunction( new Func_FlowT2Populations()      );
 
-        
+
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
@@ -353,6 +354,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_mtRev()                                       );
         addFunction( new Func_orderedRateMatrix()                           );
         addFunction( new Func_PoMoKN()                                      );
+        addFunction( new Func_PoMoBalance4N()                               );
         addFunction( new Func_revPoMoKN()                                   );
         addFunction( new Func_revPoMoBalance4N()                            );
         addFunction( new Func_revPoMoM2N()                                  );
@@ -481,7 +483,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // geometric mean function
         addFunction( new Func_geometricMean() );
-        
+
         // logistic function
         addFunction( new Func_logistic() );
 

@@ -58,12 +58,12 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_revPoMoBalance4
 
     if ( b->getValue().size() !=  6 )
     {
-        throw RbException("The number of balacing selection coefficients beta does not match the number of pairwise combinations of alleles: 6.");
+        throw RbException("The number of balancing selection coefficients beta does not match the number of pairwise combinations of alleles: 6.");
     }
 
     if ( Bf->getValue().size() !=  6 )
     {
-        throw RbException("The number of perfered frequencies B does not match the number of pairwise combinations of alleles: 6.");
+        throw RbException("The number of preferred frequencies B does not match the number of pairwise combinations of alleles: 6.");
     }
 
     RevBayesCore::revPoMoBalance4NRateMatrixFunction* f = new RevBayesCore::revPoMoBalance4NRateMatrixFunction( n, p, r, s, b, Bf );
