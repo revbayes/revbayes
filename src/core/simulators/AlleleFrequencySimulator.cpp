@@ -700,7 +700,7 @@ void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const path& fil
         if ( writing_pid == pid )
         {
             // advance to end of
-            out_stream.seekg(0, std::ios::end);
+            out_stream.seekp(0, std::ios::end);
             
 #endif
     for (size_t site=0; site<num_sites_per_process; ++site)
