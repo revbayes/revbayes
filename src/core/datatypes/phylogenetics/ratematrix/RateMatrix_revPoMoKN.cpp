@@ -166,50 +166,59 @@ RateMatrix_revPoMoKN* RateMatrix_revPoMoKN::clone( void ) const
 double RateMatrix_revPoMoKN::calculateReciprocalExpectedDivergence( void )
 {
 
-  // calculating the denominator of the expected rate
-  double sum_d = 0.0;
+    // calculating the denominator of the expected rate
+    double sum_d = 0.0;
 
-  // summing the stationary weights for the fixed states 
-  for (int i=0; i<K; i++) {
-    sum_d += pi[i]*pow(phi[i],N-1);
-  }
-
-  // now for the polymorphic states 
-  //first edge
-  int E = 0;
-
-  double drift_coefficient;
-
-  for (int i=0; i<K; i++){
-    for (int j=i+1; j<K; j++){
-      for (int n=1; n<N; n++) {
-
-        // sum weight
-        drift_coefficient = 1.0*N/(n*(N-n));
-        sum_d += pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n-1)*(n*phi[j]+(N-n)*phi[i])*drift_coefficient;
-
-      }
-      E += 1;
+    // summing the stationary weights for the fixed states
+    for (int i=0; i<K; i++)
+    {
+        sum_d += pi[i]*pow(phi[i],N-1);
     }
-  }
 
+    // now for the polymorphic states
+    // first edge
+    int E = 0;
 
+    double drift_coefficient;
 
-  // now the numerator of the expected rate
-  double sum_n = 0.0;
-  E = 0;
+    for (int i=0; i<K; i++)
+    {
+        
+        for (int j=i+1; j<K; j++)
+        {
+      
+            for (int n=1; n<N; n++)
+            {
 
-  for (int i=0; i<K; i++){
-    for (int j=i+1; j<K; j++){
-      for (int n=1; n<(N+1); n++) {
+                // sum weight
+                drift_coefficient = 1.0*N/(n*(N-n));
+                sum_d += pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n-1)*(n*phi[j]+(N-n)*phi[i])*drift_coefficient;
 
-        sum_n += pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n);
-
-      }
-      E += 1;
-
+            }
+            E += 1;
+        }
     }
-  }
+
+
+
+    // now the numerator of the expected rate
+    double sum_n = 0.0;
+    E = 0;
+
+    for (int i=0; i<K; i++)
+    {
+        for (int j=i+1; j<K; j++)
+        {
+            for (int n=1; n<(N+1); n++)
+            {
+
+                sum_n += pi[i]*pi[j]*rho[E]*pow(phi[j],n-1)*pow(phi[i],N-n);
+
+            }
+            E += 1;
+
+        }
+    }
 
   // finaly the rate (the reciprocal)
   double rRate;
@@ -247,76 +256,72 @@ void RateMatrix_revPoMoKN::computeOffDiagonal( void )
 
 
 
-  //populate rate matrix with 0.0
+  // populate rate matrix with 0.0
   // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i< num_states; i++){
-    for (int j=0; j< num_states; j++){
-      m[i][j] = 0.0;        
-    }
+  for (int i=0; i< num_states; i++)
+  {
+      for (int j=0; j< num_states; j++)
+      {
+          m[i][j] = 0.0;
+      }
   }
 
   double rRate;
   rRate = calculateReciprocalExpectedDivergence();
-  //std::cout << "rate:" << rRate << "\n";
 
-  //first edge
+  // first edge
   int E = 0;
 
 
-  //these for loops go through the (K*K-K) edges of the pomo state-space
-  //their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
-  for (int i=0; i<K; i++){
-    for (int j=i+1; j<K; j++){
-
-      //mutations
-      m[i][K+E*N-E]          = N*pi[j]*rho[E]*rRate;    //{Nai} -> {(N-1)ai,1aj}
-      m[j][K+(E+1)*(N-1)-1]  = N*pi[i]*rho[E]*rRate;    //{Naj} -> {1ai,(N-1)aj}
-
-      //fixations
-      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]*rRate/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {Nai} 
-      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]*rRate/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {Naj} 
-
-
-      //the pomo rate matrix is entirely defined by fixations and mutations if N=2
-      if (N>2) {
-
-        //frequency shifts from singletons
-        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]*rRate/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
-        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]*rRate/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
-
-        //frequency shifts for all the other polymorphic states
-        if (N>3) {
-
-          //polymorphic states are populated
-          for (int n=2; n<(N-1); n++){
-
-            //populates the first half of the polymorphic edge aiaj
-            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]*rRate/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
-            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]*rRate/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
-
-
-
+  // these for loops go through the (K*K-K) edges of the pomo state-space
+  // their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
+  for (int i=0; i<K; i++)
+  {
+      for (int j=i+1; j<K; j++)
+      {
+          
+          // mutations
+          m[i][K+E*N-E]          = N*pi[j]*rho[E]*rRate;    //{Nai} -> {(N-1)ai,1aj}
+          m[j][K+(E+1)*(N-1)-1]  = N*pi[i]*rho[E]*rRate;    //{Naj} -> {1ai,(N-1)aj}
+          
+          //fixations
+          m[K+E*N-E]        [i]  = (N-1.0)*phi[i]*rRate/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {Nai}
+          m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]*rRate/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {Naj}
+          
+          
+          // the pomo rate matrix is entirely defined by fixations and mutations if N=2
+          if (N>2)
+          {
+              
+              // frequency shifts from singletons
+              m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]*rRate/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
+              m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]*rRate/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
+              
+              //frequency shifts for all the other polymorphic states
+              if (N>3)
+              {
+                  
+                  //polymorphic states are populated
+                  for (int n=2; n<(N-1); n++)
+                  {
+                      
+                      //populates the first half of the polymorphic edge aiaj
+                      m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]*rRate/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+                      m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]*rRate/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
+                      
+                      
+                  }
+                  
+              }
+              
           }
-
-        }
-
+          
+          // update edge
+          E += 1;
+          
       }
-
-      //update edge
-      E += 1; 
-
-    }
+      
   }
-
-
-  //int n_states = K+(K*K-K)*(N-1)/2;
-  //std::vector<double> stationary_freqs; 
-  //stationary_freqs = getStationaryFrequencies();
-
-  //for (int i=0; i<n_states; i++) {
-  //  std::cout << "sf" << i << ":" << stationary_freqs[i] << "\n";
-  //}
-
 
 
   // set flags

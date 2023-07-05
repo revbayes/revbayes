@@ -19,15 +19,15 @@ namespace RevBayesCore {
     public:
         RateMatrix_revPoMoKN(  long num_states, long in_k, long in_n, long in_nex );                                                                                            //!< Construct rate matrix with n states
         RateMatrix_revPoMoKN(const RateMatrix_revPoMoKN& m);                                                                  //!< Copy constructor
-        virtual                             ~RateMatrix_revPoMoKN(void);                                                              //!< Destructor
+        virtual                                                ~RateMatrix_revPoMoKN(void);                                                              //!< Destructor
         
         // overloaded operators
-        RateMatrix_revPoMoKN&             operator=(const RateMatrix_revPoMoKN& r);
+        RateMatrix_revPoMoKN&                                   operator=(const RateMatrix_revPoMoKN& r);
         
         // RateMatrix functions
-        virtual RateMatrix_revPoMoKN&     assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
+        virtual RateMatrix_revPoMoKN&                           assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
-        RateMatrix_revPoMoKN*                           clone(void) const;
+        RateMatrix_revPoMoKN*                                   clone(void) const;
 
         void                                                    setK( long &na );
         void                                                    setN( long &ni );

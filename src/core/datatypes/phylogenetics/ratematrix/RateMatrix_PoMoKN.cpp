@@ -125,10 +125,12 @@ void RateMatrix_PoMoKN::buildRateMatrix(void)
 
   //populate rate matrix with 0.0
   // **total waste of time with sparse matrices like pomos**
-  for (int i=0; i< num_states; i++){
-    for (int j=0; j< num_states; j++){
-      m[i][j] = 0.0;        
-    }
+  for (int i=0; i< num_states; i++)
+  {
+      for (int j=0; j< num_states; j++)
+      {
+          m[i][j] = 0.0;
+      }
   }
 
 
@@ -140,40 +142,45 @@ void RateMatrix_PoMoKN::buildRateMatrix(void)
 
   //these for loops go through the (K*K-K) edges of the pomo state-space
   //their represent all the possible pairwise combinations of alleles: a0a1, a1a2, ..., aK-2aK-1
-  for (int i=0; i<K; i++){
-    for (int j=i+1; j<K; j++){
+  for (int i=0; i<K; i++)
+  {
+      for (int j=i+1; j<K; j++)
+      {
 
-      //mutations
-      m[i][K+E*N-E]          = N*mu[2*E];    //{Nai} -> {(N-1)ai,1aj}
-      m[j][K+(E+1)*(N-1)-1]  = N*mu[2*E+1];  //{Naj} -> {1ai,(N-1)aj}
-      diagonal[i] += m[i][K+E*N-E];
-      diagonal[j] += m[j][K+(E+1)*(N-1)-1] ;
+          // mutations
+          m[i][K+E*N-E]          = N*mu[2*E];    //{Nai} -> {(N-1)ai,1aj}
+          m[j][K+(E+1)*(N-1)-1]  = N*mu[2*E+1];  //{Naj} -> {1ai,(N-1)aj}
+          diagonal[i] += m[i][K+E*N-E];
+          diagonal[j] += m[j][K+(E+1)*(N-1)-1] ;
 
-      //fixations
-      m[K+E*N-E]        [i]  = (N-1.0)*phi[i]/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {Nai} 
-      m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {Naj} 
-      diagonal[K+E*N-E]         += m[K+E*N-E]        [i];
-      diagonal[K+(E+1)*(N-1)-1] += m[K+(E+1)*(N-1)-1][j];
+          // fixations
+          m[K+E*N-E]        [i]  = (N-1.0)*phi[i]/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {Nai}
+          m[K+(E+1)*(N-1)-1][j]  = (N-1.0)*phi[j]/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {Naj} 
+          diagonal[K+E*N-E]         += m[K+E*N-E]        [i];
+          diagonal[K+(E+1)*(N-1)-1] += m[K+(E+1)*(N-1)-1][j];
 
-      //the pomo rate matrix is entirely defined by fixations and mutations if N=2
-      if (N>2) {
+          // the pomo rate matrix is entirely defined by fixations and mutations if N=2
+          if (N>2)
+          {
 
-        //frequency shifts from singletons
-        m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
-        m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
-        diagonal[K+E*N-E]         += m[K+E*N-E]        [K+E*N-E+1] ;
-        diagonal[K+(E+1)*(N-1)-1] += m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2];
+              // frequency shifts from singletons
+              m[K+E*N-E]        [K+E*N-E+1]       = (N-1.0)*phi[j]/(phi[j] + (N-1.0)*phi[i]);  //{(N-1)ai,1aj} -> {(N-2)ai,2aj}
+              m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2] = (N-1.0)*phi[i]/(phi[i] + (N-1.0)*phi[j]);  //{1ai,(N-1)aj} -> {2ai,(N-2)aj}
+              diagonal[K+E*N-E]         += m[K+E*N-E]        [K+E*N-E+1] ;
+              diagonal[K+(E+1)*(N-1)-1] += m[K+(E+1)*(N-1)-1][K+(E+1)*(N-1)-2];
 
-        //frequency shifts for all the other polymorphic states
-        if (N>3) {
+              // frequency shifts for all the other polymorphic states
+              if (N>3)
+              {
 
-          //polymorphic states are populated
-          for (int n=2; n<(N-1); n++){
+                  // polymorphic states are populated
+                  for (int n=2; n<(N-1); n++)
+                  {
 
-            //populates the first half of the polymorphic edge aiaj
-            m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
-            m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
-            diagonal[K+E*N-E+n-1] += m[K+E*N-E+n-1][K+E*N-E+n] + m[K+E*N-E+n-1][K+E*N-E+n-2];
+                      // populates the first half of the polymorphic edge aiaj
+                      m[K+E*N-E+n-1]    [K+E*N-E+n]         = n*(N-n)*phi[j]/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
+                      m[K+E*N-E+n-1]    [K+E*N-E+n-2]       = n*(N-n)*phi[i]/(n*phi[j] + (N-n)*phi[i]); //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
+                      diagonal[K+E*N-E+n-1] += m[K+E*N-E+n-1][K+E*N-E+n] + m[K+E*N-E+n-1][K+E*N-E+n-2];
 
           }
 
