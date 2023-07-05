@@ -53,6 +53,7 @@ connectivityType( ct )
     
     if (numCharacters > 8) {
         std::cout << "Warning: analyses may be prohibitively slow for >8 regions.\n";
+//        throw RbException(">10 characters currently unsupported");
     }
     
     buildBits();
