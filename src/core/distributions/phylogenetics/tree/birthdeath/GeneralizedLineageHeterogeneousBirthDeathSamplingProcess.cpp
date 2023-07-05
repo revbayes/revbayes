@@ -1307,7 +1307,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 			while ( true )
 			{
 				// if we found a colon stop
-				if ( &var.back() == pattern )
+				if ( std::string(&var.back()) == pattern )
 				{
 					break;
 				}
@@ -1329,7 +1329,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 			while ( true )
 			{
 				// if we found a colon stop
-				if ( &var.back() == pattern )
+				if ( std::string(&var.back()) == pattern )
 				{
 					break;
 				}

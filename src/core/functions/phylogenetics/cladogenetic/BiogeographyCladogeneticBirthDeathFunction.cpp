@@ -51,9 +51,10 @@ connectivityType( ct )
     addParameter( withinRegionFeatures );
     addParameter( betweenRegionFeatures );
     
-    if (numCharacters > 10)
+    if (numCharacters > 8)
     {
-        throw RbException(">10 characters currently unsupported");
+        std::cout << "Warning: analyses may be prohibitively slow for >8 regions.\n";
+//        throw RbException(">10 characters currently unsupported");
     }
     
     buildBits();
