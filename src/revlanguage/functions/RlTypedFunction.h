@@ -32,7 +32,7 @@ namespace RevLanguage {
         
     public:
         virtual                                         ~TypedFunction(void);                                                               //!< Destructor
-        TypedFunction<valueType>(const TypedFunction<valueType> &x);                                                                        //!< Copy constuctor
+        TypedFunction(const TypedFunction<valueType> &x);                                                                                   //!< Copy constuctor
         
         virtual RevPtr<RevVariable>                     execute(void);                                                                      //!< Create a random variable from this distribution
         virtual const TypeSpec&                         getReturnType(void) const;                                                          //!< Get type of return value
@@ -50,7 +50,7 @@ namespace RevLanguage {
         
         
     protected:
-        TypedFunction<valueType>(void);                                                                                                     //!< Basic constructor
+        TypedFunction(void);                                                                                                                //!< Basic constructor
     };
     
 }
