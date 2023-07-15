@@ -107,14 +107,14 @@ double RateAgeProposal::doProposal( void )
     RbOrderedSet<DagNode*> affected;
     tree->getAffectedNodes( affected );
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
+    // pick a random node which is not the root, the direct descendant of the root, or the ancestor of a sampled ancestor tip
     TopologyNode* node;
     size_t node_index = 0;
     do {
         double u = rng->uniform01();
         node_index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_index);
-    } while ( node->isRoot() || node->isTip() );
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
     
     TopologyNode& parent = node->getParent();
     
@@ -159,6 +159,12 @@ double RateAgeProposal::doProposal( void )
     double m = (my_age-child_Age) / (parent_age-child_Age);
     double a = alpha * m + 1.0;
     double b = alpha * (1.0-m) + 1.0;
+
+    if (a <= 0. || b <= 0. || (!RbMath::isFinite(a) && !RbMath::isFinite(b)))
+    {
+    	std::cout << a << " -- " << b << " -- " << my_age << " -- " << child_Age << " -- " << parent_age << std::endl;
+    }
+
     double new_m = RbStatistics::Beta::rv(a, b, *rng);
     double my_new_age = (parent_age-child_Age) * new_m + child_Age;
     
