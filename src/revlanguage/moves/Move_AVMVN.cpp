@@ -50,28 +50,34 @@ Move_AVMVN::Move_AVMVN() : Move()
     // add member methods
 
     // first, the argument rules
-    ArgumentRules* addScalarArgRules                = new ArgumentRules();
+    ArgumentRules* addRealArgRules                  = new ArgumentRules();
+    ArgumentRules* addRealPosArgRules               = new ArgumentRules();
     ArgumentRules* addSimplexArgRules               = new ArgumentRules();
     ArgumentRules* addModelVectorArgRules           = new ArgumentRules();
-    ArgumentRules* removeScalarArgRules             = new ArgumentRules();
+    ArgumentRules* removeRealArgRules               = new ArgumentRules();
+    ArgumentRules* removeRealPosArgRules            = new ArgumentRules();
     ArgumentRules* removeSimplexArgRules            = new ArgumentRules();
     ArgumentRules* removeModelVectorArgRules        = new ArgumentRules();
 
 
     // next, set the specific arguments
-    addScalarArgRules->push_back(                   new ArgumentRule( "var"        , Real::getClassTypeSpec(),                 "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+    addRealArgRules->push_back(                     new ArgumentRule( "var"        , Real::getClassTypeSpec(),                 "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+    addRealPosArgRules->push_back(                  new ArgumentRule( "var"        , RealPos::getClassTypeSpec(),              "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
     addSimplexArgRules->push_back(                  new ArgumentRule( "var"        , Simplex::getClassTypeSpec(),              "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
     addModelVectorArgRules->push_back(              new ArgumentRule( "var"        , ModelVector<Real>::getClassTypeSpec(),    "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-    removeScalarArgRules->push_back(                new ArgumentRule( "var"        , Real::getClassTypeSpec(),                 "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+    removeRealArgRules->push_back(                  new ArgumentRule( "var"        , Real::getClassTypeSpec(),                 "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+    removeRealPosArgRules->push_back(               new ArgumentRule( "var"        , RealPos::getClassTypeSpec(),              "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
     removeSimplexArgRules->push_back(               new ArgumentRule( "var"        , Simplex::getClassTypeSpec(),              "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
     removeModelVectorArgRules->push_back(           new ArgumentRule( "var"        , ModelVector<Real>::getClassTypeSpec(),    "The variable to move"             , ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
 
 
     // finally, create the methods
-    methods.addFunction( new MemberProcedure( "addVariable",    RlUtils::Void, addScalarArgRules) );
+    methods.addFunction( new MemberProcedure( "addVariable",    RlUtils::Void, addRealArgRules) );
+    methods.addFunction( new MemberProcedure( "addVariable",    RlUtils::Void, addRealPosArgRules) );
     methods.addFunction( new MemberProcedure( "addVariable",    RlUtils::Void, addSimplexArgRules) );
     methods.addFunction( new MemberProcedure( "addVariable",    RlUtils::Void, addModelVectorArgRules) );
-    methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeScalarArgRules) );
+    methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeRealArgRules) );
+    methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeRealPosArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeSimplexArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeModelVectorArgRules) );
 

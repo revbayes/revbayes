@@ -76,11 +76,6 @@ else
   mpi = dependency('', required: false)
 endif
 
-if get_option('jupyter')
-  rb_name += '-jupyter'
-  add_project_arguments(['-DRB_XCODE'], language : 'cpp')
-endif
-
 if get_option('rb-exe-name') != 'default'
   rb_name = get_option('rb-exe-name')
 endif
@@ -190,7 +185,6 @@ summary({'host': host_machine.system()
 
 summary({'exe name': rb_name,
          'mpi': get_option('mpi'),
-         'jupyter': get_option('jupyter'),
          'studio': get_option('studio'),
         },section: 'Options')
 

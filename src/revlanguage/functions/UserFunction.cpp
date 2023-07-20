@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "RbException.h"
 #include "Signals.h"

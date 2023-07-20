@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include "AbstractBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
@@ -114,25 +115,25 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( interval_times_global );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_speciation);
-    homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
+    homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
 
     addParameter( homogeneous_lambda );
     addParameter( heterogeneous_lambda );
 
     heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_extinction);
-    homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
+    homogeneous_mu   = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
 
     addParameter( homogeneous_mu );
     addParameter( heterogeneous_mu );
 
     heterogeneous_phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_sampling);
-    homogeneous_phi = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
+    homogeneous_phi   = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
 
     addParameter( homogeneous_phi );
     addParameter( heterogeneous_phi );
 
     heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_treatment);
-    homogeneous_r = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
+    homogeneous_r   = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
 
     addParameter( homogeneous_r );
     addParameter( heterogeneous_r );
@@ -146,7 +147,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( heterogeneous_Mu );
 
     heterogeneous_Phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_sampling);
-    homogeneous_Phi = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);
+    homogeneous_Phi   = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);  
 
     addParameter( homogeneous_Phi );
     addParameter( heterogeneous_Phi );
@@ -165,7 +166,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
 
     delete value;
     
-    if (t != nullptr) {
+    if (t != nullptr)
+    {
         value = t;
     }
     else
@@ -1473,7 +1475,15 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
+//            simulateTree();
+            
+            RbVector<Clade> constr;
+            // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+            StartingTreeSimulator simulator;
+            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            // store the new value
+            value = my_tree;
         }
     }
     else if ( condition == SimulationCondition::VALIDATION )
@@ -1543,7 +1553,6 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
 {
     // incorrect placeholder, there is no way to simulate an FBD tree consistent with fossil times, we use a coalescent simulator instead
 
-
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
@@ -1554,35 +1563,41 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
     double b = lambda[i];
     double d = mu[i];
     double p_e = phi_event[i];
+    double x = b - d;
 
+    // make sure age is not negative, otherwise function doesn't work
+    assert(age >= 0);
 
     // get a random draw
     double u = rng->uniform01();
 
     // compute the time for this draw
     double t = 0.0;
-    if ( b > d )
+    if ( x > 0 )
     {
         if( p_e > 0.0 )
         {
-            t = ( log( ( (b-d) / (1 - (u)*(1-((b-d)*exp((d-b)*age))/(p_e*b+(b*(1-p_e)-d)*exp((d-b)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+            t = ( log( ( x / (1 - (u)*(1-(x*exp((-x)*age))/(p_e*b+(b*(1-p_e)-d)*exp((-x)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  x;
         }
         else
         {
-            t = log( 1 - u * (exp(age*(d-b)) - 1) / exp(age*(d-b)) ) / (b-d);
+            t = log( (1 - u) * exp(-x * age) + u) / x + age;
         }
     }
     else
     {
         if( p_e > 0.0 )
         {
-            t = ( log( ( (b-d) / (1 - (u)*(1-(b-d)/(p_e*b*exp((b-d)*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+            t = ( log( ( x / (1 - (u)*(1-x/(p_e*b*exp(x*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  x;
         }
         else
         {
-            t = log( 1 - u * (1 - exp(age*(b-d)))  ) / (b-d);
+            t = log( 1 - u * (1 - exp(age*x))  ) / x;
         }
     }
+
+    // make sure the result is in the right range
+    assert(0 <= t and t <= age);
 
     return present + t;
 }

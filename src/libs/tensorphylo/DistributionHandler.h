@@ -67,6 +67,7 @@ public:
 	virtual ~DistributionHandler() {};
 
 	virtual void setTree(const std::string &aNewickTree) = 0;
+	virtual void setTree(const std::string &aNewickTree, const std::vector<bool> dirtyNodes) = 0;
 	virtual void setData(const std::vector<std::string> &taxa, const std::map<std::string, std::vector<double> > &aProbabilityMap) = 0;
 
 	virtual void forceSchedulerUpdate() = 0;

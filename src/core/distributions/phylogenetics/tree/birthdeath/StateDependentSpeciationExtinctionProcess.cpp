@@ -540,7 +540,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         }
         
     }
-    
+
 }
 
 
@@ -589,8 +589,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
         // cladogenetic events should be included at the root. right now,
         // I am just forcing the cladogenetic events at the root, but there
         // may be a better solution.
-        if ( use_cladogenetic_events == true || speciation_node == true )
-//		if ( use_cladogenetic_events == true && speciation_node == true )
+		if ( use_cladogenetic_events == true && speciation_node == true )
         {
 
             double like_sum = 0.0;
@@ -1813,6 +1812,7 @@ double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double
  */
 void StateDependentSpeciationExtinctionProcess::redrawValue( void )
 {
+
     size_t attempts = 0;    
     //while (attempts < 100000)
     while (attempts < 10000)

@@ -1,0 +1,118 @@
+################################################################################
+#
+# RevBayes Script: Bayesian inference of diversification rates under an
+#                   episodic birth-death process with a HSMRF smoothing prior
+#
+#
+# authors: Andrew Magee
+#
+################################################################################
+
+seed(8472)
+
+dataset <- "primates"
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in the "observed" tree
+psi <- readTrees("data/" + dataset + ".tree")[1]
+
+# Get some useful variables from the data. We need these later on.
+taxa <- psi.taxa()
+num_species <- psi.ntips()
+root_height <- psi.rootAge()
+
+# set my move index
+mvi = 0
+
+# set number of diversification regimes
+NUM_INTERVALS = 100
+interval_times <- (root_height * seq(1/NUM_INTERVALS,1-(1/NUM_INTERVALS),1/NUM_INTERVALS))
+
+rho <- 1.0
+
+####################
+# Create the rates #
+####################
+
+speciation_logmean <- ln(ln(num_species/rho/2)/root_height)
+speciation_logsd <- 2*0.587405
+
+speciation[1] ~ dnLognormal(speciation_logmean,speciation_logsd)
+extinction ~ dnExponential(10)
+
+moves[++mvi] = mvScaleBactrian(speciation[1],weight=2)
+moves[++mvi] = mvScaleBactrian(extinction,weight=2)
+
+# Global shrinkage parameter
+speciation_global_scale_hyperprior <- 0.0021
+
+speciation_global_scale ~ dnHalfCauchy(0,1)
+speciation_global_scale.setValue(runif(1,0.005,0.1)[1])
+
+for (i in 1:(NUM_INTERVALS-1)) {
+
+  # Variable-scaled variances for hierarchical horseshoe
+  sigma_speciation[i] ~ dnHalfCauchy(0,1)
+
+  # Make sure values initialize to something reasonable
+  sigma_speciation[i].setValue(runif(1,0.005,0.1)[1])
+
+  # non-centralized parameterization of horseshoe (also variable-scaled)
+  # risk of getting stuck in local modes is high without non-centralized parameterization
+  delta_speciation[i] ~ dnNormal( mean=0, sd=sigma_speciation[i]*speciation_global_scale*speciation_global_scale_hyperprior )
+
+  # Make sure values initialize to something reasonable
+  delta_speciation[i].setValue(runif(1,-0.1,0.1)[1])
+
+  # transform the log-rate changes into the non-log rates for this interval, accounting for variable scaling
+  speciation[i+1] := exp( ln(speciation[i]) + delta_speciation[i] )
+
+}
+
+# Move all field parameters in one go
+moves[++mvi] = mvEllipticalSliceSamplingSimple(delta_speciation,weight=5,tune=FALSE)
+
+# Move all field hyperparameters in one go
+moves[++mvi] = mvHSRFHyperpriorsGibbs(speciation_global_scale, sigma_speciation, delta_speciation, speciation_global_scale_hyperprior, weight=5)
+
+timetree ~ dnEpisodicBirthDeath(rootAge          = root_height,
+  lambdaRates                                    = speciation,
+  lambdaTimes                                    = interval_times,
+  muRates                                        = extinction,
+  rho                                            = rho,
+  samplingStrategy                               = "uniform",
+  condition                                      = "time",
+  taxa                                           = taxa)
+
+### clamp the model with the "observed" tree
+timetree.clamp(psi)
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(rho)
+
+### set up the monitors that will output parameter values to file and screen
+monitors[1] = mnModel(filename="output/HSMRF_BDP.log",printgen=1, separator = TAB)
+monitors[2] = mnScreen(speciation_global_scale,printgen=1)
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1)
+
+### Use burnin to tune the MH proposals ###
+mymcmc.burnin(generations=10,tuningInterval=5)
+
+### run the MCMC ###
+mymcmc.run(generations=10)
+
+q()

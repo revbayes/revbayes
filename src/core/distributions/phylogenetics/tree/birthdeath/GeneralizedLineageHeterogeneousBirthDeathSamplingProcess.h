@@ -108,6 +108,10 @@ namespace RevBayesCore {
         void                                                              executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;
         RevLanguage::RevPtr<RevLanguage::RevVariable>                     executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
+        // dirty nodes
+        void                                                              resizeVectors(size_t num_nodes);
+        void                                                              recursivelyFlagNodeDirty(const TopologyNode& n);
+
         // updating function
         void                                                              prepareParameters(bool force = false);
         void                                                              updateTree(bool force = false);
@@ -132,6 +136,7 @@ namespace RevBayesCore {
         std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< RateGenerator > &obj);
         std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< MatrixReal > &obj);
         std::vector< std::map< std::vector<unsigned>, double > >          RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj);
+        void                                                              checkTimesAreAscending(const RbVector<double> &obj);
 
         // taxa
         std::vector<Taxon> taxa;
@@ -199,6 +204,8 @@ namespace RevBayesCore {
 
 		// misc. book-keeping
 		bool tree_dirty = true;
+        std::vector<bool> dirty_nodes;
+
 
     };
     
