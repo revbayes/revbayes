@@ -121,7 +121,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
 
             }
 
-        b += gene_b / 2.0;
+        b += gene_b * 2.0;
         // std::cout << "b for gene[" << i << "]: " << gene_b << std::endl;
         // std::cout << "current b: " << b << std::endl;
         }
@@ -146,7 +146,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     }
     else
     {
-        double ln_prob_coal = (-a * RbConstants::LN2) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
+        double ln_prob_coal = (a * RbConstants::LN2) + (alpha * log(beta)) - ((alpha + a) * log(beta + b)) + log_gamma_ratio;
 
         // std::cout << "ln prob coal: " << ln_prob_coal << "\n" << std::endl;
 
