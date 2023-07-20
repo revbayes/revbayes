@@ -115,25 +115,25 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( interval_times_global );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_speciation);
-    homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
+    homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
 
     addParameter( homogeneous_lambda );
     addParameter( heterogeneous_lambda );
 
     heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_extinction);
-    homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
+    homogeneous_mu   = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
 
     addParameter( homogeneous_mu );
     addParameter( heterogeneous_mu );
 
     heterogeneous_phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_sampling);
-    homogeneous_phi = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
+    homogeneous_phi   = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
 
     addParameter( homogeneous_phi );
     addParameter( heterogeneous_phi );
 
     heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_treatment);
-    homogeneous_r = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
+    homogeneous_r   = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
 
     addParameter( homogeneous_r );
     addParameter( heterogeneous_r );
@@ -147,7 +147,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( heterogeneous_Mu );
 
     heterogeneous_Phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_sampling);
-    homogeneous_Phi = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);
+    homogeneous_Phi   = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);  
 
     addParameter( homogeneous_Phi );
     addParameter( heterogeneous_Phi );
@@ -166,6 +166,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
 
     
     if (starting_tree == NULL)
+    {
     {
         delete value;
         
@@ -1472,7 +1473,15 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
+//            simulateTree();
+            
+            RbVector<Clade> constr;
+            // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+            StartingTreeSimulator simulator;
+            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            // store the new value
+            value = my_tree;
         }
     }
     else if ( condition == SimulationCondition::VALIDATION )

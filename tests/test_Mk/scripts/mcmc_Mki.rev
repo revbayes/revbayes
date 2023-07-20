@@ -1,0 +1,61 @@
+seed(12345)
+
+####################
+# read in the data #
+data <- readDiscreteCharacterData("data/discrete.nex")
+taxa <- data.taxa()
+
+# global variables
+n_taxa <- taxa.size()
+
+# vector for the moves and monitors
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+# topology
+topology ~ dnUniformTopology(taxa)
+
+moves.append( mvNNI(topology) )
+moves.append( mvSPR(topology) )
+
+# branch lengths
+n_branches <- 2 * n_taxa - 3
+for (i in 1:n_branches) {
+   br_lens[i] ~ dnExponential(10.0)
+   moves.append( mvScale(br_lens[i]) )
+}
+
+# tree length
+TL := sum(br_lens)
+
+phylogeny := treeAssembly(topology, br_lens)
+
+# loop over the characters by num state #
+partition_vector <- data.getNumStatesVector()
+for (i in 2:partition_vector.size()) {
+    Q[i-1] := fnJC(i)  # simple Mk model
+    
+    # create the substitution model and clamp with observed data
+    seq_informative[i-1] ~ dnPhyloCTMC(tree=phylogeny, Q=Q[i-1], type="Standard", coding="informative")
+    seq_informative[i-1].clamp(partition_vector[i])
+}
+
+mymodel = model(phylogeny)
+
+############
+# run MCMC #
+
+# some minitors
+monitors.append( mnScreen(printgen=1) )
+monitors.append( mnModel(filename="output/Mki.log", printgen=1) )
+monitors.append( mnFile(filename="output/Mki.trees", printgen=1, phylogeny) )
+
+# initialize the MCMC object
+mymcmc = mcmc(mymodel, moves, monitors)
+
+# run the MCMC
+mymcmc.run(generations=10)
+
+#################
+# quit RevBayes #
+q()

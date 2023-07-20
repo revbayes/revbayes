@@ -667,7 +667,6 @@ double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, 
 
 void AbstractRootedTreeDistribution::simulateTree( void )
 {
-
     
     // the time tree object (topology & times)
     Tree *psi = new Tree();

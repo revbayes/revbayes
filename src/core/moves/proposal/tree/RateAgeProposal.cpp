@@ -159,8 +159,6 @@ double RateAgeProposal::doProposal( void )
     double m = (my_age-child_Age) / (parent_age-child_Age);
     double a = alpha * m + 1.0;
     double b = alpha * (1.0-m) + 1.0;
-//    double a = 1.0;
-//    double b = 1.0;
     double new_m = RbStatistics::Beta::rv(a, b, *rng);
     double my_new_age = (parent_age-child_Age) * new_m + child_Age;
     
@@ -168,8 +166,6 @@ double RateAgeProposal::doProposal( void )
     double forward = RbStatistics::Beta::lnPdf(a, b, new_m);
     double new_a = alpha * new_m + 1.0;
     double new_b = alpha * (1.0-new_m) + 1.0;
-//    double new_a = 1.0;
-//    double new_b = 1.0;
     double backward = RbStatistics::Beta::lnPdf(new_a, new_b, m);
     double ln_hastings_ratio = backward - forward;
     
@@ -180,7 +176,7 @@ double RateAgeProposal::doProposal( void )
     double pa = node->getParent().getAge();
 
     
-    for(size_t i = 0; i < branch_rates.size(); ++i )
+    for (size_t i = 0; i < branch_rates.size(); ++i )
     {
         
         double my_new_rate = (pa - my_age) * stored_rates[i][0] / (pa - my_new_age);

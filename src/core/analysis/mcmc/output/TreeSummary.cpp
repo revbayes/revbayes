@@ -863,7 +863,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
 
 
-double TreeSummary::cladeProbability(const RevBayesCore::Clade &c, bool verbose )
+double TreeSummary::cladeProbability(const Clade &c, bool verbose )
 {
     summarize(verbose);
 
@@ -1137,22 +1137,6 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-long TreeSummary::splitCount(const Split &n) const
-{
-    auto iter = clade_counts.find(n);
-
-    if (iter == clade_counts.end())
-        return 0;
-    else
-        return iter->second;
-}
-
-double TreeSummary::splitFrequency(const Split &n) const
-{
-    return double(splitCount(n))/sampleSize(true);
-}
-
-
 TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
@@ -1413,6 +1397,94 @@ bool TreeSummary::isDirty(void) const
     }
 
     return false;
+}
+
+
+
+double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose )
+{
+    summarize(verbose);
+    
+    RbVector<Clade> ref_clades = c;
+
+    size_t num_clades = ref_clades.size();
+    for ( size_t i=0; i<num_clades; ++i )
+    {
+        Clade& tmp = ref_clades[i];
+        tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+    }
+    
+    std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
+    std::sort(tip_names.begin(),tip_names.end());
+    const std::string& this_outgroup = tip_names[0];
+
+    rooted = traces.front()->objectAt(0).isRooted();
+
+    ProgressBar progress = ProgressBar(sampleSize(true));
+
+    if ( verbose )
+    {
+        RBOUT("Summarizing clades ...\n");
+        progress.start();
+    }
+
+    size_t count = 0;
+    double num_matches = 0;
+
+    for (auto& trace: traces)
+    {
+        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
+        {
+            if ( verbose )
+            {
+                progress.update(count);
+            }
+            count++;
+
+            Tree tree = trace->objectAt(i);
+
+            if ( rooted == false )
+            {
+                if ( outgroup )
+                {
+                    tree.reroot( *outgroup, false, true );
+                }
+                else
+                {
+                    tree.reroot( this_outgroup, false, true );
+                }
+            }
+            
+            bool matches = true;
+            for ( size_t i=0; i<num_clades; ++i )
+            {
+                const Clade& this_clade = ref_clades[i];
+                bool contains = tree.getRoot().containsClade( this_clade.getBitRepresentation(), true);
+                if ( contains == false )
+                {
+                    matches = false;
+                    break;
+                }
+                
+            }
+            
+            if ( matches == true )
+            {
+                ++num_matches;
+            }
+            
+        }
+    }
+
+
+
+    // finish progress bar
+    if ( verbose )
+    {
+        progress.finish();
+    }
+
+    return num_matches / double(count);
 }
 
 double TreeSummary::maxdiff( bool verbose )
@@ -1865,6 +1937,22 @@ long TreeSummary::sampleSize(bool post) const
     }
 
     return total;
+}
+
+
+long TreeSummary::splitCount(const Split &n) const
+{
+    auto iter = clade_counts.find(n);
+
+    if (iter == clade_counts.end())
+        return 0;
+    else
+        return iter->second;
+}
+
+double TreeSummary::splitFrequency(const Split &n) const
+{
+    return double(splitCount(n))/sampleSize(true);
 }
 
 

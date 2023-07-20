@@ -24,10 +24,14 @@
 #include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
 #include "RbConstants.h" // IWYU pragma: keep
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
 
 using boost::optional;
+
+using std::string;
+using std::vector;
 
 /** Default constructor (interior node, no name). Give the node an optional index ID */
 TopologyNode::TopologyNode() {}
@@ -153,7 +157,7 @@ void TopologyNode::addBranchParameter(const std::string &n, double p)
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal branch parameter with name '" << n << "'.\n";
+        throw RbException() << "Illegal branch parameter with name '" << n << "'.";
     }
 
     std::stringstream o;
@@ -165,13 +169,12 @@ void TopologyNode::addBranchParameter(const std::string &n, double p)
 
 }
 
-
 void TopologyNode::addBranchParameter(const std::string &n, const std::string &p)
 {
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal branch parameter with name '" << n << "'.\n";
+        throw RbException() << "Illegal branch parameter with name '" << n << "'.\n";
     }
 
     std::string comment = n + "=" + p;
@@ -216,6 +219,80 @@ void TopologyNode::addBranchParameters(std::string const &n, const std::vector<s
 }
 
 
+bool TopologyNode::hasNodeComment(const std::string& comment) const
+{
+    for(auto& node_comment: node_comments)
+        if (node_comment == comment)
+            return true;
+    return false;
+}
+
+std::optional<std::string> TopologyNode::getNodeParameter(const std::string& name) const
+{
+    for(auto& node_comment: node_comments)
+    {
+        if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
+        {
+            return node_comment.substr(name.size()+1);
+        }
+    }
+
+    // Not found
+    return {};
+}
+
+// If the parameter is already set, modify the existing comment instead of appending a new one.
+bool TopologyNode::setNodeParameter(const std::string& name, const std::string& value)
+{
+    // value probably better not have any commas in it.
+
+    for(auto& node_comment: node_comments)
+    {
+        // If this command starts with '<name>=', then set the value here.
+        if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
+        {
+            node_comment = name + "=" + value;
+            return true;
+        }
+    }
+
+    // Otherwise append a new comment to the end.
+    node_comments.push_back(name + "=" + value);
+    return false;
+}
+
+std::optional<std::string> TopologyNode::eraseNodeParameter(const std::string& name)
+{
+    // 1. Find the index of the parameter, if it exists.
+    std::optional<int> found_index;
+    for(int i=0;i<node_comments.size();i++)
+    {
+        auto& node_comment = node_comments[i];
+        if (node_comment.substr(0,name.size()) == name and node_comment.size() > name.size() and node_comment[name.size()] == '=')
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    // 2. If it doesn't exist, then we're done.
+    if (not found_index) return {};
+
+    // 3. Save the parameter value.
+    string value = node_comments[*found_index].substr(name.size()+1);
+
+    // 4. Move the comment to the end of the array and pop it.
+    if (*found_index < node_comments.size()-1)
+    {
+        std::swap(node_comments[*found_index], node_comments.back());
+    }
+    node_comments.pop_back();
+
+    // 5. Return the saved value.
+    return value;
+}
+
+
 /** Add a child node. We own it from here on. */
 void TopologyNode::addChild(TopologyNode* c, size_t pos )
 {
@@ -241,7 +318,7 @@ void TopologyNode::addNodeParameter(const std::string &n, double p)
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
+        throw RbException() << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
     }
 
     std::stringstream o;
@@ -259,12 +336,17 @@ void TopologyNode::addNodeParameter(const std::string &n, const std::string &p)
 
     if ( n == "index" || n == "species" )
     {
-        std::cerr << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
+        throw RbException() << "Illegal node parameter with name '" << n << "' and value "<< p <<".\n";
     }
 
+    addNodeParameter_(n,p);
+}
+
+
+void TopologyNode::addNodeParameter_(const std::string &n, const std::string &p)
+{
     std::string comment = n + "=" + p;
     node_comments.push_back( comment );
-
 }
 
 
@@ -312,13 +394,115 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
 }
 
 
+std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
+{
+    // ensure we have an updated copy of branch_length variables
+    if ( not isRoot() )
+    {
+        recomputeBranchLength();
+    }
+
+    // 1. Write out the child newicks if there are any.
+    if (not isTip())
+    {
+        o << "(";
+        for (size_t i=0; i< children.size(); i++)
+        {
+            if (i > 0)
+            {
+                o << ",";
+            }
+            children[i]->buildNewick(o, simmap);
+        }
+        o << ")";
+    }
+
+    // 2. Write out the node name is there is any.
+    if (children.size() < 2)
+        o << taxon.getName();
+
+    // 3. Write out node comments if there are any and (simmap == false)
+    if ( ( node_comments.size() > 0 or RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
+    {
+        o << "[&";
+
+        // first let us print the node index, we must increment by 1 to match RevLanguage indexing
+        if ( RbSettings::userSettings().getPrintNodeIndex() == true )
+        {
+            o << "index=" << getIndex() + 1;
+            if (node_comments.size() > 0)
+                o<<",";
+        }
+
+        StringUtilities::join(o, node_comments, ",");
+
+        o << "]";
+    }
+
+    // 4a. Write ":" + branch length + branch_comments if (simmap == false)
+    if ( simmap == false )
+    {
+        double br = getBranchLength();
+
+        if( RevBayesCore::RbMath::isNan(br) == false )
+        {
+            o << ":" << br;
+        }
+
+        if ( branch_comments.size() > 0 )
+        {
+            o << "[&";
+            for (size_t i = 0; i < branch_comments.size(); ++i)
+            {
+                if ( i > 0 )
+                {
+                    o << ",";
+                }
+                o << branch_comments[i];
+            }
+            o << "]";
+        }
+    }
+    // 4b. Write ":" + simmap comment if (simmap == true)
+    else
+    {
+        if ( isRoot() == false )
+        {
+            // Find the simmap comment
+            optional<string> simmap_comment;
+            for (auto& node_comment: node_comments)
+            {
+                if ( node_comment.substr(0, 18) == "character_history=" )
+                {
+                    simmap_comment = node_comment.substr(18);
+                    break;
+                }
+            }
+
+            // Print the simmap comment
+            if ( simmap_comment )
+                o << ":" << simmap_comment.value();
+            else
+                throw RbException("Error while writing SIMMAP newick string: no character history found for node.");
+        }
+    }
+
+    // 5. Write ";" if we're done with the tree.
+    if ( isRoot() )
+    {
+        // FIXME - move to caller?
+        o << ";";
+    }
+
+    return o;
+}
+
 /*
  * Build newick string.
  * If simmap = true build a newick string compatible with SIMMAP and phytools.
  */
 std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
 {
-
     // create the newick string
     std::stringstream o;
 
@@ -333,142 +517,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         o.precision( std::numeric_limits<double>::digits10 );
     }
 
-    std::vector<std::string> fossil_comments;
-
-    // ensure we have an updated copy of branch_length variables
-    if ( not isRoot() )
-    {
-        recomputeBranchLength();
-    }
-
-    // test whether this is a internal or external node
-    if ( isTip() )
-    {
-        // this is a tip so we just return the name of the node
-        o << taxon.getName();
-
-    }
-    else
-    {
-        std::string fossil_name = "";
-
-        o << "(";
-        size_t j = 0;
-        for (size_t i=0; i< children.size(); i++)
-        {
-            if ( RbSettings::userSettings().getCollapseSampledAncestors()
-                    && children[i]->isSampledAncestor()
-                    && (children[i]->getName() < fossil_name || fossil_name == "" ) )
-            {
-                fossil_name = children[i]->getName();
-                fossil_comments = children[i]->getNodeParameters();
-            }
-            else
-            {
-                if (j > 0)
-                {
-                    o << ",";
-                }
-                j++;
-                o << children[i]->buildNewickString( simmap, round );
-            }
-        }
-
-        o << ")" << fossil_name;
-
-    }
-
-    if ( ( node_comments.size() + fossil_comments.size() > 0 || RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
-    {
-        o << "[&";
-
-        bool needsComma = false;
-
-        // first let us print the node index, we must increment by 1 to match RevLanguage indexing
-        if ( RbSettings::userSettings().getPrintNodeIndex() == true )
-        {
-            o << "index=" << getIndex() + 1;
-            needsComma = true;
-        }
-
-        for (size_t i = 0; i < node_comments.size(); ++i)
-        {
-            if ( needsComma == true )
-            {
-                o << ",";
-            }
-            o << node_comments[i];
-            needsComma = true;
-        }
-
-        for (size_t i = 0; i < fossil_comments.size(); ++i)
-        {
-            if ( needsComma == true )
-            {
-                o << ",";
-            }
-            o << fossil_comments[i];
-            needsComma = true;
-        }
-
-        //Finally let's print the species name (always)
-//        if ( needsComma == true )
-//        {
-//            o << ",";
-//        }
-//        o << "&species=" << getSpeciesName();
-
-        o << "]";
-    }
-
-    if ( simmap == false )
-    {
-        double br = getBranchLength();
-
-        if( RevBayesCore::RbMath::isNan(br) == false )
-        {
-            o << ":" << br;
-        }
-    }
-    else
-    {
-        if ( isRoot() == false )
-        {
-            bool found = false;
-            for (size_t i = 0; i < node_comments.size(); ++i)
-            {
-                if ( node_comments[i].substr(0, 18) == "character_history=" )
-                {
-                    o << ":" << node_comments[i].substr(18, node_comments[i].length());
-                    found = true;
-                    break;
-                }
-            }
-            if ( found == false )
-            {
-                throw RbException("Error while writing SIMMAP newick string: no character history found for node.");
-            }
-        }
-    }
-
-    if ( branch_comments.size() > 0 && simmap == false )
-    {
-        o << "[&";
-        for (size_t i = 0; i < branch_comments.size(); ++i)
-        {
-            if ( i > 0 )
-            {
-                o << ",";
-            }
-            o << branch_comments[i];
-        }
-        o << "]";
-    }
-
-    if ( isRoot() )
-    {
-        o << ";";
-    }
+    buildNewick(o, simmap);
 
     return o.str();
 }
@@ -531,7 +580,6 @@ std::string TopologyNode::computeNewick( bool round )
 /* Build newick string */
 std::string TopologyNode::computePlainNewick( void ) const
 {
-
     // test whether this is a internal or external node
     if ( isTip() )
     {
@@ -540,38 +588,20 @@ std::string TopologyNode::computePlainNewick( void ) const
     }
     else
     {
-        std::string fossil = "";
-        std::string newick = "(";
-        std::vector<std::string> child_newick;
+        // Can we do this unconditionally?
+        // That is, do we ever have taxon names for non-sampled ancestors?
+        string node_name;
+        if (sampled_ancestor and getNumberOfChildren() == 1)
+            node_name = taxon.getName();
+
+        std::vector<std::string> child_newicks;
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
-        {
-            const TopologyNode& child = getChild( i );
-            if ( RbSettings::userSettings().getCollapseSampledAncestors()
-                    && child.isSampledAncestor()
-                    && (child.getName() < fossil || fossil == "") )
-            {
-                fossil = child.getName();
-            }
-            else
-            {
-                child_newick.push_back( child.computePlainNewick() );
-            }
-        }
-        sort(child_newick.begin(), child_newick.end());
-        for (std::vector<std::string>::iterator it = child_newick.begin(); it != child_newick.end(); ++it)
-        {
-            if ( it != child_newick.begin() )
-            {
-                newick += ",";
-            }
-            newick += *it;
-        }
-        newick += ")";
-        newick += fossil;
+            child_newicks.push_back( getChild(i).computePlainNewick() );
 
-        return newick;
+        sort(child_newicks.begin(), child_newicks.end());
+
+        return "(" + StringUtilities::join(child_newicks, ",") + ")" + node_name;
     }
-
 }
 
 
@@ -736,35 +766,13 @@ std::string TopologyNode::fillCladeIndices(std::map<std::string,size_t> &clade_i
     }
     else
     {
-        std::string fossil = "";
-        newick = "(";
-        std::vector<std::string> child_newick;
+        std::vector<std::string> child_newicks;
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
-        {
-            const TopologyNode& child = getChild( i );
-            if ( RbSettings::userSettings().getCollapseSampledAncestors()
-                && child.isSampledAncestor()
-                && (child.getName() < fossil || fossil == "") )
-            {
-                fossil = child.getName();
-            }
-            else
-            {
-                child_newick.push_back( child.fillCladeIndices(clade_index_map) );
-            }
-        }
-        sort(child_newick.begin(), child_newick.end());
-        for (std::vector<std::string>::iterator it = child_newick.begin(); it != child_newick.end(); ++it)
-        {
-            if ( it != child_newick.begin() )
-            {
-                newick += ",";
-            }
-            newick += *it;
-        }
-        newick += ")";
-        newick += fossil;
+            child_newicks.push_back( getChild(i).fillCladeIndices(clade_index_map) );
 
+        sort(child_newicks.begin(), child_newicks.end());
+
+        newick = "(" + StringUtilities::join(child_newicks, ",") + ")";
     }
 
     // now insert the newick string for this node/clade with the index of this node
@@ -1571,6 +1579,21 @@ bool TopologyNode::isRoot( void ) const
 }
 
 
+bool TopologyNode::isTipSampledAncestor() const
+{
+    /*
+     * Only return true for tips that are sampled ancestors,
+     * not for other nodes which might have the sampled_ancestor
+     * flag set, including:
+     *   - parents of those tips (which should have the same time)
+     *   - nodes with 1 child.
+     */
+
+    // Should we check that the branch length is 0?
+
+    return sampled_ancestor and isTip();
+}
+
 bool TopologyNode::isSampledAncestor(  bool propagate ) const
 {
 
@@ -1591,33 +1614,6 @@ bool TopologyNode::isTip( void ) const
 {
 
     return children.empty();
-}
-
-
-bool TopologyNode::isUltrametric(double &depth) const
-{
-    // if we are simply a tip node, then this subtree must be ultrametric
-    if ( isTip() == true )
-    {
-        depth = 0;
-        return true;
-    }
-    
-    double my_depth = 0.0;
-    bool am_ultrametric = children[0]->isUltrametric(my_depth);
-    my_depth += children[0]->getBranchLength();
-    
-    for ( size_t i=1; i<children.size(); ++i )
-    {
-        double child_depth = 0.0;
-        bool child_is_ultrametric = children[i]->isUltrametric(child_depth);
-        child_depth += children[i]->getBranchLength();
-        
-        am_ultrametric = (am_ultrametric && child_is_ultrametric);
-        am_ultrametric = (am_ultrametric && fabs(child_depth - my_depth) < 1E-4);
-    }
-    
-    return am_ultrametric;
 }
 
 
@@ -1821,9 +1817,21 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    if ( sampled_ancestor == true && propagate == true )
+    // Sometimes the `sampled_ancestor` flag is set to `true` for nodes with 1 child.
+    // For those nodes we want to set the age directly, not modify the parent.
+    if ( isTipSampledAncestor() and propagate == true )
     {
+        // The parent should be a bifurcating node.
+        assert(parent->getNumberOfChildren() == 2);
+
+        // We can get away with doing nothing to the nothing to current node
+        // because we'll handle the current node while processing the parent.
         parent->setAge(a);
+
+        // These will be true AFTER the parent->setAge( ) call fixes them up.
+        assert(getAge() == parent->getAge());
+        assert(branch_length == 0);
+
         return;
     }
 
@@ -1837,7 +1845,7 @@ void TopologyNode::setAge(double a, bool propagate)
 
     // we need to recompute my branch-length
     recomputeBranchLength();
-    
+
     // fire tree change event
     // we need to also flag this node as dirty (instead of only its children) as
     // 1) this node can be a tip, and
@@ -1848,10 +1856,9 @@ void TopologyNode::setAge(double a, bool propagate)
     }
 
     // we also need to recompute the branch lengths of my children
-    for (std::vector<TopologyNode *>::iterator it = children.begin(); it != children.end(); ++it)
+    for (auto& child: children)
     {
-        TopologyNode *child = *it;
-        if ( child->isSampledAncestor() )
+        if ( child->isTipSampledAncestor() )
         {
             child->setAge(a, false);
         }
@@ -2007,3 +2014,4 @@ void TopologyNode::setTree(Tree *t)
     }
 
 }
+

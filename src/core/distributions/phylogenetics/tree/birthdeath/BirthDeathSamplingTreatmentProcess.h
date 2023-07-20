@@ -81,7 +81,7 @@ namespace RevBayesCore {
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const;
         void                                            prepareTimeline(void) const;
-        void                                            prepareProbComputation(void) const;
+        void                                            prepareProbComputation(void) const override;
         double                                          pSampling(double t) const;
         double                                          pSurvival(double start, double end) const;
         double                                          simulateDivergenceTime(double origin, double present) const;            //!< Simulate a speciation event.
@@ -116,14 +116,14 @@ namespace RevBayesCore {
         const TypedDagNode<RbVector<double> >*          interval_times_event_extinction;                       //!< The user-specified non-zero times of the instantaneous events and rate shifts.
         const TypedDagNode<RbVector<double> >*          interval_times_event_sampling;                         //!< The user-specified non-zero times of the instantaneous events and rate shifts.
 
-        mutable std::vector<double>                     lambda_times;                                           //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     mu_times;                                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     phi_times;                                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     r_times;                                                //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     lambda_event_times;                                     //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     mu_event_times;                                         //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     phi_event_times;                                        //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     global_timeline;                                        //!< The times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     lambda_times;                                          //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     mu_times;                                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     phi_times;                                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     r_times;                                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     lambda_event_times;                                    //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     mu_event_times;                                        //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     phi_event_times;                                       //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     global_timeline;                                       //!< The times of the instantaneous events and rate shifts.
 
         mutable std::vector<double>                     serial_tip_ages;                                       //!< The ages of all sampled dead lineages sampled by rate-sampling
         mutable std::vector<double>                     serial_sampled_ancestor_ages;                          //!< The ages of all sampled ancestors sampled by rate-sampling
