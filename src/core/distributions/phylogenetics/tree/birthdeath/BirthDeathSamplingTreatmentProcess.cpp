@@ -26,6 +26,8 @@
 #include "Tree.h"
 #include "TypedDagNode.h"
 
+#include <chrono>
+
 namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
@@ -239,7 +241,9 @@ void BirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDagNode<RbV
  */
 double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
-    
+    // See for more on timing: https://www.geeksforgeeks.org/measure-execution-time-function-cpp/#
+    auto startTime = std::chrono::high_resolution_clock::now();
+
     // update parameter vectors
     prepareTimeline();
 
@@ -260,6 +264,10 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( 
     // variable declarations and initialization
     double lnProbTimes = computeLnProbabilityTimes();
     
+    auto stopTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stopTime - startTime);
+    std::cout << std::setprecision(25) << "Execution time (in nanoseconds): " << duration.count() << std::endl;
+
     return lnProbTimes;
 }
 
