@@ -1,6 +1,3 @@
-# print lots of digits
-setOption("outputPrecision",20)
-
 test_tree <- readTrees("data/4_tip_tree.tre")[1]
 taxa <- test_tree.taxa()
 
