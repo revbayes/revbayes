@@ -168,7 +168,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     
     if (t != nullptr)
     {
-        value = t;
+        value = t->clone();
     }
     else
     {
