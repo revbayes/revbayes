@@ -4542,8 +4542,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
     bool   b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode() != "manual"
                                  ? true : false;
 
-    size_t b_max_cpu_threads     = RbSettings::userSettings().getBeagleMaxCPUThreads();
-    int    b_tipCount            = this->tau->getValue().getNumberOfTips();
+    int    b_tipCount            = int( this->tau->getValue().getNumberOfTips() );
     int    b_partialsBufferCount = 2 * this->num_nodes
                                  + ( this->using_ambiguous_characters
                                    ? this->tau->getValue().getNumberOfTips()
