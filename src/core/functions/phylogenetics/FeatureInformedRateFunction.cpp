@@ -1,11 +1,3 @@
-//
-//  FeatureInformedRateFunction.cpp
-//  revbayes-tensorphylo-proj
-//
-//  Created by Michael Landis on 7/12/22.
-//  Copyright © 2022 Michael Landis. All rights reserved.
-//
-
 #include "FeatureInformedRateFunction.h"
 #include "RbException.h"
 #include "Cloneable.h"
@@ -13,6 +5,7 @@
 #include "RbVectorImpl.h"
 #include "TypedDagNode.h"
 
+#include <cmath>
 #include <stddef.h>
 
 namespace RevBayesCore { class DagNode; }
