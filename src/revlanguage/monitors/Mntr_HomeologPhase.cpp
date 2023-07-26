@@ -152,7 +152,7 @@ void Mntr_HomeologPhase::setConstParameter(const std::string& name, const RevPtr
     }
     else
     {
-        Monitor::setConstParameter(name, var);
+    	FileMonitor::setConstParameter(name, var);
     }
     
 }

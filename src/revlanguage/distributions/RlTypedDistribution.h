@@ -11,7 +11,7 @@ namespace RevLanguage {
     class TypedDistribution : public Distribution {
         
     public:
-        TypedDistribution<rlType>(const TypedDistribution<rlType> &x);                                                                //!< Copy constuctor
+        TypedDistribution(const TypedDistribution<rlType> &x);                                                                              //!< Copy constuctor
         virtual                                         ~TypedDistribution(void);                                                                  //!< Destructor
         
         TypedDistribution<rlType>&                      operator=(const TypedDistribution<rlType> &d);
@@ -37,7 +37,7 @@ namespace RevLanguage {
         
         
     protected:
-        TypedDistribution<rlType>(void);                                                                                                 //!< Basic constructor
+        TypedDistribution(void);                                                                                                            //!< Basic constructor
         
         // this is the random variable is associated with the distribution
         // it should only be used for linking functions from the variable to the distribution
