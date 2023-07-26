@@ -673,11 +673,15 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
 {
-	// check that tree is binary
-//    if (v->isBinary() == false)
-//    {
-//        throw RbException("The process is only implemented for binary trees.");
-//    }
+
+    // make sure the input tree is binary
+    v->makeInternalNodesBifurcating(true, true);
+
+	// check that tree is binary (this seems redundant? MRM 7/26/2023)
+    if (v->isBinary() == false)
+    {
+        throw RbException("The process is only implemented for binary trees.");
+    }
 
     // check the taxon labels in the current tree and new tree
     std::vector<std::string> param_taxa;
@@ -686,9 +690,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     {
     	param_taxa.push_back( taxa[i].getName() );
     }
-
-    // make sure the input tree is binary
-    v->makeInternalNodesBifurcating(true, true);
 
 //    // get the taxa names from the input tree
 //    std::vector<Taxon> input_taxa_obj = v->getTaxa();
