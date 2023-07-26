@@ -105,6 +105,7 @@
 #include "Func_pomoState4Converter.h"
 #include "Func_pomoRootFrequencies.h"
 #include "Func_pruneTree.h"
+#include "Func_collapseSA.h"
 #include "Func_featureInformedRates.h"
 #include "Func_simStartingTree.h"
 #include "Func_simTree.h"
@@ -434,6 +435,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomoState4Converter()                             );
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
+        addFunction( new Func_collapseSA<Tree>()                                );
+        addFunction( new Func_collapseSA<BranchLengthTree>()                    );
+        addFunction( new Func_collapseSA<TimeTree>()                            );
         addFunction( new Func_featureInformedRates()                            );
         addFunction( new Func_readPoMoCountFile()                               );
         addFunction( new Func_convertCountFileToNaturalNumbers()                );

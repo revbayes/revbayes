@@ -1344,11 +1344,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		if ( use_origin )
 		{
 			// strip out trailing zeros
-			std::string pattern = ":";
+			char pattern = ':';
 			while ( true )
 			{
 				// if we found a colon stop
-				if ( &var.back() == pattern )
+				if ( var.back() == pattern )
 				{
 					break;
 				}
@@ -1366,11 +1366,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		{
 			// strip off the tail
 			// strip out trailing zeros
-			std::string pattern = ":";
+            char pattern = ':';
 			while ( true )
 			{
 				// if we found a colon stop
-				if ( &var.back() == pattern )
+				if ( var.back() == pattern )
 				{
 					break;
 				}
