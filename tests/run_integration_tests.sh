@@ -65,13 +65,10 @@ for t in revbayes.github.io/tutorials/*/test.sh; do
     res="$?"
     if [ $res = 1 ]; then
         res="error: $f"
-        break
     elif [ $res = 139 ]; then
         res="segfault: $f"
-        break
     elif [ $res != 0 ]; then
         res="error $res: $f"
-        break
     fi
 
     status+=("$res")

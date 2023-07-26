@@ -1,0 +1,18 @@
+1 |> ln()
+
+fnJC(4) |> fnX3() |> fndNdS(2)
+
+1 |> ln(_)
+
+1 |> _mul(_, 2)
+1 |> _mul(2, _)
+
+# Check that we can handle method calls
+x ~ dnNormal(0,1)
+m1 = mvSlide(x)
+moves[1] = m1
+
+m1 |>  moves.append()
+moves |> _.append(m1)
+
+q()
