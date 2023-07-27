@@ -82,14 +82,10 @@ RevBayesCore::MultispeciesCoalescentInverseGammaPrior* Dist_multispeciesCoalesce
     RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Taxon> > t = static_cast<const ModelVector<ModelVector<Taxon> > &>( taxa->getRevObject() ).getValue();
 
 
-    RevBayesCore::MultispeciesCoalescentInverseGammaPrior*   d = new RevBayesCore::MultispeciesCoalescentInverseGammaPrior( st, t, ngt );
+    RevBayesCore::TypedDagNode<double>* sh = static_cast<const RealPos &>( shape->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sc = static_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
 
-
-    RevBayesCore::TypedDagNode<double>* s = static_cast<const RealPos &>( shape->getRevObject() ).getDagNode();
-    d->setShape( s );
-    RevBayesCore::TypedDagNode<double>* r = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-    d->setRate( r );
-
+    RevBayesCore::MultispeciesCoalescentInverseGammaPrior*   d = new RevBayesCore::MultispeciesCoalescentInverseGammaPrior( st, sh, sc, t, ngt );
 
     d->redrawValue();
 
@@ -162,7 +158,7 @@ const MemberRules& Dist_multispeciesCoalescentInverseGammaPrior::getParameterRul
     {
         memberRules.push_back( new ArgumentRule( "speciesTree"  , TimeTree::getClassTypeSpec(), "The species tree in which the gene trees evolve.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule( "shape"        , RealPos::getClassTypeSpec(), "The shape of the inverse gamma prior distribution on the effective population sizes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "rate"         , RealPos::getClassTypeSpec(), "The rate of the inverse gamma prior distribution on the effective population sizes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule( "scale"         , RealPos::getClassTypeSpec(), "The scale of the inverse gamma prior distribution on the effective population sizes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule( "num_genes"    , Natural::getClassTypeSpec(), "The number of genes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule( "taxa"         , ModelVector<ModelVector<Taxon>>::getClassTypeSpec(), "The vector of taxa which have species and individual names.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
@@ -194,9 +190,9 @@ void Dist_multispeciesCoalescentInverseGammaPrior::setConstParameter(const std::
     {
         shape = var;
     }
-    else if ( name == "rate" )
+    else if ( name == "scale" )
     {
-        rate = var;
+        scale = var;
     }
     else if ( name == "taxa" )
     {

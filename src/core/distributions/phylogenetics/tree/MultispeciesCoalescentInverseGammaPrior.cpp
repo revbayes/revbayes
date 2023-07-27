@@ -17,11 +17,12 @@ namespace RevBayesCore { class Tree; }
 
 using namespace RevBayesCore;
 
-MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, RbVector< RbVector<Taxon> > t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt),
-    shape( NULL ),
-    rate( NULL )
+MultispeciesCoalescentInverseGammaPrior::MultispeciesCoalescentInverseGammaPrior(const TypedDagNode<Tree> *sp, TypedDagNode<double>* sh, TypedDagNode<double>* sc, RbVector< RbVector<Taxon> > t, size_t ngt) : AbstractMultispeciesCoalescentGenewise(sp, t, ngt),
+    shape( sh ),
+    scale( sc )
 {
-
+    addParameter( shape );
+    addParameter( scale );
 }
 
 
@@ -52,7 +53,7 @@ double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(s
     // is the only possible outcome)
 
     double alpha = shape->getValue();
-    double beta = rate->getValue();
+    double beta = scale->getValue();
 
     // Initialize terms that are summed over all genes
     int a = 0; // q_b term in Jones (2017); branchQ term in *BEAST
@@ -162,71 +163,71 @@ double MultispeciesCoalescentInverseGammaPrior::drawNe( size_t index )
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    double u = RbStatistics::InverseGamma::rv(shape->getValue(), rate->getValue(), *rng);
+    double u = RbStatistics::InverseGamma::rv(shape->getValue(), scale->getValue(), *rng);
 
     return u;
 }
 
 
-double  MultispeciesCoalescentInverseGammaPrior::getShape(size_t index) const
-{
+// double  MultispeciesCoalescentInverseGammaPrior::getShape(size_t index) const
+// {
 
-    if ( shape != NULL )
-    {
-        return shape->getValue();
-    }
-    else
-    {
-        std::cerr << "Error: Null Pointers for shape." << std::endl;
-        exit(-1);
-    }
-}
-
-
-double  MultispeciesCoalescentInverseGammaPrior::getRate(size_t index) const
-{
-
-    if ( rate != NULL )
-    {
-        return rate->getValue();
-    }
-    else
-    {
-        std::cerr << "Error: Null Pointers for rate." << std::endl;
-        exit(-1);
-    }
-}
+//     if ( shape != NULL )
+//     {
+//         return shape->getValue();
+//     }
+//     else
+//     {
+//         std::cerr << "Error: Null Pointers for shape." << std::endl;
+//         exit(-1);
+//     }
+// }
 
 
-void MultispeciesCoalescentInverseGammaPrior::setShape(TypedDagNode<double>* s)
-{
+// double  MultispeciesCoalescentInverseGammaPrior::getScale(size_t index) const
+// {
 
-    removeParameter( shape );
+//     if ( scale != NULL )
+//     {
+//         return scale->getValue();
+//     }
+//     else
+//     {
+//         std::cerr << "Error: Null Pointers for scale." << std::endl;
+//         exit(-1);
+//     }
+// }
 
-    shape = s;
 
-    addParameter( shape );
-}
+// void MultispeciesCoalescentInverseGammaPrior::setShape(TypedDagNode<double>* s)
+// {
+
+//     removeParameter( shape );
+
+//     shape = s;
+
+//     addParameter( shape );
+// }
 
 
-void MultispeciesCoalescentInverseGammaPrior::setRate(TypedDagNode<double>* r)
-{
+// void MultispeciesCoalescentInverseGammaPrior::setScale(TypedDagNode<double>* s)
+// {
 
-    removeParameter( rate );
+//     removeParameter( scale );
 
-    rate = r;
+//     scale = s;
 
-    addParameter( rate );
-}
+//     addParameter( scale );
+// }
 
 
 /** Swap a parameter of the distribution */
 void MultispeciesCoalescentInverseGammaPrior::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
-    if ( oldP == rate )
+    if ( oldP == scale )
     {
-        rate = static_cast<const TypedDagNode< double >* >( newP );
+        scale = static_cast<const TypedDagNode< double >* >( newP );
     }
 
     if ( oldP == shape )
