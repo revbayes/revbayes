@@ -805,7 +805,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             double lower = node_ages[(int)(0.5 * (double)total_branch_lengths)];
             double upper = node_ages[(int)(0.5 * (double)total_branch_lengths)];
 
-            int interval_size = (int)(report.node_ages_HPD * (double)total_branch_lengths);
+            int interval_size = (int)ceil(report.node_ages_HPD * (double)total_branch_lengths);
             // we need to make sure that we sampled more than one age
             if ( interval_size > 1 )
             {
@@ -827,6 +827,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
                 upper = node_ages[interval_start + interval_size - 1];
 
             }
+            
 
             // make node age annotation
             std::string interval = "{" + StringUtilities::toString(lower)
@@ -848,6 +849,16 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         }
 
     }
+    
+    // making sure that now all branch lengths are internally stored correctly.
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        TopologyNode* n = nodes[i];
+        
+        n->recomputeBranchLength();
+    }
+
+    
 
     if ( report.node_ages && clock && report.force_positive_branch_lengths )
     {
@@ -1126,13 +1137,15 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
     std::vector<TopologyNode*> children = node.getChildren();
 
     double minimum_branch_length = 1e-6;
+    double max_child_age = 0.0;
     for (size_t i = 0; i < children.size(); i++)
     {
-        if (children[i]->getAge() > node.getAge())
-        {
-            children[i]->setAge( node.getAge() - minimum_branch_length );
-        }
         enforceNonnegativeBranchLengths( *children[i] );
+        max_child_age = ( children[i]->getAge() > max_child_age ? children[i]->getAge() : max_child_age );
+    }
+    if ( node.getAge() < max_child_age )
+    {
+        node.setAge( max_child_age + minimum_branch_length );
     }
 }
 
