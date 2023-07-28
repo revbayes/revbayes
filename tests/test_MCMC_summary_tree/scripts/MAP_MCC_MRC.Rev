@@ -1,0 +1,17 @@
+seed(12345)
+
+
+
+trace = readTreeTrace("data/bears_TEFBD.trees",thinning=1)
+my_map_tree = mapTree(trace, file="output/bears_TEFBD.map.cca.tre", positiveBranchLengths=TRUE, mean=FALSE, conditionalAges=TRUE )
+my_map_tree = mapTree(trace, file="output/bears_TEFBD.map.pos.tre", positiveBranchLengths=TRUE, mean=FALSE, conditionalAges=FALSE )
+my_map_tree = mapTree(trace, file="output/bears_TEFBD.map.tre", positiveBranchLengths=FALSE, mean=FALSE, conditionalAges=FALSE )
+my_mcc_tree = mccTree(trace, file="output/bears_TEFBD.mcc.cca.tre", positiveBranchLengths=TRUE, mean=FALSE, conditionalAges=TRUE )
+my_mcc_tree = mccTree(trace, file="output/bears_TEFBD.mcc.pos.tre", positiveBranchLengths=TRUE, mean=FALSE, conditionalAges=FALSE )
+my_mcc_tree = mccTree(trace, file="output/bears_TEFBD.mcc.tre", positiveBranchLengths=FALSE, mean=FALSE, conditionalAges=FALSE )
+
+my_mrj_tree = conTree(trace, cutoff=0.5, file="output/bears_TEFBD.mrj.tre", positiveBranchLengths=TRUE, mean=FALSE )
+
+
+
+q()
