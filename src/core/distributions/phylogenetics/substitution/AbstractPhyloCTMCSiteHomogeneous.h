@@ -3436,7 +3436,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 // add the likelihood for this mixture category
                 double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
-                per_mixture_Likelihoods[site] += exp(tmp_sf - per_mixture_scaling_factors[site]) * site_mixture_probs[mixture] * tmp;
+                per_mixture_Likelihoods[site] += exp(per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
             }
             else
             {
