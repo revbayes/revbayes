@@ -3406,7 +3406,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             for (size_t mixture = 1; mixture < this->num_site_mixtures; ++mixture)
             {
                 double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
-                max_scaling = (max_scaling > tmp_sf);
+                if ( scale_threshold == true )
+                {
+                    max_scaling = (max_scaling < tmp_sf);
+                }
+                else
+                {
+                    max_scaling = (max_scaling > tmp_sf);
+                }
             }
             per_mixture_scaling_factors[site] = max_scaling;
         }
@@ -3436,7 +3443,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 // add the likelihood for this mixture category
                 double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
-                per_mixture_Likelihoods[site] += exp(per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
+                if ( scale_threshold == false )
+                {
+                    per_mixture_Likelihoods[site] += exp(per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
+                }
+                else
+                {
+                    per_mixture_Likelihoods[site] += pow(2, per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
+                }
             }
             else
             {
@@ -3504,13 +3518,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
 
-                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    if ( scale_threshold == false )
                     {
                         rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(per_mixture_scaling_factors[site]) ) * *patterns;
                     }
-                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    else
                     {
-                        rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] * (RbConstants::SCALING_THRESHOLD * per_mixture_scaling_factors[site]) ) * *patterns;
+                        rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] * pow(RbConstants::SCALING_THRESHOLD, per_mixture_scaling_factors[site]) ) * *patterns;
                     }
                 }
                 else
