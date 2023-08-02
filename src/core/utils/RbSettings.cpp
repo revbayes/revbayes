@@ -135,6 +135,10 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return StringUtilities::to_string(lineWidth);
     }
+    else if ( key == "partialLikelihoodStroring" )
+    {
+        return partial_likelihood_storing;
+    }
     else if ( key == "scalingDensity" )
     {
         return StringUtilities::to_string(scaling_density);
@@ -197,6 +201,13 @@ size_t RbSettings::getOutputPrecision( void ) const
 }
 
 
+const std::string& RbSettings::getPartialLikelihoodStoring( void ) const
+{
+    // return the internal value
+    return partial_likelihood_storing;
+}
+
+
 bool RbSettings::getPrintNodeIndex( void ) const
 {
     // return the internal value
@@ -215,25 +226,26 @@ double RbSettings::getTolerance( void ) const
 #define	MAX_DIR_PATH	2048
 void RbSettings::initializeUserSettings(void)
 {
-    moduleDir = "modules";          // the default module directory
-    use_scaling = true;             // the default useScaling
-    scaling_method = "threshold";   // the default useScaling
-    scaling_density = 1;            // the default scaling density
-    lineWidth = 160;                // the default line width
-    tolerance = 10E-10;             // set default value for tolerance comparing doubles
-    outputPrecision = 7;
-    printNodeIndex = true;          // print node indices of tree nodes as comments
-    collapseSampledAncestors = true;
+    moduleDir                   = "modules";        // the default module directory
+    partial_likelihood_storing  = "branch";         // the default method for partial likelihood storing
+    use_scaling                 = true;             // the default useScaling
+    scaling_method              = "threshold";      // the default useScaling
+    scaling_density             = 1;                // the default scaling density
+    lineWidth                   = 160;              // the default line width
+    tolerance                   = 10E-10;           // set default value for tolerance comparing doubles
+    outputPrecision             = 7;
+    printNodeIndex              = true;             // print node indices of tree nodes as comments
+    collapseSampledAncestors    = true;
 
 #if defined( RB_BEAGLE )
-    useBeagle                     = false;      // don't use BEAGLE by default
-    beagleDevice                  = "auto";     // auto select BEAGLE device by default
-    beagleResource                = 0;          // the default BEAGLE resource
-    beagleUseDoublePrecision      = true;       // BEAGLE will use double precision by default
-    beagleMaxCPUThreads           = -1;          // no max set, auto threading up to number of cores
-    //beagleScalingMode            = "dynamic";   // dynamic rescale as needed plus fixed frequency
+    useBeagle                     = false;          // don't use BEAGLE by default
+    beagleDevice                  = "auto";         // auto select BEAGLE device by default
+    beagleResource                = 0;              // the default BEAGLE resource
+    beagleUseDoublePrecision      = true;           // BEAGLE will use double precision by default
+    beagleMaxCPUThreads           = -1;             // no max set, auto threading up to number of cores
+    //beagleScalingMode            = "dynamic";     // dynamic rescale as needed plus fixed frequency
     beagleScalingMode             = "manual";   // manually rescale as needed
-    beagleDynamicScalingFrequency = 100;        // dynamic rescale every 100 evaluations by default
+    beagleDynamicScalingFrequency = 100;            // dynamic rescale every 100 evaluations by default
 #endif /* RB_BEAGLE */
     
     path user_dir = RevBayesCore::expandUserDir("~");
@@ -270,6 +282,7 @@ void RbSettings::listOptions() const
     std::cout << "printNodeIndex = " << (printNodeIndex ? "true" : "false") << std::endl;
     std::cout << "tolerance = " << tolerance << std::endl;
     std::cout << "linewidth = " << lineWidth << std::endl;
+    std::cout << "partialLikelihoodStoring = " << partial_likelihood_storing << std::endl;
     std::cout << "useScaling = " << (use_scaling ? "true" : "false") << std::endl;
     std::cout << "scalingMethod = " << scaling_method << std::endl;
     std::cout << "scalingDensity = " << scaling_density << std::endl;
@@ -305,6 +318,15 @@ void RbSettings::setLineWidth(size_t w)
 {
     // replace the internal value with this new value
     lineWidth = w;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setPartialLikelihoodStoring(const std::string s)
+{
+    // replace the internal value with this new value
+    partial_likelihood_storing = s;
     
     // save the current settings for the future.
     writeUserSettings();
@@ -445,6 +467,10 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
         //lineWidth = std::stoi (value,&sz);
         lineWidth = atoi(value.c_str());
     }
+    else if ( key == "partialLikelihoodStoring" )
+    {
+        partial_likelihood_storing = value;
+    }
     else if ( key == "useScaling" )
     {
         use_scaling = value == "true";
@@ -576,6 +602,7 @@ void RbSettings::writeUserSettings( void )
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
     writeStream << "tolerance=" << tolerance << std::endl;
     writeStream << "linewidth=" << lineWidth << std::endl;
+    writeStream << "partialLikelihoodStoring=" << partial_likelihood_storing << std::endl;
     writeStream << "useScaling=" << (use_scaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scaling_density << std::endl;
     writeStream << "scalingMethod=" << scaling_method << std::endl;
