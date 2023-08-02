@@ -2817,23 +2817,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
         }
     }
 
-    // TODO - ask about this...
-//#if defined( RB_BEAGLE )
-//    // flip back the active eigen system indices for BEAGLE
-//    for ( size_t i=0; i<active_eigen_system.size(); ++i)
-//    {
-//        if ( touched_eigen_system[i] == true )
-//        {
-//            active_eigen_system[i] = (active_eigen_system[i] == 0 ? 1 : 0);
-//        }
-//    }
-//
-//    // reset the eigensystem for BEAGLE
-//    for (std::vector<bool>::iterator it = touched_eigen_system.begin(); it != touched_eigen_system.end(); ++it)
-//    {
-//        (*it) = false;
-//    }
-//#endif /* RB_BEAGLE */
 }
 
 
@@ -3453,11 +3436,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 // add the likelihood for this mixture category
                 double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
-                per_mixture_Likelihoods[site] += exp(tmp_sf - per_mixture_scaling_factors[site]) * site_mixture_probs[mixture];
+                per_mixture_Likelihoods[site] += exp(tmp_sf - per_mixture_scaling_factors[site]) * site_mixture_probs[mixture] * tmp;
             }
             else
             {
-                per_mixture_Likelihoods[site] += site_mixture_probs[mixture];
+                per_mixture_Likelihoods[site] += site_mixture_probs[mixture] * tmp;
             }
             // increment the pointers to the next site
 //            p_site_mixture+=this->siteOffset;
@@ -4055,6 +4038,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         touched = true;
         this->storedLnProb = this->lnProb;
     }
+    touch_all = true;
 
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
