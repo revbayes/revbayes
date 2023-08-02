@@ -215,14 +215,14 @@ double RbSettings::getTolerance( void ) const
 #define	MAX_DIR_PATH	2048
 void RbSettings::initializeUserSettings(void)
 {
-    moduleDir = "modules";      // the default module directory
-    use_scaling = true;         // the default useScaling
-    use_method = "threshold";   // the default useScaling
-    scaling_density = 1;        // the default scaling density
-    lineWidth = 160;            // the default line width
-    tolerance = 10E-10;         // set default value for tolerance comparing doubles
+    moduleDir = "modules";          // the default module directory
+    use_scaling = true;             // the default useScaling
+    scaling_method = "threshold";   // the default useScaling
+    scaling_density = 1;            // the default scaling density
+    lineWidth = 160;                // the default line width
+    tolerance = 10E-10;             // set default value for tolerance comparing doubles
     outputPrecision = 7;
-    printNodeIndex = true;      // print node indices of tree nodes as comments
+    printNodeIndex = true;          // print node indices of tree nodes as comments
     collapseSampledAncestors = true;
 
 #if defined( RB_BEAGLE )

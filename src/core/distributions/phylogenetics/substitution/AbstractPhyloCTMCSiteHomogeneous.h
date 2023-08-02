@@ -211,7 +211,8 @@ namespace RevBayesCore {
         std::vector<size_t>                                                 activeLikelihood;
         double*                                                             marginalLikelihoods;
 
-        std::vector< std::vector< std::vector<double> > >                   perNodeSiteLogScalingFactors;
+//        std::vector< std::vector< std::vector<double> > >                   per_node_site_mixture_log_scaling_factors;
+        std::vector< std::vector< std::vector<std::vector<double> > > >     per_node_site_mixture_log_scaling_factors;
 
         // the data
         std::vector<std::vector<RbBitSet> >                                 ambiguous_char_matrix;
@@ -363,7 +364,7 @@ partialLikelihoods( NULL ),
 activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
 //    marginalLikelihoods( new double[num_nodes*num_site_mixtures*num_sites*num_chars] ),
 marginalLikelihoods( NULL ),
-perNodeSiteLogScalingFactors( std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(num_sites, 0.0) ) ) ),
+per_node_site_mixture_log_scaling_factors( std::vector<std::vector< std::vector< std::vector<double> > > >(2, std::vector<std::vector< std::vector<double> > >(num_nodes, std::vector< std::vector<double> >( num_site_mixtures, std::vector<double>(num_sites, 0.0) ) ) ) ),
 ambiguous_char_matrix(),
 char_matrix(),
 gap_matrix(),
@@ -466,7 +467,7 @@ partialLikelihoods( NULL ),
 activeLikelihood( n.activeLikelihood ),
 //    marginalLikelihoods( new double[num_nodes*num_site_mixtures*num_sites*num_chars] ),
 marginalLikelihoods( NULL ),
-perNodeSiteLogScalingFactors( n.perNodeSiteLogScalingFactors ),
+per_node_site_mixture_log_scaling_factors( n.per_node_site_mixture_log_scaling_factors ),
 ambiguous_char_matrix( n.ambiguous_char_matrix ),
 char_matrix( n.char_matrix ),
 gap_matrix( n.gap_matrix ),
@@ -2271,7 +2272,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
             //-- We only need to scale only if we are not using BEAGLE
 #if !defined ( RB_BEAGLE )
             // rescale likelihood vector
-            scale(node_index);
+//            scale(node_index);
 #endif /* NOT RB_BEAGLE */
         }
         else
@@ -2777,7 +2778,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 
     }
 
-    perNodeSiteLogScalingFactors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(pattern_block_size, 0.0) ) );
+    per_node_site_mixture_log_scaling_factors = std::vector<std::vector< std::vector< std::vector<double> > > >(2, std::vector<std::vector< std::vector<double> > >(num_nodes, std::vector< std::vector<double> >(num_site_mixtures, std::vector<double>(pattern_block_size, 0.0) ) ) );
     
     activePmatrixOffset         =  num_nodes * num_site_mixtures;
     pmatNodeOffset              =  num_site_mixtures;
@@ -2860,65 +2861,94 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 
     double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
-    if ( RbSettings::userSettings().getUseScaling() == true &&
-         node_index % RbSettings::userSettings().getScalingDensity() == 0 )
-    {
-        // iterate over all mixture categories
-        for (size_t site = 0; site < this->pattern_block_size ; ++site)
-        {
-
-            // the max probability
-            double max = 0.0;
-
-            // compute the per site probabilities
-            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-            {
-                // get the pointers to the likelihood for this mixture category
-                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
-
-                double* p_site_mixture = p_node + offset;
-
-                for ( size_t i=0; i<this->num_chars; ++i)
-                {
-                    if ( p_site_mixture[i] > max )
-                    {
-                        max = p_site_mixture[i];
-                    }
-                }
-
-            }
-
-            // Don't divide by zero or NaN.
-            if (not (max > 0)) continue;
-
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
-
-            // compute the per site probabilities
-            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-            {
-                // get the pointers to the likelihood for this mixture category
-                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
-
-                double* p_site_mixture = p_node + offset;
-
-                for ( size_t i=0; i<this->num_chars; ++i)
-                {
-                    p_site_mixture[i] /= max;
-                }
-
-            }
-
-        }
-    }
-    else if ( RbSettings::userSettings().getUseScaling() == true )
-    {
-        // iterate over all sites
-        for (size_t site = 0; site < this->pattern_block_size ; ++site)
-        {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = 0;
-        }
-
-    }
+//    if ( RbSettings::userSettings().getUseScaling() == true && ( (RbSettings::userSettings().getScalingMethod() == "node" &&
+//         node_index % RbSettings::userSettings().getScalingDensity() == 0) || RbSettings::userSettings().getScalingMethod() == "threshold" ) )
+//    {
+//        // iterate over all mixture categories
+//        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+//        {
+//
+//            // the max probability
+//            double max = 0.0;
+//
+//            // compute the per site probabilities
+//            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//            {
+//                // get the pointers to the likelihood for this mixture category
+//                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                double* p_site_mixture = p_node + offset;
+//
+//                for ( size_t i=0; i<this->num_chars; ++i)
+//                {
+//                    if ( p_site_mixture[i] > max )
+//                    {
+//                        max = p_site_mixture[i];
+//                    }
+//                }
+//
+//            }
+//
+//            // Don't divide by zero or NaN.
+//            if (not (max > 0)) continue;
+//
+//            if ( RbSettings::userSettings().getScalingMethod() == "node" )
+//            {
+//                this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
+//
+//                // compute the per site probabilities
+//                for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//                {
+//                    // get the pointers to the likelihood for this mixture category
+//                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                    double* p_site_mixture = p_node + offset;
+//
+//                    for ( size_t i=0; i<this->num_chars; ++i)
+//                    {
+//                        p_site_mixture[i] /= max;
+//                    }
+//                }
+//
+//            }
+//            else if ( RbSettings::userSettings().getScalingMethod() == "threshold" && max < RbConstants::SCALING_THRESHOLD )
+//            {
+//                this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = 1.0;
+//
+//                // compute the per site probabilities
+//                for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//                {
+//                    // get the pointers to the likelihood for this mixture category
+//                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                    double* p_site_mixture = p_node + offset;
+//
+//                    for ( size_t i=0; i<this->num_chars; ++i)
+//                    {
+//                        p_site_mixture[i] /= RbConstants::SCALING_THRESHOLD;
+//                    }
+//                }
+//            }
+//            else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+//            {
+//                this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = 0.0;
+//            }
+//            else
+//            {
+//                throw RbException("Unexpected scaling method '" + RbSettings::userSettings().getScalingMethod() + "' used in PhyloCTMC");
+//            }
+//
+//        }
+//    }
+//    else if ( RbSettings::userSettings().getUseScaling() == true )
+//    {
+//        // iterate over all sites
+//        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+//        {
+//            this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = 0;
+//        }
+//
+//    }
 }
 
 
@@ -2926,68 +2956,100 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right )
 {
 
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-
-    if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
-    {
-        // iterate over all mixture categories
-        for (size_t site = 0; site < this->pattern_block_size ; ++site)
-        {
-
-            // the max probability
-            double max = 0.0;
-
-            // compute the per site probabilities
-            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-            {
-                // get the pointers to the likelihood for this mixture category
-                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
-
-                double*          p_site_mixture          = p_node + offset;
-
-                for ( size_t i=0; i<this->num_chars; ++i)
-                {
-                    if ( p_site_mixture[i] > max )
-                    {
-                        max = p_site_mixture[i];
-                    }
-
-                }
-
-            }
-
-            // Don't divide by zero or NaN.
-            if (not (max > 0)) continue;
-
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] - log(max);
-
-            // compute the per site probabilities
-            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-            {
-                // get the pointers to the likelihood for this mixture category
-                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
-
-                double* p_site_mixture = p_node + offset;
-
-                for ( size_t i=0; i<this->num_chars; ++i)
-                {
-                    p_site_mixture[i] /= max;
-                }
-
-            }
-
-        }
-
-    }
-    else if ( RbSettings::userSettings().getUseScaling() == true )
-    {
-        // iterate over all mixture categories
-        for (size_t site = 0; site < this->pattern_block_size ; ++site)
-        {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site];
-        }
-
-    }
+//    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+//
+//    if ( RbSettings::userSettings().getUseScaling() == true && ( ( RbSettings::userSettings().getScalingMethod() == "node" && node_index % RbSettings::userSettings().getScalingDensity() == 0 ) || RbSettings::userSettings().getScalingMethod() == "threshold" ) )
+//    {
+//        // iterate over all mixture categories
+//        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+//        {
+//
+//            // the max probability
+//            double max = 0.0;
+//
+//            // compute the per site probabilities
+//            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//            {
+//                // get the pointers to the likelihood for this mixture category
+//                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                double*          p_site_mixture          = p_node + offset;
+//
+//                for ( size_t i=0; i<this->num_chars; ++i)
+//                {
+//                    if ( p_site_mixture[i] > max )
+//                    {
+//                        max = p_site_mixture[i];
+//                    }
+//
+//                }
+//
+//            }
+//
+//            // Don't divide by zero or NaN.
+//            if (not (max > 0)) continue;
+//
+//            if ( RbSettings::userSettings().getScalingMethod() == "node" )
+//            {
+//                this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site] - log(max);
+//
+//                // compute the per site probabilities
+//                for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//                {
+//                    // get the pointers to the likelihood for this mixture category
+//                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                    double* p_site_mixture = p_node + offset;
+//
+//                    for ( size_t i=0; i<this->num_chars; ++i)
+//                    {
+//                        p_site_mixture[i] /= max;
+//                    }
+//
+//                }
+//
+//            }
+//            else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+//            {
+//                if ( max < RbConstants::SCALING_THRESHOLD )
+//                {
+//
+//                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site] + 1;
+//
+//                    // compute the per site probabilities
+//                    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//                    {
+//                        // get the pointers to the likelihood for this mixture category
+//                        size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                        double* p_site_mixture = p_node + offset;
+//
+//                        for ( size_t i=0; i<this->num_chars; ++i)
+//                        {
+//                            p_site_mixture[i] /= RbConstants::SCALING_THRESHOLD;
+//                        }
+//                    }
+//
+//                }
+//                else
+//                {
+//                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site];
+//                }
+//
+//            }
+//
+//        }
+//
+//    }
+//    else if ( RbSettings::userSettings().getUseScaling() == true )
+//    {
+//        // iterate over all mixture categories
+//        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+//        {
+//            this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site];
+//        }
+//
+//    }
 
 }
 
@@ -2996,66 +3058,100 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
 
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-
-    if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
-    {
-        // iterate over all mixture categories
-        for (size_t site = 0; site < this->pattern_block_size ; ++site)
-        {
-
-            // the max probability
-            double max = 0.0;
-
-            // compute the per site probabilities
-            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-            {
-                // get the pointers to the likelihood for this mixture category
-                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
-
-                double* p_site_mixture = p_node + offset;
-
-                for ( size_t i=0; i<this->num_chars; ++i)
-                {
-                    if ( p_site_mixture[i] > max )
-                    {
-                        max = p_site_mixture[i];
-                    }
-                }
-
-            }
-
-            // Don't divide by zero or NaN.
-            if (not (max > 0)) continue;
-
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site] - log(max);
-
-            // compute the per site probabilities
-            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-            {
-                // get the pointers to the likelihood for this mixture category
-                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
-
-                double* p_site_mixture = p_node + offset;
-
-                for ( size_t i=0; i<this->num_chars; ++i)
-                {
-                    p_site_mixture[i] /= max;
-                }
-
-            }
-
-        }
-    }
-    else if ( RbSettings::userSettings().getUseScaling() == true )
-    {
-        // iterate over all mixture categories
-        for (size_t site = 0; site < this->pattern_block_size ; ++site)
-        {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site];
-        }
-
-    }
+//    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+//
+//    if ( RbSettings::userSettings().getUseScaling() == true && ( ( RbSettings::userSettings().getScalingMethod() == "node" && node_index % RbSettings::userSettings().getScalingDensity() == 0 ) || RbSettings::userSettings().getScalingMethod() == "threshold" ) )
+//    {
+//        // iterate over all mixture categories
+//        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+//        {
+//
+//            // the max probability
+//            double max = 0.0;
+//
+//            // compute the per site probabilities
+//            for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//            {
+//                // get the pointers to the likelihood for this mixture category
+//                size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                double* p_site_mixture = p_node + offset;
+//
+//                for ( size_t i=0; i<this->num_chars; ++i)
+//                {
+//                    if ( p_site_mixture[i] > max )
+//                    {
+//                        max = p_site_mixture[i];
+//                    }
+//                }
+//
+//            }
+//
+//            // Don't divide by zero or NaN.
+//            if (not (max > 0)) continue;
+//
+//            if ( RbSettings::userSettings().getScalingMethod() == "node" )
+//            {
+//
+//                this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][site] - log(max);
+//
+//                // compute the per site probabilities
+//                for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//                {
+//                    // get the pointers to the likelihood for this mixture category
+//                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                    double* p_site_mixture = p_node + offset;
+//
+//                    for ( size_t i=0; i<this->num_chars; ++i)
+//                    {
+//                        p_site_mixture[i] /= max;
+//                    }
+//
+//                }
+//
+//            }
+//            else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+//            {
+//                if ( max < RbConstants::SCALING_THRESHOLD )
+//                {
+//
+//                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][site] + 1;
+//
+//                    // compute the per site probabilities
+//                    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+//                    {
+//                        // get the pointers to the likelihood for this mixture category
+//                        size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+//
+//                        double* p_site_mixture = p_node + offset;
+//
+//                        for ( size_t i=0; i<this->num_chars; ++i)
+//                        {
+//                            p_site_mixture[i] /= RbConstants::SCALING_THRESHOLD;
+//                        }
+//                    }
+//
+//                }
+//                else
+//                {
+//                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][site];
+//
+//                }
+//
+//            }
+//
+//        }
+//    }
+//    else if ( RbSettings::userSettings().getUseScaling() == true )
+//    {
+//        // iterate over all mixture categories
+//        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+//        {
+//            this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][site];
+//        }
+//
+//    }
 }
 
 
@@ -3622,21 +3718,34 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
     std::vector<double> per_mixture_Likelihoods = std::vector<double>(pattern_block_size,0.0);
+    std::vector<double> per_mixture_scaling_factors = std::vector<double>(pattern_block_size,0.0);
 
     std::vector<double> site_mixture_probs = getMixtureProbs();
 
     // get pointer the likelihood
     double*   p_mixture     = p_node;
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+
+    // iterate over all sites
+    for (size_t site = 0; site < pattern_block_size; ++site)
     {
-
-        // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
-        // iterate over all sites
-
-        for (size_t site = 0; site < pattern_block_size; ++site)
+        
+        // first find the max scaling
+        double max_scaling = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site];
+        // iterate over all mixture categories
+        for (size_t mixture = 1; mixture < this->num_site_mixtures; ++mixture)
         {
+            double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
+            max_scaling = (max_scaling > tmp_sf);
+        }
+        per_mixture_scaling_factors[site] = max_scaling;
+        
+        // iterate over all mixture categories
+        for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+        {
+
+            // get pointers to the likelihood for this mixture category
+            double*   p_site_mixture     = p_mixture + (mixture*this->mixtureOffset) + (site*this->siteOffset);
+
             // temporary variable storing the likelihood
             double tmp = 0.0;
             // get the pointers to the likelihoods for this site and mixture category
@@ -3651,15 +3760,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 ++p_site_j;
             }
             // add the likelihood for this mixture category
-            per_mixture_Likelihoods[site] += tmp * site_mixture_probs[mixture];
+            double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
+            per_mixture_Likelihoods[site] += exp(tmp_sf - max_scaling) * site_mixture_probs[mixture];
 
             // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset;
+//            p_site_mixture+=this->siteOffset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset;
+//        p_mixture+=this->mixtureOffset;
 
     } // end-for over all mixtures
 
@@ -3715,12 +3825,27 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
 
-                    rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site]) ) * *patterns;
+                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    {
+                        rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(per_mixture_scaling_factors[site]) ) * *patterns;
+                    }
+                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    {
+                        rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] * (RbConstants::SCALING_THRESHOLD * per_mixture_scaling_factors[site]) ) * *patterns;
+                    }
                 }
                 else
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                    rv[site] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
+                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    {
+                        rv[site] -= per_mixture_scaling_factors[site] * *patterns;
+                    }
+                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    {
+                        rv[site] -= (RbConstants::LN2 * 256 * per_mixture_scaling_factors[site]) * *patterns;
+                    }
+
                 }
 
             }
@@ -3756,7 +3881,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
-                rv[site] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
+                if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                {
+                    rv[site] -= per_mixture_scaling_factors[site] * *patterns;
+                }
+                else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                {
+                    rv[site] -= (RbConstants::LN2 * 256 * per_mixture_scaling_factors[site]) * *patterns;
+                }
             }
 
         }
@@ -3875,7 +4007,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                     if ( RbSettings::userSettings().getUseScaling() == true )
                     {
-                        rv[site][site_rate_index * num_site_matrices + matrix] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
+                        if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                        {
+                            rv[site][site_rate_index * num_site_matrices + matrix] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                        }
+                        else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                        {
+                            rv[site][site_rate_index * num_site_matrices + matrix] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                        }
+                            
                     }
 
                 }
@@ -3896,7 +4036,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                 if ( RbSettings::userSettings().getUseScaling() == true )
                 {
-                    rv[site][mixture] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
+                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    {
+                        rv[site][mixture] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                    }
+                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    {
+                        rv[site][mixture] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                    }
                 }
             }
 
@@ -4030,7 +4177,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                 if ( RbSettings::userSettings().getUseScaling() == true )
                 {
-                    rv[site][site_rate_index] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
+                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    {
+                        rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                    }
+                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    {
+                        rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                    }
                 }
 
             }
@@ -4049,8 +4203,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                 if ( RbSettings::userSettings().getUseScaling() == true )
                 {
-                    rv[site][site_rate_index] -= this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] * *patterns;
+                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    {
+                        rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                    }
+                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    {
+                        rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                    }
+
                 }
+
             }
 
         }

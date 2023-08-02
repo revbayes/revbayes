@@ -99,6 +99,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
           double*   p_mixture          = p;
     const double*   p_mixture_left     = p_left;
     const double*   p_mixture_right    = p_right;
+    
+    
+    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true && ( (RbSettings::userSettings().getScalingMethod() == "node" &&
+                                                                                    root % RbSettings::userSettings().getScalingDensity() == 0) || RbSettings::userSettings().getScalingMethod() == "threshold" );
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
+    
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -136,6 +143,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     
     // reset the likelihood
     this->lnProb = 0.0;
+    
+    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true && ( (RbSettings::userSettings().getScalingMethod() == "node" &&
+                                                                                    root % RbSettings::userSettings().getScalingDensity() == 0) || RbSettings::userSettings().getScalingMethod() == "threshold" );
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
     
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -222,11 +234,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
 #   endif
     
+    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true && ( (RbSettings::userSettings().getScalingMethod() == "node" &&
+                                                                                    node_index % RbSettings::userSettings().getScalingDensity() == 0) || RbSettings::userSettings().getScalingMethod() == "threshold" );
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-//         const double* tp_begin = this->transition_prob_matrices[mixture].theMatrix;
         const double* tp_begin = this->pmatrices[pmat_offset + mixture].theMatrix;
         
         // get the pointers to the likelihood for this mixture category
@@ -364,6 +379,33 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
 #           endif
             
+            if ( test_underflow )
+            {
+                double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
+                max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
+                max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
+                if ( scale_threshold == false )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][mixture][site] - log(max);
+                    p_site_mixture[0] /= max;
+                    p_site_mixture[1] /= max;
+                    p_site_mixture[2] /= max;
+                    p_site_mixture[3] /= max;
+                }
+                else if ( max < RbConstants::SCALING_THRESHOLD )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][mixture][site] + 1;
+                    p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
+                    p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
+                    p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
+                    p_site_mixture[3] /= RbConstants::SCALING_THRESHOLD;
+                }
+                else
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][mixture][site];
+                }
+            }
+            
             // increment the pointers to the next site
             p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset; p_site_mixture+=this->siteOffset;
 
@@ -393,6 +435,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     const double*   p_middle    = this->partialLikelihoods + this->activeLikelihood[middle]*this->activeLikelihoodOffset + middle*this->nodeOffset;
     const double*   p_right     = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
     double*         p_node      = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    
+    
+    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true && ( (RbSettings::userSettings().getScalingMethod() == "node" &&
+                                                                                    node_index % RbSettings::userSettings().getScalingDensity() == 0) || RbSettings::userSettings().getScalingMethod() == "threshold" );
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -541,6 +589,34 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
 #           endif
             
+            
+            if ( test_underflow )
+            {
+                double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
+                max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
+                max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
+                if ( scale_threshold == false )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][mixture][site] - log(max);
+                    p_site_mixture[0] /= max;
+                    p_site_mixture[1] /= max;
+                    p_site_mixture[2] /= max;
+                    p_site_mixture[3] /= max;
+                }
+                else if ( max < RbConstants::SCALING_THRESHOLD )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][mixture][site] + 1;
+                    p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
+                    p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
+                    p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
+                    p_site_mixture[3] /= RbConstants::SCALING_THRESHOLD;
+                }
+                else
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[middle]][middle][mixture][site];
+                }
+            }
+            
             // increment the pointers to the next site
             p_site_mixture_left+=this->siteOffset; p_site_mixture_middle+=this->siteOffset; p_site_mixture_right+=this->siteOffset; p_site_mixture+=this->siteOffset;
             
@@ -564,24 +640,33 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
-//     this->updateTransitionProbabilities( node_index );
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
     
-    double*   p_mixture      = p_node;
+//    double*   p_mixture      = p_node;
+    
+    
+    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true && ( (RbSettings::userSettings().getScalingMethod() == "node" &&
+                                                                                    node_index % RbSettings::userSettings().getScalingDensity() == 0) || RbSettings::userSettings().getScalingMethod() == "threshold" );
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
-        // the transition probability matrix for this mixture category
-//         const double*       tp_begin    = this->transition_prob_matrices[mixture].theMatrix;
-        const double*       tp_begin    = this->pmatrices[pmat_offset + mixture].theMatrix;
-        
-        // get the pointer to the likelihoods for this site and mixture category
-        double*     p_site_mixture      = p_mixture;
-        
+
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {
+        
+            
+            // the transition probability matrix for this mixture category
+            const double*       tp_begin    = this->pmatrices[pmat_offset + mixture].theMatrix;
+        
+            // get the pointer to the likelihoods for this site and mixture category
+            size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+
+            double* p_site_mixture      = p_node + offset;
+//            double* p_site_mixture      = p_mixture;
             
             // is this site a gap?
             if ( gap_node[site] ) 
@@ -592,6 +677,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                 p_site_mixture[2] = 1.0;
                 p_site_mixture[3] = 1.0;
                 
+                if ( test_underflow )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = 0;
+                }
             } 
             else // we have observed a character
             {
@@ -658,19 +747,49 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         
                 }
                 
+                
+                if ( test_underflow )
+                {
+                    double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
+                    max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
+                    max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
+                    if ( scale_threshold == false )
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = - log(max);
+                        p_site_mixture[0] /= max;
+                        p_site_mixture[1] /= max;
+                        p_site_mixture[2] /= max;
+                        p_site_mixture[3] /= max;
+                    }
+                    else if ( max < RbConstants::SCALING_THRESHOLD )
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = 1;
+                        p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
+                        p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
+                        p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
+                        p_site_mixture[3] /= RbConstants::SCALING_THRESHOLD;
+                    }
+                    else
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site] = 0;
+                    }
+                }
+                
+                
             } // end-if a gap state
             
             
             // increment the pointers to next site
-            p_site_mixture+=this->siteOffset; 
+//            p_site_mixture+=this->siteOffset;
             
         } // end-for over all sites/patterns in the sequence
+
         
         // increment the pointers to next mixture category
-        p_mixture+=this->mixtureOffset;
+//        p_mixture+=this->mixtureOffset;
         
     } // end-for over all mixture categories
-    
+
 }
 
 
