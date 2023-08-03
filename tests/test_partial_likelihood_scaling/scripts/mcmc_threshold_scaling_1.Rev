@@ -1,0 +1,105 @@
+################################################################################
+#
+# RevBayes Validation Test: Testing partial likelihood rescaling
+#
+# Model: Sequences evolve under the GTR+Gamma+I.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+setOption("useScaling","true")
+setOption("scalingMethod","threshold")
+setOption("scalingDensity",1)
+
+
+
+#######################
+# Reading in the Data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# vector for the moves and monitors
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+
+######################
+# Substitution Model #
+######################
+
+rho_prior <- rep(1, 6 )
+rho ~ dnDirichlet(rho_prior)
+moves.append(mvBetaSimplex(rho, weight=4.0))
+moves.append(mvDirichletSimplex(rho, weight=2.0))
+
+pi_prior <- rep(1,4)
+pi ~ dnDirichlet(pi_prior)
+moves.append(mvBetaSimplex(pi, weight=2.0))
+moves.append(mvDirichletSimplex(pi, weight=1.0))
+
+Q := fnGTR(rho,pi)
+
+alpha ~ dnUniform(0, 1e8)
+alpha.setValue(1.0)
+sr := fnDiscretizeGamma(alpha, alpha, 4, false)
+moves.append(mvScale(alpha, weight=2.0))
+
+
+pinv ~ dnBeta(1,1)
+moves.append(mvBetaProbability(pinv, weight=2.0))
+
+
+##############
+# Tree model #
+##############
+
+psi ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+
+moves.append( mvNNI(psi, weight=taxa.size() * 2.0) )
+moves.append( mvSPR(psi, weight=taxa.size() / 5.0) )
+moves.append( mvSubtreeSwap(psi, weight=taxa.size() / 5.0) )
+moves.append( mvBranchLengthScale(psi, weight=2*taxa.size()) )
+
+###################
+# PhyloCTMC Model #
+###################
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=sr, pInv=pinv, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+monitors.append( mnStochasticVariable(filename="output/mcmc_threshold_scaling_1.out",printgen=1, separator = TAB) )
+monitors.append( mnScreen(printgen=100) )
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+
+mymcmc.run(generations=1000)
+
+
+# you may want to quit RevBayes now
+q()
