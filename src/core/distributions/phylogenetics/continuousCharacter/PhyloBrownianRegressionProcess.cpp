@@ -33,6 +33,7 @@ PhyloBrownianRegressionProcess::PhyloBrownianRegressionProcess(const TypedDagNod
     predictors( pred )
 {
     
+    num_predictors = predictors.getNumberOfCharacters();
     
     // We don'e want tau to die before we die, or it can't remove us as listener
     tau->getValue().getTreeChangeEventHandler().addListener( this );
