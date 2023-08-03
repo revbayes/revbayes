@@ -12,7 +12,7 @@
 seed(12345)
 
 setOption("useScaling","true")
-setOption("scalingMethod","threshold")
+setOption("scalingMethod","node")
 setOption("scalingDensity",1)
 
 
