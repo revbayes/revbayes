@@ -745,6 +745,22 @@ void PhyloBrownianRegressionProcess::swapParameterInternal(const DagNode *oldP, 
         AbstractPhyloBrownianProcess::swapParameterInternal(oldP, newP);
         this->tau->getValue().getTreeChangeEventHandler().addListener( this );
     }
+    else if (oldP == this->single_mean_predictor)
+    {
+        single_mean_predictor = static_cast< const TypedDagNode<double> * >( newP );
+    }
+    else if (oldP == this->multiple_mean_predictor)
+    {
+        multiple_mean_predictor = static_cast< const TypedDagNode< RbVector<double> > * >( newP );
+    }
+    else if (oldP == this->single_slope)
+    {
+        single_slope = static_cast< const TypedDagNode<double> * >( newP );
+    }
+    else if (oldP == this->multiple_slope)
+    {
+        multiple_slope = static_cast< const TypedDagNode< RbVector<double> > * >( newP );
+    }
     else
     {
         AbstractPhyloBrownianProcess::swapParameterInternal(oldP, newP);
