@@ -3408,11 +3408,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
                 if ( scale_threshold == true )
                 {
-                    max_scaling = (max_scaling < tmp_sf);
+                    max_scaling = (max_scaling < tmp_sf ? max_scaling : tmp_sf);
                 }
                 else
                 {
-                    max_scaling = (max_scaling > tmp_sf);
+                    max_scaling = (max_scaling < tmp_sf ? max_scaling : tmp_sf);
                 }
             }
             per_mixture_scaling_factors[site] = max_scaling;
@@ -3530,11 +3530,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 else
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    if ( scale_threshold == false )
                     {
                         rv[site] -= per_mixture_scaling_factors[site] * *patterns;
                     }
-                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    else
                     {
                         rv[site] -= (RbConstants::LN2 * 256 * per_mixture_scaling_factors[site]) * *patterns;
                     }
@@ -4052,7 +4052,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         touched = true;
         this->storedLnProb = this->lnProb;
     }
-    touch_all = true;
 
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
