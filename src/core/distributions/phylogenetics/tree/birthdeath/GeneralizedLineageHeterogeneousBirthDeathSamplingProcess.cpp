@@ -763,7 +763,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool use_simmap_default)
 {
 	// draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistory();
@@ -777,14 +777,29 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 		// create the string
         std::string simmap_string = "{";
-        std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
-        first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
-        for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
+        if (use_simmap_default == true)
         {
-            simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
-            if ( jt != first_event )
+            std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
+            first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
+            for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
             {
-                simmap_string = simmap_string + ":";
+                simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
+                if ( jt != first_event )
+                {
+                    simmap_string = simmap_string + ":";
+                }
+            }
+        }
+        else
+        {
+            std::vector< std::pair<double, size_t> >::iterator first_event = this_history.begin();
+            for(std::vector< std::pair<double, size_t> >::iterator jt = this_history.begin(); jt != this_history.end(); ++jt)
+            {
+                if ( jt != first_event )
+                {
+                    simmap_string = simmap_string + ":";
+                }
+                simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
             }
         }
         simmap_string = simmap_string + "}";
@@ -793,7 +808,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
         character_histories[it->first - 1] = simmap_string;
 
 	}
-
+    
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events)
