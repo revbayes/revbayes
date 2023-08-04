@@ -3,6 +3,10 @@
 #include <cstddef>
 #include <ostream>
 
+#ifdef RB_BEAGLE
+#include "PhyloCTMCSiteHomogeneousBEAGLE.h"
+#endif
+
 #include "RlDistributionMemberFunction.h"
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "PhyloCTMCSiteHomogeneousBinary.h"
@@ -292,8 +296,20 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
     if ( dt == "DNA" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
-
+        RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<RevBayesCore::DnaState> *dist = NULL;
+#ifdef RB_BEAGLE
+        if ( RbSettings::userSettings().getUseBeagle() == true )
+        {
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::DnaState>( tau, 4, true, n, ambig, internal, gapmatch);
+        }
+        else
+        {
+#endif
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
+#ifdef RB_BEAGLE
+        }
+#endif
+ 
 	return setDistParameters(dist);
     }
     else if ( dt == "RNA" )
@@ -304,7 +320,19 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else if ( dt == "AA" || dt == "Protein" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, true, n, ambig, internal, gapmatch);
+        RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = NULL;
+#ifdef RB_BEAGLE
+        if ( RbSettings::userSettings().getUseBeagle() == true )
+        {
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::AminoAcidState>(tau, 20, false, n, ambig, internal, gapmatch);
+        }
+        else
+        {
+#endif
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, false, n, ambig, internal, gapmatch);
+#ifdef RB_BEAGLE
+        }
+#endif
 
         return setDistParameters(dist);
     }
