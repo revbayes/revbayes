@@ -21,6 +21,7 @@
 #include <cfloat>
 #include <limits>
 #include <cstdlib>
+#include <cmath>
 
 namespace RbConstants {
     
@@ -129,6 +130,8 @@ namespace RbConstants {
     /* computed to 30 decimal places with Mathematica*/
     /* see Yang and Rodriguez (2013) SI eqn 19 for more details*/
     const double BACT_SD           = 0.312249899919919910292344656047;
+
+    const double SCALING_THRESHOLD = pow(2,-256);
 }
 
 #endif
