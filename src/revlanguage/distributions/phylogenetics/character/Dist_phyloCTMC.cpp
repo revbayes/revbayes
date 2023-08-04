@@ -53,6 +53,11 @@
 #include "TypeSpec.h"
 #include "UserFunctionNode.h"
 
+#ifdef RB_BEAGLE
+#include "PhyloCTMCSiteHomogeneousBEAGLE.h"
+#endif
+
+
 using namespace RevLanguage;
 
 Dist_phyloCTMC::Dist_phyloCTMC() : TypedDistribution< AbstractHomologousDiscreteCharacterData >()
@@ -160,9 +165,20 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
     if ( dt == "DNA" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist =
-        new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
-
+        RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<RevBayesCore::DnaState> *dist = NULL;
+#ifdef RB_BEAGLE
+        if ( RbSettings::userSettings().getUseBeagle() == true )
+        {
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::DnaState>( tau, 4, false, n, ambig, internal, gapmatch);
+        }
+        else
+        {
+#endif
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, false, n, ambig, internal, gapmatch);
+#ifdef RB_BEAGLE
+        }
+#endif
+ 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
 
@@ -209,13 +225,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             }
             dist->setRateMatrix( rm );
         }
-
         else
         {
             RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
             dist->setRateMatrix( rm );
         }
-
+ 
         if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
         {
             dist->setSiteRates( site_ratesNode );
@@ -225,7 +240,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         {
             dist->setSiteRatesProbs( site_rates_probsNode );
         }
-        
 
         d = dist;
     }
@@ -302,8 +316,21 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else if ( dt == "AA" || dt == "Protein" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, true, n, ambig, internal, gapmatch);
 
+        RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = NULL;
+#ifdef RB_BEAGLE
+        if ( RbSettings::userSettings().getUseBeagle() == true )
+        {
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::AminoAcidState>(tau, 20, false, n, ambig, internal, gapmatch);
+        }
+        else
+        {
+#endif
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, false, n, ambig, internal, gapmatch);
+#ifdef RB_BEAGLE
+        }
+#endif
+        
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
 
