@@ -36,6 +36,17 @@ public:
     int                         getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
     int                         getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
 
+    bool                            getUseBeagle(void) const;                           //!< Retrieve the flag whether we should use the BEAGLE library in CTMC models
+#if defined( RB_BEAGLE )
+    const std::string&              getBeagleDevice(void) const;                        //!< Retrieve the BEAGLE device that is being used
+    size_t                          getBeagleResource(void) const;                      //!< Retrieve the BEAGLE resource to be used
+    bool                            getBeagleUseDoublePrecision(void) const;            //!< Retrieve the flag whether BEAGLE will use double precision floating point format
+    size_t                          getBeagleMaxCPUThreads(void) const;                 //!< Retrieve the maximum number of CPU threads BEAGLE is set to use        
+    const std::string&              getBeagleScalingMode(void) const;                   //!< Retrieve the BEAGLE numerical scaling mode
+    size_t                          getBeagleDynamicScalingFrequency(void) const;       //!< Retrieve the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
+#endif /* RB_BEAGLE */
+
+
     // setters
     void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
     void                        setModuleDir(const RevBayesCore::path &md);         //!< Set the module directory name
@@ -50,6 +61,17 @@ public:
     void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
     void                        setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
     void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
+#if defined( RB_BEAGLE )
+    void                            setUseBeagle(bool s);                               //!< Set the flag whether we should use the BEAGLE library in CTMC models
+    void                            setBeagleDevice(const std::string &bsm);            //!< Set the BEAGLE device to use
+    void                            setBeagleResource(size_t w);                        //!< Set the BEAGLE resource to be used
+    void                            setBeagleUseDoublePrecision(bool s);                //!< Set the flag whether BEAGLE will use double precision floating point format
+    void                            setBeagleMaxCPUThreads(size_t w);                   //!< Set the maximum number of CPU threads BEAGLE is set to use        
+    void                            setBeagleScalingMode(const std::string &bsm);       //!< Set the BEAGLE numerical scaling mode
+    void                            setBeagleDynamicScalingFrequency(size_t w);         //!< Set the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
+#endif /* RB_BEAGLE */
+
+
 private:
     RbSettings(void);                                   //!< Default constructor
     RbSettings(const RbSettings&) = delete;             //!< Prevent copy
@@ -73,6 +95,17 @@ private:
     bool                        scaling_per_mixture;
     std::string                 scaling_method;
     std::string                 partial_likelihood_storing;
+
+#if defined( RB_BEAGLE )
+    bool                        useBeagle;
+    std::string                 beagleDevice;
+    size_t                      beagleResource;        
+    bool                        beagleUseDoublePrecision;
+    size_t                      beagleMaxCPUThreads;
+    std::string                 beagleScalingMode;
+    size_t                      beagleDynamicScalingFrequency;
+#endif /* RB_BEAGLE */
+    
 };
 
 void showDebug(const std::string& s, int level=1);
