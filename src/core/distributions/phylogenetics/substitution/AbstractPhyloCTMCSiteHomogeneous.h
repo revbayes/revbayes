@@ -3449,7 +3449,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 }
                 else
                 {
-                    per_mixture_Likelihoods[site] += pow(2, per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
+                    per_mixture_Likelihoods[site] += pow(2, 256*(per_mixture_scaling_factors[site] - tmp_sf)) * site_mixture_probs[mixture] * tmp;
                 }
             }
             else
@@ -3574,11 +3574,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
             if ( use_scaling == true )
             {
-                if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                if ( scale_threshold == false )
                 {
                     rv[site] -= per_mixture_scaling_factors[site] * *patterns;
                 }
-                else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                else
                 {
                     rv[site] -= (RbConstants::LN2 * 256 * per_mixture_scaling_factors[site]) * *patterns;
                 }
@@ -3608,6 +3608,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     std::vector<std::vector<double> > per_site_mixture_Likelihoods = std::vector<std::vector<double> >(pattern_block_size, std::vector<double>(num_site_mixtures, 0.0));
 
     std::vector<double> site_mixture_probs = getMixtureProbs();
+    
+    bool use_scaling     = RbSettings::userSettings().getUseScaling();
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
 
     // get pointer the likelihood
     double*   p_mixture     = p_node;
@@ -3698,13 +3701,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     rv[site][site_rate_index * num_site_matrices + matrix] = log( oneMinusPInv * per_site_mixture_Likelihoods[site][site_rate_index * num_site_matrices + matrix] ) * *patterns;
 
-                    if ( RbSettings::userSettings().getUseScaling() == true )
+                    if ( use_scaling == true )
                     {
-                        if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                        if ( scale_threshold == false )
                         {
                             rv[site][site_rate_index * num_site_matrices + matrix] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
                         }
-                        else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                        else
                         {
                             rv[site][site_rate_index * num_site_matrices + matrix] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
                         }
@@ -3727,13 +3730,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 rv[site][mixture] = log( per_site_mixture_Likelihoods[site][mixture] ) * *patterns;
 
-                if ( RbSettings::userSettings().getUseScaling() == true )
+                if ( use_scaling == true )
                 {
-                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    if ( scale_threshold == false )
                     {
                         rv[site][mixture] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
                     }
-                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    else
                     {
                         rv[site][mixture] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
                     }
@@ -3766,7 +3769,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     std::vector<std::vector<double> > per_site_rate_Likelihoods = std::vector<std::vector<double> >(pattern_block_size, std::vector<double>(num_site_rates, 0.0));
 
     std::vector<double> site_mixture_probs = getMixtureProbs();
-
+    
+    
+    bool use_scaling     = RbSettings::userSettings().getUseScaling();
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
     // get pointer the likelihood
     double*   p_mixture     = p_node;
     // iterate over all mixture categories
@@ -3868,13 +3875,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 rv[site][site_rate_index] = log( oneMinusPInv * per_site_rate_Likelihoods[site][site_rate_index - 1] ) * *patterns;
 
-                if ( RbSettings::userSettings().getUseScaling() == true )
+                if ( use_scaling == true )
                 {
-                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    if ( scale_threshold == false )
                     {
                         rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
                     }
-                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    else
                     {
                         rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
                     }
@@ -3894,13 +3901,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 rv[site][site_rate_index] = log( per_site_rate_Likelihoods[site][site_rate_index] ) * *patterns;
 
-                if ( RbSettings::userSettings().getUseScaling() == true )
+                if ( use_scaling == true )
                 {
-                    if ( RbSettings::userSettings().getScalingMethod() == "node" )
+                    if ( scale_threshold == false )
                     {
                         rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
                     }
-                    else if ( RbSettings::userSettings().getScalingMethod() == "threshold" )
+                    else
                     {
                         rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
                     }
