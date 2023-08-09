@@ -3616,6 +3616,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     std::vector<std::vector<double> > per_site_mixture_Likelihoods = std::vector<std::vector<double> >(pattern_block_size, std::vector<double>(num_site_mixtures, 0.0));
 
     std::vector<double> site_mixture_probs = getMixtureProbs();
+    
+    bool use_scaling     = RbSettings::userSettings().getUseScaling();
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
 
     // get pointer the likelihood
     double*   p_mixture     = p_node;
@@ -3706,7 +3709,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     rv[site][site_rate_index * num_site_matrices + matrix] = log( oneMinusPInv * per_site_mixture_Likelihoods[site][site_rate_index * num_site_matrices + matrix] ) * *patterns;
 
-                    if ( RbSettings::userSettings().getUseScaling() == true )
+                    if ( use_scaling == true )
                     {
                         if ( scale_threshold == false )
                         {
@@ -3735,7 +3738,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 rv[site][mixture] = log( per_site_mixture_Likelihoods[site][mixture] ) * *patterns;
 
-                if ( RbSettings::userSettings().getUseScaling() == true )
+                if ( use_scaling == true )
                 {
                     if ( scale_threshold == false )
                     {
@@ -3774,7 +3777,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     std::vector<std::vector<double> > per_site_rate_Likelihoods = std::vector<std::vector<double> >(pattern_block_size, std::vector<double>(num_site_rates, 0.0));
 
     std::vector<double> site_mixture_probs = getMixtureProbs();
-
+    
+    
+    bool use_scaling     = RbSettings::userSettings().getUseScaling();
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    
     // get pointer the likelihood
     double*   p_mixture     = p_node;
     // iterate over all mixture categories
@@ -3876,7 +3883,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 rv[site][site_rate_index] = log( oneMinusPInv * per_site_rate_Likelihoods[site][site_rate_index - 1] ) * *patterns;
 
-                if ( RbSettings::userSettings().getUseScaling() == true )
+                if ( use_scaling == true )
                 {
                     if ( scale_threshold == false )
                     {
@@ -3902,7 +3909,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             {
                 rv[site][site_rate_index] = log( per_site_rate_Likelihoods[site][site_rate_index] ) * *patterns;
 
-                if ( RbSettings::userSettings().getUseScaling() == true )
+                if ( use_scaling == true )
                 {
                     if ( scale_threshold == false )
                     {
