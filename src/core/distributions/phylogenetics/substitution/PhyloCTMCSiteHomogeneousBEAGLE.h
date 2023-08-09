@@ -4,14 +4,28 @@
  * This file contains BEAGLE specific methods that implement the
  * virtual functions from AbstractPhyloCTMCSiteHomogeneous.
  *
+ * There are still some things that we need to finish:
+ *
+ *     - Using transition matrices with ASRV does not return correct likelihoods. This is probably
+ *       because there is a transition matrix per site rate. Need to allocate more memory in BEAGLE
+ *       and adjust accordingly. For now, only use ASRV when compiling with Eigen3 support.
+ *
+ *     - Configure for usage with MPI.
+ *
+ *     - Configure for usage with mixture models.
+ *
  */
 
 #ifndef PhyloCTMCSiteHomogeneousBEAGLE_H
 #define PhyloCTMCSiteHomogeneousBEAGLE_H
 
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
-#include "BeagleInstance.h"
-#include "BeagleUtilities.h"
+
+
+#define RB_BEAGLE_DEBUG
+#define RB_BEAGLE_DEBUG_TIP
+#define RB_BEAGLE_INFO
+//#undef RB_BEAGLE_DEBUG
 
 
 namespace RevBayesCore
