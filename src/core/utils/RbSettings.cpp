@@ -48,6 +48,12 @@ size_t RbSettings::getScalingDensity( void ) const
     return scalingDensity;
 }
 
+bool RbSettings::getScalingPerMixture( void ) const
+{
+    // return the internal value
+    return scaling_per_mixture;
+}
+
 bool RbSettings::getUseScaling( void ) const
 {
     // return the internal value
@@ -97,6 +103,10 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return StringUtilities::to_string(scalingDensity);
     }
+    else if ( key == "scalingPerMixture" )
+    {
+        return scaling_per_mixture ? "true" : "false";
+    }
     else if ( key == "useScaling" )
     {
         return useScaling ? "true" : "false";
@@ -141,6 +151,7 @@ double RbSettings::getTolerance( void ) const
 /** Initialize the user settings */
 void RbSettings::readUserSettings(void)
 {
+    scaling_per_mixture         = false;            // the default scaling option per or over mixture categories
     path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
@@ -177,6 +188,7 @@ void RbSettings::listOptions() const
     std::cout << "linewidth = " << lineWidth << std::endl;
     std::cout << "useScaling = " << (useScaling ? "true" : "false") << std::endl;
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
+    std::cout << "scalingPerMixture = " << (scaling_per_mixture ? "true" : "false") << std::endl;
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
     std::cout << "logMCMC = " << logMCMC << std::endl;
 }
@@ -218,6 +230,15 @@ void RbSettings::setScalingDensity(size_t w)
 {
     // replace the internal value with this new value
     scalingDensity = w;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setScalingPerMixture(bool tf)
+{
+    // replace the internal value with this new value
+    scaling_per_mixture = tf;
     
     // save the current settings for the future.
     writeUserSettings();
@@ -284,7 +305,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "useScaling" )
     {
-        useScaling = value == "true";
+        use_scaling = (value == "true");
     }
     else if ( key == "scalingDensity" )
     {
@@ -293,6 +314,10 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
             throw(RbException("scalingDensity must be an integer greater than 0"));
         
         scalingDensity = boost::lexical_cast<int>(value);
+    }
+    else if ( key == "scalingPerMixture" )
+    {
+        scaling_per_mixture = (value == "true");
     }
     else if ( key == "debugMCMC" )
     {
@@ -359,6 +384,7 @@ void RbSettings::writeUserSettings( void )
     writeStream << "linewidth=" << lineWidth << std::endl;
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
+    writeStream << "scalingPerMixture=" << (scaling_per_mixture ? "true" : "false") << std::endl;
 
     writeStream.close();
 }
