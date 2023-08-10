@@ -169,12 +169,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 #ifdef RB_BEAGLE
         if ( RbSettings::userSettings().getUseBeagle() == true )
         {
-            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::DnaState>( tau, 4, true, n, ambig, internal, gapmatch);
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<RevBayesCore::DnaState>( tau, 4, false, n, ambig, internal, gapmatch);
         }
         else
         {
 #endif
-            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, false, n, ambig, internal, gapmatch);
 #ifdef RB_BEAGLE
         }
 #endif

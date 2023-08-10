@@ -51,6 +51,12 @@ const std::string& RbSettings::getScalingMethod( void ) const
     return scaling_method;
 }
 
+bool RbSettings::getScalingPerMixture( void ) const
+{
+    // return the internal value
+    return scaling_per_mixture;
+}
+
 bool RbSettings::getUseScaling( void ) const
 {
     // return the internal value
@@ -147,6 +153,10 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return scaling_method;
     }
+    else if ( key == "scalingPerMixture" )
+    {
+        return scaling_per_mixture ? "true" : "false";
+    }
     else if ( key == "useScaling" )
     {
         return use_scaling ? "true" : "false";
@@ -231,6 +241,7 @@ void RbSettings::initializeUserSettings(void)
     use_scaling                 = true;             // the default useScaling
     scaling_method              = "threshold";      // the default useScaling
     scaling_density             = 1;                // the default scaling density
+    scaling_per_mixture         = false;            // the default scaling option per or over mixture categories
     lineWidth                   = 160;              // the default line width
     tolerance                   = 10E-10;           // set default value for tolerance comparing doubles
     outputPrecision             = 7;
@@ -286,6 +297,7 @@ void RbSettings::listOptions() const
     std::cout << "useScaling = " << (use_scaling ? "true" : "false") << std::endl;
     std::cout << "scalingMethod = " << scaling_method << std::endl;
     std::cout << "scalingDensity = " << scaling_density << std::endl;
+    std::cout << "scalingPerMixture = " << (scaling_per_mixture ? "true" : "false") << std::endl;
     std::cout << "collapseSampledAncestors = " << (collapseSampledAncestors ? "true" : "false") << std::endl;
 
 #if defined( RB_BEAGLE )
@@ -354,6 +366,15 @@ void RbSettings::setScalingDensity(size_t w)
 {
     // replace the internal value with this new value
     scaling_density = w;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+void RbSettings::setScalingPerMixture(bool tf)
+{
+    // replace the internal value with this new value
+    scaling_per_mixture = tf;
     
     // save the current settings for the future.
     writeUserSettings();
@@ -473,7 +494,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "useScaling" )
     {
-        use_scaling = value == "true";
+        use_scaling = (value == "true");
     }
     else if ( key == "scalingMethod" )
     {
@@ -487,9 +508,13 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
         
         scaling_density = atoi(value.c_str());
     }
+    else if ( key == "scalingPerMixture" )
+    {
+        scaling_per_mixture = (value == "true");
+    }
     else if ( key == "collapseSampledAncestors" )
     {
-        collapseSampledAncestors = value == "true";
+        collapseSampledAncestors = (value == "true");
     }
 #if defined( RB_BEAGLE )
     else if ( key == "useBeagle" )
@@ -606,6 +631,7 @@ void RbSettings::writeUserSettings( void )
     writeStream << "useScaling=" << (use_scaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scaling_density << std::endl;
     writeStream << "scalingMethod=" << scaling_method << std::endl;
+    writeStream << "scalingPerMixture=" << (scaling_per_mixture ? "true" : "false") << std::endl;
     writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
     writeStream.close();
 

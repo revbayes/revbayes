@@ -29,6 +29,7 @@ class RbSettings {
         bool                        getPrintNodeIndex(void) const;                      //!< Retrieve the flag whether we should print node indices
         size_t                      getScalingDensity(void) const;                      //!< Retrieve the scaling density that determines how often to scale the likelihood in CTMC models
         const std::string&          getScalingMethod(void) const;                       //!< Retrieve the scaling method for the likelihood in CTMC models
+        bool                        getScalingPerMixture(void) const;                   //!< Retrieve the flag whether we should scale the likelihood in CTMC models per mixture category or all categories jointly
         double                      getTolerance(void) const;                           //!< Retrieve the tolerance for comparing doubles
         bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
         void                        listOptions(void) const;                            //!< Retrieve a list of all user options and their current values
@@ -54,8 +55,9 @@ class RbSettings {
     void                            setPrintNodeIndex(bool tf);                         //!< Set the flag whether we should print node indices
     void                            setScalingDensity(size_t w);                        //!< Set the scaling density n, where CTMC likelihoods are scaled every n-th node (min 1)
     void                            setScalingMethod(const std::string s);              //!< Set the scaling method, either node or threshold
+    void                            setScalingPerMixture(bool tf);                      //!< Set the flag whether we should scale the likelihood in CTMC models per mixture category or all categories together
     void                            setTolerance(double t);                             //!< Set the tolerance for comparing double
-    void                            setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
+    void                            setUseScaling(bool tf);                             //!< Set the flag whether we should scale the likelihood in CTMC models
     void                            setWorkingDirectory(const std::string &wd);         //!< Set the current working directory
        
 #if defined( RB_BEAGLE )
@@ -86,8 +88,9 @@ class RbSettings {
         bool                        printNodeIndex;                                     //!< Should the node index of a tree be printed as a comment?
         double                      tolerance;                                          //!< Tolerance for comparison of doubles
     // related to rescaling to avoid underflow
-        size_t                      scaling_density;
         bool                        use_scaling;
+        size_t                      scaling_density;
+        bool                        scaling_per_mixture;
         std::string                 scaling_method;
         std::string                 partial_likelihood_storing;
 

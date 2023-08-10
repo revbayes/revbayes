@@ -104,7 +104,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
     bool test_this_node  = ((root+1) % RbSettings::userSettings().getScalingDensity() == 0);
     bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
     
+    test_underflow = test_underflow && scale_per_mixture;
+
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -125,7 +128,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
             p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * f[2];
             p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * f[3];
             
-            if ( test_underflow )
+            if ( test_underflow == true )
             {
                 if ( test_this_node == false )
                 {
@@ -178,11 +181,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     // reset the likelihood
     this->lnProb = 0.0;
     
-    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
-    bool test_this_node  = ((root+1) % RbSettings::userSettings().getScalingDensity() == 0);
-    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
-    
-    
+    bool test_underflow     = RbSettings::userSettings().getUseScaling() == true;
+    bool test_this_node     = ((root+1) % RbSettings::userSettings().getScalingDensity() == 0);
+    bool scale_threshold    = RbSettings::userSettings().getScalingMethod() == "threshold";
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
+
+    test_underflow = test_underflow && scale_per_mixture;
+
     // get the root frequencies
     std::vector<std::vector<double> > ff;
     this->getRootFrequencies(ff);
@@ -305,8 +310,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
     bool test_this_node  = ((node_index+1) % RbSettings::userSettings().getScalingDensity() == 0);
     bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
-    
-    
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
+
+    test_underflow = test_underflow && scale_per_mixture;
+
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -516,8 +523,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
     bool test_this_node  = ( (node_index+1) % RbSettings::userSettings().getScalingDensity() == 0);
     bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
-    
-    
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
+
+    test_underflow = test_underflow && scale_per_mixture;
+
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -731,7 +740,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
     bool test_this_node  = ( (node_index+1) % RbSettings::userSettings().getScalingDensity() == 0);
     bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
-    
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
+
+    test_underflow = test_underflow && scale_per_mixture;
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
