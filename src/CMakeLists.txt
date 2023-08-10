@@ -59,6 +59,75 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
+if ("${RB_BEAGLE}" STREQUAL "ON")
+    ADD_DEFINITIONS(-DRB_BEAGLE)
+    message("BEAGLE configuration results:")
+
+    #-- Try to set BEAGLE root path from the environment variable fist
+    set(BEAGLE_ROOT "$ENV{BEAGLE_ROOT}" )
+    if( NOT BEAGLE_ROOT )
+	#-- If there is no environment variable, try to set from command line
+        if ( NOT "${RB_BEAGLE_ROOT}" STREQUAL "")
+	  set(BEAGLE_ROOT "${RB_BEAGLE_ROOT}")
+        endif()
+    endif()
+
+    if( BEAGLE_ROOT )
+      message("  BEAGLE_ROOT:        ${BEAGLE_ROOT}")
+      set(BEAGLE_INCLUDEDIR       ${BEAGLE_ROOT}/include/libhmsbeagle-1)
+      set(BEAGLE_INCLUDE_DIRS     ${BEAGLE_INCLUDEDIR})
+      set(BEAGLE_LIBRARY_DIRS     ${BEAGLE_ROOT}/lib)
+
+      set(BEAGLE_COMPILE_FLAGS    "-I${BEAGLE_INCLUDEDIR} -I${BEAGLE_ROOT}/libhmsbeagle")
+      set(BEAGLE_LINK_FLAGS       "-L${BEAGLE_ROOT}/lib/libhmsbeagle-1 -L${BEAGLE_ROOT}/lib -lhmsbeagle")
+
+      set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${BEAGLE_COMPILE_FLAGS}")
+      set(CMAKE_CXX_LINK_FLAGS    "${CMAKE_CXX_LINK_FLAGS}    ${BEAGLE_LINK_FLAGS}")
+
+    else()
+      #-- Alternatively, we could search for it on CMAKE path
+      #find_package(BEAGLE NAMES beagle-lib hmsbeagle hmsbeagle-1 REQUIRED)
+
+      #-- Find beagle with pkg-config
+      find_package(PkgConfig REQUIRED)
+      pkg_search_module(BEAGLE REQUIRED hmsbeagle-1 beagle-lib hmsbeagle)
+
+      get_cmake_property(_variableNames VARIABLES)
+
+    endif()
+
+    include_directories(${BEAGLE_INCLUDE_DIRS})
+    link_directories(${BEAGLE_LIBRARY_DIRS})
+
+    message("  BEAGLE_INCLUDE_DIRS: ${BEAGLE_INCLUDE_DIRS}")
+    message("  BEAGLE_LIBRARY_DIRS: ${BEAGLE_LIBRARY_DIRS}")
+endif()
+
+
+if ("${RB_USE_EIGEN3}" STREQUAL "ON")
+
+  add_definitions(-DRB_USE_EIGEN3)
+  #-- Try to set the Eigen3 path from the environment variable fist
+  set(EIGEN_INCLUDEDIR "$ENV{EIGEN_INCLUDE_DIR}" )
+
+  if( NOT EIGEN_INCLUDEDIR )
+      find_package(PkgConfig REQUIRED)
+      pkg_search_module(EIGEN REQUIRED eigen3 eigen Eigen3 Eigen)
+
+      #-- If that doesn't work, then we could to search for it in the CMAKE path
+      # find_package(EIGEN NAMES Eigen3 Eigen eigen3 eigen REQUIRED)
+      # set(EIGEN_COMPILE_FLAGS "-I${EIGEN_INCLUDEDIR}")
+      # set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${EIGEN_COMPILE_FLAGS}")
+  else()
+      set(EIGEN_INCLUDE_DIRS ${EIGEN_INCLUDEDIR})
+  endif()
+
+  include_directories(${EIGEN_INCLUDE_DIRS})
+
+  message("EIGEN3 information:")
+  message("  EIGEN_INCLUDE_DIRS : ${EIGEN_INCLUDE_DIRS}")
+endif()
+
 ##### rpath: where to find shared libraries #####
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
@@ -216,8 +285,11 @@ endif()
   target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
 target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
 # Link the target to other libraries.  Some variables can be empty.
-target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
+target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
+#target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
+target_link_libraries(${RB_EXEC_NAME}   ${GTK_LIBRARIES} ${MPI_LIBRARIES} ${BEAGLE_LIBRARIES})
 
 set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
+
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

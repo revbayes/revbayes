@@ -35,6 +35,9 @@ travis="false"
 mpi="false"
 cmd="false"
 help2yml="false"
+beagle="false"
+beagle_root=""
+eigen="false"
 boost_root=""
 boost_lib=""
 boost_include=""
@@ -54,6 +57,9 @@ while echo $1 | grep ^- > /dev/null; do
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
+-beagle         <true|false>    : set to true if you want to build the BEAGLE version. Defaults to false.
+-beagle_root    string          : specify directory where BEAGLE-lib is located. Defaults to unset.
+-eigen          <true|false>    : set to true if you want to build with Eigen3 support. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
@@ -94,6 +100,12 @@ done
 
 if [ "$mpi" = "true" ] ; then
     BUILD_DIR="build-mpi"
+elif [ "$beagle" = "true" ] ; then
+    if [ "$eigen" = "true" ] ; then
+        BUILD_DIR="build-beagle-eigen"
+    else
+        BUILD_DIR="build-beagle-transition"
+    fi
 else
     BUILD_DIR="build"
 fi
@@ -101,6 +113,8 @@ fi
 if [ -z "${exec_name}" ] ; then
     if [ "$mpi" = "true" ] ; then
         exec_name="rb-mpi"
+    elif [ "$beagle" = "true" ] ; then
+        exec_name="rb-beagle"
     else
         exec_name=rb
     fi
@@ -124,6 +138,18 @@ fi
 
 if [ "$mpi" = "true" ] ; then
     cmake_args="-DMPI=ON $cmake_args"
+fi
+
+if [ "$beagle" = "true" ] ; then
+    cmake_args="-DRB_BEAGLE=ON $cmake_args"
+fi
+
+if [ -n "$beagle_root" ] ; then
+    cmake_args="-DRB_BEAGLE_ROOT=${beagle_root} $cmake_args"
+fi
+
+if [ "$eigen" = "true" ] ; then
+    cmake_args="-DRB_USE_EIGEN3=ON $cmake_args"
 fi
 
 if [ "$cmd" = "true" ] ; then
@@ -248,4 +274,3 @@ if [ -e  GitVersion_backup.cpp ] ; then
     cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
     rm GitVersion_backup.cpp
 fi
-
