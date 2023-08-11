@@ -78,7 +78,8 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
 
     BeagleInstanceDetails b_return_info;
 
-    if (RbSettings::userSettings().getBeagleDevice() == "auto") {
+    if (RbSettings::userSettings().getBeagleDevice() == "auto")
+    {
 #if defined ( RB_BEAGLE_INFO )
         ss << "\tRunning benchmarks to automatically select fastest BEAGLE resource... ";
         ss << std::endl;
@@ -102,13 +103,17 @@ void BeagleInstance::createBEAGLE(  int  b_tipCount
         b_resource = (rBList != NULL) ? rBList->list[0].number : 0;
 
 #if defined ( RB_BEAGLE_INFO )
-        if ( rBList != NULL ) {
+        if ( rBList != NULL )
+        {
             ss << "\t\tUsing resource " << rBList->list[0].number << ": " << rBList->list[0].name;
-            if ( rBList->list[0].number != 0 ) {
+            if ( rBList->list[0].number != 0 )
+            {
                 ss << " (" << rBList->list[0].performanceRatio << "x CPU)";
             }
             ss << std::endl;
-        } else {
+        }
+        else
+        {
             ss << "\t\tResource benchmarking failed, using resource "
                << b_resource << ": " << rBList->list[0].name
                << std::endl;
@@ -265,19 +270,28 @@ long BeagleInstance::generateSettingsBitmap(void)
     //   BEAGLE_FLAG_PARALLELOPS_GRID
     //   BEAGLE_FLAG_COMPUTATION_SYNCH
     //   BEAGLE_FLAG_COMPUTATION_ASYNCH
-    if (b_device == "cpu") {
+    if (b_device == "cpu")
+    {
     	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU | BEAGLE_FLAG_COMPUTATION_SYNCH;
     	b_flag_vectorization = BEAGLE_FLAG_VECTOR_NONE;
-    } else if (b_device == "cpu_sse") {
+    }
+    else if (b_device == "cpu_sse")
+    {
     	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU | BEAGLE_FLAG_COMPUTATION_SYNCH;
     	b_flag_vectorization = BEAGLE_FLAG_VECTOR_SSE;
-    } else if (b_device == "cpu_avx") {
+    }
+    else if (b_device == "cpu_avx")
+    {
     	b_flag_device = BEAGLE_FLAG_PROCESSOR_CPU | BEAGLE_FLAG_FRAMEWORK_CPU | BEAGLE_FLAG_COMPUTATION_SYNCH;
     	b_flag_vectorization = BEAGLE_FLAG_VECTOR_AVX;
-    } else if (b_device == "gpu_opencl") {
+    }
+    else if (b_device == "gpu_opencl")
+    {
     	b_flag_device = BEAGLE_FLAG_PROCESSOR_GPU | BEAGLE_FLAG_FRAMEWORK_OPENCL;
         b_flag_gpu_ops = BEAGLE_FLAG_PARALLELOPS_GRID | BEAGLE_FLAG_COMPUTATION_SYNCH;
-    } else if (b_device == "gpu_cuda") {
+    }
+    else if (b_device == "gpu_cuda")
+    {
     	b_flag_device = BEAGLE_FLAG_PROCESSOR_GPU | BEAGLE_FLAG_FRAMEWORK_CUDA;
         b_flag_gpu_ops = BEAGLE_FLAG_PARALLELOPS_GRID;
     }
@@ -286,9 +300,12 @@ long BeagleInstance::generateSettingsBitmap(void)
     // Relevant flags:
     //   BEAGLE_FLAG_PRECISION_DOUBLE
     //   BEAGLE_FLAG_PRECISION_SINGLE
-    if (b_use_double) {
+    if (b_use_double)
+    {
     	b_flag_precision = BEAGLE_FLAG_PRECISION_DOUBLE;
-    } else {
+    }
+    else
+    {
     	b_flag_precision = BEAGLE_FLAG_PRECISION_SINGLE;
     }
 
@@ -301,13 +318,20 @@ long BeagleInstance::generateSettingsBitmap(void)
     //   BEAGLE_FLAG_SCALING_AUTO
     //   BEAGLE_FLAG_SCALING_ALWAYS
     //   BEAGLE_FLAG_SCALING_MANUAL
-    if (b_scaling_mode == "dynamic") {
+    if (b_scaling_mode == "dynamic")
+    {
         b_flag_scaling = BEAGLE_FLAG_SCALING_DYNAMIC;
-    } else if (b_scaling_mode == "auto") {
+    }
+    else if (b_scaling_mode == "auto")
+    {
         b_flag_scaling = BEAGLE_FLAG_SCALING_AUTO;    
-    } else if (b_scaling_mode == "always") {
+    }
+    else if (b_scaling_mode == "always")
+    {
         b_flag_scaling = BEAGLE_FLAG_SCALING_ALWAYS; 
-    } else if (b_scaling_mode == "manual") {
+    }
+    else if (b_scaling_mode == "manual")
+    {
         b_flag_scaling = BEAGLE_FLAG_SCALING_MANUAL | BEAGLE_FLAG_SCALERS_RAW;
     }
 
@@ -316,10 +340,14 @@ long BeagleInstance::generateSettingsBitmap(void)
     // Relevant flags:
     //   BEAGLE_FLAG_THREADING_CPP
     //   BEAGLE_FLAG_THREADING_NONE
-    if (b_device == "cpu" || b_device == "cpu_sse" || b_device == "cpu_avx") {
-        if (b_max_cpu_threads != 1) {
+    if (b_device == "cpu" || b_device == "cpu_sse" || b_device == "cpu_avx")
+    {
+        if (b_max_cpu_threads != 1)
+        {
             b_flag_threading = BEAGLE_FLAG_THREADING_CPP;
-        } else {
+        }
+        else
+        {
             b_flag_threading = BEAGLE_FLAG_THREADING_NONE;
         }
     }

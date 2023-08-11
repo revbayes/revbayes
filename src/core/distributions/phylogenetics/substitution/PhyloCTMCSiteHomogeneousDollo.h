@@ -69,7 +69,7 @@ template <class valueType> class TypedDagNode;
             std::vector< std::vector<size_t> >                  maskNodeObservationCounts;
             std::vector<double>                                 survival;
             size_t                                              activeMassOffset;
-            size_t                                              massNodeOffset;
+            size_t                                              massnode_offset;
 
             bool                                                normalize;
             const TypedDagNode< double >*                       death_rate;

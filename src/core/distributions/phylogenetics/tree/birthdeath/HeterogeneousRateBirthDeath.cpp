@@ -44,7 +44,7 @@ HeterogeneousRateBirthDeath::HeterogeneousRateBirthDeath( const TypedDagNode<dou
     branch_histories( NULL, 1, speciation->getValue().size() ),
     condition( cdt ),
     taxa( n ),
-    activeLikelihood( std::vector<size_t>(2*n.size()-1, 0) ),
+    active_likelihood( std::vector<size_t>(2*n.size()-1, 0) ),
     changed_nodes( std::vector<bool>(2*n.size()-1, false) ),
     dirty_nodes( std::vector<bool>(2*n.size()-1, true) ),
     nodeStates( std::vector<std::vector<std::vector< double > > >(2*n.size()-1, std::vector<std::vector< double > >(2,std::vector<double>(1+speciation->getValue().size(),0))) ),
@@ -298,8 +298,8 @@ void HeterogeneousRateBirthDeath::computeNodeProbability(const RevBayesCore::Top
             computeNodeProbability( right, right_index );
             
             // now compute the likelihoods of this internal node
-            const std::vector<double> &leftStates = nodeStates[left_index][activeLikelihood[left_index]];
-            const std::vector<double> &rightStates = nodeStates[right_index][activeLikelihood[right_index]];
+            const std::vector<double> &leftStates = nodeStates[left_index][active_likelihood[left_index]];
+            const std::vector<double> &rightStates = nodeStates[right_index][active_likelihood[right_index]];
             const RbVector<double> &birthRate = speciation->getValue();
             for (size_t i=0; i<num_rate_categories; ++i)
             {
@@ -356,15 +356,15 @@ void HeterogeneousRateBirthDeath::computeNodeProbability(const RevBayesCore::Top
         double max = ext_obs_probs[num_rate_categories];
         ext_obs_probs[num_rate_categories] = 1.0;
         
-        //        totalScaling -= scalingFactors[node_index][activeLikelihood[node_index]];
-        //        scalingFactors[node_index][activeLikelihood[node_index]] = log(max);
-        //        totalScaling += scalingFactors[node_index][activeLikelihood[node_index]] - scalingFactors[node_index][activeLikelihood[node_index]^1];
-        //        totalScaling += scalingFactors[node_index][activeLikelihood[node_index]];
+        //        totalScaling -= scalingFactors[node_index][active_likelihood[node_index]];
+        //        scalingFactors[node_index][active_likelihood[node_index]] = log(max);
+        //        totalScaling += scalingFactors[node_index][active_likelihood[node_index]] - scalingFactors[node_index][active_likelihood[node_index]^1];
+        //        totalScaling += scalingFactors[node_index][active_likelihood[node_index]];
         
         totalScaling += log(max);
         
         // store the states
-        nodeStates[node_index][activeLikelihood[node_index]] = ext_obs_probs;
+        nodeStates[node_index][active_likelihood[node_index]] = ext_obs_probs;
     }
     
 }
@@ -460,8 +460,8 @@ double HeterogeneousRateBirthDeath::computeRootLikelihood( void )
     
     
     // now compute the likelihoods of this internal node
-    std::vector< double > leftStates = nodeStates[left_index][activeLikelihood[left_index]];
-    std::vector< double > rightStates = nodeStates[right_index][activeLikelihood[right_index]];
+    std::vector< double > leftStates = nodeStates[left_index][active_likelihood[left_index]];
+    std::vector< double > rightStates = nodeStates[right_index][active_likelihood[right_index]];
     
     double prob = leftStates[num_rate_categories]*rightStates[num_rate_categories];
     double ln_prob = log( prob );
