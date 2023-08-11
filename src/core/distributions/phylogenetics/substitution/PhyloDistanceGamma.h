@@ -54,7 +54,7 @@ namespace RevBayesCore {
 		double 																lnProb;
 
 		// the likelihoods
-		std::vector<double>                                                 partialLikelihoods;
+		std::vector<double>                                                 partial_likelihoods;
 		
 
     private:

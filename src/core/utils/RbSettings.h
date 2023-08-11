@@ -25,7 +25,7 @@ class RbSettings {
         const RevBayesCore::path&   getModuleDir(void) const;                           //!< Retrieve the module directory name
         std::string                 getOption(const std::string &k) const;              //!< Retrieve a user option
         size_t                      getOutputPrecision(void) const;                     //!< Retrieve the default output precision width
-        const std::string&          getPartialLikelihoodStoring(void) const;            //!< Retrieve the method for partial likelihood storing
+        const std::string&          getpartial_likelihoodstoring(void) const;            //!< Retrieve the method for partial likelihood storing
         bool                        getPrintNodeIndex(void) const;                      //!< Retrieve the flag whether we should print node indices
         size_t                      getScalingDensity(void) const;                      //!< Retrieve the scaling density that determines how often to scale the likelihood in CTMC models
         const std::string&          getScalingMethod(void) const;                       //!< Retrieve the scaling method for the likelihood in CTMC models
@@ -51,7 +51,7 @@ class RbSettings {
     void                            setModuleDir(const RevBayesCore::path &md);         //!< Set the module directory name
     void                            setOutputPrecision(size_t p);                       //!< Set the default output precision width
     void                            setOption(const std::string &k, const std::string &v, bool write);  //!< Set the key value pair.
-    void                            setPartialLikelihoodStoring(const std::string s);   //!< Set the method for partial likelihood storing (node|branch|both)
+    void                            setpartial_likelihoodstoring(const std::string s);   //!< Set the method for partial likelihood storing (node|branch|both)
     void                            setPrintNodeIndex(bool tf);                         //!< Set the flag whether we should print node indices
     void                            setScalingDensity(size_t w);                        //!< Set the scaling density n, where CTMC likelihoods are scaled every n-th node (min 1)
     void                            setScalingMethod(const std::string s);              //!< Set the scaling method, either node or threshold
@@ -87,12 +87,12 @@ class RbSettings {
         size_t                      outputPrecision;
         bool                        printNodeIndex;                                     //!< Should the node index of a tree be printed as a comment?
         double                      tolerance;                                          //!< Tolerance for comparison of doubles
+        std::string                 partial_likelihood_storing;                         //!< How should we store partial likelihoods (branch|node|both)?
     // related to rescaling to avoid underflow
         bool                        use_scaling;
         size_t                      scaling_density;
         bool                        scaling_per_mixture;
         std::string                 scaling_method;
-        std::string                 partial_likelihood_storing;
 
 #if defined( RB_BEAGLE )
     bool                        useBeagle;

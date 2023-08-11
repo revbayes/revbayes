@@ -77,7 +77,7 @@ namespace RevBayesCore {
         std::vector<Taxon>                                  taxa;
     
     
-        std::vector<size_t>                                 activeLikelihood;
+        std::vector<size_t>                                 active_likelihood;
         mutable std::vector<bool>                           changed_nodes;
         mutable std::vector<bool>                           dirty_nodes;
         mutable std::vector<std::vector<std::vector<double> > >       nodeStates;

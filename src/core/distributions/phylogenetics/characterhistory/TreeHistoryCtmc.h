@@ -103,7 +103,7 @@ namespace RevBayesCore {
         const TypedDagNode<Tree>*                                           tau;
 
         // the likelihoods
-        std::vector<size_t>                                                 activeLikelihood;
+        std::vector<size_t>                                                 active_likelihood;
         std::vector<std::vector<double> >                                   historyLikelihoods;
 
         // the data
@@ -154,7 +154,7 @@ RevBayesCore::TreeHistoryCtmc<charType>::TreeHistoryCtmc(const TypedDagNode<Tree
     num_sites( nSites ),
     num_site_rates( 1 ),
     tau( t ),
-    activeLikelihood( std::vector<size_t>(tau->getValue().getNumberOfNodes(), 0) ),
+    active_likelihood( std::vector<size_t>(tau->getValue().getNumberOfNodes(), 0) ),
     historyLikelihoods(),
     charMatrix(),
     gapMatrix(),
@@ -204,7 +204,7 @@ RevBayesCore::TreeHistoryCtmc<charType>::TreeHistoryCtmc(const TreeHistoryCtmc &
     num_sites( n.num_sites ),
     num_site_rates( n.num_site_rates ),
     tau( n.tau ),
-    activeLikelihood( n.activeLikelihood ),
+    active_likelihood( n.active_likelihood ),
     historyLikelihoods( n.historyLikelihoods ),
     charMatrix( n.charMatrix ),
     gapMatrix( n.gapMatrix ),
@@ -286,7 +286,7 @@ double RevBayesCore::TreeHistoryCtmc<charType>::computeLnProbability( void )
         const TopologyNode& nd = *nodes[i];
         size_t nodeIndex = nd.getIndex();
         fillLikelihoodVector(nd);
-        double nodeLnProb = historyLikelihoods[ activeLikelihood[nodeIndex] ][nodeIndex];
+        double nodeLnProb = historyLikelihoods[ active_likelihood[nodeIndex] ][nodeIndex];
         this->lnProb += nodeLnProb;
     }
 
@@ -414,7 +414,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::fillLikelihoodVector(const Topolog
         lnL += computeRootLikelihood(node);
     }
 
-    historyLikelihoods[ activeLikelihood[nodeIndex] ][nodeIndex] = lnL;
+    historyLikelihoods[ active_likelihood[nodeIndex] ][nodeIndex] = lnL;
 
     // mark as computed
     dirtyNodes[nodeIndex] = false;
@@ -449,8 +449,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::flagNodeDirty( const RevBayesCore:
         // if we previously haven't touched this node, then we need to change the active likelihood pointer
         if ( changedNodes[index] == false )
         {
-            activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
-            //activeLikelihood[index] = 0;
+            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
+            //active_likelihood[index] = 0;
             changedNodes[index] = true;
         }
 
@@ -611,7 +611,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNo
         // then we need to revert this change
         if ( changedNodes[index])
         {
-            activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
+            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
         }
         
         // set all flags to false
@@ -916,8 +916,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( const DagNode
         {
             if ( !changedNodes[index])
             {
-                activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
-                //activeLikelihood[index] = 0;
+                active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
+                //active_likelihood[index] = 0;
                 changedNodes[index] = true;
             }
 

@@ -141,7 +141,7 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return StringUtilities::to_string(lineWidth);
     }
-    else if ( key == "partialLikelihoodStroring" )
+    else if ( key == "partial_likelihoodstroring" )
     {
         return partial_likelihood_storing;
     }
@@ -211,7 +211,7 @@ size_t RbSettings::getOutputPrecision( void ) const
 }
 
 
-const std::string& RbSettings::getPartialLikelihoodStoring( void ) const
+const std::string& RbSettings::getpartial_likelihoodstoring( void ) const
 {
     // return the internal value
     return partial_likelihood_storing;
@@ -293,7 +293,7 @@ void RbSettings::listOptions() const
     std::cout << "printNodeIndex = " << (printNodeIndex ? "true" : "false") << std::endl;
     std::cout << "tolerance = " << tolerance << std::endl;
     std::cout << "linewidth = " << lineWidth << std::endl;
-    std::cout << "partialLikelihoodStoring = " << partial_likelihood_storing << std::endl;
+    std::cout << "partial_likelihoodstoring = " << partial_likelihood_storing << std::endl;
     std::cout << "useScaling = " << (use_scaling ? "true" : "false") << std::endl;
     std::cout << "scalingMethod = " << scaling_method << std::endl;
     std::cout << "scalingDensity = " << scaling_density << std::endl;
@@ -335,7 +335,7 @@ void RbSettings::setLineWidth(size_t w)
     writeUserSettings();
 }
 
-void RbSettings::setPartialLikelihoodStoring(const std::string s)
+void RbSettings::setpartial_likelihoodstoring(const std::string s)
 {
     // replace the internal value with this new value
     partial_likelihood_storing = s;
@@ -488,7 +488,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
         //lineWidth = std::stoi (value,&sz);
         lineWidth = atoi(value.c_str());
     }
-    else if ( key == "partialLikelihoodStoring" )
+    else if ( key == "partial_likelihoodstoring" )
     {
         partial_likelihood_storing = value;
     }
@@ -627,7 +627,7 @@ void RbSettings::writeUserSettings( void )
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
     writeStream << "tolerance=" << tolerance << std::endl;
     writeStream << "linewidth=" << lineWidth << std::endl;
-    writeStream << "partialLikelihoodStoring=" << partial_likelihood_storing << std::endl;
+    writeStream << "partial_likelihoodstoring=" << partial_likelihood_storing << std::endl;
     writeStream << "useScaling=" << (use_scaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scaling_density << std::endl;
     writeStream << "scalingMethod=" << scaling_method << std::endl;

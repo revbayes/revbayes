@@ -60,37 +60,37 @@ namespace RevBayesCore {
      * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) and can
      * be compressed.
      *
-     * The partial likelihoods are stored in a c-style array called partialLikelihoods. The dimension are
-     * partialLikelihoods[active][node_index][siteRateIndex][siteIndex][charIndex], however, since this is a one-dimensional c-style array,
-     * you have to access the partialLikelihoods via
-     * partialLikelihoods[active*num_nodes*num_site_mixtures*pattern_block_size*num_chars +
+     * The partial likelihoods are stored in a c-style array called partial_likelihoods. The dimension are
+     * partial_likelihoods[active][node_index][siteRateIndex][siteIndex][charIndex], however, since this is a one-dimensional c-style array,
+     * you have to access the partial_likelihoods via
+     * partial_likelihoods[active*num_nodes*num_site_mixtures*pattern_block_size*num_chars +
      *                    node_index*num_site_mixtures*pattern_block_size*num_chars +
      *                    siteRateIndex*pattern_block_size*num_chars +
      *                    siteIndex*num_chars +
      *                    charIndex]
      * Since this is a bit complex, we have some offset variables for convenience:
-     * activeLikelihoodOffset      =  num_nodes*num_site_mixtures*pattern_block_size*num_chars;
-     * nodeOffset                  =  num_site_mixtures*pattern_block_size*num_chars;
-     * mixtureOffset               =  pattern_block_size*num_chars;
-     * siteOffset                  =  num_chars;
+     * active_likelihood_offset      =  num_nodes*num_site_mixtures*pattern_block_size*num_chars;
+     * node_offset                  =  num_site_mixtures*pattern_block_size*num_chars;
+     * mixture_offset               =  pattern_block_size*num_chars;
+     * site_offset                  =  num_chars;
      * This gives the more convenient access via
-     * partialLikelihoods[active*activeLikelihoodOffset + node_index*nodeOffset + siteRateIndex*mixtureOffset + siteIndex*siteOffset + charIndex]
+     * partial_likelihoods[active*active_likelihood_offset + node_index*node_offset + siteRateIndex*mixture_offset + siteIndex*site_offset + charIndex]
      *
      * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node, but not for site rates.
      * We also use twice as much memory because we store the partial likelihood along each branch and not only for each internal node.
      * This gives us a speed improvement during MCMC proposal in the order of a factor 2.
      *
-     * The transition probability matrices are stored in a c-style array called partialLikelihoods. The dimension are
+     * The transition probability matrices are stored in a c-style array called partial_likelihoods. The dimension are
      * pmatrices[active][node_index][siteMixtureIndex], however, since this is a one-dimensional c-style array,
-     * you have to access the partialLikelihoods via
+     * you have to access the partial_likelihoods via
      * pmatrices[active * num_nodes * num_site_mixtures +
      *                    node_index * num_site_mixtures +
      *                    site_mixture_index]
      * Since this is a bit complex, we have some offset variables for convenience:
-     * activePmatrixOffset         =  num_nodes * num_site_mixtures;
-     * nodeOffset                  =  num_site_mixtures;
+     * active_P_matrix_offset         =  num_nodes * num_site_mixtures;
+     * node_offset                  =  num_site_mixtures;
      * This gives the more convenient access via
-     * pmatrices[active * activePmatrixOffset + node_index * nodeOffset + site_mixture_index]
+     * pmatrices[active * active_P_matrix_offset + node_index * node_offset + site_mixture_index]
      *
      */
     template<class charType>
@@ -174,6 +174,11 @@ namespace RevBayesCore {
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle) = 0;
 
+        virtual void                                                        computeInternalNodeLikelihoodNode(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
+        virtual void                                                        computeInternalNodeLikelihoodNode(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) = 0;
+        virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right) = 0;
+        virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right, size_t middle) = 0;
+
         // virtual methods that you may want to overwrite
         virtual void                                                        compress(void);
         virtual void                                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
@@ -207,12 +212,13 @@ namespace RevBayesCore {
         mutable std::vector<bool>                                           pmat_dirty_nodes;
         
         // offsets for nodes
-        size_t                                                              activePmatrixOffset;
-        size_t                                                              pmatNodeOffset;
+        size_t                                                              active_P_matrix_offset;
+        size_t                                                              pmat_node_offset;
 
         // the likelihoods
-        mutable double*                                                     partialLikelihoods;
-        std::vector<size_t>                                                 activeLikelihood;
+        mutable double*                                                     partial_likelihoods;
+        mutable double*                                                     partial_likelihoods_node;
+        std::vector<size_t>                                                 active_likelihood;
         double*                                                             marginalLikelihoods;
 
         std::vector< std::vector< std::vector<double> > >                   per_node_site_log_scaling_factors;
@@ -241,10 +247,10 @@ namespace RevBayesCore {
 #endif /* RB_BEAGLE */
 
         // offsets for nodes
-        size_t                                                              activeLikelihoodOffset;
-        size_t                                                              nodeOffset;
-        size_t                                                              mixtureOffset;
-        size_t                                                              siteOffset;
+        size_t                                                              active_likelihood_offset;
+        size_t                                                              node_offset;
+        size_t                                                              mixture_offset;
+        size_t                                                              site_offset;
 
         // flags
         bool                                                                using_ambiguous_characters;
@@ -360,9 +366,9 @@ num_site_mixtures( nMix ),
 num_matrices( 1 ),
 tau( t ),
 transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) ) ),
-//    partialLikelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
-partialLikelihoods( NULL ),
-activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
+//    partial_likelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
+partial_likelihoods( NULL ),
+active_likelihood( std::vector<size_t>(num_nodes, 0) ),
 //    marginalLikelihoods( new double[num_nodes*num_site_mixtures*num_sites*num_chars] ),
 marginalLikelihoods( NULL ),
 per_node_site_mixture_log_scaling_factors( std::vector<std::vector< std::vector< std::vector<double> > > >(2, std::vector<std::vector< std::vector<double> > >(num_nodes, std::vector< std::vector<double> >( num_site_mixtures, std::vector<double>(num_sites, 0.0) ) ) ) ),
@@ -420,17 +426,17 @@ sampled_site_matrix_component( 0 )
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
-    activeLikelihoodOffset      =  num_nodes*num_site_mixtures*pattern_block_size*num_chars;
-    nodeOffset                  =  num_site_mixtures*pattern_block_size*num_chars;
-    mixtureOffset               =  pattern_block_size*num_chars;
-    siteOffset                  =  num_chars;
+    active_likelihood_offset      =  num_nodes*num_site_mixtures*pattern_block_size*num_chars;
+    node_offset                  =  num_site_mixtures*pattern_block_size*num_chars;
+    mixture_offset               =  pattern_block_size*num_chars;
+    site_offset                  =  num_chars;
     
-    activePmatrixOffset         =  num_nodes * num_site_mixtures;
-    pmatNodeOffset              =  num_site_mixtures;
+    active_P_matrix_offset         =  num_nodes * num_site_mixtures;
+    pmat_node_offset              =  num_site_mixtures;
     active_pmatrices            =  std::vector<size_t>(num_nodes, 0);
     pmat_changed_nodes          =  std::vector<bool>(num_nodes, false);
     pmat_dirty_nodes            =  std::vector<bool>(num_nodes, true);
-    pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
+    pmatrices                   =  std::vector<TransitionProbabilityMatrix>(active_P_matrix_offset * 2, TransitionProbabilityMatrix(num_chars));
 
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -464,9 +470,9 @@ num_site_mixtures( n.num_site_mixtures ),
 num_matrices( n.num_matrices ),
 tau( n.tau ),
 transition_prob_matrices( n.transition_prob_matrices ),
-//    partialLikelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
-partialLikelihoods( NULL ),
-activeLikelihood( n.activeLikelihood ),
+//    partial_likelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
+partial_likelihoods( NULL ),
+active_likelihood( n.active_likelihood ),
 //    marginalLikelihoods( new double[num_nodes*num_site_mixtures*num_sites*num_chars] ),
 marginalLikelihoods( NULL ),
 per_node_site_mixture_log_scaling_factors( n.per_node_site_mixture_log_scaling_factors ),
@@ -517,13 +523,13 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     site_rates_probs             = n.site_rates_probs;
     p_inv                        = n.p_inv;
 
-    activeLikelihoodOffset      =  n.activeLikelihoodOffset;
-    nodeOffset                  =  n.nodeOffset;
-    mixtureOffset               =  n.mixtureOffset;
-    siteOffset                  =  n.siteOffset;
+    active_likelihood_offset      =  n.active_likelihood_offset;
+    node_offset                  =  n.node_offset;
+    mixture_offset               =  n.mixture_offset;
+    site_offset                  =  n.site_offset;
     
-    activePmatrixOffset         =  n.activePmatrixOffset;
-    pmatNodeOffset              =  n.pmatNodeOffset;
+    active_P_matrix_offset         =  n.active_P_matrix_offset;
+    pmat_node_offset              =  n.pmat_node_offset;
     active_pmatrices            =  n.active_pmatrices;
     pmat_changed_nodes          =  n.pmat_changed_nodes;
     pmat_dirty_nodes            =  n.pmat_dirty_nodes;
@@ -548,20 +554,20 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
         }
         else
         {
-           partialLikelihoods = new double[2*activeLikelihoodOffset];
-           memcpy(partialLikelihoods, n.partialLikelihoods, 2*activeLikelihoodOffset*sizeof(double));
+           partial_likelihoods = new double[2*active_likelihood_offset];
+           memcpy(partial_likelihoods, n.partial_likelihoods, 2*active_likelihood_offset*sizeof(double));
         }
 #else
-        partialLikelihoods = new double[2*activeLikelihoodOffset];
-        memcpy(partialLikelihoods, n.partialLikelihoods, 2*activeLikelihoodOffset*sizeof(double));
+        partial_likelihoods = new double[2*active_likelihood_offset];
+        memcpy(partial_likelihoods, n.partial_likelihoods, 2*active_likelihood_offset*sizeof(double));
 #endif /* RB_BEAGLE */
     }
 
     // copy the marginal likelihoods if necessary
     if ( useMarginalLikelihoods == true && RbSettings::userSettings().getUseBeagle() != true )
     {
-        marginalLikelihoods = new double[activeLikelihoodOffset];
-        memcpy(marginalLikelihoods, n.marginalLikelihoods, activeLikelihoodOffset*sizeof(double));
+        marginalLikelihoods = new double[active_likelihood_offset];
+        memcpy(marginalLikelihoods, n.marginalLikelihoods, active_likelihood_offset*sizeof(double));
     }
 }
 
@@ -591,12 +597,12 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::~AbstractPhyloCTMCSite
     else
     {
         // If BEAGLE is not used, we still need to free the partial likelihoods
-        delete[] partialLikelihoods;
+        delete[] partial_likelihoods;
         delete[] marginalLikelihoods;
     }
 #else
     // free the partial likelihoods
-    delete [] partialLikelihoods;
+    delete [] partial_likelihoods;
     delete [] marginalLikelihoods;
 #endif
 }
@@ -1002,7 +1008,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
     if ( in_mcmc_mode == false )
     {
-        partialLikelihoods = new double[2*activeLikelihoodOffset];
+        partial_likelihoods = new double[2*active_likelihood_offset];
 
 #if defined( RB_BEAGLE )
         // We need to set up BEAGLE here if we are not in mcmc mode...
@@ -1022,54 +1028,64 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
+    
+    const std::string& partial_likelihood_storing_approach = RbSettings::userSettings().getpartial_likelihoodstoring();
 
-    // only necessary if the root is actually dirty
-    if ( dirty_nodes[root_index] == true )
+    if ( partial_likelihood_storing_approach == "branch" )
     {
-
-        // start by filling the likelihood vector for the children of the root
-        if ( root.getNumberOfChildren() == 2 ) // rooted trees have two children for the root
+        // only necessary if the root is actually dirty
+        if ( dirty_nodes[root_index] == true )
         {
-            const TopologyNode &left = root.getChild(0);
-            size_t left_index = left.getIndex();
-            const TopologyNode &right = root.getChild(1);
-            size_t right_index = right.getIndex();
 
-            fillLikelihoodVector( left, left_index );
-            fillLikelihoodVector( right, right_index );
+            // start by filling the likelihood vector for the children of the root
+            if ( root.getNumberOfChildren() == 2 ) // rooted trees have two children for the root
+            {
+                const TopologyNode &left = root.getChild(0);
+                size_t left_index = left.getIndex();
+                const TopologyNode &right = root.getChild(1);
+                size_t right_index = right.getIndex();
 
-            computeRootLikelihood( root_index, left_index, right_index );
+                fillLikelihoodVector( left, left_index );
+                fillLikelihoodVector( right, right_index );
+
+                computeRootLikelihood( root_index, left_index, right_index );
             
-            // now call scaling
-            scale(root_index, left_index, right_index);
+                // now call scaling
+                scale(root_index, left_index, right_index);
 
-        }
-        else if ( root.getNumberOfChildren() == 3 ) // unrooted trees have three children for the root
-        {
-            const TopologyNode &left = root.getChild(0);
-            size_t left_index = left.getIndex();
-            const TopologyNode &right = root.getChild(1);
-            size_t right_index = right.getIndex();
-            const TopologyNode &middle = root.getChild(2);
-            size_t middleIndex = middle.getIndex();
+            }
+            else if ( root.getNumberOfChildren() == 3 ) // unrooted trees have three children for the root
+            {
+                const TopologyNode &left = root.getChild(0);
+                size_t left_index = left.getIndex();
+                const TopologyNode &right = root.getChild(1);
+                size_t right_index = right.getIndex();
+                const TopologyNode &middle = root.getChild(2);
+                size_t middleIndex = middle.getIndex();
 
-            fillLikelihoodVector( left, left_index );
-            fillLikelihoodVector( right, right_index );
-            fillLikelihoodVector( middle, middleIndex );
+                fillLikelihoodVector( left, left_index );
+                fillLikelihoodVector( right, right_index );
+                fillLikelihoodVector( middle, middleIndex );
 
-            computeRootLikelihood( root_index, left_index, right_index, middleIndex );
+                computeRootLikelihood( root_index, left_index, right_index, middleIndex );
             
-            // now call scaling
-            scale(root_index, left_index, right_index, middleIndex);
-        }
-        else
-        {
-            throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
+                // now call scaling
+                scale(root_index, left_index, right_index, middleIndex);
+            }
+            else
+            {
+                throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
+            }
+
+            // sum the partials up
+            this->lnProb = sumRootLikelihood();
+            
         }
 
-        // sum the partials up
-        this->lnProb = sumRootLikelihood();
-
+    }
+    else if ( partial_likelihood_storing_approach == "node" )
+    {
+        
     }
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
@@ -1083,8 +1099,8 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             this->freeBeagleInstances();
         }
 #endif
-        delete [] partialLikelihoods;
-        partialLikelihoods = NULL;
+        delete [] partial_likelihoods;
+        partial_likelihoods = NULL;
     }
 
     // set the ancestral states as stale
@@ -1102,9 +1118,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
     this->updateTransitionProbabilities( node_index );
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node                  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-    double*         p_node_marginal         = this->marginalLikelihoods + node_index*this->nodeOffset;
-    const double*   p_parent_node_marginal  = this->marginalLikelihoods + parentnode_index*this->nodeOffset;
+    const double*   p_node                  = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
+    double*         p_node_marginal         = this->marginalLikelihoods + node_index*this->node_offset;
+    const double*   p_parent_node_marginal  = this->marginalLikelihoods + parentnode_index*this->node_offset;
 
     // get pointers the likelihood for both subtrees
     const double*   p_mixture                   = p_node;
@@ -1152,12 +1168,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
             }
 
             // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_marginal+=this->siteOffset; p_parent_site_mixture_marginal+=this->siteOffset;
+            p_site_mixture+=this->site_offset; p_site_mixture_marginal+=this->site_offset; p_parent_site_mixture_marginal+=this->site_offset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_marginal+=this->mixtureOffset; p_parent_mixture_marginal+=this->mixtureOffset;
+        p_mixture+=this->mixture_offset; p_mixture_marginal+=this->mixture_offset; p_parent_mixture_marginal+=this->mixture_offset;
 
     } // end-for over all mixtures (=rate categories)
 
@@ -1179,8 +1195,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node           = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-    double*         p_node_marginal  = this->marginalLikelihoods + node_index*this->nodeOffset;
+    const double*   p_node           = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
+    double*         p_node_marginal  = this->marginalLikelihoods + node_index*this->node_offset;
 
     // get pointers the likelihood for both subtrees
     const double*   p_mixture           = p_node;
@@ -1217,12 +1233,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
             }
 
             // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_marginal+=this->siteOffset;
+            p_site_mixture+=this->site_offset; p_site_mixture_marginal+=this->site_offset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_marginal+=this->mixtureOffset;
+        p_mixture+=this->mixture_offset; p_mixture_marginal+=this->mixture_offset;
 
     } // end-for over all mixtures (=rate categories)
 
@@ -1344,7 +1360,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double*         p_node  = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
 
     // get pointers the likelihood for both subtrees
     const double*   p_site           = p_node;
@@ -1373,7 +1389,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
         }
 
         // get ptr to first mixture cat for site
-        p_site          = p_node  + pattern * this->siteOffset;
+        p_site          = p_node  + pattern * this->site_offset;
 
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -1394,7 +1410,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
             }
 
             // increment the pointers to the next mixture category for given site
-            p_site       += this->mixtureOffset;
+            p_site       += this->mixture_offset;
 
         } // end-for over all mixtures (=rate categories)
 
@@ -1467,7 +1483,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAl
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double*         p_node  = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
 
     // get pointers the likelihood for both subtrees
     const double*   p_site           = p_node;
@@ -1493,7 +1509,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAl
         }
 
         // get ptr to first mixture cat for site
-        p_site          = p_node  + pattern * this->siteOffset;
+        p_site          = p_node  + pattern * this->site_offset;
 
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -1514,7 +1530,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAl
             }
 
             // increment the pointers to the next mixture category for given site
-            p_site       += this->mixtureOffset;
+            p_site       += this->mixture_offset;
 
         } // end-for over all mixtures (=rate categories)
 
@@ -1773,7 +1789,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( in_mcmc_mode == false )
         {
             delete_partial_likelihoods = true;
-            partialLikelihoods = new double[2*activeLikelihoodOffset];
+            partial_likelihoods = new double[2*active_likelihood_offset];
             in_mcmc_mode = true;
 
             for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
@@ -1793,8 +1809,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            delete [] partialLikelihoods;
-            partialLikelihoods = NULL;
+            delete [] partial_likelihoods;
+            partial_likelihoods = NULL;
             in_mcmc_mode = false;
         }
 
@@ -1824,7 +1840,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( in_mcmc_mode == false )
         {
             delete_partial_likelihoods = true;
-            partialLikelihoods = new double[2*activeLikelihoodOffset];
+            partial_likelihoods = new double[2*active_likelihood_offset];
             in_mcmc_mode = true;
 
             for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
@@ -1863,8 +1879,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            delete [] partialLikelihoods;
-            partialLikelihoods = NULL;
+            delete [] partial_likelihoods;
+            partial_likelihoods = NULL;
             in_mcmc_mode = false;
         }
 
@@ -1952,7 +1968,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( in_mcmc_mode == false )
         {
             delete_partial_likelihoods = true;
-            partialLikelihoods = new double[2*activeLikelihoodOffset];
+            partial_likelihoods = new double[2*active_likelihood_offset];
             in_mcmc_mode = true;
 
             for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
@@ -1980,8 +1996,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            delete [] partialLikelihoods;
-            partialLikelihoods = NULL;
+            delete [] partial_likelihoods;
+            partial_likelihoods = NULL;
             in_mcmc_mode = false;
         }
 
@@ -2006,7 +2022,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( in_mcmc_mode == false )
         {
             delete_partial_likelihoods = true;
-            partialLikelihoods = new double[2*activeLikelihoodOffset];
+            partial_likelihoods = new double[2*active_likelihood_offset];
             in_mcmc_mode = true;
 
             for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
@@ -2034,8 +2050,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            delete [] partialLikelihoods;
-            partialLikelihoods = NULL;
+            delete [] partial_likelihoods;
+            partial_likelihoods = NULL;
             in_mcmc_mode = false;
         }
 
@@ -2076,9 +2092,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
     this->updateTransitionProbabilities( node_index );
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    //    double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-    const double*   p_left  = this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    const double*   p_right = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
+    //    double*         p_node  = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
+    const double*   p_left  = this->partial_likelihoods + this->active_likelihood[left]*this->active_likelihood_offset + left*this->node_offset;
+    const double*   p_right = this->partial_likelihoods + this->active_likelihood[right]*this->active_likelihood_offset + right*this->node_offset;
 
     // get pointers the likelihood for both subtrees
     //    const double*   p_site           = p_node;
@@ -2104,9 +2120,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
         }
 
         // get ptr to first mixture cat for site
-        //        p_site          = p_node  + cat * this->mixtureOffset + pattern * this->siteOffset;
-        const double* p_left_site_mixture_j     = p_left  + cat * this->mixtureOffset + pattern * this->siteOffset;
-        const double* p_right_site_mixture_j    = p_right + cat * this->mixtureOffset + pattern * this->siteOffset;
+        //        p_site          = p_node  + cat * this->mixture_offset + pattern * this->site_offset;
+        const double* p_left_site_mixture_j     = p_left  + cat * this->mixture_offset + pattern * this->site_offset;
+        const double* p_right_site_mixture_j    = p_right + cat * this->mixture_offset + pattern * this->site_offset;
 
         // iterate over possible end states for each site given start state
         for (size_t j = 0; j < this->num_chars; j++)
@@ -2255,32 +2271,70 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVector(const TopologyNode &node, size_t node_index)
 {
 
-    // check for recomputation
-    if ( dirty_nodes[node_index] == true )
+    const std::string& partial_likelihood_storing_approach = RbSettings::userSettings().getpartial_likelihoodstoring();
+
+
+    if ( partial_likelihood_storing_approach == "branch" )
     {
-        // mark as computed
-        dirty_nodes[node_index] = false;
 
-        if ( node.isTip() == true )
+        // check for recomputation
+        if ( dirty_nodes[node_index] == true )
         {
-            // this is a tip node
-            // compute the likelihood for the tip and we are done
-            computeTipLikelihood(node, node_index);
+            // mark as computed
+            dirty_nodes[node_index] = false;
 
-            //-- We only need to scale only if we are not using BEAGLE
+            if ( node.isTip() == true )
+            {
+                // this is a tip node
+                // compute the likelihood for the tip and we are done
+                computeTipLikelihood(node, node_index);
+
+                //-- We only need to scale only if we are not using BEAGLE
 #if !defined ( RB_BEAGLE )
-            // rescale likelihood vector
-            scale(node_index);
+                // rescale likelihood vector
+                scale(node_index);
 #endif /* NOT RB_BEAGLE */
+            }
+            else
+            {
+                // this is an internal node
+                const TopologyNode     &left        = node.getChild(0);
+                size_t                  left_index  = left.getIndex();
+                const TopologyNode     &right       = node.getChild(1);
+                size_t                  right_index = right.getIndex();
+                
+                fillLikelihoodVector( left, left_index );
+                fillLikelihoodVector( right, right_index );
+
+                // now compute the likelihoods of this internal node
+                computeInternalNodeLikelihood(node,node_index,left_index,right_index);
+            
+            
+                //-- We only need to scale only if we are not using BEAGLE
+#if !defined ( RB_BEAGLE )
+                // rescale likelihood vector
+                scale(node_index,left_index,right_index);
+#endif /* NOT RB_BEAGLE */
+
+            }
+
         }
-        else
+    }
+    else if ( partial_likelihood_storing_approach == "node" )
+    {
+        // check for recomputation
+        if ( dirty_nodes[node_index] == true && node.isTip() == false )
         {
+            // mark as computed
+            dirty_nodes[node_index] = false;
+
             // this is an internal node
             const TopologyNode     &left        = node.getChild(0);
             size_t                  left_index  = left.getIndex();
-            fillLikelihoodVector( left, left_index );
             const TopologyNode     &right       = node.getChild(1);
             size_t                  right_index = right.getIndex();
+                
+            fillLikelihoodVector( left, left_index );
             fillLikelihoodVector( right, right_index );
 
             // now compute the likelihoods of this internal node
@@ -2295,6 +2349,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
         }
 
+
+    }
+    else if ( partial_likelihood_storing_approach == "both" )
+    {
+        
+    }
+    else
+    {
+        throw RbException("Unknown method '" + partial_likelihood_storing_approach + "' for storing partial likelihoods.");
     }
 
 }
@@ -2516,7 +2579,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
         // if we previously haven't touched this node, then we need to change the active likelihood pointer
         if ( changed_nodes[index] == false )
         {
-            activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
+            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
             changed_nodes[index] = true;
         }
 
@@ -2699,7 +2762,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
     {
         if ( changed_nodes[index] == false )
         {
-            activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
+            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
             changed_nodes[index] = true;
         }
     }
@@ -2743,23 +2806,23 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     }
 
     // set the offsets for easier iteration through the likelihood vector
-    siteOffset                  =  num_chars;
-    mixtureOffset               =  pattern_block_size*siteOffset;
-    nodeOffset                  =  num_site_mixtures*mixtureOffset;
-    activeLikelihoodOffset      =  num_nodes*nodeOffset;
+    site_offset                  =  num_chars;
+    mixture_offset               =  pattern_block_size*site_offset;
+    node_offset                  =  num_site_mixtures*mixture_offset;
+    active_likelihood_offset      =  num_nodes*node_offset;
 
     // only do this if we are in MCMC mode. This will safe memory
     if ( in_mcmc_mode == true )
     {
         // we resize the partial likelihood vectors to the new dimensions
-        delete [] partialLikelihoods;
+        delete [] partial_likelihoods;
 
-        partialLikelihoods = new double[2*activeLikelihoodOffset];
+        partial_likelihoods = new double[2*active_likelihood_offset];
 
         // reinitialize likelihood vectors
-        for (size_t i = 0; i < 2*activeLikelihoodOffset; i++)
+        for (size_t i = 0; i < 2*active_likelihood_offset; i++)
         {
-            partialLikelihoods[i] = 0.0;
+            partial_likelihoods[i] = 0.0;
         }
     }
 
@@ -2768,10 +2831,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
         // we resize the partial likelihood vectors to the new dimensions
         delete [] marginalLikelihoods;
 
-        marginalLikelihoods = new double[activeLikelihoodOffset];
+        marginalLikelihoods = new double[active_likelihood_offset];
 
         // reinitialize likelihood vectors
-        for (size_t i = 0; i < activeLikelihoodOffset; i++)
+        for (size_t i = 0; i < active_likelihood_offset; i++)
         {
             marginalLikelihoods[i] = 0.0;
         }
@@ -2781,9 +2844,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     per_node_site_mixture_log_scaling_factors   = std::vector<std::vector< std::vector< std::vector<double> > > >(2, std::vector<std::vector< std::vector<double> > >(num_nodes, std::vector< std::vector<double> >(num_site_mixtures, std::vector<double>(pattern_block_size, 0.0) ) ) );
     per_node_site_log_scaling_factors           = std::vector<std::vector< std::vector< double > > >(2, std::vector<std::vector< double > >(num_nodes, std::vector<double>(pattern_block_size, 0.0 ) ) );
 
-    activePmatrixOffset         =  num_nodes * num_site_mixtures;
-    pmatNodeOffset              =  num_site_mixtures;
-    pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
+    active_P_matrix_offset         =  num_nodes * num_site_mixtures;
+    pmat_node_offset              =  num_site_mixtures;
+    pmatrices                   =  std::vector<TransitionProbabilityMatrix>(active_P_matrix_offset * 2, TransitionProbabilityMatrix(num_chars));
 
     transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) );
 }
@@ -2812,7 +2875,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
         // then we need to revert this change
         if ( changed_nodes[index] == true )
         {
-            activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
+            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
         }
 
         // set all flags to false
@@ -2848,7 +2911,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
     bool scale_threshold    = RbSettings::userSettings().getScalingMethod() == "threshold";
     bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
     
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
 
     if ( test_underflow == true && scale_per_mixture == false )
     {
@@ -2865,7 +2928,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                 {
                     // get the pointers to the likelihood for this mixture category
-                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                    size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                     double* p_site_mixture = p_node + offset;
 
@@ -2886,13 +2949,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     // Don't divide by zero or NaN.
                     if (not (max > 0)) continue;
 
-                    this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
+                    this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = -log(max);
 
                     // compute the per site probabilities
                     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                     {
                         // get the pointers to the likelihood for this mixture category
-                        size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                        size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                         double* p_site_mixture = p_node + offset;
 
@@ -2908,13 +2971,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     // only scale if the max-prob was smaller than a fixed threshold
                     if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = 1;
+                        this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = 1;
 
                         // compute the per site probabilities
                         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                         {
                             // get the pointers to the likelihood for this mixture category
-                            size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                            size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                             double* p_site_mixture = p_node + offset;
 
@@ -2928,7 +2991,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     } // end-if the max prob was smaller than a fixed threshold
                     else
                     {
-                        this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = 0;
+                        this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = 0;
                     }
                 } // end-else scale by fixed threshold
 
@@ -2939,7 +3002,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             // iterate over all sites
             for (size_t site = 0; site < this->pattern_block_size ; ++site)
             {
-                this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = 0;
+                this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = 0;
             }
         } // end-else not testing this node
     }
@@ -2950,7 +3013,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right )
 {
 
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
 
     
     bool test_underflow     = RbSettings::userSettings().getUseScaling() == true;
@@ -2976,7 +3039,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                 {
                     // get the pointers to the likelihood for this mixture category
-                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                    size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                     double*          p_site_mixture          = p_node + offset;
 
@@ -2997,13 +3060,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     // Don't divide by zero or NaN.
                     if (not (max > 0)) continue;
 
-                    this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site] - log(max);
+                    this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site] - log(max);
 
                     // compute the per site probabilities
                     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                     {
                         // get the pointers to the likelihood for this mixture category
-                        size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                        size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                         double* p_site_mixture = p_node + offset;
 
@@ -3018,13 +3081,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     // only scale if the max-prob was smaller than a fixed threshold
                     if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site] + 1;
+                        this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site] + 1;
 
                         // compute the per site probabilities
                         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                         {
                             // get the pointers to the likelihood for this mixture category
-                            size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                            size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                             double* p_site_mixture = p_node + offset;
 
@@ -3038,7 +3101,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     } // end-if the max prob was smaller than a fixed threshold
                     else
                     {
-                        this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site];
+                        this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site];
                     }
                 } // end-else scale by fixed threshold
 
@@ -3050,7 +3113,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             // iterate over all mixture categories
             for (size_t site = 0; site < this->pattern_block_size ; ++site)
             {
-                this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site];
+                this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site];
             }
 
         }
@@ -3064,7 +3127,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
 
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = this->partial_likelihoods + this->active_likelihood[node_index]*this->active_likelihood_offset + node_index*this->node_offset;
 
     
     bool test_underflow     = RbSettings::userSettings().getUseScaling() == true;
@@ -3090,7 +3153,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                 {
                     // get the pointers to the likelihood for this mixture category
-                    size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                    size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                     double* p_site_mixture = p_node + offset;
 
@@ -3110,13 +3173,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     // Don't divide by zero or NaN.
                     if (not (max > 0)) continue;
 
-                    this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site] - log(max);
+                    this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site] - log(max);
 
                     // compute the per site probabilities
                     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                     {
                         // get the pointers to the likelihood for this mixture category
-                        size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                        size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                         double* p_site_mixture = p_node + offset;
 
@@ -3131,13 +3194,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     // only scale if the max-prob was smaller than a fixed threshold
                     if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site] + 1;
+                        this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site] + 1;
 
                         // compute the per site probabilities
                         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
                         {
                             // get the pointers to the likelihood for this mixture category
-                            size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
+                            size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
                             double* p_site_mixture = p_node + offset;
 
@@ -3151,7 +3214,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     } // end-if the max prob was smaller than a fixed threshold
                     else
                     {
-                        this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site];
+                        this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site];
                     }
                 } // end-else scale by fixed threshold
 
@@ -3163,7 +3226,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             // iterate over all mixture categories
             for (size_t site = 0; site < this->pattern_block_size ; ++site)
             {
-                this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->activeLikelihood[right]][right][site];
+                this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site] = this->per_node_site_log_scaling_factors[this->active_likelihood[middle]][middle][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[left]][left][site] + this->per_node_site_log_scaling_factors[this->active_likelihood[right]][right][site];
             }
 
         }
@@ -3392,12 +3455,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
         }
         else
         {
-            delete [] partialLikelihoods;
-            partialLikelihoods = NULL;
+            delete [] partial_likelihoods;
+            partial_likelihoods = NULL;
         }
 #else
-        delete [] partialLikelihoods;
-        partialLikelihoods = NULL;
+        delete [] partial_likelihoods;
+        partial_likelihoods = NULL;
 #endif
     }
 
@@ -3681,7 +3744,7 @@ std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneo
     std::vector<double> mixture_probs = getMixtureProbs();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node_marginal         = this->marginalLikelihoods + node_index*this->nodeOffset;
+    double*         p_node_marginal         = this->marginalLikelihoods + node_index*this->node_offset;
 
     // get pointers the likelihood for both subtrees
     double*         p_mixture_marginal          = p_node_marginal;
@@ -3707,12 +3770,12 @@ std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneo
             }
 
             // increment the pointers to the next site
-            p_site_mixture_marginal+=this->siteOffset;
+            p_site_mixture_marginal+=this->site_offset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-        p_mixture_marginal+=this->mixtureOffset;
+        p_mixture_marginal+=this->mixture_offset;
 
     } // end-for over all mixtures (=rate categories)
 
@@ -3732,7 +3795,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->partialLikelihoods + this->activeLikelihood[node_index] * this->activeLikelihoodOffset  + node_index*this->nodeOffset;
+    double*   p_node  = this->partial_likelihoods + this->active_likelihood[node_index] * this->active_likelihood_offset  + node_index*this->node_offset;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3758,11 +3821,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             if ( scale_per_mixture == true )
             {
                 // first find the max scaling
-                double max_scaling = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site];
+                double max_scaling = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site];
                 // iterate over all mixture categories
                 for (size_t mixture = 1; mixture < this->num_site_mixtures; ++mixture)
                 {
-                    double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
+                    double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site];
                     if ( scale_threshold == true )
                     {
                         max_scaling = (max_scaling < tmp_sf ? max_scaling : tmp_sf);
@@ -3776,7 +3839,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             }
             else
             {
-                per_mixture_scaling_factors[site] = this->per_node_site_log_scaling_factors[this->activeLikelihood[node_index]][node_index][site];
+                per_mixture_scaling_factors[site] = this->per_node_site_log_scaling_factors[this->active_likelihood[node_index]][node_index][site];
             }
         }
         
@@ -3785,7 +3848,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
         {
 
             // get pointers to the likelihood for this mixture category
-            double*   p_site_mixture     = p_mixture + (mixture*this->mixtureOffset) + (site*this->siteOffset);
+            double*   p_site_mixture     = p_mixture + (mixture*this->mixture_offset) + (site*this->site_offset);
 
             // temporary variable storing the likelihood
             double tmp = 0.0;
@@ -3806,7 +3869,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 if ( scale_per_mixture == true )
                 {
                     // add the likelihood for this mixture category
-                    double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][mixture][site];
+                    double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site];
                     if ( scale_threshold == false )
                     {
                         per_mixture_Likelihoods[site] += exp(per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
@@ -3826,12 +3889,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 per_mixture_Likelihoods[site] += site_mixture_probs[mixture] * tmp;
             }
             // increment the pointers to the next site
-//            p_site_mixture+=this->siteOffset;
+//            p_site_mixture+=this->site_offset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-//        p_mixture+=this->mixtureOffset;
+//        p_mixture+=this->mixture_offset;
 
     } // end-for over all mixtures
 
@@ -3977,7 +4040,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->partialLikelihoods + this->activeLikelihood[node_index] * this->activeLikelihoodOffset  + node_index*this->nodeOffset;
+    double*   p_node  = this->partial_likelihoods + this->active_likelihood[node_index] * this->active_likelihood_offset  + node_index*this->node_offset;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -4017,12 +4080,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             per_site_mixture_Likelihoods[site][mixture] += tmp * site_mixture_probs[mixture];
 
             // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset;
+            p_site_mixture+=this->site_offset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset;
+        p_mixture+=this->mixture_offset;
 
     } // end-for over all mixtures
 
@@ -4081,11 +4144,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                     {
                         if ( scale_threshold == false )
                         {
-                            rv[site][site_rate_index * num_site_matrices + matrix] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                            rv[site][site_rate_index * num_site_matrices + matrix] -= this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site] * *patterns;
                         }
                         else
                         {
-                            rv[site][site_rate_index * num_site_matrices + matrix] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                            rv[site][site_rate_index * num_site_matrices + matrix] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site]) * *patterns;
                         }
                             
                     }
@@ -4110,11 +4173,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     if ( scale_threshold == false )
                     {
-                        rv[site][mixture] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                        rv[site][mixture] -= this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site] * *patterns;
                     }
                     else
                     {
-                        rv[site][mixture] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                        rv[site][mixture] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site]) * *patterns;
                     }
                 }
             }
@@ -4136,7 +4199,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->partialLikelihoods + this->activeLikelihood[node_index] * this->activeLikelihoodOffset  + node_index*this->nodeOffset;
+    double*   p_node  = this->partial_likelihoods + this->active_likelihood[node_index] * this->active_likelihood_offset  + node_index*this->node_offset;
 
     size_t num_site_matrices = num_site_mixtures/num_site_rates;
 
@@ -4180,12 +4243,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             per_site_rate_Likelihoods[site][site_rate_index] += tmp * site_mixture_probs[mixture];
 
             // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset;
+            p_site_mixture+=this->site_offset;
 
         } // end-for over all sites (=patterns)
 
         // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset;
+        p_mixture+=this->mixture_offset;
 
     } // end-for over all mixtures (=rate categories)
 
@@ -4255,11 +4318,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     if ( scale_threshold == false )
                     {
-                        rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                        rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site] * *patterns;
                     }
                     else
                     {
-                        rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                        rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site]) * *patterns;
                     }
                 }
 
@@ -4281,11 +4344,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                 {
                     if ( scale_threshold == false )
                     {
-                        rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site] * *patterns;
+                        rv[site][site_rate_index] -= this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site] * *patterns;
                     }
                     else
                     {
-                        rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->activeLikelihood[node_index]][node_index][0][site]) * *patterns;
+                        rv[site][site_rate_index] -= (RbConstants::LN2 * 256 * this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][0][site]) * *patterns;
                     }
 
                 }
@@ -4507,7 +4570,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         {
             if ( changed_nodes[index] == false )
             {
-                activeLikelihood[index] = (activeLikelihood[index] == 0 ? 1 : 0);
+                active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
                 changed_nodes[index] = true;
             }
         }
@@ -4690,7 +4753,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     RateMatrix_JC jc(this->num_chars);
     const RateGenerator *rm = &jc;
     
-    size_t pmat_offset = this->active_pmatrices[node_idx] * this->activePmatrixOffset + node_idx * this->pmatNodeOffset;
+    size_t pmat_offset = this->active_pmatrices[node_idx] * this->active_P_matrix_offset + node_idx * this->pmat_node_offset;
     
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
@@ -4795,8 +4858,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
     this->num_mixtures           = (this->homogeneous_rate_matrix)
                                  ? 1 : this->heterogeneous_rate_matrices->getValue().size();
     
-    bool   b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode() != "manual"
-                                 ? true : false;
+    bool   b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode() == "manual"
+                                 ? false : true;
 
     int    b_tipCount            = int( this->tau->getValue().getNumberOfTips() );
     int    b_partialsBufferCount = 2 * this->num_nodes

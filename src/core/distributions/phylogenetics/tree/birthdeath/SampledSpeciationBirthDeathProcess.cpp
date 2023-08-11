@@ -46,7 +46,7 @@ extinction( e ),
 rho( r ),
 branch_histories( NULL, 1, 1, true ),
 taxa( n ),
-activeLikelihood( std::vector<size_t>(2*n.size()-1, 0) ),
+active_likelihood( std::vector<size_t>(2*n.size()-1, 0) ),
 storedLikelihood( std::vector<std::vector<double> >(2*n.size()-1, std::vector<double>(2, 0.0))),
 changed_nodes( std::vector<bool>(2*n.size()-1, false) ),
 dirty_nodes( std::vector<bool>(2*n.size()-1, true) ),
@@ -354,7 +354,7 @@ void SampledSpeciationBirthDeathProcess::computeNodeProbability(const RevBayesCo
     
     
         // store likelihood
-        storedLikelihood[node_index][ activeLikelihood[node_index] ] = lnProb;
+        storedLikelihood[node_index][ active_likelihood[node_index] ] = lnProb;
 
         // mark as computed
         dirty_nodes[node_index] = false;
@@ -383,7 +383,7 @@ double SampledSpeciationBirthDeathProcess::computeRootLikelihood( void )
     double lnProb = 0.0;
     for (size_t i = 0; i < storedLikelihood.size(); ++i)
     {
-        lnProb += storedLikelihood[i][activeLikelihood[i]];
+        lnProb += storedLikelihood[i][active_likelihood[i]];
     }
     
     return lnProb;
