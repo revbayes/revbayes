@@ -1170,6 +1170,260 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
 
 
 template<class charType>
+void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihoodNode( size_t root, size_t left, size_t right)
+{
+    
+    // reset the likelihood
+    this->lnProb = 0.0;
+    
+    // compute the transition probability matrix
+    size_t pmat_offset_left  = this->active_pmatrices[left]  * this->active_P_matrix_offset + left  * this->pmat_node_offset;
+    size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + right * this->pmat_node_offset;
+    
+    // get the root frequencies
+    std::vector<std::vector<double> > base_frequencies_vector;
+    this->getRootFrequencies(base_frequencies_vector);
+    
+    // get the pointers to the partial likelihoods of the left and right subtree
+          double* p        = this->partial_likelihoods + this->active_likelihood[root]  *this->active_likelihood_offset + root   * this->node_offset;
+    const double* p_left   = this->partial_likelihoods + this->active_likelihood[left]  *this->active_likelihood_offset + left   * this->node_offset;
+    const double* p_right  = this->partial_likelihoods + this->active_likelihood[right] *this->active_likelihood_offset + right  * this->node_offset;
+    
+    // get pointers the likelihood for both subtrees
+          double*   p_mixture          = p;
+    const double*   p_mixture_left     = p_left;
+    const double*   p_mixture_right    = p_right;
+
+    
+    // iterate over all mixture categories
+    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+    {
+        // get the root frequencies
+        const std::vector<double> &base_frequencies = base_frequencies_vector[mixture % base_frequencies_vector.size()];
+        
+        // the transition probability matrix for this mixture category
+        const double* tp_begin_left  = this->pmatrices[pmat_offset_left  + mixture].theMatrix;
+        const double* tp_begin_right = this->pmatrices[pmat_offset_right + mixture].theMatrix;
+        
+        // get pointers to the likelihood for this mixture category
+              double*   p_site_mixture          = p_mixture;
+        const double*   p_site_mixture_left     = p_mixture_left;
+        const double*   p_site_mixture_right    = p_mixture_right;
+        // iterate over all sites
+        for (size_t site = 0; site < this->pattern_block_size; ++site)
+        {
+            
+            // get the pointers for this mixture category and this site
+            const double*       tp_a_left    = tp_begin_left;
+            const double*       tp_a_right   = tp_begin_right;
+            
+            // compute the first the likelihood of 'A'
+            double  sum_left  = p_site_mixture_left[0] * tp_a_left[0];
+                    sum_left += p_site_mixture_left[1] * tp_a_left[1];
+                    sum_left += p_site_mixture_left[2] * tp_a_left[2];
+                    sum_left += p_site_mixture_left[3] * tp_a_left[3];
+            double  sum_right  = p_site_mixture_right[0] * tp_a_right[0];
+                    sum_right += p_site_mixture_right[1] * tp_a_right[1];
+                    sum_right += p_site_mixture_right[2] * tp_a_right[2];
+                    sum_right += p_site_mixture_right[3] * tp_a_right[3];
+
+            p_site_mixture[0] = sum_left * sum_right * base_frequencies[0];
+
+            
+            // compute the first the likelihood of 'C'
+            sum_left  = p_site_mixture_left[0] * tp_a_left[4];
+            sum_left += p_site_mixture_left[1] * tp_a_left[5];
+            sum_left += p_site_mixture_left[2] * tp_a_left[6];
+            sum_left += p_site_mixture_left[3] * tp_a_left[7];
+            sum_right  = p_site_mixture_right[0] * tp_a_right[4];
+            sum_right += p_site_mixture_right[1] * tp_a_right[5];
+            sum_right += p_site_mixture_right[2] * tp_a_right[6];
+            sum_right += p_site_mixture_right[3] * tp_a_right[7];
+            
+            p_site_mixture[1] = sum_left * sum_right * base_frequencies[1];
+            
+            
+            // compute the first the likelihood of 'G'
+            sum_left  = p_site_mixture_left[0] * tp_a_left[8];
+            sum_left += p_site_mixture_left[1] * tp_a_left[9];
+            sum_left += p_site_mixture_left[2] * tp_a_left[10];
+            sum_left += p_site_mixture_left[3] * tp_a_left[11];
+            sum_right  = p_site_mixture_right[0] * tp_a_right[8];
+            sum_right += p_site_mixture_right[1] * tp_a_right[9];
+            sum_right += p_site_mixture_right[2] * tp_a_right[10];
+            sum_right += p_site_mixture_right[3] * tp_a_right[11];
+            
+            p_site_mixture[2] = sum_left * sum_right * base_frequencies[2];
+            
+            
+            // compute the first the likelihood of 'T'
+            sum_left  = p_site_mixture_left[0] * tp_a_left[12];
+            sum_left += p_site_mixture_left[1] * tp_a_left[13];
+            sum_left += p_site_mixture_left[2] * tp_a_left[14];
+            sum_left += p_site_mixture_left[3] * tp_a_left[15];
+            sum_right  = p_site_mixture_right[0] * tp_a_right[12];
+            sum_right += p_site_mixture_right[1] * tp_a_right[13];
+            sum_right += p_site_mixture_right[2] * tp_a_right[14];
+            sum_right += p_site_mixture_right[3] * tp_a_right[15];
+            
+            p_site_mixture[3] = sum_left * sum_right * base_frequencies[3];
+            
+            
+            
+            // increment the pointers to the next site
+            p_site_mixture       += this->site_offset;
+            p_site_mixture_left  += this->site_offset;
+            p_site_mixture_right += this->site_offset;
+            
+        } // end-for over all sites (=patterns)
+        
+        // increment the pointers to the next mixture category
+        p_mixture       += this->mixture_offset;
+        p_mixture_left  += this->mixture_offset;
+        p_mixture_right += this->mixture_offset;
+        
+    } // end-for over all mixtures (=rate categories)
+    
+}
+
+template<class charType>
+void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihoodNode( size_t root, size_t left, size_t right, size_t middle)
+{
+    
+    // reset the likelihood
+    this->lnProb = 0.0;
+    
+    // compute the transition probability matrix
+    size_t pmat_offset_left   = this->active_pmatrices[left]   * this->active_P_matrix_offset + left   * this->pmat_node_offset;
+    size_t pmat_offset_right  = this->active_pmatrices[right]  * this->active_P_matrix_offset + right  * this->pmat_node_offset;
+    size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
+
+    // get the root frequencies
+    std::vector<std::vector<double> > base_frequencies_vector;
+    this->getRootFrequencies(base_frequencies_vector);
+    
+    // get the pointers to the partial likelihoods of the left and right subtree
+          double* p        = this->partial_likelihoods + this->active_likelihood[root]   * this->active_likelihood_offset + root   * this->node_offset;
+    const double* p_left   = this->partial_likelihoods + this->active_likelihood[left]   * this->active_likelihood_offset + left   * this->node_offset;
+    const double* p_right  = this->partial_likelihoods + this->active_likelihood[right]  * this->active_likelihood_offset + right  * this->node_offset;
+    const double* p_middle = this->partial_likelihoods + this->active_likelihood[middle] * this->active_likelihood_offset + middle * this->node_offset;
+
+    // get pointers the likelihood for both subtrees
+          double*   p_mixture          = p;
+    const double*   p_mixture_left     = p_left;
+    const double*   p_mixture_right    = p_right;
+    const double*   p_mixture_middle   = p_middle;
+
+    
+    // iterate over all mixture categories
+    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+    {
+        // get the root frequencies
+        const std::vector<double> &base_frequencies = base_frequencies_vector[mixture % base_frequencies_vector.size()];
+        
+        // the transition probability matrix for this mixture category
+        const double* tp_left   = this->pmatrices[pmat_offset_left   + mixture].theMatrix;
+        const double* tp_right  = this->pmatrices[pmat_offset_right  + mixture].theMatrix;
+        const double* tp_middle = this->pmatrices[pmat_offset_middle + mixture].theMatrix;
+
+        // get pointers to the likelihood for this mixture category
+              double*   p_site_mixture          = p_mixture;
+        const double*   p_site_mixture_left     = p_mixture_left;
+        const double*   p_site_mixture_right    = p_mixture_right;
+        const double*   p_site_mixture_middle   = p_mixture_middle;
+        // iterate over all sites
+        for (size_t site = 0; site < this->pattern_block_size; ++site)
+        {
+            
+            // compute the first the likelihood of 'A'
+            double  sum_left  = p_site_mixture_left[0] * tp_left[0];
+                    sum_left += p_site_mixture_left[1] * tp_left[1];
+                    sum_left += p_site_mixture_left[2] * tp_left[2];
+                    sum_left += p_site_mixture_left[3] * tp_left[3];
+            double  sum_right  = p_site_mixture_right[0] * tp_right[0];
+                    sum_right += p_site_mixture_right[1] * tp_right[1];
+                    sum_right += p_site_mixture_right[2] * tp_right[2];
+                    sum_right += p_site_mixture_right[3] * tp_right[3];
+            double  sum_middle  = p_site_mixture_middle[0] * tp_middle[0];
+                    sum_middle += p_site_mixture_middle[1] * tp_middle[1];
+                    sum_middle += p_site_mixture_middle[2] * tp_middle[2];
+                    sum_middle += p_site_mixture_middle[3] * tp_middle[3];
+
+            p_site_mixture[0] = sum_left * sum_right * sum_middle * base_frequencies[0];
+
+            
+            // compute the first the likelihood of 'C'
+            sum_left  = p_site_mixture_left[0] * tp_left[4];
+            sum_left += p_site_mixture_left[1] * tp_left[5];
+            sum_left += p_site_mixture_left[2] * tp_left[6];
+            sum_left += p_site_mixture_left[3] * tp_left[7];
+            sum_right  = p_site_mixture_right[0] * tp_right[4];
+            sum_right += p_site_mixture_right[1] * tp_right[5];
+            sum_right += p_site_mixture_right[2] * tp_right[6];
+            sum_right += p_site_mixture_right[3] * tp_right[7];
+            sum_middle  = p_site_mixture_middle[0] * tp_middle[4];
+            sum_middle += p_site_mixture_middle[1] * tp_middle[5];
+            sum_middle += p_site_mixture_middle[2] * tp_middle[6];
+            sum_middle += p_site_mixture_middle[3] * tp_middle[7];
+            
+            p_site_mixture[1] = sum_left * sum_right * sum_middle * base_frequencies[1];
+            
+            
+            // compute the first the likelihood of 'G'
+            sum_left  = p_site_mixture_left[0] * tp_left[8];
+            sum_left += p_site_mixture_left[1] * tp_left[9];
+            sum_left += p_site_mixture_left[2] * tp_left[10];
+            sum_left += p_site_mixture_left[3] * tp_left[11];
+            sum_right  = p_site_mixture_right[0] * tp_right[8];
+            sum_right += p_site_mixture_right[1] * tp_right[9];
+            sum_right += p_site_mixture_right[2] * tp_right[10];
+            sum_right += p_site_mixture_right[3] * tp_right[11];
+            sum_middle  = p_site_mixture_middle[0] * tp_middle[8];
+            sum_middle += p_site_mixture_middle[1] * tp_middle[9];
+            sum_middle += p_site_mixture_middle[2] * tp_middle[10];
+            sum_middle += p_site_mixture_middle[3] * tp_middle[11];
+            
+            p_site_mixture[2] = sum_left * sum_right * sum_middle * base_frequencies[2];
+            
+            
+            // compute the first the likelihood of 'T'
+            sum_left  = p_site_mixture_left[0] * tp_left[12];
+            sum_left += p_site_mixture_left[1] * tp_left[13];
+            sum_left += p_site_mixture_left[2] * tp_left[14];
+            sum_left += p_site_mixture_left[3] * tp_left[15];
+            sum_right  = p_site_mixture_right[0] * tp_right[12];
+            sum_right += p_site_mixture_right[1] * tp_right[13];
+            sum_right += p_site_mixture_right[2] * tp_right[14];
+            sum_right += p_site_mixture_right[3] * tp_right[15];
+            sum_middle  = p_site_mixture_middle[0] * tp_middle[12];
+            sum_middle += p_site_mixture_middle[1] * tp_middle[13];
+            sum_middle += p_site_mixture_middle[2] * tp_middle[14];
+            sum_middle += p_site_mixture_middle[3] * tp_middle[15];
+            
+            p_site_mixture[3] = sum_left * sum_right * sum_middle * base_frequencies[3];
+            
+            
+            
+            // increment the pointers to the next site
+            p_site_mixture        += this->site_offset;
+            p_site_mixture_left   += this->site_offset;
+            p_site_mixture_right  += this->site_offset;
+            p_site_mixture_middle += this->site_offset;
+            
+        } // end-for over all sites (=patterns)
+        
+        // increment the pointers to the next mixture category
+        p_mixture        += this->mixture_offset;
+        p_mixture_left   += this->mixture_offset;
+        p_mixture_right  += this->mixture_offset;
+        p_mixture_middle += this->mixture_offset;
+        
+    } // end-for over all mixtures (=rate categories)
+
+}
+
+
+template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index) 
 {    
     
