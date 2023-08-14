@@ -633,37 +633,37 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
 #           if defined ( SSE_ENABLED )
             
-            __m128d a01 = _mm_load_pd(p_site_mixture_left);
-            __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
-            
-            __m128d b01 = _mm_load_pd(p_site_mixture_right);
-            __m128d b23 = _mm_load_pd(p_site_mixture_right+2);
-            
-            __m128d p01 = _mm_mul_pd(a01,b01);
-            __m128d p23 = _mm_mul_pd(a23,b23);
-            
-            __m128d a_ac = _mm_mul_pd(p01, tp_a_ac   );
-            __m128d a_gt = _mm_mul_pd(p23, tp_a_gt );
-            __m128d a_acgt = _mm_hadd_pd(a_ac,a_gt);
-            
-            __m128d c_ac = _mm_mul_pd(p01, tp_c_ac );
-            __m128d c_gt = _mm_mul_pd(p23, tp_c_gt );
-            __m128d c_acgt = _mm_hadd_pd(c_ac,c_gt);
-            
-            __m128d ac = _mm_hadd_pd(a_acgt,c_acgt);
-            _mm_store_pd(p_site_mixture,ac);
-            
-            
-            __m128d g_ac = _mm_mul_pd(p01, tp_g_ac  );
-            __m128d g_gt = _mm_mul_pd(p23, tp_g_gt );
-            __m128d g_acgt = _mm_hadd_pd(g_ac,g_gt);
-            
-            __m128d t_ac = _mm_mul_pd(p01, tp_t_ac );
-            __m128d t_gt = _mm_mul_pd(p23, tp_t_gt );
-            __m128d t_acgt = _mm_hadd_pd(t_ac,t_gt);
-            
-            __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
-            _mm_store_pd(p_site_mixture+2,gt);
+//            __m128d a01 = _mm_load_pd(p_site_mixture_left);
+//            __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
+//            
+//            __m128d b01 = _mm_load_pd(p_site_mixture_right);
+//            __m128d b23 = _mm_load_pd(p_site_mixture_right+2);
+//            
+//            __m128d p01 = _mm_mul_pd(a01,b01);
+//            __m128d p23 = _mm_mul_pd(a23,b23);
+//            
+//            __m128d a_ac = _mm_mul_pd(p01, tp_a_ac   );
+//            __m128d a_gt = _mm_mul_pd(p23, tp_a_gt );
+//            __m128d a_acgt = _mm_hadd_pd(a_ac,a_gt);
+//            
+//            __m128d c_ac = _mm_mul_pd(p01, tp_c_ac );
+//            __m128d c_gt = _mm_mul_pd(p23, tp_c_gt );
+//            __m128d c_acgt = _mm_hadd_pd(c_ac,c_gt);
+//            
+//            __m128d ac = _mm_hadd_pd(a_acgt,c_acgt);
+//            _mm_store_pd(p_site_mixture,ac);
+//            
+//            
+//            __m128d g_ac = _mm_mul_pd(p01, tp_g_ac  );
+//            __m128d g_gt = _mm_mul_pd(p23, tp_g_gt );
+//            __m128d g_acgt = _mm_hadd_pd(g_ac,g_gt);
+//            
+//            __m128d t_ac = _mm_mul_pd(p01, tp_t_ac );
+//            __m128d t_gt = _mm_mul_pd(p23, tp_t_gt );
+//            __m128d t_acgt = _mm_hadd_pd(t_ac,t_gt);
+//            
+//            __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
+//            _mm_store_pd(p_site_mixture+2,gt);
  
 #           elif defined ( AVX_ENABLED )
  
