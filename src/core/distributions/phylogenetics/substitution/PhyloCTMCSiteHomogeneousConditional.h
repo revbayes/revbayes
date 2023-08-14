@@ -93,15 +93,15 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
         // number of correction patterns per character state
         if (coding & (AscertainmentBias::INFORMATIVE ^ AscertainmentBias::VARIABLE))
         {
-            numCorrectionPatterns = std::pow(2.0f, float(this->num_chars - 1));
+            numCorrectionPatterns = std::pow(2.0f, float(this->num_states - 1));
         }
         else
         {
             numCorrectionPatterns = 1;
         }
 
-        correctionOffset        = this->num_chars*numCorrectionPatterns;
-        correctionMaskOffset    = correctionOffset*this->num_chars;
+        correctionOffset        = this->num_states*numCorrectionPatterns;
+        correctionMaskOffset    = correctionOffset*this->num_states;
         correctionmixture_offset = numCorrectionMasks*correctionMaskOffset;
         correctionnode_offset    = this->num_site_mixtures*correctionmixture_offset;
         activeCorrectionOffset  = this->num_nodes*correctionnode_offset;
@@ -490,14 +490,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
             bool gap = correctionMaskMatrix[mask][data_tip_index];
 
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
 
                 std::vector<double>::iterator                 u = p_node   + offset;
 
                 // iterate over constant/autapomorphic states
-                for (size_t i = 0; i < this->num_chars; i++)
+                for (size_t i = 0; i < this->num_states; i++)
                 {
                     if (i > 0 && numCorrectionPatterns == 1)
                         break;
@@ -505,19 +505,19 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
                     // get bit pattern for this constant/autapomorphic state
                     size_t c = ( i == 0 ? 0 : std::pow(2.0f, float(i - 1)) );
 
-                    std::vector<double>::iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::iterator         uc = u  + c*this->num_states;
 
                     // if we have a gap, then fill with ones for constant patterns
                     // or zero for other patterns
                     if (gap)
                     {
-                        std::fill(uc, uc + this->num_chars, i == 0);
+                        std::fill(uc, uc + this->num_states, i == 0);
                     }
                     // if this is a constant pattern, fill with transition prob from ci to a
                     else if (c == 0)
                     {
                         // iterate over initial states
-                        for (size_t ci = 0; ci < this->num_chars; ci++)
+                        for (size_t ci = 0; ci < this->num_states; ci++)
                         {
                             uc[ci] = pij[ci][a];
                         }
@@ -529,7 +529,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
                         size_t cj = (i-1 >= a ? i : i-1);
 
                         // iterate over initial states
-                        for (size_t ci = 0; ci < this->num_chars; ci++)
+                        for (size_t ci = 0; ci < this->num_states; ci++)
                         {
                             uc[ci] = pij[ci][cj];
                         }
@@ -561,7 +561,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
         {
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
 
@@ -573,9 +573,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
                 // iterate over combinations of autapomorphic states
                 for (size_t c = 0; c < numCorrectionPatterns; c++)
                 {
-                    std::vector<double>::iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::iterator         uc = u  + c*this->num_states;
 
-                    std::fill(uc, uc + this->num_chars, 0.0);
+                    std::fill(uc, uc + this->num_states, 0.0);
 
                     // iterate over partitions of c
                     for (size_t p1 = 0; p1 <= c; p1++)
@@ -591,15 +591,15 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
                                 {
                                     size_t p3 = p2 ^ p_tmp;
 
-                                    std::vector<double>::const_iterator         lc = u_l  + p1*this->num_chars;
-                                    std::vector<double>::const_iterator         rc = u_r  + p2*this->num_chars;
-                                    std::vector<double>::const_iterator         mc = u_m  + p3*this->num_chars;
+                                    std::vector<double>::const_iterator         lc = u_l  + p1*this->num_states;
+                                    std::vector<double>::const_iterator         rc = u_r  + p2*this->num_states;
+                                    std::vector<double>::const_iterator         mc = u_m  + p3*this->num_states;
 
                                     // iterate over initial states
-                                    for (size_t ci = 0; ci < this->num_chars; ci++)
+                                    for (size_t ci = 0; ci < this->num_states; ci++)
                                     {
                                         // iterate over ending states
-                                        for (size_t cj = 0; cj < this->num_chars; cj++)
+                                        for (size_t cj = 0; cj < this->num_states; cj++)
                                         {
                                             uc[ci] += pij[ci][cj] * lc[cj] * rc[cj] * mc[cj];
                                         }
@@ -634,7 +634,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
         {
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
 
@@ -645,9 +645,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
                 // iterate over combinations of autapomorphic states
                 for (size_t c = 0; c < numCorrectionPatterns; c++)
                 {
-                    std::vector<double>::iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::iterator         uc = u  + c*this->num_states;
 
-                    std::fill(uc, uc + this->num_chars, 0.0);
+                    std::fill(uc, uc + this->num_states, 0.0);
 
                     // iterate over partitions of c
                     for (size_t p1 = 0; p1 <= c; p1++)
@@ -656,14 +656,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
                         {
                             size_t p2 = p1 ^ c;
 
-                            std::vector<double>::const_iterator         lc = u_l  + p1*this->num_chars;
-                            std::vector<double>::const_iterator         rc = u_r  + p2*this->num_chars;
+                            std::vector<double>::const_iterator         lc = u_l  + p1*this->num_states;
+                            std::vector<double>::const_iterator         rc = u_r  + p2*this->num_states;
 
                             // iterate over initial states
-                            for (size_t ci = 0; ci < this->num_chars; ci++)
+                            for (size_t ci = 0; ci < this->num_states; ci++)
                             {
                                 // iterate over ending states
-                                for (size_t cj = 0; cj < this->num_chars; cj++)
+                                for (size_t cj = 0; cj < this->num_states; cj++)
                                 {
                                     uc[ci] += pij[ci][cj] * lc[cj] * rc[cj];
                                 }
@@ -698,7 +698,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCor
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
         {
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
 
@@ -710,9 +710,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCor
                 // iterate over combinations of autapomorphic states
                 for (size_t c = 0; c < numCorrectionPatterns; c++)
                 {
-                    std::vector<double>::iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::iterator         uc = u  + c*this->num_states;
 
-                    std::fill(uc, uc + this->num_chars, 0.0);
+                    std::fill(uc, uc + this->num_states, 0.0);
 
                     // iterate over partitions of c
                     for (size_t p1 = 0; p1 <= c; p1++)
@@ -728,12 +728,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCor
                                 {
                                     size_t p3 = p2 ^ p_tmp;
 
-                                    std::vector<double>::const_iterator         lc = u_l  + p1*this->num_chars;
-                                    std::vector<double>::const_iterator         rc = u_r  + p2*this->num_chars;
-                                    std::vector<double>::const_iterator         mc = u_m  + p3*this->num_chars;
+                                    std::vector<double>::const_iterator         lc = u_l  + p1*this->num_states;
+                                    std::vector<double>::const_iterator         rc = u_r  + p2*this->num_states;
+                                    std::vector<double>::const_iterator         mc = u_m  + p3*this->num_states;
 
                                     // iterate over initial states
-                                    for (size_t ci = 0; ci < this->num_chars; ci++)
+                                    for (size_t ci = 0; ci < this->num_states; ci++)
                                     {
                                         uc[ci] += f[ci] * lc[ci] * rc[ci] * mc[ci];
                                     }
@@ -768,7 +768,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCor
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
         {
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
 
@@ -779,9 +779,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCor
                 // iterate over combinations of autapomorphic states
                 for (size_t c = 0; c < numCorrectionPatterns; c++)
                 {
-                    std::vector<double>::iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::iterator         uc = u  + c*this->num_states;
 
-                    std::fill(uc, uc + this->num_chars, 0.0);
+                    std::fill(uc, uc + this->num_states, 0.0);
                     
                     // iterate over partitions of c
                     for (size_t p1 = 0; p1 <= c; p1++)
@@ -790,11 +790,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCor
                         {
                             size_t p2 = p1 ^ c;
 
-                            std::vector<double>::const_iterator         lc = u_l  + p1*this->num_chars;
-                            std::vector<double>::const_iterator         rc = u_r  + p2*this->num_chars;
+                            std::vector<double>::const_iterator         lc = u_l  + p1*this->num_states;
+                            std::vector<double>::const_iterator         rc = u_r  + p2*this->num_states;
 
                             // iterate over initial states
-                            for (size_t ci = 0; ci < this->num_chars; ci++)
+                            for (size_t ci = 0; ci < this->num_states; ci++)
                             {
                                 uc[ci] += f[ci] * lc[ci] * rc[ci];
                             }
@@ -835,7 +835,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
             double prob = 0.0;
             
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
 
@@ -844,12 +844,12 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                 // iterate over combinations of autapomorphic states
                 for (size_t c = 0; c < numCorrectionPatterns; c++)
                 {
-                    std::vector<double>::const_iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::const_iterator         uc = u  + c*this->num_states;
 
                     if (c == 0 && coding == AscertainmentBias::VARIABLE)
                     {
                         // iterate over initial states
-                        for (size_t ci = 0; ci < this->num_chars; ci++)
+                        for (size_t ci = 0; ci < this->num_states; ci++)
                         {
                             prob += uc[ci];
                         }
@@ -870,7 +870,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                              maskObservationCounts[mask] > popcount + 1)
                         {
                             // iterate over initial states
-                            for (size_t ci = 0; ci < this->num_chars; ci++)
+                            for (size_t ci = 0; ci < this->num_states; ci++)
                             {
                                 prob += uc[ci];
                             }
@@ -1081,7 +1081,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
 
         const std::vector< double > &freqs = ff[perSiteRates[i] % ff.size()];
 
-        std::vector<charType> siteData(num_nodes, charType(this->num_chars));
+        std::vector<charType> siteData(num_nodes, charType(this->num_states));
 
         // create the character
         charType &c = siteData[root_index];
@@ -1094,7 +1094,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
             u -= freqs[stateIndex];
             ++stateIndex;
 
-            if ( u > 0.0 && stateIndex < this->num_chars)
+            if ( u > 0.0 && stateIndex < this->num_states)
             {
                 ++c;
             }
@@ -1206,7 +1206,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( cons
             u -= *freqs;
             ++stateIndex;
 
-            if ( u > 0.0 && stateIndex < this->num_chars)
+            if ( u > 0.0 && stateIndex < this->num_states)
             {
                 ++c;
                 ++freqs;
