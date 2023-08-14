@@ -128,7 +128,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousBinary::sumRootLikelihood( void )
             double prob = 0.0;
             
             // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_chars; a++)
+            for (size_t a = 0; a < this->num_states; a++)
             {
                 size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
                 
@@ -138,7 +138,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousBinary::sumRootLikelihood( void )
                 for (size_t c = 0; c < numCorrectionPatterns; c++)
                 {
                     // constant site pattern likelihoods
-                    std::vector<double>::const_iterator         uc = u  + c*this->num_chars;
+                    std::vector<double>::const_iterator         uc = u  + c*this->num_states;
                     
                     if ( ((coding & BinaryAscertainmentBias::NOABSENCESITES)      && a == 0 && c == 0) ||
                        ((coding & BinaryAscertainmentBias::NOPRESENCESITES)     && a == 1 && c == 0) ||
@@ -150,7 +150,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousBinary::sumRootLikelihood( void )
                        )
                     {
                         // iterate over initial states
-                        for (size_t ci = 0; ci < this->num_chars; ci++)
+                        for (size_t ci = 0; ci < this->num_states; ci++)
                         {
                             prob += uc[ci];
                         }
