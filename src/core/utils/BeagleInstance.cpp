@@ -328,7 +328,8 @@ long BeagleInstance::generateSettingsBitmap(void)
     }
     else if (b_scaling_mode == "always")
     {
-        b_flag_scaling = BEAGLE_FLAG_SCALING_ALWAYS; 
+//        b_flag_scaling = BEAGLE_FLAG_SCALING_ALWAYS;
+        b_flag_scaling = BEAGLE_FLAG_SCALING_MANUAL | BEAGLE_FLAG_SCALERS_RAW;
     }
     else if (b_scaling_mode == "manual")
     {

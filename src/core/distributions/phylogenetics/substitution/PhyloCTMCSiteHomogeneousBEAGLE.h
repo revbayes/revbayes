@@ -166,7 +166,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 #endif
     
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = BEAGLE_OP_NONE;
+    int scaler_index_write = (int) root_idx;
     
     //-- Push the last operation onto the queue
     BeagleOperation b_operation =
@@ -266,17 +266,23 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     this->b_ops.clear();
     this->b_branch_lengths.clear();
     this->b_node_indices.clear();
-    this->b_scale_indices.clear();
+//    this->b_scale_indices.clear();
     
 
     //-- BEAGLE model parameters.
     int     b_parentBufferIndices     = (int) root_idx;
     int*    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int     b_stateFrequenciesIndices = 0; //(int) model;  //0;
-    int     b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
+    int     b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_likelihood[root];
     int     b_count                   = 1;
     double  b_outSumLogLikelihood     = std::numeric_limits<double>::min();
     
+    beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
+    beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(),
+                                 b_cumulativeScaleIndices);
+    
+    this->b_scale_indices.clear();
+
     b_ret_code = beagleCalculateRootLogLikelihoods( this->beagle_instance->getResourceID(),
                                                    &b_parentBufferIndices,
                                                    b_categoryWeightsIndices,
@@ -333,8 +339,11 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     std::vector<int> categoryIndicesASRV;
 #endif
 
+//    int scaler_index_read  = BEAGLE_OP_NONE;
+//    int scaler_index_write = BEAGLE_OP_NONE;
+    
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = BEAGLE_OP_NONE;
+    int scaler_index_write = (int) root_idx;
     
     //-- Create BEAGLE operation.
     BeagleOperation b_operation =
@@ -404,10 +413,13 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     }
 
     //-- Calculate and update all partial likelihood buffers
+    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
+    beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
+
     b_ret_code = beagleUpdatePartials( this->beagle_instance->getResourceID(),
                                        &this->b_ops[0],
                                        this->b_ops.size(),
-                                       BEAGLE_OP_NONE );
+                                       b_cumulativeScaleIndices );
 #else
     std::vector< std::vector<double> > model_pi_vectors;
     this->getRootFrequencies(model_pi_vectors);
@@ -436,7 +448,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     this->b_ops.clear();
     this->b_branch_lengths.clear();
     this->b_node_indices.clear();
-    this->b_scale_indices.clear();
     
     //-- Configure BEAGLE model parameters.
     int      b_parentBufferIndices     = (int) root_idx;
@@ -446,12 +457,20 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     int *    b_secondDerivativeIndices = NULL;
     int *    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
-    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
+//    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
+//    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_likelihood[root];
+//    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
     int      b_count                   = 1;
     double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
     double * b_outSumFirstDerivative   = NULL;
     double * b_outSumSecondDerivative  = NULL;
-
+        
+//    beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
+//    beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(),
+//                                 b_cumulativeScaleIndices);
+    
+    this->b_scale_indices.clear();
+    
     //-- Calclulate the lnLikelihood of the model
     b_ret_code = beagleCalculateEdgeLogLikelihoods(
                                                    this->beagle_instance->getResourceID(),
@@ -495,8 +514,11 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     // Compute the branch length
     double b_branch_length = this->calculateBranchLength(node, node_index);
     
+//    int scaler_index_read  = BEAGLE_OP_NONE;
+//    int scaler_index_write = BEAGLE_OP_NONE;
+    
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = BEAGLE_OP_NONE;
+    int scaler_index_write = (int) b_node_idx;
 
     // Construct the BEAGLE operation that will be pushed onto the compute queue.
     BeagleOperation b_operation =
@@ -555,8 +577,11 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
 
     double branch_length = this->calculateBranchLength(node, node_index);
 
+//    int scaler_index_read  = BEAGLE_OP_NONE;
+//    int scaler_index_write = BEAGLE_OP_NONE;
+    
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = BEAGLE_OP_NONE;
+    int scaler_index_write = (int) node_idx;
     
     //-- TODO : Check which operation for middle
     BeagleOperation b_operation =

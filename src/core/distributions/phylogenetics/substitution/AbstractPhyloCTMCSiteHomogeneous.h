@@ -174,10 +174,10 @@ namespace RevBayesCore {
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle) = 0;
 
-        virtual void                                                        computeInternalNodeLikelihoodNode(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
-        virtual void                                                        computeInternalNodeLikelihoodNode(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) = 0;
-        virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right) = 0;
-        virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right, size_t middle) = 0;
+//        virtual void                                                        computeInternalNodeLikelihoodNode(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
+//        virtual void                                                        computeInternalNodeLikelihoodNode(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) = 0;
+//        virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right) = 0;
+//        virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right, size_t middle) = 0;
 
         // virtual methods that you may want to overwrite
         virtual void                                                        compress(void);
@@ -4878,7 +4878,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
     int    b_categoryCount       = this->num_site_rates +
                                    ( this->getPInv() > std::numeric_limits<double>::epsilon()
                                      ? 1 : 0 );
-    int    b_scaleBufferCount    = b_use_scaling ? (this->num_nodes * 2) : 0;
+    int    b_scaleBufferCount    = b_use_scaling ? (this->num_nodes * 2 + 2) : 0;
 
     BeagleInstance *b_instance   = new BeagleInstance();
 
