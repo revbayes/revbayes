@@ -87,8 +87,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->lnProb = 0.0;
     
     // get the root frequencies
-    std::vector<std::vector<double> > ff;
-    this->getRootFrequencies(ff);
+    std::vector<std::vector<double> > base_frequencies_vector;
+    this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
           double* p        = this->partialLikelihoods + this->activeLikelihood[root]  *this->activeLikelihoodOffset + root   * this->nodeOffset;
@@ -103,7 +103,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // get the root frequencies
-        const std::vector<double> &f = ff[mixture % ff.size()];
+        const std::vector<double> &base_frequencies = base_frequencies_vector[mixture % base_frequencies_vector.size()];
 
         // get pointers to the likelihood for this mixture category
               double*   p_site_mixture          = p_mixture;
@@ -113,10 +113,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {
             
-            p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * f[0];
-            p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * f[1];
-            p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * f[2];
-            p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * f[3];
+            p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * base_frequencies[0];
+            p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * base_frequencies[1];
+            p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * base_frequencies[2];
+            p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * base_frequencies[3];
             
             // increment the pointers to the next site
             p_site_mixture+=this->siteOffset; p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset;
@@ -138,8 +138,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->lnProb = 0.0;
     
     // get the root frequencies
-    std::vector<std::vector<double> > ff;
-    this->getRootFrequencies(ff);
+    std::vector<std::vector<double> > base_frequencies_vector;
+    this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
           double* p        = this->partialLikelihoods + this->activeLikelihood[root]  *this->activeLikelihoodOffset + root   * this->nodeOffset;
@@ -156,7 +156,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // get the root frequencies
-        const std::vector<double> &f = ff[mixture % ff.size()];
+        const std::vector<double> &base_frequencies = base_frequencies_vector[mixture % base_frequencies_vector.size()];
 
         // get pointers to the likelihood for this mixture category
               double*   p_site_mixture          = p_mixture;
@@ -166,10 +166,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {   
-            p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * p_site_mixture_middle[0] * f[0];
-            p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * p_site_mixture_middle[1] * f[1];
-            p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * p_site_mixture_middle[2] * f[2];
-            p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * p_site_mixture_middle[3] * f[3];
+            p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * p_site_mixture_middle[0] * base_frequencies[0];
+            p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * p_site_mixture_middle[1] * base_frequencies[1];
+            p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * p_site_mixture_middle[2] * base_frequencies[2];
+            p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * p_site_mixture_middle[3] * base_frequencies[3];
             
             // increment the pointers to the next site
             p_site_mixture+=this->siteOffset; p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset; p_site_mixture_middle+=this->siteOffset;
