@@ -222,6 +222,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
     bool left_is_tip  = left  < this->num_tips;
     bool right_is_tip = right < this->num_tips;
+    if ( left_is_tip   ) p_left   = this->tip_likelihoods + left   * this->tip_offset;
+    if ( right_is_tip  ) p_right  = this->tip_likelihoods + right  * this->tip_offset;
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -603,9 +605,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
 {
 
     // compute the transition probability matrix
-    size_t pmat_offset_left   = this->active_pmatrices[left]   * this->active_P_matrix_offset + left  * this->pmat_node_offset;
-    size_t pmat_offset_right  = this->active_pmatrices[right]  * this->active_P_matrix_offset + right * this->pmat_node_offset;
-    size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + right * this->pmat_node_offset;
+    size_t pmat_offset_left   = this->active_pmatrices[left]   * this->active_P_matrix_offset + left   * this->pmat_node_offset;
+    size_t pmat_offset_right  = this->active_pmatrices[right]  * this->active_P_matrix_offset + right  * this->pmat_node_offset;
+    size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods of the left and right subtree
           double* p        = this->partial_likelihoods_node + this->active_likelihood[root]   * this->active_likelihood_offset + root   * this->node_offset;
@@ -625,15 +627,15 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     std::vector<double> per_mixture_Likelihoods = std::vector<double>(this->num_patterns,0.0);
 
     // get the root frequencies
-    std::vector<std::vector<double> >   ff;
-    this->getRootFrequencies(ff);
+    std::vector<std::vector<double> >   base_frequencies_vectors;
+    this->getRootFrequencies(base_frequencies_vectors);
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         
         // get the root frequencies
-        const std::vector<double> &base_freqs = ff[mixture % ff.size()];
+        const std::vector<double> &base_freqs = base_frequencies_vectors[mixture % base_frequencies_vectors.size()];
         assert(base_freqs.size() == this->num_states);
         
         // the transition probability matrix for this mixture category
