@@ -894,76 +894,76 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
 #           else
             
-            double sum_left = p_site_mixture_left[0] * tp_begin_left[0];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[1];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[2];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[3];
-            
-            double sum_right = p_site_mixture_right[0] * tp_begin_right[0];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[1];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[2];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[3];
-            
-            double sum_middle = p_site_mixture_middle[0] * tp_begin_middle[0];
-            sum_middle += p_site_mixture_middle[1] * tp_begin_middle[1];
-            sum_middle += p_site_mixture_middle[2] * tp_begin_middle[2];
-            sum_middle += p_site_mixture_middle[3] * tp_begin_middle[3];
-            
-            p_site_mixture[0] = sum_left * sum_right * sum_middle;
-            
-            
-            sum_left  = p_site_mixture_left[0] * tp_begin_left[4];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[5];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[6];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[7];
-            
-            sum_right  = p_site_mixture_right[0] * tp_begin_right[4];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[5];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[6];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[7];
-            
-            sum_middle  = p_site_mixture_middle[0] * tp_begin_middle[4];
-            sum_middle += p_site_mixture_middle[1] * tp_begin_middle[5];
-            sum_middle += p_site_mixture_middle[2] * tp_begin_middle[6];
-            sum_middle += p_site_mixture_middle[3] * tp_begin_middle[7];
-            
-            p_site_mixture[1] = sum_left * sum_right * sum_middle;
-            
-            
-            sum_left  = p_site_mixture_left[0] * tp_begin_left[8];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[9];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[10];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[11];
-            
-            sum_right  = p_site_mixture_right[0] * tp_begin_right[8];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[9];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[10];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[11];
-            
-            sum_middl  = p_site_mixture_middl[0] * tp_begin_middl[8];
-            sum_middl += p_site_mixture_middl[1] * tp_begin_middl[9];
-            sum_middl += p_site_mixture_middl[2] * tp_begin_middl[10];
-            sum_middl += p_site_mixture_middl[3] * tp_begin_middl[11];
-            
-            p_site_mixture[2] = sum_left * sum_right * sum_middle;
-            
-            
-            sum_left  = p_site_mixture_left[0] * tp_begin_left[12];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[13];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[14];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[15];
-            
-            sum_right  = p_site_mixture_right[0] * tp_begin_right[12];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[13];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[14];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[15];
-            
-            sum_middl  = p_site_mixture_middl[0] * tp_begin_middl[8];
-            sum_middl += p_site_mixture_middl[1] * tp_begin_middl[9];
-            sum_middl += p_site_mixture_middl[2] * tp_begin_middl[10];
-            sum_middl += p_site_mixture_middl[3] * tp_begin_middl[11];
-            
-            p_site_mixture[3] = sum_left * sum_right * sum_middle;
+//            double sum_left = p_site_mixture_left[0] * tp_begin_left[0];
+//            sum_left += p_site_mixture_left[1] * tp_begin_left[1];
+//            sum_left += p_site_mixture_left[2] * tp_begin_left[2];
+//            sum_left += p_site_mixture_left[3] * tp_begin_left[3];
+//            
+//            double sum_right = p_site_mixture_right[0] * tp_begin_right[0];
+//            sum_right += p_site_mixture_right[1] * tp_begin_right[1];
+//            sum_right += p_site_mixture_right[2] * tp_begin_right[2];
+//            sum_right += p_site_mixture_right[3] * tp_begin_right[3];
+//            
+//            double sum_middle = p_site_mixture_middle[0] * tp_begin_middle[0];
+//            sum_middle += p_site_mixture_middle[1] * tp_begin_middle[1];
+//            sum_middle += p_site_mixture_middle[2] * tp_begin_middle[2];
+//            sum_middle += p_site_mixture_middle[3] * tp_begin_middle[3];
+//            
+//            p_site_mixture[0] = sum_left * sum_right * sum_middle;
+//            
+//            
+//            sum_left  = p_site_mixture_left[0] * tp_begin_left[4];
+//            sum_left += p_site_mixture_left[1] * tp_begin_left[5];
+//            sum_left += p_site_mixture_left[2] * tp_begin_left[6];
+//            sum_left += p_site_mixture_left[3] * tp_begin_left[7];
+//            
+//            sum_right  = p_site_mixture_right[0] * tp_begin_right[4];
+//            sum_right += p_site_mixture_right[1] * tp_begin_right[5];
+//            sum_right += p_site_mixture_right[2] * tp_begin_right[6];
+//            sum_right += p_site_mixture_right[3] * tp_begin_right[7];
+//            
+//            sum_middle  = p_site_mixture_middle[0] * tp_begin_middle[4];
+//            sum_middle += p_site_mixture_middle[1] * tp_begin_middle[5];
+//            sum_middle += p_site_mixture_middle[2] * tp_begin_middle[6];
+//            sum_middle += p_site_mixture_middle[3] * tp_begin_middle[7];
+//            
+//            p_site_mixture[1] = sum_left * sum_right * sum_middle;
+//            
+//            
+//            sum_left  = p_site_mixture_left[0] * tp_begin_left[8];
+//            sum_left += p_site_mixture_left[1] * tp_begin_left[9];
+//            sum_left += p_site_mixture_left[2] * tp_begin_left[10];
+//            sum_left += p_site_mixture_left[3] * tp_begin_left[11];
+//            
+//            sum_right  = p_site_mixture_right[0] * tp_begin_right[8];
+//            sum_right += p_site_mixture_right[1] * tp_begin_right[9];
+//            sum_right += p_site_mixture_right[2] * tp_begin_right[10];
+//            sum_right += p_site_mixture_right[3] * tp_begin_right[11];
+//            
+//            sum_middl  = p_site_mixture_middl[0] * tp_begin_middl[8];
+//            sum_middl += p_site_mixture_middl[1] * tp_begin_middl[9];
+//            sum_middl += p_site_mixture_middl[2] * tp_begin_middl[10];
+//            sum_middl += p_site_mixture_middl[3] * tp_begin_middl[11];
+//            
+//            p_site_mixture[2] = sum_left * sum_right * sum_middle;
+//            
+//            
+//            sum_left  = p_site_mixture_left[0] * tp_begin_left[12];
+//            sum_left += p_site_mixture_left[1] * tp_begin_left[13];
+//            sum_left += p_site_mixture_left[2] * tp_begin_left[14];
+//            sum_left += p_site_mixture_left[3] * tp_begin_left[15];
+//            
+//            sum_right  = p_site_mixture_right[0] * tp_begin_right[12];
+//            sum_right += p_site_mixture_right[1] * tp_begin_right[13];
+//            sum_right += p_site_mixture_right[2] * tp_begin_right[14];
+//            sum_right += p_site_mixture_right[3] * tp_begin_right[15];
+//            
+//            sum_middl  = p_site_mixture_middl[0] * tp_begin_middl[8];
+//            sum_middl += p_site_mixture_middl[1] * tp_begin_middl[9];
+//            sum_middl += p_site_mixture_middl[2] * tp_begin_middl[10];
+//            sum_middl += p_site_mixture_middl[3] * tp_begin_middl[11];
+//            
+//            p_site_mixture[3] = sum_left * sum_right * sum_middle;
             
 #           endif
             
