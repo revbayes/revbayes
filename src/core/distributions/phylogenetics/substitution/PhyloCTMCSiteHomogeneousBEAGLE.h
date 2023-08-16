@@ -466,7 +466,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     double * b_outSumFirstDerivative   = NULL;
     double * b_outSumSecondDerivative  = NULL;
     
-    if ( this->b_scale_indices.size() < (this->num_nodes-this->num_tips) )
+    if ( this->b_scale_indices.size() < (this->num_nodes-this->num_tips) && false )
     {
         std::vector<int> old_indices;
         for ( size_t i=0;i<this->b_scale_indices.size(); ++i  )

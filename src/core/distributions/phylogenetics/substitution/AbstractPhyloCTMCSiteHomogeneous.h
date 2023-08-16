@@ -2884,10 +2884,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
         (*it) = false;
     }
     
-    bool dest = this->active_likelihood[this->tau->getValue().getRoot().getIndex()];
-    int srcScalingIndex   = (int) 2*this->num_nodes+(dest ? 1 : 0);
-    int destScalingIndex  = (int) 2*this->num_nodes+(dest ? 0 : 1);
-    beagleCopyScaleFactors(this->beagle_instance->getResourceID(), destScalingIndex, srcScalingIndex);
+//    bool dest = this->active_likelihood[this->tau->getValue().getRoot().getIndex()];
+//    int destScalingIndex  = (int) 2*this->num_nodes+(dest ? 1 : 0);
+//    int srcScalingIndex   = (int) 2*this->num_nodes+(dest ? 0 : 1);
+//    beagleCopyScaleFactors(this->beagle_instance->getResourceID(), destScalingIndex, srcScalingIndex);
 
     
 #endif /* RB_BEAGLE */
