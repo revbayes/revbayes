@@ -93,15 +93,15 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     
 #   if defined ( SSE_ENABLED )
     
-    double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double* p_node   = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double* p_node   = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
     
 #   elif defined ( AVX_ENABLED )
 
-    double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double* p_node   = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double* p_node   = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
@@ -112,9 +112,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 #   else
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    const double*   p_right = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double*         p_node  = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    const double*   p_left  = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    const double*   p_right = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double*         p_node  = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
 
 #   endif
         
@@ -270,7 +270,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             {
                 if ( test_this_node == false )
                 {
-                    this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site];
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
                 }
                 else
                 {
@@ -279,7 +279,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] - log(max);
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
                         p_site_mixture[0] /= max;
                         p_site_mixture[1] /= max;
                         p_site_mixture[2] /= max;
@@ -287,7 +287,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + 1;
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + 1;
                         p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
@@ -295,7 +295,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site];
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
                     }
                 }
             }
@@ -325,10 +325,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
     
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left      = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    const double*   p_middle    = this->partial_branch_likelihoods + this->active_likelihood[middle]     * this->active_branch_likelihood_offset + middle     * this->node_offset;
-    const double*   p_right     = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double*         p_node      = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    const double*   p_left      = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    const double*   p_middle    = this->partial_branch_likelihoods + this->active_branch_likelihood[middle]     * this->active_branch_likelihood_offset + middle     * this->node_offset;
+    const double*   p_right     = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double*         p_node      = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
     
     
     bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
@@ -490,7 +490,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             {
                 if ( test_this_node == false )
                 {
-                    this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site];
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
                 }
                 else
                 {
@@ -499,7 +499,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site] - log(max);
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
                         p_site_mixture[0] /= max;
                         p_site_mixture[1] /= max;
                         p_site_mixture[2] /= max;
@@ -507,7 +507,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site] + 1;
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] + 1;
                         p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
@@ -515,7 +515,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site];
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
                     }
                 }
             }
@@ -542,15 +542,15 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
 #   if defined ( SSE_ENABLED )
     
-    double* p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    double* p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double* p_node   = this->partial_node_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    double* p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
+    double* p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
+    double* p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
     
 #   elif defined ( AVX_ENABLED )
 
-    double* p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    double* p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double* p_node   = this->partial_node_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    double* p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
+    double* p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
+    double* p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
@@ -561,9 +561,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 #   else
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    const double*   p_right = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double*         p_node  = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    const double*   p_left  = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
+    const double*   p_right = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
+    double*         p_node  = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
 
 #   endif
 
@@ -762,10 +762,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left      = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    const double*   p_middle    = this->partial_node_likelihoods + this->active_likelihood[middle]     * this->active_branch_likelihood_offset + middle     * this->node_offset;
-    const double*   p_right     = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double*         p_node      = this->partial_node_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    const double*   p_left      = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    const double*   p_middle    = this->partial_node_likelihoods + this->active_node_likelihood[middle]     * this->active_branch_likelihood_offset + middle     * this->node_offset;
+    const double*   p_right     = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double*         p_node      = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -985,9 +985,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_likelihood[root]  * this->active_branch_likelihood_offset + root   * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]  * this->active_branch_likelihood_offset + left   * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right] * this->active_branch_likelihood_offset + right  * this->node_offset;
+          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]  * this->active_branch_likelihood_offset + root   * this->node_offset;
+    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]  * this->active_branch_likelihood_offset + left   * this->node_offset;
+    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right] * this->active_branch_likelihood_offset + right  * this->node_offset;
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -1026,7 +1026,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
             {
                 if ( test_this_node == false )
                 {
-                    this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site];
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
                 }
                 else
                 {
@@ -1035,7 +1035,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] - log(max);
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
                         p_site_mixture[0] /= max;
                         p_site_mixture[1] /= max;
                         p_site_mixture[2] /= max;
@@ -1043,7 +1043,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + 1;
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + 1;
                         p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
@@ -1051,7 +1051,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site];
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
                     }
                 }
             }
@@ -1087,10 +1087,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_likelihood[root]  * this->active_branch_likelihood_offset + root   * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]  * this->active_branch_likelihood_offset + left   * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right] * this->active_branch_likelihood_offset + right  * this->node_offset;
-    const double* p_middle = this->partial_branch_likelihoods + this->active_likelihood[middle]* this->active_branch_likelihood_offset + middle * this->node_offset;
+          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]  * this->active_branch_likelihood_offset + root   * this->node_offset;
+    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]  * this->active_branch_likelihood_offset + left   * this->node_offset;
+    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right] * this->active_branch_likelihood_offset + right  * this->node_offset;
+    const double* p_middle = this->partial_branch_likelihoods + this->active_branch_likelihood[middle]* this->active_branch_likelihood_offset + middle * this->node_offset;
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -1120,7 +1120,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
             {
                 if ( test_this_node == false )
                 {
-                    this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site];
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
                 }
                 else
                 {
@@ -1129,7 +1129,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site] - log(max);
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
                         p_site_mixture[0] /= max;
                         p_site_mixture[1] /= max;
                         p_site_mixture[2] /= max;
@@ -1137,7 +1137,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site] + 1;
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] + 1;
                         p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
                         p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
@@ -1145,7 +1145,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[middle]][middle][mixture][site];
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
                     }
                 }
             }
@@ -1179,9 +1179,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_likelihood[root]  * this->active_branch_likelihood_offset + root  * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]  * this->active_branch_likelihood_offset + left  * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right] * this->active_branch_likelihood_offset + right * this->node_offset;
+          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]  * this->active_branch_likelihood_offset + root  * this->node_offset;
+    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]  * this->active_branch_likelihood_offset + left  * this->node_offset;
+    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right] * this->active_branch_likelihood_offset + right * this->node_offset;
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -1297,10 +1297,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_likelihood[root]   * this->active_branch_likelihood_offset + root   * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]   * this->active_branch_likelihood_offset + left   * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right]  * this->active_branch_likelihood_offset + right  * this->node_offset;
-    const double* p_middle = this->partial_branch_likelihoods + this->active_likelihood[middle] * this->active_branch_likelihood_offset + middle * this->node_offset;
+          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]   * this->active_branch_likelihood_offset + root   * this->node_offset;
+    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]   * this->active_branch_likelihood_offset + left   * this->node_offset;
+    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]  * this->active_branch_likelihood_offset + right  * this->node_offset;
+    const double* p_middle = this->partial_branch_likelihoods + this->active_branch_likelihood[middle] * this->active_branch_likelihood_offset + middle * this->node_offset;
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -1421,7 +1421,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index) 
 {    
     
-    double* p_node = this->partial_branch_likelihoods + this->active_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
+    double* p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
@@ -1470,7 +1470,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                 
                 if ( test_underflow )
                 {
-                    this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = 0;
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = 0;
                 }
             } 
             else // we have observed a character
@@ -1543,7 +1543,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                 {
                     if (test_this_node == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = 0;
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = 0;
                     }
                     else
                     {
@@ -1552,7 +1552,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
                         if ( scale_threshold == false )
                         {
-                            this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = - log(max);
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = - log(max);
                             p_site_mixture[0] /= max;
                             p_site_mixture[1] /= max;
                             p_site_mixture[2] /= max;
@@ -1560,7 +1560,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         }
                         else if ( max < RbConstants::SCALING_THRESHOLD )
                         {
-                            this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = 1;
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = 1;
                             p_site_mixture[0] /= RbConstants::SCALING_THRESHOLD;
                             p_site_mixture[1] /= RbConstants::SCALING_THRESHOLD;
                             p_site_mixture[2] /= RbConstants::SCALING_THRESHOLD;
@@ -1568,7 +1568,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         }
                         else
                         {
-                            this->per_node_site_mixture_log_scaling_factors[this->active_likelihood[node_index]][node_index][mixture][site] = 0;
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = 0;
                         }
                     }
                 }

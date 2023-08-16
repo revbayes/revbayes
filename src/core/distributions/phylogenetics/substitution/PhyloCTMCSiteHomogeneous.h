@@ -91,14 +91,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + right * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    double*         p_node         = this->partial_node_likelihoods   + this->active_likelihood[node_index] * this->active_node_likelihood_offset   + (node_index-this->num_tips) * this->node_offset;
-    double*         p_branch_left  = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left                        * this->node_offset;
-    double*         p_branch_right = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right                       * this->node_offset;
+    double*         p_node         = this->partial_node_likelihoods   + this->active_node_likelihood[node_index]   * this->active_node_likelihood_offset   + (node_index-this->num_tips) * this->node_offset;
+    double*         p_branch_left  = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left                        * this->node_offset;
+    double*         p_branch_right = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right                       * this->node_offset;
     const double*   p_left         = NULL;
     const double*   p_right        = NULL;
     
-    bool left_branch_dirty  = this->dirty_nodes[left];
-    bool right_branch_dirty = this->dirty_nodes[right];
+    bool left_branch_dirty  = this->dirty_branches[left];
+    bool right_branch_dirty = this->dirty_branches[right];
     
     bool left_is_tip  = left  < this->num_tips;
     bool right_is_tip = right < this->num_tips;
@@ -108,7 +108,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_left  = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left  = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -116,7 +116,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_right = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     
     bool left_use_tip_state  = left_is_tip  && this->using_ambiguous_characters == false && this->using_weighted_characters == false;
@@ -156,62 +156,69 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 
                 if ( left_branch_dirty == true )
                 {
-                    // initialize the probability
-                    p_branch_site_mixture_left[c1]  = 0.0;
                     
                     if ( left_use_tip_state == true )
                     {
                         if ( left_gap_node[site] == true )
                         {
+//                            p_branch_site_mixture_left[c1] = 1.0;
                             p_branch_site_mixture_left[c1] = 1.0;
                         }
                         else
                         {
+//                            p_branch_site_mixture_left[c1] = tp_a_left[left_char_node[site]];
                             p_branch_site_mixture_left[c1] = tp_a_left[left_char_node[site]];
                         }
                     }
                     else
                     {
+                        // initialize the probability
+//                        p_branch_site_mixture_left[c1]  = 0.0;
+                        double sum = 0.0;
                         // iterate over all possible terminal states
                         for (size_t c2 = 0; c2 < this->num_states; ++c2 )
                         {
-                            p_branch_site_mixture_left[c1]  += p_node_site_mixture_left [c2] * tp_a_left [c2];
+//                            p_branch_site_mixture_left[c1]  += p_node_site_mixture_left [c2] * tp_a_left [c2];
+                            sum  += p_node_site_mixture_left [c2] * tp_a_left [c2];
                         } // end-for over all distination character
+                        p_branch_site_mixture_left[c1]  = sum;
                     }
                 }
                 
                 if ( right_branch_dirty == true )
                 {
-                    // initialize the probability
-                    p_branch_site_mixture_right[c1]  = 0.0;
                     if ( right_use_tip_state == true )
                     {
-                        // temporary variable
-                        double sum_right = 0.0;
-                    
                         if ( right_gap_node[site] == true )
                         {
+//                            p_branch_site_mixture_right[c1] = 1.0;
                             p_branch_site_mixture_right[c1] = 1.0;
                         }
                         else
                         {
+//                            p_branch_site_mixture_right[c1] = tp_a_right[right_char_node[site]];
                             p_branch_site_mixture_right[c1] = tp_a_right[right_char_node[site]];
-                        }
+                       }
                     }
                     else
                     {
+                        // initialize the probability
+//                        p_branch_site_mixture_right[c1]  = 0.0;
+                        double sum = 0.0;
                         // iterate over all possible terminal states
                         for (size_t c2 = 0; c2 < this->num_states; ++c2 )
                         {
-                            p_branch_site_mixture_right[c1]  += p_node_site_mixture_right[c2] * tp_a_right[c2];
+//                            p_branch_site_mixture_right[c1]  += p_node_site_mixture_right[c2] * tp_a_right[c2];
+                            sum += p_node_site_mixture_right[c2] * tp_a_right[c2];
                         } // end-for over all distination character
+                        p_branch_site_mixture_right[c1] = sum;
                     }
                 }
 
                 // store the likelihood for this starting state
                 p_node_site_mixture[c1] = p_branch_site_mixture_left[c1] * p_branch_site_mixture_right[c1];
 
-                assert(isnan(p_node_site_mixture[c1]) || (0 <= p_node_site_mixture[c1] and p_node_site_mixture[c1] <= 1.00000000001));
+                assert(isnan(p_node_site_mixture[c1]) || (0 <= p_node_site_mixture[c1] and p_node_site_mixture[c1] <= 1.00000000001) || p_node_site_mixture[c1] <= 0);
 
                 // increment the pointers to the next starting state
                 tp_a_left  += this->num_states;
@@ -230,6 +237,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
     } // end-for over all mixtures (=rate-categories)
 
+    this->dirty_branches[left]  = false;
+    this->dirty_branches[right] = false;
 }
 
 
@@ -243,7 +252,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    double*         p_node   = this->partial_node_likelihoods + this->active_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
+    double*         p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
     const double*   p_left   = NULL;
     const double*   p_right  = NULL;
     const double*   p_middle = NULL;
@@ -257,7 +266,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -265,7 +274,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     if ( middle_is_tip  )
     {
@@ -273,7 +282,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_middle = this->partial_node_likelihoods + this->active_likelihood[middle]     * this->active_branch_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
+        p_middle = this->partial_node_likelihoods + this->active_node_likelihood[middle]     * this->active_branch_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
     }
     
     // iterate over all mixture categories
@@ -349,9 +358,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    const double*   p_right = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double*         p_node  = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    const double*   p_left  = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    const double*   p_right = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double*         p_node  = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -415,10 +424,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left      = this->partial_branch_likelihoods + this->active_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
-    const double*   p_middle    = this->partial_branch_likelihoods + this->active_likelihood[middle]     * this->active_branch_likelihood_offset + middle     * this->node_offset;
-    const double*   p_right     = this->partial_branch_likelihoods + this->active_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
-    double*         p_node      = this->partial_branch_likelihoods + this->active_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    const double*   p_left      = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
+    const double*   p_middle    = this->partial_branch_likelihoods + this->active_branch_likelihood[middle]     * this->active_branch_likelihood_offset + middle     * this->node_offset;
+    const double*   p_right     = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
+    double*         p_node      = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -481,7 +490,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + right * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    double*         p_node  = this->partial_node_likelihoods + this->active_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
+    double*         p_node  = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
     const double*   p_left  = NULL;
     const double*   p_right = NULL;
 
@@ -493,7 +502,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_left  = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left  = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -501,7 +510,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_right = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     
     bool left_use_tip_state  = left_is_tip  && this->using_ambiguous_characters == false && this->using_weighted_characters == false;
@@ -620,7 +629,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    double*         p_node   = this->partial_node_likelihoods + this->active_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
+    double*         p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
     const double*   p_left   = NULL;
     const double*   p_right  = NULL;
     const double*   p_middle = NULL;
@@ -634,7 +643,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -642,7 +651,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     if ( middle_is_tip  )
     {
@@ -650,7 +659,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     }
     else
     {
-        p_middle = this->partial_node_likelihoods + this->active_likelihood[middle]     * this->active_branch_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
+        p_middle = this->partial_node_likelihoods + this->active_node_likelihood[middle]     * this->active_branch_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
     }
     
     // iterate over all mixture categories
@@ -726,7 +735,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + right * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double*   p        = this->partial_node_likelihoods + this->active_likelihood[root]  * this->active_node_likelihood_offset + (root-this->num_tips)  * this->node_offset;
+          double*   p        = this->partial_node_likelihoods + this->active_node_likelihood[root]  * this->active_node_likelihood_offset + (root-this->num_tips)  * this->node_offset;
     const double*   p_left   = NULL;
     const double*   p_right  = NULL;
     
@@ -738,7 +747,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     }
     else
     {
-        p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -746,7 +755,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     }
     else
     {
-        p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     
     // create a vector for the per mixture likelihoods
@@ -831,7 +840,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double*   p        = this->partial_node_likelihoods + this->active_likelihood[root]   * this->active_node_likelihood_offset + (root-this->num_tips)   * this->node_offset;
+          double*   p        = this->partial_node_likelihoods + this->active_node_likelihood[root]   * this->active_node_likelihood_offset + (root-this->num_tips)   * this->node_offset;
     const double*   p_left   = NULL;
     const double*   p_right  = NULL;
     const double*   p_middle = NULL;
@@ -845,7 +854,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     }
     else
     {
-        p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -853,7 +862,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     }
     else
     {
-        p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     if ( middle_is_tip  )
     {
@@ -861,7 +870,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     }
     else
     {
-        p_middle = this->partial_node_likelihoods + this->active_likelihood[middle]     * this->active_node_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
+        p_middle = this->partial_node_likelihoods + this->active_node_likelihood[middle]     * this->active_node_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
     }
 
     // create a vector for the per mixture likelihoods
@@ -949,9 +958,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 {
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_likelihood[root]  * this->active_branch_likelihood_offset + root  * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]  * this->active_branch_likelihood_offset + left  * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right] * this->active_branch_likelihood_offset + right * this->node_offset;
+          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]  * this->active_branch_likelihood_offset + root  * this->node_offset;
+    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]  * this->active_branch_likelihood_offset + left  * this->node_offset;
+    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right] * this->active_branch_likelihood_offset + right * this->node_offset;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1019,10 +1028,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 {
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_likelihood[root]   * this->active_branch_likelihood_offset + root   * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_likelihood[left]   * this->active_branch_likelihood_offset + left   * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_likelihood[right]  * this->active_branch_likelihood_offset + right  * this->node_offset;
-    const double* p_middle = this->partial_branch_likelihoods + this->active_likelihood[middle] * this->active_branch_likelihood_offset + middle * this->node_offset;
+          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]   * this->active_branch_likelihood_offset + root   * this->node_offset;
+    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]   * this->active_branch_likelihood_offset + left   * this->node_offset;
+    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]  * this->active_branch_likelihood_offset + right  * this->node_offset;
+    const double* p_middle = this->partial_branch_likelihoods + this->active_branch_likelihood[middle] * this->active_branch_likelihood_offset + middle * this->node_offset;
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -1095,7 +1104,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + right * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double*   p        = this->partial_node_likelihoods + this->active_likelihood[root]  * this->active_node_likelihood_offset + (root-this->num_tips)  * this->node_offset;
+          double*   p        = this->partial_node_likelihoods + this->active_node_likelihood[root]  * this->active_node_likelihood_offset + (root-this->num_tips)  * this->node_offset;
     const double*   p_left   = NULL;
     const double*   p_right  = NULL;
     
@@ -1107,7 +1116,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     }
     else
     {
-        p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -1115,7 +1124,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     }
     else
     {
-        p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     
     // create a vector for the per mixture likelihoods
@@ -1200,7 +1209,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double*   p        = this->partial_node_likelihoods + this->active_likelihood[root]   * this->active_node_likelihood_offset + (root-this->num_tips)   * this->node_offset;
+          double*   p        = this->partial_node_likelihoods + this->active_node_likelihood[root]   * this->active_node_likelihood_offset + (root-this->num_tips)   * this->node_offset;
     const double*   p_left   = NULL;
     const double*   p_right  = NULL;
     const double*   p_middle = NULL;
@@ -1214,7 +1223,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     }
     else
     {
-        p_left   = this->partial_node_likelihoods + this->active_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
     }
     if ( right_is_tip  )
     {
@@ -1222,7 +1231,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     }
     else
     {
-        p_right  = this->partial_node_likelihoods + this->active_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
     }
     if ( middle_is_tip  )
     {
@@ -1230,7 +1239,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodNode
     }
     else
     {
-        p_middle = this->partial_node_likelihoods + this->active_likelihood[middle]     * this->active_node_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
+        p_middle = this->partial_node_likelihoods + this->active_node_likelihood[middle]     * this->active_node_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
     }
 
     // create a vector for the per mixture likelihoods
@@ -1316,7 +1325,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
 
-    double* p_node = this->partial_branch_likelihoods + this->active_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
+    double* p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];

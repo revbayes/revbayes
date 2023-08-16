@@ -148,9 +148,9 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     if ( b_num_models < 1 ) { b_num_models = 1; }
     
     
-    size_t root_idx  = root  + this->num_nodes * this->active_likelihood[root];
-    size_t left_idx  = left  + this->num_nodes * this->active_likelihood[left];
-    size_t right_idx = right + this->num_nodes * this->active_likelihood[right];
+    size_t root_idx  = root  + this->num_nodes * this->active_branch_likelihood[root];
+    size_t left_idx  = left  + this->num_nodes * this->active_branch_likelihood[left];
+    size_t right_idx = right + this->num_nodes * this->active_branch_likelihood[right];
 
     //-- Tips are actually just stored once, so we dont need offsets.
     size_t left_partials  = (left  < num_taxa) ? left  : left_idx;
@@ -273,7 +273,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     int     b_parentBufferIndices     = (int) root_idx;
     int*    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int     b_stateFrequenciesIndices = 0; //(int) model;  //0;
-    int     b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_likelihood[root];
+    int     b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_branch_likelihood[root];
     int     b_count                   = 1;
     double  b_outSumLogLikelihood     = std::numeric_limits<double>::min();
     
@@ -320,10 +320,10 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     if ( b_num_models < 1 ) { b_num_models = 1; }
     
     //-- Calculate the node indices accounting for active/inactive offests.
-    size_t root_idx  = root   + this->num_nodes * this->active_likelihood[root];
-    size_t mid_idx   = middle + this->num_nodes * this->active_likelihood[middle];
-    size_t left_idx  = left   + this->num_nodes * this->active_likelihood[left];
-    size_t right_idx = right  + this->num_nodes * this->active_likelihood[right];
+    size_t root_idx  = root   + this->num_nodes * this->active_branch_likelihood[root];
+    size_t mid_idx   = middle + this->num_nodes * this->active_branch_likelihood[middle];
+    size_t left_idx  = left   + this->num_nodes * this->active_branch_likelihood[left];
+    size_t right_idx = right  + this->num_nodes * this->active_branch_likelihood[right];
 
     //-- Tips are actually just stored once in BEAGLE, so we cant have active/inactive offests.
     size_t mid_partials   = (middle < num_taxa) ? middle : mid_idx;
@@ -459,7 +459,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     int *    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
 //    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
-             b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_likelihood[root];
+             b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_branch_likelihood[root];
 //    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
     int      b_count                   = 1;
     double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
@@ -502,7 +502,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 
             if ( node->isTip() == false )
             {
-                size_t this_node_idx  = node->getIndex()   + this->num_nodes * this->active_likelihood[node->getIndex()];
+                size_t this_node_idx  = node->getIndex()   + this->num_nodes * this->active_branch_likelihood[node->getIndex()];
                 this->b_scale_indices.push_back(this_node_idx);
             }
             
@@ -546,9 +546,9 @@ void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihoodBranchWise( const TopologyNode &node, size_t node_index, size_t left, size_t right )
 {
     //-- Calculate the node indices accounting for active/inactive offests.
-    size_t b_node_idx  = node_index + this->num_nodes * this->active_likelihood[node_index];
-    size_t b_left_idx  = left       + this->num_nodes * this->active_likelihood[left];
-    size_t b_right_idx = right      + this->num_nodes * this->active_likelihood[right];
+    size_t b_node_idx  = node_index + this->num_nodes * this->active_branch_likelihood[node_index];
+    size_t b_left_idx  = left       + this->num_nodes * this->active_branch_likelihood[left];
+    size_t b_right_idx = right      + this->num_nodes * this->active_branch_likelihood[right];
 
     //-- Tips are actually just stored once, so we dont need offests.
     size_t b_left_partials  = (node.getChild(0).isTip()) ? left  : b_left_idx;
@@ -608,10 +608,10 @@ template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihoodBranchWise( const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle )
 {
-    size_t node_idx   = node_index + this->num_nodes * this->active_likelihood[node_index];
-    size_t left_idx   = left       + this->num_nodes * this->active_likelihood[left];
-    size_t right_idx  = right      + this->num_nodes * this->active_likelihood[right];
-    size_t middle_idx = middle     + this->num_nodes * this->active_likelihood[middle];
+    size_t node_idx   = node_index + this->num_nodes * this->active_branch_likelihood[node_index];
+    size_t left_idx   = left       + this->num_nodes * this->active_branch_likelihood[left];
+    size_t right_idx  = right      + this->num_nodes * this->active_branch_likelihood[right];
+    size_t middle_idx = middle     + this->num_nodes * this->active_branch_likelihood[middle];
     
     //-- Tips are actually just stored once, so we dont need offests.
     size_t left_partials   = (node.getChild(0).isTip()) ? left   : left_idx;
@@ -671,29 +671,7 @@ template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood( const TopologyNode &node, size_t node_index )
 {
-    size_t b_node_idx      = node_index + this->num_nodes * this->active_likelihood[node_index];
-    double b_branch_length = this->calculateBranchLength(node, node_index);
-
-    this->b_node_indices.push_back((int)b_node_idx);
-    this->b_scale_indices.push_back((int)b_node_idx);
-    this->b_branch_lengths.push_back(b_branch_length);
-
-#if !defined ( RB_USE_EIGEN3 )
-    //-- If we are not using the eigensystem, we will need to update and set the
-    //   transition probability matrices.
-
-    // Compute and update the transition probability matrices in revbayes
-    this->updateTransitionProbabilities( node_index );
-
-    // Update transition matrix
-	// Set the transition probability matrix in BEAGLE
-	const double * b_tp_begin = this->transition_prob_matrices[0].theMatrix;
-
-	beagleSetTransitionMatrix( this->beagle_instance->getResourceID(),
-                               (int) b_node_idx,
-                               b_tp_begin,
-                               1.0 );
-#endif //-- !RB_USE_EIGEN3
+    throw RbException("computeTipLikelihood should never be called for BEAGLE.");
 }
 
 
