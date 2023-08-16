@@ -33,7 +33,7 @@ PhyloMultivariateBrownianProcessMultiSampleREML::PhyloMultivariateBrownianProces
 //PhyloMultivariateBrownianProcessMultiSampleREML::PhyloMultivariateBrownianProcessMultiSampleREML(const TypedDagNode<Tree> *tr, const TypedDagNode<MatrixReal> *c, const TypedDagNode< RbVector< double > > *v, const TypedDagNode< RbVector< double > > *v2, const std::vector<Taxon> &ta, size_t ns) : AbstractPhyloBrownianProcess( tr, ns ),
     within_species_variances( v ),
 //    within_species_variances2( v2 ),
-    partial_likelihoods( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
+    partial_branch_likelihoods( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
@@ -122,7 +122,7 @@ double PhyloMultivariateBrownianProcessMultiSampleREML::computeLnProbability( vo
         recursiveComputeLnProbability( root, root_index );
         
         // sum the partials up
-        this->ln_prob = this->partial_likelihoods[this->active_likelihood[root_index]][root_index];
+        this->ln_prob = this->partial_branch_likelihoods[this->active_likelihood[root_index]][root_index];
 
     }
     return this->ln_prob;
@@ -234,7 +234,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbabil
     if ( node.isTip() == true && dirty_nodes[node_index] == true )
     {
         
-        double &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        double &p_node  = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
         
         const std::string &name = this->tau->getValue().getNode( node_index ).getName();
@@ -294,7 +294,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbabil
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        double &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        double &p_node  = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
         
         
@@ -317,8 +317,8 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbabil
             size_t right_index = right.getIndex();
             recursiveComputeLnProbability( right, right_index );
             
-            double p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-            double p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+            double p_left  = this->partial_branch_likelihoods[this->active_likelihood[left_index]][left_index];
+            double p_right = this->partial_branch_likelihoods[this->active_likelihood[right_index]][right_index];
             
             // get the per node and site contrasts
             const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
@@ -480,7 +480,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    partial_branch_likelihoods = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
     contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrast_uncertainty = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
 

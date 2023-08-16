@@ -22,7 +22,7 @@ using namespace RevBayesCore;
 
 PhyloBrownianProcessREML::PhyloBrownianProcessREML(const TypedDagNode<Tree> *t, size_t ns) :
     AbstractPhyloBrownianProcess( t, ns ),
-    partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    partial_branch_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     variances_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
@@ -141,7 +141,7 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
     if ( node.isTip() == false && (dirty_nodes[node_index] == true || use_missing_data) )
     {
 
-        std::vector<double> &p_node   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node   = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node  = this->means[this->active_likelihood[node_index]][node_index];
 
         
@@ -167,8 +167,8 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             // mark as computed
             dirty_nodes[node_index] = false;
 
-            const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+            const std::vector<double> &p_left  = this->partial_branch_likelihoods[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &p_right = this->partial_branch_likelihoods[this->active_likelihood[right_index]][right_index];
 
             // get the per node and site means
             const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
@@ -319,7 +319,7 @@ void PhyloBrownianProcessREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    partial_branch_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     means                   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
 
@@ -468,7 +468,7 @@ double PhyloBrownianProcessREML::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_node = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+    std::vector<double> &p_node = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
     
     // sum the log-likelihoods for all sites together
     double sum_partial_probs = 0.0;

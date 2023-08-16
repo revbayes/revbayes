@@ -35,7 +35,7 @@ PhyloMultiSampleOrnsteinUhlenbeckProcessREML::PhyloMultiSampleOrnsteinUhlenbeckP
     num_species( t->getValue().getNumberOfTips() ),
     num_individuals( ta.size() ),
     taxa( ta ),
-    partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    partial_branch_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     //variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     variances_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
@@ -330,7 +330,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
         
         std::vector<double> &mu_node = this->means[this->active_likelihood[node_index]][node_index];
         std::vector<double> &v_node  = this->variances_per_site[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node  = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         
         const std::string &name = this->tau->getValue().getNode( node_index ).getName();
         
@@ -413,7 +413,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
         
         std::vector<double> &mu_node = this->means[this->active_likelihood[node_index]][node_index];
         std::vector<double> &v_node  = this->variances_per_site[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node  = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -436,8 +436,8 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
         const std::vector<double> &v_left   = this->variances_per_site[this->active_likelihood[left_index]][left_index];
         const std::vector<double> &v_right  = this->variances_per_site[this->active_likelihood[right_index]][right_index];
         
-        const std::vector<double> &p_left   = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &p_right  = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+        const std::vector<double> &p_left   = this->partial_branch_likelihoods[this->active_likelihood[left_index]][left_index];
+        const std::vector<double> &p_right  = this->partial_branch_likelihoods[this->active_likelihood[right_index]][right_index];
         
 
         size_t num_sites = this->num_sites;
@@ -581,12 +581,12 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    means                   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    //variances               = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    variances_per_site      = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    normalizing_constants   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
-    missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, true) );
+    partial_branch_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    means                      = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    //variances                  = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    variances_per_site         = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    normalizing_constants      = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
+    missing_data               = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, true) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -1030,7 +1030,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_node = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+    std::vector<double> &p_node = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
     
     // sum the log-likelihoods for all sites together
     double sum_partial_probs = 0.0;

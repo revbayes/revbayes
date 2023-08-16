@@ -112,8 +112,8 @@ namespace RevBayesCore {
         std::vector<bool>                                               active_likelihood;
         mutable std::vector<bool>                                       changed_nodes;
         mutable std::vector<bool>                                       dirty_nodes;
-        mutable std::vector<std::vector<std::vector<double> > >         node_partial_likelihoods;
-        mutable std::map<size_t, std::vector<std::vector<double> > >    branch_partial_likelihoods;
+        mutable std::vector<std::vector<std::vector<double> > >         node_partial_branch_likelihoods;
+        mutable std::map<size_t, std::vector<std::vector<double> > >    branch_partial_branch_likelihoods;
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
         size_t                                                          num_states;
         mutable std::vector<std::vector<double> >                       scaling_factors;
