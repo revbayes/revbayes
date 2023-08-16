@@ -25,7 +25,7 @@ using namespace RevBayesCore;
 
 PhyloMultivariateBrownianProcessREML::PhyloMultivariateBrownianProcessREML(const TypedDagNode<Tree> *t, const TypedDagNode<MatrixReal> *c, size_t ns) :
     AbstractPhyloBrownianProcess( t, ns ),
-    partial_likelihoods( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
+    partial_branch_likelihoods( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0.0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
@@ -112,7 +112,7 @@ double PhyloMultivariateBrownianProcessREML::computeLnProbability( void )
         recursiveComputeLnProbability( root, rootIndex );
         
         // return the likelihood at the root
-        this->ln_prob = this->partial_likelihoods[this->active_likelihood[rootIndex]][rootIndex];
+        this->ln_prob = this->partial_branch_likelihoods[this->active_likelihood[rootIndex]][rootIndex];
         
     }
     
@@ -191,7 +191,7 @@ void PhyloMultivariateBrownianProcessREML::recursiveComputeLnProbability( const 
         // mark as computed
         dirty_nodes[node_index] = false;
 
-        double              &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        double              &p_node  = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node = this->contrasts[this->active_likelihood[node_index]][node_index];
 
         // get the number of children
@@ -213,8 +213,8 @@ void PhyloMultivariateBrownianProcessREML::recursiveComputeLnProbability( const 
             size_t right_index = right.getIndex();
             recursiveComputeLnProbability( right, right_index );
 
-            const double &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-            const double &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+            const double &p_left  = this->partial_branch_likelihoods[this->active_likelihood[left_index]][left_index];
+            const double &p_right = this->partial_branch_likelihoods[this->active_likelihood[right_index]][right_index];
 
             // get the per node and site contrasts
             const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
@@ -361,7 +361,7 @@ void PhyloMultivariateBrownianProcessREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    partial_branch_likelihoods = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
     contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
     

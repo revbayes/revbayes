@@ -27,7 +27,7 @@ using namespace RevBayesCore;
 
 PhyloBrownianCharacterHistoryProcess::PhyloBrownianCharacterHistoryProcess(const TypedDagNode<Tree> *t, size_t ns) :
     AbstractPhyloContinuousCharacterHistoryProcess( t, ns ),
-    partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    partial_branch_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) )
@@ -215,7 +215,7 @@ void PhyloBrownianCharacterHistoryProcess::keepSpecialization( const DagNode* af
 //        // mark as computed
 //        dirty_nodes[node_index] = false;
 //
-//        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+//        std::vector<double> &p_node  = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
 //        std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
 //
 //        
@@ -238,8 +238,8 @@ void PhyloBrownianCharacterHistoryProcess::keepSpecialization( const DagNode* af
 //            size_t right_index = right.getIndex();
 //            recursiveComputeLnProbability( right, right_index );
 //
-//            const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-//            const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+//            const std::vector<double> &p_left  = this->partial_branch_likelihoods[this->active_likelihood[left_index]][left_index];
+//            const std::vector<double> &p_right = this->partial_branch_likelihoods[this->active_likelihood[right_index]][right_index];
 //
 //            // get the per node and site contrasts
 //            const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
@@ -297,7 +297,7 @@ void PhyloBrownianCharacterHistoryProcess::resetValue( void )
     simulateInternalNodeStates();
     
     // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    partial_branch_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded

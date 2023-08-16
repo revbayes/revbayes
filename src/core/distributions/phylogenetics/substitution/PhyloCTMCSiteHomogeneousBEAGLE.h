@@ -52,12 +52,12 @@ namespace RevBayesCore
 
         protected:
 
-            virtual double                          sumRootLikelihood( void );                                                                          //!< Return the computed likelihood.
-            virtual void                            computeRootLikelihood( size_t root, size_t l, size_t r );                                           //!< BEAGLE compute lnLikelihood of a rooted tree.
-            virtual void                            computeRootLikelihood( size_t root, size_t l, size_t r, size_t m);                                  //!< BEAGLE compute lnLikelihood of an unrooted tree.
-            virtual void                            computeInternalNodeLikelihood ( const TopologyNode &n, size_t nIdx, size_t l, size_t r );           //!< Collect a BEAGLE operation for an internal node into the computation queue.
-            virtual void                            computeInternalNodeLikelihood ( const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);  //!< Collect a BEAGLE operation for an internal node into the computation queue.
-            virtual void                            computeTipLikelihood( const TopologyNode &node, size_t nIdx);                                       //!< Collect a BEAGLE operation for a leaf node into the computation queue.
+            virtual double                          sumRootLikelihood( void );                                                                                      //!< Return the computed likelihood.
+            virtual void                            computeRootLikelihood( size_t root, size_t l, size_t r );                                                       //!< BEAGLE compute lnLikelihood of a rooted tree.
+            virtual void                            computeRootLikelihood( size_t root, size_t l, size_t r, size_t m);                                              //!< BEAGLE compute lnLikelihood of an unrooted tree.
+            virtual void                            computeInternalNodeLikelihoodBranchWise( const TopologyNode &n, size_t nIdx, size_t l, size_t r );              //!< Collect a BEAGLE operation for an internal node into the computation queue.
+            virtual void                            computeInternalNodeLikelihoodBranchWise( const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);     //!< Collect a BEAGLE operation for an internal node into the computation queue.
+            virtual void                            computeTipLikelihood( const TopologyNode &node, size_t nIdx);                                                   //!< Collect a BEAGLE operation for a leaf node into the computation queue.
 
         private:
 
@@ -413,8 +413,9 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     }
 
     //-- Calculate and update all partial likelihood buffers
-    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
-    beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
+    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
+//    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
+//    beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
 
     b_ret_code = beagleUpdatePartials( this->beagle_instance->getResourceID(),
                                        &this->b_ops[0],
@@ -458,16 +459,58 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     int *    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
 //    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
-//    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_likelihood[root];
+             b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_likelihood[root];
 //    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
     int      b_count                   = 1;
     double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
     double * b_outSumFirstDerivative   = NULL;
     double * b_outSumSecondDerivative  = NULL;
-        
-//    beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
-//    beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(),
-//                                 b_cumulativeScaleIndices);
+    
+    if ( this->b_scale_indices.size() < (this->num_nodes-this->num_tips) )
+    {
+        std::vector<int> old_indices;
+        for ( size_t i=0;i<this->b_scale_indices.size(); ++i  )
+        {
+            int index = this->b_scale_indices[i];
+            int old_index = -1;
+            if ( index < this->num_nodes )
+            {
+                old_index = index + this->num_nodes;
+            }
+            else
+            {
+                old_index = index - this->num_nodes;
+            }
+            old_indices.push_back( old_index );
+        }
+    
+    
+        beagleRemoveScaleFactors(this->beagle_instance->getResourceID(), &old_indices[0], old_indices.size(), b_cumulativeScaleIndices);
+        beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(), b_cumulativeScaleIndices);
+    }
+    else
+    {
+    
+        this->b_scale_indices.clear();
+        std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
+        size_t number_of_nodes = nodes.size();
+
+        // reinitialize likelihood vectors
+        for (size_t n = 0; n < number_of_nodes; ++n)
+        {
+            TopologyNode* node = nodes[n];
+
+            if ( node->isTip() == false )
+            {
+                size_t this_node_idx  = node->getIndex()   + this->num_nodes * this->active_likelihood[node->getIndex()];
+                this->b_scale_indices.push_back(this_node_idx);
+            }
+            
+        }
+
+        beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
+        beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(), b_cumulativeScaleIndices);
+    }
     
     this->b_scale_indices.clear();
     
@@ -500,7 +543,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 
 template<class charType>
 void
-RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihood( const TopologyNode &node, size_t node_index, size_t left, size_t right )
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihoodBranchWise( const TopologyNode &node, size_t node_index, size_t left, size_t right )
 {
     //-- Calculate the node indices accounting for active/inactive offests.
     size_t b_node_idx  = node_index + this->num_nodes * this->active_likelihood[node_index];
@@ -563,7 +606,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
 //TODO : This should probably never exist.... Why is this here
 template<class charType>
 void
-RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihood( const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle )
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihoodBranchWise( const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle )
 {
     size_t node_idx   = node_index + this->num_nodes * this->active_likelihood[node_index];
     size_t left_idx   = left       + this->num_nodes * this->active_likelihood[left];

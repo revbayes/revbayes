@@ -76,7 +76,7 @@ TimeVaryingStateDependentSpeciationExtinctionProcess::TimeVaryingStateDependentS
     active_likelihood( std::vector<bool>(5, 0) ),
     changed_nodes( std::vector<bool>(5, false) ),
     dirty_nodes( std::vector<bool>(5, true) ),
-    node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*ext->getValue().size(),0))) ),
+    node_partial_branch_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*ext->getValue().size(),0))) ),
     extinction_probabilities( std::vector<std::vector<double> >( 500.0, std::vector<double>( ext->getValue().size(), 0) ) ),
     num_states( p->getValue().size() ),
     scaling_factors( std::vector<std::vector<double> >(5, std::vector<double>(2,0.0) ) ),
@@ -355,7 +355,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+        std::vector<double> &node_likelihood  = node_partial_branch_likelihoods[node_index][active_likelihood[node_index]];
         
         if ( node.isTip() == true )
         {
@@ -422,8 +422,8 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             computeNodeProbability( right, right_index );
             
             // get the likelihoods of descendant nodes
-            const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
-            const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+            const std::vector<double> &left_likelihoods  = node_partial_branch_likelihoods[left_index][active_likelihood[left_index]];
+            const std::vector<double> &right_likelihoods = node_partial_branch_likelihoods[right_index][active_likelihood[right_index]];
             
             std::map<std::vector<unsigned>, double> eventMap;
             std::vector<double> speciation_rates;
@@ -519,7 +519,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 }
                 
                 // save the branch conditional likelihoods
-                branch_partial_likelihoods[node_index] = branch_likelihoods;
+                branch_partial_branch_likelihoods[node_index] = branch_likelihoods;
             }
         }
         
@@ -570,10 +570,10 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeRootLikeliho
     computeNodeProbability( right, right_index );
     
     // get the likelihoods of descendant nodes
-    const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
-    const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    const std::vector<double> &left_likelihoods  = node_partial_branch_likelihoods[left_index][active_likelihood[left_index]];
+    const std::vector<double> &right_likelihoods = node_partial_branch_likelihoods[right_index][active_likelihood[right_index]];
     
-    std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+    std::vector<double> &node_likelihood  = node_partial_branch_likelihoods[node_index][active_likelihood[node_index]];
     
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
@@ -667,7 +667,7 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeRootLikeliho
             }
             
             // save the branch conditional likelihoods
-            branch_partial_likelihoods[node_index] = branch_likelihoods;
+            branch_partial_branch_likelihoods[node_index] = branch_likelihoods;
         }
     }
     
@@ -709,10 +709,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::drawJointConditionalA
     size_t                       node_index         = root.getIndex();
     const TopologyNode          &left               = root.getChild(0);
     size_t                       left_index         = left.getIndex();
-    const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+    const std::vector< double > &left_likelihoods   = node_partial_branch_likelihoods[left_index][active_likelihood[left_index]];
     const TopologyNode          &right              = root.getChild(1);
     size_t                       right_index        = right.getIndex();
-    const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    const std::vector< double > &right_likelihoods  = node_partial_branch_likelihoods[right_index][active_likelihood[right_index]];
     
     
     std::map<std::vector<unsigned>, double> eventMap;
@@ -913,10 +913,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawJointC
         // get likelihoods of descendant nodes
         const TopologyNode &left = node.getChild(0);
         size_t left_index = left.getIndex();
-        std::vector< double > left_likelihoods = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        std::vector< double > left_likelihoods = node_partial_branch_likelihoods[left_index][active_likelihood[left_index]];
         const TopologyNode &right = node.getChild(1);
         size_t right_index = right.getIndex();
-        std::vector< double > right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        std::vector< double > right_likelihoods = node_partial_branch_likelihoods[right_index][active_likelihood[right_index]];
         
         std::map<std::vector<unsigned>, double> sample_probs;
         double sample_probs_sum = 0.0;
@@ -1052,10 +1052,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::drawStochasticCharact
     size_t                       node_index         = root.getIndex();
     const TopologyNode          &left               = root.getChild(0);
     size_t                       left_index         = left.getIndex();
-    const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+    const std::vector< double > &left_likelihoods   = node_partial_branch_likelihoods[left_index][active_likelihood[left_index]];
     const TopologyNode          &right              = root.getChild(1);
     size_t                       right_index        = right.getIndex();
-    const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    const std::vector< double > &right_likelihoods  = node_partial_branch_likelihoods[right_index][active_likelihood[right_index]];
     
     
     // now begin the root-to-tip pass, drawing ancestral states for each time slice conditional on the start states
@@ -1196,7 +1196,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
     std::vector<double> transition_times;
     transition_states.push_back(current_state);
     
-    int downpass_dt = int( branch_partial_likelihoods[node_index].size() ) - 1;
+    int downpass_dt = int( branch_partial_branch_likelihoods[node_index].size() ) - 1;
     
     // keep track of rates in each time interval so we can calculate per branch averages of each rate
     double total_speciation_rate = 0.0;
@@ -1216,7 +1216,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
         double probs_sum = 0.0;
         for (size_t i = 0; i < num_states; i++)
         {
-            probs_sum += branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
+            probs_sum += branch_conditional_probs[i + num_states] * branch_partial_branch_likelihoods[node_index][downpass_dt][i];
         }
         if ( probs_sum == 0.0 )
         {
@@ -1231,7 +1231,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
             
             for (size_t i = 0; i < num_states; i++)
             {
-                u -= branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
+                u -= branch_conditional_probs[i + num_states] * branch_partial_branch_likelihoods[node_index][downpass_dt][i];
                 if (u < 0.0)
                 {
                     new_state = i;
@@ -1371,10 +1371,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
         // get likelihoods of descendant nodes
         const TopologyNode &left = node.getChild(0);
         size_t left_index = left.getIndex();
-        std::vector< double > left_likelihoods = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        std::vector< double > left_likelihoods = node_partial_branch_likelihoods[left_index][active_likelihood[left_index]];
         const TopologyNode &right = node.getChild(1);
         size_t right_index = right.getIndex();
-        std::vector< double > right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        std::vector< double > right_likelihoods = node_partial_branch_likelihoods[right_index][active_likelihood[right_index]];
         
         std::map<std::vector<unsigned>, double> sample_probs;
         double sample_probs_sum = 0.0;
@@ -2650,7 +2650,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::resizeVectors(size_t 
     active_likelihood = std::vector<bool>(num_nodes, false);
     changed_nodes = std::vector<bool>(num_nodes, false);
     dirty_nodes = std::vector<bool>(num_nodes, true);
-    node_partial_likelihoods = std::vector<std::vector<std::vector<double> > >(num_nodes, std::vector<std::vector<double> >(2,std::vector<double>(2*num_states,0)));
+    node_partial_branch_likelihoods = std::vector<std::vector<std::vector<double> > >(num_nodes, std::vector<std::vector<double> >(2,std::vector<double>(2*num_states,0)));
     scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);

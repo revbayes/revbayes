@@ -48,7 +48,7 @@ namespace RevBayesCore {
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
 
         // the likelihoods
-        std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
+        std::vector<std::vector<std::vector<double> > >                     partial_branch_likelihoods;
         std::vector<size_t>                                                 active_likelihood;
         
         // convenience variables available for derived classes too

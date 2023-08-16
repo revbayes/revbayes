@@ -50,7 +50,7 @@ namespace RevBayesCore {
 
         
         // the likelihoods
-        std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
+        std::vector<std::vector<std::vector<double> > >                     partial_branch_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     contrasts;
         std::vector<std::vector<double> >                                   contrast_uncertainty;
         std::vector<size_t>                                                 active_likelihood;

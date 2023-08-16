@@ -30,7 +30,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 using namespace RevBayesCore;
 
 PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
-    partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    partial_branch_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     normalizing_constants( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) ) ),
@@ -223,7 +223,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node             = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node            = this->contrasts[this->active_likelihood[node_index]][node_index];
         std::vector<double> &norm_const_node    = this->normalizing_constants[this->active_likelihood[node_index]][node_index];
         
@@ -247,8 +247,8 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             size_t right_index = right.getIndex();
             recursiveComputeLnProbability( right, right_index );
             
-            const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+            const std::vector<double> &p_left  = this->partial_branch_likelihoods[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &p_right = this->partial_branch_likelihoods[this->active_likelihood[right_index]][right_index];
             
             // get the per node and site contrasts
             const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
@@ -384,7 +384,7 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    partial_branch_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
     normalizing_constants = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
@@ -739,7 +739,7 @@ double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_node = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+    std::vector<double> &p_node = this->partial_branch_likelihoods[this->active_likelihood[node_index]][node_index];
     
     // sum the log-likelihoods for all sites together
     double sum_partial_probs = 0.0;
