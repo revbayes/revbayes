@@ -1142,10 +1142,13 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( right, right_index );
 
                 computeRootLikelihood( root_index, left_index, right_index );
-            
+
+                
+                //-- We only need to scale if we are not using BEAGLE
+#if !defined ( RB_BEAGLE )
                 // now call scaling
                 scale(root_index, left_index, right_index);
-
+#endif
             }
             else if ( root.getNumberOfChildren() == 3 ) // unrooted trees have three children for the root
             {
@@ -1161,9 +1164,12 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( middle, middleIndex );
 
                 computeRootLikelihood( root_index, left_index, right_index, middleIndex );
-            
+                
+                //-- We only need to scale if we are not using BEAGLE
+#if !defined ( RB_BEAGLE )
                 // now call scaling
                 scale(root_index, left_index, right_index, middleIndex);
+#endif
             }
             else
             {
@@ -2515,7 +2521,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
                 computeInternalNodeLikelihoodBranchWise(node,node_index,left_index,right_index);
             
             
-                //-- We only need to scale only if we are not using BEAGLE
+                //-- We only need to scale if we are not using BEAGLE
 #if !defined ( RB_BEAGLE )
                 // rescale likelihood vector
                 scale(node_index,left_index,right_index);
