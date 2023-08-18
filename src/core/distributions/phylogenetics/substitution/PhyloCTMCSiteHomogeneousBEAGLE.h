@@ -679,7 +679,7 @@ template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood( const TopologyNode &node, size_t node_index )
 {
-    size_t b_node_idx      = node_index + this->num_nodes * this->activeLikelihood[node_index];
+    size_t b_node_idx      = node_index + this->num_nodes * this->active_branch_likelihood[node_index];
     double b_branch_length = this->calculateBranchLength(node, node_index);
 
     this->b_node_indices.push_back(b_node_idx);
