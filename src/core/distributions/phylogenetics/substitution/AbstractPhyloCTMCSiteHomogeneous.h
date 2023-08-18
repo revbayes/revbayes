@@ -2490,11 +2490,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
             if ( node.isTip() == true )
             {
                 // this is a tip node
+
+                //-- We only need to compute the tip likelihoods if we are not using BEAGLE
+#if !defined ( RB_BEAGLE )
                 // compute the likelihood for the tip and we are done
                 computeTipLikelihood(node, node_index);
-
-                //-- We only need to scale only if we are not using BEAGLE
-#if !defined ( RB_BEAGLE )
+                
                 // rescale likelihood vector
                 scale(node_index);
 #endif /* NOT RB_BEAGLE */
