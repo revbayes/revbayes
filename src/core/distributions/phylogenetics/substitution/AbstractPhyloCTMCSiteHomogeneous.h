@@ -5392,13 +5392,16 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
     // Initialize tips for models
     this->initializeBeagleTips();
     
-    for (size_t i=0; i<num_nodes; ++i)
+    if ( RbSettings::userSettings().getUseScaling() == true )
     {
-        beagleResetScaleFactors(beagle_instance->getResourceID(), i);
-        beagleResetScaleFactors(beagle_instance->getResourceID(), i+num_nodes);
+        for (size_t i=0; i<num_nodes; ++i)
+        {
+            beagleResetScaleFactors(beagle_instance->getResourceID(), i);
+            beagleResetScaleFactors(beagle_instance->getResourceID(), i+num_nodes);
+        }
+        beagleResetScaleFactors(beagle_instance->getResourceID(), 2*num_nodes);
+        beagleResetScaleFactors(beagle_instance->getResourceID(), 2*num_nodes+1);
     }
-    beagleResetScaleFactors(beagle_instance->getResourceID(), 2*num_nodes);
-    beagleResetScaleFactors(beagle_instance->getResourceID(), 2*num_nodes+1);
 }
 
 
