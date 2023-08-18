@@ -679,7 +679,28 @@ template<class charType>
 void
 RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeTipLikelihood( const TopologyNode &node, size_t node_index )
 {
-    throw RbException("computeTipLikelihood should never be called for BEAGLE.");
+    size_t b_node_idx      = node_index + this->num_nodes * this->activeLikelihood[node_index];
+    double b_branch_length = this->calculateBranchLength(node, node_index);
+
+    this->b_node_indices.push_back(b_node_idx);
+    this->b_branch_lengths.push_back(b_branch_length);
+
+#if !defined ( RB_USE_EIGEN3 )
+    //-- If we are not using the eigensystem, we will need to update and set the
+    //   transition probability matrices.
+
+    // Compute and update the transition probability matrices in revbayes
+    this->updateTransitionProbabilities( node_index );
+
+    // Update transition matrix
+    // Set the transition probability matrix in BEAGLE
+    const double * b_tp_begin = this->transition_prob_matrices[0].theMatrix;
+
+    beagleSetTransitionMatrix( this->beagle_instance->getResourceID(),
+                               (int) b_node_idx,
+                               b_tp_begin,
+                               1.0 );
+#endif //-- !RB_USE_EIGEN3
 }
 
 
