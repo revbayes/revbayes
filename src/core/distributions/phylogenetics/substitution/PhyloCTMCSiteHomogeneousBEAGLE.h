@@ -83,24 +83,10 @@ namespace RevBayesCore
 
 
 template<class charType>
-RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::PhyloCTMCSiteHomogeneousBEAGLE
-  ( const TypedDagNode<Tree>* t
-  , size_t nChars
-  , bool c
-  , size_t nSites
-  , bool amb
-  , bool internal
-  , bool gapmatch
-  ) : AbstractPhyloCTMCSiteHomogeneous<charType> ( t
-                                                 , nChars
-                                                 , 1
-                                                 , c
-                                                 , nSites
-                                                 , amb
-                                                 , internal
-                                                 , gapmatch
-                                                 )
-{ }
+RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::PhyloCTMCSiteHomogeneousBEAGLE( const TypedDagNode<Tree>* t, size_t nChars, bool c, size_t nSites, bool amb, bool internal, bool gapmatch) : AbstractPhyloCTMCSiteHomogeneous<charType> ( t, nChars, 1, c, nSites, amb, internal, gapmatch)
+{
+    
+}
 
 
 
@@ -281,7 +267,11 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(),
                                  b_cumulativeScaleIndices);
     
-    this->b_scale_indices.clear();
+    if ( RbSettings::userSettings().getUseScaling() == true )
+    {
+        this->b_scale_indices.clear();
+    }
+    
 
     b_ret_code = beagleCalculateRootLogLikelihoods( this->beagle_instance->getResourceID(),
                                                    &b_parentBufferIndices,
@@ -339,11 +329,14 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     std::vector<int> categoryIndicesASRV;
 #endif
 
-//    int scaler_index_read  = BEAGLE_OP_NONE;
-//    int scaler_index_write = BEAGLE_OP_NONE;
-    
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = (int) root_idx;
+    int scaler_index_write = BEAGLE_OP_NONE;
+    
+    if ( RbSettings::userSettings().getUseScaling() == true )
+    {
+        scaler_index_write = (int) root_idx;
+        this->b_node_indices.push_back((int)root_idx);
+    }
     
     //-- Create BEAGLE operation.
     BeagleOperation b_operation =
@@ -358,7 +351,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
 
     //-- Push operation and root index onto respective vectors to prepare for likelihood calculation.
     this->b_ops.push_back(b_operation);
-    this->b_node_indices.push_back((int)root_idx);
     this->b_scale_indices.push_back((int)root_idx);
     
 #if defined ( RB_USE_EIGEN3 )
@@ -458,61 +450,73 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeRootLikelihood( s
     int *    b_secondDerivativeIndices = NULL;
     int *    b_categoryWeightsIndices  = &categoryIndicesASRV[0];
     int      b_stateFrequenciesIndices = 0; //(int) model;  //0;
-//    int      b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
-             b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_branch_likelihood[root];
-//    int      b_cumulativeScaleIndices  = (int) 2*this->num_nodes+1;
     int      b_count                   = 1;
     double   b_outSumLogLikelihood     = std::numeric_limits<double>::min();
     double * b_outSumFirstDerivative   = NULL;
     double * b_outSumSecondDerivative  = NULL;
     
-    if ( this->b_scale_indices.size() < (this->num_nodes-this->num_tips) && false )
+    if ( RbSettings::userSettings().getUseScaling() == true )
     {
-        std::vector<int> old_indices;
-        for ( size_t i=0;i<this->b_scale_indices.size(); ++i  )
-        {
-            int index = this->b_scale_indices[i];
-            int old_index = -1;
-            if ( index < this->num_nodes )
-            {
-                old_index = index + this->num_nodes;
-            }
-            else
-            {
-                old_index = index - this->num_nodes;
-            }
-            old_indices.push_back( old_index );
-        }
-    
-    
-        beagleRemoveScaleFactors(this->beagle_instance->getResourceID(), &old_indices[0], old_indices.size(), b_cumulativeScaleIndices);
-        beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(), b_cumulativeScaleIndices);
+        b_cumulativeScaleIndices  = (int) 2*this->num_nodes+this->active_branch_likelihood[root];
     }
     else
     {
-    
-        this->b_scale_indices.clear();
-        std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
-        size_t number_of_nodes = nodes.size();
-
-        // reinitialize likelihood vectors
-        for (size_t n = 0; n < number_of_nodes; ++n)
-        {
-            TopologyNode* node = nodes[n];
-
-            if ( node->isTip() == false )
-            {
-                size_t this_node_idx  = node->getIndex()   + this->num_nodes * this->active_branch_likelihood[node->getIndex()];
-                this->b_scale_indices.push_back(this_node_idx);
-            }
-            
-        }
-
-        beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
-        beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(), b_cumulativeScaleIndices);
+        b_cumulativeScaleIndices  = BEAGLE_OP_NONE;
     }
     
-    this->b_scale_indices.clear();
+    
+    if ( RbSettings::userSettings().getUseScaling() == true )
+    {
+
+        if ( this->b_scale_indices.size() < (this->num_nodes-this->num_tips) && false )
+        {
+            std::vector<int> old_indices;
+            for ( size_t i=0;i<this->b_scale_indices.size(); ++i  )
+            {
+                int index = this->b_scale_indices[i];
+                int old_index = -1;
+                if ( index < this->num_nodes )
+                {
+                    old_index = index + this->num_nodes;
+                }
+                else
+                {
+                    old_index = index - this->num_nodes;
+                }
+                old_indices.push_back( old_index );
+            }
+    
+    
+            beagleRemoveScaleFactors(this->beagle_instance->getResourceID(), &old_indices[0], old_indices.size(), b_cumulativeScaleIndices);
+            beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(), b_cumulativeScaleIndices);
+        }
+        else
+        {
+    
+            this->b_scale_indices.clear();
+            std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
+            size_t number_of_nodes = nodes.size();
+
+            // reinitialize likelihood vectors
+            for (size_t n = 0; n < number_of_nodes; ++n)
+            {
+                TopologyNode* node = nodes[n];
+
+                if ( node->isTip() == false )
+                {
+                    size_t this_node_idx  = node->getIndex()   + this->num_nodes * this->active_branch_likelihood[node->getIndex()];
+                    this->b_scale_indices.push_back(this_node_idx);
+                }
+            
+            }
+
+            beagleResetScaleFactors(this->beagle_instance->getResourceID(), b_cumulativeScaleIndices);
+            beagleAccumulateScaleFactors(this->beagle_instance->getResourceID(), &b_scale_indices[0], b_scale_indices.size(), b_cumulativeScaleIndices);
+        }
+        this->b_scale_indices.clear();
+        
+    } // end-if we use scaling
+    
     
     //-- Calclulate the lnLikelihood of the model
     b_ret_code = beagleCalculateEdgeLogLikelihoods(
@@ -557,12 +561,15 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     // Compute the branch length
     double b_branch_length = this->calculateBranchLength(node, node_index);
     
-//    int scaler_index_read  = BEAGLE_OP_NONE;
-//    int scaler_index_write = BEAGLE_OP_NONE;
-    
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = (int) b_node_idx;
-
+    int scaler_index_write = BEAGLE_OP_NONE;
+    
+    if ( RbSettings::userSettings().getUseScaling() == true )
+    {
+        scaler_index_write = (int) b_node_idx;
+        this->b_scale_indices.push_back((int)b_node_idx);
+    }
+        
     // Construct the BEAGLE operation that will be pushed onto the compute queue.
     BeagleOperation b_operation =
         { .destinationPartials    = (int) b_node_idx
@@ -577,7 +584,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     //-- Push operations, nodes, and branches into respective vectors
     this->b_ops.push_back(b_operation);
     this->b_node_indices.push_back((int)b_node_idx);
-    this->b_scale_indices.push_back((int)b_node_idx);
     this->b_branch_lengths.push_back(b_branch_length);
 
 #if !defined ( RB_USE_EIGEN3 )
@@ -620,11 +626,14 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
 
     double branch_length = this->calculateBranchLength(node, node_index);
 
-//    int scaler_index_read  = BEAGLE_OP_NONE;
-//    int scaler_index_write = BEAGLE_OP_NONE;
-    
     int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = (int) node_idx;
+    int scaler_index_write = BEAGLE_OP_NONE;
+
+    if ( RbSettings::userSettings().getUseScaling() == true )
+    {
+        scaler_index_write = (int) node_idx;
+        this->b_scale_indices.push_back((int)node_idx);
+    }
     
     //-- TODO : Check which operation for middle
     BeagleOperation b_operation =
@@ -640,7 +649,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
     //-- push operations, nodes, and branches into respective vectors
     this->b_ops.push_back(b_operation);
     this->b_node_indices.push_back((int)node_idx);
-    this->b_scale_indices.push_back((int)node_idx);
     this->b_branch_lengths.push_back(branch_length);
 
 #if !defined ( RB_USE_EIGEN3 )

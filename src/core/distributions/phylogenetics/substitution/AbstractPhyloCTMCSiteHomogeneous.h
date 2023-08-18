@@ -5345,8 +5345,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
     this->num_mixtures           = (this->homogeneous_rate_matrix)
                                  ? 1 : this->heterogeneous_rate_matrices->getValue().size();
     
-    bool   b_use_scaling         = RbSettings::userSettings().getBeagleScalingMode() == "manual"
-                                 ? false : true;
+    bool   b_use_scaling         = RbSettings::userSettings().getUseScaling();
 
     int    b_tipCount            = int( this->num_tips );
     int    b_partialsBufferCount = 2 * this->num_nodes
@@ -5366,12 +5365,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleInstan
                                    ( this->getPInv() > std::numeric_limits<double>::epsilon()
                                      ? 1 : 0 );
     // @todo: need to fix this, don't need to allocate as many buffers (Sebastian)
-//    int    b_scaleBufferCount    = b_use_scaling ? (this->num_nodes * 2 + 2) : 0;
-    int    b_scaleBufferCount    = 2 + 2 * this->num_nodes
-                                 + ( this->using_ambiguous_characters
-                                   ? this->tau->getValue().getNumberOfTips()
-                                   : 0
-                                   );
+    int    b_scaleBufferCount    = b_use_scaling ? (2 + 2 * this->num_nodes + ( this->using_ambiguous_characters ? this->tau->getValue().getNumberOfTips() : 0)) : 0;
     BeagleInstance *b_instance   = new BeagleInstance();
 
     // Create the BEAGLE instance
