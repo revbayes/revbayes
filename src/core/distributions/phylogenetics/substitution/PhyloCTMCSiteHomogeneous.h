@@ -1473,7 +1473,15 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
 {
+    
+    
+    bool test_underflow     = RbSettings::userSettings().getUseScaling() == true;
+    bool test_this_node     = ((root+1) % RbSettings::userSettings().getScalingDensity() == 0);
+    bool scale_threshold    = RbSettings::userSettings().getScalingMethod() == "threshold";
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
 
+    test_underflow = test_underflow && scale_per_mixture;
+    
     // get the pointers to the partial likelihoods of the left and right subtree
           double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]   * this->active_branch_likelihood_offset + root   * this->node_offset;
     const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]   * this->active_branch_likelihood_offset + left   * this->node_offset;
@@ -1526,6 +1534,48 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 
                 // increment pointers
                 ++p_site_j; ++p_site_left_j; ++p_site_right_j; ++p_site_middle_j;
+            }
+            
+            if ( test_underflow )
+            {
+                if ( test_this_node == false )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
+                }
+                else
+                {
+                    
+                    // iterate over all possible terminal states
+                    double max = p_site_mixture[0];
+                    for (size_t c2 = 1; c2 < this->num_states; ++c2 )
+                    {
+                        max = ( p_site_mixture[c2] > max ? p_site_mixture[c2] : max );
+
+                    } // end-for over all distination character
+                    
+                    if ( scale_threshold == false )
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
+                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                        {
+                            p_site_mixture[c2] /= max;
+
+                        } // end-for over all distination character
+                    }
+                    else if ( max < RbConstants::SCALING_THRESHOLD )
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] + 1;
+                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                        {
+                            p_site_mixture[c2] /= RbConstants::SCALING_THRESHOLD;
+
+                        } // end-for over all distination character
+                    }
+                    else
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
+                    }
+                }
             }
 
             // increment the pointers to the next site
