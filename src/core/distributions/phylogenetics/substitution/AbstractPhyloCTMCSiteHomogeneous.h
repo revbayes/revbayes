@@ -173,18 +173,15 @@ namespace RevBayesCore {
 
         // pure virtual methods
         virtual void                                                        computeInternalNodeLikelihoodBranchWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
-        virtual void                                                        computeInternalNodeLikelihoodBranchWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) = 0;
         virtual void                                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle) = 0;
 
         virtual void                                                        computeInternalNodeLikelihoodNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r) { throw RbException("Missing implementation of computeInternalNodeLikelihoodNodeWise."); }
-        virtual void                                                        computeInternalNodeLikelihoodNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) { throw RbException("Missing implementation of computeInternalNodeLikelihoodNodeWise."); }
         virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right) { throw RbException("Missing implementation of computeRootLikelihoodNode."); }
         virtual void                                                        computeRootLikelihoodNode( size_t root, size_t left, size_t right, size_t middle) { throw RbException("Missing implementation of computeRootLikelihoodNode."); }
 
         virtual void                                                        computeInternalNodeLikelihoodBranchNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r) { throw RbException("Missing implementation of computeInternalNodeLikelihoodBranchNodeWise."); }
-        virtual void                                                        computeInternalNodeLikelihoodBranchNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) { throw RbException("Missing implementation of computeInternalNodeLikelihoodBranchNodeWise."); }
         virtual void                                                        computeRootLikelihoodBranchNode( size_t root, size_t left, size_t right) { throw RbException("Missing implementation of computeRootLikelihoodBranchNode."); }
         virtual void                                                        computeRootLikelihoodBranchNode( size_t root, size_t left, size_t right, size_t middle) { throw RbException("Missing implementation of computeRootLikelihoodBranchNode."); }
 

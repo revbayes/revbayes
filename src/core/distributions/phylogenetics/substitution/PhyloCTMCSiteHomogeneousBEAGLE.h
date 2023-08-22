@@ -56,7 +56,6 @@ namespace RevBayesCore
             virtual void                            computeRootLikelihood( size_t root, size_t l, size_t r );                                                       //!< BEAGLE compute lnLikelihood of a rooted tree.
             virtual void                            computeRootLikelihood( size_t root, size_t l, size_t r, size_t m);                                              //!< BEAGLE compute lnLikelihood of an unrooted tree.
             virtual void                            computeInternalNodeLikelihoodBranchWise( const TopologyNode &n, size_t nIdx, size_t l, size_t r );              //!< Collect a BEAGLE operation for an internal node into the computation queue.
-            virtual void                            computeInternalNodeLikelihoodBranchWise( const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);     //!< Collect a BEAGLE operation for an internal node into the computation queue.
             virtual void                            computeTipLikelihood( const TopologyNode &node, size_t nIdx);                                                   //!< Collect a BEAGLE operation for a leaf node into the computation queue.
 
         private:
@@ -606,72 +605,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikel
                           1,
                           BEAGLE_OP_NONE );
 #endif //-- !RB_USE_EIGEN3
-}
-
-
-//TODO : This should probably never exist.... Why is this here
-template<class charType>
-void
-RevBayesCore::PhyloCTMCSiteHomogeneousBEAGLE<charType>::computeInternalNodeLikelihoodBranchWise( const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle )
-{
-    size_t node_idx   = node_index + this->num_nodes * this->active_branch_likelihood[node_index];
-    size_t left_idx   = left       + this->num_nodes * this->active_branch_likelihood[left];
-    size_t right_idx  = right      + this->num_nodes * this->active_branch_likelihood[right];
-    size_t middle_idx = middle     + this->num_nodes * this->active_branch_likelihood[middle];
-    
-    //-- Tips are actually just stored once, so we dont need offests.
-    size_t left_partials   = (node.getChild(0).isTip()) ? left   : left_idx;
-    size_t right_partials  = (node.getChild(1).isTip()) ? right  : right_idx;
-    size_t middle_partials = (node.getChild(2).isTip()) ? middle : middle_idx;
-
-    double branch_length = this->calculateBranchLength(node, node_index);
-
-    int scaler_index_read  = BEAGLE_OP_NONE;
-    int scaler_index_write = BEAGLE_OP_NONE;
-
-    if ( RbSettings::userSettings().getUseScaling() == true )
-    {
-        scaler_index_write = (int) node_idx;
-        this->b_scale_indices.push_back((int)node_idx);
-    }
-    
-    //-- TODO : Check which operation for middle
-    BeagleOperation b_operation =
-        { .destinationPartials    = (int) node_idx
-        , .destinationScaleWrite  = scaler_index_write
-        , .destinationScaleRead   = scaler_index_read
-        , .child1Partials         = (int) left_partials
-        , .child1TransitionMatrix = (int) left_idx
-        , .child2Partials         = (int) right_partials
-        , .child2TransitionMatrix = (int) right_idx
-        };
-
-    //-- push operations, nodes, and branches into respective vectors
-    this->b_ops.push_back(b_operation);
-    this->b_node_indices.push_back((int)node_idx);
-    this->b_branch_lengths.push_back(branch_length);
-
-#if !defined ( RB_USE_EIGEN3 )
-    //-- If we are not using the eigensystem, we will need to update and set the
-    //   transition probability matrices.
-
-    // Compute and update the transition probability matrices in revbayes
-    this->updateTransitionProbabilities( node_index );
-
-    // Update all model transition matrices and partials
-	const double *b_tp_begin = this->transition_prob_matrices[0].theMatrix;
-
-	beagleSetTransitionMatrix( this->beagle_instance->getResourceID(),
-                              (int) node_index,
-                              b_tp_begin,
-                              1.0 );
-
-	beagleUpdatePartials( this->beagle_instance->getResourceID(),
-                          &b_operation,
-                          1,
-                          BEAGLE_OP_NONE );
-#endif //-- RB_USE_EIGEN3
-
 }
 
 

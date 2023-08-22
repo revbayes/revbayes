@@ -36,13 +36,11 @@ namespace RevBayesCore {
         virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r);
         virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
         virtual void                                        computeInternalNodeLikelihoodBranchWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-        virtual void                                        computeInternalNodeLikelihoodBranchWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
         virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx);
 
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r);
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r, size_t m);
         virtual void                                        computeInternalNodeCorrection(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-        virtual void                                        computeInternalNodeCorrection(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
         virtual void                                        computeTipCorrection(const TopologyNode &node, size_t nIdx);
 
         virtual void                                        resizeLikelihoodVectors(void);
@@ -442,19 +440,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
 }
 
 
-template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihoodBranchWise(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
-{
-
-    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihoodBranchWise(node, node_index, left, right, middle);
-
-    if (coding != AscertainmentBias::ALL)
-    {
-        computeInternalNodeCorrection(node, node_index, left, right, middle);
-    }
-}
-
-
 
 
 template<class charType>
@@ -540,79 +525,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
     }
 }
 
-template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
-{
-    // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->active_branch_likelihood[left]*activeCorrectionOffset + left*correctionnode_offset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->active_branch_likelihood[right]*activeCorrectionOffset + right*correctionnode_offset;
-    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->active_branch_likelihood[middle]*activeCorrectionOffset + middle*correctionnode_offset;
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->active_branch_likelihood[node_index]*activeCorrectionOffset + node_index*correctionnode_offset;
-    
-    size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
-
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-    {
-        // const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
-        const TransitionProbabilityMatrix&    pij = this->pmatrices[pmat_offset + mixture];
-
-        // iterate over correction masks
-        for (size_t mask = 0; mask < numCorrectionMasks; mask++)
-        {
-            // iterate over ancestral (non-autapomorphic) states
-            for (size_t a = 0; a < this->num_states; a++)
-            {
-                size_t offset = mixture*correctionmixture_offset + mask*correctionMaskOffset + a*correctionOffset;
-
-                std::vector<double>::iterator                 u = p_node   + offset;
-                std::vector<double>::const_iterator         u_l = p_left   + offset;
-                std::vector<double>::const_iterator         u_r = p_right  + offset;
-                std::vector<double>::const_iterator         u_m = p_middle + offset;
-
-                // iterate over combinations of autapomorphic states
-                for (size_t c = 0; c < numCorrectionPatterns; c++)
-                {
-                    std::vector<double>::iterator         uc = u  + c*this->num_states;
-
-                    std::fill(uc, uc + this->num_states, 0.0);
-
-                    // iterate over partitions of c
-                    for (size_t p1 = 0; p1 <= c; p1++)
-                    {
-                        if ( (p1 | c) == c)
-                        {
-                            size_t p_tmp = p1 ^ c;
-
-                            // iterate over partitions of p_tmp
-                            for (size_t p2 = 0; p2 <= p_tmp; p2++)
-                            {
-                                if ( (p2 | p_tmp) == p_tmp)
-                                {
-                                    size_t p3 = p2 ^ p_tmp;
-
-                                    std::vector<double>::const_iterator         lc = u_l  + p1*this->num_states;
-                                    std::vector<double>::const_iterator         rc = u_r  + p2*this->num_states;
-                                    std::vector<double>::const_iterator         mc = u_m  + p3*this->num_states;
-
-                                    // iterate over initial states
-                                    for (size_t ci = 0; ci < this->num_states; ci++)
-                                    {
-                                        // iterate over ending states
-                                        for (size_t cj = 0; cj < this->num_states; cj++)
-                                        {
-                                            uc[ci] += pij[ci][cj] * lc[cj] * rc[cj] * mc[cj];
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right)
@@ -996,7 +908,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::updateCorrecti
             else
             {
                 // this->updateTransitionProbabilities( nodeIndex );
-                computeInternalNodeCorrection( node, nodeIndex, leftIndex, rightIndex, middleIndex );
+//                computeInternalNodeCorrection( node, nodeIndex, leftIndex, rightIndex, middleIndex );
             }
 
         }
