@@ -97,6 +97,9 @@ namespace RevBayesCore {
     class AbstractPhyloCTMCSiteHomogeneous : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public MemberObject< RbVector<double> >, public MemberObject < MatrixReal >, public TreeChangeEventListener {
 
     public:
+        
+        enum PARTIAL_LIKELIHOOD_STORING { BRANCH, NODE, BOTH };
+        
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
         AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true );
         AbstractPhyloCTMCSiteHomogeneous(const AbstractPhyloCTMCSiteHomogeneous &n);                                                                                    //!< Copy constructor
@@ -203,6 +206,7 @@ namespace RevBayesCore {
         
         // members
         double                                                              lnProb;
+        PARTIAL_LIKELIHOOD_STORING                                          partial_likelihood_storing_approach;
         double                                                              storedLnProb;
         size_t                                                              num_matrices;
         size_t                                                              num_nodes;
@@ -1073,8 +1077,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 template<class charType>
 double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbability( void )
 {
-    const std::string& partial_likelihood_storing_approach = RbSettings::userSettings().getPartialLikelihoodStoring();
-
+    const std::string& pls_approach = RbSettings::userSettings().getPartialLikelihoodStoring();
+    if ( pls_approach == "branch" )
+    {
+        partial_likelihood_storing_approach = PARTIAL_LIKELIHOOD_STORING::BRANCH;
+    }
+    else if ( pls_approach == "node" )
+    {
+        partial_likelihood_storing_approach = PARTIAL_LIKELIHOOD_STORING::NODE;
+    }
+    else if ( pls_approach == "both" )
+    {
+        partial_likelihood_storing_approach = PARTIAL_LIKELIHOOD_STORING::BOTH;
+    }
+    
     // @todo: #thread
     // This part should be done on several threads if possible
     // That means we should probabily call this function as a job,
@@ -1096,11 +1112,11 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
     if ( in_mcmc_mode == false )
     {
-        if ( partial_likelihood_storing_approach == "branch" || partial_likelihood_storing_approach == "both" )
+        if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BRANCH || partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BOTH )
         {
             partial_branch_likelihoods = new double[2*active_branch_likelihood_offset];
         }
-        if ( partial_likelihood_storing_approach == "node" || partial_likelihood_storing_approach == "both" )
+        if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::NODE || partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BOTH )
         {
             partial_node_likelihoods = new double[2*active_node_likelihood_offset];
         }
@@ -1124,7 +1140,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
     
-    if ( partial_likelihood_storing_approach == "branch" )
+    if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BRANCH )
     {
         // only necessary if the root is actually dirty
         if ( dirty_branches[root_index] == true )
@@ -1182,7 +1198,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         }
 
     }
-    else if ( partial_likelihood_storing_approach == "node" )
+    else if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::NODE )
     {
         // only necessary if the root is actually dirty
         if ( dirty_nodes[root_index] == true )
@@ -1233,7 +1249,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             
         }
     }
-    else if ( partial_likelihood_storing_approach == "both" )
+    else if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BOTH )
     {
         // only necessary if the root is actually dirty
         if ( dirty_nodes[root_index] == true )
