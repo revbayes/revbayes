@@ -3397,8 +3397,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
     bool scale_threshold    = RbSettings::userSettings().getScalingMethod() == "threshold";
     bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
     
-    double* p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
-
+    double* p_node = NULL;
+    if ( partial_likelihood_storing_approach == BRANCH )
+    {
+        p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
+    }
+    else
+    {
+        p_node = this->partial_node_likelihoods + this->active_node_likelihood[node_index]*this->active_node_likelihood_offset + (node_index-this->num_tips)*this->node_offset;
+    }
+    
     if ( test_underflow == true && scale_per_mixture == false )
     {
         if ( test_this_node == true )
@@ -3498,9 +3506,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right )
 {
-
-    double* p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
-
+    
+    double* p_node = NULL;
+    if ( partial_likelihood_storing_approach == BRANCH )
+    {
+        p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
+    }
+    else
+    {
+        p_node = this->partial_node_likelihoods + this->active_node_likelihood[node_index]*this->active_node_likelihood_offset + (node_index-this->num_tips)*this->node_offset;
+    }
     
     bool test_underflow     = RbSettings::userSettings().getUseScaling() == true;
     bool test_this_node     = ((node_index+1) % RbSettings::userSettings().getScalingDensity() == 0);
@@ -3612,8 +3627,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
-
-    double* p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
+    
+    double* p_node = NULL;
+    if ( partial_likelihood_storing_approach == BRANCH )
+    {
+        p_node = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index]*this->active_branch_likelihood_offset + node_index*this->node_offset;
+    }
+    else
+    {
+        p_node = this->partial_node_likelihoods + this->active_node_likelihood[node_index]*this->active_node_likelihood_offset + (node_index-this->num_tips)*this->node_offset;
+    }
 
     
     bool test_underflow     = RbSettings::userSettings().getUseScaling() == true;

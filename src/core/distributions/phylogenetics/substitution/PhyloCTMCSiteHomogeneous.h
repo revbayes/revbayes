@@ -649,19 +649,24 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 {
 
     // compute the transition probability matrix
-//    this->updateTransitionProbabilities( node_index );
     size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left  = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
     const double*   p_right = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
     double*         p_node  = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
+    
+    bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
+    bool test_this_node  = ((node_index+1) % RbSettings::userSettings().getScalingDensity() == 0);
+    bool scale_threshold = RbSettings::userSettings().getScalingMethod() == "threshold";
+    bool scale_per_mixture  = RbSettings::userSettings().getScalingPerMixture();
 
+    test_underflow = test_underflow && scale_per_mixture;
+    
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-//        const double*    tp_begin                = this->transition_prob_matrices[mixture].theMatrix;
         const double* tp_begin = this->pmatrices[pmat_offset + mixture].theMatrix;
 
         // get the pointers to the likelihood for this mixture category
@@ -698,6 +703,48 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
             } // end-for over all initial characters
 
+            if ( test_underflow )
+            {
+                if ( test_this_node == false )
+                {
+                    this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
+                }
+                else
+                {
+                    
+                    // iterate over all possible terminal states
+                    double max = p_site_mixture[0];
+                    for (size_t c2 = 1; c2 < this->num_states; ++c2 )
+                    {
+                        max = ( p_site_mixture[c2] > max ? p_site_mixture[c2] : max );
+
+                    } // end-for over all distination character
+                    
+                    if ( scale_threshold == false )
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
+                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                        {
+                            p_site_mixture[c2] /= max;
+
+                        } // end-for over all distination character
+                    }
+                    else if ( max < RbConstants::SCALING_THRESHOLD )
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + 1;
+                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                        {
+                            p_site_mixture[c2] /= RbConstants::SCALING_THRESHOLD;
+
+                        } // end-for over all distination character
+                    }
+                    else
+                    {
+                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
+                    }
+                }
+            }
+            
             // increment the pointers to the next site
             p_site_mixture_left  += this->site_offset;
             p_site_mixture_right += this->site_offset;
@@ -1135,7 +1182,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     size_t pmat_offset_middle = this->active_pmatrices[middle] * this->active_P_matrix_offset + middle * this->pmat_node_offset;
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double*   p               = this->partial_node_likelihoods   + this->active_node_likelihood[root]         * this->active_node_likelihood_offset   + (root-this->num_tips)       * this->node_offset;
+    double*         p               = this->partial_node_likelihoods   + this->active_node_likelihood[root]         * this->active_node_likelihood_offset   + (root-this->num_tips)       * this->node_offset;
     double*         p_branch_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left                        * this->node_offset;
     double*         p_branch_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right                       * this->node_offset;
     double*         p_branch_middle = this->partial_branch_likelihoods + this->active_branch_likelihood[middle]     * this->active_branch_likelihood_offset + middle                      * this->node_offset;
