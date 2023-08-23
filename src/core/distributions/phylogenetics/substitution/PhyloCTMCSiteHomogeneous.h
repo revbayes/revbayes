@@ -481,12 +481,18 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                     
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
-                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                        if ( max > 0 )
                         {
-                            p_site_mixture[c2] /= max;
-
-                        } // end-for over all distination character
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
+                            for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                            {
+                                p_site_mixture[c2] /= max;
+                            } // end-for over all distination character
+                        }
+                        else
+                        {
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
+                        }
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
@@ -1214,12 +1220,18 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                     
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
-                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                        if ( max > 0 )
                         {
-                            p_site_mixture[c2] /= max;
-
-                        } // end-for over all distination character
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
+                            for (size_t c2 = 0; c2 < this->num_states; ++c2 )
+                            {
+                                p_site_mixture[c2] /= max;
+                            } // end-for over all distination character
+                        }
+                        else
+                        {
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
+                        }
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {

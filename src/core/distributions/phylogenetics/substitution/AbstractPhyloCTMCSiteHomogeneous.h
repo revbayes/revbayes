@@ -4388,6 +4388,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                     double tmp_sf = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site];
                     if ( scale_threshold == false )
                     {
+                        double test_nan = exp(per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
+                        if ( RbMath::isFinite(test_nan) == false )
+                        {
+                            std::cerr << "exp(" << per_mixture_scaling_factors[site] << "-" << tmp_sf<< ") * site_mixture_probs[mixture] *" << tmp << std::endl;
+                        }
                         per_mixture_Likelihoods[site] += exp(per_mixture_scaling_factors[site] - tmp_sf) * site_mixture_probs[mixture] * tmp;
                     }
                     else
@@ -4472,7 +4477,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                     if ( scale_threshold == false )
                     {
-                        rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(this_sf) ) * *patterns;
+                        rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] * exp(-this_sf) ) * *patterns;
                     }
                     else
                     {

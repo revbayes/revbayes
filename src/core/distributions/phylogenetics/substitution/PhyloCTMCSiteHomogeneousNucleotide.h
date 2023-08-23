@@ -277,13 +277,23 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
                     max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
+//                    max = 1;
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
-                        p_site_mixture[0] /= max;
-                        p_site_mixture[1] /= max;
-                        p_site_mixture[2] /= max;
-                        p_site_mixture[3] /= max;
+                        // Don't divide by zero or NaN.
+                        if (max > 0)
+                        {
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] - log(max);
+                            
+                            p_site_mixture[0] /= max;
+                            p_site_mixture[1] /= max;
+                            p_site_mixture[2] /= max;
+                            p_site_mixture[3] /= max;
+                        }
+                        else
+                        {
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
+                        }
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
@@ -338,9 +348,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
-//    double tmp_ac[4];
-//    double tmp_gt[4];
-    
     
 #   else
 
@@ -693,11 +700,20 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
                     if ( scale_threshold == false )
                     {
-                        this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
-                        p_site_mixture[0] /= max;
-                        p_site_mixture[1] /= max;
-                        p_site_mixture[2] /= max;
-                        p_site_mixture[3] /= max;
+                        
+                        // Don't divide by zero or NaN.
+                        if (max > 0)
+                        {
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site] - log(max);
+                            p_site_mixture[0] /= max;
+                            p_site_mixture[1] /= max;
+                            p_site_mixture[2] /= max;
+                            p_site_mixture[3] /= max;
+                        }
+                        else
+                        {
+                            this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[root]][root][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[middle]][middle][mixture][site];
+                        }
                     }
                     else if ( max < RbConstants::SCALING_THRESHOLD )
                     {
@@ -1114,6 +1130,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
                         max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
                         max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
+//                        max = 1.0;
                         if ( scale_threshold == false )
                         {
                             this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = - log(max);
@@ -1141,14 +1158,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
             } // end-if a gap state
             
             
-            // increment the pointers to next site
-//            p_site_mixture+=this->site_offset;
-            
         } // end-for over all sites/patterns in the sequence
-
-        
-        // increment the pointers to next mixture category
-//        p_mixture+=this->mixture_offset;
         
     } // end-for over all mixture categories
 
