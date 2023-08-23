@@ -24,15 +24,17 @@ namespace RevBayesCore {
     protected:
         
         void                                                computeInternalNodeLikelihoodBranchWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-//        void                                                computeInternalNodeLikelihoodBranchWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r,  size_t m);
         void                                                computeRootLikelihood( size_t root, size_t left, size_t right);
         void                                                computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle);
         void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx);
 
         void                                                computeInternalNodeLikelihoodNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-//        void                                                computeInternalNodeLikelihoodNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r,  size_t m);
         void                                                computeRootLikelihoodNode( size_t root, size_t left, size_t right);
         void                                                computeRootLikelihoodNode( size_t root, size_t left, size_t right, size_t middle);
+
+//        void                                                computeInternalNodeLikelihoodBranchNodeWise(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
+//        void                                                computeRootLikelihoodBranchNode( size_t root, size_t left, size_t right);
+//        void                                                computeRootLikelihoodBranchNode( size_t root, size_t left, size_t right, size_t middle);
 
         
     private:        
@@ -352,9 +354,29 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 #   else
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
-    const double*   p_right = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
-    double*         p_node  = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
+    double*         p_node  = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
+    const double*   p_left  = NULL;
+    const double*   p_right = NULL;
+    
+    bool left_is_tip  = left  < this->num_tips;
+    bool right_is_tip = right < this->num_tips;
+    if ( left_is_tip   )
+    {
+        p_left   = this->tip_likelihoods + left   * this->tip_offset;
+    }
+    else
+    {
+        p_left  = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+    }
+    if ( right_is_tip  )
+    {
+        p_right  = this->tip_likelihoods + right  * this->tip_offset;
+    }
+    else
+    {
+        p_right = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+    }
+
 
 #   endif
 
@@ -368,11 +390,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixture_offset;
         
-#       if defined ( SSE_ENABLED )
+        double*          p_site_mixture                 = p_node  + offset;
+        const double*    p_node_site_mixture_left       = p_left  + (left_is_tip  ? 0 : offset);
+        const double*    p_node_site_mixture_right      = p_right + (right_is_tip ? 0 : offset);
         
-        double*          p_site_mixture          = p_node  + offset;
-        const double*    p_site_mixture_left     = p_left  + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
+#       if defined ( SSE_ENABLED )
         
         __m128d tp_a_ac_left = _mm_load_pd(tp_begin_left);
         __m128d tp_a_gt_left = _mm_load_pd(tp_begin_left+2);
@@ -403,12 +425,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m256d tp_c = _mm256_load_pd(tp_begin+4);
         __m256d tp_g = _mm256_load_pd(tp_begin+8);
         __m256d tp_t = _mm256_load_pd(tp_begin+12);
-        
-#       else
-
-        double*          p_site_mixture          = p_node  + offset;
-        const double*    p_site_mixture_left     = p_left  + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
 
 #       endif
 
@@ -417,63 +433,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         {
             
 #           if defined ( SSE_ENABLED )
-            
-//            __m128d a01 = _mm_load_pd(p_site_mixture_left);
-//            __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
-//            
-//            __m128d b01 = _mm_load_pd(p_site_mixture_right);
-//            __m128d b23 = _mm_load_pd(p_site_mixture_right+2);
-//            
-//            __m128d p01 = _mm_mul_pd(a01,b01);
-//            __m128d p23 = _mm_mul_pd(a23,b23);
-//            
-//            __m128d a_ac = _mm_mul_pd(p01, tp_a_ac   );
-//            __m128d a_gt = _mm_mul_pd(p23, tp_a_gt );
-//            __m128d a_acgt = _mm_hadd_pd(a_ac,a_gt);
-//            
-//            __m128d c_ac = _mm_mul_pd(p01, tp_c_ac );
-//            __m128d c_gt = _mm_mul_pd(p23, tp_c_gt );
-//            __m128d c_acgt = _mm_hadd_pd(c_ac,c_gt);
-//            
-//            __m128d ac = _mm_hadd_pd(a_acgt,c_acgt);
-//            _mm_store_pd(p_site_mixture,ac);
-//            
-//            
-//            __m128d g_ac = _mm_mul_pd(p01, tp_g_ac  );
-//            __m128d g_gt = _mm_mul_pd(p23, tp_g_gt );
-//            __m128d g_acgt = _mm_hadd_pd(g_ac,g_gt);
-//            
-//            __m128d t_ac = _mm_mul_pd(p01, tp_t_ac );
-//            __m128d t_gt = _mm_mul_pd(p23, tp_t_gt );
-//            __m128d t_acgt = _mm_hadd_pd(t_ac,t_gt);
-//            
-//            __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
-//            _mm_store_pd(p_site_mixture+2,gt);
- 
-#           elif defined ( AVX_ENABLED )
- 
-            __m256d a = _mm256_load_pd(p_site_mixture_left);
-            __m256d b = _mm256_load_pd(p_site_mixture_right);
-            __m256d p = _mm256_mul_pd(a,b);
-            
-            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
-            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
-            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
-            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
-            
-            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
-            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
-            
-            
-            _mm256_store_pd(tmp_ac,ac);
-            _mm256_store_pd(tmp_gt,gt);
-            
-            p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
-            p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
-            p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
-            p_site_mixture[3] = tmp_gt[1] + tmp_gt[3];
-
-#           else
             
             double sum_left = p_site_mixture_left[0] * tp_begin_left[0];
             sum_left += p_site_mixture_left[1] * tp_begin_left[1];
@@ -487,49 +446,153 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
             p_site_mixture[0] = sum_left * sum_right;
             
+            __m128d left_a01 = _mm_load_pd(p_site_mixture_left);
+            __m128d left_a23 = _mm_load_pd(p_site_mixture_left+2);
             
-            sum_left  = p_site_mixture_left[0] * tp_begin_left[4];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[5];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[6];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[7];
+            __m128d right_a01 = _mm_load_pd(p_site_mixture_right);
+            __m128d right_a23 = _mm_load_pd(p_site_mixture_right+2);
             
-            sum_right  = p_site_mixture_right[0] * tp_begin_right[4];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[5];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[6];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[7];
+            
+            __m128d left_p01 = _mm_mul_pd(left_a01,tp_a_ac_left);
+            __m128d left_p23 = _mm_mul_pd(left_a23,tp_a_gt_left);
+            
+            __m128d right_p01 = _mm_mul_pd(right_a01,tp_a_gt_right);
+            __m128d right_p23 = _mm_mul_pd(right_a23,tp_a_gt_right);
+            
+            
+            __m128d left_a   = _mm_hadd_pd(left_p01,left_p23);
+            __m128d right_a  = _mm_hadd_pd(right_p01,right_p23);
+            
+            __m128d a = _mm_hadd_pd(left_a,right_a);
+            
+            
+            __m128d left_p01 = _mm_mul_pd(left_a01,tp_c_ac_left);
+            __m128d left_p23 = _mm_mul_pd(left_a23,tp_c_gt_left);
+            
+            __m128d right_p01 = _mm_mul_pd(right_a01,tp_c_gt_right);
+            __m128d right_p23 = _mm_mul_pd(right_a23,tp_c_gt_right);
+            
+            
+            __m128d left_c   = _mm_hadd_pd(left_p01,left_p23);
+            __m128d right_c  = _mm_hadd_pd(right_p01,right_p23);
+            
+            __m128d c  = _mm_hadd_pd(left_c,right_c);
+            __m128d ac = _mm_mul_pd(a,c);
+            
+            _mm_store_pd(p_site_mixture,ac);
+            
+            
+            
+            __m128d left_p01 = _mm_mul_pd(left_a01,tp_g_ac_left);
+            __m128d left_p23 = _mm_mul_pd(left_a23,tp_g_gt_left);
+            
+            __m128d right_p01 = _mm_mul_pd(right_a01,tp_g_gt_right);
+            __m128d right_p23 = _mm_mul_pd(right_a23,tp_g_gt_right);
+            
+            
+            __m128d left_g   = _mm_hadd_pd(left_p01,left_p23);
+            __m128d right_g  = _mm_hadd_pd(right_p01,right_p23);
+            
+            __m128d g = _mm_hadd_pd(left_g,right_g);
+            
+            
+            __m128d left_p01 = _mm_mul_pd(left_a01,tp_t_ac_left);
+            __m128d left_p23 = _mm_mul_pd(left_a23,tp_t_gt_left);
+            
+            __m128d right_p01 = _mm_mul_pd(right_a01,tp_t_gt_right);
+            __m128d right_p23 = _mm_mul_pd(right_a23,tp_t_gt_right);
+            
+            
+            __m128d left_t   = _mm_hadd_pd(left_p01,left_p23);
+            __m128d right_t  = _mm_hadd_pd(right_p01,right_p23);
+            
+            __m128d t = _mm_hadd_pd(left_t,right_t);
+            __m128d gt = _mm_mul_pd(g,t);
+            
+            _mm_store_pd(p_site_mixture+2,gt);
+ 
+//#           elif defined ( AVX_ENABLED )
+//
+//            __m256d a = _mm256_load_pd(p_site_mixture_left);
+//            __m256d b = _mm256_load_pd(p_site_mixture_right);
+//            __m256d p = _mm256_mul_pd(a,b);
+//
+//            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
+//            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
+//            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
+//            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
+//
+//            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
+//            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
+//
+//
+//            _mm256_store_pd(tmp_ac,ac);
+//            _mm256_store_pd(tmp_gt,gt);
+//
+//            p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
+//            p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
+//            p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
+//            p_site_mixture[3] = tmp_gt[1] + tmp_gt[3];
+
+#           else
+            
+            double sum_left = p_node_site_mixture_left[0] * tp_begin_left[0];
+            sum_left += p_node_site_mixture_left[1] * tp_begin_left[1];
+            sum_left += p_node_site_mixture_left[2] * tp_begin_left[2];
+            sum_left += p_node_site_mixture_left[3] * tp_begin_left[3];
+            
+            double sum_right = p_node_site_mixture_right[0] * tp_begin_right[0];
+            sum_right += p_node_site_mixture_right[1] * tp_begin_right[1];
+            sum_right += p_node_site_mixture_right[2] * tp_begin_right[2];
+            sum_right += p_node_site_mixture_right[3] * tp_begin_right[3];
+            
+            p_site_mixture[0] = sum_left * sum_right;
+            
+            
+            sum_left  = p_node_site_mixture_left[0] * tp_begin_left[4];
+            sum_left += p_node_site_mixture_left[1] * tp_begin_left[5];
+            sum_left += p_node_site_mixture_left[2] * tp_begin_left[6];
+            sum_left += p_node_site_mixture_left[3] * tp_begin_left[7];
+            
+            sum_right  = p_node_site_mixture_right[0] * tp_begin_right[4];
+            sum_right += p_node_site_mixture_right[1] * tp_begin_right[5];
+            sum_right += p_node_site_mixture_right[2] * tp_begin_right[6];
+            sum_right += p_node_site_mixture_right[3] * tp_begin_right[7];
             
             p_site_mixture[1] = sum_left * sum_right;
             
             
-            sum_left  = p_site_mixture_left[0] * tp_begin_left[8];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[9];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[10];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[11];
+            sum_left  = p_node_site_mixture_left[0] * tp_begin_left[8];
+            sum_left += p_node_site_mixture_left[1] * tp_begin_left[9];
+            sum_left += p_node_site_mixture_left[2] * tp_begin_left[10];
+            sum_left += p_node_site_mixture_left[3] * tp_begin_left[11];
             
-            sum_right  = p_site_mixture_right[0] * tp_begin_right[8];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[9];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[10];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[11];
+            sum_right  = p_node_site_mixture_right[0] * tp_begin_right[8];
+            sum_right += p_node_site_mixture_right[1] * tp_begin_right[9];
+            sum_right += p_node_site_mixture_right[2] * tp_begin_right[10];
+            sum_right += p_node_site_mixture_right[3] * tp_begin_right[11];
             
             p_site_mixture[2] = sum_left * sum_right;
             
             
-            sum_left  = p_site_mixture_left[0] * tp_begin_left[12];
-            sum_left += p_site_mixture_left[1] * tp_begin_left[13];
-            sum_left += p_site_mixture_left[2] * tp_begin_left[14];
-            sum_left += p_site_mixture_left[3] * tp_begin_left[15];
+            sum_left  = p_node_site_mixture_left[0] * tp_begin_left[12];
+            sum_left += p_node_site_mixture_left[1] * tp_begin_left[13];
+            sum_left += p_node_site_mixture_left[2] * tp_begin_left[14];
+            sum_left += p_node_site_mixture_left[3] * tp_begin_left[15];
             
-            sum_right  = p_site_mixture_right[0] * tp_begin_right[12];
-            sum_right += p_site_mixture_right[1] * tp_begin_right[13];
-            sum_right += p_site_mixture_right[2] * tp_begin_right[14];
-            sum_right += p_site_mixture_right[3] * tp_begin_right[15];
+            sum_right  = p_node_site_mixture_right[0] * tp_begin_right[12];
+            sum_right += p_node_site_mixture_right[1] * tp_begin_right[13];
+            sum_right += p_node_site_mixture_right[2] * tp_begin_right[14];
+            sum_right += p_node_site_mixture_right[3] * tp_begin_right[15];
             
             p_site_mixture[3] = sum_left * sum_right;
 
 #           endif
                     
             // increment the pointers to the next site
-            p_site_mixture_left+=this->site_offset; p_site_mixture_right+=this->site_offset; p_site_mixture+=this->site_offset;
+            p_node_site_mixture_left    += this->site_offset;
+            p_node_site_mixture_right   += this->site_offset;
+            p_site_mixture              += this->site_offset;
 
                         
         } // end-for over all sites (=patterns)
@@ -877,11 +940,39 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(base_frequencies_vector);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partial_branch_likelihoods + this->active_branch_likelihood[root]   * this->active_branch_likelihood_offset + root   * this->node_offset;
-    const double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]   * this->active_branch_likelihood_offset + left   * this->node_offset;
-    const double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]  * this->active_branch_likelihood_offset + right  * this->node_offset;
-    const double* p_middle = this->partial_branch_likelihoods + this->active_branch_likelihood[middle] * this->active_branch_likelihood_offset + middle * this->node_offset;
-
+          double*   p        = this->partial_node_likelihoods + this->active_node_likelihood[root]   * this->active_node_likelihood_offset + (root-this->num_tips)   * this->node_offset;
+    const double*   p_left   = NULL;
+    const double*   p_right  = NULL;
+    const double*   p_middle = NULL;
+    
+    bool left_is_tip   = left   < this->num_tips;
+    bool right_is_tip  = right  < this->num_tips;
+    bool middle_is_tip = middle < this->num_tips;
+    if ( left_is_tip   )
+    {
+        p_left   = this->tip_likelihoods + left   * this->tip_offset;
+    }
+    else
+    {
+        p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + (left-this->num_tips)       * this->node_offset;
+    }
+    if ( right_is_tip  )
+    {
+        p_right  = this->tip_likelihoods + right  * this->tip_offset;
+    }
+    else
+    {
+        p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + (right-this->num_tips)      * this->node_offset;
+    }
+    if ( middle_is_tip  )
+    {
+        p_middle  = this->tip_likelihoods + middle  * this->tip_offset;
+    }
+    else
+    {
+        p_middle = this->partial_node_likelihoods + this->active_node_likelihood[middle]     * this->active_node_likelihood_offset + (middle-this->num_tips)      * this->node_offset;
+    }
+    
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
     const double*   p_mixture_left     = p_left;
