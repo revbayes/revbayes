@@ -72,9 +72,9 @@ namespace RevBayesCore {
      *                    charIndex]
      * Since this is a bit complex, we have some offset variables for convenience:
      * active_branch_likelihood_offset  =  num_nodes*num_site_mixtures*pattern_block_size*num_states;
-     * node_offset                                 =  num_site_mixtures*pattern_block_size*num_states;
-     * mixture_offset                             =  pattern_block_size*num_states;
-     * site_offset                                   =  num_states;
+     * node_offset                      =  num_site_mixtures*pattern_block_size*num_states;
+     * mixture_offset                   =  pattern_block_size*num_states;
+     * site_offset                      =  num_states;
      * This gives the more convenient access via
      * partial_branch_likelihoods[active*active_branch_likelihood_offset + node_index*node_offset + siteRateIndex*mixture_offset + siteIndex*site_offset + charIndex]
      *
@@ -1295,7 +1295,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( middle, middleIndex );
 
                 computeRootLikelihoodBranchNode( root_index, left_index, right_index, middleIndex );
-            
+
                 // now call scaling
                 scale(root_index, left_index, right_index, middleIndex);
             }
@@ -2499,10 +2499,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVector(const TopologyNode &node, size_t node_index)
 {
 
-    const std::string& partial_likelihood_storing_approach = RbSettings::userSettings().getPartialLikelihoodStoring();
-
-
-    if ( partial_likelihood_storing_approach == "branch" )
+    if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BRANCH )
     {
 
         // check for recomputation
@@ -2548,7 +2545,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
         }
     }
-    else if ( partial_likelihood_storing_approach == "node" )
+    else if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::NODE )
     {
         // check for recomputation
         if ( dirty_nodes[node_index] == true && node.isTip() == false )
@@ -2582,7 +2579,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
         dirty_nodes[node_index] = false;
 
     }
-    else if ( partial_likelihood_storing_approach == "both" )
+    else if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BOTH )
     {
         
         // check for recomputation
@@ -2603,7 +2600,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
             // now compute the likelihoods of this internal node
             computeInternalNodeLikelihoodBranchNodeWise(node,node_index,left_index,right_index);
                 
-                
             //-- We only need to scale only if we are not using BEAGLE
 #if !defined ( RB_BEAGLE )
             // rescale likelihood vector
@@ -2611,10 +2607,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 #endif /* NOT RB_BEAGLE */
 
         }
-    }
-    else
-    {
-        throw RbException("Unknown method '" + partial_likelihood_storing_approach + "' for storing partial likelihoods.");
     }
 
 }
