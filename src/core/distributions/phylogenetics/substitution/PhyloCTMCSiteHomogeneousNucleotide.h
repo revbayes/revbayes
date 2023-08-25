@@ -50,6 +50,7 @@ namespace RevBayesCore {
 #include "RandomNumberFactory.h"
 #include "RbMathLogic.h"
 
+
 #include <cmath>
 #include <cstring>
 #if defined (SSE_ENABLED)
@@ -105,7 +106,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     bool left_branch_dirty  = this->dirty_branches[left];
     bool right_branch_dirty = this->dirty_branches[right];
     
-    
     bool left_is_tip  = left  < this->num_tips;
     bool right_is_tip = right < this->num_tips;
     if ( left_is_tip   )
@@ -154,236 +154,181 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             {
 
                 // get the pointers for this mixture category and this site
-                const double*       tp_a_left    = tp_begin_left;
-                const double*       tp_a_right   = tp_begin_right;
-                
-                    
+                const double*       tp_left    = tp_begin_left;
+                const double*       tp_right   = tp_begin_right;
+
+
                 // initialize the probabilities
-                double sum_left  = 0.0;
-                double sum_right = 0.0;
+                double sum_left_A  = 0.0;
+                double sum_left_C  = 0.0;
+                double sum_left_G  = 0.0;
+                double sum_left_T  = 0.0;
+                double sum_right_A = 0.0;
+                double sum_right_C = 0.0;
+                double sum_right_G = 0.0;
+                double sum_right_T = 0.0;
                 if ( left_use_tip_state == true )
                 {
                     if ( left_gap_node[site] == true )
                     {
-                        sum_left = 1.0;
+                        sum_left_A = 1.0;
+                        sum_left_C = 1.0;
+                        sum_left_G = 1.0;
+                        sum_left_T = 1.0;
+                        tp_left  += 4*this->num_states;
                     }
                     else
                     {
-                        sum_left = tp_a_left[left_char_node[site]];
+                        unsigned long this_char_state = left_char_node[site];
+
+                        sum_left_A  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
+                        sum_left_C  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
+                        sum_left_G  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
+                        sum_left_T  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
                     }
                 }
                 else
                 {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
+                    sum_left_A   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_A  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_A  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_A  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
+
+                    sum_left_C   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_C  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_C  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_C  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
+
+                    sum_left_G   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_G  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_G  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_G  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
+
+                    sum_left_T   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_T  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_T  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_T  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
                 }
-                (*p_branch_site_mixture_left)  = sum_left;
-                    
+
+                (*p_branch_site_mixture_left)   = sum_left_A;
+                ++p_branch_site_mixture_left;
+
+                (*p_branch_site_mixture_left)   = sum_left_C;
+                ++p_branch_site_mixture_left;
+
+                (*p_branch_site_mixture_left)   = sum_left_G;
+                ++p_branch_site_mixture_left;
+
+                (*p_branch_site_mixture_left)   = sum_left_T;
+                ++p_branch_site_mixture_left;
+
                 if ( right_use_tip_state == true )
                 {
                     if ( right_gap_node[site] == true )
                     {
-                        sum_right = 1.0;
+                        sum_right_A = 1.0;
+                        sum_right_C = 1.0;
+                        sum_right_G = 1.0;
+                        sum_right_T = 1.0;
+                        tp_right    += 4*this->num_states;
                     }
                     else
                     {
-                        sum_right = tp_a_right[right_char_node[site]];
+                        unsigned long this_char_state = right_char_node[site];
+                        sum_right_A  = tp_right[this_char_state];
+                        tp_right    += this->num_states;
+                        sum_right_C  = tp_right[this_char_state];
+                        tp_right    += this->num_states;
+                        sum_right_G  = tp_right[this_char_state];
+                        tp_right    += this->num_states;
+                        sum_right_T  = tp_right[this_char_state];
                     }
                 }
                 else
                 {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * sum_right;
+                    sum_right_A  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_A += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_A += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_A += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
 
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                tp_a_right += this->num_states;
-                    
-                ++p_branch_site_mixture_left;
+                    sum_right_C  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_C += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_C += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_C += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+
+                    sum_right_G  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_G += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_G += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_G += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+
+                    sum_right_T  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_T += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_T += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_T += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                }
+
+                (*p_branch_site_mixture_right)  = sum_right_A;
                 ++p_branch_site_mixture_right;
+
+                (*p_branch_site_mixture_right)  = sum_right_C;
+                ++p_branch_site_mixture_right;
+
+                (*p_branch_site_mixture_right)  = sum_right_G;
+                ++p_branch_site_mixture_right;
+
+                (*p_branch_site_mixture_right)  = sum_right_T;
+                ++p_branch_site_mixture_right;
+
+                // store the likelihood for this starting state
+                (*p_node_site_mixture) = sum_left_A * sum_right_A;
+                ++p_node_site_mixture;
+                (*p_node_site_mixture) = sum_left_C * sum_right_C;
+                ++p_node_site_mixture;
+                (*p_node_site_mixture) = sum_left_G * sum_right_G;
+                ++p_node_site_mixture;
+                (*p_node_site_mixture) = sum_left_T * sum_right_T;
                 ++p_node_site_mixture;
                 
-                
-                
-                // initialize the probabilities
-                sum_left  = 0.0;
-                sum_right = 0.0;
-                if ( left_use_tip_state == true )
-                {
-                    if ( left_gap_node[site] == true )
-                    {
-                        sum_left = 1.0;
-                    }
-                    else
-                    {
-                        sum_left = tp_a_left[left_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
-                }
-                (*p_branch_site_mixture_left)  = sum_left;
-                
-                if ( right_use_tip_state == true )
-                {
-                    if ( right_gap_node[site] == true )
-                    {
-                        sum_right = 1.0;
-                    }
-                    else
-                    {
-                        sum_right = tp_a_right[right_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                tp_a_right += this->num_states;
-                
-                ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
-                
-                
-                
-                // initialize the probabilities
-                sum_left  = 0.0;
-                sum_right = 0.0;
-                if ( left_use_tip_state == true )
-                {
-                    if ( left_gap_node[site] == true )
-                    {
-                        sum_left = 1.0;
-                    }
-                    else
-                    {
-                        sum_left = tp_a_left[left_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
-                }
-                (*p_branch_site_mixture_left)  = sum_left;
-                
-                if ( right_use_tip_state == true )
-                {
-                    if ( right_gap_node[site] == true )
-                    {
-                        sum_right = 1.0;
-                    }
-                    else
-                    {
-                        sum_right = tp_a_right[right_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                tp_a_right += this->num_states;
-                
-                ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
-                
-                
-                
-                // initialize the probabilities
-                sum_left  = 0.0;
-                sum_right = 0.0;
-                if ( left_use_tip_state == true )
-                {
-                    if ( left_gap_node[site] == true )
-                    {
-                        sum_left = 1.0;
-                    }
-                    else
-                    {
-                        sum_left = tp_a_left[left_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
-                }
-                (*p_branch_site_mixture_left)  = sum_left;
-                
-                if ( right_use_tip_state == true )
-                {
-                    if ( right_gap_node[site] == true )
-                    {
-                        sum_right = 1.0;
-                    }
-                    else
-                    {
-                        sum_right = tp_a_right[right_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                tp_a_right += this->num_states;
-                
-                ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
-
                 // increment the pointers to the next site
                 p_node_site_mixture_left    += this->site_offset;
                 p_node_site_mixture_right   += this->site_offset;
-
+                
             } // end-for over all sites (=patterns)
         
         } // end-for over all mixture categories
@@ -409,139 +354,102 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             {
 
                 // get the pointers for this mixture category and this site
-                const double*       tp_a_left    = tp_begin_left;
-                
-                double sum_left  = 0.0;
+                const double*       tp_left    = tp_begin_left;
+                    
+                // initialize the probabilities
+                double sum_left_A  = 0.0;
+                double sum_left_C  = 0.0;
+                double sum_left_G  = 0.0;
+                double sum_left_T  = 0.0;
                 if ( left_use_tip_state == true )
                 {
                     if ( left_gap_node[site] == true )
                     {
-                        sum_left = 1.0;
+                        sum_left_A = 1.0;
+                        sum_left_C = 1.0;
+                        sum_left_G = 1.0;
+                        sum_left_T = 1.0;
+                        tp_left  += 4*this->num_states;
                     }
                     else
                     {
-                        sum_left = tp_a_left[left_char_node[site]];
+                        unsigned long this_char_state = left_char_node[site];
+                        
+                        sum_left_A  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
+                        sum_left_C  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
+                        sum_left_G  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
+                        sum_left_T  = tp_left[this_char_state];
+                        tp_left    += this->num_states;
                     }
                 }
                 else
                 {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
+                    sum_left_A   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_A  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_A  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_A  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
+                    
+                    sum_left_C   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_C  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_C  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_C  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
+                    
+                    sum_left_G   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_G  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_G  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_G  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
+                    
+                    sum_left_T   = p_node_site_mixture_left [0] * *tp_left;
+                    ++tp_left;
+                    sum_left_T  += p_node_site_mixture_left [1] * *tp_left;
+                    ++tp_left;
+                    sum_left_T  += p_node_site_mixture_left [2] * *tp_left;
+                    ++tp_left;
+                    sum_left_T  += p_node_site_mixture_left [3] * *tp_left;
+                    ++tp_left;
                 }
-                (*p_branch_site_mixture_left)  = sum_left;
-
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * *p_branch_site_mixture_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
                 
+                (*p_branch_site_mixture_left)   = sum_left_A;
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
                 
-                
-                
-                sum_left  = 0.0;
-                if ( left_use_tip_state == true )
-                {
-                    if ( left_gap_node[site] == true )
-                    {
-                        sum_left = 1.0;
-                    }
-                    else
-                    {
-                        sum_left = tp_a_left[left_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
-                }
-                (*p_branch_site_mixture_left)  = sum_left;
-
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * *p_branch_site_mixture_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                
+                (*p_branch_site_mixture_left)   = sum_left_C;
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
                 
-                
-                
-                sum_left  = 0.0;
-                if ( left_use_tip_state == true )
-                {
-                    if ( left_gap_node[site] == true )
-                    {
-                        sum_left = 1.0;
-                    }
-                    else
-                    {
-                        sum_left = tp_a_left[left_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
-                }
-                (*p_branch_site_mixture_left)  = sum_left;
-
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * *p_branch_site_mixture_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                
+                (*p_branch_site_mixture_left)   = sum_left_G;
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
                 
-                
-                
-                sum_left  = 0.0;
-                if ( left_use_tip_state == true )
-                {
-                    if ( left_gap_node[site] == true )
-                    {
-                        sum_left = 1.0;
-                    }
-                    else
-                    {
-                        sum_left = tp_a_left[left_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_left   = p_node_site_mixture_left [0] * tp_a_left [0];
-                    sum_left  += p_node_site_mixture_left [1] * tp_a_left [1];
-                    sum_left  += p_node_site_mixture_left [2] * tp_a_left [2];
-                    sum_left  += p_node_site_mixture_left [3] * tp_a_left [3];
-                }
-                (*p_branch_site_mixture_left)  = sum_left;
-
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * *p_branch_site_mixture_right;
-
-                // increment the pointers to the next starting state
-                tp_a_left  += this->num_states;
-                
+                (*p_branch_site_mixture_left)   = sum_left_T;
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
-                ++p_node_site_mixture;
                 
-
+                // store the likelihood for this starting state
+                (*p_node_site_mixture) = sum_left_A * *p_branch_site_mixture_right;
+                ++p_node_site_mixture;
+                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = sum_left_C * *p_branch_site_mixture_right;
+                ++p_node_site_mixture;
+                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = sum_left_G * *p_branch_site_mixture_right;
+                ++p_node_site_mixture;
+                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = sum_left_T * *p_branch_site_mixture_right;
+                ++p_node_site_mixture;
+                ++p_branch_site_mixture_right;
+                
                 // increment the pointers to the next site
                 p_node_site_mixture_left    += this->site_offset;
                 
@@ -569,142 +477,104 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             {
 
                 // get the pointers for this mixture category and this site
-                const double*       tp_a_right   = tp_begin_right;
+                const double*       tp_right   = tp_begin_right;
                 
                 // initialize the probabilities
-                double sum_right = 0.0;
+                double sum_right_A = 0.0;
+                double sum_right_C = 0.0;
+                double sum_right_G = 0.0;
+                double sum_right_T = 0.0;
+                    
                 if ( right_use_tip_state == true )
                 {
                     if ( right_gap_node[site] == true )
                     {
-                        sum_right = 1.0;
+                        sum_right_A = 1.0;
+                        sum_right_C = 1.0;
+                        sum_right_G = 1.0;
+                        sum_right_T = 1.0;
+                        tp_right    += 4*this->num_states;
                     }
                     else
                     {
-                        sum_right = tp_a_right[right_char_node[site]];
+                        unsigned long this_char_state = right_char_node[site];
+                        sum_right_A  = tp_right[this_char_state];
+                        tp_right    += this->num_states;
+                        sum_right_C  = tp_right[this_char_state];
+                        tp_right    += this->num_states;
+                        sum_right_G  = tp_right[this_char_state];
+                        tp_right    += this->num_states;
+                        sum_right_T  = tp_right[this_char_state];
                     }
                 }
                 else
                 {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
+                    sum_right_A  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_A += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_A += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_A += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                    
+                    sum_right_C  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_C += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_C += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_C += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                    
+                    sum_right_G  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_G += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_G += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_G += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                    
+                    sum_right_T  = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_T += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_T += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_T += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
                 }
-                (*p_branch_site_mixture_right)  = sum_right;
+                
+                (*p_branch_site_mixture_right)  = sum_right_A;
+                ++p_branch_site_mixture_right;
+                
+                (*p_branch_site_mixture_right)  = sum_right_C;
+                ++p_branch_site_mixture_right;
+                
+                (*p_branch_site_mixture_right)  = sum_right_G;
+                ++p_branch_site_mixture_right;
+                
+                (*p_branch_site_mixture_right)  = sum_right_T;
+                ++p_branch_site_mixture_right;
                 
                 // store the likelihood for this starting state
-                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_right += this->num_states;
-                
-                ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right_A;
                 ++p_node_site_mixture;
-                
-                
-                // initialize the probabilities
-                sum_right = 0.0;
-                if ( right_use_tip_state == true )
-                {
-                    if ( right_gap_node[site] == true )
-                    {
-                        sum_right = 1.0;
-                    }
-                    else
-                    {
-                        sum_right = tp_a_right[right_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_right += this->num_states;
-                
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right_C;
                 ++p_node_site_mixture;
-                
-                
-                // initialize the probabilities
-                sum_right = 0.0;
-                if ( right_use_tip_state == true )
-                {
-                    if ( right_gap_node[site] == true )
-                    {
-                        sum_right = 1.0;
-                    }
-                    else
-                    {
-                        sum_right = tp_a_right[right_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_right += this->num_states;
-                
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right_G;
                 ++p_node_site_mixture;
-                
-                
-                // initialize the probabilities
-                sum_right = 0.0;
-                if ( right_use_tip_state == true )
-                {
-                    if ( right_gap_node[site] == true )
-                    {
-                        sum_right = 1.0;
-                    }
-                    else
-                    {
-                        sum_right = tp_a_right[right_char_node[site]];
-                    }
-                }
-                else
-                {
-                    sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                    sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                    sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                    sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-                }
-                (*p_branch_site_mixture_right)  = sum_right;
-                
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right;
-
-                // increment the pointers to the next starting state
-                tp_a_right += this->num_states;
-                
                 ++p_branch_site_mixture_left;
-                ++p_branch_site_mixture_right;
+                (*p_node_site_mixture) = *p_branch_site_mixture_left * sum_right_T;
                 ++p_node_site_mixture;
-
+                ++p_branch_site_mixture_left;
+                
                 // increment the pointers to the next site
                 p_node_site_mixture_right   += this->site_offset;
-
+                
             } // end-for over all sites (=patterns)
         
         } // end-for over all mixture categories
@@ -762,15 +632,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 {
     
     // compute the transition probability matrix
-//    this->updateTransitionProbabilities( node_index );
     size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
     
 #   if defined ( SSE_ENABLED )
-    
+
     double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
     double* p_right  = this->partial_branch_likelihoods + this->active_branch_likelihood[right]      * this->active_branch_likelihood_offset + right      * this->node_offset;
     double* p_node   = this->partial_branch_likelihoods + this->active_branch_likelihood[node_index] * this->active_branch_likelihood_offset + node_index * this->node_offset;
-    
+
 #   elif defined ( AVX_ENABLED )
 
     double* p_left   = this->partial_branch_likelihoods + this->active_branch_likelihood[left]       * this->active_branch_likelihood_offset + left       * this->node_offset;
@@ -779,10 +648,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
-//    double tmp_ac[4];
-//    double tmp_gt[4];
-    
-    
+
+
 #   else
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
@@ -809,11 +676,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         size_t offset = mixture*this->mixture_offset;
         
 #       if defined ( SSE_ENABLED )
-        
+
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
         const double*    p_site_mixture_right    = p_right + offset;
-        
+
         __m128d tp_a_ac = _mm_load_pd(tp_begin);
         __m128d tp_a_gt = _mm_load_pd(tp_begin+2);
         __m128d tp_c_ac = _mm_load_pd(tp_begin+4);
@@ -822,18 +689,18 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m128d tp_g_gt = _mm_load_pd(tp_begin+10);
         __m128d tp_t_ac = _mm_load_pd(tp_begin+12);
         __m128d tp_t_gt = _mm_load_pd(tp_begin+14);
-        
+
 #       elif defined ( AVX_ENABLED )
-        
+
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
         const double*    p_site_mixture_right    = p_right + offset;
-        
+
         __m256d tp_a = _mm256_load_pd(tp_begin);
         __m256d tp_c = _mm256_load_pd(tp_begin+4);
         __m256d tp_g = _mm256_load_pd(tp_begin+8);
         __m256d tp_t = _mm256_load_pd(tp_begin+12);
-        
+
 #       else
 
         double*          p_site_mixture          = p_node + offset;
@@ -847,57 +714,57 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         {
             
 #           if defined ( SSE_ENABLED )
-            
+
             __m128d a01 = _mm_load_pd(p_site_mixture_left);
             __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
-            
+
             __m128d b01 = _mm_load_pd(p_site_mixture_right);
             __m128d b23 = _mm_load_pd(p_site_mixture_right+2);
-            
+
             __m128d p01 = _mm_mul_pd(a01,b01);
             __m128d p23 = _mm_mul_pd(a23,b23);
-            
+
             __m128d a_ac = _mm_mul_pd(p01, tp_a_ac   );
             __m128d a_gt = _mm_mul_pd(p23, tp_a_gt );
             __m128d a_acgt = _mm_hadd_pd(a_ac,a_gt);
-            
+
             __m128d c_ac = _mm_mul_pd(p01, tp_c_ac );
             __m128d c_gt = _mm_mul_pd(p23, tp_c_gt );
             __m128d c_acgt = _mm_hadd_pd(c_ac,c_gt);
-            
+
             __m128d ac = _mm_hadd_pd(a_acgt,c_acgt);
             _mm_store_pd(p_site_mixture,ac);
-            
-            
+
+
             __m128d g_ac = _mm_mul_pd(p01, tp_g_ac  );
             __m128d g_gt = _mm_mul_pd(p23, tp_g_gt );
             __m128d g_acgt = _mm_hadd_pd(g_ac,g_gt);
-            
+
             __m128d t_ac = _mm_mul_pd(p01, tp_t_ac );
             __m128d t_gt = _mm_mul_pd(p23, tp_t_gt );
             __m128d t_acgt = _mm_hadd_pd(t_ac,t_gt);
-            
+
             __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
             _mm_store_pd(p_site_mixture+2,gt);
- 
+
 #           elif defined ( AVX_ENABLED )
- 
+
             __m256d a = _mm256_load_pd(p_site_mixture_left);
             __m256d b = _mm256_load_pd(p_site_mixture_right);
             __m256d p = _mm256_mul_pd(a,b);
-            
+
             __m256d a_acgt = _mm256_mul_pd(p, tp_a );
             __m256d c_acgt = _mm256_mul_pd(p, tp_c );
             __m256d g_acgt = _mm256_mul_pd(p, tp_g );
             __m256d t_acgt = _mm256_mul_pd(p, tp_t );
-            
+
             __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
             __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
-            
-            
+
+
             _mm256_store_pd(tmp_ac,ac);
             _mm256_store_pd(tmp_gt,gt);
-            
+
             p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
             p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
             p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
@@ -951,7 +818,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
                     max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
                     max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
-//                    max = 1;
                     if ( scale_threshold == false )
                     {
                         // Don't divide by zero or NaN.
@@ -1008,22 +874,22 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     size_t pmat_offset_left  = this->active_pmatrices[left]  * this->active_P_matrix_offset + left  * this->pmat_node_offset;
     size_t pmat_offset_right = this->active_pmatrices[right] * this->active_P_matrix_offset + right * this->pmat_node_offset;
 
-#   if defined ( SSE_ENABLED )
-    
-    double* p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
-    double* p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
-    double* p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
-    
-#   elif defined ( AVX_ENABLED )
-
-    double* p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
-    double* p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
-    double* p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
-
-    double* tmp_ac = new double[4];
-    double* tmp_gt = new double[4];
-    
-#   else
+//#   if defined ( SSE_ENABLED )
+//
+//    double* p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
+//    double* p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
+//    double* p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
+//
+//#   elif defined ( AVX_ENABLED )
+//
+//    double* p_left   = this->partial_node_likelihoods + this->active_node_likelihood[left]       * this->active_node_likelihood_offset + left       * this->node_offset;
+//    double* p_right  = this->partial_node_likelihoods + this->active_node_likelihood[right]      * this->active_node_likelihood_offset + right      * this->node_offset;
+//    double* p_node   = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + node_index * this->node_offset;
+//
+//    double* tmp_ac = new double[4];
+//    double* tmp_gt = new double[4];
+//
+//#   else
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     double*         p_node  = this->partial_node_likelihoods + this->active_node_likelihood[node_index] * this->active_node_likelihood_offset + (node_index-this->num_tips) * this->node_offset;
@@ -1058,7 +924,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     const std::vector<unsigned long>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
 
 
-#   endif
+//#   endif
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -1074,330 +940,283 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         const double*    p_node_site_mixture_left       = p_left  + (left_is_tip  ? 0 : offset);
         const double*    p_node_site_mixture_right      = p_right + (right_is_tip ? 0 : offset);
         
-#       if defined ( SSE_ENABLED )
-        
-        __m128d tp_a_ac_left = _mm_load_pd(tp_begin_left);
-        __m128d tp_a_gt_left = _mm_load_pd(tp_begin_left+2);
-        __m128d tp_c_ac_left = _mm_load_pd(tp_begin_left+4);
-        __m128d tp_c_gt_left = _mm_load_pd(tp_begin_left+6);
-        __m128d tp_g_ac_left = _mm_load_pd(tp_begin_left+8);
-        __m128d tp_g_gt_left = _mm_load_pd(tp_begin_left+10);
-        __m128d tp_t_ac_left = _mm_load_pd(tp_begin_left+12);
-        __m128d tp_t_gt_left = _mm_load_pd(tp_begin_left+14);
-        
-        __m128d tp_a_ac_right = _mm_load_pd(tp_begin_right);
-        __m128d tp_a_gt_right = _mm_load_pd(tp_begin_right+2);
-        __m128d tp_c_ac_right = _mm_load_pd(tp_begin_right+4);
-        __m128d tp_c_gt_right = _mm_load_pd(tp_begin_right+6);
-        __m128d tp_g_ac_right = _mm_load_pd(tp_begin_right+8);
-        __m128d tp_g_gt_right = _mm_load_pd(tp_begin_right+10);
-        __m128d tp_t_ac_right = _mm_load_pd(tp_begin_right+12);
-        __m128d tp_t_gt_right = _mm_load_pd(tp_begin_right+14);
-
-        
-#       elif defined ( AVX_ENABLED )
-        
-        double*          p_site_mixture          = p_node  + offset;
-        const double*    p_site_mixture_left     = p_left  + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
-        
-        __m256d tp_a = _mm256_load_pd(tp_begin);
-        __m256d tp_c = _mm256_load_pd(tp_begin+4);
-        __m256d tp_g = _mm256_load_pd(tp_begin+8);
-        __m256d tp_t = _mm256_load_pd(tp_begin+12);
-
-#       endif
+//#       if defined ( SSE_ENABLED )
+//
+//        __m128d tp_a_ac_left = _mm_load_pd(tp_begin_left);
+//        __m128d tp_a_gt_left = _mm_load_pd(tp_begin_left+2);
+//        __m128d tp_c_ac_left = _mm_load_pd(tp_begin_left+4);
+//        __m128d tp_c_gt_left = _mm_load_pd(tp_begin_left+6);
+//        __m128d tp_g_ac_left = _mm_load_pd(tp_begin_left+8);
+//        __m128d tp_g_gt_left = _mm_load_pd(tp_begin_left+10);
+//        __m128d tp_t_ac_left = _mm_load_pd(tp_begin_left+12);
+//        __m128d tp_t_gt_left = _mm_load_pd(tp_begin_left+14);
+//
+//        __m128d tp_a_ac_right = _mm_load_pd(tp_begin_right);
+//        __m128d tp_a_gt_right = _mm_load_pd(tp_begin_right+2);
+//        __m128d tp_c_ac_right = _mm_load_pd(tp_begin_right+4);
+//        __m128d tp_c_gt_right = _mm_load_pd(tp_begin_right+6);
+//        __m128d tp_g_ac_right = _mm_load_pd(tp_begin_right+8);
+//        __m128d tp_g_gt_right = _mm_load_pd(tp_begin_right+10);
+//        __m128d tp_t_ac_right = _mm_load_pd(tp_begin_right+12);
+//        __m128d tp_t_gt_right = _mm_load_pd(tp_begin_right+14);
+//
+//
+//#       elif defined ( AVX_ENABLED )
+//
+//        double*          p_site_mixture          = p_node  + offset;
+//        const double*    p_site_mixture_left     = p_left  + offset;
+//        const double*    p_site_mixture_right    = p_right + offset;
+//
+//        __m256d tp_a = _mm256_load_pd(tp_begin);
+//        __m256d tp_c = _mm256_load_pd(tp_begin+4);
+//        __m256d tp_g = _mm256_load_pd(tp_begin+8);
+//        __m256d tp_t = _mm256_load_pd(tp_begin+12);
+//
+//#       endif
 
         // compute the per site probabilities
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
             
-#           if defined ( SSE_ENABLED )
-            
-            p_site_mixture[0] = sum_left * sum_right;
-            
-            __m128d left_a01 = _mm_load_pd(p_site_mixture_left);
-            __m128d left_a23 = _mm_load_pd(p_site_mixture_left+2);
-            
-            __m128d right_a01 = _mm_load_pd(p_site_mixture_right);
-            __m128d right_a23 = _mm_load_pd(p_site_mixture_right+2);
-            
-            
-            __m128d left_p01 = _mm_mul_pd(left_a01,tp_a_ac_left);
-            __m128d left_p23 = _mm_mul_pd(left_a23,tp_a_gt_left);
-            
-            __m128d right_p01 = _mm_mul_pd(right_a01,tp_a_gt_right);
-            __m128d right_p23 = _mm_mul_pd(right_a23,tp_a_gt_right);
-            
-            
-            __m128d left_a   = _mm_hadd_pd(left_p01,left_p23);
-            __m128d right_a  = _mm_hadd_pd(right_p01,right_p23);
-            
-            __m128d a = _mm_hadd_pd(left_a,right_a);
-            
-            
-            __m128d left_p01 = _mm_mul_pd(left_a01,tp_c_ac_left);
-            __m128d left_p23 = _mm_mul_pd(left_a23,tp_c_gt_left);
-            
-            __m128d right_p01 = _mm_mul_pd(right_a01,tp_c_gt_right);
-            __m128d right_p23 = _mm_mul_pd(right_a23,tp_c_gt_right);
-            
-            
-            __m128d left_c   = _mm_hadd_pd(left_p01,left_p23);
-            __m128d right_c  = _mm_hadd_pd(right_p01,right_p23);
-            
-            __m128d c  = _mm_hadd_pd(left_c,right_c);
-            __m128d ac = _mm_mul_pd(a,c);
-            
-            _mm_store_pd(p_site_mixture,ac);
-            
-            
-            
-            __m128d left_p01 = _mm_mul_pd(left_a01,tp_g_ac_left);
-            __m128d left_p23 = _mm_mul_pd(left_a23,tp_g_gt_left);
-            
-            __m128d right_p01 = _mm_mul_pd(right_a01,tp_g_gt_right);
-            __m128d right_p23 = _mm_mul_pd(right_a23,tp_g_gt_right);
-            
-            
-            __m128d left_g   = _mm_hadd_pd(left_p01,left_p23);
-            __m128d right_g  = _mm_hadd_pd(right_p01,right_p23);
-            
-            __m128d g = _mm_hadd_pd(left_g,right_g);
-            
-            
-            __m128d left_p01 = _mm_mul_pd(left_a01,tp_t_ac_left);
-            __m128d left_p23 = _mm_mul_pd(left_a23,tp_t_gt_left);
-            
-            __m128d right_p01 = _mm_mul_pd(right_a01,tp_t_gt_right);
-            __m128d right_p23 = _mm_mul_pd(right_a23,tp_t_gt_right);
-            
-            
-            __m128d left_t   = _mm_hadd_pd(left_p01,left_p23);
-            __m128d right_t  = _mm_hadd_pd(right_p01,right_p23);
-            
-            __m128d t = _mm_hadd_pd(left_t,right_t);
-            __m128d gt = _mm_mul_pd(g,t);
-            
-            _mm_store_pd(p_site_mixture+2,gt);
- 
-//#           elif defined ( AVX_ENABLED )
+//#           if defined ( SSE_ENABLED )
 //
-//            __m256d a = _mm256_load_pd(p_site_mixture_left);
-//            __m256d b = _mm256_load_pd(p_site_mixture_right);
-//            __m256d p = _mm256_mul_pd(a,b);
+//            p_site_mixture[0] = sum_left * sum_right;
 //
-//            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
-//            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
-//            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
-//            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
+//            __m128d left_a01 = _mm_load_pd(p_site_mixture_left);
+//            __m128d left_a23 = _mm_load_pd(p_site_mixture_left+2);
 //
-//            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
-//            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
+//            __m128d right_a01 = _mm_load_pd(p_site_mixture_right);
+//            __m128d right_a23 = _mm_load_pd(p_site_mixture_right+2);
 //
 //
-//            _mm256_store_pd(tmp_ac,ac);
-//            _mm256_store_pd(tmp_gt,gt);
+//            __m128d left_p01 = _mm_mul_pd(left_a01,tp_a_ac_left);
+//            __m128d left_p23 = _mm_mul_pd(left_a23,tp_a_gt_left);
 //
-//            p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
-//            p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
-//            p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
-//            p_site_mixture[3] = tmp_gt[1] + tmp_gt[3];
-
-#           else
+//            __m128d right_p01 = _mm_mul_pd(right_a01,tp_a_gt_right);
+//            __m128d right_p23 = _mm_mul_pd(right_a23,tp_a_gt_right);
+//
+//
+//            __m128d left_a   = _mm_hadd_pd(left_p01,left_p23);
+//            __m128d right_a  = _mm_hadd_pd(right_p01,right_p23);
+//
+//            __m128d a = _mm_hadd_pd(left_a,right_a);
+//
+//
+//            __m128d left_p01 = _mm_mul_pd(left_a01,tp_c_ac_left);
+//            __m128d left_p23 = _mm_mul_pd(left_a23,tp_c_gt_left);
+//
+//            __m128d right_p01 = _mm_mul_pd(right_a01,tp_c_gt_right);
+//            __m128d right_p23 = _mm_mul_pd(right_a23,tp_c_gt_right);
+//
+//
+//            __m128d left_c   = _mm_hadd_pd(left_p01,left_p23);
+//            __m128d right_c  = _mm_hadd_pd(right_p01,right_p23);
+//
+//            __m128d c  = _mm_hadd_pd(left_c,right_c);
+//            __m128d ac = _mm_mul_pd(a,c);
+//
+//            _mm_store_pd(p_site_mixture,ac);
+//
+//
+//
+//            __m128d left_p01 = _mm_mul_pd(left_a01,tp_g_ac_left);
+//            __m128d left_p23 = _mm_mul_pd(left_a23,tp_g_gt_left);
+//
+//            __m128d right_p01 = _mm_mul_pd(right_a01,tp_g_gt_right);
+//            __m128d right_p23 = _mm_mul_pd(right_a23,tp_g_gt_right);
+//
+//
+//            __m128d left_g   = _mm_hadd_pd(left_p01,left_p23);
+//            __m128d right_g  = _mm_hadd_pd(right_p01,right_p23);
+//
+//            __m128d g = _mm_hadd_pd(left_g,right_g);
+//
+//
+//            __m128d left_p01 = _mm_mul_pd(left_a01,tp_t_ac_left);
+//            __m128d left_p23 = _mm_mul_pd(left_a23,tp_t_gt_left);
+//
+//            __m128d right_p01 = _mm_mul_pd(right_a01,tp_t_gt_right);
+//            __m128d right_p23 = _mm_mul_pd(right_a23,tp_t_gt_right);
+//
+//
+//            __m128d left_t   = _mm_hadd_pd(left_p01,left_p23);
+//            __m128d right_t  = _mm_hadd_pd(right_p01,right_p23);
+//
+//            __m128d t = _mm_hadd_pd(left_t,right_t);
+//            __m128d gt = _mm_mul_pd(g,t);
+//
+//            _mm_store_pd(p_site_mixture+2,gt);
+//
+////#           elif defined ( AVX_ENABLED )
+////
+////            __m256d a = _mm256_load_pd(p_site_mixture_left);
+////            __m256d b = _mm256_load_pd(p_site_mixture_right);
+////            __m256d p = _mm256_mul_pd(a,b);
+////
+////            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
+////            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
+////            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
+////            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
+////
+////            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
+////            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
+////
+////
+////            _mm256_store_pd(tmp_ac,ac);
+////            _mm256_store_pd(tmp_gt,gt);
+////
+////            p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
+////            p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
+////            p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
+////            p_site_mixture[3] = tmp_gt[1] + tmp_gt[3];
+//
+//#           else
             
             // get the pointers for this mixture category and this site
-            const double*       tp_a_left    = tp_begin_left;
-            const double*       tp_a_right   = tp_begin_right;
+            const double*       tp_left    = tp_begin_left;
+            const double*       tp_right   = tp_begin_right;
             
-            double sum_left  = 0.0;
-            double sum_right = 0.0;
-            
-            if ( left_use_tip_state == true )
-            {
-                if ( left_gap_node[site] == true )
-                {
-                    sum_left = 1.0;
-                }
-                else
-                {
-                    sum_left = tp_a_left[left_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_left  = p_node_site_mixture_left[0] * tp_a_left[0];
-                sum_left += p_node_site_mixture_left[1] * tp_a_left[1];
-                sum_left += p_node_site_mixture_left[2] * tp_a_left[2];
-                sum_left += p_node_site_mixture_left[3] * tp_a_left[3];
-            }
-            
-            if ( right_use_tip_state == true )
-            {
-                if ( right_gap_node[site] == true )
-                {
-                    sum_right = 1.0;
-                }
-                else
-                {
-                    sum_right = tp_a_right[right_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-            }
-            
-            p_site_mixture[0] = sum_left * sum_right;
-            
-            // increment the pointers to the next starting state
-            tp_a_left  += this->num_states;
-            tp_a_right += this->num_states;
-            
-            
-            
-            if ( left_use_tip_state == true )
-            {
-                if ( left_gap_node[site] == true )
-                {
-                    sum_left = 1.0;
-                }
-                else
-                {
-                    sum_left = tp_a_left[left_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_left  = p_node_site_mixture_left[0] * tp_a_left[0];
-                sum_left += p_node_site_mixture_left[1] * tp_a_left[1];
-                sum_left += p_node_site_mixture_left[2] * tp_a_left[2];
-                sum_left += p_node_site_mixture_left[3] * tp_a_left[3];
-            }
-            
-            if ( right_use_tip_state == true )
-            {
-                if ( right_gap_node[site] == true )
-                {
-                    sum_right = 1.0;
-                }
-                else
-                {
-                    sum_right = tp_a_right[right_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-            }
-            
-            p_site_mixture[1] = sum_left * sum_right;
-            
-            // increment the pointers to the next starting state
-            tp_a_left  += this->num_states;
-            tp_a_right += this->num_states;
-            
-            
-            
-            
-            if ( left_use_tip_state == true )
-            {
-                if ( left_gap_node[site] == true )
-                {
-                    sum_left = 1.0;
-                }
-                else
-                {
-                    sum_left = tp_a_left[left_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_left  = p_node_site_mixture_left[0] * tp_a_left[0];
-                sum_left += p_node_site_mixture_left[1] * tp_a_left[1];
-                sum_left += p_node_site_mixture_left[2] * tp_a_left[2];
-                sum_left += p_node_site_mixture_left[3] * tp_a_left[3];
-            }
-            
-            if ( right_use_tip_state == true )
-            {
-                if ( right_gap_node[site] == true )
-                {
-                    sum_right = 1.0;
-                }
-                else
-                {
-                    sum_right = tp_a_right[right_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-            }
-            
-            p_site_mixture[2] = sum_left * sum_right;
-            
-            // increment the pointers to the next starting state
-            tp_a_left  += this->num_states;
-            tp_a_right += this->num_states;
-            
-            
-            
-            
-            if ( left_use_tip_state == true )
-            {
-                if ( left_gap_node[site] == true )
-                {
-                    sum_left = 1.0;
-                }
-                else
-                {
-                    sum_left = tp_a_left[left_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_left  = p_node_site_mixture_left[0] * tp_a_left[0];
-                sum_left += p_node_site_mixture_left[1] * tp_a_left[1];
-                sum_left += p_node_site_mixture_left[2] * tp_a_left[2];
-                sum_left += p_node_site_mixture_left[3] * tp_a_left[3];
-            }
-            
-            if ( right_use_tip_state == true )
-            {
-                if ( right_gap_node[site] == true )
-                {
-                    sum_right = 1.0;
-                }
-                else
-                {
-                    sum_right = tp_a_right[right_char_node[site]];
-                }
-            }
-            else
-            {
-                sum_right  = p_node_site_mixture_right[0] * tp_a_right[0];
-                sum_right += p_node_site_mixture_right[1] * tp_a_right[1];
-                sum_right += p_node_site_mixture_right[2] * tp_a_right[2];
-                sum_right += p_node_site_mixture_right[3] * tp_a_right[3];
-            }
-            
-            p_site_mixture[3] = sum_left * sum_right;
-            
-            // increment the pointers to the next starting state
-            tp_a_left  += this->num_states;
-            tp_a_right += this->num_states;
+            double sum_left_A  = 0.0;
+            double sum_left_C  = 0.0;
+            double sum_left_G  = 0.0;
+            double sum_left_T  = 0.0;
+            double sum_right_A = 0.0;
+            double sum_right_C = 0.0;
+            double sum_right_G = 0.0;
+            double sum_right_T = 0.0;
 
-#           endif
+            if ( left_use_tip_state == true )
+            {
+                if ( left_gap_node[site] == true )
+                {
+                    sum_left_A = 1.0;
+                    sum_left_C = 1.0;
+                    sum_left_G = 1.0;
+                    sum_left_T = 1.0;
+                    
+                    tp_left  += 4*this->num_states;
+                }
+                else
+                {
+                    unsigned long this_char = left_char_node[site];
+                    sum_left_A = tp_left[this_char];
+                    tp_left  += this->num_states;
+                    sum_left_C = tp_left[this_char];
+                    tp_left  += this->num_states;
+                    sum_left_G = tp_left[this_char];
+                    tp_left  += this->num_states;
+                    sum_left_T = tp_left[this_char];
+                    tp_left  += this->num_states;
+                }
+            }
+            else
+            {
+                sum_left_A  = p_node_site_mixture_left[0] * *tp_left;
+                ++tp_left;
+                sum_left_A += p_node_site_mixture_left[1] * *tp_left;
+                ++tp_left;
+                sum_left_A += p_node_site_mixture_left[2] * *tp_left;
+                ++tp_left;
+                sum_left_A += p_node_site_mixture_left[3] * *tp_left;
+                ++tp_left;
+                
+                sum_left_C  = p_node_site_mixture_left[0] * *tp_left;
+                ++tp_left;
+                sum_left_C += p_node_site_mixture_left[1] * *tp_left;
+                ++tp_left;
+                sum_left_C += p_node_site_mixture_left[2] * *tp_left;
+                ++tp_left;
+                sum_left_C += p_node_site_mixture_left[3] * *tp_left;
+                ++tp_left;
+                
+                sum_left_G  = p_node_site_mixture_left[0] * *tp_left;
+                ++tp_left;
+                sum_left_G += p_node_site_mixture_left[1] * *tp_left;
+                ++tp_left;
+                sum_left_G += p_node_site_mixture_left[2] * *tp_left;
+                ++tp_left;
+                sum_left_G += p_node_site_mixture_left[3] * *tp_left;
+                ++tp_left;
+                
+                sum_left_T  = p_node_site_mixture_left[0] * *tp_left;
+                ++tp_left;
+                sum_left_T += p_node_site_mixture_left[1] * *tp_left;
+                ++tp_left;
+                sum_left_T += p_node_site_mixture_left[2] * *tp_left;
+                ++tp_left;
+                sum_left_T += p_node_site_mixture_left[3] * *tp_left;
+                ++tp_left;
+            }
+            
+            if ( right_use_tip_state == true )
+            {
+                if ( right_gap_node[site] == true )
+                {
+                    sum_right_A = 1.0;
+                    sum_right_C = 1.0;
+                    sum_right_G = 1.0;
+                    sum_right_T = 1.0;
+                    
+                    tp_right  += 4*this->num_states;
+                }
+                else
+                {
+                    unsigned long this_char = right_char_node[site];
+                    sum_right_A = tp_right[this_char];
+                    tp_right  += this->num_states;
+                    sum_right_C = tp_right[this_char];
+                    tp_right  += this->num_states;
+                    sum_right_G = tp_right[this_char];
+                    tp_right  += this->num_states;
+                    sum_right_T = tp_right[this_char];
+                    tp_right  += this->num_states;
+                }
+            }
+            else
+            {
+                sum_right_A  = p_node_site_mixture_right[0] * *tp_right;
+                ++tp_right;
+                sum_right_A += p_node_site_mixture_right[1] * *tp_right;
+                ++tp_right;
+                sum_right_A += p_node_site_mixture_right[2] * *tp_right;
+                ++tp_right;
+                sum_right_A += p_node_site_mixture_right[3] * *tp_right;
+                ++tp_right;
+                
+                sum_right_C  = p_node_site_mixture_right[0] * *tp_right;
+                ++tp_right;
+                sum_right_C += p_node_site_mixture_right[1] * *tp_right;
+                ++tp_right;
+                sum_right_C += p_node_site_mixture_right[2] * *tp_right;
+                ++tp_right;
+                sum_right_C += p_node_site_mixture_right[3] * *tp_right;
+                ++tp_right;
+                
+                sum_right_G  = p_node_site_mixture_right[0] * *tp_right;
+                ++tp_right;
+                sum_right_G += p_node_site_mixture_right[1] * *tp_right;
+                ++tp_right;
+                sum_right_G += p_node_site_mixture_right[2] * *tp_right;
+                ++tp_right;
+                sum_right_G += p_node_site_mixture_right[3] * *tp_right;
+                ++tp_right;
+                
+                sum_right_T  = p_node_site_mixture_right[0] * *tp_right;
+                ++tp_right;
+                sum_right_T += p_node_site_mixture_right[1] * *tp_right;
+                ++tp_right;
+                sum_right_T += p_node_site_mixture_right[2] * *tp_right;
+                ++tp_right;
+                sum_right_T += p_node_site_mixture_right[3] * *tp_right;
+                ++tp_right;
+            }
+            
+            p_site_mixture[0] = sum_left_A * sum_right_A;
+            p_site_mixture[1] = sum_left_C * sum_right_C;
+            p_site_mixture[2] = sum_left_G * sum_right_G;
+            p_site_mixture[3] = sum_left_T * sum_right_T;
+
+//#           endif
                     
             // increment the pointers to the next site
             p_node_site_mixture_left    += this->site_offset;
@@ -1567,8 +1386,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                 // store the likelihood for this starting state
                 (*p_node_site_mixture) = sum_left * sum_right * base_freqs[c1];
 
-                assert(isnan(*p_node_site_mixture) || (0 <= *p_node_site_mixture and *p_node_site_mixture <= 1.00000000001));
-
                 // increment the pointers to the next starting state
                 tp_a_left   += this->num_states;
                 tp_a_right  += this->num_states;
@@ -1692,121 +1509,289 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         {
             
             // get the pointers for this mixture category and this site
-            const double*       tp_a_left    = tp_begin_left;
-            const double*       tp_a_right   = tp_begin_right;
-            const double*       tp_a_middle  = tp_begin_middle;
+            const double*       tp_left    = tp_begin_left;
+            const double*       tp_right   = tp_begin_right;
+            const double*       tp_middle  = tp_begin_middle;
             
-            // iterate over the possible starting states
-            for (size_t c1 = 0; c1 < this->num_states; ++c1)
+            // temporary variable
+            double sum_left_A   = 0.0;
+            double sum_left_C   = 0.0;
+            double sum_left_G   = 0.0;
+            double sum_left_T   = 0.0;
+            double sum_right_A  = 0.0;
+            double sum_right_C  = 0.0;
+            double sum_right_G  = 0.0;
+            double sum_right_T  = 0.0;
+            double sum_middle_A = 0.0;
+            double sum_middle_C = 0.0;
+            double sum_middle_G = 0.0;
+            double sum_middle_T = 0.0;
+
+            if ( left_branch_dirty == true )
             {
-                // temporary variable
-                double sum_left   = 0.0;
-                double sum_right  = 0.0;
-                double sum_middle = 0.0;
-                
-                if ( left_branch_dirty == true )
-                {
  
-                     if ( left_use_tip_state == true )
-                     {
-                         if ( left_gap_node[site] == true )
-                         {
-                             sum_left = 1.0;
-                         }
-                         else
-                         {
-                             sum_left = tp_a_left[left_char_node[site]];
-                         }
-                     }
-                     else
-                     {
-                         // iterate over all possible terminal states
-                         for (size_t c2 = 0; c2 < this->num_states; ++c2 )
-                         {
-                             sum_left  += p_node_site_mixture_left [c2] * tp_a_left [c2];
-                         } // end-for over all distination character
-                     }
-                    (*p_branch_site_mixture_left)  = sum_left;
-                }
-                else
+                if ( left_use_tip_state == true )
                 {
-                    sum_left = (*p_branch_site_mixture_left);
-                }
-                
-                if ( right_branch_dirty == true )
-                {
-                    if ( right_use_tip_state == true )
+                    if ( left_gap_node[site] == true )
                     {
-                        if ( right_gap_node[site] == true )
-                        {
-                            sum_right = 1.0;
-                        }
-                        else
-                        {
-                            sum_right = tp_a_right[right_char_node[site]];
-                       }
+                        sum_left_A = 1.0;
+                        sum_left_C = 1.0;
+                        sum_left_G = 1.0;
+                        sum_left_T = 1.0;
+                        tp_left   += 4*this->num_states;
                     }
                     else
                     {
-                        // iterate over all possible terminal states
-                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
-                        {
-                            sum_right += p_node_site_mixture_right[c2] * tp_a_right[c2];
-                        } // end-for over all distination character
+                        unsigned long this_char_state = left_char_node[site];
+                        sum_left_A = tp_left[this_char_state];
+                        tp_left   += this->num_states;
+                        sum_left_C = tp_left[this_char_state];
+                        tp_left   += this->num_states;
+                        sum_left_G = tp_left[this_char_state];
+                        tp_left   += this->num_states;
+                        sum_left_T = tp_left[this_char_state];
+                        tp_left   += this->num_states;
                     }
-
-                    (*p_branch_site_mixture_right)  = sum_right;
                 }
                 else
                 {
-                    sum_right = (*p_branch_site_mixture_right);
+                    sum_left_A    = p_node_site_mixture_left[0] * *tp_left;
+                    ++tp_left;
+                    sum_left_A   += p_node_site_mixture_left[1] * *tp_left;
+                    ++tp_left;
+                    sum_left_A   += p_node_site_mixture_left[2] * *tp_left;
+                    ++tp_left;
+                    sum_left_A   += p_node_site_mixture_left[3] * *tp_left;
+                    ++tp_left;
+                    
+                    sum_left_C    = p_node_site_mixture_left[0] * *tp_left;
+                    ++tp_left;
+                    sum_left_C   += p_node_site_mixture_left[1] * *tp_left;
+                    ++tp_left;
+                    sum_left_C   += p_node_site_mixture_left[2] * *tp_left;
+                    ++tp_left;
+                    sum_left_C   += p_node_site_mixture_left[3] * *tp_left;
+                    ++tp_left;
+                    
+                    sum_left_G    = p_node_site_mixture_left[0] * *tp_left;
+                    ++tp_left;
+                    sum_left_G   += p_node_site_mixture_left[1] * *tp_left;
+                    ++tp_left;
+                    sum_left_G   += p_node_site_mixture_left[2] * *tp_left;
+                    ++tp_left;
+                    sum_left_G   += p_node_site_mixture_left[3] * *tp_left;
+                    ++tp_left;
+                    
+                    sum_left_T    = p_node_site_mixture_left[0] * *tp_left;
+                    ++tp_left;
+                    sum_left_T   += p_node_site_mixture_left[1] * *tp_left;
+                    ++tp_left;
+                    sum_left_T   += p_node_site_mixture_left[2] * *tp_left;
+                    ++tp_left;
+                    sum_left_T   += p_node_site_mixture_left[3] * *tp_left;
+                    ++tp_left;
+                    
                 }
-                
-                if ( middle_branch_dirty == true )
-                {
-                    if ( middle_use_tip_state == true )
-                    {
-                        if ( middle_gap_node[site] == true )
-                        {
-                            sum_middle = 1.0;
-                        }
-                        else
-                        {
-                            sum_middle = tp_a_middle[middle_char_node[site]];
-                       }
-                    }
-                    else
-                    {
-                        // iterate over all possible terminal states
-                        for (size_t c2 = 0; c2 < this->num_states; ++c2 )
-                        {
-                            sum_middle += p_node_site_mixture_middle[c2] * tp_a_middle[c2];
-                        } // end-for over all distination character
-                    }
-
-                    (*p_branch_site_mixture_middle)  = sum_middle;
-                }
-                else
-                {
-                    sum_middle = (*p_branch_site_mixture_middle);
-                }
-
-                // store the likelihood for this starting state
-                (*p_node_site_mixture) = sum_left * sum_right * sum_middle * base_freqs[c1];
-
-                assert(isnan(*p_node_site_mixture) || (0 <= *p_node_site_mixture and *p_node_site_mixture <= 1.00000000001));
-
-                // increment the pointers to the next starting state
-                tp_a_left   += this->num_states;
-                tp_a_right  += this->num_states;
-                tp_a_middle += this->num_states;
-
+                (*p_branch_site_mixture_left)  = sum_left_A;
                 ++p_branch_site_mixture_left;
+                (*p_branch_site_mixture_left)  = sum_left_C;
+                ++p_branch_site_mixture_left;
+                (*p_branch_site_mixture_left)  = sum_left_G;
+                ++p_branch_site_mixture_left;
+                (*p_branch_site_mixture_left)  = sum_left_T;
+                ++p_branch_site_mixture_left;
+            }
+            else
+            {
+                sum_left_A = (*p_branch_site_mixture_left);
+                ++p_branch_site_mixture_left;
+                sum_left_C = (*p_branch_site_mixture_left);
+                ++p_branch_site_mixture_left;
+                sum_left_G = (*p_branch_site_mixture_left);
+                ++p_branch_site_mixture_left;
+                sum_left_T = (*p_branch_site_mixture_left);
+                ++p_branch_site_mixture_left;
+            }
+                
+            if ( right_branch_dirty == true )
+            {
+                if ( right_use_tip_state == true )
+                {
+                    if ( right_gap_node[site] == true )
+                    {
+                        sum_right_A = 1.0;
+                        sum_right_C = 1.0;
+                        sum_right_G = 1.0;
+                        sum_right_T = 1.0;
+                        tp_right   += 4*this->num_states;
+                    }
+                    else
+                    {
+                        unsigned long this_char_state = right_char_node[site];
+                        sum_right_A = tp_right[this_char_state];
+                        tp_right   += this->num_states;
+                        sum_right_C = tp_right[this_char_state];
+                        tp_right   += this->num_states;
+                        sum_right_G = tp_right[this_char_state];
+                        tp_right   += this->num_states;
+                        sum_right_T = tp_right[this_char_state];
+                        tp_right   += this->num_states;
+                    }
+                }
+                else
+                {
+                    sum_right_A    = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_A   += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_A   += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_A   += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                        
+                    sum_right_C    = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_C   += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_C   += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_C   += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                        
+                    sum_right_G    = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_G   += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_G   += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_G   += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                        
+                    sum_right_T    = p_node_site_mixture_right[0] * *tp_right;
+                    ++tp_right;
+                    sum_right_T   += p_node_site_mixture_right[1] * *tp_right;
+                    ++tp_right;
+                    sum_right_T   += p_node_site_mixture_right[2] * *tp_right;
+                    ++tp_right;
+                    sum_right_T   += p_node_site_mixture_right[3] * *tp_right;
+                    ++tp_right;
+                }
+                (*p_branch_site_mixture_right)  = sum_right_A;
                 ++p_branch_site_mixture_right;
+                (*p_branch_site_mixture_right)  = sum_right_C;
+                ++p_branch_site_mixture_right;
+                (*p_branch_site_mixture_right)  = sum_right_G;
+                ++p_branch_site_mixture_right;
+                (*p_branch_site_mixture_right)  = sum_right_T;
+                ++p_branch_site_mixture_right;
+            }
+            else
+            {
+                sum_right_A = (*p_branch_site_mixture_right);
+                ++p_branch_site_mixture_right;
+                sum_right_C = (*p_branch_site_mixture_right);
+                ++p_branch_site_mixture_right;
+                sum_right_G = (*p_branch_site_mixture_right);
+                ++p_branch_site_mixture_right;
+                sum_right_T = (*p_branch_site_mixture_right);
+                ++p_branch_site_mixture_right;
+            }
+                
+            if ( middle_branch_dirty == true )
+            {
+                if ( middle_use_tip_state == true )
+                {
+                    if ( middle_gap_node[site] == true )
+                    {
+                        sum_middle_A = 1.0;
+                        sum_middle_C = 1.0;
+                        sum_middle_G = 1.0;
+                        sum_middle_T = 1.0;
+                        tp_middle   += 4*this->num_states;
+                    }
+                    else
+                    {
+                        unsigned long this_char_state = middle_char_node[site];
+                        sum_middle_A = tp_middle[this_char_state];
+                        tp_middle   += this->num_states;
+                        sum_middle_C = tp_middle[this_char_state];
+                        tp_middle   += this->num_states;
+                        sum_middle_G = tp_middle[this_char_state];
+                        tp_middle   += this->num_states;
+                        sum_middle_T = tp_middle[this_char_state];
+                        tp_middle   += this->num_states;
+                    }
+                }
+                else
+                {
+                    sum_middle_A    = p_node_site_mixture_middle[0] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_A   += p_node_site_mixture_middle[1] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_A   += p_node_site_mixture_middle[2] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_A   += p_node_site_mixture_middle[3] * *tp_middle;
+                    ++tp_middle;
+                    
+                    sum_middle_C    = p_node_site_mixture_middle[0] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_C   += p_node_site_mixture_middle[1] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_C   += p_node_site_mixture_middle[2] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_C   += p_node_site_mixture_middle[3] * *tp_middle;
+                    ++tp_middle;
+                    
+                    sum_middle_G    = p_node_site_mixture_middle[0] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_G   += p_node_site_mixture_middle[1] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_G   += p_node_site_mixture_middle[2] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_G   += p_node_site_mixture_middle[3] * *tp_middle;
+                    ++tp_middle;
+                    
+                    sum_middle_T    = p_node_site_mixture_middle[0] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_T   += p_node_site_mixture_middle[1] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_T   += p_node_site_mixture_middle[2] * *tp_middle;
+                    ++tp_middle;
+                    sum_middle_T   += p_node_site_mixture_middle[3] * *tp_middle;
+                    ++tp_middle;
+                }
+                
+                (*p_branch_site_mixture_middle)  = sum_middle_A;
                 ++p_branch_site_mixture_middle;
-                ++p_node_site_mixture;
+                (*p_branch_site_mixture_middle)  = sum_middle_C;
+                ++p_branch_site_mixture_middle;
+                (*p_branch_site_mixture_middle)  = sum_middle_G;
+                ++p_branch_site_mixture_middle;
+                (*p_branch_site_mixture_middle)  = sum_middle_T;
+                ++p_branch_site_mixture_middle;
+            }
+            else
+            {
+                sum_middle_A = (*p_branch_site_mixture_middle);
+                ++p_branch_site_mixture_middle;
+                sum_middle_C = (*p_branch_site_mixture_middle);
+                ++p_branch_site_mixture_middle;
+                sum_middle_G = (*p_branch_site_mixture_middle);
+                ++p_branch_site_mixture_middle;
+                sum_middle_T = (*p_branch_site_mixture_middle);
+                ++p_branch_site_mixture_middle;
+            }
 
-            } // end-for over all initial characters
+            // store the likelihood for this starting state
+            (*p_node_site_mixture) = sum_left_A * sum_right_A * sum_middle_A * base_freqs[0];
+            ++p_node_site_mixture;
+            (*p_node_site_mixture) = sum_left_C * sum_right_C * sum_middle_C * base_freqs[1];
+            ++p_node_site_mixture;
+            (*p_node_site_mixture) = sum_left_G * sum_right_G * sum_middle_G * base_freqs[2];
+            ++p_node_site_mixture;
+            (*p_node_site_mixture) = sum_left_T * sum_right_T * sum_middle_T * base_freqs[3];
+            ++p_node_site_mixture;
+
 
             // increment the pointers to the next site
             p_node_site_mixture_left   += this->site_offset;
@@ -2320,9 +2305,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     
     // compute the transition probabilities
     size_t pmat_offset = this->active_pmatrices[node_index] * this->active_P_matrix_offset + node_index * this->pmat_node_offset;
-    
-//    double*   p_mixture      = p_node;
-    
+        
     
     bool test_underflow  = RbSettings::userSettings().getUseScaling() == true;
     bool test_this_node  = ( (node_index+1) % RbSettings::userSettings().getScalingDensity() == 0);
@@ -2339,7 +2322,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {
         
-            
             // the transition probability matrix for this mixture category
             const double*       tp_begin    = this->pmatrices[pmat_offset + mixture].theMatrix;
         
@@ -2347,7 +2329,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
             size_t offset = mixture*this->mixture_offset + site*this->site_offset;
 
             double* p_site_mixture      = p_node + offset;
-//            double* p_site_mixture      = p_mixture;
             
             // is this site a gap?
             if ( gap_node[site] ) 
@@ -2440,7 +2421,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                         double max = ( p_site_mixture[1] > p_site_mixture[0] ? p_site_mixture[1] : p_site_mixture[0] );
                         max = ( p_site_mixture[2] > max ? p_site_mixture[2] : max );
                         max = ( p_site_mixture[3] > max ? p_site_mixture[3] : max );
-//                        max = 1.0;
                         if ( scale_threshold == false )
                         {
                             this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = - log(max);
@@ -2466,7 +2446,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                                 
                 
             } // end-if a gap state
-            
             
         } // end-for over all sites/patterns in the sequence
         
