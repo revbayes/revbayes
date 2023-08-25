@@ -1282,8 +1282,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( right, right_index );
                 fillLikelihoodVector( middle, middleIndex );
 
-//                computeRootLikelihoodBranchNode( root_index, left_index, right_index, middleIndex );
-                computeRootLikelihoodNode( root_index, left_index, right_index, middleIndex );
+                computeRootLikelihoodBranchNode( root_index, left_index, right_index, middleIndex );
 
                 // now call scaling
                 scale(root_index, left_index, right_index, middleIndex);
@@ -2593,8 +2592,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
             // now compute the likelihoods of this internal node
             computeInternalNodeLikelihoodBranchNodeWise(node,node_index,left_index,right_index);
-//            computeInternalNodeLikelihoodNodeWise(node,node_index,left_index,right_index);
-
                 
             //-- We only need to scale only if we are not using BEAGLE
 #if !defined ( RB_BEAGLE )
