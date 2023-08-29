@@ -13,7 +13,7 @@
 #include "RbVectorImpl.h"
 #include "TypedDagNode.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace RevBayesCore { class DagNode; }
 

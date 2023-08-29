@@ -1,7 +1,7 @@
 #ifndef FileMonitor_H
 #define FileMonitor_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

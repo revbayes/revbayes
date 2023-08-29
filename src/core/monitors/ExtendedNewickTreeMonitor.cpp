@@ -1,6 +1,6 @@
 #include "ExtendedNewickTreeMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <string>
 

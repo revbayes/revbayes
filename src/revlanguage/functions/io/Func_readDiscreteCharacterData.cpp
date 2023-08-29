@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <sstream>
 #include <string>

@@ -1,7 +1,7 @@
 #ifndef OrderedEventTimeSlideProposal_H
 #define OrderedEventTimeSlideProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

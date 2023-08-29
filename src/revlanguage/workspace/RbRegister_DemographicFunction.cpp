@@ -24,7 +24,7 @@
  */
 
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 /* Files including helper classes */

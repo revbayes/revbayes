@@ -7,7 +7,7 @@
 
 #include "Move_GraphShiftEdge.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <vector>
 

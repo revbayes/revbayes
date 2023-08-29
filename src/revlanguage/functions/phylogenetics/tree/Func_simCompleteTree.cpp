@@ -1,5 +1,5 @@
 #include <math.h>       /* log2 */
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <iosfwd>
 #include <vector>

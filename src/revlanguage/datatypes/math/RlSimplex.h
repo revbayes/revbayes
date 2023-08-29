@@ -2,7 +2,7 @@
 #define RlSimplex_H
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <string>
