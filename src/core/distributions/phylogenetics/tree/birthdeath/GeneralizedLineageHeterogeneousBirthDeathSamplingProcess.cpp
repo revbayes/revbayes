@@ -57,6 +57,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// turn on/off debug
 	tp_ptr->setConditionalProbCompatibilityMode(false);
 	tp_ptr->setNumberOfThreads(n_proc);
+	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
 
 	// add the parameters
 	addParameter(age);
@@ -1401,21 +1402,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 	{
 		// get the newick string
 		std::string var = this->getValue().getNewickRepresentation();
+		size_t num_chars = var.size();
 
 		if ( use_origin )
 		{
 			// strip out trailing zeros
-			std::string pattern = ":";
-			while ( true )
-			{
-				// if we found a colon stop
-				if ( &var.back() == pattern )
-				{
+			char pattern = ':';
+			size_t i;
+			for(i = num_chars - 1; i >= 0; --i) {
+				if (var[i] == pattern) {
 					break;
 				}
-				// otherwise, pop off the last character
-				var.pop_back();
 			}
+			var = var.substr(0, i + 1);
 
 			// now add the tail
 			double origin_age  = age->getValue();
@@ -1425,19 +1424,17 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		}
 		else
 		{
+
 			// strip off the tail
 			// strip out trailing zeros
-			std::string pattern = ":";
-			while ( true )
-			{
-				// if we found a colon stop
-				if ( &var.back() == pattern )
-				{
+			char pattern = ':';
+			size_t i;
+			for(i = num_chars - 1; i >= 0; --i) {
+				if (var[i] == pattern) {
 					break;
 				}
-				// otherwise, pop off the last character
-				var.pop_back();
 			}
+			var = var.substr(0, i + 1);
 
 			// now add the trailing zeros
 			var += "0.00000";
