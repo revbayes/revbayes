@@ -57,6 +57,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// turn on/off debug
 	tp_ptr->setConditionalProbCompatibilityMode(false);
 	tp_ptr->setNumberOfThreads(n_proc);
+	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
 
 	// add the parameters
 	addParameter(age);
