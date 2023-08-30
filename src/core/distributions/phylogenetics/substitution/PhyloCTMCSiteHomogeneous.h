@@ -507,8 +507,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                     {
                         this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[node_index]][node_index][mixture][site] = this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[left]][left][mixture][site] + this->per_node_site_mixture_log_scaling_factors[this->active_branch_likelihood[right]][right][mixture][site];
                     }
-                }
-            }
+                } // end else if we don't test this node
+            } // end-if test for underflow
             
             // increment the pointers to the next site
             p_site_mixture_left  += this->site_offset;
