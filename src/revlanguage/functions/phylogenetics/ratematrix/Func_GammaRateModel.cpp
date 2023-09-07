@@ -171,7 +171,7 @@ const TypeSpec& Func_GammaRateModel::getClassTypeSpec(void)
 std::string Func_GammaRateModel::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnGamma";
+    std::string f_name = "fnGammaASRV";
 
     return f_name;
 }
