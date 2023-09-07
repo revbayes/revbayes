@@ -138,7 +138,7 @@ const TypeSpec& Func_InvModel::getClassTypeSpec(void)
 std::string Func_InvModel::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnInv";
+    std::string f_name = "fnInvASRV";
 
     return f_name;
 }
