@@ -48,7 +48,8 @@ ProbabilityMonitor* ProbabilityMonitor::clone(void) const
  */
 void ProbabilityMonitor::monitorVariables(unsigned long gen)
 {
-    
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
     for (std::vector<DagNode*>::iterator i = nodes.begin(); i != nodes.end(); ++i)
     {
         // add a separator before every new element
