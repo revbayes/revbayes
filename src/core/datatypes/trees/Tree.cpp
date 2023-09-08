@@ -1532,6 +1532,11 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
     o << s;
 }
 
+json Tree::toJSON() const
+{
+    return this->getNewickRepresentation(false);
+}
+
 void Tree::collapseSampledAncestors()
 {
     for(auto& node: nodes)
