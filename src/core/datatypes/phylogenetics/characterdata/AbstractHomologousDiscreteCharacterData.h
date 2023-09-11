@@ -90,6 +90,7 @@ class DiscreteCharacterState;
         virtual double                                          varGcContent(bool excl) const = 0;                                                          //!< Mean GC-content of all sequence
         virtual double                                          varGcContentByCodon(size_t n, bool excl) const = 0;                                         //!< Mean GC-content of all sequences by codon position
         
+        void                                                    removeMissingSites( void );
         void                                                    removeRandomSites( double p );
         virtual void                                            removeExcludedCharacters(void) = 0;                                                         //!< Remove all the excluded characters
         virtual void                                            restoreCharacter(size_t i) = 0;                                                             //!< Restore character
