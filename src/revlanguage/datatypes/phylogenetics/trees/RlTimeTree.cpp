@@ -148,6 +148,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
         this->dag_node->getValue().collapseNegativeBranchLengths(length);
         return NULL;
     }
+    else if (name == "setNodeAge")
+    {
+        found = true;
+        
+        RevBayesCore::Tree& tree = this->dag_node->getValue();
+        
+        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue();
+        double age = static_cast<const RealPos&>( args[1].getVariable()->getRevObject() ).getValue();
+        
+        // now unroot the tree
+        tree.getNode( index ).setAge( age );
+        
+        return NULL;
+    }
     else if (name == "unroot")
     {
         found = true;
@@ -220,6 +234,11 @@ void TimeTree::initMethods( void )
     ArgumentRules* node_age_arg_rules = new ArgumentRules();
     node_age_arg_rules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberFunction<TimeTree, RealPos>( "nodeAge", this, node_age_arg_rules   ) );
+
+    ArgumentRules* set_node_age_arg_rules = new ArgumentRules();
+    set_node_age_arg_rules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    set_node_age_arg_rules->push_back( new ArgumentRule( "age", RealPos::getClassTypeSpec(), "The age of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "setNodeAge", RlUtils::Void, set_node_age_arg_rules   ) );
 
     ArgumentRules* colless_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberFunction<TimeTree, Natural>( "colless", this, colless_arg_rules ) );
