@@ -167,7 +167,6 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     
     if (starting_tree == NULL)
     {
-    {
         delete value;
         
         RbVector<Clade> constr;
