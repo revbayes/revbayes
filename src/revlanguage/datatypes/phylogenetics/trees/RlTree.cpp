@@ -312,6 +312,24 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         }
         return NULL;
     }
+    else if (name == "setNodeAge")
+    {
+        found = true;
+
+        const RevObject& current = args[0].getVariable()->getRevObject();
+        if ( current.isType( Natural::getClassTypeSpec() ) )
+        {
+            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            const RevObject& new_value = args[1].getVariable()->getRevObject();
+            if ( new_value.isType( RealPos::getClassTypeSpec() ) )
+            {
+                double value = static_cast<const RealPos&>( new_value ).getValue();
+                RevBayesCore::Tree &tree = dag_node->getValue();
+                tree.getNode(index).setAge(value);
+            }
+        }
+        return NULL;
+    }
     else if (name == "setTaxonName")
     {
         found = true;
@@ -511,6 +529,11 @@ void Tree::initMethods( void )
     setBranchLengthArgRules->push_back(        new ArgumentRule("index"    , Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     setBranchLengthArgRules->push_back(        new ArgumentRule("value"        , RealPos::getClassTypeSpec(), "The new branch length value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "setBranchLength", RlUtils::Void, setBranchLengthArgRules ) );
+
+    ArgumentRules* setNodeAgeArgRules         = new ArgumentRules();
+    setNodeAgeArgRules->push_back(        new ArgumentRule("index"    , Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    setNodeAgeArgRules->push_back(        new ArgumentRule("value"        , RealPos::getClassTypeSpec(), "The new node age value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "setNodeAge", RlUtils::Void, setNodeAgeArgRules ) );
 
     ArgumentRules* setTaxonNameArgRules         = new ArgumentRules();
     setTaxonNameArgRules->push_back(        new ArgumentRule("current"    , RlString::getClassTypeSpec(), "The old name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
