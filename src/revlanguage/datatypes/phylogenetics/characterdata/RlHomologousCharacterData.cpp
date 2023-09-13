@@ -1,6 +1,6 @@
 #include "RlHomologousCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

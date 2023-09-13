@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>
 #include <iostream>
