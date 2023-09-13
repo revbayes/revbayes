@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RateMatrix_F81.h"

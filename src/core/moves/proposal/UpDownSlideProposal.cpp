@@ -1,6 +1,6 @@
 #include "UpDownSlideProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 
 #include "RandomNumberFactory.h"

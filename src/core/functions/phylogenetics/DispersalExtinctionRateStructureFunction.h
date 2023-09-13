@@ -1,7 +1,7 @@
 #ifndef DispersalExtinctionRateStructureFunction_H
 #define DispersalExtinctionRateStructureFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <map>
 

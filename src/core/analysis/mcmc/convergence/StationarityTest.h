@@ -1,7 +1,7 @@
 #ifndef StationarityTest_H
 #define StationarityTest_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "ConvergenceDiagnosticContinuous.h"

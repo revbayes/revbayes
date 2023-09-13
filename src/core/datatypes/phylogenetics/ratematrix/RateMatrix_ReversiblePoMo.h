@@ -21,7 +21,7 @@
 #ifndef RateMatrix_ReversiblePoMo_H
 #define RateMatrix_ReversiblePoMo_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"

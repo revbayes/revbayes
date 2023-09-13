@@ -1,6 +1,6 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "RlAbstractDiscreteTaxonData.h"

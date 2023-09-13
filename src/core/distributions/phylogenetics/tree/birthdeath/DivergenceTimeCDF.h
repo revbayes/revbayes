@@ -1,7 +1,7 @@
 #ifndef DivergenceTimeCDF_H
 #define DivergenceTimeCDF_H
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
 namespace RevBayesCore {
