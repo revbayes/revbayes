@@ -867,7 +867,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             
             if ( c < 0 || c >= this->num_chars )
             {
-                throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
+                throw RbException() << "Possible bug: Invar sites with ambiguous chars at site " << i << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
             }
             invariant_site_index[i].push_back(c);
 

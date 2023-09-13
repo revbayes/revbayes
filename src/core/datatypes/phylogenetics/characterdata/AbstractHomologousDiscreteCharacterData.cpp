@@ -77,6 +77,48 @@ void AbstractHomologousDiscreteCharacterData::fillMissingSitesMask(std::vector<s
 }
 
 
+void AbstractHomologousDiscreteCharacterData::removeMissingSites( void )
+{
+
+    size_t num_taxa  = getNumberOfTaxa();
+    size_t num_sites = getNumberOfCharacters();
+    
+    for ( size_t site=0; site<num_sites; ++site)
+    {
+        
+        bool all_missing = true;
+        
+        const std::string &taxon_name_first = getTaxonNameWithIndex( 0 );
+        AbstractDiscreteTaxonData& taxon_first = getTaxonData( taxon_name_first );
+
+        DiscreteCharacterState &ref = taxon_first.getCharacter(site);
+
+        for (size_t i = 0; i < num_taxa; ++i)
+        {
+
+            const std::string &taxon_name = getTaxonNameWithIndex( i );
+            AbstractDiscreteTaxonData& taxon = getTaxonData( taxon_name );
+
+            DiscreteCharacterState &c = taxon.getCharacter(site);
+            
+            if ( !( c.isGapState() == true || c.isMissingState() == true || c.isAmbiguous() == true ) )
+            {
+                all_missing = false;
+                break;
+            }
+                        
+        }
+        
+        if ( all_missing == true )
+        {
+            excludeCharacter( site );
+        }
+
+    }
+    
+}
+
+
 void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
 {
 

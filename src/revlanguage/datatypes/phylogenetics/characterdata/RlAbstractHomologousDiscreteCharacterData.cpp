@@ -425,6 +425,14 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Natural(num_taxa) );
     }
+    else if (name == "removeMissingSites")
+    {
+        found = true;
+        
+        this->dag_node->getValue().removeMissingSites();
+        
+        return NULL;
+    }
     else if (name == "removeRandomSites")
     {
         found = true;
@@ -787,6 +795,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
     ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
     ArgumentRules* remove_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* remove_missing_sites_arg_rules           = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2               = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules            = new ArgumentRules();
@@ -856,8 +865,9 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "minPairwiseDifference",                  Natural::getClassTypeSpec(),        minPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "meanGcContent",                          Probability::getClassTypeSpec(),    meanGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "meanGcContentByCodonPosition",           Probability::getClassTypeSpec(),    meanGcContentByCodonPositionArgRules                ) );
-    methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules         ) );
-    methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules         ) );
+    methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules     ) );
+    methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules ) );
+    methods.addFunction( new MemberProcedure( "removeMissingSites",                     RlUtils::Void,                      remove_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "removeRandomSites",                      RlUtils::Void,                      remove_random_sites_arg_rules   ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
