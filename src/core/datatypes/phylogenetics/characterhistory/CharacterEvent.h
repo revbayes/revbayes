@@ -1,7 +1,7 @@
 #ifndef CharacterEvent_H
 #define CharacterEvent_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <iosfwd>
 
 #include "Cloneable.h"

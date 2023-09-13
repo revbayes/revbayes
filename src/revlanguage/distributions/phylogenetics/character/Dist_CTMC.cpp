@@ -1,6 +1,6 @@
 #include "Dist_CTMC.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "CTMCProcess.h"

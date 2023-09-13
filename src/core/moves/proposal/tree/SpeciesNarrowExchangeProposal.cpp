@@ -1,6 +1,6 @@
 #include "SpeciesNarrowExchangeProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iterator>
 

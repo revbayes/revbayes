@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <vector>
 #include <boost/math/special_functions/expint.hpp>

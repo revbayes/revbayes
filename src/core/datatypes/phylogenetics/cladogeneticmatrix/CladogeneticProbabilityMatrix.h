@@ -9,7 +9,7 @@
 #ifndef CladogeneticProbabilityMatrix_h
 #define CladogeneticProbabilityMatrix_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>
