@@ -22,17 +22,16 @@
 namespace RevBayesCore { class BranchHistory; }
 namespace RevBayesCore { class DagNode; }
 
-
 using namespace RevBayesCore;
 
-
-//TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
-BiogeographyCladogeneticBirthDeathFunction::BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode< RbVector< double > >* sr,
-                                                                                        TypedDagNode< RbVector<double> >* wf,
-                                                                                        TypedDagNode< RbVector< RbVector<double> > >* bf,
-                                                                                        unsigned mrs,
-                                                                                        unsigned msss,
-                                                                                        std::string ct ):
+BiogeographyCladogeneticBirthDeathFunction::BiogeographyCladogeneticBirthDeathFunction(
+    const TypedDagNode< RbVector< double > >* sr,
+    TypedDagNode< RbVector<double> >* wf,
+    TypedDagNode< RbVector< RbVector<double> > >* bf,
+    unsigned mrs,
+    unsigned msss,
+    bool nss,
+    std::string ct) :
 TypedFunction<CladogeneticSpeciationRateMatrix>( new CladogeneticSpeciationRateMatrix(  pow(2,mrs)-1) ),
 speciationRates( sr ),
 withinRegionFeatures( wf ),
@@ -45,23 +44,21 @@ maxSubrangeSplitSize(msss),
 numEventTypes( (unsigned)sr->getValue().size() ),
 use_hidden_rate(false),
 use_cutset_mean(true),
+normalize_split_scores(nss),
 connectivityType( ct )
 {
     addParameter( speciationRates );
     addParameter( withinRegionFeatures );
     addParameter( betweenRegionFeatures );
     
-    if (numCharacters > 8)
-    {
+    if (numCharacters > 8) {
         std::cout << "Warning: analyses may be prohibitively slow for >8 regions.\n";
-//        throw RbException(">10 characters currently unsupported");
     }
     
     buildBits();
     buildRanges(ranges, betweenRegionFeatures, true);
     
     numRanges = (unsigned)ranges.size();
-//    numRanges++; // add one for the null range
     
     buildEventMap();
     if (connectivityType == "none")
@@ -71,11 +68,9 @@ connectivityType( ct )
     else if (connectivityType == "cutset")
     {
         buildCutsets();
-//        buildCutsetFactors();
     }
     buildBuddingRegions();
     buildEventMapFactors();
-//    updateEventMapWeights();
     
     update();
     
@@ -660,7 +655,9 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
         std::vector<unsigned> idx = it->first;
         unsigned event_type = it->second;
 
-        eventMapFactors[ idx ] = eventMapFactors[ idx ] / geomean_value[ event_type ];
+        if (normalize_split_scores) {
+            eventMapFactors[ idx ] = eventMapFactors[ idx ] / geomean_value[ event_type ];
+        }
         eventMapWeights[ idx ] = eventMapFactors[ idx ];
     }
         
