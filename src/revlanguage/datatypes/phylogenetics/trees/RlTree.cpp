@@ -222,7 +222,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         
         tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
         
-        return new RevVariable( new Natural( this->dag_node->getValue().getMrca( tmp ).getIndex() ) );
+        return new RevVariable( new Natural( this->dag_node->getValue().getMrca( tmp ).getIndex() + 1 ) );
     }
     else if ( name == "getPSSP" )
     {

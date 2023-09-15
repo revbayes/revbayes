@@ -154,8 +154,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
         
         RevBayesCore::Tree& tree = this->dag_node->getValue();
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue();
+        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         double age = static_cast<const RealPos&>( args[1].getVariable()->getRevObject() ).getValue();
+        bool rec = static_cast<const RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
+        double age_dff = static_cast<const RealPos&>( args[3].getVariable()->getRevObject() ).getValue();
+        
+        tree.getRoot().setUseAges(true, true);
+        if ( rec == true )
+        {
+            recursiveSetAge( tree, index, age, age_dff);
+        }
         
         // now unroot the tree
         tree.getNode( index ).setAge( age );
@@ -238,6 +246,8 @@ void TimeTree::initMethods( void )
     ArgumentRules* set_node_age_arg_rules = new ArgumentRules();
     set_node_age_arg_rules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     set_node_age_arg_rules->push_back( new ArgumentRule( "age", RealPos::getClassTypeSpec(), "The age of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    set_node_age_arg_rules->push_back( new ArgumentRule( "recursive", RlBoolean::getClassTypeSpec(), "Should the children be updated too.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+    set_node_age_arg_rules->push_back( new ArgumentRule( "ageDifference", RealPos::getClassTypeSpec(), "The age difference to children.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos( 0.1 ) ) );
     methods.addFunction( new MemberProcedure( "setNodeAge", RlUtils::Void, set_node_age_arg_rules   ) );
 
     ArgumentRules* colless_arg_rules = new ArgumentRules();
@@ -249,4 +259,24 @@ void TimeTree::initMethods( void )
     ArgumentRules* unroot_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "unroot", BranchLengthTree::getClassTypeSpec(), unroot_arg_rules ) );
 
+}
+
+
+
+void TimeTree::recursiveSetAge(RevBayesCore::Tree& tree, size_t index, double age, double diff)
+{
+    RevBayesCore::TopologyNode& node = tree.getNode( index );
+    if ( node.isInternal() == true )
+    {
+        double child_age = std::max(0.0, age - diff);
+        for (size_t i=0; i<node.getNumberOfChildren(); ++i)
+        {
+            RevBayesCore::TopologyNode& child = node.getChild(i);
+            if ( child.getAge() > child_age )
+            {
+                recursiveSetAge(tree, child.getIndex(), child_age, diff);
+                child.setAge( child_age );
+            }
+        }
+    }
 }
