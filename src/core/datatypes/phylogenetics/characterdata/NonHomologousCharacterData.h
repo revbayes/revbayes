@@ -1,7 +1,7 @@
 #ifndef NonHomologousCharacterData_H
 #define NonHomologousCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

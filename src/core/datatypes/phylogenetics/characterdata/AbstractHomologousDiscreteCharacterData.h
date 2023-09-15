@@ -1,7 +1,7 @@
 #ifndef AbstractHomologousDiscreteCharacterData_H
 #define AbstractHomologousDiscreteCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

@@ -1,6 +1,6 @@
 #include "StochasticBranchStateTimesMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "StochasticNode.h"

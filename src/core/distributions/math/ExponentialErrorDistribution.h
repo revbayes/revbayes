@@ -8,7 +8,7 @@
 #ifndef EXPONENTIALERRORDISTRIBUTION_H
 #define EXPONENTIALERRORDISTRIBUTION_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDistribution.h"
 #include "AverageDistanceMatrix.h"

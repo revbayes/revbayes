@@ -1,7 +1,7 @@
 #ifndef MultiValueEvent_h
 #define MultiValueEvent_h
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <iosfwd>
 

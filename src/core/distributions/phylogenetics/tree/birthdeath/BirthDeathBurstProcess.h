@@ -1,7 +1,7 @@
 #ifndef BirthDeathBurstProcess_H
 #define BirthDeathBurstProcess_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

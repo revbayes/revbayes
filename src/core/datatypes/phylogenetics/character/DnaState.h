@@ -16,7 +16,7 @@
 #ifndef DnaState_H
 #define DnaState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "DiscreteCharacterState.h"

@@ -1,6 +1,6 @@
 #include "SimplexFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDagNode.h"
 
