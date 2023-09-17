@@ -191,7 +191,7 @@ void RegionalFeatures::normalizeWithinQuantitative(void) {
                 if (std::isnan( v[0][a] )) {
                     ; // do nothing
                 } else {
-                    stddev += std::pow(v[0][a] - m, 2);
+                    stddev += std::pow(v[0][a] - mean, 2);
                 }
             }
         }
