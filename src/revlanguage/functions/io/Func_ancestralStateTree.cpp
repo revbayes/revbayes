@@ -127,7 +127,9 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
     RevBayesCore::Tree* tree;
     if (start_states)
     {
-        tree = joint_trace.cladoAncestralStateTree(tree_node->getValue(), summary_stat, site, conditional, false, verbose);
+        size_t num_states = 3;
+        num_states = static_cast<const Natural &>(args[10].getVariable()->getRevObject()).getValue();
+        tree = joint_trace.cladoAncestralStateTree2(tree_node->getValue(), summary_stat, num_states, site, conditional, false, verbose);
     }
     else
     {
