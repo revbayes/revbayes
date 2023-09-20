@@ -215,8 +215,8 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::execu
 template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
-    // only delegate when the toucher was our parameters
-    if ( affecter == const_value && this->dag_node != NULL )
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( affecter == const_value && index == 0 && this->dag_node != NULL )
     {
         this->dag_node->initiateGetAffectedNodes( affected );
     }
@@ -268,8 +268,8 @@ size_t RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::get
 template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
-    // only do this when the toucher was our parameters
-    if ( affecter == const_value && this->dag_node != NULL )
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( affecter == const_value && index == 0 && this->dag_node != NULL )
     {
         this->dag_node->keepAffected();
     }
@@ -310,8 +310,8 @@ template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
 {
     
-    // only do this when the toucher was our parameters
-    if ( restorer == const_value )
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( restorer == const_value && index == 0 )
     {
         const mixtureType &tmp = const_value->getValue();
         Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
@@ -407,8 +407,8 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setVa
 template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
-    // only do this when the toucher was our parameters
-    if ( toucher == const_value )
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( toucher == const_value && index == 0 )
     {
         const mixtureType &tmp = const_value->getValue();
         Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
