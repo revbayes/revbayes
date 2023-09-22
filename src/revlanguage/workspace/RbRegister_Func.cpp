@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 
 /* Files including helper classes */
 #include "RbException.h"
@@ -435,7 +435,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_pomoState4Converter()                             );
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );
-        addFunction( new Func_collapseSA()                                      );
+        addFunction( new Func_collapseSA<Tree>()                                );
+        addFunction( new Func_collapseSA<BranchLengthTree>()                    );
+        addFunction( new Func_collapseSA<TimeTree>()                            );
         addFunction( new Func_featureInformedRates()                            );
         addFunction( new Func_readPoMoCountFile()                               );
         addFunction( new Func_convertCountFileToNaturalNumbers()                );

@@ -1,5 +1,5 @@
-#include <float.h>
-#include <stddef.h>
+#include <cfloat>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -168,7 +168,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     
     if (t != nullptr)
     {
-        value = t;
+        value = t->clone();
     }
     else
     {

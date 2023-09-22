@@ -1,7 +1,7 @@
 #include "Func_readTreeTrace.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <set>
 #include <sstream>
@@ -92,7 +92,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
     long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
     long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
-    bool nexus = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
+    bool                nexus    = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
     long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
     std::vector<RevBayesCore::path> vectorOfFileNames;
@@ -437,6 +437,12 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
             
             // increase our sample counter
             ++n_samples;
+            
+            // we need to check if we skip this sample in case of skipping.
+            if ( (double(n_samples)-offset) <= 0 )
+            {
+                continue;
+            }
             
             // we need to check if we skip this sample in case of thinning.
             if ( (n_samples-1-offset) % thinning > 0 )

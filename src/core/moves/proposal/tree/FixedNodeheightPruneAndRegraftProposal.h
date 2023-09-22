@@ -1,7 +1,7 @@
 #ifndef FixedNodeheightPruneAndRegraftProposal_H
 #define FixedNodeheightPruneAndRegraftProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

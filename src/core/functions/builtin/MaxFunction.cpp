@@ -1,5 +1,5 @@
 #include "MaxFunction.h"
-#include <stddef.h>
+#include <cstddef>
 #include "RbConstants.h"
 #include "Cloneable.h"
 #include "DagNode.h"

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 
 #include "RevObject.h"
 #include "SyntaxConstant.h"

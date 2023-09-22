@@ -9,7 +9,7 @@
 #ifndef StateCountRateModifierFunction_hpp
 #define StateCountRateModifierFunction_hpp
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "CharacterHistoryRateModifier.h"
 #include "TypedFunction.h"

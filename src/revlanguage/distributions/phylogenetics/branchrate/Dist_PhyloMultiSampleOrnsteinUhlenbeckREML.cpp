@@ -1,6 +1,6 @@
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloMultiSampleOrnsteinUhlenbeckProcessREML.h"

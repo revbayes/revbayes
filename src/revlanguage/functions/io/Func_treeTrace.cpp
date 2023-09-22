@@ -11,7 +11,7 @@
 #include "Func_treeTrace.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "ModelVector.h"
