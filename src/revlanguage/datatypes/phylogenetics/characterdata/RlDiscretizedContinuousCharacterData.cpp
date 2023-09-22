@@ -1,6 +1,6 @@
 #include "RlDiscretizedContinuousCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ModelVector.h"
 #include "RlDiscretizedContinuousState.h"

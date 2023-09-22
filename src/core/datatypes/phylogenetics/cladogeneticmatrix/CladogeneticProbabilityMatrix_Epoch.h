@@ -9,7 +9,7 @@
 #ifndef CladogeneticProbabilityMatrix_Epoch_Epoch_h
 #define CladogeneticProbabilityMatrix_Epoch_Epoch_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <vector>

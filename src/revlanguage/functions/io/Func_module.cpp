@@ -17,7 +17,7 @@
  * $Id: Func_module.cpp 1485 2012-05-04 16:03:37Z hoehna $
  */
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>

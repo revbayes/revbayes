@@ -1,7 +1,7 @@
 #ifndef VectorSlideRecenterProposal_H
 #define VectorSlideRecenterProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

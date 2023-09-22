@@ -1,7 +1,7 @@
 #ifndef DagNode_H
 #define DagNode_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <set>
 #include <vector>

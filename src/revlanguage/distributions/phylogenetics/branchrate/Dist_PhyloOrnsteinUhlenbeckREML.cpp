@@ -1,6 +1,6 @@
 #include "Dist_PhyloOrnsteinUhlenbeckREML.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloOrnsteinUhlenbeckREML.h"

@@ -7,7 +7,7 @@
 #ifndef CladogeneticSpeciationRateMatrix_h
 #define CladogeneticSpeciationRateMatrix_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>
