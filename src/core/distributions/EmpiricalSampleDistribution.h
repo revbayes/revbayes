@@ -45,13 +45,15 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
-        
+        virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                                          //!< Set the number of processes for this distribution.
+
         
     private:
         // helper methods
         RbVector<valueType>*                                simulate();
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
+        void                                                setInternalDistributions(void);
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // private members
@@ -65,6 +67,7 @@ namespace RevBayesCore {
         size_t                                              sample_block_size;
 
         std::vector<double>                                 ln_probs;
+        RbVector<valueType>                                 internal_value_copy;
         
 #ifdef RB_MPI
         std::vector<size_t>                                 pid_per_sample;
@@ -119,7 +122,8 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistributio
     sample_block_start( d.sample_block_start ),
     sample_block_end( d.sample_block_end ),
     sample_block_size( d.sample_block_size ),
-    ln_probs( d.ln_probs )
+    ln_probs( d.ln_probs ),
+    internal_value_copy( d.internal_value_copy )
 {
     
 #ifdef RB_MPI
@@ -180,6 +184,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
         sample_block_size   = d.sample_block_size;
         
         ln_probs            = d.ln_probs;
+        internal_value_copy = d.internal_value_copy;
 
         
 #ifdef RB_MPI
@@ -443,16 +448,22 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::swapParameterInternal
 
 
 template <class valueType>
-void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<valueType> *v, bool force)
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::setActivePIDSpecialized(size_t a, size_t n)
 {
+
+    setInternalDistributions();
     
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::setInternalDistributions( void )
+{
     // free the old distributions
-    for (size_t i = 0; i < num_samples; ++i)
+    for (size_t i = 0; i < base_distribution_instances.size(); ++i)
     {
         delete base_distribution_instances[i];
     }
-
-    num_samples = v->size();
     
     // compute which block of the data this process needs to compute
     sample_block_start = 0;
@@ -468,7 +479,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     {
         TypedDistribution<valueType> *base_distribution_clone = base_distribution->clone();
         base_distribution_instances[i] = base_distribution_clone;
-        base_distribution_clone->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( (*v)[i]) );
+        base_distribution_clone->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( internal_value_copy[i]) );
     }
     
 #ifdef RB_MPI
@@ -485,8 +496,19 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     }
 #endif
     
-    ln_probs = std::vector<double>(num_samples, 0.0);
+}
 
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<valueType> *v, bool force)
+{
+    
+    num_samples = v->size();
+    internal_value_copy = *v;
+    
+    ln_probs = std::vector<double>(num_samples, 0.0);
+    
+    setInternalDistributions();
     
     // delegate class
     TypedDistribution< RbVector<valueType> >::setValue( v, force );
