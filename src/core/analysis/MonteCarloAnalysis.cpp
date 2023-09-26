@@ -442,7 +442,7 @@ void MonteCarloAnalysis::resetReplicates( const MPI_Comm &analysis_comm )
 void MonteCarloAnalysis::resetReplicates( void )
 #endif
 {
-    
+
     // free the runs
     MonteCarloSampler *m = NULL;
     for (size_t i = 0; i < replicates; ++i)
@@ -479,7 +479,7 @@ void MonteCarloAnalysis::resetReplicates( void )
 
         replicate_indices_start[i] = this_replicate_start;
         replicate_indices_end[i]   = size_t( fmin( fmax(this_replicate_start+1,this_replicate_end), replicates ) );
-
+        
     }
     
     // create replicate Monte Carlo samplers
@@ -509,14 +509,19 @@ void MonteCarloAnalysis::resetReplicates( void )
         if ( pid >= replicate_pid_start && pid <= replicate_pid_end )
         {
             no_sampler_set = false;
-            
+
             if ( i == 0 )
             {
                 runs[i] = m;
+                runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );
             }
             else
             {
+                m->setActivePID( pid, 1 );
+
                 runs[i] = m->clone();
+                runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );
+
             }
             
             runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );

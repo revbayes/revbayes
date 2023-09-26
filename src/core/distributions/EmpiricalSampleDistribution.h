@@ -155,6 +155,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::~EmpiricalSampleDistributi
     for (size_t i = 0; i < num_samples; ++i)
     {
         delete base_distribution_instances[i];
+        base_distribution_instances[i] = NULL;
     }
     
 }
@@ -173,6 +174,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
         for (size_t i = 0; i < num_samples; ++i)
         {
             delete base_distribution_instances[i];
+            base_distribution_instances[i] = NULL;
         }
         base_distribution_instances.clear();
         
@@ -184,7 +186,11 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
         sample_block_size   = d.sample_block_size;
         
         ln_probs            = d.ln_probs;
-        internal_value_copy = d.internal_value_copy;
+        internal_value_copy = RbVector<valueType>(d.internal_value_copy.size());
+        for (size_t i = 0; i < d.internal_value_copy.size(); ++i)
+        {
+            internal_value_copy[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( d.internal_value_copy[i] );
+        }
 
         
 #ifdef RB_MPI
@@ -243,10 +249,10 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
 #ifdef RB_MPI
     for (size_t i = 0; i < num_samples; ++i)
     {
-        
+
         if ( this->pid == pid_per_sample[i] )
         {
-            
+
             // send the likelihood from the helpers to the master
             if ( this->process_active == false )
             {
@@ -254,7 +260,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
                 // send from the workers the log-likelihood to the master
                 MPI_Send(&ln_probs[i], 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
             }
-            
+
         }
         // receive the likelihoods from the helpers
         else if ( this->process_active == true )
@@ -263,7 +269,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
             MPI_Recv(&ln_probs[i], 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
 
         }
-        
+
     }
 #endif
     
@@ -303,19 +309,19 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         ln_prob = std::log( prob ) + max - std::log( num_samples );
         
 #ifdef RB_MPI
-        
+
         for (size_t i=this->active_PID+1; i<this->active_PID+this->num_processes; ++i)
         {
             MPI_Send(&ln_prob, 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
         }
-        
+
     }
     else
     {
-        
+
         MPI_Status status;
         MPI_Recv(&ln_prob, 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
-        
+
     }
 #endif
 
@@ -450,7 +456,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::swapParameterInternal
 template <class valueType>
 void RevBayesCore::EmpiricalSampleDistribution<valueType>::setActivePIDSpecialized(size_t a, size_t n)
 {
-
+    
     setInternalDistributions();
     
 }
@@ -463,6 +469,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setInternalDistributi
     for (size_t i = 0; i < base_distribution_instances.size(); ++i)
     {
         delete base_distribution_instances[i];
+        base_distribution_instances[i] = NULL;
     }
     
     // compute which block of the data this process needs to compute
@@ -473,7 +480,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setInternalDistributi
     sample_block_end   = size_t(ceil( (double(this->pid+1 - this->active_PID)   / this->num_processes ) * num_samples) );
 #endif
     sample_block_size  = sample_block_end - sample_block_start;
-    
+        
     base_distribution_instances = std::vector< TypedDistribution<valueType>* >( num_samples, NULL );
     for (size_t i = sample_block_start; i < sample_block_end; ++i)
     {
@@ -482,10 +489,12 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setInternalDistributi
         base_distribution_clone->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( internal_value_copy[i]) );
     }
     
+
+    
 #ifdef RB_MPI
     // now we need to populate which process is responsible for the given sample
     pid_per_sample = std::vector<size_t>( num_samples, 0 );
-    for (size_t i = 0; i < (this->num_processes-this->active_PID); ++i)
+    for (size_t i = this->active_PID; i < (this->active_PID+this->num_processes); ++i)
     {
         size_t this_pid_sample_block_start = size_t(ceil( (double(i   - this->active_PID)   / this->num_processes ) * num_samples) );
         size_t this_pid_sample_block_end   = size_t(ceil( (double(i+1 - this->active_PID)   / this->num_processes ) * num_samples) );
