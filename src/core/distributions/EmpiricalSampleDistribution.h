@@ -114,7 +114,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistributio
 }
 
 template <class valueType>
-RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution( const EmpiricalSampleDistribution &d ) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>( d.getValue() ) ),
+RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution( const EmpiricalSampleDistribution &d ) : TypedDistribution< RbVector<valueType> >( d ),
     base_distribution( d.base_distribution->clone() ),
     base_distribution_instances(),
     sample_prior_density( d.sample_prior_density ),
