@@ -39,7 +39,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	use_origin(use_origin_),
 	zero_indexed(zero_indexed_),
 	root_frequency(root_frequency_),
-	dirty_nodes( std::vector<bool>(5, true) )
+	dirty_nodes( std::vector<bool>(2 * taxa.size() - 1, true) )
 {
 	try {
 		// create the pointer
@@ -297,7 +297,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::recursivelyFlagNo
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
     if ( dirty_nodes[index] == false )
     {
-        // the root doesn't have an ancestor
+
+    	// the root doesn't have an ancestor
         if ( n.isRoot() == false )
         {
             recursivelyFlagNodeDirty( n.getParent() );
