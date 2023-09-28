@@ -1403,7 +1403,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 	if ( force or tree_dirty )
 	{
 
-
 		// get the newick string
 		std::string var = this->getValue().getNewickRepresentation();
 		size_t num_chars = var.size();

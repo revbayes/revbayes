@@ -264,5 +264,8 @@ mymcmc = mcmc(mymodel, monitors, moves)
 # Run the MCMC #
 mymcmc.run(generations=30)
 
+# Load the tree trace
+treetrace = readTreeTrace("output/BDSTP.trees", treetype="clock")
+
 # Quit RevBayes #
 q()
