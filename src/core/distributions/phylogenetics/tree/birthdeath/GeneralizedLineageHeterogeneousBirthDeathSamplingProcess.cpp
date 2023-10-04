@@ -285,7 +285,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEve
     recursivelyFlagNodeDirty( n );
 
 	// update the newick string to tensorphylo
-	updateTree(); // TODO: move me somewhere later
+//	updateTree(); // TODO: move me somewhere later
 
 }
 
@@ -1500,7 +1500,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		var += ";";
 
 		// set the tree
+//		dirty_nodes = std::vector<bool>(dirty_nodes.size(), true);
 		tp_ptr->setTree(var, dirty_nodes);
+//		tp_ptr->setTree(var);
+
+		// mark tree as clean
+		tree_dirty = false;
 
 	}
 }
