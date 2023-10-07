@@ -8,7 +8,7 @@
 
 #include "VectorFlattenFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDagNode.h"
 #include "Cloner.h"

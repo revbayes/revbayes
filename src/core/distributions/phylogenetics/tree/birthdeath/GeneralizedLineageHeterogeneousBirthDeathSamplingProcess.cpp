@@ -308,6 +308,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 		throw RbException("Tried to set lambda twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	lambda_var   = param;
 	lambda_times = times;
@@ -319,6 +322,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 	// flag for update
 	lambda_dirty = true;
 	probability_dirty = true;
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector<double> >* param)
@@ -346,6 +350,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 	{
 		throw RbException("Tried to set mu twice.");
 	}
+
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
 
 	// set the value
 	mu_var   = param;
@@ -386,6 +393,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 		throw RbException("Tried to set phi twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	phi_var   = param;
 	phi_times = times;
@@ -424,6 +434,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 	{
 		throw RbException("Tried to set delta twice.");
 	}
+
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
 
 	// set the value
 	delta_var   = param;
@@ -582,6 +595,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 		throw RbException("Tried to set eta twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	eta_var   = param;
 	eta_times = times;
@@ -621,6 +637,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 		throw RbException("Tried to set omega twice.");
 	}
 
+	// check for ascending times
+	checkTimesAreAscending(times->getValue());
+
 	// set the value
 	omega_var   = param;
 	omega_times = times;
@@ -654,7 +673,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
 {
-	// check that tree is binary
+
+    // make sure the input tree is binary
+    v->makeInternalNodesBifurcating(true, true);
+
+	// check that tree is binary (this seems redundant? MRM 7/26/2023)
     if (v->isBinary() == false)
     {
         throw RbException("The process is only implemented for binary trees.");
@@ -667,9 +690,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     {
     	param_taxa.push_back( taxa[i].getName() );
     }
+
+//    // get the taxa names from the input tree
+//    std::vector<Taxon> input_taxa_obj = v->getTaxa();
+//    std::vector<std::string> input_taxa;
+//    for (size_t i = 0; i < input_taxa_obj.size(); ++i)
+//	{
+//    	input_taxa.push_back( input_taxa_obj[i].getSpeciesName() );
+//    }
+//
+//    // get the taxa names from the current tree
+//    std::vector<Taxon> current_taxa_obj = value->getTaxa();
+//    std::vector<std::string> current_taxa;
+//    for (size_t i = 0; i < current_taxa_obj.size(); ++i)
+//	{
+//    	current_taxa.push_back( current_taxa_obj[i].getSpeciesName() );
+//    }
+
     std::vector<std::string> input_taxa   = v->getSpeciesNames();
     std::vector<std::string> current_taxa = value->getSpeciesNames();
-//    std::vector<std::string> current_taxa = v->getSpeciesNames();
 
     // check that the number of taxa match
     if ( input_taxa.size() != num_taxa )
@@ -739,7 +778,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 		// create the string
         std::string simmap_string = "{";
         std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
-        //first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
+        first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
         for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
         {
             simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
@@ -1293,21 +1332,56 @@ std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeter
 	return std_object;
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::checkTimesAreAscending(const RbVector<double> &obj) {
+
+	bool isValid = true;
+	for(size_t i = 0; i < obj.size(); ++i) {
+		if ( std::fabs(obj[i] - 0.0) < std::numeric_limits<double>::epsilon() ) {
+			isValid = false;
+			break;
+		}
+		if ( i != obj.size() - 1 ) {
+			if (obj[i] > obj[i + 1]) {
+				isValid = false;
+				break;
+			}
+		}
+	}
+
+	if (!isValid) {
+		throw RbException("Problem with rate change times. Please make sure that times are in ascending order, and that there is no time that is zero. The first element of the time vector should be the start age of the youngest epoch, etc.");
+	}
+
+}
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool force)
 {
 	if ( force or tree_dirty )
 	{
+
+		// MRM/BP 7/26/23: Bruno and I made a change here to collapse zero-length branches
+		// into sampled ancestors before getting the newick string. This solves a problem
+		// but may create a new one: might be expensive to traverse entire tree and collapse
+		// ancestors every time we change the tree?
+		// possible alternative: use a different algorithm to make the newick string that
+		// correctly creates sampled ancestor nodes even when the branch has zero length
+
+		// collapse sampled ancestors
+		Tree* tmp_tree = this->getValue().clone();
+		tmp_tree->collapseSampledAncestors();
+
 		// get the newick string
-		std::string var = this->getValue().getNewickRepresentation();
+		std::string var = tmp_tree->getNewickRepresentation();
+//		std::string var = this->getValue().getNewickRepresentation();
 
 		if ( use_origin )
 		{
 			// strip out trailing zeros
-			std::string pattern = ":";
+			char pattern = ':';
 			while ( true )
 			{
 				// if we found a colon stop
-				if ( &var.back() == pattern )
+				if ( var.back() == pattern )
 				{
 					break;
 				}
@@ -1325,11 +1399,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		{
 			// strip off the tail
 			// strip out trailing zeros
-			std::string pattern = ":";
+            char pattern = ':';
 			while ( true )
 			{
 				// if we found a colon stop
-				if ( &var.back() == pattern )
+				if ( var.back() == pattern )
 				{
 					break;
 				}
@@ -1433,6 +1507,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateLambda(bool
 		}
 		else if ( lambda_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(lambda_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( lambda_var->getValue() );
 			std::vector<double>                times  = RbToStd( lambda_times->getValue() );
@@ -1468,6 +1546,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateMu(bool for
 		}
 		else if ( mu_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(mu_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( mu_var->getValue() );
 			std::vector<double>                times  = RbToStd( mu_times->getValue() );
@@ -1502,6 +1584,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updatePhi(bool fo
 		}
 		else if ( phi_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(phi_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( phi_var->getValue() );
 			std::vector<double>                times  = RbToStd( phi_times->getValue() );
@@ -1535,6 +1621,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateDelta(bool 
 		}
 		else if ( delta_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(delta_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector<double> > params = RbToStd( delta_var->getValue() );
 			std::vector<double>                times  = RbToStd( delta_times->getValue() );
@@ -1705,6 +1795,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateEta(bool fo
 		}
 		else if ( eta_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(eta_times->getValue());
+
 			// create empty vectors
 			std::vector< std::vector< std::vector<double> > > params = RbToStd( eta_var->getValue() );
 			std::vector<double>                               times  = RbToStd( eta_times->getValue() );
@@ -1737,6 +1831,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateOmega(bool 
 		}
 		else if ( omega_var != NULL )
 		{
+
+			// check for ascending times
+			checkTimesAreAscending(omega_times->getValue());
+
 			// create empty vectors
 			std::vector< std::map< std::vector<unsigned>, double > > params = RbToStd( omega_var->getValue() );
 			std::vector<double>                                      times  = RbToStd( omega_times->getValue() );

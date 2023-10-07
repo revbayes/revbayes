@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>
 #include <ostream>
@@ -521,11 +521,30 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
         constructTimeTreeRecursively(*new_child, child, nodes, ages, a);
     }
 
+    // Mark knuckles as sampled ancestors
     if ( tn.getNumberOfChildren() == 1 )
     {
         tn.setSampledAncestor( true );
     }
+    // Mark nodes on a 0-length branch as sampled ancestors, and also their parents.
+    else if ( tn.getNumberOfChildren() == 2)
+    {
+        // The time-tree doesn't have any branch lengths or ages yet, so we have to look
+        // at the branch-length tree that we are copying from.
 
+        auto& bl_c1 = n.getChild(0);
+        auto& bl_c2 = n.getChild(1);
+
+        if (bl_c1.isTip() and bl_c1.getBranchLength() == 0 and bl_c2.getBranchLength() > 0)
+        {
+            tn.getChild(0).setSampledAncestor( true );
+        }
+
+        if (bl_c2.isTip() and bl_c2.getBranchLength() == 0 and bl_c1.getBranchLength() > 0)
+        {
+            tn.getChild(1).setSampledAncestor( true );
+        }
+    }
 }
 
 /**

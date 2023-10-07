@@ -1,6 +1,6 @@
 #include "PathSampler.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Cloneable.h"

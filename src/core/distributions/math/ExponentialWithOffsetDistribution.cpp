@@ -1,6 +1,6 @@
 #include "ExponentialWithOffsetDistribution.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"

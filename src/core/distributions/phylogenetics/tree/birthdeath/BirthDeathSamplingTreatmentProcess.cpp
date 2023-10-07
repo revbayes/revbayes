@@ -1,5 +1,5 @@
-#include <float.h>
-#include <stddef.h>
+#include <cfloat>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>

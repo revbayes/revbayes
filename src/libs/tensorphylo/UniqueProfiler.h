@@ -8,7 +8,7 @@
 #define UNIQUEPROFILER_H_
 
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/time.h>
 #include <unistd.h>
 #include <fstream>

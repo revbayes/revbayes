@@ -1,7 +1,7 @@
 #ifndef ContinuousTaxonData_H
 #define ContinuousTaxonData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 #include <set>

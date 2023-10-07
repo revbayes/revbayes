@@ -16,7 +16,7 @@
 #ifndef CodonState_H
 #define CodonState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

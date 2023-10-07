@@ -69,15 +69,25 @@ namespace RevBayesCore {
         bool                                        equals(const TopologyNode& node) const;                                             //!< Test whether this is the same node
 
         // public methods
+        void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
+
         void                                        addBranchParameter(const std::string &n, double p);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
-        void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
+
         void                                        addNodeParameter(const std::string &n, double p);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
+        void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
+
+        bool                                        hasNodeComment(const std::string& comment) const;                                   //!< Checks for a comment -- maybe not of the form key=value.
+        bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
+        std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
+        std::optional<std::string>                  eraseNodeParameter(const std::string& name);                                        //!< Erases a node parameter if present, returning the value.
+
+
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
         void                                        clearNodeParameters(void);
@@ -137,9 +147,9 @@ namespace RevBayesCore {
         bool                                        isFossil(void) const;                                                               //!< Is node a fossil?
         bool                                        isInternal(void) const;                                                             //!< Is node internal?
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
-        bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
+        bool                                        isSampledAncestor(bool propagate=false) const;                                      //!< Is node (or a child node) a sampled ancestor?
+        bool                                        isTipSampledAncestor() const;                                                       //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
         void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
@@ -179,7 +189,8 @@ namespace RevBayesCore {
         bool serial_speciation = false;
 
         // helper methods
-        virtual std::string                         buildNewickString(bool simmap, bool round);                                                     //!< compute the newick string for a tree rooting at this node
+        std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
 
         // protected members
         bool                                        use_ages = true;

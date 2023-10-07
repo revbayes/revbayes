@@ -1,6 +1,6 @@
 #include "Dist_phyloDistanceGamma.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloDistanceGamma.h"

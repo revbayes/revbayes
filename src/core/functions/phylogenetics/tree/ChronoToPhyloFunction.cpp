@@ -1,6 +1,6 @@
 #include "ChronoToPhyloFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbBoolean.h"
 #include "RbVector.h"
