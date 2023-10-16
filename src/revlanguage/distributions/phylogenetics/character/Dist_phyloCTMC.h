@@ -58,6 +58,8 @@ class TypeSpec;
         RevPtr<const RevVariable>                       tree;
         RevPtr<const RevVariable>                       q;
         RevPtr<const RevVariable>                       rate;
+        RevPtr<const RevVariable>                       branch_site_rates;
+        RevPtr<const RevVariable>                       branch_site_rates_mixture;
         RevPtr<const RevVariable>                       site_rates;
         RevPtr<const RevVariable>                       site_rates_probs;
         RevPtr<const RevVariable>                       site_matrices;

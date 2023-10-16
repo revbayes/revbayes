@@ -664,6 +664,30 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             dist->setClockRate( clockRate );
         }
         dist->setUseSiteMatrices(use_site_matrices, sp);
+        
+        if ( branch_site_rates->getRevObject() != RevLanguage::RevNullObject::getInstance() )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* bsr = static_cast<const ModelVector< ModelVector<RealPos> > &>( branch_site_rates->getRevObject() ).getDagNode();
+
+            // sanity check
+            if ( n != bsr->getValue().size() )
+            {
+                throw RbException( "The number of sites needs to match the outer vector size of the branch site rates" );
+            }
+            if ( (nNodes-1) != bsr->getValue()[0].size() )
+            {
+                throw RbException( "The number of branches needs to match the inner vector size of the branch site rates" );
+            }
+
+            dist->setBranchSiteRates( bsr );
+        }
+        
+        if ( branch_site_rates_mixture->getRevObject() != RevLanguage::RevNullObject::getInstance() )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* bsrm = static_cast<const ModelVector<RealPos> &>( branch_site_rates_mixture->getRevObject() ).getDagNode();
+
+            dist->setBranchSiteRatesMixture( bsrm );
+        }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
@@ -1031,6 +1055,12 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         branchRateTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "branchRates", branchRateTypes, "The global or branch-specific rate multipliers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
+
+        dist_member_rules.push_back( new ArgumentRule( "branchSiteRates", ModelVector< ModelVector<RealPos> >::getClassTypeSpec(), "The elements the branch site rates will be integrates/summed over.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "branchSiteRatesMixture", ModelVector<RealPos>::getClassTypeSpec(), "The elements the branch site rates will be integrates/summed over.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
+
         ModelVector<RealPos> *defaultSiteRates = new ModelVector<RealPos>();
         //dist_member_rules.push_back( new ArgumentRule( "siteMatrices", RlBoolean::getClassTypeSpec(), "Treat Q as vector of site mixture categories instead of branch-specific matrices?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         std::vector<TypeSpec> matrix_probs_types;
@@ -1113,6 +1143,24 @@ void Dist_phyloCTMC::printValue(std::ostream& o) const
     {
         o << "?";
     }
+    o << ", branchSiteRates=";
+    if ( branch_site_rates != NULL )
+    {
+        o << branch_site_rates->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", branchSiteRatesMixture=";
+    if ( branch_site_rates_mixture != NULL )
+    {
+        o << branch_site_rates_mixture->getName();
+    }
+    else
+    {
+        o << "?";
+    }
     o << ", site_rates=";
     if ( site_rates != NULL )
     {
@@ -1182,6 +1230,14 @@ void Dist_phyloCTMC::setConstParameter(const std::string& name, const RevPtr<con
     else if ( name == "branchRates" )
     {
         rate = var;
+    }
+    else if ( name == "branchSiteRates" )
+    {
+        branch_site_rates = var;
+    }
+    else if ( name == "branchSiteRatesMixture" )
+    {
+        branch_site_rates_mixture = var;
     }
     else if ( name == "siteRates" )
     {
