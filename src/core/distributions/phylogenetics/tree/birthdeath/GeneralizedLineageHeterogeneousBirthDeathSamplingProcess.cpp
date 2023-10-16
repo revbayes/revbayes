@@ -1117,9 +1117,12 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
     {
     	// get the age of the tip
     	double a = taxa[i + 1].getAge();
+		double min_age_tax = taxa[i + 1].getAgeRange().getMin();
+		double max_age_tax = taxa[i + 1].getAgeRange().getMax();
 
     	// simulate the age of a node
-    	double new_age = a + rng->uniform01() * (max_age - a);
+    	double new_age = min_age_tax + rng->uniform01() * (max_age_tax - min_age_tax);
+		//a + rng->uniform01() * (max_age - a);
 
     	//add the age to the vector of ages
     	ages.push_back(new_age);
