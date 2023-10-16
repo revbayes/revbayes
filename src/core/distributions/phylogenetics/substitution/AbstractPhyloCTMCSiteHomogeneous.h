@@ -398,6 +398,8 @@ sampled_site_matrix_component( 0 )
     this->addParameter( homogeneous_rate_matrix );
     this->addParameter( heterogeneous_rate_matrices );
     this->addParameter( root_frequencies );
+    this->addParameter( branch_site_rates );
+    this->addParameter( branch_site_rates_mixture );
     this->addParameter( site_rates );
     this->addParameter( site_matrix_probs );
     this->addParameter( site_rates_probs );
@@ -4453,7 +4455,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index)
             {
                 // get the heterotachy rate multiplier
-                double h = branch_site_rates_mixture->getValue()[heterotachy_index];
+                double h = 1.0;
+                if ( branch_site_rates_mixture != NULL )
+                {
+                    h = branch_site_rates_mixture->getValue()[heterotachy_index];
+                }
                 rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, this->pmatrices[pmat_offset + j * num_heterotachy_categories + heterotachy_index] );
             }
         }
