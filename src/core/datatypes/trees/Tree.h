@@ -90,7 +90,7 @@ namespace RevBayesCore {
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>*                              getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
         std::vector<long>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
-        size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree
+        size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of non-root internal nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfExtantTips(void) const;                                                                  //!< Get the number of extant tip nodes in the Tree
         size_t                                              getNumberOfExtinctTips(void) const;                                                                 //!< Get the number of extinct tip nodes in the Tree
