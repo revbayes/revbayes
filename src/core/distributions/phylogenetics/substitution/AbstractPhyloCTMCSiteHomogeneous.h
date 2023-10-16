@@ -3002,6 +3002,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
     // get the sequence of this node
     size_t node_index = node.getIndex();
     const DiscreteTaxonData< charType > &parent = taxa[ node_index ];
+    
+    size_t num_heterotachy_categories = 1;
+    if ( this->branch_site_rates_mixture != NULL )
+    {
+        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
+    }
 
     // simulate the sequence for each child
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -3027,7 +3033,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
                 // get the ancestral character for this site
                 unsigned long parentState = parent.getCharacter( i ).getStateIndex();
 
-                double *freqs = transition_prob_matrices[ perSiteMixtures[i] ][ parentState ];
+                
+                double u_heterotachy = rng->uniform01();
+                size_t heterotachy_category_index = 0;
+                double heterotachy_cat_probs = 1.0 / double(num_heterotachy_categories);
+                while ( u_heterotachy < heterotachy_cat_probs )
+                {
+                    u_heterotachy -= heterotachy_cat_probs;
+                    ++heterotachy_category_index;
+                }
+                
+                double *freqs = transition_prob_matrices[ perSiteMixtures[i]*num_heterotachy_categories+heterotachy_category_index ][ parentState ];
 
                 // create the character
                 charType c = charType( num_chars );
