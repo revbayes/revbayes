@@ -310,13 +310,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                         sum += p_site_mixture_left[c2] * p_site_mixture_right[c2] * tp_a[c2];
                     } // end-for over all distination character
                     
+                    assert(isnan(sum) || (0 <= sum and sum <= 1.00000000001));
+                    
                     total_sum += sum;
                 }
                 
                 // store the likelihood for this starting state
                 p_site_mixture[c1] = total_sum / num_heterotachy_categories;
-
-                assert(isnan(total_sum) || (0 <= total_sum and total_sum <= 1.00000000001));
 
 //                 increment the pointers to the next starting state
 //                tp_a+=this->num_chars;
@@ -433,13 +433,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
                     } // end-for over all distination character
                     
+                    assert(isnan(sum) || (0 <= sum and sum <= 1.00000000001));
+                    
                     total_sum += sum;
                 }
                 
                 // store the likelihood for this starting state
                 p_site_mixture[c1] = total_sum / num_heterotachy_categories;
-
-                assert(isnan(total_sum) || (0 <= total_sum and total_sum <= 1.00000000001));
 
                 // increment the pointers to the next starting state
 //                tp_a+=this->num_chars;
