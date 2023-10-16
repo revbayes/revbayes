@@ -2671,7 +2671,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 
     perNodeSiteLogScalingFactors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(pattern_block_size, 0.0) ) );
     
-    activePmatrixOffset         =  num_nodes * num_site_mixtures;
+    
+    size_t num_heterotachy_categories = 1;
+    if ( this->branch_site_rates_mixture != NULL )
+    {
+        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
+    }
+    
+    activePmatrixOffset         =  num_nodes * num_site_mixtures * num_heterotachy_categories;
     pmatNodeOffset              =  num_site_mixtures;
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
 
@@ -4346,7 +4353,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 {
     const TopologyNode* node = tau->getValue().getNodes()[node_idx];
     
-    if (node->isRoot()) throw RbException("dnPhyloCTMC called updateTransitionProbabilityMatrix for the root node\n");
+    if ( node->isRoot() == true )
+    {
+        throw RbException("dnPhyloCTMC called updateTransitionProbabilityMatrix for the root node\n");
+    }
     
     // second, get the clock rate for the branch
     double rate = 1.0;
@@ -4436,7 +4446,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             {
                 // get the heterotachy rate multiplier
                 double h = branch_site_rates_mixture->getValue()[heterotachy_index];
-                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->pmatrices[pmat_offset + j * num_heterotachy_categories + heterotachy_index] );
+                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, this->pmatrices[pmat_offset + j * num_heterotachy_categories + heterotachy_index] );
             }
         }
     }

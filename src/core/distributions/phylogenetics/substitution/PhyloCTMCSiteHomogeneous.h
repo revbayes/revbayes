@@ -217,6 +217,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
+    TransitionProbabilityMatrix heterotachy_p_matrix = TransitionProbabilityMatrix(this->num_chars);
 
     // compute the transition probability matrix
 //    this->updateTransitionProbabilities( node_index );
@@ -263,7 +264,41 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
                 {
                     
-                    const double* tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                    // @Sebastian: Need to clean this up and move it somewhere outside
+                    const double* tp_begin = NULL;
+                    if ( this->branch_site_rates != NULL )
+                    {
+                        const RateGenerator *rm = &this->homogeneous_rate_matrix->getValue();
+                        double r = 1.0;
+                        if ( this->rate_variation_across_sites == true )
+                        {
+                            r = this->site_rates->getValue()[mixture];
+                        }
+                        // second, get the clock rate for the branch
+                        double rate = this->homogeneous_clock_rate->getValue();
+                        
+                        // we rescale the rate by the inverse of the proportion of invariant sites
+//                                rate /= ( 1.0 - getPInv() );
+                        
+                        double end_age = node.getAge();
+                        
+                        // if the tree is not a time tree, then the age will be not a number
+                        if ( RbMath::isFinite(end_age) == false )
+                        {
+                            // we assume by default that the end is at time 0
+                            end_age = 0.0;
+                        }
+                        double start_age = end_age + node.getBranchLength();
+                        
+                        rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                        
+                        tp_begin = heterotachy_p_matrix.theMatrix;
+
+                    }
+                    else
+                    {
+                        tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                    }
                     const double* tp_a     = tp_begin + this->num_chars * c1;
 
                     // temporary variable
@@ -301,6 +336,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
+    TransitionProbabilityMatrix heterotachy_p_matrix = TransitionProbabilityMatrix(this->num_chars);
 
     // compute the transition probability matrix
 //    this->updateTransitionProbabilities( node_index );
@@ -349,7 +385,42 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
                 {
                     
-                    const double* tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                    // @Sebastian: Need to clean this up and move it somewhere outside
+                    const double* tp_begin = NULL;
+                    if ( this->branch_site_rates != NULL )
+                    {
+                        const RateGenerator *rm = &this->homogeneous_rate_matrix->getValue();
+                        double r = 1.0;
+                        if ( this->rate_variation_across_sites == true )
+                        {
+                            r = this->site_rates->getValue()[mixture];
+                        }
+                        // second, get the clock rate for the branch
+                        double rate = this->homogeneous_clock_rate->getValue();
+                        
+                        // we rescale the rate by the inverse of the proportion of invariant sites
+//                                rate /= ( 1.0 - getPInv() );
+                        
+                        double end_age = node.getAge();
+                        
+                        // if the tree is not a time tree, then the age will be not a number
+                        if ( RbMath::isFinite(end_age) == false )
+                        {
+                            // we assume by default that the end is at time 0
+                            end_age = 0.0;
+                        }
+                        double start_age = end_age + node.getBranchLength();
+                        
+                        rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                        
+                        tp_begin = heterotachy_p_matrix.theMatrix;
+
+                    }
+                    else
+                    {
+                        tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                    }
+                    
                     const double* tp_a     = tp_begin + this->num_chars * c1;
 
                     // temporary variable
@@ -390,6 +461,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
+    TransitionProbabilityMatrix heterotachy_p_matrix = TransitionProbabilityMatrix(this->num_chars);
 
     double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
     
@@ -465,7 +537,41 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
                         {
                             
-                            const double* tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                            // @Sebastian: Need to clean this up and move it somewhere outside
+                            const double* tp_begin = NULL;
+                            if ( this->branch_site_rates != NULL )
+                            {
+                                const RateGenerator *rm = &this->homogeneous_rate_matrix->getValue();
+                                double r = 1.0;
+                                if ( this->rate_variation_across_sites == true )
+                                {
+                                    r = this->site_rates->getValue()[mixture];
+                                }
+                                // second, get the clock rate for the branch
+                                double rate = this->homogeneous_clock_rate->getValue();
+                                
+                                // we rescale the rate by the inverse of the proportion of invariant sites
+//                                rate /= ( 1.0 - getPInv() );
+                                
+                                double end_age = node.getAge();
+                                
+                                // if the tree is not a time tree, then the age will be not a number
+                                if ( RbMath::isFinite(end_age) == false )
+                                {
+                                    // we assume by default that the end is at time 0
+                                    end_age = 0.0;
+                                }
+                                double start_age = end_age + node.getBranchLength();
+                                
+                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                                
+                                tp_begin = heterotachy_p_matrix.theMatrix;
+
+                            }
+                            else
+                            {
+                                tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                            }
                             const double* tp_a     = tp_begin + this->num_chars * c1;
                             
                             // get the pointer to the transition probabilities for the terminal states
@@ -508,7 +614,41 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
                         {
                             
-                            const double* tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                            // @Sebastian: Need to clean this up and move it somewhere outside
+                            const double* tp_begin = NULL;
+                            if ( this->branch_site_rates != NULL )
+                            {
+                                const RateGenerator *rm = &this->homogeneous_rate_matrix->getValue();
+                                double r = 1.0;
+                                if ( this->rate_variation_across_sites == true )
+                                {
+                                    r = this->site_rates->getValue()[mixture];
+                                }
+                                // second, get the clock rate for the branch
+                                double rate = this->homogeneous_clock_rate->getValue();
+                                
+                                // we rescale the rate by the inverse of the proportion of invariant sites
+//                                rate /= ( 1.0 - getPInv() );
+                                
+                                double end_age = node.getAge();
+                                
+                                // if the tree is not a time tree, then the age will be not a number
+                                if ( RbMath::isFinite(end_age) == false )
+                                {
+                                    // we assume by default that the end is at time 0
+                                    end_age = 0.0;
+                                }
+                                double start_age = end_age + node.getBranchLength();
+                                
+                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                                
+                                tp_begin = heterotachy_p_matrix.theMatrix;
+
+                            }
+                            else
+                            {
+                                tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                            }
                             const double* tp_a     = tp_begin + this->num_chars * c1;
 
                             // get the pointer to the transition probabilities for the terminal states
@@ -546,7 +686,41 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
                         {
                             
-                            const double* tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                            // @Sebastian: Need to clean this up and move it somewhere outside
+                            const double* tp_begin = NULL;
+                            if ( this->branch_site_rates != NULL )
+                            {
+                                const RateGenerator *rm = &this->homogeneous_rate_matrix->getValue();
+                                double r = 1.0;
+                                if ( this->rate_variation_across_sites == true )
+                                {
+                                    r = this->site_rates->getValue()[mixture];
+                                }
+                                // second, get the clock rate for the branch
+                                double rate = this->homogeneous_clock_rate->getValue();
+                                
+                                // we rescale the rate by the inverse of the proportion of invariant sites
+//                                rate /= ( 1.0 - getPInv() );
+                                
+                                double end_age = node.getAge();
+                                
+                                // if the tree is not a time tree, then the age will be not a number
+                                if ( RbMath::isFinite(end_age) == false )
+                                {
+                                    // we assume by default that the end is at time 0
+                                    end_age = 0.0;
+                                }
+                                double start_age = end_age + node.getBranchLength();
+                                
+                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                                
+                                tp_begin = heterotachy_p_matrix.theMatrix;
+
+                            }
+                            else
+                            {
+                                tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                            }
                             
                             // store the likelihood
                             total_prob += tp_begin[c1*this->num_chars+org_val];
