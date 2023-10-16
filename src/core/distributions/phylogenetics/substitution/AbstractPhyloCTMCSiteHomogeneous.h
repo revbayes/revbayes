@@ -110,6 +110,8 @@ namespace RevBayesCore {
         void	                                                            updateMarginalNodeLikelihoods(void);
         const TypedDagNode<Tree>*                                           getTree(void);
 
+        void                                                                setBranchSiteRates(const TypedDagNode< RbVector< RbVector< double > > > *r);
+        void                                                                setBranchSiteRatesMixture(const TypedDagNode< RbVector< double > > *r);
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
         void                                                                setPInv(const TypedDagNode< double > *);
@@ -238,6 +240,8 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           site_rates;
         const TypedDagNode< Simplex >*                                      site_matrix_probs;
         const TypedDagNode< Simplex >*                                      site_rates_probs;
+        const TypedDagNode< RbVector< RbVector< double > > >*               branch_site_rates;
+        const TypedDagNode< RbVector< double > >*                           branch_site_rates_mixture;
         const TypedDagNode< double >*                                       p_inv;
 
 
@@ -354,6 +358,8 @@ sampled_site_matrix_component( 0 )
     site_rates                    = NULL;
     site_matrix_probs             = NULL;
     site_rates_probs              = NULL;
+    branch_site_rates             = NULL;
+    branch_site_rates_mixture     = NULL;
     p_inv                         = NULL;
 
     // flags specifying which model variants we use
@@ -456,6 +462,8 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     site_matrix_probs            = n.site_matrix_probs;
     site_rates_probs             = n.site_rates_probs;
     p_inv                        = n.p_inv;
+    branch_site_rates            = n.branch_site_rates;
+    branch_site_rates_mixture    = n.branch_site_rates_mixture;
 
     activeLikelihoodOffset      =  n.activeLikelihoodOffset;
     nodeOffset                  =  n.nodeOffset;
@@ -3284,6 +3292,72 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRootFrequencie
         this->redrawValue();
     }
 
+}
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setBranchSiteRates(const TypedDagNode< RbVector< RbVector< double > > > *r)
+{
+
+    // remove the old parameter first
+    if ( branch_site_rates != NULL )
+    {
+        this->removeParameter( branch_site_rates );
+        branch_site_rates = NULL;
+    }
+
+    if ( r != NULL )
+    {
+        // set the value
+        branch_site_rates = r;
+    }
+    else
+    {
+        // set the value
+        branch_site_rates = NULL;
+    }
+
+    // add the new parameter
+    this->addParameter( branch_site_rates );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+}
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setBranchSiteRatesMixture(const TypedDagNode< RbVector< double > > *r)
+{
+
+    // remove the old parameter first
+    if ( branch_site_rates_mixture != NULL )
+    {
+        this->removeParameter( branch_site_rates_mixture );
+        branch_site_rates_mixture = NULL;
+    }
+
+    if ( r != NULL )
+    {
+        // set the value
+        branch_site_rates_mixture = r;
+    }
+    else
+    {
+        // set the value
+        branch_site_rates_mixture = NULL;
+    }
+
+    // add the new parameter
+    this->addParameter( branch_site_rates_mixture );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
 }
 
 
