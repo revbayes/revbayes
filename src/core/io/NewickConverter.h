@@ -27,6 +27,7 @@
 namespace RevBayesCore {
 
     class BranchHistory;
+    class CharacterHistoryDiscrete;
     class Tree;
     class TopologyNode;
 
@@ -34,10 +35,10 @@ namespace RevBayesCore {
 
     public:
         NewickConverter();
-        virtual                 ~NewickConverter();
+        virtual                    ~NewickConverter();
     
-        Tree*                   convertFromNewick(const std::string &n, bool reindex = true );
-        Tree*                   convertSimmapFromNewick(const std::string &n, bool reindex = true );
+        Tree*                       convertFromNewick(const std::string &n, bool reindex = true );
+        CharacterHistoryDiscrete*   convertSimmapFromNewick(const std::string &n, bool reindex = true );
 
     private:
         TopologyNode*           createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens);

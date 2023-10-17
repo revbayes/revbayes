@@ -19,6 +19,12 @@ namespace RevBayesCore {
         
         virtual ~CharacterHistory(void);
         
+        // overloaded operators
+        bool                                    operator==(const CharacterHistory &t) const { return false; }
+        bool                                    operator!=(const CharacterHistory &t) const { return false; }
+        bool                                    operator<(const CharacterHistory &t) const { return false; }
+        bool                                    operator<=(const CharacterHistory &t) const { return false; }
+
         virtual BranchHistory&                  operator[](size_t i);
         virtual const BranchHistory&            operator[](size_t i) const;
 
@@ -34,7 +40,8 @@ namespace RevBayesCore {
         bool                                    hasRootBranch(void) const;
         virtual CharacterEvent*                 pickRandomEvent(size_t &bi);
         void                                    removeEvent(CharacterEvent *e, size_t bi);
-        
+        void                                    setHistory(const std::vector<BranchHistory*>& h);
+
         
     protected:
         CharacterHistory(const Tree *t, size_t nc, bool rb = false);

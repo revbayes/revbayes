@@ -7,6 +7,7 @@
 #include <string>
 
 #include "BranchHistoryDiscrete.h"
+#include "CharacterHistoryDiscrete.h"
 #include "RbException.h"
 #include "StringUtilities.h"
 #include "TopologyNode.h"
@@ -93,7 +94,7 @@ Tree* NewickConverter::convertFromNewick(const std::string &n, bool reindex)
 }
 
 
-Tree* NewickConverter::convertSimmapFromNewick(const std::string &n, bool reindex)
+CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::string &n, bool reindex)
 {
 
     // create and allocate the tree object
@@ -154,9 +155,14 @@ Tree* NewickConverter::convertSimmapFromNewick(const std::string &n, bool reinde
     {
         root->setUseAges(true, true);
     }
+    
+    
+    CharacterHistoryDiscrete* new_char_hist = new CharacterHistoryDiscrete();
+    new_char_hist->setTree( t );
+    new_char_hist->setHistory( histories );
 
     // return the tree, the caller is responsible for destruction
-    return t;
+    return new_char_hist;
 }
 
 

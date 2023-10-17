@@ -243,6 +243,10 @@ void CharacterHistory::removeEvent( CharacterEvent *e, size_t branch_index)
 }
 
 
+void CharacterHistory::setHistory(const std::vector<BranchHistory *> &h)
+{
+    histories = h;
+}
 
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const CharacterHistory& x)

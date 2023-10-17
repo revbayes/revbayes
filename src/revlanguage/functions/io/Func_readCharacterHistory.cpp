@@ -5,7 +5,9 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "CharacterHistoryDiscrete.h"
 #include "Func_readCharacterHistory.h"
+#include "ModelVector.h"
 #include "NewickConverter.h"
 #include "RlCharacterHistory.h"
 #include "RLString.h"
@@ -46,7 +48,7 @@ RevPtr<RevVariable> Func_readCharacterHistory::execute( void )
         throw RbException()<<"Could not open file "<< simmap_filename;
     
     /* Initialize */
-    std::vector<RevBayesCore::Tree*> trees = std::vector<RevBayesCore::Tree*>();
+    RevBayesCore::RbVector<RevBayesCore::CharacterHistoryDiscrete> histories;
     
     /* line-processing loop */
     while ( in_file.good() )
@@ -62,16 +64,12 @@ RevPtr<RevVariable> Func_readCharacterHistory::execute( void )
             continue;
         }
         
-        RevBayesCore::Tree *simmap_tree = con.convertSimmapFromNewick( line );
-        trees.push_back( simmap_tree );
+        RevBayesCore::CharacterHistoryDiscrete *simmap_tree = con.convertSimmapFromNewick( line );
+        histories.push_back( *simmap_tree );
     }
-
-    RevBayesCore::Tree* tree = trees[1];
-    
     
     // return the tree with annotations
-//    return new RevVariable( new CharacterHistory( tree ) );
-    return NULL;
+    return new RevVariable( new ModelVector<CharacterHistory>(  ) );
 }
 
 
@@ -141,7 +139,7 @@ const TypeSpec& Func_readCharacterHistory::getTypeSpec( void ) const
 const TypeSpec& Func_readCharacterHistory::getReturnType( void ) const
 {
     
-    static TypeSpec return_typeSpec = CharacterHistory::getClassTypeSpec();
+    static TypeSpec return_typeSpec = ModelVector<CharacterHistory>::getClassTypeSpec();
     return return_typeSpec;
 }
 
