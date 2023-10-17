@@ -34,10 +34,6 @@ RevPtr<RevVariable> Func_readCharacterHistory::execute( void )
     
     size_t arg_index = 0;
     
-    // get the input tree
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *it = static_cast<const Tree&>( this->args[arg_index++].getVariable()->getRevObject() ).getDagNode();
-    
-    
     // get the filename for the tree with MAP character history
     RevBayesCore::path simmap_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
@@ -90,8 +86,6 @@ const ArgumentRules& Func_readCharacterHistory::getArgumentRules( void ) const
     if ( rules_set == false )
     {
         
-
-        argument_rules.push_back( new ArgumentRule( "tree", Tree::getClassTypeSpec(),     "The input tree to summarize the character history over.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "The name of the file with the character history.",        ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
         rules_set = true;

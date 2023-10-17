@@ -32,7 +32,9 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<Tree> *t, const StochasticNode<AbstractHomologousDiscreteCharacterData>* states, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
+PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+    num_nodes( ch->getValue().getNumberBranches() ),
+    num_sites( ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
@@ -40,7 +42,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
-    character_states( states )
+    character_histories( ch )
 {
     // initialize default parameters
     root_state                  = new ConstantNode<double>("", new double(0.0) );
@@ -56,11 +58,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     addParameter( homogeneous_alpha );
     addParameter( homogeneous_sigma );
     addParameter( homogeneous_theta );
-    addParameter( character_states );
-    
-    
-    // We don'e want tau to die before we die, or it can't remove us as listener
-    tau->getValue().getTreeChangeEventHandler().addListener( this );
+    addParameter( character_histories );
     
     // now we need to reset the value
     this->redrawValue();
@@ -79,11 +77,11 @@ PhyloOrnsteinUhlenbeckStateDependent::~PhyloOrnsteinUhlenbeckStateDependent( voi
 {
     // We don't delete the params, because they might be used somewhere else too. The model needs to do that!
     
-    // remove myself from the tree listeners
-    if ( tau != NULL )
-    {
-        tau->getValue().getTreeChangeEventHandler().removeListener( this );
-    }
+//    // remove myself from the tree listeners
+//    if ( tau != NULL )
+//    {
+//        tau->getValue().getTreeChangeEventHandler().removeListener( this );
+//    }
     
 }
 
@@ -93,6 +91,27 @@ PhyloOrnsteinUhlenbeckStateDependent* PhyloOrnsteinUhlenbeckStateDependent::clon
 {
     
     return new PhyloOrnsteinUhlenbeckStateDependent( *this );
+}
+
+
+
+double PhyloOrnsteinUhlenbeckStateDependent::computeBranchTime( size_t nide_idx, double brlen )
+{
+    
+    // get the clock rate for the branch
+    double branch_time = 1.0;
+//    if ( this->heterogeneous_clock_rates != NULL )
+//    {
+//        double sigma = this->heterogeneous_clock_rates->getValue()[nide_idx];
+//        branch_time = sigma * sigma * brlen;
+//    }
+//    else
+//    {
+//        double sigma = this->homogeneous_clock_rate->getValue();
+//        branch_time = sigma * sigma * brlen;
+//    }
+    
+    return branch_time;
 }
 
 
@@ -163,20 +182,22 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeRootState( size_t state_inde
 double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 {
     
-    // we need to check here if we still are listining to this tree for change events
-    // the tree could have been replaced without telling us
-    if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
-    {
-        tau->getValue().getTreeChangeEventHandler().addListener( this );
-        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
-    }
+//    // we need to check here if we still are listining to this tree for change events
+//    // the tree could have been replaced without telling us
+//    if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
+//    {
+//        tau->getValue().getTreeChangeEventHandler().addListener( this );
+//        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
+//    }
+    
+    const Tree& tau = character_histories->getValue().getTree();
     
     // compute the ln probability by recursively calling the probability calculation for each node
-    const TopologyNode &root = this->tau->getValue().getRoot();
+    const TopologyNode &root = tau.getRoot();
     
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
-    
+        
     // only necessary if the root is actually dirty
     if ( this->dirty_nodes[root_index] )
     {
@@ -192,13 +213,13 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
-{
-    
-    // call a recursive flagging of all node above (closer to the root) and including this node
-    recursivelyFlagNodeDirty( n );
-    
-}
+//void PhyloOrnsteinUhlenbeckStateDependent::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
+//{
+//
+//    // call a recursive flagging of all node above (closer to the root) and including this node
+//    recursivelyFlagNodeDirty( n );
+//
+//}
 
 
 void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* affecter )
@@ -273,10 +294,10 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
 
             
             // get character history for tree
-            const TreeHistoryCtmc<StandardState>* p = static_cast< const TreeHistoryCtmc<StandardState>* >(&character_states->getDistribution());
+            const CharacterHistory& current_history = character_histories->getValue();
             
             // get branch history for node
-            const BranchHistory& bh_left = p->getHistory(*left);
+            const BranchHistory& bh_left = current_history.getHistory(left_index);
             const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_left = bh_left.getHistory();
             
 //            const std::multiset<CharacterEvent*, CharacterEventCompare> &h_left = bh_left.getHistory();
@@ -329,7 +350,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             
             
             // get branch history for node
-            const BranchHistory& bh_right = p->getHistory(right);
+            const BranchHistory& bh_right = current_history.getHistory(right_index);
             const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_right = bh_right.getHistory();
             
 //            size_t state_begin_right  = static_cast<CharacterEventDiscrete*>(bh_right.getChildCharacters()[0])->getState();
@@ -492,6 +513,47 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursivelyFlagNodeDirty( const Topol
 }
 
 
+void PhyloOrnsteinUhlenbeckStateDependent::redrawValue(void)
+{
+    // delete the old value first
+    delete this->value;
+    
+    // create a new character data object
+    this->value = new ContinuousCharacterData();
+    
+    // create a vector of taxon data
+    std::vector< ContinuousTaxonData > taxa = std::vector< ContinuousTaxonData >( num_nodes, ContinuousTaxonData( Taxon("") ) );
+    
+    const Tree& tau = character_histories->getValue().getTree();
+    
+    // simulate the root sequence
+    size_t root_index = tau.getRoot().getIndex();
+    ContinuousTaxonData &root = taxa[ root_index ];
+    
+    std::vector<double> root_states = simulateRootCharacters(num_sites);
+    for ( size_t i = 0; i < num_sites; ++i )
+    {
+        // create the character
+        double c = root_states[i];
+        
+        // add the character to the sequence
+        root.addCharacter( c );
+    }
+    
+    // recursively simulate the sequences
+    simulateRecursively( tau.getRoot(), taxa );
+    
+    // we call now our method to resample the tips
+    // this is important if we have multiple samples (e.g. individuals) per species
+//    simulateTipSamples( taxa );
+    
+    // tell the derived classes
+    this->resetValue();
+
+}
+
+
+
 void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
 {
     
@@ -519,7 +581,8 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
         ++site_index;
     }
     
-    std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
+    const Tree& tau = character_histories->getValue().getTree();
+    std::vector<TopologyNode*> nodes = tau.getNodes();
     for (size_t site = 0; site < this->num_sites; ++site)
     {
         
@@ -848,7 +911,8 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
 double PhyloOrnsteinUhlenbeckStateDependent::sumRootLikelihood( void )
 {
     // get the root node
-    const TopologyNode &root = this->tau->getValue().getRoot();
+    const Tree& tau = character_histories->getValue().getTree();
+    const TopologyNode &root = tau.getRoot();
     
     // get the index of the root node
     size_t node_index = root.getIndex();
@@ -869,7 +933,8 @@ double PhyloOrnsteinUhlenbeckStateDependent::sumRootLikelihood( void )
 
 void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
-    
+    const Tree& tau = character_histories->getValue().getTree();
+
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     if ( affecter == this->state_dependent_sigma && false )
     {
@@ -884,7 +949,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* a
         }
         else
         {
-            const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
+            const std::vector<TopologyNode *> &nodes = tau.getNodes();
             // flag recomputation only for the nodes
             for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
             {
@@ -892,7 +957,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* a
             }
         }
     }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touchAll = true;
         
@@ -929,13 +994,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* a
 void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
-    if (oldP == this->tau)
-    {
-        this->tau->getValue().getTreeChangeEventHandler().removeListener( this );
-        AbstractPhyloContinuousCharacterProcess::swapParameterInternal(oldP, newP);
-        this->tau->getValue().getTreeChangeEventHandler().addListener( this );
-    }
-    
     if (oldP == root_state)
     {
         root_state = static_cast<const TypedDagNode< double >* >( newP );
@@ -968,13 +1026,11 @@ void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *
         state_dependent_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
     }
     
-    if (oldP == character_states)
+    if (oldP == character_histories)
     {
-        character_states = static_cast<const StochasticNode< AbstractHomologousDiscreteCharacterData >* >( newP );
+        character_histories = static_cast<const TypedDagNode< CharacterHistoryDiscrete >* >( newP );
     }
-    
-    this->AbstractPhyloContinuousCharacterProcess::swapParameterInternal(oldP, newP);
-    
+        
 }
 
 

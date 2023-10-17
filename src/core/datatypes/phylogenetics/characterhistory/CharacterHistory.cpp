@@ -142,6 +142,17 @@ void CharacterHistory::addEvent( CharacterEvent *e, size_t branch_index)
 }
 
 
+
+/**
+ * Get the history for a branch.
+ */
+const BranchHistory& CharacterHistory::getHistory(size_t n) const
+{
+    return *histories[n];
+}
+
+
+
 /**
  * Get the number of branches of the tree.
  */
@@ -158,6 +169,16 @@ size_t CharacterHistory::getNumberBranches( void ) const
 size_t CharacterHistory::getNumberEvents( void ) const
 {
     return n_events;
+}
+
+
+
+/**
+ * Get the tree.
+ */
+const Tree& CharacterHistory::getTree( void ) const
+{
+    return *tree;
 }
 
 

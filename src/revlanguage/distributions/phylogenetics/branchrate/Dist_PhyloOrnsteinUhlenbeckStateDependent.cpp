@@ -12,7 +12,7 @@
 #include "Natural.h"
 #include "Real.h"
 #include "RealPos.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "RlCharacterHistory.h"
 #include "RlDistribution.h"
 #include "StringUtilities.h"
 #include "Tree.h"
@@ -47,13 +47,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( character_state->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+    const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
+    RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
     
-    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(tau, ctmc_sn, n);
+    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n);
     
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
@@ -169,9 +168,7 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "tree" , Tree::getClassTypeSpec(), "The tree along which the character evolves.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
-        dist_member_rules.push_back( new ArgumentRule("characterHistories", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character history object from which we obtain the state indices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule("characterHistory", CharacterHistory::getClassTypeSpec(), "The character history object from which we obtain the state indices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         std::vector<TypeSpec> alphaTypes;
         alphaTypes.push_back( RealPos::getClassTypeSpec() );
@@ -217,9 +214,9 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::printValue(std::ostream& o) cons
 {
     
     o << "PhyloOrnsteinUhlenbeckProcess(tree=";
-    if ( tree != NULL )
+    if ( character_history != NULL )
     {
-        o << tree->getName();
+        o << character_history->getName();
     }
     else
     {
@@ -253,13 +250,9 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::printValue(std::ostream& o) cons
 void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "tree" )
+    if ( name == "characterHistory" )
     {
-        tree = var;
-    }
-    else if ( name == "characterHistories" )
-    {
-        character_state = var;
+        character_history = var;
     }
     else if ( name == "alpha" )
     {

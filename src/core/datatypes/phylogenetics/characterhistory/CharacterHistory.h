@@ -27,8 +27,10 @@ namespace RevBayesCore {
         virtual void                            setTree(const Tree *t) = 0;
 
         void                                    addEvent(CharacterEvent *e, size_t bi);
+        const BranchHistory&                    getHistory(size_t n) const;
         size_t                                  getNumberBranches(void) const;
         size_t                                  getNumberEvents(void) const;
+        const Tree&                             getTree(void) const;
         bool                                    hasRootBranch(void) const;
         virtual CharacterEvent*                 pickRandomEvent(size_t &bi);
         void                                    removeEvent(CharacterEvent *e, size_t bi);

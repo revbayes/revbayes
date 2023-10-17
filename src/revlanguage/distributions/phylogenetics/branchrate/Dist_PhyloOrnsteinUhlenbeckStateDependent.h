@@ -54,12 +54,11 @@ class TypeSpec;
         
     private:
         
-        RevPtr<const RevVariable>                       tree;
         RevPtr<const RevVariable>                       alpha;
         RevPtr<const RevVariable>                       theta;
         RevPtr<const RevVariable>                       sigma;
         RevPtr<const RevVariable>                       root_states;
-        RevPtr<const RevVariable>                       character_state;
+        RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
         
         
