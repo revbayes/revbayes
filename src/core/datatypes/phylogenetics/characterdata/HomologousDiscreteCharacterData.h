@@ -1112,42 +1112,8 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfState
 template<class charType>
 size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfInvariantSites(bool exclude_missing) const
 {
-    size_t invSites = 0;
-    size_t nt = this->getNumberOfTaxa();
-
-    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
-    size_t nc = firstTaxonData.getNumberOfCharacters();
-    for (size_t j=0; j<nc; j++)
-    {
-        const DiscreteCharacterState* a = &firstTaxonData[j];
-        size_t k = 1;
-        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
-        {
-            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
-            a = &td[j];
-            ++k;
-        }
-        
-        bool invariant = true;
-        for (size_t i=1; i<nt; i++)
-        {
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
-            const DiscreteCharacterState& b = secondTaxonData[j];
-            
-            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
-            {
-                invariant &= (*a == b);
-            }
-
-        }
-        
-        if ( invariant == true )
-        {
-            ++invSites;
-        }
-
-    }
-    
+    std::vector<size_t> inv_site_indices = this->getInvariantSiteIndices(exclude_missing);
+    size_t invSites = inv_site_indices.size();
     return invSites;
 }
 
