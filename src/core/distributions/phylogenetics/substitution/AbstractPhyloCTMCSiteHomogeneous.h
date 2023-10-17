@@ -67,14 +67,15 @@ namespace RevBayesCore {
      * The transition probability matrices are stored in a c-style array called partialLikelihoods. The dimension are
      * pmatrices[active][node_index][siteMixtureIndex], however, since this is a one-dimensional c-style array,
      * you have to access the partialLikelihoods via
-     * pmatrices[active * num_nodes * num_site_mixtures +
-     *                    node_index * num_site_mixtures +
-     *                    site_mixture_index]
+     * pmatrices[active * num_nodes * num_site_mixtures * num_heterotachy_categories +
+     *                    node_index * num_site_mixtures  * num_heterotachy_categories +
+     *                    site_mixture_index  * num_heterotachy_categories +
+     *                    heterotachy_category_index]
      * Since this is a bit complex, we have some offset variables for convenience:
-     * activePmatrixOffset         =  num_nodes * num_site_mixtures;
-     * nodeOffset                  =  num_site_mixtures;
+     * activePmatrixOffset         =  num_nodes * num_site_mixtures *num_heterotachy_categories ;
+     * nodeOffset                  =  num_site_mixtures * num_heterotachy_categories;
      * This gives the more convenient access via
-     * pmatrices[active * activePmatrixOffset + node_index * nodeOffset + site_mixture_index]
+     * pmatrices[active * activePmatrixOffset + node_index * nodeOffset + site_mixture_index * num_heterotachy_categories +heterotachy_category_index ]
      *
      */
     template<class charType>
@@ -384,7 +385,7 @@ sampled_site_matrix_component( 0 )
     }
     
     activePmatrixOffset         =  num_nodes * num_site_mixtures * num_heterotachy_categories;
-    pmatNodeOffset              =  num_site_mixtures;
+    pmatNodeOffset              =  num_site_mixtures * num_heterotachy_categories;
     active_pmatrices            =  std::vector<size_t>(num_nodes, 0);
     pmat_changed_nodes          =  std::vector<bool>(num_nodes, false);
     pmat_dirty_nodes            =  std::vector<bool>(num_nodes, true);
@@ -2684,7 +2685,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     }
     
     activePmatrixOffset         =  num_nodes * num_site_mixtures * num_heterotachy_categories;
-    pmatNodeOffset              =  num_site_mixtures;
+    pmatNodeOffset              =  num_site_mixtures * num_heterotachy_categories;
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
 
     transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures*num_heterotachy_categories, TransitionProbabilityMatrix(num_chars) );
@@ -4452,6 +4453,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                     {
                         h = branch_site_rates_mixture->getValue()[heterotachy_index];
                     }
+                    // @Sebastian: check if the index is correct
                     rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, this->pmatrices[pmat_offset + j * this->num_matrices * num_heterotachy_categories + matrix * num_heterotachy_categories + heterotachy_index] );
                 }
             }

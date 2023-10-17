@@ -227,12 +227,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     const double*   p_left  = this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
     const double*   p_right = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
     double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-
-    size_t num_heterotachy_categories = 1;
-    if ( this->branch_site_rates_mixture != NULL )
-    {
-        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
-    }
     
     
     // iterate over all mixture categories
@@ -261,7 +255,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 double total_sum = 0.0;
                 
                 // loop over all hetertachy categories
-                for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
+                for ( size_t heterotachy_index=0; heterotachy_index<this->num_heterotachy_categories; ++heterotachy_index )
                 {
                     
                     // @Sebastian: Need to clean this up and move it somewhere outside
@@ -297,7 +291,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                     }
                     else
                     {
-                        tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                        tp_begin = this->pmatrices[pmat_offset + mixture * this->num_heterotachy_categories + heterotachy_index].theMatrix;
                     }
                     const double* tp_a     = tp_begin + this->num_chars * c1;
 
@@ -316,7 +310,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 }
                 
                 // store the likelihood for this starting state
-                p_site_mixture[c1] = total_sum / num_heterotachy_categories;
+                p_site_mixture[c1] = total_sum / this->num_heterotachy_categories;
 
 //                 increment the pointers to the next starting state
 //                tp_a+=this->num_chars;
@@ -348,12 +342,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     const double*   p_right     = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
     double*         p_node      = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
-    size_t num_heterotachy_categories = 1;
-    if ( this->branch_site_rates_mixture != NULL )
-    {
-        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
-    }
-
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -382,7 +370,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 double total_sum = 0.0;
                 
                 // loop over all hetertachy categories
-                for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
+                for ( size_t heterotachy_index=0; heterotachy_index<this->num_heterotachy_categories; ++heterotachy_index )
                 {
                     
                     // @Sebastian: Need to clean this up and move it somewhere outside
@@ -411,14 +399,17 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                         }
                         double start_age = end_age + node.getBranchLength();
                         
-                        rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                        // get the heterotachy rate multiplier
+                        double h = this->branch_site_rates->getValue()[site][node_index];
+                        
+                        rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, heterotachy_p_matrix );
                         
                         tp_begin = heterotachy_p_matrix.theMatrix;
 
                     }
                     else
                     {
-                        tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                        tp_begin = this->pmatrices[pmat_offset + mixture * this->num_heterotachy_categories + heterotachy_index].theMatrix;
                     }
                     
                     const double* tp_a     = tp_begin + this->num_chars * c1;
@@ -439,7 +430,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
                 }
                 
                 // store the likelihood for this starting state
-                p_site_mixture[c1] = total_sum / num_heterotachy_categories;
+                p_site_mixture[c1] = total_sum / this->num_heterotachy_categories;
 
                 // increment the pointers to the next starting state
 //                tp_a+=this->num_chars;
@@ -481,12 +472,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
     double* p_mixture = p_node;
-    
-    size_t num_heterotachy_categories = 1;
-    if ( this->branch_site_rates_mixture != NULL )
-    {
-        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
-    }
     
 
     // iterate over all mixture categories
@@ -534,7 +519,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         double total_sum = 0.0;
 
                         // loop over all hetertachy categories
-                        for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
+                        for ( size_t heterotachy_index=0; heterotachy_index<this->num_heterotachy_categories; ++heterotachy_index )
                         {
                             
                             // @Sebastian: Need to clean this up and move it somewhere outside
@@ -563,14 +548,17 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                                 }
                                 double start_age = end_age + node.getBranchLength();
                                 
-                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                                    // get the heterotachy rate multiplier
+                                double h = this->branch_site_rates->getValue()[site][node_index];
+                                
+                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, heterotachy_p_matrix );
                                 
                                 tp_begin = heterotachy_p_matrix.theMatrix;
 
                             }
                             else
                             {
-                                tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                                tp_begin = this->pmatrices[pmat_offset + mixture * this->num_heterotachy_categories + heterotachy_index].theMatrix;
                             }
                             const double* tp_a     = tp_begin + this->num_chars * c1;
                             
@@ -596,7 +584,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         }
                         
                         // store the likelihood
-                        p_site_mixture[c1] = total_sum / num_heterotachy_categories;
+                        p_site_mixture[c1] = total_sum / this->num_heterotachy_categories;
                         
                     }
                     else if ( this->using_weighted_characters == true )
@@ -611,7 +599,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         double total_sum = 0.0;
 
                         // loop over all hetertachy categories
-                        for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
+                        for ( size_t heterotachy_index=0; heterotachy_index<this->num_heterotachy_categories; ++heterotachy_index )
                         {
                             
                             // @Sebastian: Need to clean this up and move it somewhere outside
@@ -640,14 +628,17 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                                 }
                                 double start_age = end_age + node.getBranchLength();
                                 
-                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                                // get the heterotachy rate multiplier
+                                double h = this->branch_site_rates->getValue()[site][node_index];
+                                
+                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, heterotachy_p_matrix );
                                 
                                 tp_begin = heterotachy_p_matrix.theMatrix;
 
                             }
                             else
                             {
-                                tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                                tp_begin = this->pmatrices[pmat_offset + mixture * this->num_heterotachy_categories + heterotachy_index].theMatrix;
                             }
                             const double* tp_a     = tp_begin + this->num_chars * c1;
 
@@ -672,7 +663,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         }
                         
                         // store the likelihood
-                        p_site_mixture[c1] = total_sum / num_heterotachy_categories;
+                        p_site_mixture[c1] = total_sum / this->num_heterotachy_categories;
                         
                     }
                     else // no ambiguous characters in use
@@ -683,7 +674,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                         double total_prob = 0.0;
 
                         // loop over all hetertachy categories
-                        for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index )
+                        for ( size_t heterotachy_index=0; heterotachy_index<this->num_heterotachy_categories; ++heterotachy_index )
                         {
                             
                             // @Sebastian: Need to clean this up and move it somewhere outside
@@ -712,20 +703,23 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                                 }
                                 double start_age = end_age + node.getBranchLength();
                                 
-                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, heterotachy_p_matrix );
+                                // get the heterotachy rate multiplier
+                                double h = this->branch_site_rates->getValue()[site][node_index];
+                                
+                                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, heterotachy_p_matrix );
                                 
                                 tp_begin = heterotachy_p_matrix.theMatrix;
 
                             }
                             else
                             {
-                                tp_begin = this->pmatrices[pmat_offset + mixture + heterotachy_index].theMatrix;
+                                tp_begin = this->pmatrices[pmat_offset + mixture * this->num_heterotachy_categories + heterotachy_index].theMatrix;
                             }
                             
                             // store the likelihood
                             total_prob += tp_begin[c1*this->num_chars+org_val];
                         }
-                        p_site_mixture[c1] = total_prob / num_heterotachy_categories;
+                        p_site_mixture[c1] = total_prob / this->num_heterotachy_categories;
 
                     }
 
