@@ -215,6 +215,7 @@
 #include "Func_readAncestralStateTrace.h"
 #include "Func_readAtlas.h"
 #include "Func_readBranchLengthTrees.h"
+#include "Func_readCharacterHistory.h"
 #include "Func_readDelimitedCharacterData.h"
 #include "Func_readCharacterData.h"
 #include "Func_readContinuousCharacterData.h"
@@ -543,18 +544,19 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );
         addFunction( new Func_mccTree()                                 );
-        addFunction( new Func_loadPlugin()                                 );
+        addFunction( new Func_loadPlugin()                              );
         addFunction( new Func_module()                                  );
         addFunction( new Func_readAncestralStateTreeTrace()             );
 		addFunction( new Func_readAncestralStateTrace()                 );
         addFunction( new Func_readAtlas()                               );
 		addFunction( new Func_readBranchLengthTrees()                   );
+        addFunction( new Func_readCharacterHistory()                    );
         addFunction( new Func_readContinuousCharacterData()             );
         addFunction( new Func_readDelimitedCharacterData()              );
         addFunction( new Func_readDelimitedDataFile()                   );
         addFunction( new Func_readDiscreteCharacterData()               );
 		addFunction( new Func_readDistanceMatrix()                      );
-        addFunction( new Func_readCharacterData()              );
+        addFunction( new Func_readCharacterData()                       );
         addFunction( new Func_readMatrix()                              );
         addFunction( new Func_readRelativeNodeAgeConstraints()          );
         addFunction( new Func_readRelativeNodeAgeWeightedConstraints()  );
