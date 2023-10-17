@@ -446,21 +446,21 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         
         return NULL;
     }
-    else if (name == "removeMissingSites")
+    else if (name == "excludeMissingSites")
     {
         found = true;
         
-        this->dag_node->getValue().removeMissingSites();
+        this->dag_node->getValue().excludeMissingSites();
         
         return NULL;
     }
-    else if (name == "removeRandomSites")
+    else if (name == "replaceRandomSitesByMissingData")
     {
         found = true;
         
         double missing = static_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
 
-        this->dag_node->getValue().removeRandomSites(missing);
+        this->dag_node->getValue().replaceRandomSitesByMissingData(missing);
 
         
         return NULL;
@@ -817,8 +817,8 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
     ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
     ArgumentRules* remove_excluded_characters_arg_rules     = new ArgumentRules();
-    ArgumentRules* remove_random_sites_arg_rules            = new ArgumentRules();
-    ArgumentRules* remove_missing_sites_arg_rules           = new ArgumentRules();
+    ArgumentRules* replace_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* exclude_missing_sites_arg_rules           = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2               = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules            = new ArgumentRules();
@@ -861,7 +861,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     meanGcContentByCodonPositionArgRules->push_back(    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     numInvariableBlocksArgRules->push_back(             new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     num_taxaMissingSequenceArgRules->push_back(         new ArgumentRule( "x" ,     Probability::getClassTypeSpec()          , "The percentage/threshold for the missing sequence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
-    remove_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    replace_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     translateCharactersArgRules->push_back(             new ArgumentRule( "type" ,     RlString::getClassTypeSpec()          , "The character type into which we want to translate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     varGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     varGcContentByCodonPositionArgRules->push_back(     new ArgumentRule( "index" , Natural::getClassTypeSpec()          , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
@@ -873,6 +873,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "computeSiteFrequencySpectrum",           ModelVector<Natural>::getClassTypeSpec(), comp_site_freq_spec_arg_rules     ) );
     methods.addFunction( new MemberProcedure( "computeStateFrequencies",                MatrixReal::getClassTypeSpec(),     compStateFreqArgRules           ) );
     methods.addFunction( new MemberProcedure( "computeMultinomialProfileLikelihood",    Real::getClassTypeSpec(),           compMultiLikeArgRules           ) );
+    methods.addFunction( new MemberProcedure( "excludeMissingSites",                     RlUtils::Void,                      exclude_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
@@ -893,8 +894,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules     ) );
     methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules ) );
     methods.addFunction( new MemberProcedure( "removeExcludedCharacters",               RlUtils::Void,                    remove_excluded_characters_arg_rules ) );
-    methods.addFunction( new MemberProcedure( "removeMissingSites",                     RlUtils::Void,                      remove_missing_sites_arg_rules  ) );
-    methods.addFunction( new MemberProcedure( "removeRandomSites",                      RlUtils::Void,                      remove_random_sites_arg_rules   ) );
+    methods.addFunction( new MemberProcedure( "replaceRandomSitesByMissingData",        RlUtils::Void,                      replace_random_sites_arg_rules   ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
     methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );
