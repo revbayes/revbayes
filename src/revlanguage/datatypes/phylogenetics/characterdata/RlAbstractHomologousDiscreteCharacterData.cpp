@@ -235,16 +235,17 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Simplex(ebf) );
     }
-    else if (name == "getNumInvariantSites")
+    else if (name == "getInvariantSiteIndices")
     {
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
         bool excl = static_cast<const RlBoolean&>( argument ).getValue();
 
-        size_t n = this->dag_node->getValue().getNumberOfInvariantSites( excl );
+        std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
+        std::vector<long> inv_vect(begin(tmp), end(tmp));
 
-        return new RevVariable( new Natural(n) );
+        return new RevVariable( new ModelVector<Natural>(inv_vect) );
     }
     else if (name == "getNumInvariantSites")
     {
@@ -802,6 +803,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* getStateDescriptionsArgRules             = new ArgumentRules();
     ArgumentRules* ishomologousArgRules                     = new ArgumentRules();
     ArgumentRules* invSitesArgRules                         = new ArgumentRules();
+    ArgumentRules* invSiteIndicesArgRules                   = new ArgumentRules();
     ArgumentRules* mask_missing_arg_rules                   = new ArgumentRules();
     ArgumentRules* maxGcContentArgRules                     = new ArgumentRules();
     ArgumentRules* maxInvariableBlockLengthArgRules         = new ArgumentRules();
@@ -845,6 +847,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
 //    comp_site_freq_spec_arg_rules->push_back(           new ArgumentRule( "ambigAreDerived"  , RlBoolean::getClassTypeSpec()          , "Should we treat ambiguous characters as derived?",    ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     expandCharactersArgRules->push_back(                new ArgumentRule( "factor"           , Natural::getClassTypeSpec()            , "The factor by which the state space is expanded.",    ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     invSitesArgRules->push_back(                        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
+    invSiteIndicesArgRules->push_back(                  new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     mask_missing_arg_rules->push_back(       new ArgumentRule("ref",        AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The reference dataset/alignment which we use for applying the mask of missing sites.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     maxGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     maxInvariableBlockLengthArgRules->push_back(        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
@@ -873,6 +876,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
+    methods.addFunction( new MemberProcedure( "getInvariantSiteIndices",                ModelVector<Natural>::getClassTypeSpec(), invSiteIndicesArgRules           ) );
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
     methods.addFunction( new MemberProcedure( "getPairwiseDifference",                  DistanceMatrix::getClassTypeSpec(), getPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "getStateDescriptions",                   ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules ) );
