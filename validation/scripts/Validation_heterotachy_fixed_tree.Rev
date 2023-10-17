@@ -1,0 +1,89 @@
+################################################################################
+#
+# RevBayes Validation Test: Markov k model with heterotachy on a fixed tree
+#
+# Model: Morphology evolve under the Markov k model with a heterotachy mixture
+#        and the tree is fixed.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 100
+NUM_MCMC_ITERATIONS       = 1000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+# Import the morphological character matrix #
+# this file contains only the taxa for which morphological characters are available #
+morpho <- readDiscreteCharacterData("data/bears.nex")
+
+## helpers
+taxa <- morpho.names()
+n_taxa <- taxa.size()
+n_branches <- 2 * n_taxa - 2
+
+
+
+##############
+# Tree model #
+##############
+
+phylogeny <- readTrees("data/bears.tre")[1]
+
+
+
+###########################################
+# Binary morphological substitution model #
+###########################################
+
+# Create the Q matrix. These data are binary, so we initialize the Jukes-Cantor matrix with
+# two states
+Q_morpho <- fnJC(2)
+
+# Set up Gamma-distributed rate variation.
+alpha_morpho ~ dnLognormal( ln(5), sd=0.58 )
+heterotachy_categories := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+
+# Moves on the parameters to the Gamma distribution.
+moves.append( mvScale(alpha_morpho,lambda=1, weight=2.0) )
+
+#Combine all of our elements into a CTMC. Because we have not observed any invariant sites,
+# we specify the coding is 'variable'.
+
+phyMorpho ~ dnPhyloCTMC(tree=phylogeny, branchSiteRatesMixture=heterotachy_categories, Q=Q_morpho, type="Standard")
+phyMorpho.clamp(morpho)
+
+
+
+############
+# Analysis #
+############
+
+
+# initialize the model object #
+mymodel = model(phylogeny)
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_heterotachy_fixed" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()
