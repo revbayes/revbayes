@@ -178,7 +178,7 @@ namespace RevBayesCore {
         const size_t                                                        num_chars;
         size_t                                                              num_site_rates;
         size_t                                                              num_site_mixtures;
-        size_t                                                              num_hetertachy_categories;
+        size_t                                                              num_heterotachy_categories;
         size_t                                                              num_matrices;
         const TypedDagNode<Tree>*                                           tau;
         
@@ -310,10 +310,10 @@ num_sites( nSites ),
 num_chars( nChars ),
 num_site_rates( nMix ),
 num_site_mixtures( nMix ),
-num_hetertachy_categories( 1 ),
+num_heterotachy_categories( 1 ),
 num_matrices( 1 ),
 tau( t ),
-transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures*num_hetertachy_categories, TransitionProbabilityMatrix(num_chars) ) ),
+transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures*num_heterotachy_categories, TransitionProbabilityMatrix(num_chars) ) ),
 //    partialLikelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
 partialLikelihoods( NULL ),
 activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
@@ -424,6 +424,7 @@ num_chars( n.num_chars ),
 num_site_rates( n.num_site_rates ),
 num_site_mixtures( n.num_site_mixtures ),
 num_matrices( n.num_matrices ),
+num_heterotachy_categories( n.num_heterotachy_categories ),
 tau( n.tau ),
 transition_prob_matrices( n.transition_prob_matrices ),
 //    partialLikelihoods( new double[2*num_nodes*num_site_mixtures*num_sites*num_chars] ),
@@ -2686,7 +2687,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     pmatNodeOffset              =  num_site_mixtures;
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
 
-    transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures*num_hetertachy_categories, TransitionProbabilityMatrix(num_chars) );
+    transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures*num_heterotachy_categories, TransitionProbabilityMatrix(num_chars) );
 
 }
 
@@ -3004,12 +3005,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
     // get the sequence of this node
     size_t node_index = node.getIndex();
     const DiscreteTaxonData< charType > &parent = taxa[ node_index ];
-    
-    size_t num_heterotachy_categories = 1;
-    if ( this->branch_site_rates_mixture != NULL )
-    {
-        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
-    }
 
     // simulate the sequence for each child
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -3376,13 +3371,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setBranchSiteRate
     {
         // set the value
         branch_site_rates_mixture = r;
-        num_hetertachy_categories = branch_site_rates_mixture->getValue().size();
+        num_heterotachy_categories = branch_site_rates_mixture->getValue().size();
     }
     else
     {
         // set the value
         branch_site_rates_mixture = NULL;
-        num_hetertachy_categories = 1;
+        num_heterotachy_categories = 1;
     }
     
     this->resizeLikelihoodVectors();
@@ -4370,8 +4365,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             {
                 r = this->site_rates->getValue()[j];
             }
-
-            rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->transition_prob_matrices[j] );
+            
+            for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index)
+            {
+                // get the heterotachy rate multiplier
+                double h = 1.0;
+                if ( branch_site_rates_mixture != NULL )
+                {
+                    h = branch_site_rates_mixture->getValue()[heterotachy_index];
+                }
+                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, this->transition_prob_matrices[j * this->num_matrices * num_heterotachy_categories + heterotachy_index] );
+            }
         }
     }
 }
@@ -4420,12 +4424,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     
     size_t pmat_offset = this->active_pmatrices[node_idx] * this->activePmatrixOffset + node_idx * this->pmatNodeOffset;
     
-    size_t num_heterotachy_categories = 1;
-    if ( this->branch_site_rates_mixture != NULL )
-    {
-        num_heterotachy_categories = this->branch_site_rates_mixture->getValue().size();
-    }
-    
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
         for (size_t matrix = 0; matrix < this->num_matrices; ++matrix)
@@ -4449,7 +4447,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                 for ( size_t heterotachy_index=0; heterotachy_index<num_heterotachy_categories; ++heterotachy_index)
                 {
                     // get the heterotachy rate multiplier
-                    double h = branch_site_rates_mixture->getValue()[heterotachy_index];
+                    double h = 1.0;
+                    if ( branch_site_rates_mixture != NULL )
+                    {
+                        h = branch_site_rates_mixture->getValue()[heterotachy_index];
+                    }
                     rm->calculateTransitionProbabilities( start_age, end_age,  rate * r * h, this->pmatrices[pmat_offset + j * this->num_matrices * num_heterotachy_categories + matrix * num_heterotachy_categories + heterotachy_index] );
                 }
             }
