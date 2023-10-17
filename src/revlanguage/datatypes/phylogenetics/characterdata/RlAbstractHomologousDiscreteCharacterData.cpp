@@ -18,6 +18,7 @@
 #include "RlUserInterface.h"
 #include "RbBitSet.h"
 #include "AbstractDiscreteTaxonData.h"
+#include "HomologousDiscreteCharacterData.h"
 #include "Argument.h"
 #include "ArgumentRules.h"
 #include "DiscreteCharacterState.h"
@@ -245,6 +246,17 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Natural(n) );
     }
+    else if (name == "getNumInvariantSites")
+    {
+        found = true;
+
+        const RevObject& argument = args[0].getVariable()->getRevObject();
+        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+
+        size_t n = this->dag_node->getValue().getNumberOfInvariantSites( excl );
+
+        return new RevVariable( new Natural(n) );
+    }
     else if ( name == "getStateDescriptions" )
     {
         found = true;
@@ -424,6 +436,14 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         size_t num_taxa = this->dag_node->getValue().numberTaxaMissingSequence( percentage );
 
         return new RevVariable( new Natural(num_taxa) );
+    }
+    else if (name == "removeExcludedCharacters")
+    {
+        found = true;
+        
+        this->dag_node->getValue().removeExcludedCharacters();
+        
+        return NULL;
     }
     else if (name == "removeMissingSites")
     {
@@ -794,6 +814,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* minPairwiseDifferenceArgRules            = new ArgumentRules();
     ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
     ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
+    ArgumentRules* remove_excluded_characters_arg_rules     = new ArgumentRules();
     ArgumentRules* remove_random_sites_arg_rules            = new ArgumentRules();
     ArgumentRules* remove_missing_sites_arg_rules           = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
@@ -867,6 +888,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "meanGcContentByCodonPosition",           Probability::getClassTypeSpec(),    meanGcContentByCodonPositionArgRules                ) );
     methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules     ) );
     methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules ) );
+    methods.addFunction( new MemberProcedure( "removeExcludedCharacters",               RlUtils::Void,                    remove_excluded_characters_arg_rules ) );
     methods.addFunction( new MemberProcedure( "removeMissingSites",                     RlUtils::Void,                      remove_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "removeRandomSites",                      RlUtils::Void,                      remove_random_sites_arg_rules   ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
