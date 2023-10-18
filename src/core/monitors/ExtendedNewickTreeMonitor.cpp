@@ -48,6 +48,7 @@ ExtendedNewickTreeMonitor* ExtendedNewickTreeMonitor::clone(void) const
 /** Monitor value at generation gen */
 void ExtendedNewickTreeMonitor::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     out_stream << separator;
 
@@ -88,6 +89,7 @@ void ExtendedNewickTreeMonitor::monitorVariables(unsigned long gen)
 /** Print header for monitored values */
 void ExtendedNewickTreeMonitor::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     // add a separator tree
     out_stream << separator << "Tree";

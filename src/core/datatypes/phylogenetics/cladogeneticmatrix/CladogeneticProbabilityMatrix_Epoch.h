@@ -47,6 +47,7 @@ class Assignable;
         void                                                setEpochCladogeneticProbabilityMatrix(const CladogeneticProbabilityMatrix& cp, double t); //!< Update only epoch matrix at time t
         void                                                setEpochTimes(const RbVector<double> &t);                                                 //!< Directly set the epoch times
         
+	json                                                toJSON() const;
         virtual void                                        printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;            //!< print object for user (in user-formatted way)
         
     protected:

@@ -51,7 +51,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   prior;
         RevPtr<const RevVariable>                   posterior;
         RevPtr<const RevVariable>                   likelihood;
-
+        RevPtr<const RevVariable>                   format;
     };
     
 }
