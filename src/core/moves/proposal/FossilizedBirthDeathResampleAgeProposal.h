@@ -1,7 +1,7 @@
 #ifndef FossilizedBirthDeathResampleAgeProposal_H
 #define FossilizedBirthDeathResampleAgeProposal_H
 
-#include "AbstractFossilizedBirthDeathRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -62,7 +62,7 @@ RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::FossilizedBirthD
     // tell the base class to add the node
     addNode( variable );
 
-    AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
+    AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
 
     if ( dist == NULL )
     {
@@ -136,7 +136,7 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
-    AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
+    AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
 
     // touching handled by the distribution
     //stored_ages = dist->getAges();
@@ -187,7 +187,7 @@ void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::printParame
 template<class valType>
 void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::undoProposal( void )
 {
-	AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
+	AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
 
 	// restoration handled by the distribution
 	//dist->getAges() = stored_ages;

@@ -1,6 +1,7 @@
 #ifndef AbstractFossilizedBirthDeathProcess_H
 #define AbstractFossilizedBirthDeathProcess_H
 
+#include "Taxon.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
 

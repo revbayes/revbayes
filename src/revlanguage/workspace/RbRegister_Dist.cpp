@@ -178,7 +178,6 @@
 #include "Dist_WeightedConstrainedNodeOrder.h"
 #include "Dist_DuplicationLoss.h"
 #include "Dist_FBDRP.h"
-#include "Dist_FBDSP.h"
 #include "Dist_GLHBDSP.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
@@ -351,7 +350,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // fossilized-birth-death range processes
         AddDistribution< MatrixReal                 >( new Dist_FBDRP());
-        AddDistribution< TimeTree                   >( new Dist_FBDSP());
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
