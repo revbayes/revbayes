@@ -50,6 +50,7 @@ namespace RevBayesCore {
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
+        void                                                                simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data );
         double                                                              sumRootLikelihood(void);
         virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         

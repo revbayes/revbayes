@@ -545,7 +545,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::redrawValue(void)
     
     // we call now our method to resample the tips
     // this is important if we have multiple samples (e.g. individuals) per species
-//    simulateTipSamples( taxa );
+    simulateTipSamples( taxa );
     
     // tell the derived classes
     this->resetValue();
@@ -905,6 +905,19 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
     }
     
     return chars;
+}
+
+
+void PhyloOrnsteinUhlenbeckStateDependent::simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data )
+{
+    
+    const Tree& tau = character_histories->getValue().getTree();
+    // add the taxon data to the character data
+    for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
+    {
+        this->value->addTaxonData( taxon_data[i] );
+    }
+    
 }
 
 
