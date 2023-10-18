@@ -365,7 +365,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     
     bool use_global_obs_error = ( this->global_observation_error != NULL );
     double global_obs_error_val = 0.0;
-    if ( global_obs_error_val ) global_obs_error_val = this->global_observation_error->getValue();
+    if ( use_global_obs_error ) global_obs_error_val = this->global_observation_error->getValue();
     
     // compute the transition probabilities
 //    this->updateTransitionProbabilities( node_index );

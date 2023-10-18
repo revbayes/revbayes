@@ -4190,6 +4190,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
+    else if ( affecter == global_observation_error || affecter == global_state_specific_observation_error )
+    {
+        touch_all = true;
+    }
     else if ( affecter != tau && affecter != site_rates_probs && affecter != site_matrix_probs) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touch_all = true;
