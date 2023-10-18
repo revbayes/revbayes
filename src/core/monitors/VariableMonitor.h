@@ -8,18 +8,7 @@
 
 #include "AbstractFileMonitor.h"
 #include "MonteCarloAnalysisOptions.h"
-
-struct SeparatorFormat
-{
-    std::string separator;
-    SeparatorFormat(const std::string& s):separator(s) {}
-};
-
-struct JSONFormat
-{
-};
-
-typedef std::variant<SeparatorFormat,JSONFormat> SampleFormat;
+#include "FileFormat.h"
 
 namespace RevBayesCore {
 class DagNode;
