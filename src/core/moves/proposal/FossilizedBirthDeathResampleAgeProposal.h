@@ -1,7 +1,7 @@
 #ifndef FossilizedBirthDeathResampleAgeProposal_H
 #define FossilizedBirthDeathResampleAgeProposal_H
 
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -10,11 +10,10 @@
 namespace RevBayesCore {
     
     /**
-     * The node-age slide proposal operator using a Uniform distribution.
+     * The fossilized birth death resample age proposal.
      *
-     * This node-age proposal is a Uniform-sliding proposal on rooted subtrees without changing the topology.
-     * That is, we pick a random node which is not the root.
-     * Then, we pick an age between the parent and the oldest sampled descendant drawn from a Uniform distribution centered around the current age.
+     * This proposal resamples the oldest occurrence age for a single taxon in a fossilized birth death range process.
+     * The age is resampled uniformly between the minimum and maximum age.
      *
      *
      * @copyright Copyright 2009-
@@ -63,11 +62,11 @@ RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::FossilizedBirthD
     // tell the base class to add the node
     addNode( variable );
 
-    AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
+    AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
 
     if ( dist == NULL )
     {
-    	throw RbException("FossilizedBirthDeathResampleAgeProposal can only be used with Fossilized Birth Death Processes");
+    	throw RbException("FossilizedBirthDeathResampleAgeProposal can only be used with Fossilized Birth Death Range Processes");
     }
 }
 
@@ -137,7 +136,7 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
-    AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
+    AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
 
     // touching handled by the distribution
     //stored_ages = dist->getAges();
@@ -188,7 +187,7 @@ void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::printParame
 template<class valType>
 void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::undoProposal( void )
 {
-	AbstractFossilizedBirthDeathProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathProcess* >(&variable->getDistribution());
+	AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
 
 	// restoration handled by the distribution
 	//dist->getAges() = stored_ages;

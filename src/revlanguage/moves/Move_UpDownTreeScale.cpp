@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -50,11 +50,13 @@ Move_UpDownTreeScale::Move_UpDownTreeScale() : Move()
     ArgumentRules* addTreeArgRules                  = new ArgumentRules();
     ArgumentRules* addScalarArgRules                = new ArgumentRules();
     ArgumentRules* addModelVectorArgRules           = new ArgumentRules();
+    ArgumentRules* addModelVectorPosArgRules        = new ArgumentRules();
     ArgumentRules* addCompositeVectorArgRules       = new ArgumentRules();
     ArgumentRules* addCompositeVectorPosArgRules    = new ArgumentRules();
     ArgumentRules* removeTreeArgRules               = new ArgumentRules();
     ArgumentRules* removeScalarArgRules             = new ArgumentRules();
     ArgumentRules* removeModelVectorArgRules        = new ArgumentRules();
+    ArgumentRules* removeModelVectorPosArgRules     = new ArgumentRules();
     ArgumentRules* removeCompositeVectorArgRules    = new ArgumentRules();
     ArgumentRules* removeCompositeVectorPosArgRules = new ArgumentRules();
     
@@ -66,6 +68,8 @@ Move_UpDownTreeScale::Move_UpDownTreeScale() : Move()
     addScalarArgRules->push_back(                   new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "Scaling up or down?", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     addModelVectorArgRules->push_back(              new ArgumentRule( "var" , ModelVector<Real>::getClassTypeSpec(),    "The variable to scale", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
     addModelVectorArgRules->push_back(              new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "Scaling up or down?", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    addModelVectorPosArgRules->push_back(           new ArgumentRule( "var" , ModelVector<RealPos>::getClassTypeSpec(), "The variable to scale", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+    addModelVectorPosArgRules->push_back(           new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "Scaling up or down?", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     addCompositeVectorArgRules->push_back(          new ArgumentRule( "var" , ModelVector<Real>::getClassTypeSpec(),    "The variable to scale", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
     addCompositeVectorArgRules->push_back(          new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "Scaling up or down?", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     addCompositeVectorPosArgRules->push_back(       new ArgumentRule( "var" , ModelVector<RealPos>::getClassTypeSpec(), "The variable to scale", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
@@ -76,6 +80,8 @@ Move_UpDownTreeScale::Move_UpDownTreeScale() : Move()
     removeScalarArgRules->push_back(                new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "The variable to scale", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     removeModelVectorArgRules->push_back(           new ArgumentRule( "var" , ModelVector<Real>::getClassTypeSpec(),    "Scaling up or down?", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
     removeModelVectorArgRules->push_back(           new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "The variable to scale", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    removeModelVectorPosArgRules->push_back(        new ArgumentRule( "var" , ModelVector<RealPos>::getClassTypeSpec(), "Scaling up or down?", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+    removeModelVectorPosArgRules->push_back(        new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "The variable to scale", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     removeCompositeVectorArgRules->push_back(       new ArgumentRule( "var" , ModelVector<Real>::getClassTypeSpec(),    "Scaling up or down?", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
     removeCompositeVectorArgRules->push_back(       new ArgumentRule( "up"  , RlBoolean::getClassTypeSpec(),            "The variable to scale", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     removeCompositeVectorPosArgRules->push_back(    new ArgumentRule( "var" , ModelVector<RealPos>::getClassTypeSpec(), "Scaling up or down?", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
@@ -86,11 +92,13 @@ Move_UpDownTreeScale::Move_UpDownTreeScale() : Move()
     methods.addFunction( new MemberProcedure( "addVariable", RlUtils::Void, addTreeArgRules) );
     methods.addFunction( new MemberProcedure( "addVariable", RlUtils::Void, addScalarArgRules) );
     methods.addFunction( new MemberProcedure( "addVariable", RlUtils::Void, addModelVectorArgRules) );
+    methods.addFunction( new MemberProcedure( "addVariable", RlUtils::Void, addModelVectorPosArgRules) );
     methods.addFunction( new MemberProcedure( "addVariable", RlUtils::Void, addCompositeVectorArgRules) );
     methods.addFunction( new MemberProcedure( "addVariable", RlUtils::Void, addCompositeVectorPosArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeTreeArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeScalarArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeModelVectorArgRules) );
+    methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeModelVectorPosArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeCompositeVectorArgRules) );
     methods.addFunction( new MemberProcedure( "removeVariable", RlUtils::Void, removeCompositeVectorPosArgRules) );
     
@@ -185,6 +193,7 @@ RevPtr<RevVariable> Move_UpDownTreeScale::executeMethod(const std::string& name,
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
+            
             RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = dynamic_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( uVector->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownScaleProposal &prop = static_cast<RevBayesCore::UpDownScaleProposal&>( m->getProposal() );
@@ -200,6 +209,7 @@ RevPtr<RevVariable> Move_UpDownTreeScale::executeMethod(const std::string& name,
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == false )
         {
+            
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownScaleProposal &prop = static_cast<RevBayesCore::UpDownScaleProposal&>( m->getProposal() );
             
@@ -220,8 +230,26 @@ RevPtr<RevVariable> Move_UpDownTreeScale::executeMethod(const std::string& name,
             }
             
         }
+        else if ( upVector != NULL && upVector->getDagNode()->isStochastic() == true )
+        {
+            
+            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = dynamic_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( upVector->getDagNode() );
+            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownScaleProposal &prop = static_cast<RevBayesCore::UpDownScaleProposal&>( m->getProposal() );
+            
+            if ( the_node != NULL )
+            {
+                prop.addVariable( the_node, up );
+            }
+            else
+            {
+                throw RbException("Could not add the node because it isn't a stochastic nodes.");
+            }
+            
+        }
         else if ( upVector != NULL && upVector->getDagNode()->isStochastic() == false )
         {
+            
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownScaleProposal &prop = static_cast<RevBayesCore::UpDownScaleProposal&>( m->getProposal() );
             

@@ -1,32 +1,36 @@
 ################################################################################
 #
 # RevBayes Validation Test: Brownian-Motion on a fixed tree
-# 
+#
 # Model: Continuous character(s) evolve under Brownian motion.
-#            
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readContinuousCharacterData("data/primates_lhtlog.nex")
 
 data.excludeAll()
-data.includeCharacter(1) 
+data.includeCharacter(1)
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
-
-# set my move index
-mvi = 0
 
 
 
@@ -36,15 +40,12 @@ mvi = 0
 
 
 # sigma: variance per unit of time of the Brownian motion
-#sigma ~ dnLognormal( ln(10.0), sd=0.587405 )
 sigma <- 5.0
 root_state ~ dnUniform(-10.0,10.0)
 rate_scale ~ dnLognormal( ln(10.0), sd=0.587405 )
-#rate_scale <- 4.0
 
-#moves[++mvi] = mvScale(sigma, lambda=1.0, tune=true, weight=2.0) 
-moves[++mvi] = mvSlide(root_state, delta=1.0, tune=true, weight=2.0) 
-moves[++mvi] = mvScale(rate_scale, lambda=1.0, tune=true, weight=2.0) 
+moves.append( mvSlide(root_state, delta=1.0, tune=true, weight=2.0) )
+moves.append( mvScale(rate_scale, lambda=1.0, tune=true, weight=2.0) )
 
 
 
@@ -83,18 +84,16 @@ mymodel = model(psi)
 
 
 
-
-monitors[1] = mnModel(filename="output/primates_BM.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
 
-validation = validationAnalysis( mymcmc, 2000 )
-validation.burnin(generations=5000,tuningInterval=100)
-validation.run(generations=10000)
-validation.summarize()
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_BM_MVN" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

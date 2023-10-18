@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -10,6 +10,7 @@
 #include "ModelVector.h"
 #include "Move_HSRFHyperpriorsGibbs.h"
 #include "Natural.h"
+#include "Probability.h"
 #include "RbException.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -56,6 +57,8 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
     // now allocate a new move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
+    double p = static_cast<const RealPos &>( prop_global->getRevObject() ).getValue();
+
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( gs->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *g = static_cast< RevBayesCore::StochasticNode<double>* >( tmp );
 
@@ -96,11 +99,11 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
     size_t o = static_cast<const Natural &>( order->getRevObject() ).getValue();
     if (o == 1)
     {
-      value = new RevBayesCore::HSRFHyperpriorsGibbsMove(g, l, n, z, w);
+      value = new RevBayesCore::HSRFHyperpriorsGibbsMove(g, l, n, p, z, w);
     }
     else if (o == 2)
     {
-      value = new RevBayesCore::HSRFOrder2HyperpriorsGibbsMove(g, l, n, z, w);
+      value = new RevBayesCore::HSRFOrder2HyperpriorsGibbsMove(g, l, n, p, z, w);
     }
     else
     {
@@ -154,11 +157,12 @@ const MemberRules& Move_HSRFHyperpriorsGibbs::getParameterRules(void) const
     if ( !rules_set )
     {
 
-        move_member_rules.push_back( new ArgumentRule( "gs"       , RealPos::getClassTypeSpec(),              "The global scale variable on which this move operates", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "ls"       , ModelVector<RealPos>::getClassTypeSpec(), "The local scales variables on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "normals"  , ModelVector<Real>::getClassTypeSpec(),    "The vector of Normal RVs defining the field", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "zeta"     , RealPos::getClassTypeSpec()  ,            "The value controlling the shrinkage of the field.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY ) );
-        move_member_rules.push_back( new ArgumentRule( "order"    , Natural::getClassTypeSpec()  , "The order of this GMRF model, first (1) or second (2). Defaults to first order.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Natural(1) ) );
+        move_member_rules.push_back( new ArgumentRule( "gs"            , RealPos::getClassTypeSpec(),              "The global scale variable on which this move operates", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "ls"            , ModelVector<RealPos>::getClassTypeSpec(), "The local scales variables on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "normals"       , ModelVector<Real>::getClassTypeSpec(),    "The vector of Normal RVs defining the field", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "zeta"          , RealPos::getClassTypeSpec()  ,            "The value controlling the shrinkage of the field.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY ) );
+        move_member_rules.push_back( new ArgumentRule( "propGlobalOnly", Probability::getClassTypeSpec()  ,        "The proportion of all of these moves that only move the global scale.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(0.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "order"         , Natural::getClassTypeSpec()  ,            "The order of this HSRF model, first (1) or second (2). Defaults to first order.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Natural(1) ) );
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -218,6 +222,10 @@ void Move_HSRFHyperpriorsGibbs::setConstParameter(const std::string& name, const
     else if ( name == "zeta" )
     {
         zeta = var;
+    }
+    else if ( name == "propGlobalOnly" )
+    {
+        prop_global = var;
     }
     else if ( name == "order" )
     {

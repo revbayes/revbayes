@@ -1,7 +1,7 @@
 #ifndef PhyloOrnsteinUhlenbeckProcessMVN_H
 #define PhyloOrnsteinUhlenbeckProcessMVN_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <set>
 
@@ -50,14 +50,14 @@ template <class valueType> class TypedDagNode;
         
     protected:
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(DagNode* affecter);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter

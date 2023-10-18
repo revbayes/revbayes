@@ -1,10 +1,11 @@
 #ifndef RelativeNodeAgeConstraints_H
 #define RelativeNodeAgeConstraints_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <utility>
 #include <vector>
+#include "RbFileManager.h"
 
 #include "Cloneable.h"
 
@@ -24,13 +25,13 @@ class RelativeNodeAgeConstraintsReader;
         const std::vector <std::pair < std::pair<std::string, std::string>, std::pair<std::string, std::string> > >& getConstraints( ) const;
 
         size_t                                          getNumberOfConstraints(void) const;
-        std::string                                     getFilename(void) const;
+        const path&                                     getFilename(void) const;
        // std::string                                     getDatatype(void) const;
     protected:
         std::vector <std::pair < std::pair<std::string, std::string>, std::pair<std::string, std::string> > >								        olderYoungerConstraints;
         
     private:
-        std::string                                     filename;
+        path                                            filename;
         
     };
     

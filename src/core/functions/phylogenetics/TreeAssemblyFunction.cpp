@@ -62,7 +62,7 @@ TreeAssemblyFunction* TreeAssemblyFunction::clone( void ) const
 }
 
 
-void TreeAssemblyFunction::keep(DagNode *affecter)
+void TreeAssemblyFunction::keep( const DagNode *affecter )
 {
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
@@ -84,7 +84,7 @@ void TreeAssemblyFunction::reInitialized( void )
 }
 
 
-void TreeAssemblyFunction::restore(DagNode *restorer)
+void TreeAssemblyFunction::restore( const DagNode *restorer )
 {
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
@@ -93,18 +93,24 @@ void TreeAssemblyFunction::restore(DagNode *restorer)
 }
 
 
-void TreeAssemblyFunction::touch(DagNode *toucher)
+void TreeAssemblyFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class
     TypedFunction< Tree >::touch( toucher );
+    
+    //reset flag
+    touchedTopology = false;
     
     if ( toucher == brlen )
     {
         const std::set<size_t> &touchedIndices = toucher->getTouchedElementIndices();
         touchedNodeIndices.insert(touchedIndices.begin(), touchedIndices.end());
     }
-    
+    else if (toucher == tau)
+    {
+        touchedTopology = true;
+    }
 }
 
 
@@ -120,14 +126,13 @@ void TreeAssemblyFunction::update( void )
         }
         touchedNodeIndices.clear();
     }
-    else
+    else if (touchedTopology == false)
     {
         const std::vector<double> &v = brlen->getValue();
         for (size_t i = 0; i < v.size(); ++i)
         {
             value->getNode(i).setBranchLength( v[i] );
         }
-        
     }
 
 }

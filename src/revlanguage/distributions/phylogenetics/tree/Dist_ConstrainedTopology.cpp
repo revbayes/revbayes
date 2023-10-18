@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -86,8 +86,15 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
     const Distribution& rlDistribution                        = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
     
+    // tree for initialization
+    RevBayesCore::Tree* init = NULL;
+    if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
+    {
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+    }
+    
     // create the internal distribution object
-    RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c); // , bb);
+    RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init); // , bb);
     
     if (backbone == NULL && backbone->getRevObject() != RevNullObject::getInstance()) {
         ; // do nothing
@@ -184,7 +191,8 @@ const MemberRules& Dist_ConstrainedTopology::getParameterRules(void) const
     {
         member_rules.push_back( new ArgumentRule( "treeDistribution", TypedDistribution<TimeTree>::getClassTypeSpec(), "The base distribution for the tree.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "constraints",      ModelVector<Clade>::getClassTypeSpec(),          "The topological constraints.",          ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<Clade>() ) );
-            
+        member_rules.push_back( new ArgumentRule( "initialTree" ,     TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
         std::vector<TypeSpec> backboneTypes;
         backboneTypes.push_back( TimeTree::getClassTypeSpec() );
         backboneTypes.push_back( ModelVector<TimeTree>::getClassTypeSpec() );
@@ -237,6 +245,10 @@ void Dist_ConstrainedTopology::setConstParameter(const std::string& name, const 
     else if ( name == "inverse" )
     {
         invert_constraint = var;
+    }
+    else if ( name == "initialTree" )
+    {
+        initial_tree = var;
     }
     else
     {

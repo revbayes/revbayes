@@ -51,7 +51,7 @@ ConstantRateOutgroupBirthDeathProcess::ConstantRateOutgroupBirthDeathProcess(   
                                                                                  const std::string& sso,
                                                                                  const std::string& cdt,
                                                                                  const std::vector<Taxon> &tn,
-                                                                                 const std::vector<Taxon> &tno) : AbstractBirthDeathProcess( ra, cdt, tn ),
+                                                                                 const std::vector<Taxon> &tno) : AbstractBirthDeathProcess( ra, cdt, tn, false, NULL ),
 lambda( s ),
 mu( e ),
 rho_ingroup( ri ),
@@ -113,7 +113,7 @@ bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void )
  *
  * \return    The log-probability density.
  */
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void )
+double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
 
     // proceed with probabilities
@@ -184,7 +184,7 @@ double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void )
     
 }
 
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa)
+double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const
 {
     
     if (ages.size() < 1) {
@@ -594,18 +594,18 @@ void ConstantRateOutgroupBirthDeathProcess::setValue(Tree *v, bool f )
 
 
 
-void ConstantRateOutgroupBirthDeathProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void ConstantRateOutgroupBirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     AbstractRootedTreeDistribution::touchSpecialization(affecter, touchAll);
     stored_clades = active_clades;
 }
 
-void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(DagNode *affecter)
+void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(const DagNode *affecter)
 {
     stored_clades = active_clades;
 }
 
-void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(DagNode *restorer)
+void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(const DagNode *restorer)
 {
     active_clades = stored_clades;
 }

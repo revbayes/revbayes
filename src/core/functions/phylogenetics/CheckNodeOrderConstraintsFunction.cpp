@@ -1,6 +1,6 @@
 #include "CheckNodeOrderConstraintsFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 
@@ -50,7 +50,7 @@ CheckNodeOrderConstraintsFunction* CheckNodeOrderConstraintsFunction::clone( voi
 }
 
 
-void CheckNodeOrderConstraintsFunction::keep(DagNode *affecter)
+void CheckNodeOrderConstraintsFunction::keep( const DagNode *affecter)
 {
     //delegate to base class
     TypedFunction< Boolean >::keep( affecter );
@@ -64,14 +64,14 @@ void CheckNodeOrderConstraintsFunction::reInitialized( void )
 }
 
 
-void CheckNodeOrderConstraintsFunction::restore(DagNode *restorer)
+void CheckNodeOrderConstraintsFunction::restore( const DagNode *restorer)
 {
     //delegate to base class
     TypedFunction< Boolean >::restore( restorer );
 }
 
 
-void CheckNodeOrderConstraintsFunction::touch(DagNode *toucher)
+void CheckNodeOrderConstraintsFunction::touch(const DagNode *toucher)
 {
     
     //delegate to base class
@@ -133,55 +133,6 @@ void CheckNodeOrderConstraintsFunction::updateMapOfNodeAges()
     {
         nodeAges[(*elem)] = TreeUtilities::getAgeOfMRCA(tau->getValue(), elem->first, elem->second);
     }
-    
-    
-    
-    
-    
-    //There must be a smart and efficient way of doing that.
-    //For the moment we do it dumb and slow.
-
-    /*Attempt at a smart algorithm
-    std::unordered_set<std::string> tipsToCareAbout;
-    for (const auto& elem: constrainedNodes) {
-        nodeAges[elem] = -1.0;
-        tipsToCareAbout.insert(elem.first);
-        tipsToCareAbout.insert(elem.second);
-    }
-    //First find all tip nodes of interest
-    std::map < TopologyNode*, bool > nodesOfInterest;
-    for (size_t i = 0; i < tree->getValue().getNumberOfTips()-1; ++i)
-    {
-        TopologyNode *node = n[i];
-        if (tipsToCareAbout.contains( node->getName()) ) {
-            nodesOfInterest[node] = true;
-        }
-    }
-    //Now for internal nodes
-    for (size_t i = tree->getValue().getNumberOfTips(); i < n.size(); ++i)
-    {
-        TopologyNode *node = n[i];
-        std::vector< TopologyNode* > kids = node->getChildren();
-        bool doneOne = false;
-        for (size_t j = 0; j< kids.size() ++j) {
-            if ( nodesOfInterest[kids[j]] )
-            {
-                nodesOfInterest[node] = true;
-                if (doneOne)
-                {
-                    //Two children of interest, it may be a node whose age we'd like to know
-                    //...
-                }
-                else {
-                    doneOne = true;
-                }
-            }
-        }
-        
-    }
-     */
-    
-    return;
     
 }
 

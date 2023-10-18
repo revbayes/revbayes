@@ -2,7 +2,6 @@
 #define Func_readAtlas_H
 
 #include "Procedure.h"
-#include "RbFileManager.h"
 
 #include <map>
 #include <string>

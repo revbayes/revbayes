@@ -7,6 +7,7 @@
 
 namespace RevBayesCore {
 
+    class MatrixReal;
     class TraceTree;
 
     class TreeSummary {
@@ -48,19 +49,17 @@ namespace RevBayesCore {
          */
         struct AnnotationReport
         {
-            bool clade_probs;
-            bool conditional_clade_ages;
-            bool conditional_clade_probs;
-            bool conditional_tree_ages;
-            bool MAP_parameters;
-            bool node_ages;
-            bool mean_node_ages;
-            double node_ages_HPD;
-            bool sampled_ancestor_probs;
-            bool force_positive_branch_lengths;
-            bool use_outgroup;
-            
-            AnnotationReport();
+            bool clade_probs = true;
+            bool conditional_clade_ages = false;
+            bool conditional_clade_probs = false;
+            bool conditional_tree_ages = false;
+            bool MAP_parameters = false;
+            bool node_ages = true;
+            bool mean_node_ages = true;
+            double node_ages_HPD = 0.95;
+            bool sampled_ancestor_probs = true;
+            bool force_positive_branch_lengths = false;
+            bool use_outgroup = false;  // Is this unused?
         };
 
 
@@ -74,16 +73,19 @@ namespace RevBayesCore {
         TreeSummary*                               clone(void) const;
         void                                       annotateTree(Tree &inputTree, AnnotationReport report, bool verbose );
         double                                     cladeProbability(const Clade &c, bool verbose);
+        MatrixReal                                 computeConnectivity( double credible_interval_size, const std::string& m, bool verbose );
         double                                     computeEntropy( double credible_interval_size, int num_taxa, bool verbose );
         std::vector<double>                        computePairwiseRFDistance( double credible_interval_size, bool verbose );
         std::vector<double>                        computeTreeLengths(void);
         std::vector<Clade>                         getUniqueClades(double ci=0.95, bool non_trivial_only=true, bool verbose=true);
         std::vector<Tree>                          getUniqueTrees(double ci=0.95, bool verbose=true);
-        int                                        getTopologyFrequency(const Tree &t, bool verbose);
+        long                                       getTopologyCount(const Tree &t, bool verbose);
+        double                                     getTopologyFrequency(const Tree &t, bool verbose);
         bool                                       isClock(void) const;
         bool                                       isCoveredInInterval(const std::string &v, double size, bool verbose);
         bool                                       isCoveredInInterval(const Tree &t, double size, bool verbose);
         bool                                       isDirty(void) const;
+        double                                     jointCladeProbability(const RbVector<Clade> &c, bool verbose);
         double                                     maxdiff(bool verbose);
         Tree*                                      mapTree(AnnotationReport report, bool verbose);
         Tree*                                      mccTree(AnnotationReport report, bool verbose);
@@ -97,11 +99,13 @@ namespace RevBayesCore {
 
         Split                                      collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<Split, long>&);
         void                                       enforceNonnegativeBranchLengths(TopologyNode& tree) const;
-        long                                       splitFrequency(const Split &n) const;
         TopologyNode*                              findParentNode(TopologyNode&, const Split &, std::vector<TopologyNode*>&, RbBitSet& ) const;
+        double                                     jointSplitFrequency(const std::vector<Split>& s) const;
         void                                       mapContinuous(Tree &inputTree, const std::string &n, size_t paramIndex, double hpd, bool np, bool verbose ) const;
         void                                       mapDiscrete(Tree &inputTree, const std::string &n, size_t paramIndex, size_t num, bool np, bool verbose ) const;
         void                                       mapParameters(Tree &inputTree, bool verbose) const;
+        long                                       splitCount(const Split &n) const;
+        double                                     splitFrequency(const Split &n) const;
         void                                       summarize(bool verbose);
 
         std::vector<TraceTree* >                   traces;
@@ -109,16 +113,18 @@ namespace RevBayesCore {
         bool                                       clock;
         bool                                       rooted;
 
+        bool                                       computed = false;
+        std::map<Split, long>                      clade_counts;
         std::set<Sample<Split> >                   clade_samples;
         std::map<Taxon, long >                     sampled_ancestor_counts;
+        std::map<std::string, long>                tree_counts;
         std::set<Sample<std::string> >             tree_samples;
 
         std::map<Split, std::vector<double> >                           clade_ages;
         std::map<Split, std::map<Split, std::vector<double> > >         conditional_clade_ages;
         std::map<std::string, std::map<Split, std::vector<double> > >   tree_clade_ages;
 
-        bool                                       use_outgroup;
-        Clade                                      outgroup;
+        boost::optional<Clade>                     outgroup;
     };
 
 }

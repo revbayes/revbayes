@@ -1,7 +1,7 @@
 #ifndef HomologousCharacterData_H
 #define HomologousCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "AbstractCharacterData.h"
@@ -33,9 +33,9 @@ class AbstractTaxonData;
         virtual HomologousCharacterData*        clone(void) const = 0;
         
         // methods of the Serializable interface
-        void                                    writeToFile(const std::string &dir, const std::string &fn) const = 0;
+        void                                    writeToFile(const path &dir, const std::string &fn) const = 0;
 
-        // CharacterData functions
+        // pure virtual CharacterData functions
         virtual void                            concatenate(const AbstractCharacterData &d, std::string type = "") = 0;         //!< Concatenate two sequences
         virtual void                            concatenate(const HomologousCharacterData &d, std::string type = "") = 0;       //!< Concatenate two sequences
         virtual void                            excludeAllCharacters(void) = 0;                                                 //!< Exclude all characters
@@ -50,6 +50,7 @@ class AbstractTaxonData;
         virtual void                            removeExcludedCharacters(void) = 0;                                              //!< Remove all the excluded characters
         virtual void                            restoreCharacter(size_t i) = 0;                                                 //!< Restore character
         
+        // CharacterData functions
         bool                                    isHomologyEstablished(void) const { return true; }                              //!< Returns whether the homology of the characters has been established
         
     protected:

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -142,9 +142,12 @@ double UpDownSlideBactrianProposal::doProposal( void )
 
     // See Yang and Rodriguez (2013) SI eqns 19 and 20
     // Currently hard-coding m = 0.95
-    if ( u < 0.5 ) {
+    if ( u < 0.5 )
+    {
         delta += 0.95;
-    } else {
+    }
+    else
+    {
         delta -= 0.95;
     }
 

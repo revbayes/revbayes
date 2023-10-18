@@ -1,6 +1,6 @@
 #include "UpDownScaleProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <algorithm>
 
@@ -202,10 +202,10 @@ double UpDownScaleProposal::doProposal( void )
         TopologyNode& node = tau.getRoot();
 
         stored_up_tree_values[i] = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-        TreeUtilities::getAges(&tau, &node, stored_up_tree_values[i]);
+        TreeUtilities::getAges(node, stored_up_tree_values[i]);
         
         // rescale the subtrees
-        TreeUtilities::rescaleSubtree(&tau, &node, scaling_factor );
+        TreeUtilities::rescaleSubtree(node, scaling_factor );
         
         scalingCount += tau.getNumberOfInteriorNodes();
     }
@@ -244,10 +244,10 @@ double UpDownScaleProposal::doProposal( void )
         TopologyNode& node = tau.getRoot();
         
         stored_down_tree_values[i] = std::vector<double>(tau.getNumberOfNodes(), 0.0);
-        TreeUtilities::getAges(&tau, &node, stored_down_tree_values[i]);
+        TreeUtilities::getAges(node, stored_down_tree_values[i]);
 
         // rescale the subtrees
-        TreeUtilities::rescaleSubtree(&tau, &node, 1.0/scaling_factor );
+        TreeUtilities::rescaleSubtree(node, 1.0/scaling_factor );
         
         scalingCount -= tau.getNumberOfInteriorNodes();
     }
@@ -393,7 +393,7 @@ void UpDownScaleProposal::undoProposal( void )
         TopologyNode& node = tau.getRoot();
         
         // rescale the subtrees
-        TreeUtilities::setAges(&tau, &node, stored_up_tree_values[i] );
+        TreeUtilities::setAges(node, stored_up_tree_values[i] );
     }
     
     // scale all the single variable down
@@ -421,7 +421,7 @@ void UpDownScaleProposal::undoProposal( void )
         TopologyNode& node = tau.getRoot();
         
         // rescale the subtrees
-        TreeUtilities::setAges(&tau, &node, stored_down_tree_values[i] );
+        TreeUtilities::setAges(node, stored_down_tree_values[i] );
     }
     
 }

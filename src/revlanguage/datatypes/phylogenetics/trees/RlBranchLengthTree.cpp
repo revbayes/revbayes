@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -15,8 +15,10 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlTree.h"
+#include "RlTimeTree.h"
 #include "RlUtils.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
 using namespace RevLanguage;
@@ -24,44 +26,32 @@ using namespace RevLanguage;
 /** Default constructor */
 BranchLengthTree::BranchLengthTree(void) : Tree()
 {
-
-    ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule("leaf", RlString::getClassTypeSpec(), "The outgroup leaf.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
-    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void,  rerootArgRules       ) );
+    
+    initMethods();
 
 }
 
 /** Construct from bool */
 BranchLengthTree::BranchLengthTree(RevBayesCore::Tree *t) : Tree( t )
 {
-
-    ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule("leaf", RlString::getClassTypeSpec(), "The outgroup leaf.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
-    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void,  rerootArgRules       ) );
+    
+    initMethods();
 
 }
 
 /** Construct from bool */
 BranchLengthTree::BranchLengthTree(const RevBayesCore::Tree &t) : Tree( new RevBayesCore::Tree( t ) )
 {
-
-    ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule("leaf", RlString::getClassTypeSpec(), "The outgroup leaf.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
-    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void,  rerootArgRules       ) );
+    
+    initMethods();
 
 }
 
-/** Construct from bool */
+/** Construct from core type */
 BranchLengthTree::BranchLengthTree(RevBayesCore::TypedDagNode<RevBayesCore::Tree> *n) : Tree( n )
 {
-
-    ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule("leaf", RlString::getClassTypeSpec(), "The outgroup leaf.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
-    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void,  rerootArgRules       ) );
+    
+    initMethods();
 
 }
 
@@ -82,7 +72,17 @@ BranchLengthTree* BranchLengthTree::clone(void) const
 /* Map calls to member methods */
 RevLanguage::RevPtr<RevLanguage::RevVariable> BranchLengthTree::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
+    if (name == "makeUltrametric")
+    {
 
+        found = true;
+
+        RevBayesCore::Tree *tree = dag_node->getValue().clone();
+        RevBayesCore::TreeUtilities::makeUltrametric(*tree);
+        
+        return new RevVariable( new TimeTree( tree ) );
+    }
+    
     return Tree::executeMethod( name, args, found );
 }
 
@@ -113,4 +113,17 @@ const TypeSpec& BranchLengthTree::getTypeSpec( void ) const
     static TypeSpec type_spec = getClassTypeSpec();
 
     return type_spec;
+}
+/**
+ * Initialize the member methods.
+ */
+void BranchLengthTree::initMethods( void )
+{
+    ArgumentRules* rerootArgRules = new ArgumentRules();
+    rerootArgRules->push_back( new ArgumentRule("leaf", RlString::getClassTypeSpec(), "The outgroup leaf.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+
+    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void,  rerootArgRules       ) );
+
+    ArgumentRules* makeUltraArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "makeUltrametric", RlUtils::Void, makeUltraArgRules ) );
 }

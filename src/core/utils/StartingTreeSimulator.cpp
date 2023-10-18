@@ -1,6 +1,6 @@
 #include "StartingTreeSimulator.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <iosfwd>
 #include <iterator>
@@ -84,30 +84,34 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
         // set ages for optional constraints
-        std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
-        for (size_t k = 0; k < optional_constraints.size(); k++)
+        if ( my_constraints[i].hasOptionalConstraints() == true )
         {
-            for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
+            std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
+            for (size_t k = 0; k < optional_constraints.size(); k++)
             {
-                for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
+                for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
                 {
-                    if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
+                    for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
                     {
+                        if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
+                        {
                         
-                        optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
-                        break;
+                            optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
+                            break;
+                        }
                     }
                 }
-            }
             
-        }
+            }
         
-        my_constraints[i].setOptionalConstraints( optional_constraints );
+            my_constraints[i].setOptionalConstraints( optional_constraints );
+        } // finished with the optional constrains, if they exist
+        
         // populate sorted clades vector
         if ( my_constraints[i].size() > 1 && my_constraints[i].size() < num_taxa )
         {
             
-            if ( my_constraints[i].isOptionalMatch() == true )
+            if ( my_constraints[i].hasOptionalConstraints() == true )
             {
                 std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
@@ -128,16 +132,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
     sorted_clades.push_back(all_species);
     
     // DO WE NEED TO SORT THE TAXA?
-    // try this crummy bubble sort
-    size_t num_clades = sorted_clades.size();
-    for (int i = 0; i < num_clades - 1; i++) {
-        for(int j = 0; j < num_clades - i - 1; j++){
-            if (sorted_clades[j].getAge() > sorted_clades[j+1].getAge()) {
-                std::swap(sorted_clades[j], sorted_clades[j+1]);
-            }
-        }
-    }
-    
+    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeBefore);
     
     std::vector<Clade> virtual_taxa;
     int i = -1;
@@ -296,7 +291,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
             min_age = a;
         }
     }
-    
+
     std::set<TopologyNode*> current_nodes;
     std::multimap<double,TopologyNode*> serial_nodes;
     for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)

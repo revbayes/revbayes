@@ -58,7 +58,7 @@ template <class valueType> class TypedDagNode;
 
             double                                              sumRootLikelihood( void );
             void                                                resizeLikelihoodVectors(void);
-            void                                                updateTransitionProbabilities(size_t nodeIdx);
+            void                                                updateTransitionProbabilities(size_t node_idx);
             void                                                getStationaryFrequencies( std::vector<std::vector<double> >& ) const;
 
             virtual double                                      computeIntegratedNodeCorrection(const std::vector<std::vector<std::vector<double> > >& partials, size_t nodeIndex, size_t mask, size_t mixture, const std::vector<double> &f);
@@ -80,6 +80,7 @@ template <class valueType> class TypedDagNode;
             void                                                scale(size_t i, size_t l, size_t r);
             void                                                scale(size_t i, size_t l, size_t r, size_t m);
             virtual void                                        simulate( const TopologyNode &node, std::vector<StandardState> &taxa, size_t rateIndex, std::map<size_t, size_t>& charCounts);
+            void                                                updateTransitionProbabilityMatrices(void);
         };
 
 }

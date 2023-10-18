@@ -1,5 +1,5 @@
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -232,17 +232,16 @@ void Model::setConstParameter(const std::string& name, const RevPtr<const RevVar
 /* Write a file in DOT format for viewing the model DAG in graphviz */
 //   This requires the user to have graphviz installed, or they can paste the file contents
 //   into http://graphviz-dev.appspot.com/
-void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string &bgc)
+void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std::string &bgc)
 {
     
     const std::vector<RevBayesCore::DagNode*>& theNodes = value->getDagNodes();
     std::vector<RevBayesCore::DagNode*>::const_iterator it;
     
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(fn);
-    fm.createDirectoryForFile();
+    RevBayesCore::createDirectoryForFile( fn );
     
-    std::ofstream o;
-    o.open(fm.getFullFileName().c_str());
+    std::ofstream o( fn.string() );
+
     o << "/* Graphical model description in DOT language                                    */\n";
     o << "/*    To view graph:                                                              */\n";
     o << "/*       open this file in the program Graphviz: http://www.graphviz.org          */\n";
@@ -285,11 +284,13 @@ void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string
                         val = "...";
                     o << "   n_" << stname;
                     o << " [shape=";
-                    if ( (*it)->getName() == "" ){
+                    if ( (*it)->getName() == "" )
+                    {
                         o << "box, style=filled, fillcolor=white, ";
                         o << "label=\"" << val << "\"]\n";
                     }
-                    else {
+                    else
+                    {
                         o << "record, style=filled, fillcolor=white, ";
                         rl << "|" << val;
                         o << "label=\"{" << rl.str() << "}\"]\n";
@@ -301,11 +302,13 @@ void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string
                 o << " [shape=";
                 std::stringstream strss;
                 (*it)->printStructureInfo(strss);
-                if (strss.str().find("function",0) < strss.str().npos){
+                if (strss.str().find("function",0) < strss.str().npos)
+                {
                     std::string w;
                     
                     while(strss >> w){
-                        if (w == "_function"){
+                        if (w == "_function")
+                        {
                             strss >> w;
                             strss >> w;
 //                            std::cout << w << std::endl;
@@ -317,7 +320,8 @@ void Model::printModelDotGraph(const std::string &fn, bool vb, const std::string
                 else{
                     std::string w;
                     while(strss >> w){
-                        if (w == "_dagType"){
+                        if (w == "_dagType")
+                        {
                             strss >> w;
                             strss >> w;
                             rl << "\\n[ " << w;

@@ -12,41 +12,18 @@ jobs:
   build:
     strategy:
       matrix:
-        name: [ubuntu-gcc-5,
-               ubuntu-gcc-6,
-               ubuntu-gcc-7,
-               ubuntu-gcc-8,
-               ubuntu-gcc-9,
+        name: [ubuntu-gcc-9,
                ubuntu-gcc-9-mpi,
-               ubuntu-clang-8,
-               macos-xcode-11.7,
+               ubuntu-gcc-10,
+               ubuntu-gcc-11,
+               ubuntu-gcc-12,
+               ubuntu-clang-13,
+               macos-xcode-13,
+               macos-xcode-14,
                windows
                ]
 
         include:
-          - name: ubuntu-gcc-5
-            os: ubuntu-18.04
-            compiler: gcc
-            version: "5"
-            mpi: false
-
-          - name: ubuntu-gcc-6
-            os: ubuntu-18.04
-            compiler: gcc
-            version: "6"
-            mpi: false
-
-          - name: ubuntu-gcc-7
-            os: ubuntu-latest
-            compiler: gcc
-            version: "7"
-            mpi: false
-
-          - name: ubuntu-gcc-8
-            os: ubuntu-latest
-            compiler: gcc
-            version: "8"
-            mpi: false
 
           - name: ubuntu-gcc-9
             os: ubuntu-latest
@@ -60,16 +37,40 @@ jobs:
             version: "9"
             mpi: true
 
-          - name: ubuntu-clang-8
+          - name: ubuntu-gcc-10
             os: ubuntu-latest
-            compiler: clang
-            version: "8"
+            compiler: gcc
+            version: "10"
             mpi: false
 
-          - name: macos-xcode-11.7
+          - name: ubuntu-gcc-11
+            os: ubuntu-latest
+            compiler: gcc
+            version: "11"
+            mpi: false
+
+          - name: ubuntu-gcc-12
+            os: ubuntu-22.04
+            compiler: gcc
+            version: "12"
+            mpi: false
+
+          - name: ubuntu-clang-13
+            os: ubuntu-latest
+            compiler: clang
+            version: "13"
+            mpi: false
+
+          - name: macos-xcode-13
             os: macos-latest
             compiler: xcode
-            version: "11.7"
+            version: "13"
+            mpi: false
+
+          - name: macos-xcode-14
+            os: macos-12
+            compiler: xcode
+            version: "14"
             mpi: false
   
           - name: windows
@@ -81,8 +82,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.8
 
@@ -90,7 +91,7 @@ jobs:
       if: runner.os == 'Linux' && matrix.name != 'windows'
       run: |
         sudo apt-get update
-        sudo apt-get install -y pandoc libcairo2-dev ccache libopenlibm-dev
+        sudo apt-get install -y libcairo2-dev ccache libopenlibm-dev
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
           echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
@@ -104,15 +105,16 @@ jobs:
           sudo apt-get install libopenmpi-dev
         fi
 
+    - name: Select XCode version (macOS)
+      if: runner.os == 'macOS'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ${{ matrix.version }}
+
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          rm -rf /usr/local/bin/2to3 
-          
-          brew update
           brew install pkg-config pandoc boost ccache coreutils openlibm
-          sudo xcode-select -switch /Applications/Xcode_${{ matrix.version }}.app
-          ccache --set-config=cache_dir=$HOME/.ccache
 
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
@@ -129,16 +131,23 @@ jobs:
     - name: Prepare ccache timestamp
       id: ccache_cache_timestamp
       run: |
+        ccache --set-config=cache_dir=$HOME/.ccache
+
+        export CMAKE_C_COMPILER_LAUNCHER=ccache
+        export CMAKE_CXX_COMPILER_LAUNCHER=ccache
+
         if [ "$RUNNER_OS" = "Linux" ] ; then
           stamp=$(date '+%s')
         else
           stamp=$(gdate '+%s')
         fi
         echo "${stamp}"
-        echo "::set-output name=timestamp::${stamp}"
+        echo "timestamp=${stamp}" >> $GITHUB_OUTPUT
 
     - name: ccache cache files
-      uses: actions/cache@v1.1.0
+#      uses: actions/cache@v2
+#     We want to cache the build artifacts whether or not the tests succeed.
+      uses: pat-s/always-upload-cache@v3.0.11
       with:
          path: ~/.ccache
          key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -150,14 +159,23 @@ jobs:
       run: |
         # Don't use weird boost version installed by github actions.
         sudo rm -rf /usr/local/share/boost
-        sudo apt-get install -y libboost-dev libboost-program-options-dev libboost-date-time-dev libboost-filesystem-dev libboost-regex-dev libboost-serialization-dev libboost-system-dev libboost-thread-dev
+
+        # Maybe install a particular boost version.
+        if [ -n "${{ matrix.install_boost }}" ] ; then
+          sudo apt-get remove libboost-all-dev
+          sudo add-apt-repository ppa:mhier/libboost-latest
+          sudo apt-get update
+          sudo apt-get install -y libboost${{ matrix.install_boost }}-dev
+        else
+          sudo apt-get install -y libboost-all-dev
+        fi
 
     - name: Install BOOST and set up build (Windows meson cross compile)
       if: matrix.name == 'windows'
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true
+        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
     - name: Update submodules
@@ -168,43 +186,61 @@ jobs:
       if: matrix.name != 'windows'
       env:
         USE_MPI: ${{ matrix.mpi }}
+        OSX_VERSION_MIN: "10.14"
       run: |
+        if [ ${{ matrix.arch }} = "mac64" ] && [ -n "${OSX_VERSION_MIN}" ]; then
+          MIN="-mmacosx-version-min=${OSX_VERSION_MIN}"
+          export CFLAGS="$CFLAGS $MIN"
+          export CXXFLAGS="$CXXFLAGS $MIN"
+          export LDFLAGS="$LDFLAGS $MIN"
+        fi
+
+        ccache -p
+        ccache -s
+
         cd projects/cmake
-        ./build.sh -travis true
+        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+        cmake --install build
+
+        ccache -s
 
     - name: Configure and build (Windows meson cross compile)
       if: matrix.name == 'windows'
       env:
-        BOOST_INCLUDEDIR: /home/runner/win_root/mingw64/include/boost
-        BOOST_LIBRARYDIR: /home/runner/win_root/mingw64/lib
+        BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
-        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=${GITHUB_WORKSPACE}/wincrossbuild --cross-file=win64-cross.txt
+        CXX=x86_64-w64-mingw32-g++-posix
+        PREFIX=${HOME}/local
+        WINROOT=/home/runner/win_root
+        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        ccache -p
+        ccache -s
         /usr/local/bin/ninja -C build install
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libgcc_s_seh-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*-win32/libstdc++-6.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /home/runner/win_root/mingw64/bin/libboost_*.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /home/runner/win_root/mingw64/bin/libwinpthread-1.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        cp /home/runner/win_root/mingw64/bin/libopenlibm.dll ${GITHUB_WORKSPACE}/wincrossbuild/bin
-        echo '#!/bin/bash' > ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'cp ${GITHUB_WORKSPACE}/wincrossbuild/bin/* .' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'if [ "$#" -gt "1" ]; then' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'else' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'fi' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'rm -f *.exe' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        echo 'rm -f *.dll' >> ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
-        chmod +x ${GITHUB_WORKSPACE}/wincrossbuild/bin/rb
+        ccache -s
+        cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
+        cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
+        cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
+        cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
+        cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
+        cp $WINROOT/mingw64/bin/libopenlibm.dll           $PREFIX/bin
+        ( echo '#!/bin/bash'
+          echo "cp $PREFIX/bin/* ."
+          echo 'if [ "$#" -gt "1" ]; then'
+          echo '  wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'else'
+          echo '  wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'fi'
+          echo 'rm -f *.exe'
+          echo 'rm -f *.dll' ) > $PREFIX/bin/rb
+        chmod +x $PREFIX/bin/rb
+
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
         IS_WINDOWS: ${{ matrix.name == 'windows' }}
       run: |
-        if [ "${{ matrix.name }}" = "windows" ] ; then
-          export PATH=${GITHUB_WORKSPACE}/wincrossbuild/bin:$PATH
-        else
-          export PATH=${GITHUB_WORKSPACE}/projects/cmake:$PATH
-        fi
+        export PATH=${HOME}/local/bin:$PATH
+
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
         cd tests
@@ -218,14 +254,14 @@ jobs:
         echo ::endgroup::
 
     - name: Upload test files if they failed
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
         path: tests
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v2-preview
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: testiphy-results-${{ matrix.name }}
@@ -237,8 +273,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: technote-space/workflow-conclusion-action@v2.0.1
-    - uses: 8398a7/action-slack@v3.8.1
+    - uses: technote-space/workflow-conclusion-action@v3
+    - uses: 8398a7/action-slack@v3
       with:
         status: custom
         fields: workflow,commit,repo,ref,author

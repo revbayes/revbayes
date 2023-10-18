@@ -9,7 +9,7 @@
 #ifndef __rb_mlandis__TimeAtlasDataReader__
 #define __rb_mlandis__TimeAtlasDataReader__
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 
@@ -23,7 +23,7 @@ class GeographicArea;
     {
     public:
         
-        TimeAtlasDataReader(std::string fn, std::string d="");
+        TimeAtlasDataReader(const path& fn, std::string d="");
         TimeAtlasDataReader(const TimeAtlasDataReader& tadr);
         
         std::vector<double> getEpochs(void);

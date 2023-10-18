@@ -1,25 +1,43 @@
 ################################################################################
 #
 # RevBayes Validation Test: Exponential Distribution
-# 
-# Model: Just a single random variable from an exponential distribution. 
-#            
+#
+# Model: Several random variable from an exponential distribution.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
 
-# set my move index
-mi = 0
+## Global settings
 
-n_samples = 10
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
 
 
-rate <- 2
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
 
-x ~ dnExponential(rate)
-moves[++mi] = mvScale(x,weight=2)
+prior_mean ~ dnExp(0.2)
+moves.append( mvScale(prior_mean,weight=2) )
+
+NUM_VARS = 3
+NUM_OBS = 10
+
+for ( j in 1:NUM_VARS ) {
+
+  mean[j] ~ dnExp( 1.0 / prior_mean )
+  moves.append( mvScale(mean[j],weight=2) )
+
+  for ( i in 1:NUM_OBS){
+    index = (j-1)*NUM_OBS + i
+	x[index] ~ dnNormal(mean[j], sd=1)
+	x[index].clamp( x[index] )
+  }
+}
+
 
 
 #############
@@ -28,23 +46,18 @@ moves[++mi] = mvScale(x,weight=2)
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(rate)
+mymodel = model(prior_mean)
 
 
-
-
-
-
-monitors[1] = mnModel(filename="output/dirichlet.log",printgen=10, separator = TAB)
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=10000,tuningInterval=250)
-validation.run(generations=30000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Exp" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

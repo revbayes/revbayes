@@ -12,6 +12,8 @@
 #include "StringUtilities.h"
 #include "FastaFileToNaturalNumbersConverter.h"
 
+// FIXME: This file shares a lot of code with CountFileToNaturalNumbersConverter.cpp
+
 using namespace RevBayesCore;
 
 
@@ -28,7 +30,7 @@ FastaFileToNaturalNumbersConverter::FastaFileToNaturalNumbersConverter( void )
 
 
 /** Read Count File and Write Natural Numbers file */
-void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const std::string &fo )
+void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std::vector<std::string> &taxa, const std::vector<std::string> &alleles , const size_t& n_individuals, const path &fo )
 {
   
   // getting the number of alleles and taxa
@@ -36,11 +38,9 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   size_t n_taxa    = taxa.size();
 
   // open file
-  std::ifstream readStream;
-  RbFileManager fii = RbFileManager( fi );
-  if ( fii.openFile(readStream) == false ) {
-    throw RbException( "Could not open file \"" + fi + "\".");
-  }
+  std::ifstream readStream( fi.string() );
+  if ( not readStream )
+      throw RbException()<<"Could not open file "<<fi<<".";
 
   // some important quantities to parse the fasta file    
   std::vector<std::string> alignment;
@@ -56,7 +56,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   //for (size_t i =0; i<n_taxa; ++i){ std::cout << "lt: " <<length_taxa[i] << "\n"; }
 
   // going through the alingment lines
-  while (fii.safeGetline(readStream,line)) {
+  while (safeGetline(readStream,line)) {
 
     if (line.length() == 0) { break; }
 
@@ -68,7 +68,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
 
       // if the element is found keep the sequence (sitting in the next line) and save the taxa index
       if ( index < n_taxa )  {
-        fii.safeGetline(readStream,line);
+        safeGetline(readStream,line);
         alignment.push_back(line);
         aligment_index.push_back(index);
         ns_taxa[index] += 1;
@@ -145,7 +145,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
   }
 
   // close the input file connection
-  fii.closeFile( readStream );
+  readStream.close();
   //for (size_t i =0; i<n_taxa; ++i){ std::cout << ctaxa[i] << "\n"; }
 
   // summarizing the 
@@ -157,18 +157,18 @@ void FastaFileToNaturalNumbersConverter::faconverter( const std::string &fi, con
                    "\n  Number of PoMo states           " << n_alleles*(1.0+(n_alleles-1.0)*(n_individuals-1.0)*0.5) << "\n\n";
 
   // the filestream object
-  std::fstream NaturalNumbers;
-  RbFileManager foo = RbFileManager(fo);
-  foo.createDirectoryForFile();
-    
+  createDirectoryForFile( fo );
+
   // open the stream to the file a write it
-  NaturalNumbers.open( foo.getFullFileName().c_str(), std::fstream::out );
-  for (size_t i=0; i<n_taxa; ++i){
-    NaturalNumbers << ctaxa[i] + "\n";
+  std::ofstream NaturalNumbersStream( fo.string() );
+
+  for (size_t i=0; i<n_taxa; ++i)
+  {
+    NaturalNumbersStream << ctaxa[i] + "\n";
   }
   
   // close the stream
-  NaturalNumbers.close();
+  NaturalNumbersStream.close();
 
 }
 
@@ -192,18 +192,18 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
         
         // some variables
         std::string str_index;
-        size_t value,state,int_index,M,m,weight,n_counts,edge;
+        size_t state=-1, int_index=-1, m=-1;
 
 
         // setting total counts, the last postive count (why last? important for state indexing), and number of non-null counts to 0
-        M        = 0;
-        n_counts = 0;
+        size_t M        = 0;
+        size_t n_counts = 0;
       
         // goes through the number of alleles
         // counts are comma separated
         for (size_t k=0; k<n_alleles; k++){
         
-          value = counts[k];
+          size_t value = counts[k];
         
           // getting info from the count pattenr
           if (value > 0) {
@@ -225,7 +225,7 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
         }
       
         // sampling a 0:n_individuals frequency from the weight vector 
-        weight = sample_weight(M, m, n_individuals);
+        size_t weight = sample_weight(M, m, n_individuals);
       
         // determining the pomo state
         // three possible situations
@@ -236,16 +236,16 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
           //std::cout << "  " << state << "\n";
 
         // if the count is monoallelic & likely "sampled" from a polymoprhic state
-        } else if (n_counts==1 & weight<n_individuals ) {
+        } else if (n_counts==1 && weight<n_individuals ) {
         
-          edge = sample_edge(int_index, matrix_edges);
+          size_t edge = sample_edge(int_index, matrix_edges);
           state = n_alleles+edge*n_individuals-edge+weight-1;
           //std::cout << "  " << state << "\n";
       
         // if the count is biallelic, thus necessarily sampled from a polymoprhic state
         } else if (n_counts>1) {
         
-          edge = get_index(vector_edges,str_index);
+          size_t edge = get_index(vector_edges,str_index);
           state = n_alleles+edge*n_individuals-edge+weight-1;
           //std::cout << "  " << state << "\n";
         

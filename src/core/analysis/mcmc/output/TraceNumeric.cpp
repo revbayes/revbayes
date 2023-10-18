@@ -1,7 +1,7 @@
 #include "TraceNumeric.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "GewekeTest.h"
@@ -46,22 +46,26 @@ TraceNumeric* TraceNumeric::clone() const
 void TraceNumeric::computeStatistics( void )
 {
 
-    // test stationarity within chain
-    size_t nBlocks = 10;
-    StationarityTest testS = StationarityTest(nBlocks, 0.01);
-    passedStationarityTest = testS.assessConvergence(*this);
-
-    // Geweke's test for convergence within a chain
-    GewekeTest testG = GewekeTest(0.01);
-    passedGewekeTest = testG.assessConvergence(*this);
+    // Sebastian (20210519): The convergence test are currently broken and don't work anymore.
+//    // test stationarity within chain
+//    size_t nBlocks = 10;
+//    StationarityTest testS = StationarityTest(nBlocks, 0.01);
+//    passedStationarityTest = testS.assessConvergence(*this);
+//
+//    // Geweke's test for convergence within a chain
+//    GewekeTest testG = GewekeTest(0.01);
+//    passedGewekeTest = testG.assessConvergence(*this);
 
 }
 
 
 double TraceNumeric::getMean() const
 {
-    if( isDirty() == false ) return mean;
-
+    if ( isDirty() == false )
+    {
+        return mean;
+    }
+    
     double m = 0;
     size_t size = values.size();
     for (size_t i=burnin; i<size; i++)

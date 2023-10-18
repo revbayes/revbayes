@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 
@@ -32,17 +32,12 @@ FastaWriter::FastaWriter( void )
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  * \param[in]   data        The character data object which is written out.
  */
-void FastaWriter::writeData(std::string const &fileName, const AbstractHomologousDiscreteCharacterData &data)
+void FastaWriter::writeData(const path& file_name, const AbstractHomologousDiscreteCharacterData& data)
 {
-    
+    createDirectoryForFile( file_name );
+
     // the filestream object
-    std::fstream outStream;
-    
-    RbFileManager f = RbFileManager(fileName);
-    f.createDirectoryForFile();
-    
-    // open the stream to the file
-    outStream.open( f.getFullFileName().c_str(), std::fstream::out );
+    std::ofstream out_stream( file_name.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)
@@ -53,7 +48,7 @@ void FastaWriter::writeData(std::string const &fileName, const AbstractHomologou
 
             const AbstractDiscreteTaxonData &taxon = data.getTaxonData( it->getName() );
 
-            outStream << ">" << it->getName() << std::endl;
+            out_stream << ">" << it->getName() << std::endl;
 
             size_t nChars = taxon.getNumberOfCharacters();
             for (size_t i = 0; i < nChars; ++i)
@@ -61,15 +56,15 @@ void FastaWriter::writeData(std::string const &fileName, const AbstractHomologou
                 if ( !data.isCharacterExcluded( i ) )
                 {
                     const CharacterState &c = taxon.getCharacter( i );
-                    outStream << c.getStringValue();
+                    out_stream << c.getStringValue();
                 }
             }
-            outStream << std::endl;
+            out_stream << std::endl;
         }
     }
     
     // close the stream
-    outStream.close();
+    out_stream.close();
 }
 
 
@@ -79,17 +74,12 @@ void FastaWriter::writeData(std::string const &fileName, const AbstractHomologou
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  * \param[in]   data        The character data object which is written out.
  */
-void FastaWriter::writeData(std::string const &fileName, const AbstractNonHomologousDiscreteCharacterData &data)
+void FastaWriter::writeData(const path& fileName, const AbstractNonHomologousDiscreteCharacterData& data)
 {
-    
+    createDirectoryForFile( fileName );
+
     // the filestream object
-    std::fstream outStream;
-    
-    RbFileManager fm = RbFileManager(fileName);
-    fm.createDirectoryForFile();
-    
-    // open the stream to the file
-    outStream.open( fm.getFullFileName().c_str(), std::fstream::out );
+    std::fstream out_stream( fileName.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)
@@ -100,20 +90,20 @@ void FastaWriter::writeData(std::string const &fileName, const AbstractNonHomolo
             
             const AbstractDiscreteTaxonData &taxon = data.getTaxonData( it->getName() );
             
-            outStream << ">" << it->getName() << std::endl;
+            out_stream << ">" << it->getName() << std::endl;
             
             size_t nChars = taxon.getNumberOfCharacters();
             for (size_t i = 0; i < nChars; ++i)
             {
                 const CharacterState &c = taxon.getCharacter( i );
-                outStream << c.getStringValue();
+                out_stream << c.getStringValue();
             }
             
-            outStream << std::endl;
+            out_stream << std::endl;
         }
         
     }
     
     // close the stream
-    outStream.close();
+    out_stream.close();
 }

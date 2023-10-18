@@ -20,14 +20,6 @@ template <class valueType> class TypedDagNode;
         PhyloWhiteNoiseProcess*                                 clone(void) const;                                                                      //!< Create an independent clone
         double                                                  computeLnProbability(void);
         void                                                    redrawValue(void);
- 
-        /*
-        // special handling of state changes
-        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                          //!< get affected nodes
-        void                                                    keepSpecialization(DagNode* affecter);
-        void                                                    restoreSpecialization(DagNode *restorer);
-        void                                                    touchSpecialization(DagNode *toucher, bool touchAll);
-        */
         
     protected:
         // Parameter management functions

@@ -1,7 +1,7 @@
 #ifndef ChromosomesCladogenicStateFunction_H
 #define ChromosomesCladogenicStateFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <map>
 

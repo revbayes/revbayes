@@ -15,7 +15,7 @@ namespace RevBayesCore {
     class RateAgeBetaShift : public AbstractMove {
         
     public:
-        RateAgeBetaShift( StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> n, double delta, bool t, double weight);                                                         //!<  constructor
+        RateAgeBetaShift( StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> n, StochasticNode<RbVector<double> > *sn, double delta, bool t, double weight);                                                         //!<  constructor
         virtual                                ~RateAgeBetaShift(void);                                                             //!< Destructor
         
         // Basic utility functions
@@ -40,13 +40,14 @@ namespace RevBayesCore {
         
         // member variables
         StochasticNode<Tree>*                   tree;
-        std::vector<StochasticNode<double>* >   rates;
+        std::vector<StochasticNode<double>* >   rates_vec;
+        StochasticNode<RbVector<double> >*      rates;
         double                                  delta;
         
         // stored objects to undo proposal
-        TopologyNode*                           storedNode;
-        double                                  storedAge;
-        std::vector<double>                     storedRates;
+        TopologyNode*                           stored_node;
+        double                                  stored_age;
+        std::vector<double>                     stored_rates;
 
         size_t                                  num_accepted_current_period;
         size_t                                  num_accepted_total;

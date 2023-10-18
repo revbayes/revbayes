@@ -5,6 +5,8 @@
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "ConstantNode.h"
+#include "ContinuousTaxonData.h"
+#include "ContinuousCharacterData.h"
 #include "DiscreteTaxonData.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "DiscreteCharacterState.h"
@@ -84,9 +86,9 @@ namespace RevBayesCore {
         double                                                              computeBranchRate(size_t index);
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(DagNode* affecter);
-        virtual void                                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual methods
         virtual double                                                      computeRootLikelihood(const TopologyNode &nd) = 0;
@@ -457,14 +459,14 @@ void RevBayesCore::TreeHistoryCtmc<charType>::flagNodeDirty( const RevBayesCore:
 }
 
 template<class charType>
-double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nodeIdx) const
+double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nide_idx) const
 {
     
     // get the clock rate for the branch
     double rate;
     if ( this->branchHeterogeneousClockRates == true )
     {
-        rate = this->heterogeneousClockRates->getValue()[nodeIdx];
+        rate = this->heterogeneousClockRates->getValue()[nide_idx];
     }
     else
     {
@@ -573,7 +575,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::initializeHistoriesVector( void )
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization( DagNode* affecter )
+void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization( const DagNode* affecter )
 {
 
     // reset all flags
@@ -591,7 +593,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization( DagNode* affec
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( DagNode* affecter )
+void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNode* affecter )
 {
 
     // reset the flags
@@ -892,7 +894,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::swapParameterInternal(const DagNod
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( DagNode* affecter, bool touchAll )
+void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

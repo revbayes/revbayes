@@ -1,0 +1,78 @@
+################################################################################
+#
+# RevBayes Validation Test: Heterochronous linear demography coalescent process
+#
+# Model: Heterochronous linear demography coalescent process
+#
+#
+# authors: Sebastian Hoehna, Ronja Billenstein
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+#######################
+# Reading in the Data #
+#######################
+
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+n_taxa <- taxa.size()
+
+
+##############
+# Tree model #
+##############
+
+
+pop_size_0 ~ dnUniform(0,1E3)
+pop_size_1 ~ dnUniform(0,1E3)
+moves.append( mvScale(pop_size_0, lambda=0.1, tune=true, weight=2.0) )
+moves.append( mvScale(pop_size_1, lambda=0.1, tune=true, weight=2.0) )
+
+change_point ~ dnUniform(10,100)
+moves.append( mvSlide(change_point, delta=0.1, tune=true, weight=2.0) )
+
+demo_const = dfConstant( pop_size_1 )
+demo_lin = dfLinear( N0=pop_size_0, N1=pop_size_1, t0=0, t1=change_point )
+psi ~ dnCoalescentDemography([demo_lin,demo_const], changePoints=[change_point], taxa=taxa)
+
+### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
+psi.clamp( psi )
+
+#############
+# The Model
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+
+
+################
+# The Analysis #
+################
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Coal_het_lin" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()

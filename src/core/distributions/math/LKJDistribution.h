@@ -1,15 +1,7 @@
-//
-//  LKJDistribution.h
-//  revbayes
-//
-//  Created by Michael R. May on 2017-08-04.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
+#ifndef LKJDistribution_H
+#define LKJDistribution_H
 
-#ifndef __revbayes__LKJDistribution__
-#define __revbayes__LKJDistribution__
-
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
@@ -50,4 +42,4 @@ template <class valueType> class TypedDagNode;
 }
 
 
-#endif /* defined(__revbayes__LKJDistribution__) */
+#endif /* defined(LKJDistribution_H) */

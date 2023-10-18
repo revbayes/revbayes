@@ -26,9 +26,9 @@ namespace RevBayesCore {
         virtual const std::string&                          getRevTypeOfValue(void);                                                        //!< Get Rev language type of value
         
     protected:
-        virtual void                                        keepMe(DagNode* affecter);                                                      //!< Keep value of this and affected nodes
-        virtual void                                        restoreMe(DagNode *restorer);                                                   //!< Restore value of this node
-        virtual void                                        touchMe(DagNode *toucher, bool touchAll);                                       //!< Tell affected nodes value is reset
+        virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
+        virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
+        virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                                 //!< Tell affected nodes value is reset
         
         
         // members
@@ -163,7 +163,7 @@ const std::string& RevBayesCore::DynamicNode<valueType>::getRevTypeOfValue(void)
  * At this point, we also need to make sure we update the stored ln probability.
  */
 template<class valueType>
-void RevBayesCore::DynamicNode<valueType>::keepMe( DagNode* /*affecter*/ )
+void RevBayesCore::DynamicNode<valueType>::keepMe( const DagNode* /*affecter*/ )
 {
     
     // unset the touched flag
@@ -176,7 +176,7 @@ void RevBayesCore::DynamicNode<valueType>::keepMe( DagNode* /*affecter*/ )
  * Restore the old value of the node and tell affected 
  */
 template<class valueType>
-void RevBayesCore::DynamicNode<valueType>::restoreMe(DagNode * /*restorer*/)
+void RevBayesCore::DynamicNode<valueType>::restoreMe( const DagNode * /*restorer*/)
 {
 
     // unset the touched flag
@@ -188,7 +188,7 @@ void RevBayesCore::DynamicNode<valueType>::restoreMe(DagNode * /*restorer*/)
  * Touch this node for recalculation 
  */
 template<class valueType>
-void RevBayesCore::DynamicNode<valueType>::touchMe( DagNode * /*toucher*/, bool /*touchAll*/ )
+void RevBayesCore::DynamicNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*touchAll*/ )
 {
 
     // set the touched flag

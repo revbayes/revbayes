@@ -268,7 +268,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::getWithinSpeciesVariance(co
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::keepSpecialization( DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -567,7 +567,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::resetValue( void )
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::restoreSpecialization( DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -922,7 +922,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::sumRootLikelihood( void )
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

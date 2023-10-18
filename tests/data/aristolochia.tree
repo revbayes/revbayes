@@ -1,0 +1,45 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=34;
+	Taxlabels
+		Aristolochia_anguicida
+		Aristolochia_arborea
+		Aristolochia_burelae
+		Aristolochia_californica
+		Aristolochia_cauliflora
+		Aristolochia_esperanzae
+		Aristolochia_gaudichaudi
+		Aristolochia_hookeriana
+		Aristolochia_indica
+		Aristolochia_kerrii
+		Aristolochia_littoralis
+		Aristolochia_maxima_JM011
+		Aristolochia_maxima_SETS37
+		Aristolochia_mollisima
+		Aristolochia_neolongifolia_SETS52
+		Aristolochia_neolongifolia_SETS96
+		Aristolochia_paulistana
+		Aristolochia_peruviana
+		Aristolochia_pilosa
+		Aristolochia_praevenosa
+		Aristolochia_promissa
+		Aristolochia_saccata
+		Aristolochia_serpantaria
+		Aristolochia_sp_JM02
+		Aristolochia_sp_JM04
+		Aristolochia_sp_JM06
+		Aristolochia_tagala
+		Aristolochia_tagala_040521
+		Aristolochia_tagala_SETS48
+		Aristolochia_taliscana
+		Aristolochia_tentaculata
+		Aristolochia_tomentosa
+		Aristolochia_triactina
+		Aristolochia_wardiana
+		;
+End;
+
+Begin trees;
+tree TREE1 = [&R]((((((((((Aristolochia_hookeriana[&index=33]:0.166320,Aristolochia_kerrii[&index=32]:0.166320)[&index=34,posterior=1.000000,ccp=1.000000,height_95%_HPD={0.004457,0.357292}]:0.370342,Aristolochia_tagala_040521[&index=31]:0.536662)[&index=35,posterior=0.977939,ccp=0.974645,height_95%_HPD={0.181449,0.902364}]:0.154012,Aristolochia_tagala[&index=30]:0.690675)[&index=36,posterior=0.802137,ccp=0.618196,height_95%_HPD={0.267042,1.07915}]:0.283417,(Aristolochia_gaudichaudi[&index=29]:0.457775,Aristolochia_tagala_SETS48[&index=28]:0.457775)[&index=37,posterior=0.699069,ccp=0.618196,height_95%_HPD={0.063978,0.949166}]:0.516317)[&index=38,posterior=0.886591,ccp=0.886591,height_95%_HPD={0.469257,1.52643}]:0.681454,Aristolochia_indica[&index=27]:1.655546)[&index=39,posterior=1.000000,ccp=1.000000,height_95%_HPD={0.94433,2.35198}]:2.667089,(Aristolochia_sp_JM02[&index=26]:1.746388,Aristolochia_sp_JM04[&index=25]:1.746388)[&index=40,posterior=1.000000,ccp=1.000000,height_95%_HPD={1.15869,2.69177}]:2.576246)[&index=41,posterior=0.992761,ccp=0.991860,height_95%_HPD={3.39566,5.56592}]:0.683288,Aristolochia_burelae[&index=24]:5.005922)[&index=42,posterior=0.889349,ccp=0.453508,height_95%_HPD={3.88703,6.13655}]:0.730435,((((((Aristolochia_anguicida[&index=23]:0.644146,Aristolochia_littoralis[&index=22]:0.644146)[&index=43,posterior=1.000000,ccp=1.000000,height_95%_HPD={0.196983,1.11659}]:0.958589,Aristolochia_peruviana[&index=21]:1.602734)[&index=44,posterior=0.429162,ccp=0.496777,height_95%_HPD={1.1017,2.45964}]:0.416287,Aristolochia_pilosa[&index=20]:2.019021)[&index=45,posterior=0.855567,ccp=0.507536,height_95%_HPD={1.41725,2.84666}]:0.431302,((Aristolochia_esperanzae[&index=19]:1.710770,Aristolochia_sp_JM06[&index=18]:1.710770)[&index=46,posterior=0.978283,ccp=0.977587,height_95%_HPD={1.11527,2.59578}]:0.467038,Aristolochia_paulistana[&index=17]:2.177808)[&index=47,posterior=0.522923,ccp=0.507536,height_95%_HPD={1.58222,3.09727}]:0.272515)[&index=48,posterior=0.983454,ccp=0.983454,height_95%_HPD={1.84579,3.34463}]:0.568383,((Aristolochia_taliscana[&index=16]:0.106493,Aristolochia_tentaculata[&index=15]:0.106493)[&index=49,posterior=1.000000,ccp=1.000000,height_95%_HPD={0,0.40812}]:1.705076,Aristolochia_cauliflora[&index=14]:1.811569)[&index=50,posterior=1.000000,ccp=0.983454,height_95%_HPD={1.02076,2.78456}]:1.207138)[&index=51,posterior=1.000000,ccp=1.000000,height_95%_HPD={2.36793,4.16485}]:1.930010,(Aristolochia_maxima_JM011[&index=13]:0.442630,Aristolochia_maxima_SETS37[&index=12]:0.442630)[&index=52,posterior=1.000000,ccp=1.000000,height_95%_HPD={0.029211,0.755923}]:4.506087)[&index=53,posterior=0.485350,ccp=0.453508,height_95%_HPD={4.1239,6.50272}]:0.787640)[&index=54,posterior=0.997242,ccp=0.995519,height_95%_HPD={4.59818,6.91798}]:0.485789,((Aristolochia_promissa[&index=11]:1.024172,Aristolochia_triactina[&index=10]:1.024172)[&index=55,posterior=1.000000,ccp=1.000000,height_95%_HPD={0.412467,1.69699}]:3.559221,Aristolochia_praevenosa[&index=9]:4.583393)[&index=56,posterior=0.998276,ccp=0.995519,height_95%_HPD={3.16895,6.1598}]:1.638753)[&index=57,posterior=1.000000,ccp=1.000000,height_95%_HPD={5.19723,7.72108}]:3.777855,((((((Aristolochia_neolongifolia_SETS52[&index=8]:0.104731,Aristolochia_neolongifolia_SETS96[&index=7]:0.104731)[&index=58,posterior=1.000000,ccp=1.000000,height_95%_HPD={0,0.343712}]:0.938856,Aristolochia_mollisima[&index=6]:1.043587)[&index=59,posterior=0.495346,ccp=0.260611,height_95%_HPD={0.521176,1.59403}]:0.282641,((Aristolochia_saccata[&index=5]:0.865095,Aristolochia_wardiana[&index=4]:0.865095)[&index=60,posterior=0.374009,ccp=0.442974,height_95%_HPD={0.433046,1.45215}]:0.207885,Aristolochia_californica[&index=3]:1.072980)[&index=61,posterior=0.547053,ccp=0.260611,height_95%_HPD={0.606443,1.61853}]:0.253248)[&index=62,posterior=0.925888,ccp=0.925269,height_95%_HPD={0.881494,1.98922}]:0.576558,Aristolochia_tomentosa[&index=2]:1.902787)[&index=63,posterior=0.991727,ccp=0.991727,height_95%_HPD={1.26919,2.6787}]:0.787775,Aristolochia_arborea[&index=1]:2.690561)[&index=64,posterior=1.000000,ccp=1.000000,height_95%_HPD={1.81325,3.60065}]:1.454185,Aristolochia_serpantaria[&index=0]:4.144746)[&index=65,posterior=1.000000,ccp=1.000000,height_95%_HPD={3.10477,5.36873}]:5.855255)[&index=66,posterior=1.000000,ccp=1.000000,height_95%_HPD={10,10}]:0.000000;
+End;

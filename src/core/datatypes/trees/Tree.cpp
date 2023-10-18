@@ -20,6 +20,7 @@
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
@@ -28,19 +29,6 @@ namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 namespace RevBayesCore { class TreeChangeEventListener; }
 
 using namespace RevBayesCore;
-
-/* Default constructor */
-Tree::Tree(void) :
-    changeEventHandler(),
-    root( NULL ),
-    rooted( false ),
-    is_negative_constraint( false ),
-    num_tips( 0 ),
-    num_nodes( 0 )
-{
-
-}
-
 
 /* Copy constructor */
 Tree::Tree(const Tree& t) :
@@ -63,6 +51,13 @@ Tree::Tree(const Tree& t) :
         setRoot(newRoot, false);
     }
 
+}
+
+
+/* Copy constructor */
+Tree::Tree(Tree&& t)
+{
+    operator=( std::move(t) );
 }
 
 
@@ -115,6 +110,38 @@ Tree& Tree::operator=(const Tree &t)
     return *this;
 }
 
+Tree& Tree::operator=(Tree&& t)
+{
+    // If there are listeners watching t, then maybe we shouldn't steal its nodes.
+    // (However, since t is a temporary variable, then it probably shouldn't have listeners.)
+    if (not t.changeEventHandler.getListeners().empty())
+    {
+        // Use the copy constructor in this case.
+        return operator=(t);
+    }
+
+    // Otherwise steal nodes from t instead of copying them.
+    // By swapping with t, we let t do the work of destroying our nodes.
+    if (this != &t)
+    {
+        std::swap( rooted                , t.rooted                );
+        std::swap( num_tips              , t.num_tips              );
+        std::swap( num_nodes             , t.num_nodes             );
+        std::swap( is_negative_constraint, t.is_negative_constraint);
+        std::swap( root                  , t.root                  );
+        std::swap( nodes                 , t.nodes                 );
+        std::swap( taxon_bitset_map      , t.taxon_bitset_map      );
+
+        // This loop is maybe a reason to NOT record a tree pointer on the nodes...
+        for(auto& node: nodes)
+            node->setTree(this);
+
+        for(auto& node: t.nodes)
+            node->setTree(&t);
+    }
+
+    return *this;
+}
 
 bool Tree::operator==(const Tree &t) const
 {
@@ -233,7 +260,7 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
     if ( contains == false && unrooted == true )
     {
         your_taxa.flip();
-        contains = root->containsClade( your_taxa, true );;
+        contains = root->containsClade( your_taxa, true );
     }
 
     return contains;
@@ -267,7 +294,6 @@ void Tree::dropTipNode( size_t index )
     {
         // there is nothing left to prune
         node.setName("");
-        node.setNodeType(false, true, false);
         return;
     }
     TopologyNode &parent        = node.getParent();
@@ -293,6 +319,7 @@ void Tree::dropTipNode( size_t index )
                 sibling_state_times[i] += parent.getTimeInStates()[i];
             }
             sibling->setTimeInStates(sibling_state_times);
+            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
         }
     }
     else
@@ -310,6 +337,7 @@ void Tree::dropTipNode( size_t index )
             if (root->getTimeInStates().size() > 0)
             {
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
+                root->setNumberOfShiftEvents( 0 );
             }
         }
         else
@@ -318,16 +346,7 @@ void Tree::dropTipNode( size_t index )
         }
     }
 
-    nodes.clear();
-
-    // bootstrap all nodes from the root and add the in a pre-order traversal
-    fillNodesByPhylogeneticTraversal(root);
-    for (unsigned int i = 0; i < nodes.size(); ++i)
-    {
-        nodes[i]->setIndex(i);
-    }
-
-    num_nodes = nodes.size();
+    reindexNodes();
 
     // count the number of tips
     num_tips = 0;
@@ -335,8 +354,6 @@ void Tree::dropTipNode( size_t index )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
             throw RbException("Problem while reading in tree.");
         }
         num_tips += ( nodes[i]->isTip() ? 1 : 0);
@@ -431,6 +448,10 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     if ( n == "parent" )
     {
         long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        if (getNode( index ).isRoot() == true)
+        {
+            throw RbException("Root has no parent.");
+        }
         rv = long( getNode( index ).getParent().getIndex() )+1;
     }
     else if ( n == "child" )
@@ -634,7 +655,7 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
     {
         throw RbException("Cannot acces interior node '" + StringUtilities::to_string(indx) + "' for a tree with " + StringUtilities::to_string(n) + " tips.");
     }
-    return *nodes[ indx + getNumberOfTips() ];
+    return *nodes[ indx + n ];
 }
 
 
@@ -668,7 +689,15 @@ const TopologyNode& Tree::getMrca(const TopologyNode &n) const
 std::string Tree::getNewickRepresentation(bool round ) const
 {
 
-    return root->computeNewick( round );
+    if ( root == NULL )
+    {
+        return "";
+    }
+    else
+    {
+        return root->computeNewick( round );
+    }
+
 }
 
 
@@ -704,10 +733,10 @@ const std::vector<TopologyNode*>& Tree::getNodes(void) const
 }
 
 
-std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
+std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 {
 
-    std::vector<RbBitSet> bs;
+    std::vector<RbBitSet>* bs = new std::vector<RbBitSet>();
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -716,7 +745,7 @@ std::vector<RbBitSet> Tree::getNodesAsBitset(void) const
         {
             RbBitSet taxa_this_node = RbBitSet(num_tips);
             n->getTaxa(taxa_this_node);
-            bs.push_back( taxa_this_node );
+            bs->push_back( taxa_this_node );
         }
     }
 
@@ -770,7 +799,10 @@ size_t Tree::getNumberOfInteriorNodes( void ) const
 
     if ( isRooted() )
     {
-        return preliminaryNumIntNodes - 1;
+	if (preliminaryNumIntNodes > 1)
+	    return preliminaryNumIntNodes - 1;
+	else
+	    return 0;
     }
     else
     {
@@ -884,10 +916,14 @@ std::vector<std::string> Tree::getSpeciesNames() const
 std::vector<Taxon> Tree::getTaxa() const
 {
     std::vector< Taxon > taxa;
-    for (size_t i = 0; i < getNumberOfTips(); ++i)
+    for (auto& node: nodes)
     {
-        const TopologyNode& n = getTipNode( i );
-        taxa.push_back( n.getTaxon() );
+        if (node->isTip() or node->isSampledAncestor())
+        {
+            Taxon taxon = node->getTaxon();
+            taxon.setAge(node->getAge());
+            taxa.push_back( taxon );
+        }
     }
 
     return taxa;
@@ -920,6 +956,7 @@ const std::map<std::string, size_t>& Tree::getTaxonBitSetMap( void ) const
             taxon_bitset_map[ordered_taxa[i]] = i;
         }
     }
+    
     return taxon_bitset_map;
 }
 
@@ -1107,31 +1144,24 @@ bool Tree::hasSameTopology(const Tree &t) const
     std::string a = getPlainNewickRepresentation();
     std::string b = t.getPlainNewickRepresentation();
 
-//    std::cerr << std::endl << a << std::endl;
-//    std::cerr << std::endl << b << std::endl;
-
     return a == b;
 }
 
 
 // Serialize (resurrect) the object from a file
-void Tree::initFromFile( const std::string &dir, const std::string &fn )
+void Tree::initFromFile( const path &dir, const std::string &fn )
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".newick");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".newick");
 
     // open the stream to the file
-    std::fstream inStream;
-    inStream.open( fm.getFullFileName().c_str(), std::fstream::in);
-
+    std::ifstream inStream( filename.string() );
 
     std::string s = "";
     while ( inStream.good() )
     {
-
         // Read a line
         std::string line;
-        fm.safeGetline( inStream, line );
+        safeGetline( inStream, line );
 
         // append
         s += line;
@@ -1146,11 +1176,18 @@ void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
     Tree* bl_tree = converter.convertFromNewick( s );
-    Tree *tree = TreeUtilities::convertTree( *bl_tree );
-
-    *this = *tree;
-
-    delete tree;
+    if (isTimeTree())
+    {
+        auto time_tree = TreeUtilities::convertTree(*bl_tree, false);
+        delete bl_tree;
+        *this = *time_tree;
+        delete time_tree;
+    }
+    else
+    {
+        *this = *bl_tree;
+        delete bl_tree;
+    }
 }
 
 
@@ -1228,37 +1265,45 @@ bool Tree::isRooted(void) const
     return rooted;
 }
 
-
-bool Tree::isUltrametric( void ) const
+bool Tree::isTimeTree(void) const
 {
+    bool any_node_times = false;
+    bool all_node_times = true;
 
-    double tip_age = getTipNode( 0 ).getAge();
-    for (size_t i = 1; i < getNumberOfTips(); ++i)
+    for(auto& node: nodes)
     {
-
-        if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
-        {
-            return false;
-        }
-
+        if (not std::isnan(node->getAge()))
+            any_node_times = true;
+        else
+            all_node_times = false;
     }
 
-    return true;
-}
+    if (any_node_times and not all_node_times)
+        throw RbException()<<"isTimeTree: only some nodes have node times!";
 
+    return all_node_times;
+}
 
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
+    // If reindex is false, then makeInternalNodesBifurcating will either
+    // * do nothing (if no sampled ancestors)
+    // * crash ( if there are sampled ancestors)
+    assert(reindex);
 
     // delegate the call to the nodes which will make the tree bifurcating recursively.
     getRoot().makeBifurcating( as_fossils );
+
+    // reindex here, in case makeBifurcating
+    // * added new fossil tips with no index
+    // * removed out-degree-1 nodes ("knuckles")
     
-
     // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
-    setRoot( &getRoot(), reindex );
+    setRoot( &getRoot(), true );
 
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
     taxon_bitset_map.clear();
-
 }
 
 void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
@@ -1299,7 +1344,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
             tmp->setParent (new_child);
             //  tmp->setBranchLength(newBl) ;
         }
-    
+
         root->addChild(new_child);
         new_child->setParent( root );
         new_child->setAge(new_age);
@@ -1309,9 +1354,114 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
     {
         throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
     } // end-if the root node has 3 children
+    
+
+    // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
+    // it only makes sense to reindex the nodes because we have more nodes now!
+    bool reindex = true;
+    setRoot( &getRoot(), reindex );
+
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 
 } 
 
+
+bool Tree::tryReadIndicesFromParameters(bool remove)
+{
+    // This routine assumes that the nodes array already contains the tree nodes.
+
+    // If we want to allow for nodes NOT having valid indices, we could do
+    // `setupIndices( not *has_indices )` instead of conditionally doing orderNodesByIndex().
+
+    std::optional<bool> has_indices;
+
+    std::vector<TopologyNode*> nodes2(nodes.size(), nullptr);
+
+    std::optional<std::string> failure;
+
+    for (auto& node: nodes)
+    {
+        // 1. Get the index as a string, optionally erasing it from the parameters.
+        std::optional<std::string> value;
+        if (remove)
+            value = node->eraseNodeParameter("index");
+        else
+            value = node->getNodeParameter("index");
+
+        try
+        {
+            // 2. Does this node have an index?
+            bool has_index = value.has_value();
+
+            // 3. Complain if some nodes have indices and some do not.
+            if (not has_indices)
+                has_indices = has_index;
+
+            if (has_index != *has_indices)
+                throw RbException()<<"readIndexFromParameter: Some nodes have an index parameter, and some do not!";
+
+            // 4. Set the index if there is one.
+            if (value)
+            {
+                int index = stoi(*value) - 1;
+
+                if (index < 0)
+                    throw RbException()<<"tryReadIndicesFromParameters: Negative node index "<<index;
+                else if (index >= nodes2.size())
+                    throw RbException()<<"tryReadIndicesFromParameters: Tree only has "<<nodes.size()<<" nodes, but got index "<<index;
+                else if (nodes2[index] != nullptr)
+                    throw RbException()<<"tryReadIndicesFromParameters: Node index "<<index<<" used twice!";
+
+                nodes2[index] = node;
+            }
+        }
+        // NB - If remove == true, then we can't quit.  We have to finish erasing the "index" parameter from all nodes.
+        catch (RbException& e)
+        {
+            failure = e.getMessage();
+        }
+    }
+
+    if (failure)
+    {
+        RBOUT(*failure + ".  Ignoring indices.");
+
+        has_indices = false;
+    }
+
+    // 5.If the tree is empty, set has_indices to false.
+    if (not has_indices)
+        has_indices = false;
+
+    // 6. If we set the indices
+    if (*has_indices)
+    {
+        nodes = nodes2;
+
+        for(int i=0;i < nodes.size(); i++)
+            nodes[i]->setIndex(i);
+    }
+    else
+    {
+        // We assume the nodes have valid indices that we can fall back on if reading indices fails.
+        for(int i=0;i<nodes.size();i++)
+            assert(nodes[i]->getIndex() == i);
+    }
+
+    // 7. Did we successfully set indices from parameters?
+    return *has_indices;
+}
+
+
+void Tree::writeIndicesToParameters()
+{
+    for (auto& node: nodes)
+    {
+        node->setNodeParameter("index",std::to_string(node->getIndex()+1));
+    }
+}
 
 
 // method to order nodes by their existing index
@@ -1382,6 +1532,19 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
     o << s;
 }
 
+void Tree::collapseSampledAncestors()
+{
+    for(auto& node: nodes)
+    {
+        if (node->isTipSampledAncestor())
+        {
+            node->getParent().setTaxon(node->getTaxon());
+            node->getParent().removeChild(node);
+        }
+    }
+    setRoot(root, true);
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
@@ -1393,6 +1556,10 @@ void Tree::pruneTaxa(const RbBitSet& prune_map )
     {
         nodes[i]->setIndex(i);
     }
+    
+    // we also need to reset our internal variables
+    num_nodes = nodes.size();
+    num_tips = (num_nodes+1) / 2;
 }
 
 bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
@@ -1507,6 +1674,84 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
 }
 
 
+void Tree::reindexNodes()
+{
+    nodes.clear();
+
+    // bootstrap all nodes from the root and add the in a pre-order traversal
+    fillNodesByPhylogeneticTraversal(root);
+    for (unsigned int i = 0; i < nodes.size(); ++i)
+    {
+        nodes[i]->setIndex(i);
+    }
+
+    num_nodes = nodes.size();
+}
+
+void Tree::removeDegree2Node(TopologyNode* n)
+{
+    // 1. Check that the node is in fact degree 2
+    if (n->getDegree() != 2)
+        throw RbException()<<"removeDegree2Node: node has degree "<<n->getDegree()<<"!";
+
+    // 2. If n is the root, pivot so that it is a child of the root
+    TopologyNode* new_root = nullptr;
+    if (n->isRoot())
+    {
+        // Pick the child with the highest degree for the new root
+        TopologyNode* new_root = &n->getChild(0);
+        for(auto& child: n->getChildren())
+            if (child->getDegree() > new_root->getDegree())
+                new_root = child;
+        reverseParentChild( *new_root );
+
+        root = new_root;
+        root->setTree(this);
+
+        assert(root->isRoot());
+    }
+
+
+    // 3. Save references from n.
+    //    Now we have p -> n -> c
+    assert(not n->isRoot());
+    auto& p = n->getParent();
+    auto& c = n->getChild(0);
+    double combined_branch_length = n->getBranchLength() + c.getBranchLength();
+
+    // 4. Remove references from n
+    n->setParent(nullptr);
+    n->removeChild(&c);
+
+    // 5. Link parent and child and set new branch length
+    p.removeChild(n);
+    p.addChild(&c);
+    c.setParent(&p);
+    c.setBranchLength(combined_branch_length);
+
+    // 6. We need to reindex nodes because we removed an index.
+    reindexNodes();
+
+    // 7. Destroy the removed node.
+    delete n;
+}
+
+bool Tree::removeNodeIfDegree2(TopologyNode& n)
+{
+    if (n.getDegree() == 2)
+    {
+        removeDegree2Node( &n );
+        return true;
+    }
+    else
+        return false;
+}
+
+bool Tree::removeRootIfDegree2()
+{
+    return removeNodeIfDegree2(getRoot());
+}
+
 void Tree::removeDuplicateTaxa( void )
 {
 
@@ -1562,10 +1807,11 @@ void Tree::renumberNodes(const Tree &reference)
     }
     // Second, the tip nodes
     std::vector<std::string> tipNames = getTipNames();
-    for (auto i = 0; i<tipNames.size(); ++i) {
+    for (size_t i = 0; i<tipNames.size(); ++i)
+    {
       getTipNodeWithName(tipNames[i]).setIndex(reference.getTipNodeWithName(tipNames[i]).getIndex());
     }
-    return;
+    
 }
 
 
@@ -1593,7 +1839,7 @@ void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
     }
 
     // get the node representing the outgroup
-    TopologyNode *outgroup_node = root->getNode( outgroup, strict);
+    TopologyNode *outgroup_node = root->getNode(outgroup, strict);
 
     // check that we properly got a node
     if ( outgroup_node == NULL )
@@ -1637,8 +1883,8 @@ void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reind
 
 void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
-	// reset parent/child relationships
-	reverseParentChild( n.getParent() );
+    // reset parent/child relationships
+    reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
     // if we have a trifurcation at the root, we need to change it into a bifurcation
@@ -1646,21 +1892,54 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     {
         // first, we make the root bifurcating
         makeRootBifurcating(n.getClade(), reindex);
-        
+
         // second, we make all other nodes bifurcating
         makeInternalNodesBifurcating(reindex, true);
         
     } // end-if we do not want to make the tree bifurcating
 
 
-	// set the new root
-	setRoot( &n.getParent(), reindex );
+    // set the new root
+    setRoot( &n.getParent(), reindex );
 
+}
+
+
+/**
+ * Resets a map of the taxa to their BitSet indices.
+ * The taxa are ordered alphabetically in the BitSet.
+ */
+void Tree::resetTaxonBitSetMap( void )
+{
+    taxon_bitset_map.clear();
+    
+    // get all taxon names
+    std::vector<Taxon> unordered_taxa = getTaxa();
+    std::vector<std::string> ordered_taxa;
+    for (size_t i = 0; i < unordered_taxa.size(); ++i)
+    {
+        ordered_taxa.push_back(unordered_taxa[i].getName());
+    }
+
+    // order taxon names
+    std::sort(ordered_taxa.begin(), ordered_taxa.end());
+
+    // add taxa to bitset map
+    for (size_t i = 0; i < ordered_taxa.size(); ++i)
+    {
+        taxon_bitset_map[ordered_taxa[i]] = i;
+    }
+    
 }
 
 
 TopologyNode& Tree::reverseParentChild(TopologyNode &n)
 {
+    // This routine makes n the new root by
+    // * first making n.getParent() the new root, and then
+    // * making n.getParent() into a child of n.
+    // It returns the original root.
+
     TopologyNode* ret = &n;
 
     if ( !n.isRoot() )
@@ -1674,6 +1953,7 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         p.setBranchLength(n.getBranchLength());
 
         p.removeChild( &n );
+        n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n
         p.setParent( &n );
         n.addChild( &p );
     }
@@ -1730,9 +2010,7 @@ void Tree::setRoot( TopologyNode* r, bool reindex )
     {
         if ( nodes[i] == NULL )
         {
-            std::cerr << "#nodes after filling:\t\t" << nodes.size() << std::endl;
-            std::cerr << i << " - " << nodes[i] << std::endl;
-            throw RbException("Problem while reading in tree.");
+            throw RbException("Problem while setting the root of the tree.");
         }
         if ( nodes[i] == old_root)
         {
@@ -1756,15 +2034,58 @@ void Tree::setRoot( TopologyNode* r, bool reindex )
 //!< Set the indices of the taxa from the taxon map
 void Tree::setTaxonIndices(const TaxonMap &tm)
 {
+    assert(root);
 
-    // start a recursive call at the root
-    if ( root != NULL )
+    // 1. Initialize the number of times that we have seen each map taxon to 0
+    std::map<Taxon,int> use_count;
+    for(int i=0;i<tm.size();i++)
+        use_count.insert({tm.getTaxon(i), 0});
+
+    // 2. Initialize the nodes to their index.
+    int next_non_taxon_index = use_count.size();
+    for(auto& node: nodes)
     {
-        root->setTaxonIndices(tm);
-        orderNodesByIndex();
+        if (node->isTip() or node->isSampledAncestor())
+        {
+            // 3a. If this is a tip or sampled ancester, check that we have an index for it.
+            auto& taxon = node->getTaxon();
+            if (not tm.hasTaxon(taxon))
+                throw RbException()<<"setTaxonIndices: tree has unexpected "<<taxon<<" with no index";
+
+            // 3b. Record that we used this taxon
+            auto& count = use_count.at(taxon);
+            count++;
+
+            // 3c. Set the index for the node.
+            node->setIndex( tm.getTaxonIndex(taxon) );
+        }
+        else
+        {
+            // 4. Otherwise set an index starting after all the taxon indices.
+            node->setIndex( next_non_taxon_index++ );
+        }
     }
 
+    // 5. Check that all the taxon labels are used exactly once.
+    for(auto& taxon_count: use_count)
+    {
+        auto& taxon = taxon_count.first;
+        auto& count = taxon_count.second;
+        if (count < 1)
+        {
+            for(auto& node: nodes)
+            {
+                if (node->getTaxon() == taxon)
+                    throw RbException()<<"setTaxonIndices: taxon "<<taxon<<" with "<<node->getNumberOfChildren()<<" children is neither a tip nor a sampled ancestor";
+            }
+            throw RbException()<<"setTaxonIndices: tree is missing the taxon \'"<<taxon<<"\'";
+        }
+        if (count > 1)
+            throw RbException()<<"setTaxonIndices: tree has multiple copies of the taxon "<<taxon;
+    }
 
+    // 6. Sort the nodes by their index.
+    orderNodesByIndex();
 }
 
 
@@ -1774,14 +2095,14 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
  * \param[in] current_name    self explanatory.
  * \param[in] newName         self explanatory.
  */
-void Tree::setTaxonName(const std::string& current_name, const std::string& newName)
+void Tree::setTaxonName(const std::string& current_name, const std::string& new_name)
 {
 
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
-    t.setName( newName );
+    t.setName( new_name );
     taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( newName, node.getIndex() ) );
+    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
 }
 
 
@@ -1846,17 +2167,17 @@ void Tree::unroot( void )
 
 
 // Write this object into a file in its default format.
-void Tree::writeToFile( const std::string &dir, const std::string &fn ) const
+void Tree::writeToFile( const path &dir, const std::string &fn ) const
 {
+    
     // do not write a file if the tree is invalid
     if (this->getNumberOfTips() > 1)
     {
-        RbFileManager fm = RbFileManager(dir, fn + ".newick");
-        fm.createDirectoryForFile();
+        path filename = dir / (fn + ".newick");
+        create_directories(dir);
 
         // open the stream to the file
-        std::fstream outStream;
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        std::ofstream outStream( filename.string() );
 
         // write the value of the node
         outStream << getNewickRepresentation();

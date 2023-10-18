@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -25,7 +25,8 @@ Dist_pointMass::Dist_pointMass() : ContinuousDistribution()
 }
 
 
-Dist_pointMass::~Dist_pointMass() {
+Dist_pointMass::~Dist_pointMass()
+{
     
 }
 

@@ -1,10 +1,11 @@
 #ifndef Trace_H
 #define Trace_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <ostream>
 
+#include "AbstractTrace.h"
 #include "RbVector.h"
 #include "Simplex.h"
 #include "Cloneable.h"
@@ -13,25 +14,15 @@
 #include "Serializer.h"
 
 namespace RevBayesCore {
-class Serializable;
 
-    class AbstractTrace : public Cloneable {
-
-    public:
-
-        virtual                         ~AbstractTrace(void) {}
-
-        virtual void                    addValueFromString(const std::string &s) = 0;
-        virtual bool                    isCoveredInInterval(const std::string &v, double i, bool verbose) = 0;
-
-    };
+    class Serializable;
     
     template <class valueType>
     class Trace : public AbstractTrace {
         
     public:
         
-        Trace(void);
+        Trace(void)                     = default;
         
         virtual                         ~Trace(void) {}
 
@@ -46,11 +37,12 @@ class Serializable;
         const valueType&                objectAt(size_t index, bool post = false) const { return post ? values.at(index + burnin) : values.at(index); }
         long                            size(bool post = false) const                   { return post ? values.size() - burnin : values.size(); }
 
-        virtual void                    addObject(valueType d);
+        virtual void                    addObject(const valueType& d);
+        virtual void                    addObject(valueType&& d);
         virtual void                    addObject(valueType* d);
-        virtual bool                    isCoveredInInterval(const std::string &v, double i, bool verbose);
+        virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose);
         bool                            isDirty(void) const                             { return dirty; };
-        void                            isDirty(bool d) const                             { dirty = d; };
+        void                            setDirty(bool d)                                { dirty = d; };
         void                            removeLastObject();
         void                            removeObjectAtIndex(int index);
         
@@ -63,20 +55,20 @@ class Serializable;
         
 
         // getters and setters
-        std::string                     getFileName() const                             { return fileName; }
+        const path&                     getFileName() const                             { return fileName; }
         const std::string&              getParameterName() const                        { return parmName; }
         
-        void                            setFileName(std::string fn)                     { fileName = fn; }
+        void                            setFileName(path fn)                            { fileName = fn; }
         void                            setParameterName(std::string pm)                { parmName = pm; }
         
     protected:
         
-        size_t                          burnin;
-        std::string                     fileName;
+        size_t                          burnin = 0;
+        path                            fileName;
         std::string                     parmName;
         std::vector<valueType>          values;                                     //!< the values of this trace
 
-        mutable bool                    dirty;
+        mutable bool                    dirty = true;
 
     };
 
@@ -96,6 +88,7 @@ class Serializable;
      * Typedefs
      */
     typedef Trace<RevBayesCore::Simplex> TraceSimplex;
+    typedef Trace<long> TraceNumericInteger;
     typedef Trace<RevBayesCore::RbVector<double> > TraceNumericVector;
     typedef Trace<std::string> AncestralStateTrace;
     typedef Trace<std::string> ModelTrace;
@@ -105,33 +98,31 @@ class Serializable;
      * Template specializations
      */
     template <>
-    bool Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
+    int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
 
     template <>
-    bool Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
+    int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
 
     template <>
-    bool Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose);
+    int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
+
+    template <>
+    int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose);
 
 }
 
-/**
- * Default constructor.
- */
 template <class valueType>
-RevBayesCore::Trace<valueType>::Trace() :
-    burnin( 0 ),
-    fileName( "" ),
-    parmName( "" ),
-    dirty( true )
-{
-}
-
-
-template <class valueType>
-void RevBayesCore::Trace<valueType>::addObject(valueType t)
+void RevBayesCore::Trace<valueType>::addObject(const valueType& t)
 {
     values.push_back(t);
+    dirty = true;
+}
+
+
+template <class valueType>
+void RevBayesCore::Trace<valueType>::addObject(valueType&& t)
+{
+    values.push_back( std::move(t) );
     dirty = true;
 }
 
@@ -166,7 +157,7 @@ RevBayesCore::Trace<valueType>* RevBayesCore::Trace<valueType>::clone() const
 
 
 template <class valueType>
-bool RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/)
+int RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/)
 {
     throw RbException("Cannot compute interval coverage for '" + parmName + "' because there are not trace objects implemented for this value type.");
 }

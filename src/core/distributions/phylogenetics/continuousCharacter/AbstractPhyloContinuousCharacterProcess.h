@@ -1,7 +1,7 @@
 #ifndef AbstractPhyloContinuousCharacterProcess_H
 #define AbstractPhyloContinuousCharacterProcess_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "ContinuousCharacterData.h"
@@ -53,7 +53,7 @@ template <class valueType> class TypedDagNode;
 
         
         // helper method for this and derived classes
-        double                                                              computeBranchTime(size_t nodeIdx, double brlen);
+        double                                                              computeBranchTime(size_t nide_idx, double brlen);
         double                                                              computeSiteRate(size_t siteIdx);
         virtual void                                                        resetValue(void);
         

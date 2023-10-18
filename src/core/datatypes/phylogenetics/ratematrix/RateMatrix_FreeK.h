@@ -74,9 +74,6 @@ namespace RevBayesCore {
         
         bool                                rescale;
         
-        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
-        inline void                         multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
-        
         // members for uniformization
         MatrixReal                          singleStepMatrix;
         std::vector<MatrixReal>*            matrixProducts;

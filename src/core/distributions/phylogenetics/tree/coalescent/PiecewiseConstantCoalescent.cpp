@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -25,6 +25,22 @@ namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
+
+/**
+ * Default Constructor.
+ *
+ * @param N a vector a population sizes
+ * @param i a vector of interval starts
+ * @param meth the method for intervals. Options are 'EVENTS', 'SPECIFIED', 'UNIFORM'
+ * @param c a vector of clade constraints
+ *
+ *
+ *@note The parameter for interval starts, i, will not be used if the method for intervals is 'EVENTS' or 'UNIFORM'
+ *
+ *@note If the interval method is 'UNIFORM' then interval start times are equally distributed over the present time and the time of the root.
+ *@note If the interval method is 'EVENTS' then we assume that the time between each coalescent event is an interval.
+ *
+ */
 PiecewiseConstantCoalescent::PiecewiseConstantCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, METHOD_TYPES meth, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
     AbstractCoalescent( tn, c ),
     Nes( N ),
@@ -112,10 +128,8 @@ double PiecewiseConstantCoalescent::computeLnProbabilityTimes( void ) const
             {
                 max = (age > interval_starts[currentInterval]) ? interval_starts[currentInterval] : age;
             }
-//            double min = (prevCoalescentTime > intervals[currentInterval]) ? intervals[currentInterval] : prevCoalescentTime;
             
             deltaAge = max - prevCoalescentTime;
-//            deltaAge = age - min;
             valid = currentInterval >= interval_starts.size() || age <= interval_starts[currentInterval];
             if ( !valid )
             {
@@ -159,7 +173,7 @@ void PiecewiseConstantCoalescent::executeMethod(const std::string &n, const std:
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void PiecewiseConstantCoalescent::keepSpecialization(DagNode *affecter)
+void PiecewiseConstantCoalescent::keepSpecialization(const DagNode *affecter)
 {
     
     // nothing to do here
@@ -170,7 +184,7 @@ void PiecewiseConstantCoalescent::keepSpecialization(DagNode *affecter)
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseConstantCoalescent::restoreSpecialization(DagNode *affecter)
+void PiecewiseConstantCoalescent::restoreSpecialization(const DagNode *affecter)
 {
     
     // just re-update the start times of the intervals
@@ -245,6 +259,7 @@ std::vector<double> PiecewiseConstantCoalescent::simulateCoalescentAges( size_t 
             valid = current_interval >= interval_starts.size() || sim_age < interval_starts[current_interval];
             if ( valid == false )
             {
+                prevCoalescentTime = interval_starts[current_interval];
                 ++current_interval;
             }
             
@@ -290,7 +305,7 @@ void PiecewiseConstantCoalescent::swapParameterInternal(const DagNode *oldP, con
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseConstantCoalescent::touchSpecialization(DagNode *affecter, bool touchAll)
+void PiecewiseConstantCoalescent::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     // just update the start times of the intervals
@@ -303,6 +318,9 @@ void PiecewiseConstantCoalescent::touchSpecialization(DagNode *affecter, bool to
 /**
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
+ *
+ * @throw RbExpection when no interval start times are specified when the 'SPECIFIED' interval_method is used
+ *
  */
 void PiecewiseConstantCoalescent::updateIntervals( void )
 {
@@ -316,7 +334,7 @@ void PiecewiseConstantCoalescent::updateIntervals( void )
         }
         else
         {
-            throw RbException("You have to provide the start times of the coalescent skyline intervals if you chose 'SPECIFIED' as the method of choece.");
+            throw RbException("You have to provide the start times of the coalescent skyline intervals if you chose 'SPECIFIED' as the method of choice.");
         }
         
         // clean all the sets

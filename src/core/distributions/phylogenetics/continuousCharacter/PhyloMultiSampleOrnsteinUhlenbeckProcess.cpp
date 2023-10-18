@@ -189,7 +189,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeCovariance(MatrixReal &ind
             const TopologyNode *right_tip_node = &this->tau->getValue().getTipNode( right_index );
             
             // get mrca
-            size_t mrca_index = TreeUtilities::getMrcaIndex(left_tip_node, right_tip_node);
+            size_t mrca_index = TreeUtilities::getMrcaIndex(*left_tip_node, *right_tip_node);
             
             // get sum of alpha*branchlength for non-shared branches
             double sum_AT = 0.0;
@@ -507,7 +507,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcess::getWithinSpeciesVariance(const 
 
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::keepSpecialization( DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::keepSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -723,7 +723,7 @@ std::set<size_t> PhyloMultiSampleOrnsteinUhlenbeckProcess::recursiveComputeDista
 
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::restoreSpecialization( DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -1066,7 +1066,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::swapParameterInternal(const DagNo
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

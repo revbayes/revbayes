@@ -1,7 +1,7 @@
 #ifndef AbstractPhyloBrownianProcess_H
 #define AbstractPhyloBrownianProcess_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractPhyloContinuousCharacterProcess.h"
@@ -39,7 +39,7 @@ template <class valueType> class TypedDagNode;
         virtual void                                                        simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         virtual std::vector<double>                                         simulateRootCharacters(size_t n) = 0;
         
-        
+        std::vector< std::vector<bool> >                                    missing_data;
     };
     
 }

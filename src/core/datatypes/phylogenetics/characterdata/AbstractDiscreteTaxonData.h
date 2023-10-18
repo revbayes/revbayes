@@ -1,7 +1,7 @@
 #ifndef AbstractDiscreteTaxonData_H
 #define AbstractDiscreteTaxonData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "AbstractTaxonData.h"
@@ -13,7 +13,7 @@ namespace RevBayesCore {
     class NaturalNumbersState;
     template<typename charType>
     class DiscreteTaxonData;
-class CharacterState;
+    class CharacterState;
     
     /**
      * Abstract class for all taxon objects.

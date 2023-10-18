@@ -21,16 +21,17 @@ namespace RevBayesCore {
         virtual DeterministicNode<valueType>*               clone(void) const;
         virtual TypedFunction<valueType>&                   getFunction(void);
         virtual const TypedFunction<valueType>&             getFunction(void) const;
+        void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
         double                                              getLnProbability(void);
         double                                              getLnProbabilityRatio(void);
         valueType&                                          getValue(void);
         const valueType&                                    getValue(void) const;
         bool                                                isConstant(void) const;                                                     //!< Is this DAG node constant?
         virtual void                                        printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                                redraw(void);
+        void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);
         void                                                reInitializeMe(void);                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
-        void                                                setValueFromFile(const std::string &dir);                                   //!< Set value from string.
+        void                                                setValueFromFile(const path &dir);                                          //!< Set value from string.
         void                                                setValueFromString(const std::string &v);                                   //!< Set value from string.
 
         // Parent DAG nodes management functions
@@ -38,11 +39,11 @@ namespace RevBayesCore {
         virtual void                                        swapParent(const DagNode *oldParent, const DagNode *newParent);             //!< Exchange the parent (function parameter)
 
     protected:
-        void                                                getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);          //!< Mark and get affected nodes
-        void                                                keepMe(DagNode* affecter);                                                  //!< Keep value of this and affected nodes
-        void                                                restoreMe(DagNode *restorer);                                               //!< Restore value of this nodes
+        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
+        void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
+        void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         void                                                swapParameter(const DagNode *oldP, const DagNode *newP);                    //!< Swap the parameter of this node (needs overwriting in deterministic and stochastic nodes)
-        virtual void                                        touchMe(DagNode *toucher, bool touchAll);                                   //!< Touch myself and tell affected nodes value is reset
+        virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                             //!< Touch myself and tell affected nodes value is reset
 
     private:
 
@@ -202,7 +203,7 @@ RevBayesCore::DeterministicNode<valueType>* RevBayesCore::DeterministicNode<valu
  * This call is started by the parent. We need to delegate this call to all our children.
  */
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::getAffected(RbOrderedSet<DagNode *> &affected, DagNode* affecter)
+void RevBayesCore::DeterministicNode<valueType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
 
     this->getAffectedNodes( affected );
@@ -223,6 +224,20 @@ const RevBayesCore::TypedFunction<valueType>& RevBayesCore::DeterministicNode<va
 {
 
     return *function;
+}
+
+
+template<class valueType>
+void RevBayesCore::DeterministicNode<valueType>::getIntegratedParents(RbOrderedSet<DagNode *>& integrated_parents) const
+{
+    std::vector<const DagNode*> parents = this->getParents();                                                                     //!< Get the set of parents (empty set here)
+
+    // delegate up the DAG
+    for (size_t i=0; i<parents.size(); ++i)
+    {
+        const DagNode *the_parent = parents[i];
+        the_parent->getIntegratedParents( integrated_parents );
+    }
 }
 
 template<class valueType>
@@ -305,7 +320,7 @@ bool RevBayesCore::DeterministicNode<valueType>::isConstant( void ) const
  * At this point, we just delegate to the children.
  */
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::keepMe( DagNode* affecter )
+void RevBayesCore::DeterministicNode<valueType>::keepMe( const DagNode* affecter )
 {
 
     // delegate call to base class
@@ -351,7 +366,7 @@ void RevBayesCore::DeterministicNode<valueType>::printStructureInfo( std::ostrea
 
 
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::redraw( void )
+void RevBayesCore::DeterministicNode<valueType>::redraw( SimulationCondition c )
 {
     // nothing to do
     // the touch should have called our update
@@ -369,7 +384,7 @@ void RevBayesCore::DeterministicNode<valueType>::reInitializeMe( void )
 
 /** Restore the old value of the node and tell affected */
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::restoreMe( DagNode *restorer )
+void RevBayesCore::DeterministicNode<valueType>::restoreMe( const DagNode *restorer )
 {
 
     // the value has been changed so we need to flag for recomputing the value
@@ -405,7 +420,7 @@ void RevBayesCore::DeterministicNode<valueType>::setMcmcMode(bool tf)
 
 
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::setValueFromFile(const std::string &dir)
+void RevBayesCore::DeterministicNode<valueType>::setValueFromFile(const RevBayesCore::path &dir)
 {
 
     throw RbException("Cannot set a deterministic node from a file.");
@@ -457,7 +472,7 @@ void RevBayesCore::DeterministicNode<valueType>::swapParent( const RevBayesCore:
  *
  */
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::touchMe( DagNode *toucher, bool touchAll )
+void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
 {
 
     // store if the state of the variable was dirty (needed an update)

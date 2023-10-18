@@ -442,7 +442,7 @@ void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, con
     
 }
 
-void SampledSpeciationBirthDeathProcess::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void SampledSpeciationBirthDeathProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age)
@@ -499,7 +499,7 @@ void SampledSpeciationBirthDeathProcess::getLineagesAtAge(TopologyNode* n, std::
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void SampledSpeciationBirthDeathProcess::keepSpecialization(DagNode *affecter)
+void SampledSpeciationBirthDeathProcess::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age )
@@ -520,7 +520,7 @@ void SampledSpeciationBirthDeathProcess::redrawValue( void )
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void SampledSpeciationBirthDeathProcess::restoreSpecialization(DagNode *affecter)
+void SampledSpeciationBirthDeathProcess::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age )
@@ -629,7 +629,8 @@ void SampledSpeciationBirthDeathProcess::simulateTree( void )
             std::vector<size_t> taxon_idx;
             for (size_t i = 0; i < taxa.size(); i++)
                 taxon_idx.push_back(i);
-            std::random_shuffle(taxon_idx.begin(), taxon_idx.end());
+
+            deprecated::random_shuffle(taxon_idx.begin(), taxon_idx.end());
             
             // Set names for terminal taxa
             for (size_t i = 0; i < taxa.size(); i++)
@@ -901,7 +902,7 @@ void SampledSpeciationBirthDeathProcess::swapParameterInternal( const DagNode *o
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void SampledSpeciationBirthDeathProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void SampledSpeciationBirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )

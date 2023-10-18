@@ -1,6 +1,6 @@
 #include "DecomposedInverseWishartDistribution.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RandomNumberFactory.h"
 #include "DistributionDecomposedInverseWishart.h"
@@ -19,7 +19,8 @@ sigma0(insigma0),
 kappaVector(NULL),
 kappa(NULL),
 df(indf),
-dim( NULL )  {
+dim( NULL )
+{
     
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -64,38 +65,41 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( size_t(indim->getVal
     redrawValue();
 }
 
-DecomposedInverseWishartDistribution* DecomposedInverseWishartDistribution::clone(void) const   {
+DecomposedInverseWishartDistribution* DecomposedInverseWishartDistribution::clone(void) const
+{
 
     return new DecomposedInverseWishartDistribution(*this);
 }
 
 
-void DecomposedInverseWishartDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void DecomposedInverseWishartDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
 
     if (oldP == sigma0)
-        {
+    {
         sigma0 = static_cast<const TypedDagNode<MatrixReal>* >( newP );
-        }
+    }
     if (oldP == kappaVector)
-        {
+    {
         kappaVector = static_cast<const TypedDagNode<RbVector<double> >* >(newP);
-        }
+    }
     if (oldP == kappa)
-        {
+    {
         kappa = static_cast<const TypedDagNode<double>* >(newP);
-        }
+    }
     if (oldP == dim)
-        {
+    {
         dim = static_cast<const TypedDagNode<long>* >(newP);
-        }
+    }
     if (oldP == df)
-        {
+    {
         df = static_cast<const TypedDagNode<long>* >(newP);
-        }
+    }
 }
 
 
-double DecomposedInverseWishartDistribution::computeLnProbability(void)  {
+double DecomposedInverseWishartDistribution::computeLnProbability(void)
+{
     
     double ret = RbStatistics::DecomposedInverseWishart::lnPdf(df->getValue(), getValue());
     return ret;
@@ -106,12 +110,12 @@ void DecomposedInverseWishartDistribution::redrawValue(void)
 
     RandomNumberGenerator* rng = GLOBAL_RNG;
     if ( kappa != NULL )
-        {
+    {
         setValue( RbStatistics::DecomposedInverseWishart::rv(getValue().getDim(), df->getValue(), *rng).clone() );
-        }
+    }
     else
-        {
+    {
         throw RbException("error in decomposed inverse wishart: no parameter\n");
-        }
+    }
 
 }

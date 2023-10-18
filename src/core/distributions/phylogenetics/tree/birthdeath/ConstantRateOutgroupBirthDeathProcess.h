@@ -1,7 +1,7 @@
 #ifndef ConstantRateOutgroupBirthDeathProcess_h
 #define ConstantRateOutgroupBirthDeathProcess_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 
@@ -35,9 +35,9 @@ template <class valueType> class TypedDagNode;
         // Parameter management functions
         bool                                                isLnProbabilityNonZero(void);
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
-        virtual void                                        keepSpecialization(DagNode* affecter);
-        virtual void                                        restoreSpecialization(DagNode *restorer);
-        virtual void                                        touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
 
@@ -49,8 +49,8 @@ template <class valueType> class TypedDagNode;
         void                                                recursivelyCollectCladeAges( TopologyNode* node, std::vector<double>& ages, TopologyNode* barrier_node=NULL ) const;
 //        void                                                recursivelyCollectIngroupAges( TopologyNode* node, std::vector<double>& ages ) const;
         // helper functions
-        double                                              computeLnProbabilityTimes(void);                                          //!< Compute the log-transformed probability of the current value.
-        double                                              computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa);
+        double                                              computeLnProbabilityTimes(void) const;                                          //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const;
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const              { throw RbException("Cannot compute P(nTaxa)."); }
         double                                              simulateDivergenceTime(double origin, double present) const;                    //!< Simulate a speciation event.
         void                                                simulateOutgroupTree( void );

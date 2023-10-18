@@ -1,14 +1,6 @@
-//
-//  DistributionFunctionQuantilePositiveContinuous.cpp
-//  RevBayesCore
-//
-//  Created by Sebastian Hoehna on 3/8/13.
-//  Copyright 2013 __MyCompanyName__. All rights reserved.
-//
-
 #include "DistributionFunctionQuantilePositiveContinuous.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "DeterministicNode.h"

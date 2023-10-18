@@ -39,11 +39,13 @@ namespace RevBayesCore {
         MatrixReal(size_t n, size_t k);
         MatrixReal(size_t n, size_t k, double v);
         MatrixReal(const MatrixReal& m);
+        MatrixReal(MatrixReal&& m);
         virtual                                ~MatrixReal(void);
         
         
         // overloaded operators
         MatrixReal&                             operator=(const MatrixReal& m);
+        MatrixReal&                             operator=(MatrixReal&& m);
         RbVector<double>&                       operator[](size_t index);
         const RbVector<double>&                 operator[](size_t index) const;
 
@@ -60,6 +62,8 @@ namespace RevBayesCore {
         MatrixReal&                             operator-=(const MatrixReal& B);                                    //!< operator -= 
         MatrixReal&                             operator*=(const MatrixReal& B);                                    //!< operator *= (matrix multiplication)
         MatrixReal                              operator+(double b) const;                                          //!< operator + for matrix + scalar 
+        MatrixReal                              operator+() const;                                                  //!< operator + (unary)
+        MatrixReal                              operator-() const;                                                  //!< operator - (unary)
         MatrixReal                              operator-(double b) const;                                          //!< operator - for scalar 
         MatrixReal                              operator*(double b) const;                                          //!< operator * for scalar 
         MatrixReal                              operator+(const MatrixReal& B) const;                               //!< operator + 
@@ -74,9 +78,13 @@ namespace RevBayesCore {
 //        std::vector<std::vector<double> >::iterator             end(void);
         
         // utility functions
+        void                                    addColumn(void);
+        void                                    addRow(void);
         void                                    clear(void);
         MatrixReal*                             clone(void) const;
         MatrixReal                              computeInverse(void) const;
+        void                                    deleteColumn(size_t index);
+        void                                    deleteRow(size_t index);
         void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;       //!< Map the member methods to internal function calls
         void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;       //!< Map the member methods to internal function calls
         RbVector<double>                        getColumn(size_t i) const;                                                                               //!< Get the i-th column
@@ -87,6 +95,7 @@ namespace RevBayesCore {
         CholeskyDecomposition&                  getCholeskyDecomposition(void);
         const CholeskyDecomposition&            getCholeskyDecomposition(void) const ;
         double                                  getDet() const;
+        void                                    getIndexOfMin(size_t& row, size_t& col) const;
         double                                  getLogDet() const;
         size_t                                  getNumberOfColumns(void) const;
         double                                  getMax(void) const;
@@ -100,42 +109,30 @@ namespace RevBayesCore {
         bool                                    isSymmetric(void) const;
         bool                                    isUsingCholesky(void) const { return use_cholesky_decomp; }
         void                                    setCholesky(bool c) const;
-        
+
         size_t                                  size(void) const;
         void                                    resize(size_t r, size_t c);
-        
+
     protected:
         // helper methods
         void                                    update(void) const;
-        
+
         // members
         RbVector<RbVector<double> >             elements;
 
-        size_t                                  n_rows;
-        size_t                                  n_cols;
-        mutable EigenSystem*                    eigensystem;
-        mutable bool                            eigen_needs_update;
-        
-        mutable CholeskyDecomposition*          cholesky_decomp;
-        mutable bool                            cholesky_needs_update;
-        mutable bool                            use_cholesky_decomp;
+        size_t                                  n_rows = 0;
+        size_t                                  n_cols = 0;
+        mutable EigenSystem*                    eigensystem = nullptr;
+        mutable bool                            eigen_needs_update = true;
+
+        mutable CholeskyDecomposition*          cholesky_decomp = nullptr;
+        mutable bool                            cholesky_needs_update = true;
+        mutable bool                            use_cholesky_decomp = false;
 
     };
     
     // Global functions using the class
     std::ostream&                       operator<<(std::ostream& o, const MatrixReal& x);                                           //!< Overloaded output operator
-
-    
-//    MatrixReal                            operator+(const MatrixReal& A);                                             //!< Unary operator + 
-//    MatrixReal                            operator-(const MatrixReal& A);                                             //!< Unary operator - 
-//    MatrixReal                            operator/(const MatrixReal& A, const MatrixReal& B);                        //!< operator / for matrix / matrix 
-//    MatrixReal                            operator+(double a, const MatrixReal& B);                            //!< operator + for scalar + matrix 
-//    MatrixReal                            operator-(double a, const MatrixReal& B);                            //!< operator - for scalar - matrix 
-//    MatrixReal                            operator*(double a, const MatrixReal& B);                            //!< operator * for scalar * matrix 
-//    MatrixReal                            operator/(double a, const MatrixReal& B);                            //!< operator / for scalar / matrix 
-//    MatrixReal                            operator*(const MatrixReal& A, double b);                            //!< operator * for matrix * scalar 
-//    MatrixReal                            operator/(const MatrixReal& A, double b);                            //!< operator / for matrix / scalar 
-//    MatrixReal&                           operator/=(MatrixReal& A, double b);                                 //!< operator /= for scalar 
 
     RbVector<double>                      operator*(const RbVector<double> &a, const MatrixReal& B);                            //!< operator * for scalar * matrix
     

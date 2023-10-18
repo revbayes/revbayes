@@ -1,25 +1,35 @@
 ################################################################################
 #
 # RevBayes Validation Test: Dirichlet Distribution
-# 
-# Model: Just a single random variable from an dirichlet distribution. 
-#            
+#
+# Model: Just a single random variable from an Dirichlet distribution.
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
 
-# set my move index
-mi = 0
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
 
 
-prior <- rep(10,4) 
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+prior <- 1:6
 pi ~ dnDirichlet(prior)
-moves[++mi] = mvBetaSimplex(pi,weight=2)
-moves[++mi] = mvDirichletSimplex(pi,weight=2,numCats=4)
+moves.append( mvBetaSimplex(pi,weight=2) )
+moves.append( mvDirichletSimplex(pi,weight=2,numCats=4) )
 
+n_samples = 5
 
+for (i in 1:n_samples) {
+    x[i] ~ dnMultinomial(10, pi)
+}
 
 #############
 # THE Model #
@@ -31,19 +41,14 @@ mymodel = model(pi)
 
 
 
-
-
-
-monitors[1] = mnModel(filename="output/dirichlet.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
-validation = validationAnalysis( mymcmc, 1000 )
-validation.burnin(generations=10000,tuningInterval=250)
-validation.run(generations=30000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_Dirichlet" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now
 q()
-

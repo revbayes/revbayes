@@ -1,6 +1,6 @@
 #include "PruneTreeFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 
 #include "RbBoolean.h"
@@ -74,7 +74,7 @@ void PruneTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNode
     
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
 
-    prune_map.clear();
+    prune_map.reset();
     for (size_t i = 0; i < tau->getValue().getNumberOfTips(); i++)
     {
         const Taxon& taxon = nodes[i]->getTaxon();

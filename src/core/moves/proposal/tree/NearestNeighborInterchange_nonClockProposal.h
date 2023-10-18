@@ -50,8 +50,11 @@ template <class variableType> class StochasticNode;
         StochasticNode<Tree>*                               tree;
         
         // stored objects to undo proposal
-        TopologyNode*                                       storedChoosenNode;
-        TopologyNode*                                       storedUncle;
+        TopologyNode*                                       stored_node_A;
+        TopologyNode*                                       stored_node_B;
+        bool                                                picked_root_branch;
+        bool                                                picked_uncle;
+        bool                                                failed;
         
     };
     

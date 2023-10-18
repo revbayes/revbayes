@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <ostream>
@@ -36,11 +36,13 @@ using namespace RevBayesCore;
  * \param    ra       The start time of the process.
  * \param    tn       Taxon names used during initialization.
  * \param    uo       True = condition on the origin time, False = condition on the root age.
+ * \param    t        The starting tree if we want to avoid simulating trees.
  */
-AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo ) : TypedDistribution<Tree>( new Tree() ),
+AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo, Tree *t ) : TypedDistribution<Tree>( new Tree() ),
     process_age( ra ),
     taxa( tn ),
-    use_origin( uo )
+    use_origin( uo ),
+    starting_tree( t )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -55,18 +57,75 @@ AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNod
             found.insert(taxa[i].getName());
         }
         else
-        {
-            std::stringstream ss;
-            ss << "Duplicate taxon name '" << taxa[i].getName() << "' encountered when building tree distribution";
-            throw(RbException(ss.str()));
-        }
+            throw RbException() << "Duplicate taxon name '" << taxa[i].getName() << "' encountered when building tree distribution";
+    }
+    
+    // if we got a starting tree, then we should also use it.
+    if ( starting_tree != NULL)
+    {
+        delete value;
+        value = starting_tree->clone();
     }
 }
 
 
-AbstractRootedTreeDistribution::~AbstractRootedTreeDistribution(void)
+
+/**
+ * Copy constructor.
+ *
+ * The constructor connects the parameters of the birth-death process (DAG structure)
+ * and initializes the probability density by computing the combinatorial constant of the tree structure.
+ *
+ * \param    d       The object to copy
+ */
+AbstractRootedTreeDistribution::AbstractRootedTreeDistribution( const AbstractRootedTreeDistribution& d ) : TypedDistribution<Tree>( d ),
+    divergence_times( d.divergence_times ),
+    process_age( d.process_age ),
+    taxa( d.taxa ),
+    use_origin( d.use_origin ),
+    starting_tree( NULL )
 {
     
+    if ( d.starting_tree != NULL )
+    {
+        starting_tree = d.starting_tree->clone();
+    }
+    
+}
+
+AbstractRootedTreeDistribution::~AbstractRootedTreeDistribution(void)
+{
+    delete starting_tree;
+}
+
+
+AbstractRootedTreeDistribution& AbstractRootedTreeDistribution::operator=(const AbstractRootedTreeDistribution &d)
+{
+    
+    // check for self-assignment
+    if ( this != &d )
+    {
+        // delegate to super class
+        TypedDistribution<Tree>::operator=(d);
+        
+        // free our memory
+        delete starting_tree;
+        starting_tree = NULL;
+        
+        divergence_times    = d.divergence_times;
+        process_age         = d.process_age;
+        taxa                = d.taxa;
+        use_origin          = d.use_origin;
+        
+
+        if ( d.starting_tree != NULL )
+        {
+            starting_tree = d.starting_tree->clone();
+        }
+        
+    }
+    
+    return *this;
 }
 
 
@@ -88,13 +147,13 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
         tips.erase(tips.begin()+long(index));
         
         // add a left child
-        TopologyNode* leftChild = new TopologyNode(0);
+        TopologyNode* leftChild = new TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         tips.push_back(leftChild);
         
         // add a right child
-        TopologyNode* rightChild = new TopologyNode(0);
+        TopologyNode* rightChild = new TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         tips.push_back(rightChild);
@@ -129,7 +188,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
             {
                 if ( the_node.isSampledAncestor() == true )
                 {
-                    if( the_node.getAge() - the_node.getParent().getAge() != 0 )
+                    if ( the_node.getAge() - the_node.getParent().getAge() != 0 )
                     {
                         return RbConstants::Double::neginf;
                     }
@@ -185,8 +244,10 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeLnProbabilityDivergenceTimes();
+    double ln_prob_tree_shape = lnProbTreeShape();
+    double ln_total_prob = lnProbTimes + ln_prob_tree_shape;
         
-    return lnProbTimes + lnProbTreeShape();
+    return ln_total_prob;
 }
 
 
@@ -221,7 +282,7 @@ int AbstractRootedTreeDistribution::diversity(double t)
 }
 
 
-void AbstractRootedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void AbstractRootedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == process_age && dag_node != NULL )
@@ -373,7 +434,7 @@ const std::vector<Taxon>& AbstractRootedTreeDistribution::getTaxa( void ) const
 }
 
 
-void AbstractRootedTreeDistribution::keepSpecialization(DagNode *affecter)
+void AbstractRootedTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == process_age && dag_node != NULL)
@@ -401,7 +462,7 @@ double AbstractRootedTreeDistribution::lnProbTreeShape(void) const
  *
  * Fills vector of times. The caller needs to deallocate this vector.
  */
-void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
+void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void ) const
 {
     
     // get the time of the process
@@ -409,7 +470,8 @@ void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
     
     // retrieved the speciation times
     divergence_times = std::vector<double>();
-    for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i)
+    size_t interior_nodes = value->getNumberOfInteriorNodes()+1;
+    for (size_t i = 0; i < interior_nodes; ++i)
     {
         const TopologyNode& n = value->getInteriorNode( i );
         double t = org - n.getAge();
@@ -424,12 +486,14 @@ void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
 void AbstractRootedTreeDistribution::redrawValue( void )
 {
     
-    simulateTree();
-    
+    if ( starting_tree == NULL )
+    {
+        simulateTree();
+    }
 }
 
 
-void AbstractRootedTreeDistribution::restoreSpecialization(DagNode *affecter)
+void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affecter)
 {
     if ( affecter == process_age )
     {
@@ -544,7 +608,7 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
         
         if ( n.size() > 2 && current_age >= age  )
         {
-            throw RbException("Unexpected number of taxa (remaining #taxa was " + StringUtilities::toString(n.size()) + " and age was " + current_age + " with maximum age of " + age + ") in tree simulation");
+            throw RbException() << "Unexpected number of taxa (remaining #taxa was " << n.size() << " and age was " << current_age << " with maximum age of " << age << ") in tree simulation";
         }
         
     }
@@ -573,7 +637,7 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
     }
     else
     {
-        throw RbException("Unexpected number of taxa (" + StringUtilities::toString(n.size()) + ") in tree simulation");
+        throw RbException() << "Unexpected number of taxa (" << n.size() << ") in tree simulation";
     }
 
 
@@ -600,7 +664,6 @@ double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, 
 
 void AbstractRootedTreeDistribution::simulateTree( void )
 {
-
     
     // the time tree object (topology & times)
     Tree *psi = new Tree();
@@ -640,7 +703,7 @@ void AbstractRootedTreeDistribution::simulateTree( void )
     {
         if (ra > 0.0)
         {
-            throw(RbException("Root age younger than oldest taxon age"));
+            throw RbException("Root age younger than oldest taxon age");
         }
 
         // Get the rng
@@ -729,7 +792,7 @@ void AbstractRootedTreeDistribution::swapParameterInternal( const DagNode *oldP,
 }
 
 
-void AbstractRootedTreeDistribution::touchSpecialization(DagNode *affecter, bool touchAll)
+void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == process_age )

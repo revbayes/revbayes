@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iosfwd>
 #include <string>
@@ -36,11 +36,13 @@ using namespace RevBayesCore;
  * \param[in]    nTaxa     Number of taxa (used for initialization during simulation).
  * \param[in]    tn        Taxon names used during initialization.
  * \param[in]    c         Clade constraints.
+ * \param[in]    t         The starting tree if we want to avoid simulating trees.
  */
-BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *rh,
+BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *rh, const TypedDagNode<double> *mp,
                                      const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
-                                     const std::vector<Taxon> &tn) : AbstractBirthDeathProcess( ra, cdt, tn ),
+                                     const std::vector<Taxon> &tn, Tree* t) : AbstractBirthDeathProcess( ra, cdt, tn, false, t ),
     rho( rh ),
+    sampling_mixture_proportion( mp ),
     sampling_strategy( ss ),
     incomplete_clades( ic )
 {
@@ -54,7 +56,7 @@ BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const Typed
  *
  * \return   The log-transformed probability density.
  */
-double BirthDeathProcess::computeLnProbabilityTimes( void )
+double BirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization
@@ -70,12 +72,12 @@ double BirthDeathProcess::computeLnProbabilityTimes( void )
     }
     
     // present time
-    double ra = value->getRoot().getAge();
-    double presentTime = ra;
+    double root_age = value->getRoot().getAge();
+    double present_time = root_age;
 
     
     // multiply the probability of a descendant of the initial species
-    ln_prob_times += lnP1(0,presentTime,sampling_probability);
+    ln_prob_times += lnP1(0,present_time,sampling_probability);
     
     // we started at the root thus we square the survival prob
     ln_prob_times *= 2.0;
@@ -93,7 +95,7 @@ double BirthDeathProcess::computeLnProbabilityTimes( void )
         ln_prob_times += lnSpeciationRate(divergence_times[i]);
     }
     // add the P1 for ALL speciation events
-    ln_prob_times += lnP1(presentTime,sampling_probability);
+    ln_prob_times += lnP1(present_time,sampling_probability);
     
     // if we assume diversified sampling, we need to multiply with the probability that all missing species happened after the last speciation event
     if ( sampling_strategy == "diversified" ) 
@@ -101,65 +103,77 @@ double BirthDeathProcess::computeLnProbabilityTimes( void )
         // We use equation (5) of Hoehna et al. "Inferring Speciation and Extinction Rates under Different Sampling Schemes"
         double last_event = divergence_times[divergence_times.size()-1];
         
-        double p_0_T = 1.0 - pSurvival(0,presentTime,1.0) * exp( rateIntegral(0,presentTime) );
-        double p_0_t = (1.0 - pSurvival(last_event,presentTime,1.0) * exp( rateIntegral(last_event,presentTime) ));
+        double p_0_T = 1.0 - pSurvival(0,present_time,1.0)          * exp( rateIntegral(0,present_time) );
+        double p_0_t = 1.0 - pSurvival(last_event,present_time,1.0) * exp( rateIntegral(last_event,present_time) );
         double F_t = p_0_t / p_0_T;
         
-//        if ( F_t > 1.0 || F_t < 0.0 )
-//        {
-//            throw RbException("Problem in computing the probability of missing species in BDP.");
-//        }
+        if ( F_t > 1.0 || F_t < 0.0 )
+        {
+            throw RbException("Problem in computing the probability of missing species in BDP.");
+        }
         
         // get an estimate of the actual number of taxa
         double m = round(num_taxa / rho->getValue());
-        int initial_taxa = 2;
-//        if ( MRCA == TRUE ) k <- 2
-        ln_prob_times += (m-num_taxa) * log(F_t) + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
+        ln_prob_times += (m-num_taxa) * log(F_t);
     }
     
     int total_species = int(num_taxa);
-    
-//    double ln_fact_n_taxa = RbMath::lnFactorial( int(num_taxa-2) );
-    
+        
     // now iterate over the vector of missing species per interval
     for (size_t i=0; i<incomplete_clades.size(); ++i)
     {
         // We use equation (5) of Hoehna et al.
         // "Inferring Speciation and Extinction Rates under Different Sampling Schemes"
-        double last_event = presentTime - incomplete_clade_ages[i];
+        double last_event_time = root_age - incomplete_clade_ages[i];
         
-        double p_0_T = 1.0 - pSurvival(0,presentTime,1.0) * exp( rateIntegral(0,presentTime) );
-        double p_0_t = (1.0 - pSurvival(last_event,presentTime,1.0) * exp( rateIntegral(last_event,presentTime) ));
+        double p_0_T = 1.0 - pSurvival(0,present_time,1.0)               * exp( rateIntegral(0,present_time) );
+        double p_0_t = 1.0 - pSurvival(last_event_time,present_time,1.0) * exp( rateIntegral(last_event_time,present_time) );
         double log_F_t = log(p_0_t) - log(p_0_T);
-        
-//        if ( log_F_t > 0.0 )
-//        {
-//            throw RbException("Problem in computing the probability of missing species in BDP.");
-//        }
+
+        if ( log_F_t > 0.0 )
+        {
+            throw RbException("Problem in computing the probability of missing species in BDP.");
+        }
 
         // get an estimate of the actual number of taxa
         int m = incomplete_clades[i].getNumberMissingTaxa();
-        // remove the number of species that we started with
         
         // multiply the probability for the missing species
         ln_prob_times += m * log_F_t;
-//        ln_prob_times += m * log_F_t + RbMath::lnFactorial(m+num_taxa-2.0) - RbMath::lnFactorial(m) - ln_fact_n_taxa;
-//        ln_prob_times += m * log_F_t + log(RbMath::choose(m-initial_taxa,num_taxa-initial_taxa));
-
 
         total_species += m;
     }
     
-//    if ( incomplete_clades.size() > 0 )
-//    {
-//        ln_prob_times += RbMath::lnFactorial(total_species-2) - RbMath::lnFactorial( int(num_taxa-2) ) - RbMath::lnFactorial( int(total_species-num_taxa) );
-//    }
+    if ( incomplete_clades.size() > 0 )
+    {
+        
+        double p_0_T = 1.0 - pSurvival(0,present_time,1.0) * exp( rateIntegral(0,present_time) );
+        ln_prob_times += log( p_0_T )*total_species;
+        ln_prob_times -= log( p_0_T )*num_taxa;
+
+    }
     
     return ln_prob_times;
 }
 
 
-double BirthDeathProcess::lnP1(double end, double r)
+size_t BirthDeathProcess::getNumberOfTaxaAtPresent( void ) const
+{
+    
+    size_t num_taxa_present = value->getNumberOfTips();
+    
+    // now iterate over the vector of missing species per clade
+    for (size_t i=0; i<incomplete_clades.size(); ++i)
+    {
+        int m = incomplete_clades[i].getNumberMissingTaxa();
+        num_taxa_present += m;
+    }
+    
+    return num_taxa_present;
+}
+
+
+double BirthDeathProcess::lnP1(double end, double r) const
 {
     
     double ln_p = 0;
@@ -185,7 +199,7 @@ double BirthDeathProcess::lnP1(double end, double r)
 }
 
 
-void BirthDeathProcess::prepareRateIntegral(double end)
+void BirthDeathProcess::prepareRateIntegral(double end) const
 {
     size_t num_taxa = value->getNumberOfTips();
     
@@ -199,7 +213,7 @@ void BirthDeathProcess::prepareRateIntegral(double end)
 
 }
 
-void BirthDeathProcess::prepareSurvivalProbability(double end, double r)
+void BirthDeathProcess::prepareSurvivalProbability(double end, double r) const
 {
     size_t num_taxa = value->getNumberOfTips();
     
@@ -214,7 +228,7 @@ void BirthDeathProcess::prepareSurvivalProbability(double end, double r)
 }
 
 
-double BirthDeathProcess::lnP1(double t, double T, double r)
+double BirthDeathProcess::lnP1(double t, double T, double r) const
 {
     
     // get the survival probability
@@ -366,7 +380,7 @@ double BirthDeathProcess::pSurvival(double start, double end) const
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void BirthDeathProcess::restoreSpecialization(DagNode *affecter)
+void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
 {
     
     AbstractRootedTreeDistribution::restoreSpecialization(affecter);
@@ -378,6 +392,10 @@ void BirthDeathProcess::restoreSpecialization(DagNode *affecter)
         for (size_t i=0; i<incomplete_clades.size(); ++i)
         {
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
+            if ( incomplete_clade_ages[i] == -1 )
+            {
+                throw RbException("Could not find MRCA of clade " + incomplete_clades[i].toString() + " in tree.");
+            }
         }
         
     }
@@ -413,7 +431,7 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void BirthDeathProcess::touchSpecialization(DagNode *affecter, bool touchAll)
+void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     AbstractRootedTreeDistribution::touchSpecialization(affecter, touchAll);
@@ -425,6 +443,10 @@ void BirthDeathProcess::touchSpecialization(DagNode *affecter, bool touchAll)
         for (size_t i=0; i<incomplete_clades.size(); ++i)
         {
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
+            if ( incomplete_clade_ages[i] == -1 )
+            {
+                throw RbException("Could not find MRCA of clade " + incomplete_clades[i].toString() + " in tree.");
+            }
         }
 
     }

@@ -1,7 +1,7 @@
 #ifndef CharacterHistoryContinuous_H
 #define CharacterHistoryContinuous_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "BranchHistoryContinuous.h"
 #include "CharacterEventContinuous.h"

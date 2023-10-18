@@ -28,14 +28,16 @@ BinomialDistribution::BinomialDistribution(const TypedDagNode<long> *n, const Ty
 }
 
 
-BinomialDistribution::~BinomialDistribution(void) {
+BinomialDistribution::~BinomialDistribution(void)
+{
 
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-BinomialDistribution* BinomialDistribution::clone( void ) const {
+BinomialDistribution* BinomialDistribution::clone( void ) const
+{
 
     return new BinomialDistribution( *this );
 }
@@ -45,7 +47,7 @@ double BinomialDistribution::computeLnProbability( void )
 {
     
     // check that the value is inside the boundaries
-    if ( *value > n->getValue() || *value < 0 )
+    if ( *value > n->getValue() || *value < 0 || n->getValue() < 0)
     {
         return RbConstants::Double::neginf;
     }
@@ -55,7 +57,8 @@ double BinomialDistribution::computeLnProbability( void )
 
 
 
-void BinomialDistribution::redrawValue( void ) {
+void BinomialDistribution::redrawValue( void )
+{
 
     *value = RbStatistics::Binomial::rv(n->getValue(), p->getValue(), *GLOBAL_RNG);
 }

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <ostream>
 #include <string>
@@ -116,7 +116,7 @@ bool Function::forceUpdates(void) const
 }
 
 
-void Function::getAffected(RbOrderedSet<DagNode *> &affected, DagNode* affecter)
+void Function::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
     
     // do nothing
@@ -136,7 +136,7 @@ const std::vector<const DagNode*>& Function::getParameters( void ) const
 /**
  * Method stumb that can be overwritten for specialized treatment.
  */
-void Function::keep( DagNode* affecter )
+void Function::keep( const DagNode* affecter )
 {
 
 }
@@ -176,7 +176,7 @@ void Function::removeParameter(const RevBayesCore::DagNode *p)
 
 
 /* Method stub that can be overwritten for specialized treatment. */
-void Function::restore( DagNode *restorer )
+void Function::restore( const DagNode *restorer )
 {
     
     // nothing to change here in the base class
@@ -228,7 +228,7 @@ void Function::swapParameter(const DagNode *oldP, const DagNode *newP)
 
 
 /* Method stub that can be overwritten for specialized treatment. */
-void Function::touch( DagNode *toucher )
+void Function::touch( const DagNode *toucher )
 {
     // do nothing
 }

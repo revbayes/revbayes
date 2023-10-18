@@ -26,8 +26,7 @@ AbstractCharacterData::AbstractCharacterData() {
  */
 AbstractCharacterData::AbstractCharacterData(const AbstractCharacterData &d) :
     deletedTaxa(d.deletedTaxa),
-    fileName(d.fileName),
-    filePath(d.filePath),
+    filename(d.filename),
     taxa(d.taxa),
     taxonMap(),
     homeologMap() {
@@ -84,8 +83,7 @@ AbstractCharacterData& AbstractCharacterData::operator=( const AbstractCharacter
         clear();
         
         deletedTaxa = d.deletedTaxa;
-        fileName    = d.fileName;
-        filePath    = d.filePath;
+        filename    = d.filename;
         taxa        = d.taxa;
                  
         for (std::map<std::string, AbstractTaxonData*>::const_iterator it = d.taxonMap.begin(); it != d.taxonMap.end(); ++it)
@@ -175,11 +173,22 @@ void AbstractCharacterData::addMissingTaxon(const std::string &n) {
  */
 void AbstractCharacterData::addTaxonData(const AbstractTaxonData &obs)
 {
-    
-    // add the sequence name to the list
-    taxa.push_back( obs.getTaxon() );
-    
-    // add the sequence also as a member so that we can access it by name
+	// check if the taxon is already in the data
+	std::map<std::string, AbstractTaxonData* >::iterator it = taxonMap.find( obs.getTaxonName() );
+	if ( it == taxonMap.end() )
+	{
+	    // add the sequence name to the list
+	    taxa.push_back( obs.getTaxon() );
+	}
+	else
+	{
+		// remove the previously provided taxon data, so we can replace it with new taxon data
+		delete it->second;
+		taxonMap.erase(it);
+	}
+
+
+    // add the sequence as a member so that we can access it by name
     taxonMap.insert( std::pair<std::string, AbstractTaxonData* >( obs.getTaxonName(), obs.clone() ) );
 }
 
@@ -288,20 +297,31 @@ void AbstractCharacterData::deleteTaxon(const std::string& s) {
  *
  * \return    The original file name.
  */
-const std::string& AbstractCharacterData::getFileName(void) const {
-    
-    return fileName;
+const path& AbstractCharacterData::getFilename(void) const
+{
+    return filename;
 }
 
 /**
- * Get the file path from whcih the character data object was read in.
+ * Get the included taxa currently stored in this object.
  *
- * \return    The original file path.
+ * \return       The included taxa.
  */
-const std::string& AbstractCharacterData::getFilePath(void) const
+std::vector<Taxon> AbstractCharacterData::getIncludedTaxa(void) const
 {
+    std::vector<Taxon> included_taxa;
+    size_t n_taxa_total = getNumberOfTaxa();
     
-    return filePath;
+    for (size_t i=0; i<n_taxa_total; ++i)
+    {
+        std::set<size_t>::const_iterator pos = deletedTaxa.find( i );
+        if ( pos == deletedTaxa.end() )
+        {
+            included_taxa.push_back( taxa[i] );
+        }
+    }
+    
+    return included_taxa;
 }
 
 
@@ -343,8 +363,8 @@ const std::string AbstractCharacterData::getJsonRepresentation(void) const {
 
     std::string jsonStr = "{\"CharacterDataMatrix\": {\n";
     
-    jsonStr += std::string("   \"filePath\": \"")    + filePath + std::string("\",") + '\n';
-    jsonStr += std::string("   \"fileName\": \"")    + fileName + std::string("\",") + '\n';
+    jsonStr += std::string("   \"filePath\": \"")    + filename.parent_path().string() + std::string("\",") + '\n';
+    jsonStr += std::string("   \"fileName\": \"")    + filename.parent_path().string()+ std::string("\",") + '\n';
     jsonStr += std::string("   \"dataType\": \"")    + getDataType() + "\",\n";
     jsonStr += std::string("   \"stateLabels\": \"") + getStateLabels() + "\",\n";
     
@@ -719,21 +739,9 @@ void AbstractCharacterData::restoreTaxon(const std::string& s) {
  *
  * \param[in]    fn    The new file name.
  */
-void AbstractCharacterData::setFileName(const std::string& fn) {
-    
-    fileName = fn;
-}
-
-
-/**
- * Set the original file path for this character data object.
- *
- * \param[in]    fn    The new file path.
- */
-void AbstractCharacterData::setFilePath(const std::string& fn)
+void AbstractCharacterData::setFilename(const path& fn)
 {
-    
-    filePath = fn;
+    filename = fn;
 }
 
 
@@ -878,7 +886,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractCharacterD
         }
     o << std::endl;
 
-    o << "Origination:                   " << x.getFileName() << std::endl;
+    o << "Origination:                   " << x.getFilename().filename() << std::endl;
     o << "Number of taxa:                " << x.getNumberOfTaxa() << std::endl;
     o << "Number of included taxa:       " << x.getNumberOfIncludedTaxa() << std::endl;
     o << "Datatype:                      " << x.getDataType() << std::endl;

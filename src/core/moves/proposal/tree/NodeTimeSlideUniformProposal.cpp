@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 
@@ -20,12 +20,14 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-NodeTimeSlideUniformProposal::NodeTimeSlideUniformProposal( StochasticNode<Tree> *n ) : Proposal(),
-    variable( n )
+NodeTimeSlideUniformProposal::NodeTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<Tree> >* vec_n ) : Proposal(),
+    variable( n ),
+    vector_variable( vec_n )
 {
     // tell the base class to add the node
     addNode( variable );
-    
+    addNode( vector_variable );
+
 }
 
 
@@ -90,7 +92,18 @@ double NodeTimeSlideUniformProposal::doProposal( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    Tree& tau = variable->getValue();
+    // get the current tree either from the single variable or the vector of trees
+    Tree *tmp = NULL;
+    if ( variable != NULL )
+    {
+        tmp = &variable->getValue();
+    }
+    else
+    {
+        tree_index = floor(rng->uniform01() * vector_variable->getValue().size());
+        tmp = &(vector_variable->getValue()[tree_index]);
+    }
+    Tree& tau = *tmp;
     
     if (tau.getNumberOfTips() <= 2)
     {
@@ -179,7 +192,14 @@ void NodeTimeSlideUniformProposal::undoProposal( void )
 void NodeTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    if ( oldN == variable )
+    {
+        variable = static_cast<StochasticNode<Tree>* >(newN);
+    }
+    else if ( oldN == vector_variable )
+    {
+        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >( newN );
+    }
     
 }
 

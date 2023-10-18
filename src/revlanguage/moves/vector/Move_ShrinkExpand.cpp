@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -60,7 +60,16 @@ void Move_ShrinkExpand::constructInternalObject( void )
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = NULL;
+    if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
+    {
+        tmp = static_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
+    }
+    else if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    }
+        
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -72,7 +81,7 @@ void Move_ShrinkExpand::constructInternalObject( void )
         }
         else
         {
-            throw RbException("Could not create a mvShrinkExpand because the node isn't a vector of stochastic nodes.");
+            throw RbException("Could not create a mvShrinkExpand because the node with name '" + (*it)->getName() + "' isn't a vector of stochastic nodes.");
         }
     }
     
@@ -136,10 +145,14 @@ const MemberRules& Move_ShrinkExpand::getParameterRules(void) const
     if ( !rules_set )
     {
         
-        move_member_rules.push_back( new ArgumentRule( "x"     , ModelVector<Real>::getClassTypeSpec(), "The variable on which the move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "sd"    , RealPos::getClassTypeSpec()          , "The standard deviation parameter if available.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC, NULL ) );
-        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()          , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
-        move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec()        , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        std::vector<TypeSpec> param_types;
+        param_types.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        param_types.push_back( ModelVector<Real>::getClassTypeSpec() );
+        
+        move_member_rules.push_back( new ArgumentRule( "x"     , param_types                    , "The variable on which the move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "sd"    , RealPos::getClassTypeSpec()    , "The standard deviation parameter if available.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC, NULL ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()    , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec()  , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inherited_rules = Move::getParameterRules();

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 
@@ -110,18 +110,24 @@ double BurstEventProposal::doProposal( void )
     } while ( node->isRoot() || node->isTip() );
     
     TopologyNode& parent = node->getParent();
+    TopologyNode& child = node->getChild(0);
     
     // we need to work with the times
     double parent_age  = parent.getAge();
     double my_age      = node->getAge();
-    double child_Age   = node->getChild( 0 ).getAge();
+    double child_Age   = child.getAge();
     if ( child_Age < node->getChild( 1 ).getAge())
     {
-        child_Age = node->getChild( 1 ).getAge();
+        child = node->getChild(1);
+        child_Age = child.getAge();
     }
 
-    if ( parent_age < burst_age || child_Age > burst_age )
+    if ( parent_age < burst_age || child_Age > burst_age ||
+            dist->isBurstSpeciation(parent.getIndex()) ||
+            dist->isBurstSpeciation(child.getIndex()) )
     {
+        failed = true;
+        // TODO: Should this be returning -inf (i.e., always reject proposal)?
         return 0;
     }
     

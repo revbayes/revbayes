@@ -1,7 +1,7 @@
 #ifndef TreeAssemblyFunction_H
 #define TreeAssemblyFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 
 #include "Tree.h"
@@ -24,10 +24,10 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         TreeAssemblyFunction*                               clone(void) const;                                                                  //!< Create an independent clone
-        void                                                keep(DagNode* affecter);
-        void                                                restore(DagNode *restorer);   
+        void                                                keep(const DagNode* affecter);
+        void                                                restore(const DagNode *restorer);
         void                                                reInitialized(void);                                                                //!< The arguments have been re-initialized
-        void                                                touch(DagNode *toucher );
+        void                                                touch(const DagNode *toucher );
         void                                                update(void);
         
     protected:
@@ -39,6 +39,7 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode<Tree>*                           tau;
         const TypedDagNode< RbVector<double> >*             brlen;
         std::set<size_t>                                    touchedNodeIndices;
+        bool                                                touchedTopology;
     };
     
 }

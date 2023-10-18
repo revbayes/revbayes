@@ -1,13 +1,5 @@
-//
-//  RateMatrix_FreeBinary.h
-//  rb_mlandis
-//
-//  Created by Michael Landis on 4/4/14.
-//  Copyright (c) 2014 Michael Landis. All rights reserved.
-//
-
-#ifndef __rb_mlandis__RateMatrix_FreeBinary__
-#define __rb_mlandis__RateMatrix_FreeBinary__
+#ifndef RateMatrix_FreeBinary_H
+#define RateMatrix_FreeBinary_H
 
 #include <vector>
 
@@ -39,4 +31,4 @@ namespace RevBayesCore {
 
 }
 
-#endif /* defined(__rb_mlandis__RateMatrix_FreeBinary__) */
+#endif /* defined(RateMatrix_FreeBinary_H) */

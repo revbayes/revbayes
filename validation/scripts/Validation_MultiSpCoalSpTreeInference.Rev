@@ -10,6 +10,16 @@
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
 #######################
 # Reading in the Data #
 #######################
@@ -93,11 +103,11 @@ mymodel = model( psi )
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, 100 )
-validation.burnin(generations=1000,tuningInterval=100)
-validation.run(generations=5000)
-validation.summarize()
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_MSC_inference" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
 
 # you may want to quit RevBayes now

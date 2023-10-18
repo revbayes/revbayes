@@ -27,7 +27,7 @@
 #include <vector>
 #include <cstdlib>
 #include <math.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 /* Files including helper classes */
@@ -73,6 +73,8 @@
 #include "RlDistanceMatrix.h"
 #include "RlDistributionMemberFunction.h"
 #include "RlMultiValueEvent.h"
+#include "RlOrderedEventTimes.h"
+#include "RlOrderedEvents.h"
 #include "RlStochasticNode.h"
 #include "RlTimeTree.h"
 #include "RlTree.h"
@@ -132,6 +134,7 @@
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
+#include "Dist_CTMC.h"
 #include "Dist_phyloCTMC.h"
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
@@ -161,19 +164,22 @@
 #include "Dist_bdp.h"
 #include "Dist_bdp_complete.h"
 #include "Dist_BDSTP.h"
+#include "Dist_FBDP.h"
 #include "Dist_BirthDeathBurstProcess.h"
+#include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
+#include "Dist_ConstrainedUnrootedTopology.h"
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
 #include "Dist_DuplicationLoss.h"
-#include "Dist_FBDP.h"
 #include "Dist_FBDRP.h"
-#include "Dist_BDS.h"
+#include "Dist_FBDSP.h"
+#include "Dist_GLHBDSP.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
@@ -184,10 +190,12 @@
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
+#include "Dist_MultispeciesCoalescentMigration.h"
 #include "Dist_outgroupBirthDeath.h"
 #include "Dist_PhylodynamicBDP.h"
 #include "Dist_phyloDistanceGamma.h"
 #include "Dist_sampledSpeciationBirthDeathProcess.h"
+#include "Dist_occurrenceBirthDeathProcess.h"
 #include "Dist_TimeVaryingStateDependentSpeciationExtinctionProcess.h"
 #include "Dist_UltrametricTree.h"
 #include "Dist_uniformTimeTree.h"
@@ -255,6 +263,8 @@
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
+#include "Dist_markovTimes.h"
+#include "Dist_markovEvents.h"
 #include "Dist_mixture.h"
 #include "Dist_mixtureAnalytical.h"
 #include "Dist_mixtureVector.h"
@@ -316,6 +326,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMC() );
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloDACTMC() );
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
+        addDistribution( new Dist_CTMC() );
         addDistribution( new Dist_phyloCTMC() );
         addDistribution( new Dist_phyloCTMCDASequence() );
         addDistribution( new Dist_phyloCTMCDASiteIID() );
@@ -336,17 +347,15 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_outgroupBirthDeath() );
         AddDistribution< TimeTree                   >( new Dist_sampledSpeciationBirthDeathProcess() );
         AddDistribution< TimeTree                   >( new Dist_TimeVaryingStateDependentSpeciationExtinctionProcess() );
+        AddDistribution< TimeTree                   >( new Dist_GLHBDSP() );
 
-
-        // fossilized-birth-death species process
-        AddDistribution< TimeTree                   >( new Dist_FBDP());
+        // fossilized-birth-death range processes
         AddDistribution< MatrixReal                 >( new Dist_FBDRP());
-
-        // birth-death with rate shifts model (Silvestro et al.)
-        AddDistribution< MatrixReal                 >( new Dist_BDS());
+        AddDistribution< TimeTree                   >( new Dist_FBDSP());
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());
+        AddDistribution< TimeTree                   >( new Dist_FBDP());
         AddDistribution< TimeTree                   >( new Dist_PhylodynamicBDP());
 
         // diversity-dependent pure-birth process
@@ -377,6 +386,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_constPopMultispCoal() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentInverseGammaPrior() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentUniformPrior() );
+        AddDistribution< TimeTree                   >( new Dist_MultispeciesCoalescentMigration() );
 
         // constrained node age distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedNodeAge() );
@@ -390,11 +400,17 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // constrained topology distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
 
+        // constrained topology distribution
+        AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );
+
         // uniform time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformTimeTree() );
 
         // uniform serial-sampled time tree distribution
         AddDistribution< TimeTree                   >( new Dist_uniformSerialSampledTimeTree() );
+
+        // occurrence birth death process tree distribution
+        AddDistribution< TimeTree                   >( new Dist_occurrenceBirthDeathProcess() );
 
         // uniform topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );
@@ -407,6 +423,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // ultrametric tree distributions
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
+
+        // branch rate tree distributions
+        AddDistribution< BranchLengthTree           >( new Dist_BranchRateTree() );
 
 		// Distance Matrix Gamma distribution
 		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
@@ -544,12 +563,13 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // Exponential error distribution for matrix distance from average distance matrix
         AddDistribution< AverageDistanceMatrix      >( new Dist_exponentialError());
-        
+
         /* Empirical sample distributions (in folder "distributions/mixture") */
         AddDistribution< ModelVector<Natural>       >( new Dist_EmpiricalSample<Natural>());
         AddDistribution< ModelVector<Real>          >( new Dist_EmpiricalSample<Real>());
         AddDistribution< ModelVector<RealPos>       >( new Dist_EmpiricalSample<RealPos>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_EmpiricalSample<TimeTree>());
+        AddDistribution< ModelVector<BranchLengthTree>      >( new Dist_EmpiricalSample<BranchLengthTree>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_WeightedSample<TimeTree>());
         AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>      >( new Dist_WeightedSample<AbstractHomologousDiscreteCharacterData>());
 
@@ -623,6 +643,15 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_reversibleJumpMixtureConstant<TimeTree>() );
         AddDistribution< BranchLengthTree           >( new Dist_reversibleJumpMixtureConstant<BranchLengthTree>() );
 
+        // markov events
+        AddDistribution< RlOrderedEventTimes          >( new Dist_markovTimes() );
+        AddDistribution< RlOrderedEvents<Real>        >( new Dist_markovEvents<Real>() );
+        AddDistribution< RlOrderedEvents<RealPos>     >( new Dist_markovEvents<RealPos>() );
+        AddDistribution< RlOrderedEvents<Probability> >( new Dist_markovEvents<Probability>() );
+
+        AddDistribution< RlOrderedEvents<ModelVector<Real> >        >( new Dist_markovEvents<ModelVector<Real>        >() );
+        AddDistribution< RlOrderedEvents<ModelVector<RealPos> >     >( new Dist_markovEvents<ModelVector<RealPos>     >() );
+        AddDistribution< RlOrderedEvents<ModelVector<Probability> > >( new Dist_markovEvents<ModelVector<Probability> >() );
 
         /* Now we have added all primitive and complex data types and can start type checking */
         Workspace::globalWorkspace().typesInitialized = true;

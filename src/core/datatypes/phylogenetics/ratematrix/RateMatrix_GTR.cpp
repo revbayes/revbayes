@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <string>
 #include <complex>
@@ -148,7 +148,6 @@ RateMatrix_GTR* RateMatrix_GTR::clone( void ) const
 {
     return new RateMatrix_GTR( *this );
 }
-
 
 
 /** Calculate the transition probabilities for the real case */

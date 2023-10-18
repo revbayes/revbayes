@@ -7,17 +7,19 @@
 #include "ContinuousStochasticNode.h"
 #include "RevMemberObject.h"
 #include "MethodTable.h"
+#include "Probability.h"
 #include "RevPtr.h"
 
 namespace RevBayesCore { class ContinuousDistribution; }
 
 namespace RevLanguage {
+
 class Argument;
 class ContinuousDistribution;
 class Distribution;
 class PositiveContinuousDistribution;
-class Probability;
 class RevVariable;
+
 template <typename rlType> class TypedDistribution;
     
     class ContinuousStochasticNode : public RevBayesCore::ContinuousStochasticNode, public RevMemberObject {

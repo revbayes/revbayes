@@ -156,13 +156,13 @@ void HeterogeneousRateBirthDeath::buildRandomBinaryHistory(std::vector<TopologyN
         tips.erase(tips.begin()+long(index));
         
         // Add a left child
-        TopologyNode* leftChild = new TopologyNode(0);
+        TopologyNode* leftChild = new TopologyNode();
         parent->addChild(leftChild);
         leftChild->setParent(parent);
         tips.push_back(leftChild);
         
         // Add a right child
-        TopologyNode* rightChild = new TopologyNode(0);
+        TopologyNode* rightChild = new TopologyNode();
         parent->addChild(rightChild);
         rightChild->setParent(parent);
         tips.push_back(rightChild);
@@ -689,7 +689,7 @@ void HeterogeneousRateBirthDeath::simulateTree( void )
     
 }
 
-void HeterogeneousRateBirthDeath::getAffected(RbOrderedSet<DagNode *> &affected, RevBayesCore::DagNode *affecter)
+void HeterogeneousRateBirthDeath::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )
@@ -702,7 +702,7 @@ void HeterogeneousRateBirthDeath::getAffected(RbOrderedSet<DagNode *> &affected,
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void HeterogeneousRateBirthDeath::keepSpecialization(DagNode *affecter)
+void HeterogeneousRateBirthDeath::keepSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )
@@ -716,7 +716,7 @@ void HeterogeneousRateBirthDeath::keepSpecialization(DagNode *affecter)
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void HeterogeneousRateBirthDeath::restoreSpecialization(DagNode *affecter)
+void HeterogeneousRateBirthDeath::restoreSpecialization(const DagNode *affecter)
 {
     
     if ( affecter == root_age && this->dag_node != NULL )
@@ -769,7 +769,7 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
  * Touch the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void HeterogeneousRateBirthDeath::touchSpecialization(DagNode *affecter, bool touchAll)
+void HeterogeneousRateBirthDeath::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )

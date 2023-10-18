@@ -5,6 +5,7 @@
 #include "MonteCarloAnalysis.h"
 #include "Parallelizable.h"
 #include "RbVector.h"
+#include "RbFileManager.h"
 
 namespace RevBayesCore {
     
@@ -25,7 +26,7 @@ namespace RevBayesCore {
     class PosteriorPredictiveAnalysis : public Cloneable, public Parallelizable {
         
     public:
-        PosteriorPredictiveAnalysis(const MonteCarloAnalysis &m, const std::string &dir);
+        PosteriorPredictiveAnalysis(const MonteCarloAnalysis &m, const path &dir);
         PosteriorPredictiveAnalysis(const PosteriorPredictiveAnalysis &a);
         virtual                                ~PosteriorPredictiveAnalysis(void);                               //!< Virtual destructor
         
@@ -44,7 +45,7 @@ namespace RevBayesCore {
     private:
         
         // members
-        std::string                             directory;
+        path                                    directory;
 //        size_t                                  num_runs;
 //        std::vector<MonteCarloAnalysis*>        runs;
         size_t                                  processors_per_likelihood;

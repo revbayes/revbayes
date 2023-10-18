@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cassert>
 #include <iostream>
 #include <list>
@@ -25,8 +25,7 @@ std::string SyntaxStatement::stmtName[] = { "IF", "IF_ELSE", "FOR", "WHILE", "NE
 
 
 /** Construct from statement type */
-SyntaxStatement::SyntaxStatement( statementT type ) :
-    SyntaxElement(),
+SyntaxStatement::SyntaxStatement( statementT type ) : SyntaxElement(),
     statementType( type ),
     expression( NULL ),
     statements1( NULL ),
@@ -36,8 +35,7 @@ SyntaxStatement::SyntaxStatement( statementT type ) :
 
 
 /** Construct from statement type and expression (RETURN expression) */
-SyntaxStatement::SyntaxStatement( statementT type, SyntaxElement* expr ) :
-    SyntaxElement(),
+SyntaxStatement::SyntaxStatement( statementT type, SyntaxElement* expr ) : SyntaxElement(),
     statementType( type ),
     expression( expr ),
     statements1( NULL ),
@@ -47,8 +45,7 @@ SyntaxStatement::SyntaxStatement( statementT type, SyntaxElement* expr ) :
 
 
 /** Construct from statement type, condition and statement list */
-SyntaxStatement::SyntaxStatement( statementT type, SyntaxElement* cond, std::list<SyntaxElement*>* stmts ) :
-    SyntaxElement(),
+SyntaxStatement::SyntaxStatement( statementT type, SyntaxElement* cond, std::list<SyntaxElement*>* stmts ) : SyntaxElement(),
     statementType( type ),
     expression( cond ),
     statements1( stmts ),
@@ -72,8 +69,7 @@ SyntaxStatement::SyntaxStatement(statementT                   type,
 
 
 /** Deep copy constructor */
-SyntaxStatement::SyntaxStatement(const SyntaxStatement& x) :
-    SyntaxElement( x )
+SyntaxStatement::SyntaxStatement(const SyntaxStatement& x) : SyntaxElement( x )
 {
 
     statementType   = x.statementType;
@@ -96,7 +92,8 @@ SyntaxStatement::SyntaxStatement(const SyntaxStatement& x) :
 
 
 /** Destructor deletes expression and statements */
-SyntaxStatement::~SyntaxStatement() {
+SyntaxStatement::~SyntaxStatement()
+{
     
     delete expression;
     
@@ -249,7 +246,6 @@ RevPtr<RevVariable> SyntaxStatement::evaluateContent(Environment& env, bool dyna
             }
             
             // Catch signals
-            // TODO Return statement not handled correctly
             if ( Signals::getSignals().isSet(Signals::BREAK) )
             {
                 Signals::getSignals().clearFlags();
@@ -258,6 +254,10 @@ RevPtr<RevVariable> SyntaxStatement::evaluateContent(Environment& env, bool dyna
             else if ( Signals::getSignals().isSet(Signals::CONTINUE) )
             {
                 Signals::getSignals().clearFlags();  // Just continue with next loop state
+            }
+            else if ( Signals::getSignals().isSet(Signals::RETURN) )
+            {
+                break;
             }
         }
         

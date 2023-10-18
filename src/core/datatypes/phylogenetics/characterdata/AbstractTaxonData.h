@@ -1,7 +1,7 @@
 #ifndef AbstractTaxonData_H
 #define AbstractTaxonData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <iosfwd>
 
@@ -29,6 +29,12 @@ namespace RevBayesCore {
         
         // methods of the Cloneable interface
         virtual AbstractTaxonData*              clone(void) const = 0;
+        
+        bool                                    operator==(const AbstractTaxonData &rm) const { return this == &rm; }
+        bool                                    operator!=(const AbstractTaxonData &rm) const { return !operator==(rm); }
+        bool                                    operator<(const AbstractTaxonData &rm) const { return this < &rm; }
+        bool                                    operator<=(const AbstractTaxonData &rm) const { return operator<(rm) || operator==(rm); }
+
         
         // AbstractTaxonData functions
         virtual void                            concatenate(const AbstractTaxonData &d) = 0;                        //!< Concatenate sequences

@@ -165,7 +165,7 @@ std::vector<std::vector<double> > PhyloMultivariateBrownianProcessREML::getContr
 }
 
 
-void PhyloMultivariateBrownianProcessREML::keepSpecialization( DagNode* affecter )
+void PhyloMultivariateBrownianProcessREML::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -417,7 +417,7 @@ void PhyloMultivariateBrownianProcessREML::resetValue( void )
 }
 
 
-void PhyloMultivariateBrownianProcessREML::restoreSpecialization( DagNode* affecter )
+void PhyloMultivariateBrownianProcessREML::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the precision matrix if necessary
@@ -513,7 +513,7 @@ std::vector<double> PhyloMultivariateBrownianProcessREML::simulateRootCharacters
 }
 
 
-void PhyloMultivariateBrownianProcessREML::touchSpecialization( DagNode* affecter, bool touchAll )
+void PhyloMultivariateBrownianProcessREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
  
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty

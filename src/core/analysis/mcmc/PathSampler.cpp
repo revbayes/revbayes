@@ -1,6 +1,6 @@
 #include "PathSampler.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Cloneable.h"
@@ -62,7 +62,7 @@ double PathSampler::marginalLikelihood( void ) const
     
         // now we can compute the marginal likelihood
         // the method uses the trapezoidal rule for numerical integration
-        for (size_t i = 0; i < pathValues.size()-1; ++i)
+        for (size_t i = 0; i+1 < pathValues.size(); ++i)
         {
             marginal += (pathValues[i] + pathValues[i+1])*(powers[i]-powers[i+1])/2.0;
         }

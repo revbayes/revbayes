@@ -1,32 +1,36 @@
 ################################################################################
 #
 # RevBayes Validation Test: Ornstein-Uhlenbeck on a fixed tree
-# 
+#
 # Model: Continuous character(s) evolve under Ornstein-Uhlenbeck model.
-#            
+#
 #
 # authors: Sebastian Hoehna
 #
 ################################################################################
 
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
 #######################
 # Reading in the Data #
 #######################
 
-###### This just defines a single model for all sites #######
-
-### Read in sequence data for both genes
-
 data <- readContinuousCharacterData("data/primates_lhtlog.nex")
 
 data.excludeAll()
-data.includeCharacter(1) 
+data.includeCharacter(1)
 
 # Get some useful variables from the data. We need these later on.
 taxa <- data.taxa()
-
-# set my move index
-mvi = 0
 
 
 
@@ -37,11 +41,11 @@ mvi = 0
 
 sigma ~ dnLognormal( ln(10.0), sd=0.587405 )
 optimum ~ dnUniform(-10,10)
-attraction ~ dnExponential(1.0)
+attraction ~ dnExponential(10.0)
 
-moves[++mvi] = mvScale(sigma, lambda=1.0, tune=true, weight=2.0) 
-moves[++mvi] = mvSlide(optimum, delta=1.0, tune=true, weight=2.0) 
-moves[++mvi] = mvScale(attraction, lambda=1.0, tune=true, weight=2.0) 
+moves.append( mvScale(sigma, lambda=1.0, tune=true, weight=2.0) )
+moves.append( mvSlide(optimum, delta=1.0, tune=true, weight=2.0) )
+moves.append( mvScale(attraction, lambda=1.0, tune=true, weight=2.0) )
 
 
 
@@ -49,9 +53,7 @@ moves[++mvi] = mvScale(attraction, lambda=1.0, tune=true, weight=2.0)
 # Tree model #
 ##############
 
-
 psi <- readTrees( "data/primates.tree" )[1]
-
 
 
 
@@ -67,7 +69,6 @@ traits.clamp(data)
 
 
 
-
 #############
 # THE Model #
 #############
@@ -79,19 +80,15 @@ mymodel = model(psi)
 
 
 
-
-
-monitors[1] = mnModel(filename="output/primates_OU.log",printgen=10, separator = TAB)
-
 mymcmc = mcmc(mymodel, monitors, moves)
 
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_OU_MVN" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
 
-validation = validationAnalysis( mymcmc, 2000 )
-validation.burnin(generations=2000,tuningInterval=100)
-validation.run(generations=5000)
-validation.summarize()
 
 
 # you may want to quit RevBayes now
 q()
-

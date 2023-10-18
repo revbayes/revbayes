@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -28,9 +28,10 @@ using namespace RevBayesCore;
  * \param    cdt       The condition of the process (time/survival/nTaxa)
  * \param    tn        Taxon names used during initialization.
  * \param    uo        If true ra is the origin time otherwise the root age of the process.
+ * \param    t         The starting tree if we want to avoid simulating trees. 
  */
-AbstractBirthDeathProcess::AbstractBirthDeathProcess(const TypedDagNode<double> *ra, const std::string &cdt, const std::vector<Taxon> &tn, bool uo )
-    : AbstractRootedTreeDistribution( ra, tn, uo ),
+AbstractBirthDeathProcess::AbstractBirthDeathProcess(const TypedDagNode<double> *ra, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, Tree* t )
+    : AbstractRootedTreeDistribution( ra, tn, uo, t ),
     condition( cdt )
 {}
 
@@ -44,7 +45,7 @@ AbstractBirthDeathProcess::~AbstractBirthDeathProcess(void)
  *
  * @return log-probability
  */
-double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
+double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -67,13 +68,24 @@ double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
     }
     else if ( condition == "nTaxa" )
     {
-        lnProbTimes = -lnProbNumTaxa( value->getNumberOfTips(), 0, present_time, true );
+        size_t n_taxa_present = getNumberOfTaxaAtPresent();
+        
+        lnProbTimes = -lnProbNumTaxa( n_taxa_present, 0, present_time, true );
     }
     
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeLnProbabilityTimes();
     
     return lnProbTimes;
+}
+
+
+size_t AbstractBirthDeathProcess::getNumberOfTaxaAtPresent( void ) const
+{
+    
+    size_t num_taxa_present = value->getNumberOfTips();
+    
+    return num_taxa_present;
 }
 
 
@@ -93,7 +105,7 @@ double AbstractBirthDeathProcess::lnProbTreeShape(void) const
  * Prepare the probability computation. Here we can pre-calculate some values for more
  * efficient probability calculation. The derived classes may want to do something.
  */
-void AbstractBirthDeathProcess::prepareProbComputation( void ) 
+void AbstractBirthDeathProcess::prepareProbComputation( void ) const
 {}
 
 

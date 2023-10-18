@@ -1,10 +1,11 @@
 #ifndef Parser_H
 #define Parser_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <list>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -16,7 +17,7 @@ namespace RevLanguage {
     public:
         bool inQuote;
         bool inComment;
-        std::list<std::string> lines; 
+        std::vector<std::string> lines;
         int result;
         std::string message;
         std::string function_name;
@@ -122,8 +123,8 @@ namespace RevLanguage {
         Parser&                 operator=(const Parser& w) { return (*this); }                          //! Prevent assignment
 
         // Help functions
-        ParserInfo              breakIntoLines(const std::string& cmd, std::list<std::string>& lines, bool validate) const;    //!< Break a command string buffer into Rev lines
-        ParserInfo              breakIntoLines(const std::string& cmd, std::list<std::string>& lines) const;    //!< Break a command string buffer into Rev lines
+        ParserInfo              breakIntoLines(const std::string& cmd, std::vector<std::string>& lines, bool validate) const;    //!< Break a command string buffer into Rev lines
+        ParserInfo              breakIntoLines(const std::string& cmd, std::vector<std::string>& lines) const;    //!< Break a command string buffer into Rev lines
         void                    setParserMode(ParserMode mode);                                         //!< Set the parser mode
         
         // Member variables
@@ -138,7 +139,7 @@ namespace RevLanguage {
 }
 
 // Global call-back function for flex-generated code
-void rrinput(char* buf, size_t& result, size_t maxsize);
+void rrinput(char* buf, int& result, size_t maxsize);
 
 // Global command buffer string stream for rrinput
 extern std::stringstream rrcommand;
@@ -150,6 +151,6 @@ extern bool foundEOF;
 
 // Global column and token length variables for flex
 extern size_t yycolumn;
-extern size_t yyleng;
+extern int    yyleng;
 
 #endif

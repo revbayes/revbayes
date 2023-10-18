@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "Clade.h"
 #include "DivergenceTimeCDF.h"
 #include "EpisodicBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
@@ -31,10 +32,17 @@ namespace RevBayesCore { class Taxon; }
 using namespace RevBayesCore;
 
 EpisodicBirthDeathProcess::EpisodicBirthDeathProcess(const TypedDagNode<double> *ra,
-                                                     const TypedDagNode<RbVector<double> > *sr, const TypedDagNode<RbVector<double> > *st,
-                                                     const TypedDagNode<RbVector<double> > *er, const TypedDagNode<RbVector<double> > *et,
-                                                     const TypedDagNode<double> *r, const std::string& ss, const std::vector<Clade> &ic, const std::string &cdt,
-                                                     const std::vector<Taxon> &tn) : BirthDeathProcess( ra, r, ss, ic, cdt, tn ),
+                                                     const TypedDagNode<RbVector<double> > *sr,
+                                                     const TypedDagNode<RbVector<double> > *st,
+                                                     const TypedDagNode<RbVector<double> > *er,
+                                                     const TypedDagNode<RbVector<double> > *et,
+                                                     const TypedDagNode<double> *r,
+                                                     const TypedDagNode<double> *mp,
+                                                     const std::string& ss,
+                                                     const std::vector<Clade> &ic,
+                                                     const std::string &cdt,
+                                                     const std::vector<Taxon> &tn,
+                                                     Tree* t) : BirthDeathProcess( ra, r, mp, ss, ic, cdt, tn, t ),
     lambda_rates( sr ),
     lambda_times( st ),
     mu_rates( er ),
@@ -47,8 +55,10 @@ EpisodicBirthDeathProcess::EpisodicBirthDeathProcess(const TypedDagNode<double> 
     
     prepareProbComputation();
 
-    simulateTree();
-    
+    if ( starting_tree == NULL )
+    {
+        simulateTree();
+    }
 }
 
 
@@ -170,7 +180,7 @@ size_t EpisodicBirthDeathProcess::lower_index(double t, size_t min, size_t max) 
  *
  *
  */
-void EpisodicBirthDeathProcess::prepareProbComputation( void )
+void EpisodicBirthDeathProcess::prepareProbComputation( void ) const
 {
     
     // clean all the sets

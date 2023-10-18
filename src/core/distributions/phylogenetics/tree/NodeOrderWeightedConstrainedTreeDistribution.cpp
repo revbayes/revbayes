@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -195,52 +195,6 @@ void NodeOrderWeightedConstrainedTreeDistribution::updateMapOfNodeAges()
     {
         nodeAges[(*elem)] = TreeUtilities::getAgeOfMRCA(*value, elem->first, elem->second);
     }
-
-
-    //There must be a smart and efficient way of doing that.
-    //For the moment we do it dumb and slow.
-
-    /*Attempt at a smart algorithm
-     std::unordered_set<std::string> tipsToCareAbout;
-     for (const auto& elem: constrainedNodes) {
-     nodeAges[elem] = -1.0;
-     tipsToCareAbout.insert(elem.first);
-     tipsToCareAbout.insert(elem.second);
-     }
-     //First find all tip nodes of interest
-     std::map < TopologyNode*, bool > nodesOfInterest;
-     for (size_t i = 0; i < tree->getValue().getNumberOfTips()-1; ++i)
-     {
-     TopologyNode *node = n[i];
-     if (tipsToCareAbout.contains( node->getName()) ) {
-     nodesOfInterest[node] = true;
-     }
-     }
-     //Now for internal nodes
-     for (size_t i = tree->getValue().getNumberOfTips(); i < n.size(); ++i)
-     {
-     TopologyNode *node = n[i];
-     std::vector< TopologyNode* > kids = node->getChildren();
-     bool doneOne = false;
-     for (size_t j = 0; j< kids.size() ++j) {
-     if ( nodesOfInterest[kids[j]] )
-     {
-     nodesOfInterest[node] = true;
-     if (doneOne)
-     {
-     //Two children of interest, it may be a node whose age we'd like to know
-     //...
-     }
-     else {
-     doneOne = true;
-     }
-     }
-     }
-
-     }
-     */
-
-    return;
 
 }
 

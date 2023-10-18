@@ -5,6 +5,7 @@
 #include "Cloneable.h"
 #include "RbException.h"
 #include "TypedDagNode.h"
+#include "StochasticNode.h"
 
 namespace RevBayesCore { class DagNode; }
 
@@ -54,6 +55,17 @@ double PointMassDistribution::computeLnProbability( void )
 }
 
 
+void PointMassDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+{
+    // only delegate when the toucher was our parameters
+    if ( affecter == val && this->dag_node != NULL )
+    {
+        this->dag_node->initiateGetAffectedNodes( affected );
+    }
+    
+}
+
+
 double PointMassDistribution::getMin( void ) const
 {
 
@@ -66,6 +78,18 @@ double PointMassDistribution::getMax(void) const
 
     return val->getValue();
 }
+
+
+void PointMassDistribution::keepSpecialization( const DagNode* affecter )
+{
+    // only do this when the toucher was our parameters
+    if ( affecter == val && this->dag_node != NULL )
+    {
+        this->dag_node->keepAffected();
+    }
+    
+}
+
 
 
 double PointMassDistribution::quantile(double p) const
@@ -82,6 +106,27 @@ void PointMassDistribution::redrawValue( void )
     
 }
 
+
+
+void PointMassDistribution::restoreSpecialization( const DagNode *restorer )
+{
+    
+    // only do this when the toucher was our parameters
+    if ( restorer == val )
+    {
+        const double &tmp = val->getValue();
+        *(this->value) = tmp;
+
+        if ( this->dag_node != NULL )
+        {
+            this->dag_node->restoreAffected();
+        }
+        
+    }
+    
+}
+
+
 /** Swap a parameter of the distribution */
 void PointMassDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
@@ -89,6 +134,24 @@ void PointMassDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     if (oldP == val)
     {
         val = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    
+}
+
+
+void PointMassDistribution::touchSpecialization( const DagNode *toucher, bool touchAll )
+{
+    // only do this when the toucher was our parameters
+    if ( toucher == val )
+    {
+        const double &tmp = val->getValue();
+        *(this->value) = tmp;
+        
+        if ( this->dag_node != NULL )
+        {
+            this->dag_node->touchAffected();
+        }
+        
     }
     
 }

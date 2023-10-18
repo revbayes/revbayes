@@ -1,7 +1,7 @@
 #ifndef AbstractRateMatrix_H
 #define AbstractRateMatrix_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "MatrixReal.h"
@@ -72,8 +72,7 @@ namespace RevBayesCore {
         bool                                checkTimeReversibity(double tolerance);
         virtual void                        computeStochasticMatrix(size_t n);
         virtual void                        computeDominatingRate(void);
-        virtual void                        exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
-        virtual void                        multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
+        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
         
         // protected members available for derived classes
         MatrixReal*                         the_rate_matrix;                                                                            //!< Holds the rate matrix

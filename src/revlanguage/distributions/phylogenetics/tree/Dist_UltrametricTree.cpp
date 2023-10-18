@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -99,7 +99,12 @@ RevBayesCore::UltrametricTreeDistribution* Dist_UltrametricTree::createDistribut
     RevBayesCore::TypedDistribution<double>* rp                 = dynamic_cast<RevBayesCore::TypedDistribution<double>* >( rl_rate_prior.createDistribution() );
     
     RevBayesCore::TypedDagNode<double>* ra                      = static_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rbf                     = static_cast<const Probability &>( root_branch_fraction->getRevObject() ).getDagNode();
+    
+    RevBayesCore::TypedDagNode<double>* rbf = NULL;
+    if( root_branch_fraction->getRevObject() != RevNullObject::getInstance() )
+    {
+        rbf = static_cast<const Probability &>( root_branch_fraction->getRevObject() ).getDagNode();
+    }
 
     const RevBayesCore::TraceTree& tt                           = static_cast<const TraceTree &>( trees->getRevObject() ).getValue();
 
@@ -215,7 +220,7 @@ const MemberRules& Dist_UltrametricTree::getParameterRules(void) const
         member_rules.push_back( new ArgumentRule( "treePrior", TypedDistribution<TimeTree>::getClassTypeSpec(), "The prior distribution for the time tree (divergence times).",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "ratePrior", TypedDistribution<RealPos>::getClassTypeSpec(), "The prior distribution for the branch rates.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "rootAge", RealPos::getClassTypeSpec(), "The root age variable.",   ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        member_rules.push_back( new ArgumentRule( "rootBranchFraction", Probability::getClassTypeSpec(), "The fraction of how much of the root branch is assigned to the left subtree.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "rootBranchFraction", Probability::getClassTypeSpec(), "The fraction of how much of the root branch is assigned to the left subtree.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         member_rules.push_back( new ArgumentRule( "trees", TraceTree::getClassTypeSpec(), "The trace of tree samples.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "density", Trace::getClassTypeSpec(), "Optional trace of probability density values for each tree.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
 

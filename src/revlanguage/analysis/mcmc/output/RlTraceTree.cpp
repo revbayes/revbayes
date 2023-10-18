@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -143,6 +143,18 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         double p = this->value->cladeProbability( c, verbose );
+        
+        return new RevVariable( new Probability( p ) );
+        
+    }
+    else if ( name == "jointCladeProbability" )
+    {
+        found = true;
+        
+        const RevBayesCore::RbVector<RevBayesCore::Clade> &c    = static_cast<const ModelVector<Clade> &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        
+        double p = this->value->jointCladeProbability( c, verbose );
         
         return new RevVariable( new Probability( p ) );
         
@@ -301,6 +313,54 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         return new RevVariable( new RlBoolean( cov ) );
     }
+    else if ( name == "getTMRCA" )
+    {
+        found = true;
+        
+        // get the tree which is the only argument for this method
+        RevBayesCore::Clade this_clade = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool strict = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool stem   = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+
+        const std::vector<RevBayesCore::Tree>& trees = this->value->getValues();
+
+        RevBayesCore::RbVector<double> ages;
+
+        RevBayesCore::RbBitSet bits = RevBayesCore::RbBitSet( this->value->getValues()[0].getNumberOfTips() );
+        const std::map<std::string, size_t>& taxon_map = this->value->getValues()[0].getTaxonBitSetMap();
+        for ( size_t i=0; i<this_clade.size(); ++i )
+        {
+            RevBayesCore::Taxon t = this_clade.getTaxon(i);
+            const std::string& name = t.getName();
+            std::map<std::string,size_t>::const_iterator pos = taxon_map.find(name);
+            size_t index = pos->second;
+            bits.set( index );
+        }
+        this_clade.setBitRepresentation( bits );
+        
+        for (size_t i=this->value->getBurnin(); i<trees.size(); ++i)
+        {
+            // default age
+            double age = -1;
+            
+            const RevBayesCore::TopologyNode* mrca = trees[i].getRoot().getMrca( this_clade, strict );
+            if ( mrca != NULL )
+            {
+                if ( stem == false )
+                {
+                    age = mrca->getAge();
+                }
+                else if ( mrca->isRoot() == false )
+                {
+                    age = mrca->getParent().getAge();
+                }
+            }
+            
+            ages.push_back( age );
+        }
+        
+        return new RevVariable( new ModelVector<Real>( ages ) );
+    }
     else if ( name == "getTrees" )
     {
         found = true;
@@ -413,6 +473,11 @@ void TraceTree::initMethods( void )
     cladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "cladeProbability", Probability::getClassTypeSpec(), cladeProbArgRules) );
     
+    ArgumentRules* jointCladeProbArgRules = new ArgumentRules();
+    jointCladeProbArgRules->push_back( new ArgumentRule("clades", ModelVector<Clade>::getClassTypeSpec(), "The set of (monophyletic) clades.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    jointCladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "jointCladeProbability", Probability::getClassTypeSpec(), jointCladeProbArgRules) );
+   
     ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();
     getNumberSamplesArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
     this->methods.addFunction( new MemberProcedure( "getNumberSamples", Natural::getClassTypeSpec(), getNumberSamplesArgRules) );
@@ -430,6 +495,12 @@ void TraceTree::initMethods( void )
     getUniqueTreesArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
     getUniqueTreesArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "getUniqueTrees", ModelVector<Tree>::getClassTypeSpec(), getUniqueTreesArgRules) );
+    
+    ArgumentRules* get_tmrca_arg_rules = new ArgumentRules();
+    get_tmrca_arg_rules->push_back( new ArgumentRule("clade",  Clade::getClassTypeSpec(), "The clade for which to compute the TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    get_tmrca_arg_rules->push_back( new ArgumentRule("strict", RlBoolean::getClassTypeSpec(), "Return -1 if the clade is non-monophyletic and otherwise the non-strict TMRCA.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    get_tmrca_arg_rules->push_back( new ArgumentRule("stem",   RlBoolean::getClassTypeSpec(), "Do we want the age of the stem or crown of this clade?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure( "getTMRCA", ModelVector<Real>::getClassTypeSpec(), get_tmrca_arg_rules) );
     
     ArgumentRules* get_trees_arg_rules = new ArgumentRules();
     this->methods.addFunction( new MemberProcedure( "getTrees", ModelVector<Tree>::getClassTypeSpec(), get_trees_arg_rules) );

@@ -1,6 +1,6 @@
 #include "TreeNodeAgeUpdateProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <set>
 
@@ -226,7 +226,7 @@ std::vector<TopologyNode*> TreeNodeAgeUpdateProposal::getNodesInPopulation( Tree
     // get all the taxa from the species tree that are descendants of node i
     double min_age_left = n.getChild(0).getAge();
     std::vector<TopologyNode*> speciesTaxa_left;
-    TreeUtilities::getTaxaInSubtree( &n.getChild(0), speciesTaxa_left );
+    TreeUtilities::getTaxaInSubtree( n.getChild(0), speciesTaxa_left );
 
     // get all the individuals
     std::set<TopologyNode*> individualTaxa_left;
@@ -275,7 +275,7 @@ std::vector<TopologyNode*> TreeNodeAgeUpdateProposal::getNodesInPopulation( Tree
     // get all the taxa from the species tree that are descendants of node i
     double min_age_right = n.getChild(1).getAge();
     std::vector<TopologyNode*> speciesTaxa_right;
-    TreeUtilities::getTaxaInSubtree( &n.getChild(1), speciesTaxa_right );
+    TreeUtilities::getTaxaInSubtree( n.getChild(1), speciesTaxa_right );
 
     // get all the individuals
     std::set<TopologyNode*> individualTaxa_right;

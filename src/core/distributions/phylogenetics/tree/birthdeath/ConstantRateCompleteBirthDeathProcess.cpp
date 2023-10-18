@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iosfwd>
 #include <vector>
@@ -18,7 +18,7 @@ namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
 
-ConstantRateCompleteBirthDeathProcess::ConstantRateCompleteBirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *s, const TypedDagNode<double> *e, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, bool mr) : AbstractBirthDeathProcess( ra, cdt, tn, uo ),
+ConstantRateCompleteBirthDeathProcess::ConstantRateCompleteBirthDeathProcess(const TypedDagNode<double> *ra, const TypedDagNode<double> *s, const TypedDagNode<double> *e, const std::string &cdt, const std::vector<Taxon> &tn, bool uo, bool mr) : AbstractBirthDeathProcess( ra, cdt, tn, uo, NULL ),
     speciation( s ),
     extinction( e ),
     use_mrca( mr )
@@ -48,7 +48,7 @@ ConstantRateCompleteBirthDeathProcess* ConstantRateCompleteBirthDeathProcess::cl
  *
  * \return   The log-transformed probability density.
  */
-double ConstantRateCompleteBirthDeathProcess::computeLnProbabilityTimes( void )
+double ConstantRateCompleteBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
 
     double ln_prob_times = 0;

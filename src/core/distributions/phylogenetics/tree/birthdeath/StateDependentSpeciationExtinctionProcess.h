@@ -31,7 +31,7 @@ namespace RevBayesCore {
      * Will Freyman 6/22/16
      *
      */
-    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<double> > {
+    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
         
     public:
         StateDependentSpeciationExtinctionProcess(const TypedDagNode<double> *root,
@@ -39,7 +39,6 @@ namespace RevBayesCore {
                                                   const TypedDagNode<RateGenerator>* q,
                                                   const TypedDagNode<double>* r,
                                                   const TypedDagNode<Simplex>* p,
-                                                  const TypedDagNode<double> *rh,
                                                   const std::string &cdt,
                                                   bool uo,
                                                   size_t min_num_lineages,
@@ -67,8 +66,10 @@ namespace RevBayesCore {
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
         void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
-        void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSampleCharacterHistory(bool sample_history);                                                     //!< Set whether or not we are sampling the character history along branches.
+        void                                                            setSamplingFraction(const TypedDagNode< double > *r);
+        void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
+        void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
@@ -87,27 +88,29 @@ namespace RevBayesCore {
         std::vector<double>                                             getRootFrequencies(void) const;
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                    getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);                                  //!< get affected nodes
-        virtual void                                                    keepSpecialization(DagNode* affecter);
-        virtual void                                                    restoreSpecialization(DagNode *restorer);
-        virtual void                                                    touchSpecialization(DagNode *toucher, bool touchAll);
+        virtual void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                  //!< get affected nodes
+        virtual void                                                    keepSpecialization(const DagNode* affecter);
+        virtual void                                                    restoreSpecialization(const DagNode *restorer);
+        virtual void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
         double                                                          lnProbTreeShape(void) const;
 
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;  
+        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;     //!< Map the member methods to internal function calls
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
         // helper functions
         void                                                            buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
         std::vector<double>                                             pExtinction(double start, double end) const;                                                        //!< Compute the probability of extinction of the process (without incomplete taxon sampling).
         virtual double                                                  pSurvival(double start, double end) const;                                                          //!< Compute the probability of survival of the process (without incomplete taxon sampling).
+        double                                                          pSurvival(double start, double end, bool speciation) const;                                                          //!< Compute the probability of survival of the process (without incomplete taxon sampling).
         void                                                            recursivelyFlagNodeDirty(const TopologyNode& n);
         bool                                                            simulateTree(size_t attempts = 0);
         bool                                                            simulateTreeConditionedOnTips(size_t attempts = 0);
-        std::vector<double>                                             calculateTotalAnageneticRatePerState(void);
-        std::vector<double>                                             calculateTotalSpeciationRatePerState(void);
+        std::vector<double>                                             calculateTotalAnageneticRatePerState(void) const;
+        std::vector<double>                                             calculateTotalSpeciationRatePerState(void) const;
         void                                                            computeNodeProbability(const TopologyNode &n, size_t nIdx) const;
         double                                                          computeRootLikelihood() const;
         
@@ -136,12 +139,13 @@ namespace RevBayesCore {
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
         const TypedDagNode<RbVector<double> >*                          mu;
         const TypedDagNode<RbVector<double> >*                          lambda;
-        const TypedDagNode<RbVector<double> >*                          psi;
+        const TypedDagNode<RbVector<double> >*                          phi;
         const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
         const TypedDagNode<RateGenerator>*                              Q;
         const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
-        
+        const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
+
         RateMatrix_JC                                                   Q_default;
         size_t                                                          min_num_lineages;
         size_t                                                          max_num_lineages;

@@ -1,10 +1,11 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
+#include "ModelVector.h"
 #include "Move_RootTimeSlideUniform.h"
 #include "RootTimeSlideUniformProposal.h"
 #include "RealPos.h"
@@ -16,10 +17,6 @@
 #include "RevVariable.h"
 #include "RlMove.h"
 #include "StochasticNode.h"
-
-namespace RevBayesCore { class Proposal; }
-namespace RevBayesCore { class Tree; }
-namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 
 using namespace RevLanguage;
@@ -49,14 +46,32 @@ void Move_RootTimeSlideUniform::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    
+    // get the tree(s) variable
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = NULL;
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *vec_t = NULL;
+    if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+        t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    }
+    else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
+        vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
+    }
+    else
+    {
+        throw RbException("Wrong tree type '" + tree->getRevObject().getType() + "'.");
+    }
+    
+
     RevBayesCore::TypedDagNode<double> *tmp_double = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *d = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_double );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideUniformProposal( t, d );
+    RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideUniformProposal( t, vec_t, d );
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
 }
 
@@ -98,23 +113,26 @@ std::string Move_RootTimeSlideUniform::getMoveName( void ) const
 const MemberRules& Move_RootTimeSlideUniform::getParameterRules(void) const
 {
     
-    static MemberRules memberRules;
+    static MemberRules member_rules;
     static bool rules_set = false;
     
-    if ( !rules_set )
+    if ( rules_set == false )
     {
+        std::vector<TypeSpec> tree_var_types;
+        tree_var_types.push_back( TimeTree::getClassTypeSpec() );
+        tree_var_types.push_back( ModelVector<TimeTree>::getClassTypeSpec() );
         
-        memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        memberRules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec() , "The maximum root age.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "tree", tree_var_types, "The tree(s) on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec() , "The maximum root age.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
 
         /* Inherit weight from Move, put it after variable */
-        const MemberRules& inheritedRules = Move::getParameterRules();
-        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        const MemberRules& inherited_rules = Move::getParameterRules();
+        member_rules.insert( member_rules.end(), inherited_rules.begin(), inherited_rules.end() );
         
         rules_set = true;
     }
     
-    return memberRules;
+    return member_rules;
 }
 
 /** Get type spec */

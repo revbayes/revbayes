@@ -15,7 +15,7 @@
 #ifndef __RateMatrix_Chromosomes__
 #define __RateMatrix_Chromosomes__
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"
@@ -56,9 +56,6 @@ namespace RevBayesCore {
         std::vector<double>             stationary_freqs;                    //!< Holds the stationary frequencies
 
         void                            buildRateMatrix(void);
-        void                            exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
-        inline void                     multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;
-
     };
     
 }

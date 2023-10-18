@@ -1,6 +1,6 @@
 #include "SpeciesNarrowExchangeProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iterator>
 
@@ -318,7 +318,7 @@ std::set<TopologyNode*> SpeciesNarrowExchangeProposal::getNodesInPopulation( Tre
     // get all the taxa from the species tree that are descendants of the node
     double min_age = n.getAge();
     std::vector<TopologyNode*> species_taxa;
-    TreeUtilities::getTaxaInSubtree( &n, species_taxa );
+    TreeUtilities::getTaxaInSubtree( n, species_taxa );
 
     // get all the individuals
     std::set<TopologyNode*> individual_taxa;
@@ -386,7 +386,7 @@ std::set<TopologyNode*> SpeciesNarrowExchangeProposal::getOldestSubtreesNodesInP
 
     // get all the taxa from the species tree that are descendants of node i
     std::vector<TopologyNode*> species_taxa;
-    TreeUtilities::getTaxaInSubtree( &n, species_taxa );
+    TreeUtilities::getTaxaInSubtree( n, species_taxa );
 
     // get all the individuals
     std::set<TopologyNode*> individualTaxa;

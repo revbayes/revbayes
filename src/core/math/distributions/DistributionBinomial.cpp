@@ -67,7 +67,8 @@ double RbStatistics::Binomial::cdf(double n, double p, double x)
  * \return Returns a double with the log probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Binomial::lnPdf(double n, double p, double x) {
+double RbStatistics::Binomial::lnPdf(double n, double p, double x)
+{
 
     double q = 1.0 - p;
     return pdf(n, p, q, x, true);
@@ -281,9 +282,9 @@ double RbStatistics::Binomial::quantile(double quantile_prob, double n, double p
  * \throws Does not throw an error.
  */
 
-#include <stdlib.h>
-#include <limits.h>
-#include <float.h>
+#include <cstdlib>
+#include <climits>
+#include <cfloat>
 
 #include "RandomNumberGenerator.h"
 

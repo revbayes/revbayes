@@ -39,7 +39,7 @@ namespace RevBayesCore {
         HomologousDiscreteCharacterData<charType>*          clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                                initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
+        void                                                initFromFile( const path &dir, const std::string &fn );                     //!< Read and resurrect this object from a file in its default format.
         void                                                initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
 
         // CharacterData functions
@@ -57,16 +57,17 @@ namespace RevBayesCore {
         std::vector<double>                                 getEmpiricalBaseFrequencies(void) const;                                    //!< Compute the empirical base frequencies
         const std::set<size_t>&                             getExcludedCharacters(void) const;                                          //!< Returns the name of the file the data came from
         std::vector<size_t>                                 getIncludedSiteIndices(void) const;
+        std::vector<size_t>                                 getInvariantSiteIndices(bool excl) const;                                   //!< Get the indices of invariant characters in this matrix
         size_t                                              getMaxObservedStateIndex(void) const;                                       //!< Get the number of observed states for the characters in this matrix
         size_t                                              getNumberOfCharacters(void) const;                                          //!< Number of characters
         size_t                                              getNumberOfIncludedCharacters(void) const;                                  //!< Number of characters
         size_t                                              getNumberOfInvariantSites(bool excl) const;                                 //!< Number of invariant sites
         size_t                                              getNumberOfSegregatingSites(bool excl) const;                               //!< Compute the number of segregating sites
         size_t                                              getNumberOfStates(void) const;                                              //!< Get the number of states for the characters in this matrix
-        double                                              getAveragePaiwiseSequenceDifference(bool excl) const;                       //!< Get the average pairwise sequence distance.
-        size_t                                              getMaxPaiwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
-        size_t                                              getMinPaiwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
-        DistanceMatrix                                      getPaiwiseSequenceDifference(bool excl) const;                              //!< Get the average pairwise sequence distance.
+        double                                              getAveragePairwiseSequenceDifference(bool excl) const;                       //!< Get the average pairwise sequence distance.
+        size_t                                              getMaxPairwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
+        size_t                                              getMinPairwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
+        DistanceMatrix                                      getPairwiseSequenceDifference(bool excl) const;                              //!< Get the average pairwise sequence distance.
         DiscreteTaxonData<charType>&                        getTaxonData(size_t tn);                                                    //!< Return a reference to a sequence in the character matrix
         const DiscreteTaxonData<charType>&                  getTaxonData(size_t tn) const;                                              //!< Return a reference to a sequence in the character matrix
         DiscreteTaxonData<charType>&                        getTaxonData(const std::string &tn);                                        //!< Return a reference to a sequence in the character matrix
@@ -195,47 +196,6 @@ double RevBayesCore::HomologousDiscreteCharacterData<charType>::computeMultinomi
     std::vector<size_t> site_indices = getIncludedSiteIndices();
 
     size_t num_sites = getNumberOfIncludedCharacters();
-    
-//    // check whether there are ambiguous characters (besides gaps)
-//    bool ambiguousCharacters = false;
-//    
-//    // find the unique site patterns and compute their respective frequencies
-//    for (size_t site = 0; site < num_sites; ++site)
-//    {
-//        
-//        for (size_t i = 0; i < num_sequences; ++i)
-//        {
-//            
-//            const DiscreteTaxonData<charType>& seq = this->getTaxonData(i);
-//            DiscreteCharacterState &c = seq.getCharacter(site_indices[site]);
-//                
-//            // if we treat unknown characters as gaps and this is an unknown character then we change it
-//            // because we might then have a pattern more
-//            if ( treatAmbiguousAsGaps && (c.isAmbiguous() || c.isMissingState()) )
-//            {
-//                c.setGapState( true );
-//            }
-//            else if ( treatUnknownAsGap && (c.getNumberOfStates() == c.getNumberObservedStates() || c.isMissingState()) )
-//            {
-//                c.setGapState( true );
-//            }
-//            else if ( !c.isGapState() && (c.isAmbiguous() || c.isMissingState()) )
-//            {
-//                ambiguousCharacters = true;
-//                break;
-//            }
-//            
-//        }
-//        
-//        // break the loop if there was an ambiguous character
-//        if ( ambiguousCharacters )
-//        {
-//            break;
-//        }
-//    }
-//    
-//    // set the global variable if we use ambiguous characters
-//    bool using_ambiguous_characters = ambiguousCharacters;
     
     // find the unique site patterns and compute their respective frequencies
     std::map<std::string,size_t> patterns;
@@ -495,7 +455,7 @@ RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>
     HomologousDiscreteCharacterData<NaturalNumbersState>    *combined_data  = new HomologousDiscreteCharacterData<NaturalNumbersState>();
     
     std::string type = "union";
-    size_t sequence_length = getNumberOfCharacters();
+//    size_t sequence_length = getNumberOfCharacters();
     
     // check if both have the same number of taxa
 //    if ( taxa.size() != obsd.getNumberOfTaxa() )
@@ -979,6 +939,57 @@ std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::get
 
 
 
+/**
+ * Get the indices of invariant characters in taxon data object.
+ * This is regardless of whether the character are included or excluded.
+ *
+ * \return    The total number of characters
+ */
+template<class charType>
+std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::getInvariantSiteIndices(bool exclude_missing) const
+{
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> inv_site_indices;
+    size_t nt = this->getNumberOfTaxa();
+
+    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
+    size_t nc = firstTaxonData.getNumberOfCharacters();
+    for (size_t j=0; j<nc; j++)
+    {
+        const DiscreteCharacterState* a = &firstTaxonData[j];
+        size_t k = 1;
+        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
+        {
+            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
+            a = &td[j];
+            ++k;
+        }
+        
+        bool invariant = true;
+        for (size_t i=1; i<nt; i++)
+        {
+            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
+            const DiscreteCharacterState& b = secondTaxonData[j];
+            
+            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
+            {
+                invariant &= (*a == b);
+            }
+
+        }
+        
+        if ( invariant == true )
+        {
+            inv_site_indices.push_back( j + 1 );
+        }
+
+    }
+    
+    return inv_site_indices;
+}
+
+
 
 /** 
  * Get the number of characters in taxon data object. 
@@ -1056,7 +1067,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxObservedSt
     int max;
     for (max = int(observed.size()) - 1; max >= 0; max--)
     {
-        if (observed.isSet(max))
+        if (observed.test(max))
         {
             break;
         }
@@ -1094,49 +1105,15 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfState
 
 
 /**
- * Get the set of excluded character indices.
+ * Get the number of invariant characters.
  *
- * \return    The excluded character indices.
+ * \return    The number of invariant sites.
  */
 template<class charType>
 size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfInvariantSites(bool exclude_missing) const
 {
-    size_t invSites = 0;
-    size_t nt = this->getNumberOfTaxa();
-
-    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
-    size_t nc = firstTaxonData.getNumberOfCharacters();
-    for (size_t j=0; j<nc; j++)
-    {
-        const DiscreteCharacterState* a = &firstTaxonData[j];
-        size_t k = 1;
-        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
-        {
-            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
-            a = &td[j];
-            ++k;
-        }
-        
-        bool invariant = true;
-        for (size_t i=1; i<nt; i++)
-        {
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
-            const DiscreteCharacterState& b = secondTaxonData[j];
-            
-            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
-            {
-                invariant &= (*a == b);
-            }
-
-        }
-        
-        if ( invariant == true )
-        {
-            ++invSites;
-        }
-
-    }
-    
+    std::vector<size_t> inv_site_indices = this->getInvariantSiteIndices(exclude_missing);
+    size_t invSites = inv_site_indices.size();
     return invSites;
 }
 
@@ -1163,7 +1140,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfSegre
  * \return    The average pairwise distance.
  */
 template<class charType>
-double RevBayesCore::HomologousDiscreteCharacterData<charType>::getAveragePaiwiseSequenceDifference(bool exclude_missing) const
+double RevBayesCore::HomologousDiscreteCharacterData<charType>::getAveragePairwiseSequenceDifference(bool exclude_missing) const
 {
     double pairwiseDistance = 0.0;
     size_t nt = this->getNumberOfIncludedTaxa();
@@ -1212,7 +1189,7 @@ double RevBayesCore::HomologousDiscreteCharacterData<charType>::getAveragePaiwis
  * \return    The max pairwise distance.
  */
 template<class charType>
-size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxPaiwiseSequenceDifference( bool exclude_missing ) const
+size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxPairwiseSequenceDifference( bool exclude_missing ) const
 {
     size_t max_pd = 0.0;
     size_t nt = this->getNumberOfIncludedTaxa();
@@ -1265,7 +1242,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxPaiwiseSeq
  * \return    The min pairwise distance.
  */
 template<class charType>
-size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPaiwiseSequenceDifference( bool include_missing ) const
+size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPairwiseSequenceDifference( bool include_missing ) const
 {
     size_t min_pd = RbConstants::Size_t::max;
     size_t nt = this->getNumberOfIncludedTaxa();
@@ -1317,22 +1294,32 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPaiwiseSeq
  * \return    The min pairwise distance.
  */
 template<class charType>
-RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPaiwiseSequenceDifference( bool include_missing ) const
+RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPairwiseSequenceDifference( bool include_missing ) const
 {
-    size_t nt = this->getNumberOfIncludedTaxa();
-    MatrixReal distances = MatrixReal(nt);
+    size_t n_taxa_included = this->getNumberOfIncludedTaxa();
+    size_t n_taxa_total    = this->getNumberOfTaxa();
+    MatrixReal distances   = MatrixReal(n_taxa_included);
     
-    
-    for (size_t i=0; i<(nt-1); i++)
+    size_t index_included_i = 0;
+    size_t index_total_i    = 0;
+    for ( ; index_total_i<(n_taxa_total-1); ++index_total_i)
     {
+        // skip over excluded taxa
+        if ( isTaxonExcluded( index_total_i ) == true )
+            continue;
         
-        const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(i);
+        const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(index_total_i);
         size_t nc = firstTaxonData.getNumberOfCharacters();
         
-        for (size_t j=i+1; j<nt; j++)
+        size_t index_total_j    = index_total_i+1;
+        size_t index_included_j = index_included_i+1;
+        for ( ; index_total_j<n_taxa_total; ++index_total_j)
         {
             
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(j);
+            if ( isTaxonExcluded(index_total_j) == true )
+                continue;
+            
+            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(index_total_j);
             size_t pd = 0.0;
             
             for (size_t k=0; k<nc; k++)
@@ -1349,17 +1336,21 @@ RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charT
                 
             }
             
-            distances[i][j] = pd;
-            distances[j][i] = pd;
+            distances[index_included_i][index_included_j] = pd;
+            distances[index_included_j][index_included_i] = pd;
+            
+            ++index_included_j;
             
         } // end loop over all second taxa
         
-        distances[i][i] = 0;
+        distances[index_included_i][index_included_i] = 0;
+        
+        ++index_included_i;
         
     } // end loop over all first taxa
     
     
-    return DistanceMatrix(distances,getTaxa());
+    return DistanceMatrix(distances,getIncludedTaxa());
 }
 
 
@@ -1507,9 +1498,9 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::includeCharacter(s
  *
  */
 template<class charType>
-void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const std::string &dir, const std::string &fn)
+void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const RevBayesCore::path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
+    auto filepath = dir / (fn + ".nex");
     
     // get an instance of the NCL reader
     NclReader reader = NclReader();
@@ -1522,7 +1513,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
     myFileType += suffix;
     
     // read the content of the file now
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filepath, myFileType );
     
     if ( m_i.size() < 1 )
     {
@@ -1531,7 +1522,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
         {
             std::cerr << "NCL-Warning:\t\t" << *it << std::endl;
         }
-        throw RbException("Could not read character data matrix from file \"" + fm.getFullFileName() + "\".");
+        throw RbException()<<"Could not read character data matrix from file "<<filepath<<".";
     }
     
     HomologousDiscreteCharacterData<charType> *coreM = static_cast<HomologousDiscreteCharacterData<charType> *>( m_i[0] );

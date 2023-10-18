@@ -18,23 +18,24 @@ namespace RevBayesCore {
         void                                                bootstrap(void);                                                            //!< Bootstrap the current value of the node (applies only to stochastic nodes)
         virtual ConstantNode<valueType>*                    clone(void) const;                                                          //!< Create a clone of this node.
         DagNode*                                            cloneDAG(DagNodeMap &nodesMap, std::map<std::string, const DagNode* > &names) const; //!< Clone the entire DAG which is connected to this node
+        void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
         double                                              getLnProbability(void);
         double                                              getLnProbabilityRatio(void);
         valueType&                                          getValue(void);
         const valueType&                                    getValue(void) const;
         bool                                                isConstant(void) const;                                                     //!< Is this DAG node constant?
         void                                                printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                                redraw(void);
+        void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
         void                                                setValue(const valueType &v);
-        void                                                setValueFromFile(const std::string &dir);                                   //!< Set value from string.
+        void                                                setValueFromFile(const path &dir);                                          //!< Set value from string.
         void                                                setValueFromString(const std::string &v);                                   //!< Set value from string.
 
     protected:
-        void                                                getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter);          //!< Mark and get affected nodes
-        void                                                keepMe(DagNode* affecter);                                                  //!< Keep value of this and affected nodes
-        void                                                restoreMe(DagNode *restorer);                                               //!< Restore value of this nodes
-        void                                                touchMe(DagNode *toucher, bool touchAll);                                   //!< Tell affected nodes value is reset
+        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
+        void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
+        void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
+        void                                                touchMe(const DagNode *toucher, bool touchAll);                             //!< Tell affected nodes value is reset
         
     private:
         // members
@@ -145,13 +146,21 @@ RevBayesCore::DagNode* RevBayesCore::ConstantNode<valueType>::cloneDAG( DagNodeM
  * This call is started by the parent and since we don't have one this is a dummy implementation!
  */
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::getAffected(RbOrderedSet<DagNode *> & /*affected*/, DagNode* /*affecter*/)
+void RevBayesCore::ConstantNode<valueType>::getAffected(RbOrderedSet<DagNode *> & /*affected*/, const DagNode* /*affecter*/)
 {
     
     // do nothing
     throw RbException("You should never call getAffected() of a constant node!!!");
     
 }
+
+
+template<class valueType>
+void RevBayesCore::ConstantNode<valueType>::getIntegratedParents(RbOrderedSet<DagNode *>& ip) const
+{
+    // do nothing
+}
+
 
 
 template<class valueType>
@@ -195,7 +204,7 @@ bool RevBayesCore::ConstantNode<valueType>::isConstant( void ) const
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::keepMe( DagNode* /*affecter*/ )
+void RevBayesCore::ConstantNode<valueType>::keepMe( const DagNode* /*affecter*/ )
 {
     // nothing to do
 }
@@ -220,14 +229,14 @@ void RevBayesCore::ConstantNode<valueType>::printStructureInfo(std::ostream &o, 
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::redraw( void )
+void RevBayesCore::ConstantNode<valueType>::redraw( SimulationCondition c )
 {
     // nothing to do
 }
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::restoreMe( DagNode * /*restorer*/ )
+void RevBayesCore::ConstantNode<valueType>::restoreMe( const DagNode * /*restorer*/ )
 {
     // nothing to do
 }
@@ -253,7 +262,7 @@ void RevBayesCore::ConstantNode<valueType>::setValue(valueType const &v)
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::setValueFromFile(const std::string &dir)
+void RevBayesCore::ConstantNode<valueType>::setValueFromFile(const RevBayesCore::path &dir)
 {
     
     Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromFile( value, dir, this->getName() );
@@ -272,7 +281,7 @@ void RevBayesCore::ConstantNode<valueType>::setValueFromString(const std::string
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::touchMe( DagNode * /*toucher*/, bool /*touchAll*/ )
+void RevBayesCore::ConstantNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*touchAll*/ )
 {
     // nothing to do
 }

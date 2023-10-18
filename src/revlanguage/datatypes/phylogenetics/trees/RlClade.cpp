@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <set>
 #include <string>
@@ -162,6 +162,13 @@ void Clade::constructInternalObject( void )
         c->setAge( a );
     }
 
+    // set the name if provided
+    if ( clade_name->getRevObject() != RevNullObject::getInstance() )
+    {
+        const std::string& n = static_cast<const RlString &>( clade_name->getRevObject() ).getValue();
+        c->setCladeName( n );
+    }
+
     // set the number of missing if provided
     if ( missing->getRevObject() != RevNullObject::getInstance() )
     {
@@ -174,10 +181,6 @@ void Clade::constructInternalObject( void )
     {
         c->setOptionalConstraints( optional_constraints );
     }
-
-
-    // set optional match clade constraint
-    c->setOptionalMatch( match );
 
     // set negative clade constraint
     c->setNegativeConstraint( neg );
@@ -205,6 +208,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
         double a = this->dag_node->getValue().getAge();
         return new RevVariable( new RealPos( a ) );
     }
+    else if (name == "getCladeName" || name == "getName" )
+    {
+        found = true;
+        
+        const std::string& n = this->dag_node->getValue().getCladeName();
+        return new RevVariable( new RlString( n ) );
+    }
+    else if (name == "getNumberOfTaxaMissing" )
+    {
+        found = true;
+        
+        int n = this->dag_node->getValue().getNumberMissingTaxa();
+        return new RevVariable( new Natural( n ) );
+    }
     else if (name == "getTaxonName" )
     {
         found = true;
@@ -221,19 +238,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
         RevBayesCore::Taxon t = this->dag_node->getValue().getTaxon( index );
         return new RevVariable( new Taxon( t ) );
     }
-    else if (name == "getNumberOfTaxaMissing" )
-    {
-        found = true;
-        
-        int n = this->dag_node->getValue().getNumberMissingTaxa();
-        return new RevVariable( new Natural( n ) );
-    }
     else if (name == "setAge" )
     {
         found = true;
         double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         
         this->dag_node->getValue().setAge( a );
+        return NULL;
+    }
+    else if (name == "setCladeName" || name == "setName" )
+    {
+        found = true;
+        const std::string& n = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+        
+        this->dag_node->getValue().setCladeName( n );
         return NULL;
     }
     else if (name == "setNumberOfTaxaMissing" )
@@ -281,6 +299,7 @@ const MemberRules& Clade::getParameterRules(void) const
         member_rules.push_back( new Ellipsis( "Taxon names as taxon values", Taxon::getClassTypeSpec() ) );
         member_rules.push_back( new Ellipsis( "Taxon names as a vector of taxons", ModelVector<Taxon>::getClassTypeSpec() ) );
         member_rules.push_back( new ArgumentRule("age", RealPos::getClassTypeSpec(), "The age of the clade (optional).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        member_rules.push_back( new ArgumentRule("name", RlString::getClassTypeSpec(), "The name of the clade (optional).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         member_rules.push_back( new ArgumentRule("missing", Natural::getClassTypeSpec(), "Number of missing taxa in the clade (optional).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         member_rules.push_back( new ArgumentRule("negative", RlBoolean::getClassTypeSpec(), "Is this a negative clade constraint?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         member_rules.push_back( new ArgumentRule("optional_match", RlBoolean::getClassTypeSpec(), "Clade constraint satisfied when any Clade argument matched", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
@@ -334,6 +353,9 @@ void Clade::initMethods( void )
     ArgumentRules* get_age_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getAge", RealPos::getClassTypeSpec(), get_age_arg_rules ) );
     
+    ArgumentRules* get_clade_name_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "getCladeName", RlString::getClassTypeSpec(), get_clade_name_arg_rules ) );
+    
     ArgumentRules* namesArgRules = new ArgumentRules();
     namesArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getTaxonName", RlString::getClassTypeSpec(), namesArgRules ) );
@@ -346,8 +368,12 @@ void Clade::initMethods( void )
     methods.addFunction( new MemberProcedure( "getNumberOfTaxaMissing", Natural::getClassTypeSpec(), get_num_missing_arg_rules ) );
 
     ArgumentRules* set_age_arg_rules = new ArgumentRules();
-    set_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The age of the cladea.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    set_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The age of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "setAge", RlUtils::Void, set_age_arg_rules ) );
+    
+    ArgumentRules* set_clade_name_arg_rules = new ArgumentRules();
+    set_clade_name_arg_rules->push_back( new ArgumentRule( "x", RlString::getClassTypeSpec(), "The name of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "setCladeName", RlUtils::Void, set_clade_name_arg_rules ) );
 
     ArgumentRules* set_num_missing_arg_rules = new ArgumentRules();
     set_num_missing_arg_rules->push_back( new ArgumentRule( "n", Natural::getClassTypeSpec(), "The number of missing taxa.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
@@ -396,6 +422,10 @@ void Clade::setConstParameter(const std::string& name, const RevPtr<const RevVar
     else if ( name == "age")
     {
         age = var;
+    }
+    else if ( name == "name")
+    {
+        clade_name = var;
     }
     else if ( name == "missing")
     {

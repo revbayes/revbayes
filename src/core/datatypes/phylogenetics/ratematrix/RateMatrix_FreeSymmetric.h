@@ -69,9 +69,6 @@ namespace RevBayesCore {
         std::vector<MatrixReal>*            matrixProducts;
         double                              maxRate;                                                                           //!< The max rate of the matrix
 
-        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const; //!< Exponentiate the matrix by sqauring and scaling
-        inline void                         multiplyMatrices(TransitionProbabilityMatrix& p,  TransitionProbabilityMatrix& q,  TransitionProbabilityMatrix& r) const;  //!< Perform matrix multiplication on two matrices
-        
         EigenSystem*                        theEigenSystem;                                                                     //!< Holds the eigen system
         std::vector<double>                 c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >  cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case

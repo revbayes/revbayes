@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <set>
 #include <map>
@@ -134,7 +134,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
                 taxon.setAgeRange(interval);
             }
 
-            taxon.addAge(interval);
+            taxon.addOccurrence(interval);
         }
 
         if ( minit != column_map.end() )
@@ -159,7 +159,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
                 taxon.setAgeRange(interval);
             }
 
-            taxon.addAge(interval);
+            taxon.addOccurrence(interval);
 
             if ( countit != column_map.end() )
             {
@@ -171,7 +171,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
                 for(size_t i = 1; i < k; i++)
                 {
-                    taxon.addAge(interval);
+                    taxon.addOccurrence(interval);
                 }
             }
         }
