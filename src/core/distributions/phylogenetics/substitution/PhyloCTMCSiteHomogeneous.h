@@ -363,6 +363,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     if ( this->using_weighted_characters == true )
         site_indices = this->getIncludedSiteIndices();
     
+    bool use_global_obs_error = ( this->global_observation_error != NULL );
+    double global_obs_error_val = 0.0;
+    if ( global_obs_error_val ) global_obs_error_val = this->global_observation_error->getValue();
+    
     // compute the transition probabilities
 //    this->updateTransitionProbabilities( node_index );
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
@@ -417,11 +421,33 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
-                            // check whether we observed this state
-                            if ( val.test(i) == true )
+                            if ( use_global_obs_error == false )
                             {
-                                // add the probability
-                                tmp += *d;
+                                // check whether we observed this state
+                                if ( val.test(i) == true )
+                                {
+                                    // add the probability
+                                    tmp += *d;
+                                }
+                            }
+                            else
+                            {
+                                double tmp2 = 0;
+                                for ( size_t j=0; j<this->num_chars; ++j )
+                                {
+                                    if ( val.test(j) == true )
+                                    {
+                                        if ( i == j )
+                                        {
+                                            tmp2 += (1.0 - global_obs_error_val * (this->num_chars-1.0)/this->num_chars);
+                                        }
+                                        else
+                                        {
+                                            tmp2 += (global_obs_error_val/this->num_chars);
+                                        }
+                                    }
+                                }
+                                tmp += *d * tmp2;
                             }
 
                             // increment the pointer to the next transition probability
@@ -451,7 +477,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                             if ( val.test(i) == true )
                             {
                                 // add the probability
-                                tmp += *d * weights[i] ;
+                                tmp += *d * weights[i];
                             }
 
                             // increment the pointer to the next transition probability
@@ -465,10 +491,28 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                     else // no ambiguous characters in use
                     {
                         unsigned long org_val = char_node[site];
-
-                        // store the likelihood
-                        p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
-
+                        
+                        if ( use_global_obs_error == false )
+                        {
+                            // store the likelihood
+                            p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
+                        }
+                        else
+                        {
+                            double tmp = 0.0;
+                            for ( size_t c2=0; c2<this->num_chars; ++c2 )
+                            {
+                                if ( c2 == org_val )
+                                {
+                                    tmp += tp_begin[c1*this->num_chars+c2] * (1.0 - global_obs_error_val * (this->num_chars-1.0)/this->num_chars);
+                                }
+                                else
+                                {
+                                    tmp += tp_begin[c1*this->num_chars+c2] * (global_obs_error_val/this->num_chars);
+                                }
+                            }
+                            p_site_mixture[c1] = tmp;
+                        }
                     }
 
                 } // end-for over all possible initial character for the branch

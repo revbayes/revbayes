@@ -704,6 +704,18 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             dist->setSiteRatesProbs( site_rates_probsNode );
         }
         
+        if ( observation_error->getRevObject().isType( Probability::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< double >* obs_error = static_cast<const Probability &>( observation_error->getRevObject() ).getDagNode();
+
+            dist->setObservationError( obs_error );
+        }
+        else
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* obs_error = static_cast<const Simplex &>( observation_error->getRevObject() ).getDagNode();
+            dist->setObservationError( obs_error );
+        }
+        
 
         d = dist;
     }
@@ -1042,6 +1054,13 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "siteRatesProbs", Simplex::getClassTypeSpec(), "The probability weights of rate categories for the sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "pInv", Probability::getClassTypeSpec(), "The probability of a site being invariant.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
 
+        std::vector<TypeSpec> obs_error_types;
+        obs_error_types.push_back(Probability::getClassTypeSpec());
+        obs_error_types.push_back(Simplex::getClassTypeSpec());
+
+        dist_member_rules.push_back( new ArgumentRule( "observationError", obs_error_types, "The observational error probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        
         dist_member_rules.push_back( new ArgumentRule( "nSites", Natural::getClassTypeSpec(), "The number of sites, used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural() ) );
 
         std::vector<std::string> options;
@@ -1149,6 +1168,15 @@ void Dist_phyloCTMC::printValue(std::ostream& o) const
     {
         o << "?";
     }
+    o << ", observationError=";
+    if ( observation_error != NULL )
+    {
+        o << observation_error->getName();
+    }
+    else
+    {
+        o << "?";
+    }
     o << ", nSites=";
     if ( nSites != NULL )
     {
@@ -1198,6 +1226,10 @@ void Dist_phyloCTMC::setConstParameter(const std::string& name, const RevPtr<con
     else if ( name == "pInv" )
     {
         p_inv = var;
+    }
+    else if ( name == "observationError" )
+    {
+        observation_error = var;
     }
     else if ( name == "nSites" )
     {

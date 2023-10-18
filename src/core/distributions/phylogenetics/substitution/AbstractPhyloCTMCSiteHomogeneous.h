@@ -112,6 +112,8 @@ namespace RevBayesCore {
 
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
+        void                                                                setObservationError(const TypedDagNode< double > *r);
+        void                                                                setObservationError(const TypedDagNode< Simplex > *r);
         void                                                                setPInv(const TypedDagNode< double > *);
         void                                                                setRateMatrix(const TypedDagNode< RateGenerator > *rm);
         void                                                                setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm);
@@ -234,6 +236,8 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix;
         const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices;
+        const TypedDagNode< double >*                                       global_observation_error;
+        const TypedDagNode< Simplex >*                                      global_state_specific_observation_error;
         const TypedDagNode< Simplex >*                                      root_frequencies;
         const TypedDagNode< RbVector< double > >*                           site_rates;
         const TypedDagNode< Simplex >*                                      site_matrix_probs;
@@ -346,15 +350,17 @@ sampled_site_matrix_component( 0 )
 {
 
     // initialize with default parameters
-    homogeneous_clock_rate        = NULL;
-    heterogeneous_clock_rates     = NULL;
-    homogeneous_rate_matrix       = NULL;
-    heterogeneous_rate_matrices   = NULL;
-    root_frequencies              = NULL;
-    site_rates                    = NULL;
-    site_matrix_probs             = NULL;
-    site_rates_probs              = NULL;
-    p_inv                         = NULL;
+    homogeneous_clock_rate                  = NULL;
+    heterogeneous_clock_rates               = NULL;
+    homogeneous_rate_matrix                 = NULL;
+    heterogeneous_rate_matrices             = NULL;
+    global_observation_error                = NULL;
+    global_state_specific_observation_error = NULL;
+    root_frequencies                        = NULL;
+    site_rates                              = NULL;
+    site_matrix_probs                       = NULL;
+    site_rates_probs                        = NULL;
+    p_inv                                   = NULL;
 
     // flags specifying which model variants we use
     branch_heterogeneous_clock_rates               = false;
@@ -385,6 +391,8 @@ sampled_site_matrix_component( 0 )
     this->addParameter( heterogeneous_clock_rates );
     this->addParameter( homogeneous_rate_matrix );
     this->addParameter( heterogeneous_rate_matrices );
+    this->addParameter( global_observation_error );
+    this->addParameter( global_state_specific_observation_error );
     this->addParameter( root_frequencies );
     this->addParameter( site_rates );
     this->addParameter( site_matrix_probs );
@@ -447,15 +455,17 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
 {
 
     // initialize with default parameters
-    homogeneous_clock_rate       = n.homogeneous_clock_rate;
-    heterogeneous_clock_rates    = n.heterogeneous_clock_rates;
-    homogeneous_rate_matrix      = n.homogeneous_rate_matrix;
-    heterogeneous_rate_matrices  = n.heterogeneous_rate_matrices;
-    root_frequencies             = n.root_frequencies;
-    site_rates                   = n.site_rates;
-    site_matrix_probs            = n.site_matrix_probs;
-    site_rates_probs             = n.site_rates_probs;
-    p_inv                        = n.p_inv;
+    homogeneous_clock_rate                  = n.homogeneous_clock_rate;
+    heterogeneous_clock_rates               = n.heterogeneous_clock_rates;
+    homogeneous_rate_matrix                 = n.homogeneous_rate_matrix;
+    heterogeneous_rate_matrices             = n.heterogeneous_rate_matrices;
+    global_observation_error                = n.global_observation_error;
+    global_state_specific_observation_error = n.global_state_specific_observation_error;
+    root_frequencies                        = n.root_frequencies;
+    site_rates                              = n.site_rates;
+    site_matrix_probs                       = n.site_matrix_probs;
+    site_rates_probs                        = n.site_rates_probs;
+    p_inv                                   = n.p_inv;
 
     activeLikelihoodOffset      =  n.activeLikelihoodOffset;
     nodeOffset                  =  n.nodeOffset;
@@ -3028,6 +3038,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
                     }
 
                 }
+                
+                if ( this->global_observation_error != NULL )
+                {
+                    double error_prob = this->global_observation_error->getValue();
+                    double u2 = rng->uniform01();
+                    if ( u2 < error_prob )
+                    {
+                        // there was an error
+                        size_t new_state = size_t( rng->uniform01() * (this->num_chars-1) );
+                        if ( new_state >= c.getStateIndex() ) ++new_state;
+                        c.setStateByIndex(new_state);
+                    }
+                }
 
                 // add the character to the sequence
                 taxon.addCharacter( c );
@@ -3145,6 +3168,71 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     if ( in_mcmc_mode == true )
     {
         resizeLikelihoodVectors();
+    }
+
+}
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationError(const TypedDagNode< double > *r)
+{
+
+    // remove the old parameter first
+    if ( global_observation_error != NULL )
+    {
+        this->removeParameter( global_observation_error );
+        global_observation_error = NULL;
+    }
+    else // heterogeneousClockRate != NULL
+    {
+        this->removeParameter( global_state_specific_observation_error );
+        global_state_specific_observation_error = NULL;
+    }
+
+    // set the value
+//    branch_heterogeneous_clock_rates = false;
+    global_observation_error = r;
+
+    // add the new parameter
+    this->addParameter( global_observation_error );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+
+}
+
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationError(const TypedDagNode< Simplex > *r)
+{
+
+    // remove the old parameter first
+    if ( global_observation_error != NULL )
+    {
+        this->removeParameter( global_observation_error );
+        global_observation_error = NULL;
+    }
+    else // heterogeneousClockRate != NULL
+    {
+        this->removeParameter( global_state_specific_observation_error );
+        global_state_specific_observation_error = NULL;
+    }
+
+    // set the value
+//    branch_heterogeneous_clock_rates = true;
+    global_state_specific_observation_error = r;
+
+    // add the new parameter
+    this->addParameter( global_state_specific_observation_error );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
     }
 
 }
@@ -3996,6 +4084,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
     else if (oldP == heterogeneous_rate_matrices)
     {
         heterogeneous_rate_matrices = static_cast<const TypedDagNode< RbVector< RateGenerator > >* >( newP );
+    }
+    else if (oldP == global_observation_error)
+    {
+        global_observation_error = static_cast<const TypedDagNode< double >* >( newP );
+    }
+    else if (oldP == global_state_specific_observation_error)
+    {
+        global_state_specific_observation_error = static_cast<const TypedDagNode< Simplex >* >( newP );
     }
     else if (oldP == root_frequencies)
     {
