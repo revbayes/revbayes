@@ -1,15 +1,15 @@
-#ifndef FossilizedBirthDeathSpeciationProcess_H
-#define FossilizedBirthDeathSpeciationProcess_H
+#ifndef FossilizedBirthDeathProcess_H
+#define FossilizedBirthDeathProcess_H
 
-#include "AbstractFossilizedBirthDeathRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 #include "AbstractBirthDeathProcess.h"
 
 namespace RevBayesCore {
     
     /**
-     * @brief Piecewise-constant fossilized birth-death species distribution of extended trees.
+     * @brief Piecewise-constant fossilized birth-death range distribution of extended trees.
      *
-     * The piecewise-constant fossilized birth-death species process has constant rates for each time interval.
+     * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
      * of the rates. Additionally, there may be sampling at the end of each interval.
      * Finally, fossils are sampled with rate psi, the others (fossils and extant taxa) are
@@ -24,12 +24,12 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class FossilizedBirthDeathSpeciationProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathRangeProcess {
+    class FossilizedBirthDeathProcess : public AbstractBirthDeathProcess, public AbstractFossilizedBirthDeathProcess {
         
-        using AbstractFossilizedBirthDeathRangeProcess::taxa;
+        using AbstractFossilizedBirthDeathProcess::taxa;
 
     public:
-        FossilizedBirthDeathSpeciationProcess (const TypedDagNode<double>* ra,
+        FossilizedBirthDeathProcess (const TypedDagNode<double>* ra,
                                       const DagNode *speciation,
                                       const DagNode *extinction,
                                       const DagNode *psi,
@@ -43,7 +43,7 @@ namespace RevBayesCore {
                                       bool resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathProcess*                    clone(void) const;                                         //!< Create an independent clone
 
         void                                            redrawValue(void);
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
@@ -55,7 +55,7 @@ namespace RevBayesCore {
         double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
         // Parameter management functions
-        double                                          computeLnProbabilityTimes(void) const;                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityTimes(void);                            //!< Compute the log-transformed probability of the current value.
         double                                          computeLnProbabilityDivergenceTimes(void);                            //!< Compute the log-transformed probability of the current value.
 
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
@@ -73,22 +73,22 @@ namespace RevBayesCore {
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
-        void                                            prepareProbComputation(void) const override;
+        void                                            prepareProbComputation(void);
 
     private:
         
         // helper functions
         double                                          getMaxTaxonAge( const TopologyNode& ) const;
 
-        mutable std::vector<bool>                       I;                                                       //!< Indicates for each taxon whether the parent species was a sampled ancestor.
+        mutable std::vector<bool>                       I;
 
-        mutable std::vector<double>                     anagenetic;                                              //!< The sorted anagenetic speciation rates.
-        mutable std::vector<double>                     symmetric;                                               //!< The sorted symmetric speciation probabilities.
+        mutable std::vector<double>                     anagenetic;
+        mutable std::vector<double>                     symmetric;
 
         const TypedDagNode<double >*                    homogeneous_lambda_a;                                    //!< The homogeneous anagenetic speciation rates.
         const TypedDagNode<RbVector<double> >*          heterogeneous_lambda_a;                                  //!< The heterogeneous anagenetic speciation rates.
-        const TypedDagNode<double >*                    homogeneous_beta;                                        //!< The homogeneous symmetric speciation probability.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_beta;                                      //!< The heterogeneous symmetric speciation probabilities.
+        const TypedDagNode<double >*                    homogeneous_beta;                                        //!< The homogeneous symmetric speciation prob.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_beta;                                      //!< The heterogeneous symmetric speciation probs.
 
     };
 }

@@ -1,7 +1,7 @@
 #ifndef FossilizedBirthDeathRangeProcess_H
 #define FossilizedBirthDeathRangeProcess_H
 
-#include "AbstractFossilizedBirthDeathRangeProcess.h"
+#include "AbstractFossilizedBirthDeathProcess.h"
 
 #include "MatrixReal.h"
 #include "RbVector.h"
@@ -28,7 +28,7 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathRangeProcess {
+    class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathProcess {
         
     public:
         FossilizedBirthDeathRangeProcess (const DagNode *speciation,
@@ -39,21 +39,19 @@ namespace RevBayesCore {
 										  const std::string &condition,
 										  const std::vector<Taxon> &taxa,
 										  bool complete,
-										  bool resampling,
-                                          bool bds);                                                                        //!< Constructor
+										  bool resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathRangeProcess*         clone(void) const;                                                        //!< Create an independent clone
+        FossilizedBirthDeathRangeProcess*               clone(void) const;                                     //!< Create an independent clone
 
     protected:
         void                                            updateStartEndTimes();
 
         // Parameter management functions
-        double                                          computeLnProbability(void);                                         //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityBDS(void);                                      //!< Compute the log probability assuming complete lineage sampling.
+        double                                          computeLnProbability(void);                            //!< Compute the log-transformed probability of the current value.
 
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);
@@ -62,13 +60,12 @@ namespace RevBayesCore {
     private:
         
         // helper functions
-        void                                            updateGamma(bool force = false);                                    //!< Number of species alive at time t.
+        void                                            updateGamma(bool force = false);                             //!< Number of species alive at time t.
         void                                            redrawValue(void);
 
-        bool                                            bds;                //!< Indicates whether to assume complete lineage sampling (BDS model)
-        std::vector<size_t>                             gamma_i;            //!< The number of coexisting lineages at each taxon birth time
-        std::vector<std::vector<bool> >                 gamma_links;        //!< A boolean matrix indicating which taxa are coexiting at each birth time
-        std::vector<bool>                               dirty_gamma;        //!< Indicates whether gamma needs updating
+        std::vector<size_t>                             gamma_i;
+        std::vector<std::vector<bool> >                 gamma_links;
+        std::vector<bool>                               dirty_gamma;
     };
 }
 
