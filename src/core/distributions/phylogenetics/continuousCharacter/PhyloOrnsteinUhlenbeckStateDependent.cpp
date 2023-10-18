@@ -288,7 +288,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             double delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
             
             
-            // @TODO: maybe change later to allow for more states.
+            // @TODO: maybe change later to allow for more characters/sites.
             double current_mu_left  = mu_left[0];
             double current_mu_right = mu_right[0];
 
