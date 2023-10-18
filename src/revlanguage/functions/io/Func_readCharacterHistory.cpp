@@ -69,7 +69,7 @@ RevPtr<RevVariable> Func_readCharacterHistory::execute( void )
     }
     
     // return the tree with annotations
-    return new RevVariable( new ModelVector<CharacterHistory>(  ) );
+    return new RevVariable( new ModelVector<CharacterHistory>( histories ) );
 }
 
 
