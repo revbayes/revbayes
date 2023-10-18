@@ -814,6 +814,21 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<RbVector<
 }
 
 
+void PhyloOrnsteinUhlenbeckStateDependent::setValue(ContinuousCharacterData *v, bool force)
+{
+    
+    // delegate to the parent class
+    TypedDistribution< ContinuousCharacterData >::setValue(v, force);
+    
+    // reset the number of sites
+    num_sites = v->getNumberOfIncludedCharacters();
+    
+    // tell the derived classes
+    this->resetValue();
+    
+}
+
+
 void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
     
