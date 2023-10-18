@@ -3039,15 +3039,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
 
                 }
                 
-                if ( this->global_observation_error != NULL )
+                if ( child.isTip() && this->global_observation_error != NULL )
                 {
                     double error_prob = this->global_observation_error->getValue();
                     double u2 = rng->uniform01();
                     if ( u2 < error_prob )
                     {
                         // there was an error
-                        size_t new_state = size_t( rng->uniform01() * (this->num_chars-1) );
-                        if ( new_state >= c.getStateIndex() ) ++new_state;
+//                        size_t new_state = size_t( rng->uniform01() * (this->num_chars-1) );
+//                        if ( new_state >= c.getStateIndex() ) ++new_state;
+                        size_t new_state = size_t( rng->uniform01() * this->num_chars );
                         c.setStateByIndex(new_state);
                     }
                 }
