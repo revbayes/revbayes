@@ -2,7 +2,7 @@
 #define Dist_FBDP_H
 
 #include "RlFossilizedBirthDeathRangeProcess.h"
-#include "FossilizedBirthDeathProcess.h"
+#include "FossilizedBirthDeathSpeciationProcess.h"
 #include "RlTimeTree.h"
 
 namespace RevLanguage {
@@ -34,7 +34,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::FossilizedBirthDeathProcess*              createDistribution(void) const;
+        RevBayesCore::FossilizedBirthDeathSpeciationProcess*              createDistribution(void) const;
         
     protected:
         

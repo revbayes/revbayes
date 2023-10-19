@@ -9,7 +9,6 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
-#include "FossilizedBirthDeathProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -66,7 +65,7 @@ Dist_FBDP* Dist_FBDP::clone( void ) const
  *
  * \return A new internal distribution object.
  */
-RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void ) const
+RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDP::createDistribution( void ) const
 {
     
     // get the parameters
@@ -106,7 +105,7 @@ RevBayesCore::FossilizedBirthDeathProcess* Dist_FBDP::createDistribution( void )
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathProcess* d = new RevBayesCore::FossilizedBirthDeathProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
 
     return d;
 }

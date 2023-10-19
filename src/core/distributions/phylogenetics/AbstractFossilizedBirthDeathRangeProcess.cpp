@@ -1,4 +1,4 @@
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 
 #include <algorithm>
 #include <cmath>
@@ -36,7 +36,7 @@ using namespace RevBayesCore;
  * \param[in]    c              Complete sampling?
  * \param[in]    re             Augmented age resampling weight.
  */
-AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const DagNode *inspeciation,
+AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                          const DagNode *inextinction,
                                                                          const DagNode *inpsi,
                                                                          const TypedDagNode<double> *inrho,
@@ -193,7 +193,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool force )
+double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( bool force )
 {
     // prepare the probability computation
     prepareProbComputation();
@@ -201,7 +201,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
     updateStartEndTimes();
 
     // variable declarations and initialization
-    double lnProbTimes = 0.0;
+    double lnProb = 0.0;
 
     size_t num_rho_sampled = 0;
     size_t num_rho_unsampled = 0;
@@ -257,7 +257,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             // skip the rest for extant taxa with no fossil samples
             if ( max_age == present )
             {
-                lnProbTimes += partial_likelihood[i];
+                lnProb += partial_likelihood[i];
 
                 continue;
             }
@@ -288,7 +288,6 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
                     std::vector<double> psi(ages.size(), 0.0);
                     
-                    bool test = true;
                     for (size_t j = 0; j < num_intervals; j++)
                     {
                         double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
@@ -375,42 +374,42 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
             partial_likelihood[i] += Psi[i];
         }
 
-        lnProbTimes += partial_likelihood[i];
+        lnProb += partial_likelihood[i];
     }
 
     size_t ori = findIndex(origin);
 
     // the origin is not a speciation event
-    lnProbTimes -= log( birth[ori] );
+    lnProb -= log( birth[ori] );
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
     {
-        lnProbTimes += num_rho_sampled * log( homogeneous_rho->getValue() );
+        lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
     }
     // add the unsampled extant tip age term
     if ( homogeneous_rho->getValue() < 1.0)
     {
-        lnProbTimes += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
+        lnProb += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
     }
 
     // condition on sampling
     if ( condition == "sampling" )
     {
-        lnProbTimes -= log( 1.0 - p(ori, origin, false) );
+        lnProb -= log( 1.0 - p(ori, origin, false) );
     }
     // condition on survival
     else if ( condition == "survival" )
     {
-        lnProbTimes -= log( 1.0 - p(ori, origin, true) );
+        lnProb -= log( 1.0 - p(ori, origin, true) );
     }
 
-    if ( RbMath::isFinite(lnProbTimes) == false )
+    if ( RbMath::isFinite(lnProb) == false )
     {
         return RbConstants::Double::neginf;
     }
 
-    return lnProbTimes;
+    return lnProb;
 }
 
 
@@ -420,7 +419,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
  * t_0 is origin
  * t_l = 0.0
  */
-size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
+size_t AbstractFossilizedBirthDeathRangeProcess::findIndex(double t) const
 {
     return std::prev(std::upper_bound( times.begin(), times.end(), t)) - times.begin();
 }
@@ -429,7 +428,7 @@ size_t AbstractFossilizedBirthDeathProcess::findIndex(double t) const
 /**
  * p_i(t)
  */
-double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival ) const
+double AbstractFossilizedBirthDeathRangeProcess::p( size_t i, double t, bool survival ) const
 {
     // get the parameters
     double b = birth[i];
@@ -456,7 +455,7 @@ double AbstractFossilizedBirthDeathProcess::p( size_t i, double t, bool survival
 /**
  * q_i(t)
  */
-double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) const
+double AbstractFossilizedBirthDeathRangeProcess::q( size_t i, double t, bool tilde ) const
 {
     if ( t == times[i] ) return 0.0;
     
@@ -489,7 +488,7 @@ double AbstractFossilizedBirthDeathProcess::q( size_t i, double t, bool tilde ) 
  *
  *
  */
-std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
+std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 {
     return age;
 }
@@ -499,7 +498,7 @@ std::vector<double>& AbstractFossilizedBirthDeathProcess::getAges(void)
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i)
+void AbstractFossilizedBirthDeathRangeProcess::resampleAge(size_t i)
 {
     stored_age = age;
     resampled = true;
@@ -508,7 +507,7 @@ void AbstractFossilizedBirthDeathProcess::resampleAge(size_t i)
 }
 
 
-void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_psi  = std::vector<bool>(taxa.size(), false);
     dirty_taxa = std::vector<bool>(taxa.size(), false);
@@ -518,7 +517,7 @@ void AbstractFossilizedBirthDeathProcess::keepSpecialization(DagNode *toucher)
 }
 
 
-void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
     Psi = stored_Psi;
@@ -536,7 +535,7 @@ void AbstractFossilizedBirthDeathProcess::restoreSpecialization(DagNode *toucher
 }
 
 
-void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
 {
     if ( touched == false )
     {
@@ -559,7 +558,7 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::prepareProbComputation() const
+void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation(void) const
 {
     if ( homogeneous_lambda != NULL )
     {
@@ -650,7 +649,7 @@ void AbstractFossilizedBirthDeathProcess::prepareProbComputation() const
  * \param[in]    oldP      Pointer to the old parameter.
  * \param[in]    newP      Pointer to the new parameter.
  */
-void AbstractFossilizedBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == heterogeneous_lambda)
     {

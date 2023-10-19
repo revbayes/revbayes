@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "DistributionExponential.h"
 #include "MatrixReal.h"
 #include "RandomNumberFactory.h"
@@ -50,7 +50,7 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      bool complete,
                                                                      bool resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
@@ -209,12 +209,12 @@ void FossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), false);
 
-    AbstractFossilizedBirthDeathProcess::keepSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
 }
 
 void FossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
 {
-    AbstractFossilizedBirthDeathProcess::restoreSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
 }
 
 
@@ -249,7 +249,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
     }
     else
     {
-        AbstractFossilizedBirthDeathProcess::touchSpecialization(toucher, touchAll);
+        AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(toucher, touchAll);
     }
 }
 
@@ -262,5 +262,5 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, boo
  */
 void FossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    AbstractFossilizedBirthDeathProcess::swapParameterInternal(oldP, newP);
+    AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(oldP, newP);
 }

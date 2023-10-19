@@ -1,7 +1,7 @@
 #ifndef FossilizedBirthDeathRangeProcess_H
 #define FossilizedBirthDeathRangeProcess_H
 
-#include "AbstractFossilizedBirthDeathProcess.h"
+#include "AbstractFossilizedBirthDeathRangeProcess.h"
 
 #include "MatrixReal.h"
 #include "RbVector.h"
@@ -28,7 +28,7 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathProcess {
+    class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathRangeProcess {
         
     public:
         FossilizedBirthDeathRangeProcess (const DagNode *speciation,
