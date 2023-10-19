@@ -16,25 +16,25 @@ using namespace RevBayesCore;
 
 /* Constructor */
 VariableMonitor::VariableMonitor(DagNode *n, unsigned long g, const path &fname,
-                                 const std::string &del, bool pp, bool l, bool pr, bool ap, bool wv) :
+                                 const SampleFormat& f, bool pp, bool l, bool pr, bool ap, bool wv) :
     AbstractFileMonitor(n,g,fname,ap,wv),
     posterior( pp ),
     prior( pr ),
     likelihood( l ),
-    separator( del )
+    format( f )
 {
     
 }
 
 
 /* Constructor */
-VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, const std::string &del,
+VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, const SampleFormat &f,
                                  bool pp, bool l, bool pr, bool ap, bool wv) :
     AbstractFileMonitor(n,g,fname,ap,wv),
     posterior( pp ),
     prior( pr ),
     likelihood( l ),
-    separator( del )
+    format( f )
 {
 
 }
@@ -43,7 +43,6 @@ VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, unsigned long 
 /* Clone the object */
 VariableMonitor* VariableMonitor::clone(void) const
 {
-
     return new VariableMonitor(*this);
 }
 
@@ -52,54 +51,83 @@ VariableMonitor* VariableMonitor::clone(void) const
  */
 void VariableMonitor::printHeader( void )
 {
-
-    if ( enabled == true )
+    if (not enabled) return;
+    
+    if (to<JSONFormat>(format))
     {
+	std::vector<json> fields;
+	// print one column for the iteration number
+	fields.push_back("Iteration");
 
-//    out_stream.open( working_file_name.c_str(), std::fstream::out | std::fstream::app);
-        out_stream.seekg(0, std::ios::end);
+	if ( posterior ) fields.push_back("Posterior");
 
-        if ( write_version == true )
-        {
-            RbVersion version;
-            out_stream << "#RevBayes version (" + version.getVersion() + ")\n";
-            out_stream << "#Build from " + version.getGitBranch() + " (" + version.getGitCommit() + ") on " + version.getDate() + "\n";
-        }
+	if ( likelihood ) fields.push_back("Likelihood");
 
-        // print one column for the iteration number
-        out_stream << "Iteration";
+	if ( prior ) fields.push_back("Prior");
 
-        if ( posterior == true )
-        {
-            // add a separator before every new element
-            out_stream << separator;
-            out_stream << "Posterior";
-        }
+	json header;
+	header["fields"] = fields;
+	header["format"] = "MCON";
+	header["version"] = "0.1";
+	header["nested"] = true;
+	header["atomic"] = false;
+    
+	if ( write_version == true )
+	{
+	    RbVersion version;
 
-        if ( likelihood == true )
-        {
-            // add a separator before every new element
-            out_stream << separator;
-            out_stream << "Likelihood";
-        }
+	    json rb;
+	    rb["version"] = version.getVersion();
+	    rb["branch"] = version.getGitBranch();
+	    rb["commit"] = version.getGitCommit();
+	    rb["builddate"] = version.getDate();
+	    // build date?
+	    header["RevBayes"] = rb;
+	}
 
-        if ( prior == true )
-        {
-            // add a separator before every new element
-            out_stream << separator;
-            out_stream << "Prior";
-        }
+	out_stream.seekg(0, std::ios::end);
+	out_stream<<header<<std::endl;
+    }
+    else if (auto f = to<SeparatorFormat>(format))
+    {
+	auto& separator = f->separator;
+	out_stream.seekg(0, std::ios::end);
 
-        // print the headers for the variables
-        printFileHeader();
+	if ( write_version == true )
+	{
+	    RbVersion version;
+	    out_stream << "#RevBayes version (" + version.getVersion() + ")\n";
+	    out_stream << "#Build from " + version.getGitBranch() + " (" + version.getGitCommit() + ") on " + version.getDate() + "\n";
+	}
 
-        out_stream << std::endl;
+	// print one column for the iteration number
+	out_stream << "Iteration";
 
-        out_stream.flush();
+	if ( posterior == true )
+	{
+	    // add a separator before every new element
+	    out_stream << separator << "Posterior";
+	}
 
-        //    out_stream.close();
+	if ( likelihood == true )
+	{
+	    // add a separator before every new element
+	    out_stream << separator << "Likelihood";
+	}
+
+	if ( prior == true )
+	{
+	    // add a separator before every new element
+	    out_stream << separator << "Prior";
+	}
+
+	// print the headers for the variables
+	printFileHeader();
+
+	out_stream << std::endl;
     }
 
+    out_stream.flush();
 }
 
 /**
@@ -107,81 +135,87 @@ void VariableMonitor::printHeader( void )
  */
 void VariableMonitor::monitor(unsigned long gen)
 {
+    if ( not enabled or gen % printgen != 0 ) return;
 
-    // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    out_stream.seekg(0, std::ios::end);
 
-    if ( enabled == true && gen % samplingFrequency == 0 )
+    if (to<SeparatorFormat>(format))
     {
-//        out_stream.open( working_file_name.c_str(), std::fstream::out | std::fstream::app);
-        out_stream.seekg(0, std::ios::end);
-
-        // print the iteration number first
+        // print the iteration number "first", before we change the precision?
         out_stream << gen;
+    }
+
+    std::streamsize previousPrecision = out_stream.precision();
+    std::ios_base::fmtflags previousFlags = out_stream.flags();
+    out_stream.precision(RbSettings::userSettings().getOutputPrecision());
+
+    double Posterior = 0;
+    double Likelihood = 0;
+    double Prior = 0;
+    if (posterior or likelihood or prior)
+    {
+	for (auto& node: model->getDagNodes())
+	{
+	    double Pr = node->getLnProbability();
+	    Posterior += Pr;
+	    if (node->isClamped())
+		Likelihood += Pr;
+	    else
+		Prior += Pr;
+	}
+    }
         
-        std::streamsize previousPrecision = out_stream.precision();
-        std::ios_base::fmtflags previousFlags = out_stream.flags();
-        out_stream.precision(RbSettings::userSettings().getOutputPrecision());
+
+    if (to<JSONFormat>(format))
+    {
+	json line;
+
+	line["Iteration"] = gen;
+        
+	if (Posterior) line["Posterior"] = Posterior;
+	if (Likelihood) line["Likelihood"] = Likelihood;
+	if (Prior) line["Prior"] = Prior;
+
+	for (auto& node: nodes)
+	{
+	    auto name = node->getName();
+	    if (name.empty())
+		name = std::to_string((uintptr_t)node);
+	    line[name] = node->getValueAsJSON();
+	}
+
+	out_stream << line << "\n";
+    }
+    else
+    {
+	auto& separator = to<SeparatorFormat>(format)->separator;
 
         if ( posterior == true )
         {
             // add a separator before every new element
-            out_stream << separator;
-
-            const std::vector<DagNode*> &n = model->getDagNodes();
-            double pp = 0.0;
-            for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
-            {
-                pp += (*it)->getLnProbability();
-            }
-            out_stream << pp;
+            out_stream << separator << Posterior;
         }
 
         if ( likelihood == true )
         {
             // add a separator before every new element
-            out_stream << separator;
-
-            const std::vector<DagNode*> &n = model->getDagNodes();
-            double pp = 0.0;
-            for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
-            {
-                if ( (*it)->isClamped() )
-                {
-                    pp += (*it)->getLnProbability();
-                }
-            }
-            out_stream << pp;
+            out_stream << separator << Likelihood;
         }
 
         if ( prior == true )
         {
             // add a separator before every new element
-            out_stream << separator;
-
-            const std::vector<DagNode*> &n = model->getDagNodes();
-            double pp = 0.0;
-            for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
-            {
-                if ( !(*it)->isClamped() )
-                {
-                    pp += (*it)->getLnProbability();
-                }
-            }
-            out_stream << pp;
+            out_stream << separator << Prior;
         }
         
-        out_stream.setf(previousFlags);
-        out_stream.precision(previousPrecision);
-
         monitorVariables( gen );
 
         out_stream << std::endl;
-
-        out_stream.flush();
-
     }
 
+    out_stream.setf(previousFlags);
+    out_stream.precision(previousPrecision);
+    out_stream.flush();
 }
 
 /**
@@ -189,6 +223,7 @@ void VariableMonitor::monitor(unsigned long gen)
  */
 void VariableMonitor::printFileHeader( void )
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     for (std::vector<DagNode *>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)
     {
@@ -216,6 +251,7 @@ void VariableMonitor::printFileHeader( void )
  */
 void VariableMonitor::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     for (std::vector<DagNode*>::iterator i = nodes.begin(); i != nodes.end(); ++i)
     {
@@ -237,9 +273,10 @@ void VariableMonitor::monitorVariables(unsigned long gen)
  */
 void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
 {
-
-    if ( enabled == true )
+    if ( enabled == true and to<SeparatorFormat>(format))
     {
+
+	auto & separator = to<SeparatorFormat>(format)->separator;
 
         std::fstream combined_output_stream;
 

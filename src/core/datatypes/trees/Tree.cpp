@@ -799,7 +799,10 @@ size_t Tree::getNumberOfInteriorNodes( void ) const
 
     if ( isRooted() )
     {
-        return preliminaryNumIntNodes - 1;
+	if (preliminaryNumIntNodes > 1)
+	    return preliminaryNumIntNodes - 1;
+	else
+	    return 0;
     }
     else
     {
@@ -1527,6 +1530,11 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
         StringUtilities::fillWithSpaces(s, l, left);
     }
     o << s;
+}
+
+json Tree::toJSON() const
+{
+    return this->getNewickRepresentation(false);
 }
 
 void Tree::collapseSampledAncestors()
