@@ -103,7 +103,7 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDP::createDistributi
     }
 
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
+    bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
 
