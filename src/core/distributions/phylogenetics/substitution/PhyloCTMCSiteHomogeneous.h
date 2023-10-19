@@ -363,10 +363,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     if ( this->using_weighted_characters == true )
         site_indices = this->getIncludedSiteIndices();
     
-    bool use_global_obs_error = ( this->global_observation_error != NULL );
-    double global_obs_error_val = 0.0;
-    if ( use_global_obs_error ) global_obs_error_val = this->global_observation_error->getValue();
-    
+    double obs_error_prob = 0.0;
+    Simplex obs_error_freqs = Simplex(2);
+    if ( this->using_observation_error )
+    {
+        obs_error_prob  = this->observation_error_probability->getValue();
+        obs_error_freqs = this->observation_error_frequencies->getValue();
+    }
     // compute the transition probabilities
 //    this->updateTransitionProbabilities( node_index );
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
@@ -421,7 +424,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
-                            if ( use_global_obs_error == false )
+                            if ( this->using_observation_error == false )
                             {
                                 // check whether we observed this state
                                 if ( val.test(i) == true )
@@ -439,11 +442,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                                     {
                                         if ( i == j )
                                         {
-                                            tmp2 += (1.0 - global_obs_error_val * (this->num_chars-1.0)/this->num_chars);
+                                            tmp2 += (1.0 - obs_error_prob * (1.0-obs_error_freqs[i]));
                                         }
                                         else
                                         {
-                                            tmp2 += (global_obs_error_val/this->num_chars);
+//                                            tmp2 += (global_obs_error_val/this->num_chars);
+                                            tmp2 += obs_error_prob*obs_error_freqs[j];
                                         }
                                     }
                                 }
@@ -492,7 +496,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                     {
                         unsigned long org_val = char_node[site];
                         
-                        if ( use_global_obs_error == false )
+                        if ( this->using_observation_error == false )
                         {
                             // store the likelihood
                             p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
@@ -504,11 +508,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                             {
                                 if ( c2 == org_val )
                                 {
-                                    tmp += tp_begin[c1*this->num_chars+c2] * (1.0 - global_obs_error_val * (this->num_chars-1.0)/this->num_chars);
+                                    tmp += tp_begin[c1*this->num_chars+c2] * (1.0 - obs_error_prob * (1.0-obs_error_freqs[c2]));
                                 }
                                 else
                                 {
-                                    tmp += tp_begin[c1*this->num_chars+c2] * (global_obs_error_val/this->num_chars);
+                                    tmp += tp_begin[c1*this->num_chars+c2] * (obs_error_prob*obs_error_freqs[org_val]);
                                 }
                             }
                             p_site_mixture[c1] = tmp;

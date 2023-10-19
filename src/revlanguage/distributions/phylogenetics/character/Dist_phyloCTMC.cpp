@@ -704,16 +704,24 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             dist->setSiteRatesProbs( site_rates_probsNode );
         }
         
-        if ( observation_error->getRevObject().isType( Probability::getClassTypeSpec() ) )
+        bool observation_error_prob_received = false;
+        if ( observation_error_probability->getRevObject() != RevNullObject::getInstance() )
         {
-            RevBayesCore::TypedDagNode< double >* obs_error = static_cast<const Probability &>( observation_error->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< double >* obs_error = static_cast<const Probability &>( observation_error_probability->getRevObject() ).getDagNode();
 
-            dist->setObservationError( obs_error );
+            dist->setObservationErrorProbability( obs_error );
+            
+            observation_error_prob_received = true;
         }
-        else
+        if ( observation_error_frequencies->getRevObject() != RevNullObject::getInstance() )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* obs_error = static_cast<const Simplex &>( observation_error->getRevObject() ).getDagNode();
-            dist->setObservationError( obs_error );
+            if ( observation_error_prob_received == false )
+            {
+                throw RbException("If you specify the observation error frequencies, then you also must specify the observation error probability!");
+            }
+            
+            RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* obs_error = static_cast<const Simplex &>( observation_error_frequencies->getRevObject() ).getDagNode();
+            dist->setObservationErrorFrequencies( obs_error );
         }
         
 
@@ -1054,11 +1062,8 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "siteRatesProbs", Simplex::getClassTypeSpec(), "The probability weights of rate categories for the sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "pInv", Probability::getClassTypeSpec(), "The probability of a site being invariant.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
 
-        std::vector<TypeSpec> obs_error_types;
-        obs_error_types.push_back(Probability::getClassTypeSpec());
-        obs_error_types.push_back(Simplex::getClassTypeSpec());
-
-        dist_member_rules.push_back( new ArgumentRule( "observationError", obs_error_types, "The observational error probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "observationErrorProbability", Probability::getClassTypeSpec(), "The observational error probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "observationErrorFrequencies", Simplex::getClassTypeSpec(), "The observational error frequencies of the states once there was an observation error.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         
         dist_member_rules.push_back( new ArgumentRule( "nSites", Natural::getClassTypeSpec(), "The number of sites, used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural() ) );
@@ -1168,10 +1173,19 @@ void Dist_phyloCTMC::printValue(std::ostream& o) const
     {
         o << "?";
     }
-    o << ", observationError=";
-    if ( observation_error != NULL )
+    o << ", observationErrorProbability=";
+    if ( observation_error_probability != NULL )
     {
-        o << observation_error->getName();
+        o << observation_error_probability->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", observationErrorFrequencies=";
+    if ( observation_error_frequencies != NULL )
+    {
+        o << observation_error_frequencies->getName();
     }
     else
     {
@@ -1227,9 +1241,13 @@ void Dist_phyloCTMC::setConstParameter(const std::string& name, const RevPtr<con
     {
         p_inv = var;
     }
-    else if ( name == "observationError" )
+    else if ( name == "observationErrorProbability" )
     {
-        observation_error = var;
+        observation_error_probability = var;
+    }
+    else if ( name == "observationErrorFrequencies" )
+    {
+        observation_error_frequencies = var;
     }
     else if ( name == "nSites" )
     {

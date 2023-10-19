@@ -112,8 +112,8 @@ namespace RevBayesCore {
 
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
-        void                                                                setObservationError(const TypedDagNode< double > *r);
-        void                                                                setObservationError(const TypedDagNode< Simplex > *r);
+        void                                                                setObservationErrorProbability(const TypedDagNode< double > *r);
+        void                                                                setObservationErrorFrequencies(const TypedDagNode< Simplex > *r);
         void                                                                setPInv(const TypedDagNode< double > *);
         void                                                                setRateMatrix(const TypedDagNode< RateGenerator > *rm);
         void                                                                setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm);
@@ -225,8 +225,8 @@ namespace RevBayesCore {
         bool                                                                using_ambiguous_characters;
         bool                                                                treatUnknownAsGap;
         bool                                                                treatAmbiguousAsGaps;
-
         bool                                                                using_weighted_characters;
+        bool                                                                using_observation_error;
 
         bool                                                                useMarginalLikelihoods;
         mutable bool                                                        in_mcmc_mode;
@@ -236,8 +236,8 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix;
         const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices;
-        const TypedDagNode< double >*                                       global_observation_error;
-        const TypedDagNode< Simplex >*                                      global_state_specific_observation_error;
+        const TypedDagNode< double >*                                       observation_error_probability;
+        const TypedDagNode< Simplex >*                                      observation_error_frequencies;
         const TypedDagNode< Simplex >*                                      root_frequencies;
         const TypedDagNode< RbVector< double > >*                           site_rates;
         const TypedDagNode< Simplex >*                                      site_matrix_probs;
@@ -284,6 +284,7 @@ namespace RevBayesCore {
 }
 
 
+#include "ConstantNode.h"
 #include "DiscreteCharacterState.h"
 #include "DistributionExponential.h"
 #include "HomologousDiscreteCharacterData.h"
@@ -335,6 +336,7 @@ using_ambiguous_characters( amb ),
 treatUnknownAsGap( true ),
 treatAmbiguousAsGaps( false ),
 using_weighted_characters( wd ),
+using_observation_error( false ),
 useMarginalLikelihoods( false ),
 in_mcmc_mode( false ),
 pattern_block_start( 0 ),
@@ -354,8 +356,8 @@ sampled_site_matrix_component( 0 )
     heterogeneous_clock_rates               = NULL;
     homogeneous_rate_matrix                 = NULL;
     heterogeneous_rate_matrices             = NULL;
-    global_observation_error                = NULL;
-    global_state_specific_observation_error = NULL;
+    observation_error_probability           = NULL;
+    observation_error_frequencies           = NULL;
     root_frequencies                        = NULL;
     site_rates                              = NULL;
     site_matrix_probs                       = NULL;
@@ -391,8 +393,8 @@ sampled_site_matrix_component( 0 )
     this->addParameter( heterogeneous_clock_rates );
     this->addParameter( homogeneous_rate_matrix );
     this->addParameter( heterogeneous_rate_matrices );
-    this->addParameter( global_observation_error );
-    this->addParameter( global_state_specific_observation_error );
+    this->addParameter( observation_error_probability );
+    this->addParameter( observation_error_frequencies );
     this->addParameter( root_frequencies );
     this->addParameter( site_rates );
     this->addParameter( site_matrix_probs );
@@ -441,6 +443,7 @@ using_ambiguous_characters( n.using_ambiguous_characters ),
 treatUnknownAsGap( n.treatUnknownAsGap ),
 treatAmbiguousAsGaps( n.treatAmbiguousAsGaps ),
 using_weighted_characters( n.using_weighted_characters ),
+using_observation_error( n.using_observation_error ),
 useMarginalLikelihoods( n.useMarginalLikelihoods ),
 in_mcmc_mode( n.in_mcmc_mode ),
 pattern_block_start( n.pattern_block_start ),
@@ -459,8 +462,8 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     heterogeneous_clock_rates               = n.heterogeneous_clock_rates;
     homogeneous_rate_matrix                 = n.homogeneous_rate_matrix;
     heterogeneous_rate_matrices             = n.heterogeneous_rate_matrices;
-    global_observation_error                = n.global_observation_error;
-    global_state_specific_observation_error = n.global_state_specific_observation_error;
+    observation_error_probability           = n.observation_error_probability;
+    observation_error_frequencies           = n.observation_error_frequencies;
     root_frequencies                        = n.root_frequencies;
     site_rates                              = n.site_rates;
     site_matrix_probs                       = n.site_matrix_probs;
@@ -3039,16 +3042,21 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
 
                 }
                 
-                if ( child.isTip() && this->global_observation_error != NULL )
+                if ( child.isTip() && using_observation_error )
                 {
-                    double error_prob = this->global_observation_error->getValue();
+                    double error_prob = this->observation_error_probability->getValue();
                     double u2 = rng->uniform01();
                     if ( u2 < error_prob )
                     {
                         // there was an error
-//                        size_t new_state = size_t( rng->uniform01() * (this->num_chars-1) );
-//                        if ( new_state >= c.getStateIndex() ) ++new_state;
-                        size_t new_state = size_t( rng->uniform01() * this->num_chars );
+                        const Simplex& error_probs = this->observation_error_frequencies->getValue();
+                        double u3 = rng->uniform01();
+                        size_t new_state = 0;
+                        while ( error_probs[new_state] < u3 )
+                        {
+                            u3 -= error_probs[new_state];
+                            ++new_state;
+                        }
                         c.setStateByIndex(new_state);
                     }
                 }
@@ -3175,28 +3183,32 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationError(const TypedDagNode< double > *r)
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationErrorProbability(const TypedDagNode< double > *r)
 {
 
     // remove the old parameter first
-    if ( global_observation_error != NULL )
+    if ( observation_error_probability != NULL )
     {
-        this->removeParameter( global_observation_error );
-        global_observation_error = NULL;
-    }
-    else // heterogeneousClockRate != NULL
-    {
-        this->removeParameter( global_state_specific_observation_error );
-        global_state_specific_observation_error = NULL;
+        this->removeParameter( observation_error_probability );
+        observation_error_probability = NULL;
     }
 
     // set the value
-//    branch_heterogeneous_clock_rates = false;
-    global_observation_error = r;
+    using_observation_error = r != NULL;
+    observation_error_probability = r;
 
     // add the new parameter
-    this->addParameter( global_observation_error );
+    this->addParameter( observation_error_probability );
 
+    if ( observation_error_frequencies == NULL )
+    {
+        Simplex* tmp_val = new Simplex( this->num_chars );
+        ConstantNode<Simplex>* tmp = new ConstantNode<Simplex>(".observationErrorFrequencies", tmp_val);
+        
+        observation_error_frequencies = tmp;
+        this->addParameter( observation_error_frequencies );
+    }
+    
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
     {
@@ -3208,27 +3220,21 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationErr
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationError(const TypedDagNode< Simplex > *r)
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationErrorFrequencies(const TypedDagNode< Simplex > *r)
 {
 
     // remove the old parameter first
-    if ( global_observation_error != NULL )
+    if ( observation_error_frequencies != NULL )
     {
-        this->removeParameter( global_observation_error );
-        global_observation_error = NULL;
-    }
-    else // heterogeneousClockRate != NULL
-    {
-        this->removeParameter( global_state_specific_observation_error );
-        global_state_specific_observation_error = NULL;
+        this->removeParameter( observation_error_frequencies );
+        observation_error_frequencies = NULL;
     }
 
     // set the value
-//    branch_heterogeneous_clock_rates = true;
-    global_state_specific_observation_error = r;
+    observation_error_frequencies = r;
 
     // add the new parameter
-    this->addParameter( global_state_specific_observation_error );
+    this->addParameter( observation_error_frequencies );
 
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
@@ -4086,13 +4092,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
     {
         heterogeneous_rate_matrices = static_cast<const TypedDagNode< RbVector< RateGenerator > >* >( newP );
     }
-    else if (oldP == global_observation_error)
+    else if (oldP == observation_error_probability)
     {
-        global_observation_error = static_cast<const TypedDagNode< double >* >( newP );
+        observation_error_probability = static_cast<const TypedDagNode< double >* >( newP );
     }
-    else if (oldP == global_state_specific_observation_error)
+    else if (oldP == observation_error_frequencies)
     {
-        global_state_specific_observation_error = static_cast<const TypedDagNode< Simplex >* >( newP );
+        observation_error_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
     }
     else if (oldP == root_frequencies)
     {
@@ -4191,7 +4197,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
-    else if ( affecter == global_observation_error || affecter == global_state_specific_observation_error )
+    else if ( affecter == observation_error_probability || affecter == observation_error_frequencies )
     {
         touch_all = true;
     }
