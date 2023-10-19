@@ -96,6 +96,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     RevBayesCore::DagNode* m = mu->getRevObject().getDagNode();
     // fossilization rate
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
+    // origin age
+    RevBayesCore::TypedDagNode<double>* o = static_cast<const RealPos &>( originAge->getRevObject() ).getDagNode();
 
     // sampling probability
     RevBayesCore::TypedDagNode<double>* r = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
@@ -110,7 +112,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, o, r, rt, cond, t, c, re);
 
     return d;
 }

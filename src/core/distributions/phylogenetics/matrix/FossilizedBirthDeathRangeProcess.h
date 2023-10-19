@@ -34,6 +34,7 @@ namespace RevBayesCore {
         FossilizedBirthDeathRangeProcess (const DagNode *speciation,
 										  const DagNode *extinction,
 										  const DagNode *psi,
+                                          const TypedDagNode<double> *origin,
 										  const TypedDagNode<double>* rho,
 										  const TypedDagNode<RbVector<double> > *times,
 										  const std::string &condition,

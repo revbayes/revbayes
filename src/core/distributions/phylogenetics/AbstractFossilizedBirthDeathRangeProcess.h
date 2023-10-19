@@ -31,6 +31,7 @@ namespace RevBayesCore {
         AbstractFossilizedBirthDeathRangeProcess(const DagNode *speciation,
                                             const DagNode *extinction,
                                             const DagNode *psi,
+                                            const TypedDagNode<double> *origin,
                                             const TypedDagNode<double>* rho,
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::string &condition,
@@ -88,7 +89,7 @@ namespace RevBayesCore {
         std::vector<double>                     o_i;
         std::vector<double>                     y_i;
 
-        double                                  origin;
+        const TypedDagNode<double >*                    origin;
 
         mutable std::vector<double>                     q_i;
         mutable std::vector<double>                     q_tilde_i;

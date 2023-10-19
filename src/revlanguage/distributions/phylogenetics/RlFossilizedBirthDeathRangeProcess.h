@@ -42,6 +42,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           lambda;                                                                             //!< The speciation rate(s)
         RevPtr<const RevVariable>                           mu;                                                                                 //!< The extinction rate(s)
         RevPtr<const RevVariable>                           psi;                                                                                //!< The fossilization rate(s)
+        RevPtr<const RevVariable>                           originAge;                                                                          //!< The origin age of the process
         RevPtr<const RevVariable>                           rho;                                                                                //!< The extant sampling proportion
         RevPtr<const RevVariable>                           timeline;                                                                           //!< The interval times
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
@@ -186,6 +187,10 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "psi" )
     {
         psi = var;
+    }
+    else if ( name == "originAge")
+    {
+        originAge = var;
     }
     else if ( name == "rho" )
     {

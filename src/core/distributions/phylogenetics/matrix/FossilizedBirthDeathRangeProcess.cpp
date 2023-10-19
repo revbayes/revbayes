@@ -43,6 +43,7 @@ using namespace RevBayesCore;
 FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                      const DagNode *inextinction,
                                                                      const DagNode *inpsi,
+                                                                     const TypedDagNode<double> *origin,
                                                                      const TypedDagNode<double> *inrho,
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
@@ -50,7 +51,7 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      bool complete,
                                                                      bool resample) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, origin, inrho, intimes, incondition, intaxa, complete, resample)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
@@ -152,14 +153,15 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
  */
 void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
-    origin = 0;
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
         b_i[i] = (*this->value)[i][0];
         d_i[i] = (*this->value)[i][1];
 
-        origin = std::max(origin, b_i[i]);
+        // made irrelevant by first logical statement in line 224 on AbstractFossilizedBirthDeathRangeProcess.cpp
+        // where the origin is ensured to always be higher or equal to b_i
+        //origin = std::max(origin, b_i[i]);
     }
 }
 
@@ -174,21 +176,8 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    double max = 0;
-    // get the max first occurence
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        double o = taxa[i].getMaxAge();
-        if ( o > max ) max = o;
-    }
+    double max = origin->getValue();
     
-    max *= 1.1;
-    
-    if (max == 0.0)
-    {
-        max = 1.0;
-    }
-
     double present = times.front();
 
     // get random uniform draws

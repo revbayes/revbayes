@@ -39,6 +39,7 @@ using namespace RevBayesCore;
 AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                          const DagNode *inextinction,
                                                                          const DagNode *inpsi,
+                                                                         const TypedDagNode<double> *origin,
                                                                          const TypedDagNode<double> *inrho,
                                                                          const TypedDagNode< RbVector<double> > *intimes,
                                                                          const std::string &incondition,
@@ -49,7 +50,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     condition(incondition),
     homogeneous_rho(inrho),
     timeline( intimes ),
-    origin(0.0),
+    origin( origin ),
     complete(c),
     resampled(false),
     resampling(re),
@@ -221,7 +222,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
         // check model constraints
         //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
-        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= present ) )
+        if ( !( b <= origin->getValue() && b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= present ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -377,7 +378,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         lnProb += partial_likelihood[i];
     }
 
-    size_t ori = findIndex(origin);
+    size_t ori = findIndex(origin->getValue());
 
     // the origin is not a speciation event
     lnProb -= log( birth[ori] );
@@ -396,12 +397,12 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     // condition on sampling
     if ( condition == "sampling" )
     {
-        lnProb -= log( 1.0 - p(ori, origin, false) );
+        lnProb -= log( 1.0 - p(ori, origin->getValue(), false) );
     }
     // condition on survival
     else if ( condition == "survival" )
     {
-        lnProb -= log( 1.0 - p(ori, origin, true) );
+        lnProb -= log( 1.0 - p(ori, origin->getValue(), true) );
     }
 
     if ( RbMath::isFinite(lnProb) == false )
@@ -674,6 +675,10 @@ void AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNo
     else if (oldP == homogeneous_psi)
     {
         homogeneous_psi = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    else if (oldP == origin)
+    {
+        origin = static_cast<const TypedDagNode<double>* >( newP );
     }
     else if (oldP == homogeneous_rho)
     {

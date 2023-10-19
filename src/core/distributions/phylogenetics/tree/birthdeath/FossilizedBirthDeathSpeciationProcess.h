@@ -29,7 +29,7 @@ namespace RevBayesCore {
         using AbstractFossilizedBirthDeathRangeProcess::taxa;
 
     public:
-        FossilizedBirthDeathSpeciationProcess (const TypedDagNode<double>* ra,
+        FossilizedBirthDeathSpeciationProcess (const TypedDagNode<double>* o,
                                       const DagNode *speciation,
                                       const DagNode *extinction,
                                       const DagNode *psi,

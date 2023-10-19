@@ -71,7 +71,7 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDP::createDistributi
     // get the parameters
     
     // the start age
-    RevBayesCore::TypedDagNode<double>* sa = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* o = static_cast<const RealPos &>( originAge->getRevObject() ).getDagNode();
 
     // get the parameters
 
@@ -105,7 +105,7 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDP::createDistributi
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(o, l, m, p, r, la, b, rt, cond, t, c, re);
 
     return d;
 }
@@ -244,10 +244,6 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     else if ( name == "beta" )
     {
         beta = var;
-    }
-    else if ( name == "originAge" )
-    {
-        start_age = var;
     }
     else
     {

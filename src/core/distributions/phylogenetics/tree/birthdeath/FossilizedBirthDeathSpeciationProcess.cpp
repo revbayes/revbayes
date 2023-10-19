@@ -34,6 +34,7 @@ using namespace RevBayesCore;
  * Constructor. 
  * We delegate most parameters to the base class and initialize the members.
  *
+ * \param[in]    o              Origin age.
  * \param[in]    s              Speciation rates.
  * \param[in]    e              Extinction rates.
  * \param[in]    p              Fossil sampling rates.
@@ -47,7 +48,7 @@ using namespace RevBayesCore;
  * \param[in]    c              Complete sampling?
  * \param[in]    re             Augmented age resampling weight.
  */
-FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(const TypedDagNode<double> *ra,
+FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(const TypedDagNode<double> *o,
                                                            const DagNode *inspeciation,
                                                            const DagNode *inextinction,
                                                            const DagNode *inpsi,
@@ -59,8 +60,8 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const std::vector<Taxon> &intaxa,
                                                            bool c,
                                                            bool re) :
-    AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, c, re)
+    AbstractBirthDeathProcess(o, incondition, intaxa, true, NULL),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, o, inrho, intimes, incondition, intaxa, c, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
@@ -286,7 +287,7 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
 
     double current_age = RbConstants::Double::inf;
     double minimum_age = 0.0;
-    double max_age = getOriginAge();
+    double max_age = origin->getValue();
 
     for (size_t i = 0; i < n.size(); ++i)
     {
@@ -627,12 +628,11 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
             // set the start time to the origin
             if( node.isRoot() )
             {
-                double age = getOriginAge();
+                double age = origin->getValue();
 
                 if ( age != b_i[i] )
                 {
                     b_i[i] = age;
-                    origin = age;
                     dirty_psi[i] = true;
                     dirty_taxa[i] = true;
                     // resample augmented age
