@@ -223,7 +223,8 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
         // check model constraints
         //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
-        if ( !( b <= origin->getValue() && b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= present ) )
+        // b <= origin->getValue() && -> hopefully we can figure out this check soon
+        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= present ) )
         {
             return RbConstants::Double::neginf;
         }
