@@ -558,7 +558,7 @@ void AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *touc
  *
  *
  */
-void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation(void) const
+void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation( void ) const
 {
     if ( homogeneous_lambda != NULL )
     {

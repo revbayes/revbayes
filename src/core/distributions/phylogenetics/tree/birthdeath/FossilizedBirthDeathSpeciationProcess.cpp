@@ -126,9 +126,10 @@ FossilizedBirthDeathSpeciationProcess* FossilizedBirthDeathSpeciationProcess::cl
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void ) 
+double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void )
 {
-    double lnProb = computeLnProbabilityTimes();
+    double lnProb = computeLnProbabilityRanges();
+    lnProb += computeLnProbabilityTimes();
 
     return lnProb;
 }
@@ -138,9 +139,9 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTime
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes ( void ) const
+double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) const
 {
-    double lnProb = computeLnProbabilityRanges();
+    double lnProb = 0.0;
 
     for(size_t i = 0; i < taxa.size(); i++)
     {
@@ -651,7 +652,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
  *
  *
  */
-void FossilizedBirthDeathSpeciationProcess::prepareProbComputation()
+void FossilizedBirthDeathSpeciationProcess::prepareProbComputation() const
 {
     AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation();
 
@@ -730,6 +731,7 @@ void FossilizedBirthDeathSpeciationProcess::touchSpecialization(DagNode *toucher
     }
     else
     {
+        AbstractBirthDeathProcess::touchSpecialization(toucher, touchAll);
         AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(toucher, touchAll);
     }
 }

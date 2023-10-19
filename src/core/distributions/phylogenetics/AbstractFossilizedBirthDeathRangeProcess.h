@@ -78,10 +78,10 @@ namespace RevBayesCore {
 
         std::vector<const DagNode*>                     range_parameters;
 
-        std::vector<double>                     birth;
-        std::vector<double>                     death;
-        std::vector<double>                     fossil;
-        std::vector<double>                     times;
+        mutable std::vector<double>                     birth;
+        mutable std::vector<double>                     death;
+        mutable std::vector<double>                     fossil;
+        mutable std::vector<double>                     times;
 
         std::vector<double>                     b_i;
         std::vector<double>                     d_i;
@@ -90,10 +90,10 @@ namespace RevBayesCore {
 
         double                                  origin;
 
-        std::vector<double>                     q_i;
-        std::vector<double>                     q_tilde_i;
-        std::vector<double>                     p_i;
-        std::vector<double>                     pS_i;
+        mutable std::vector<double>                     q_i;
+        mutable std::vector<double>                     q_tilde_i;
+        mutable std::vector<double>                     p_i;
+        mutable std::vector<double>                     pS_i;
 
         std::vector<double>                     Psi;
         std::vector<double>                     stored_Psi;

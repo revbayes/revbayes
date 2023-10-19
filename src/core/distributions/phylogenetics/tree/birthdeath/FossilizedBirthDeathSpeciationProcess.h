@@ -7,9 +7,9 @@
 namespace RevBayesCore {
     
     /**
-     * @brief Piecewise-constant fossilized birth-death range distribution of extended trees.
+     * @brief Piecewise-constant fossilized birth-death species distribution of extended trees.
      *
-     * The piecewise-constant fossilized birth-death range process has constant rates for each time interval.
+     * The piecewise-constant fossilized birth-death species process has constant rates for each time interval.
      * At the end of each time interval there may be an abrupt rate-shift (jump) for each
      * of the rates. Additionally, there may be sampling at the end of each interval.
      * Finally, fossils are sampled with rate psi, the others (fossils and extant taxa) are
@@ -56,7 +56,7 @@ namespace RevBayesCore {
 
         // Parameter management functions
         double                                          computeLnProbabilityTimes(void) const override;                            //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityDivergenceTimes(void) const override;                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void);                            //!< Compute the log-transformed probability of the current value.
 
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const;
