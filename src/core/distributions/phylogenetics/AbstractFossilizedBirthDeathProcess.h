@@ -55,7 +55,7 @@ namespace RevBayesCore {
         double                                          p(size_t i, double t, bool survival = false) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
 
-        virtual void                                    prepareProbComputation();
+        virtual void                                    prepareProbComputation() const;
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);

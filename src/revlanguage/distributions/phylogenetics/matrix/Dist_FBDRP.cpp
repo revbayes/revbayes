@@ -51,7 +51,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDRP::Dist_FBDRP() : FossilizedBirthDeathProcess<MatrixReal>()
+Dist_FBDRP::Dist_FBDRP() : FossilizedBirthDeathRangeProcess<MatrixReal>()
 {
     
 }
@@ -196,7 +196,7 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     {
 
         // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathProcess<MatrixReal>::getParameterRules();
+        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;

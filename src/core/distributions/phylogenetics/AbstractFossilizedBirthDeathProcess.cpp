@@ -169,7 +169,7 @@ AbstractFossilizedBirthDeathProcess::AbstractFossilizedBirthDeathProcess(const D
 
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
-        std::map<TimeInterval, size_t> ages = taxa[i].getAges();
+        std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
@@ -279,7 +279,7 @@ double AbstractFossilizedBirthDeathProcess::computeLnProbabilityRanges( bool for
 
             if ( dirty_psi[i] || force )
             {
-                std::map<TimeInterval, size_t> ages = taxa[i].getAges();
+                std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
 
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
@@ -559,7 +559,7 @@ void AbstractFossilizedBirthDeathProcess::touchSpecialization(DagNode *toucher, 
  *
  *
  */
-void AbstractFossilizedBirthDeathProcess::prepareProbComputation()
+void AbstractFossilizedBirthDeathProcess::prepareProbComputation() const
 {
     if ( homogeneous_lambda != NULL )
     {

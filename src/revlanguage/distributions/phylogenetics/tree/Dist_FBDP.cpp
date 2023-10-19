@@ -38,7 +38,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDP::Dist_FBDP() : FossilizedBirthDeathProcess<TimeTree>()
+Dist_FBDP::Dist_FBDP() : FossilizedBirthDeathRangeProcess<TimeTree>()
 {
     
 }
@@ -134,7 +134,7 @@ const std::string& Dist_FBDP::getClassType( void )
 const TypeSpec& Dist_FBDP::getClassTypeSpec( void )
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( FossilizedBirthDeathProcess<TimeTree>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( FossilizedBirthDeathRangeProcess<TimeTree>::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }
@@ -192,7 +192,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "originAge", RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathProcess<TimeTree>::getParameterRules();
+        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<TimeTree>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
 
         std::vector<TypeSpec> paramTypes;
@@ -252,7 +252,7 @@ void Dist_FBDP::setConstParameter(const std::string& name, const RevPtr<const Re
     }
     else
     {
-        FossilizedBirthDeathProcess<TimeTree>::setConstParameter(name, var);
+        FossilizedBirthDeathRangeProcess<TimeTree>::setConstParameter(name, var);
     }
     
 }

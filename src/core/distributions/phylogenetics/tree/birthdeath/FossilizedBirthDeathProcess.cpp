@@ -126,7 +126,7 @@ FossilizedBirthDeathProcess* FossilizedBirthDeathProcess::clone( void ) const
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
+double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
     double lnProb = computeLnProbabilityTimes();
 
@@ -138,7 +138,7 @@ double FossilizedBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathProcess::computeLnProbabilityTimes( void )
+double FossilizedBirthDeathProcess::computeLnProbabilityTimes ( void ) const
 {
     double lnProb = computeLnProbabilityRanges();
 
@@ -435,7 +435,8 @@ void FossilizedBirthDeathProcess::simulateClade(std::vector<TopologyNode *> &n, 
 
         }
 
-        if ( n.size() > 2 && current_age >= age  ) throw RbException("Unexpected number of taxa (remaining #taxa was " + StringUtilities::toString(n.size()) + " and age was " + current_age + " with maximum age of " + age + ") in tree simulation");
+        if ( n.size() > 2 && current_age >= age  ) throw RbException("Unexpected number of taxa (remaining #taxa was " + StringUtilities::toString(n.size()) + " and age was " + 
+                                                                        StringUtilities::toString(current_age) + " with maximum age of " + StringUtilities::toString(age) + ") in tree simulation");
 
     }
 

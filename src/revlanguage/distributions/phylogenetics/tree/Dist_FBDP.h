@@ -1,7 +1,7 @@
 #ifndef Dist_FBDP_H
 #define Dist_FBDP_H
 
-#include "RlFossilizedBirthDeathProcess.h"
+#include "RlFossilizedBirthDeathRangeProcess.h"
 #include "FossilizedBirthDeathProcess.h"
 #include "RlTimeTree.h"
 
@@ -18,7 +18,7 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_FBDP : public FossilizedBirthDeathProcess<TimeTree> {
+    class Dist_FBDP : public FossilizedBirthDeathRangeProcess<TimeTree> {
         
     public:
         Dist_FBDP( void );

@@ -2,7 +2,7 @@
 #define Dist_FBDRP_H
 
 #include "FossilizedBirthDeathRangeProcess.h"
-#include "RlFossilizedBirthDeathProcess.h"
+#include "RlFossilizedBirthDeathRangeProcess.h"
 #include "ModelVector.h"
 #include "RlMatrixReal.h"
 
@@ -19,7 +19,7 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *c
      */
-    class Dist_FBDRP : public FossilizedBirthDeathProcess<MatrixReal> {
+    class Dist_FBDRP : public FossilizedBirthDeathRangeProcess<MatrixReal> {
         
     public:
         Dist_FBDRP( void );
