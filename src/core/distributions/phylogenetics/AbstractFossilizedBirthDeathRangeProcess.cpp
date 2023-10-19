@@ -81,6 +81,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     range_parameters.push_back( heterogeneous_mu );
     range_parameters.push_back( homogeneous_psi );
     range_parameters.push_back( heterogeneous_psi );
+    range_parameters.push_back( origin );
 
     // setup the timeline
     num_intervals = timeline == NULL ? 1 : timeline->getValue().size();

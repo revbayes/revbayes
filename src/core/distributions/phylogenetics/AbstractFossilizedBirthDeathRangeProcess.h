@@ -84,7 +84,7 @@ namespace RevBayesCore {
         std::vector<double>                             o_i;                                                    //!< The oldest minimum fossil age for each taxon
         std::vector<double>                             y_i;                                                    //!< The youngest maximum fossil age for each taxon
         
-        double                                          origin;                                                 //!< The origin time (oldest birth time)
+        const TypedDagNode<double >*                    origin;                                         //!< The origin time (oldest birth time)
 
         // the following vectors are used internally for more efficient likelihood calculations and are filled by 'prepareProbComputation'
         mutable std::vector<double>                     birth;                                                  //!< The sorted speciation rates
@@ -97,31 +97,6 @@ namespace RevBayesCore {
         mutable std::vector<double>                     p_i;                                                    //!< Probability of leaving no sampled descendants from the end of each time interval
         mutable std::vector<double>                     pS_i;                                                   //!< Probability of leaving no descendants from the end of each time interval
 
-<<<<<<< HEAD
-        const TypedDagNode<double >*                    origin;
-
-        mutable std::vector<double>                     q_i;
-        mutable std::vector<double>                     q_tilde_i;
-        mutable std::vector<double>                     p_i;
-        mutable std::vector<double>                     pS_i;
-
-        std::vector<double>                     Psi;
-        std::vector<double>                     stored_Psi;
-
-        std::vector<double>                     age;
-        std::vector<double>                     stored_age;
-
-        std::vector<double>                     partial_likelihood;
-        std::vector<double>                     stored_likelihood;
-
-        std::vector<bool>                       dirty_psi;
-        std::vector<bool>                       dirty_taxa;
-
-        bool                                    complete;
-        bool                                    touched;
-        bool                                    resampled;
-        bool                                    resampling;
-=======
         std::vector<double>                             Psi;                                                    //!< Fossil sampling terms computed for each taxon
         std::vector<double>                             stored_Psi;                                             //!< Stored fossil sampling terms
                                 
@@ -138,7 +113,6 @@ namespace RevBayesCore {
         bool                                            touched;                                                //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
->>>>>>> befe8994f28bfd17db5a6a589e00374db9644f14
     };
 }
 
