@@ -6,7 +6,6 @@
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
-#include "TreeVector.h"
 
 namespace RevBayesCore {
 
