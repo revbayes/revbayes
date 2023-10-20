@@ -449,7 +449,6 @@ double AbstractFossilizedBirthDeathRangeProcess::p( size_t i, double t, bool sur
     double ln_e = -A*dt;
 
     double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
-
     
     return (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
 }
