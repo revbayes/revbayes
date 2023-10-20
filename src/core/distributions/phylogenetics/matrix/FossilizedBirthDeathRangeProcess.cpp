@@ -183,7 +183,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        double b = taxa[i].getMaxAge() + rng->uniform01()*(max - taxa[i].getMaxAge()) + taxa[i].getMaxAge();
+        double b = taxa[i].getMaxAge() + rng->uniform01()*(max - taxa[i].getMaxAge());
         double d = taxa[i].isExtinct() ? rng->uniform01()*(taxa[i].getMinAge() - present) + present : present;
 
         (*this->value)[i][0] = b;

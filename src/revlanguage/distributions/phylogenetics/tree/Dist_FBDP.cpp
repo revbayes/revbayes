@@ -188,8 +188,6 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "originAge", RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
         // add the rules from the base class
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<TimeTree>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
