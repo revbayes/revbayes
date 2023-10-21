@@ -27,18 +27,18 @@
 using std::vector;
 using std::unique_ptr;
 
-RevBayesCore::ConcreteMixtureModel* InvModelFunc(const RevBayesCore::MixtureModel& sub_model, double p)
+RevBayesCore::ConcreteMixtureModel* InvModelFunc(const RevBayesCore::SubstitutionMixtureModel& sub_model, double p)
 {
     using namespace RevBayesCore;
 
     if (p < 0 or p > 1)
         throw RbException()<<"fnInv: pInv should be in [0,1], but pInv = "<<p;
 
-    vector<unique_ptr<RevBayesCore::MixtureModel>> sub_models;
+    vector<unique_ptr<RevBayesCore::SubstitutionMixtureModel>> sub_models;
     vector<double> fractions = {1-p, p};
 
     // The non-invariant part.
-    sub_models.push_back( unique_ptr<RevBayesCore::MixtureModel>(sub_model.clone()) );
+    sub_models.push_back( unique_ptr<RevBayesCore::SubstitutionMixtureModel>(sub_model.clone()) );
 
     auto f = sub_model.componentProbs();
     int n = sub_model.getNumberOfStates();
@@ -52,7 +52,7 @@ RevBayesCore::ConcreteMixtureModel* InvModelFunc(const RevBayesCore::MixtureMode
     vector<double> er(n*(n-1)/2,0);
     RevBayesCore::ConcreteTimeReversibleRateMatrix INV(er,pi,{});
 
-    sub_models.push_back( unique_ptr<RevBayesCore::MixtureModel>(new RevBayesCore::UnitMixtureModel(INV)) );
+    sub_models.push_back( unique_ptr<RevBayesCore::SubstitutionMixtureModel>(new RevBayesCore::UnitMixtureModel(INV)) );
     
     auto inv_model = new RevBayesCore::ConcreteMixtureModel(sub_models, fractions);
 
@@ -73,7 +73,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_InvModel::Func_InvModel( void ) : TypedFunction<MixtureModel>( )
+Func_InvModel::Func_InvModel( void ) : TypedFunction<SubstitutionMixtureModel>( )
 {
 }
 
@@ -90,12 +90,12 @@ Func_InvModel* Func_InvModel::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction< RevBayesCore::MixtureModel >* Func_InvModel::createFunction( void ) const
+RevBayesCore::TypedFunction< RevBayesCore::SubstitutionMixtureModel >* Func_InvModel::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* submodel = static_cast<const MixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* submodel = static_cast<const SubstitutionMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* pInv = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr< RevBayesCore::MixtureModel >( InvModelFunc, submodel, pInv );
+    return RevBayesCore::generic_function_ptr< RevBayesCore::SubstitutionMixtureModel >( InvModelFunc, submodel, pInv );
 }
 
 
@@ -107,7 +107,7 @@ const ArgumentRules& Func_InvModel::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "submodel"       , MixtureModel::getClassTypeSpec(), "Sub-rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "submodel"       , SubstitutionMixtureModel::getClassTypeSpec(), "Sub-rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "pInv"           , RealPos::getClassTypeSpec(), "The fraction of invariable sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;

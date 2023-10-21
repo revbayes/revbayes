@@ -338,7 +338,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_replicate<RealPos>()          );
         addFunction( new Func_replicate<RlString>()         );
         addFunction( new Func_replicate<RlBoolean>()        );
-        addFunction( new Func_replicate<MixtureModel>()     );
+        addFunction( new Func_replicate<SubstitutionMixtureModel>() );
         addFunction( new Func_seed()                        );
         addFunction( new Func_replicateEvents<Real>()       );
         addFunction( new Func_replicateEvents<RealPos>()    );

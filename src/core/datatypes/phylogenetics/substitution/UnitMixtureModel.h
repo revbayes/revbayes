@@ -9,7 +9,7 @@ namespace RevBayesCore {
 
     class Tree;
 
-    class UnitMixtureModel: public MixtureModel
+    class UnitMixtureModel: public SubstitutionMixtureModel
     {
         std::unique_ptr<RateGenerator> generator;
         std::vector<double> frequencies;

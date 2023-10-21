@@ -27,7 +27,7 @@ class TypeSpec;
      * @since 2023-04-16, version 1.0
      *
      */
-    class Func_InvModel: public TypedFunction<MixtureModel> {
+    class Func_InvModel: public TypedFunction<SubstitutionMixtureModel> {
 
     public:
         Func_InvModel( void );
@@ -40,7 +40,7 @@ class TypeSpec;
         const TypeSpec&                                                     getTypeSpec(void) const;                                    //!< Get the type spec of the instance
 
         // Function functions you have to override
-        RevBayesCore::TypedFunction< RevBayesCore::MixtureModel >*          createFunction(void) const;                                 //!< Create a function object
+        RevBayesCore::TypedFunction< RevBayesCore::SubstitutionMixtureModel>*          createFunction(void) const;                                 //!< Create a function object
         const ArgumentRules&                                                getArgumentRules(void) const;                               //!< Get argument rules
 
     };

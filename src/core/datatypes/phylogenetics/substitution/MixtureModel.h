@@ -1,5 +1,5 @@
-#ifndef MIXTURE_MODEL_H
-#define MIXTURE_MODEL_H
+#ifndef SUBSTITUTION_MIXTURE_MODEL_H
+#define SUBSTITUTION_MIXTURE_MODEL_H
 
 #include <stddef.h>
 #include <vector>
@@ -26,14 +26,14 @@ namespace RevBayesCore {
      * @since 2022-09-22, version 1.0
      */
 
-    class MixtureModel: public Cloneable, public MemberObject< RbVector<RbVector<RbVector<double>>> >
+    class SubstitutionMixtureModel: public Cloneable, public MemberObject< RbVector<RbVector<RbVector<double>>> >
     {
         int n_mixture_components = 0;
         int n_states = 0;
 
     public:
-        virtual                          ~MixtureModel() = default;                                                  //!< Destructor
-        virtual MixtureModel*            clone() const = 0;
+        virtual                          ~SubstitutionMixtureModel() = default;                                                  //!< Destructor
+        virtual SubstitutionMixtureModel*            clone() const = 0;
 
         int                              getNumberOfComponents() const;
         int                              getNumberOfStates() const;
@@ -55,20 +55,20 @@ namespace RevBayesCore {
         virtual std::vector<double>      componentProbs() const = 0;
 
         // This is a hack to satisfy ModelVector<T>, which incorrectly assumes that these exist for all T.
-        bool                             operator==(const MixtureModel&) const {return false;}
-        bool                             operator!=(const MixtureModel&) const {return true;}
-        bool                             operator<=(const MixtureModel&) const {return false;}
+        bool                             operator==(const SubstitutionMixtureModel&) const {return false;}
+        bool                             operator!=(const SubstitutionMixtureModel&) const {return true;}
+        bool                             operator<=(const SubstitutionMixtureModel&) const {return false;}
 
         // virtual std::vector<int>            get_emitted_letters() const;                                          //!<Find out what alphet letter each state emits, for markov modulated models.
 
     protected:
 
         // prevent instantiation
-        MixtureModel(int m, int n);
+        SubstitutionMixtureModel(int m, int n);
     };
 
-    // We need this for TypedDagNode<MixtureModel> for some reason...
-    std::ostream&                                       operator<<(std::ostream& o, const MixtureModel& x);
+    // We need this for TypedDagNode<SubstitutionMixtureModel> for some reason...
+    std::ostream&                                       operator<<(std::ostream& o, const SubstitutionMixtureModel& x);
 }
 
 #endif
