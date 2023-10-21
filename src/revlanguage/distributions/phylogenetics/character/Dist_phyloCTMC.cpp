@@ -164,9 +164,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist =
         new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
 
-        if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
             d = dist;
             return d;
@@ -289,9 +289,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -364,9 +364,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -439,9 +439,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -514,9 +514,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -548,9 +548,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
             nChars = rm->getValue()[0].getNumberOfStates();
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             nChars = mm->getValue().getNumberOfStates();
         }
         else
@@ -609,9 +609,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -643,9 +643,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
             nChars = rm->getValue()[0].getNumberOfStates();
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             nChars = mm->getValue().getNumberOfStates();
         }
         else
@@ -731,9 +731,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -820,9 +820,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -854,9 +854,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
             nChars = rm->getValue()[0].getNumberOfStates();
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             nChars = mm->getValue().getNumberOfStates();
         }
         else
@@ -975,9 +975,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
             dist->setRateMatrix( rm );
         }
-        else if (q->getRevObject().isType( MixtureModel::getClassTypeSpec() ) )
+        else if (q->getRevObject().isType( SubstitutionMixtureModel::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::MixtureModel >* mm = static_cast<const MixtureModel &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::SubstitutionMixtureModel >* mm = static_cast<const SubstitutionMixtureModel &>( q->getRevObject() ).getDagNode();
             dist->setMixtureModel( mm );
         }
         else
@@ -1084,7 +1084,7 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         std::vector<TypeSpec> rateMatrixTypes;
         rateMatrixTypes.push_back( RateGenerator::getClassTypeSpec() );
         rateMatrixTypes.push_back( ModelVector<RateGenerator>::getClassTypeSpec() );
-        rateMatrixTypes.push_back( MixtureModel::getClassTypeSpec() );
+        rateMatrixTypes.push_back( SubstitutionMixtureModel::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "Q", rateMatrixTypes, "The global, branch-specific or site-mixture rate matrices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         // optional argument for the root frequencies

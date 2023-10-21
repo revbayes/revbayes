@@ -44,38 +44,38 @@ namespace RevLanguage { class Argument; }
 
 using namespace RevLanguage;
 
-MixtureModel::MixtureModel(void) : ModelObject<RevBayesCore::MixtureModel>()
+SubstitutionMixtureModel::SubstitutionMixtureModel(void) : ModelObject<RevBayesCore::SubstitutionMixtureModel>()
 {
     initMethods();
 }
 
 
-MixtureModel::MixtureModel( const RevBayesCore::MixtureModel &v) : ModelObject<RevBayesCore::MixtureModel>( v.clone() )
+SubstitutionMixtureModel::SubstitutionMixtureModel( const RevBayesCore::SubstitutionMixtureModel &v) : ModelObject<RevBayesCore::SubstitutionMixtureModel>( v.clone() )
 {
     initMethods();
 }
 
 
-MixtureModel::MixtureModel( RevBayesCore::MixtureModel *v) : ModelObject<RevBayesCore::MixtureModel>( v )
+SubstitutionMixtureModel::SubstitutionMixtureModel( RevBayesCore::SubstitutionMixtureModel *v) : ModelObject<RevBayesCore::SubstitutionMixtureModel>( v )
 {
     initMethods();
 }
 
 
-MixtureModel::MixtureModel( RevBayesCore::TypedDagNode<RevBayesCore::MixtureModel> *m) : ModelObject<RevBayesCore::MixtureModel>( m )
+SubstitutionMixtureModel::SubstitutionMixtureModel( RevBayesCore::TypedDagNode<RevBayesCore::SubstitutionMixtureModel> *m) : ModelObject<RevBayesCore::SubstitutionMixtureModel>( m )
 {
     initMethods();
 }
 
 
-MixtureModel* MixtureModel::clone() const
+SubstitutionMixtureModel* SubstitutionMixtureModel::clone() const
 {
-    return new MixtureModel( *this );
+    return new SubstitutionMixtureModel( *this );
 }
 
 
 /* Map calls to member methods */
-RevPtr<RevVariable> MixtureModel::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
+RevPtr<RevVariable> SubstitutionMixtureModel::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
     if (name == "nComponents")
     {
@@ -120,20 +120,20 @@ RevPtr<RevVariable> MixtureModel::executeMethod(std::string const &name, const s
     }
 
     ; // do nothing for now
-    return ModelObject<RevBayesCore::MixtureModel>::executeMethod( name, args, found );
+    return ModelObject<RevBayesCore::SubstitutionMixtureModel>::executeMethod( name, args, found );
 }
 
 
 /* Get Rev type of object */
-const std::string& MixtureModel::getClassType(void) {
+const std::string& SubstitutionMixtureModel::getClassType(void) {
 
-    static std::string rev_type = "MixtureModel";
+    static std::string rev_type = "SubstitutionMixtureModel";
 
 	return rev_type;
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& MixtureModel::getClassTypeSpec(void) {
+const TypeSpec& SubstitutionMixtureModel::getClassTypeSpec(void) {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
 
@@ -142,13 +142,13 @@ const TypeSpec& MixtureModel::getClassTypeSpec(void) {
 
 
 /** Get the type spec of this class. We return a member variable because instances might have different element types. */
-const TypeSpec& MixtureModel::getTypeSpec(void) const {
+const TypeSpec& SubstitutionMixtureModel::getTypeSpec(void) const {
 
     static TypeSpec type_spec = getClassTypeSpec();
     return type_spec;
 }
 
-void MixtureModel::initMethods(void)
+void SubstitutionMixtureModel::initMethods(void)
 {
     // add method for call "nComponents" as a function
     ArgumentRules* nComponentsArgRules = new ArgumentRules();
@@ -176,6 +176,6 @@ void MixtureModel::initMethods(void)
     getTransitionProbArgRules->push_back( new ArgumentRule( "tree", Tree::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     getTransitionProbArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     getTransitionProbArgRules->push_back( new ArgumentRule( "rate", RealPos::getClassTypeSpec(), "The rate of the process (or duration of the process assuming rate=1).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberFunction<MixtureModel, ModelVector<ModelVector<ModelVector<RealPos> > > >( "getTransitionProbabilities", this, getTransitionProbArgRules   ) );
+    methods.addFunction( new MemberFunction<SubstitutionMixtureModel, ModelVector<ModelVector<ModelVector<RealPos> > > >( "getTransitionProbabilities", this, getTransitionProbArgRules   ) );
 }
 

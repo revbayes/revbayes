@@ -55,7 +55,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_UnitMixture::Func_UnitMixture( void ) : TypedFunction<MixtureModel>( )
+Func_UnitMixture::Func_UnitMixture( void ) : TypedFunction<SubstitutionMixtureModel>( )
 {
 }
 
@@ -72,7 +72,7 @@ Func_UnitMixture* Func_UnitMixture::clone( void ) const
 }
 
 
-Core::TypedFunction< Core::MixtureModel >* Func_UnitMixture::createFunction( void ) const
+Core::TypedFunction< Core::SubstitutionMixtureModel >* Func_UnitMixture::createFunction( void ) const
 {
     Core::TypedDagNode< Core::RateGenerator >* model = dynamic_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
@@ -81,10 +81,10 @@ Core::TypedFunction< Core::MixtureModel >* Func_UnitMixture::createFunction( voi
     if (auto& root_freqs_var = *args[1].getVariable(); root_freqs_var.getRevObject() != RevNullObject::getInstance())
     {
         Core::TypedDagNode< Core::Simplex >* root_freqs = dynamic_cast<const Simplex &>( root_freqs_var.getRevObject() ).getDagNode();
-        return Core::generic_function_ptr< Core::MixtureModel >( UnitMixtureFunc, model, root_freqs, rate );
+        return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( UnitMixtureFunc, model, root_freqs, rate );
     }
     else
-        return Core::generic_function_ptr< Core::MixtureModel >( UnitMixtureFuncNoFreqs, model, rate );
+        return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( UnitMixtureFuncNoFreqs, model, rate );
 }
 
 

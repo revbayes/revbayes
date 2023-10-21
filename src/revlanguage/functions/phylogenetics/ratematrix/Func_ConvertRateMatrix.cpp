@@ -43,7 +43,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_ConvertRateMatrix::Func_ConvertRateMatrix( void ) : TypedFunction<MixtureModel>( )
+Func_ConvertRateMatrix::Func_ConvertRateMatrix( void ) : TypedFunction<SubstitutionMixtureModel>( )
 {
 }
 
@@ -60,11 +60,11 @@ Func_ConvertRateMatrix* Func_ConvertRateMatrix::clone( void ) const
 }
 
 
-Core::TypedFunction< Core::MixtureModel >* Func_ConvertRateMatrix::createFunction( void ) const
+Core::TypedFunction< Core::SubstitutionMixtureModel >* Func_ConvertRateMatrix::createFunction( void ) const
 {
     Core::TypedDagNode< Core::RateGenerator >* model = dynamic_cast<const RateMatrix &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-    return Core::generic_function_ptr< Core::MixtureModel >( ConvertRateMatrixFunc, model);
+    return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( ConvertRateMatrixFunc, model);
 }
 
 

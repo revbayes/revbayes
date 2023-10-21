@@ -21,7 +21,7 @@ using std::unique_ptr;
 using std::optional;
 using std::tuple;
 
-int sum_submodels( const vector<unique_ptr<MixtureModel>>& ms)
+int sum_submodels( const vector<unique_ptr<SubstitutionMixtureModel>>& ms)
 {
     int total = 0;
     for(auto& m: ms)
@@ -29,11 +29,11 @@ int sum_submodels( const vector<unique_ptr<MixtureModel>>& ms)
     return total;
 }
 
-vector<unique_ptr<MixtureModel>> clone_models(const vector<unique_ptr<MixtureModel>>& ms)
+vector<unique_ptr<SubstitutionMixtureModel>> clone_models(const vector<unique_ptr<SubstitutionMixtureModel>>& ms)
 {
-    vector<unique_ptr<MixtureModel>> submodels;
+    vector<unique_ptr<SubstitutionMixtureModel>> submodels;
     for(auto& m: ms)
-        submodels.push_back( unique_ptr<MixtureModel>(m->clone()) );
+        submodels.push_back( unique_ptr<SubstitutionMixtureModel>(m->clone()) );
     return submodels;
 }
 
@@ -42,7 +42,7 @@ ConcreteMixtureModel* ConcreteMixtureModel::clone() const
     return new ConcreteMixtureModel(*this);
 }
 
-std::pair<int,int> get_indices(const vector<unique_ptr<MixtureModel>>& ms, int i)
+std::pair<int,int> get_indices(const vector<unique_ptr<SubstitutionMixtureModel>>& ms, int i)
 {
     int component = 0;
     for(auto& m: ms)
@@ -112,9 +112,9 @@ optional<double> ConcreteMixtureModel::rate() const
     return r;
 }
 
-ConcreteMixtureModel::ConcreteMixtureModel(const vector<unique_ptr<MixtureModel>>& ms,
+ConcreteMixtureModel::ConcreteMixtureModel(const vector<unique_ptr<SubstitutionMixtureModel>>& ms,
                                            const vector<double>& fs)
-    :MixtureModel( sum_submodels(ms), ms[0]->getNumberOfStates() ),
+    :SubstitutionMixtureModel( sum_submodels(ms), ms[0]->getNumberOfStates() ),
      sub_models( clone_models(ms) ),
      fractions(fs)
 {
@@ -125,14 +125,14 @@ ConcreteMixtureModel::ConcreteMixtureModel(const vector<unique_ptr<MixtureModel>
 
 ConcreteMixtureModel& ConcreteMixtureModel::operator=(const ConcreteMixtureModel& m)
 {
-    MixtureModel::operator=(m);
+    SubstitutionMixtureModel::operator=(m);
     sub_models = clone_models( m.sub_models );
     fractions = m.fractions;
     return *this;
 }
 
 ConcreteMixtureModel::ConcreteMixtureModel(const ConcreteMixtureModel& m)
-    :MixtureModel(m),
+    :SubstitutionMixtureModel(m),
      fractions(m.fractions)
 {
     sub_models = clone_models( m.sub_models );
@@ -140,12 +140,12 @@ ConcreteMixtureModel::ConcreteMixtureModel(const ConcreteMixtureModel& m)
 
 namespace RevBayesCore
 {
-ConcreteMixtureModel* scaled_mixture(const MixtureModel& sub_model, const std::vector<double>& fractions, const std::vector<double>& rates)
+ConcreteMixtureModel* scaled_mixture(const SubstitutionMixtureModel& sub_model, const std::vector<double>& fractions, const std::vector<double>& rates)
 {
-    vector<unique_ptr<MixtureModel>> sub_models;
+    vector<unique_ptr<SubstitutionMixtureModel>> sub_models;
     for(auto& rate: rates)
     {
-        auto sub_model2 = std::unique_ptr<MixtureModel>(sub_model.clone());
+        auto sub_model2 = std::unique_ptr<SubstitutionMixtureModel>(sub_model.clone());
         sub_model2->setRate(rate);
         sub_models.push_back( std::move(sub_model2) );
     }

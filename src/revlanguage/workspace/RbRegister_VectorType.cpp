@@ -146,7 +146,7 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<BranchLengthTree,3>::addTypeToWorkspace( *this, new BranchLengthTree() );
         AddWorkspaceVectorType<Tree,3>::addTypeToWorkspace( *this, new Tree() );
         AddWorkspaceVectorType<Clade,3>::addTypeToWorkspace( *this, new Clade() );
-        AddWorkspaceVectorType<MixtureModel,3>::addTypeToWorkspace( *this, new MixtureModel() );
+        AddWorkspaceVectorType<SubstitutionMixtureModel,3>::addTypeToWorkspace( *this, new SubstitutionMixtureModel() );
 //        AddWorkspaceVectorType<RlRegionalFeatures,3>::addTypeToWorkspace( *this, new RlRegionalFeatures() );
         AddWorkspaceVectorType<RlRegionalFeatureLayer,3>::addTypeToWorkspace( *this, new RlRegionalFeatureLayer() );
         //        AddWorkspaceVectorType<Dist_bdp,3>::addTypeToWorkspace( *this, new Dist_bdp() );

@@ -15,7 +15,7 @@ using namespace RevBayesCore;
 
 using std::vector;
 
-MixtureModel::MixtureModel(int m, int n)
+SubstitutionMixtureModel::SubstitutionMixtureModel(int m, int n)
     :n_mixture_components(m),
      n_states(n)
 {
@@ -23,17 +23,17 @@ MixtureModel::MixtureModel(int m, int n)
         throw RbException()<<"Mixture model: number of components is "<<m<<", but must be at least 1";
 }
 
-int MixtureModel::getNumberOfComponents() const
+int SubstitutionMixtureModel::getNumberOfComponents() const
 {
     return n_mixture_components;
 }
 
-int MixtureModel::getNumberOfStates() const
+int SubstitutionMixtureModel::getNumberOfStates() const
 {
     return n_states;
 }
 
-vector<TransitionProbabilityMatrix> MixtureModel::calculateTransitionProbabilities(const Tree& t, int node, double rate) const
+vector<TransitionProbabilityMatrix> SubstitutionMixtureModel::calculateTransitionProbabilities(const Tree& t, int node, double rate) const
 {
     vector<TransitionProbabilityMatrix> Ps;
     for(int c=0; c < getNumberOfComponents(); c++)
@@ -41,7 +41,7 @@ vector<TransitionProbabilityMatrix> MixtureModel::calculateTransitionProbabiliti
     return Ps;
 }
 
-void MixtureModel::setRate(double r)
+void SubstitutionMixtureModel::setRate(double r)
 {
     if (auto R = rate())
     {
@@ -54,7 +54,7 @@ void MixtureModel::setRate(double r)
         throw RbException()<<"Cannot set rate to "<<r<<" because the rate is not defined for this model.";
 }
 
-void MixtureModel::executeMethod( const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<RbVector<double>>> &rv) const
+void SubstitutionMixtureModel::executeMethod( const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<RbVector<double>>> &rv) const
 {
 
     if (n == "getTransitionProbabilities")
@@ -67,7 +67,7 @@ void MixtureModel::executeMethod( const std::string &n, const std::vector<const 
         double rate = dynamic_cast<const TypedDagNode<double> *>( args[2] )->getValue();
 
         if (node < 0 or node >= tree.getNumberOfNodes())
-            throw RbException()<<"MixtureModel.getTransitionProbabilities(tree,node,rate): node "<<node<<" is out of range.  Tree only has "<<tree.getNumberOfNodes()<<" nodes.";
+            throw RbException()<<"SubstitutionMixtureModel.getTransitionProbabilities(tree,node,rate): node "<<node<<" is out of range.  Tree only has "<<tree.getNumberOfNodes()<<" nodes.";
 
         auto Ps = calculateTransitionProbabilities( tree, node, rate );
 
@@ -91,9 +91,9 @@ void MixtureModel::executeMethod( const std::string &n, const std::vector<const 
 namespace RevBayesCore
 {
 
-std::ostream& operator<<(std::ostream& o, const MixtureModel& m)
+std::ostream& operator<<(std::ostream& o, const SubstitutionMixtureModel& m)
 {
-    o<<"MixtureModel with "<<m.getNumberOfComponents()<<" components and "<<m.getNumberOfStates()<<" states.";
+    o<<"SubstitutionMixtureModel with "<<m.getNumberOfComponents()<<" components and "<<m.getNumberOfStates()<<" states.";
     return o;
 }
 
