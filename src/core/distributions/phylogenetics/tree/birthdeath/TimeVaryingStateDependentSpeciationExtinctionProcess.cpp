@@ -377,7 +377,8 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 extinction = pExtinction(0.0, node.getAge());
             }
             
-            RbBitSet obs_state(num_states, true);
+            RbBitSet obs_state(num_states);
+            obs_state.set();
             bool gap = true;
             
             if ( tree->hasCharacterData() == true )
