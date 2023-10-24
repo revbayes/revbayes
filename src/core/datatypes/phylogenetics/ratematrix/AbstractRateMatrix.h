@@ -31,19 +31,10 @@ namespace RevBayesCore {
         
     public:
         virtual                            ~AbstractRateMatrix(void);                                                                   //!< Destructor
-        
-        // overloaded operators
-//        std::vector<double>&                operator[](size_t i);                                                                       //!< Subscript operator
-//        const std::vector<double>&          operator[](size_t i) const;                                                                 //!< Subscript operator (const)
-        
-//        std::vector<std::vector<double> >::const_iterator       begin(void) const;
-//        std::vector<std::vector<double> >::iterator             begin(void);
-//        std::vector<std::vector<double> >::const_iterator       end(void) const;
-//        std::vector<std::vector<double> >::iterator             end(void);
-        
+               
         // public methods
         double                              getRate(size_t from, size_t to, double rate=1.0) const;
-        double                              getRate(size_t from, size_t to, double age, double rate) const;         //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
+        double                              getRate(size_t from, size_t to, double age, double rate) const;                             //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
         void                                rescaleToAverageRate(double r);                                                             //!< Rescale the rate matrix such that the average rate is "r"
         void                                setDiagonal(void);                                                                          //!< Set the diagonal such that each row sums to zero
         virtual std::vector<int>            get_emitted_letters() const;                                                                //!<Find out what alphet letter each state emits        
