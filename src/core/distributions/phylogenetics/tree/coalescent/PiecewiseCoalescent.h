@@ -70,7 +70,6 @@ namespace RevBayesCore {
         mutable RbVector<double>                            pop_sizes;                              //!< The population sizes for each interval
         METHOD_TYPES                                        interval_method;                        //!< The method of specifying coalescent intervals
         DEMOGRAPHY_FUNCTION_TYPES                           demographic_function_var;
-//        RbVector< DemographicFunction >                     demographies;
 
     };
     

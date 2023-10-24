@@ -10,9 +10,9 @@ namespace RevLanguage {
     /**
      * The RevLanguage wrapper of the Dist_CoalescentDemography
      *
-     * The RevLanguage wrapper of the constant population size HeterochronousCoalescent process connects
-     * the variables/parameters of the process and creates the internal ConstantPopulationHeterochronousCoalescent object.
-     * Please read the ConstantPopulationHeterochronousCoalescent.h for more info.
+     * The RevLanguage wrapper of the constant population size CoalescentDemography process connects
+     * the variables/parameters of the process and creates the internal CoalescentDemography object.
+     * Please read the CoalescentDemography.h for more info.
      *
      *
      * @copyright Copyright 2009-
