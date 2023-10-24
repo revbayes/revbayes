@@ -1,8 +1,9 @@
-#ifndef Dist_beta_H
-#define Dist_beta_H
+#ifndef Dist_Q_H
+#define Dist_Q_H
 
-#include "BetaDistribution.h"
+#include "QDistribution.h"
 #include "Probability.h"
+#include "RlRateMatrix.h"
 #include "RlTypedDistribution.h"
 
 namespace RevLanguage {
@@ -23,14 +24,14 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_beta : public TypedDistribution<Probability> {
+    class Dist_Q : public TypedDistribution<RateGenerator> {
         
     public:
-        Dist_beta( void );
-        virtual ~Dist_beta();
+        Dist_Q( void );
+        virtual ~Dist_Q();
         
         // Basic utility functions
-        Dist_beta*                                      clone(void) const;                                                                      //!< Clone the object
+        Dist_Q*                                         clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
@@ -39,9 +40,9 @@ namespace RevLanguage {
         void                                            printValue(std::ostream& o) const;                                                      //!< Print the general information on the function ('usage')
         
         
-        // Distribution functions you have to override                  
-        virtual Probability*                            createRandomVariable(void) const;  
-        RevBayesCore::BetaDistribution*                 createDistribution(void) const;
+        // Distribution functions you have to override
+        virtual RateMatrix*                             createRandomVariable(void) const;
+        RevBayesCore::QDistribution*                    createDistribution(void) const;
         
     protected:
         
@@ -50,7 +51,7 @@ namespace RevLanguage {
         
     private:
         RevPtr<const RevVariable>                       alpha;
-        RevPtr<const RevVariable>                       beta;
+        RevPtr<const RevVariable>                       rho;
         
     };
     

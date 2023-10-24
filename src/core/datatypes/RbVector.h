@@ -9,6 +9,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include <gmpxx.h>
+
 
 #include <vector>
 #include <iostream>
@@ -122,6 +124,47 @@ namespace RevBayesCore {
         
         
     };
+
+    template<>
+    class RbVector<mpq_class> : public RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is > {
+    
+    public:
+        // constructor(s)
+        RbVector() : RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is  >( ) {}
+        RbVector(size_t n) : RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is  >( n ) {}
+        RbVector(size_t n, const mpq_class &v) : RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is  >( n, v ) {}
+        RbVector(const std::vector<mpq_class> &v) : RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is  >( v ) {}
+        RbVector(const RbVector<long> &v) : RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is  >( ) {  for (size_t i=0; i<v.size(); ++i) push_back( mpq_class(v[i]) ); }
+        RbVector(const RbVector<mpq_class> &v) : RbVectorImpl<mpq_class, IsAbstract<mpq_class>::Is  >( v ) {}
+        RbVector(RbVector<mpq_class> &&v) = default;
+    virtual                                            ~RbVector(void) {}
+    
+    // public member functions
+    RbVector<mpq_class>&                                   operator=(const RbVector<mpq_class>& ) = default;
+    RbVector<mpq_class>&                                   operator=(      RbVector<mpq_class>&&) = default;
+    RbVector<mpq_class>*                                   clone(void) const { return new RbVector<mpq_class>( *this ); }                                                                            //!< Create an independent clone
+    void                                                    printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, int l=-1, bool left=true) const {
+                                                            std::stringstream ss;
+                                                            ss << this->operator[](i).get_d();
+                                                            std::string s = ss.str();
+                                                            StringUtilities::fillWithSpaces( s, l, left );
+                                                            o << s;
+                                                        } //!< Print the i-th element
+    
+//        StringUtilities::fillWithSpaces( s, columnWidth, false );
+    void                                                sort(bool ascending = true) {
+                                                            if ( ascending == true)
+                                                            {
+                                                                std::sort(this->std::vector<mpq_class>::begin(), this->std::vector<mpq_class>::end() );
+                                                            }
+                                                            else
+                                                            {
+                                                                std::sort(this->std::vector<mpq_class>::rbegin(), this->std::vector<mpq_class>::rend() );
+                                                            }
+                                                        }
+    
+    
+};
     
     template <>
     inline void RbVector<unsigned int>::printElement(std::ostream& o, size_t idx, std::string /*sep*/, int l, bool left) const
