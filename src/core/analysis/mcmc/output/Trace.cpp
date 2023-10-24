@@ -66,7 +66,7 @@ int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool ve
     RandomNumberGenerator *rng = GLOBAL_RNG;
 
     double u = rng->uniform01();
-    double quantile = (smaller_values_count + u*equal_values_count) / double(values.size());
+    double quantile = (smaller_values_count + floor(u*(equal_values_count+1)) ) / double(values.size());
     double lower = (1.0 - alpha) / 2.0;
     double upper = 1.0 - lower;
     bool covered = ( quantile >= lower && quantile <= upper );
