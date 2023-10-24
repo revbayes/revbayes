@@ -604,17 +604,14 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_numUniqueInVector<Natural>( )  );
         addFunction( new Func_numUniqueInVector<Probability>( )  );
         addFunction( new Func_numUniqueInVector<Simplex>( )  );
-        
-        addFunction( new Func_discretizeDistribution( )            );
-        addFunction( new Func_discretizePositiveDistribution( )    );
-        addFunction( new Func_discretizeProbabilityDistribution( ) );
 
         // return a distcretized (by quantile) and normalized vector from a continuous distribution
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
         addFunction( new Func_fnNormalizedQuantile<RealPos>()    );
-
-        addFunction( new Func_discretizeDistribution( )         );
-        addFunction( new Func_discretizePositiveDistribution( ) );
+        
+        addFunction( new Func_discretizeDistribution( )            );
+        addFunction( new Func_discretizePositiveDistribution( )    );
+        addFunction( new Func_discretizeProbabilityDistribution( ) );
 
         // return a discretized gamma distribution (for gamma-dist rates)
         addFunction( new Func_discretizeBeta( )    );
