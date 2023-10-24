@@ -407,81 +407,6 @@ void PiecewiseCoalescent::restoreSpecialization(const DagNode *affecter)
     
 }
 
-//
-///**
-// * Simulate new coalescent times.
-// *
-// * \param[in]    n      The number of coalescent events to simulate.
-// *
-// * \return    A vector of the simulated coalescent times.
-// */
-//std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) const
-//{
-//
-//    // first check if we want to set the interval ages here!
-//    if ( interval_method == SPECIFIED )
-//    {
-//        updateIntervals();
-//    }
-//    else
-//    {
-//        interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
-//    }
-//    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
-//    size_t current_num_events_in_interval = 0;
-//
-//    // Get the rng
-//    RandomNumberGenerator* rng = GLOBAL_RNG;
-//
-//    // allocate the vector for the times
-//    std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
-//
-//    const RbVector<double> &pop_sizes  = Nes->getValue();
-//    size_t current_interval = 0;
-//    size_t current_num_lineages = num_taxa;
-//    // draw a time for each speciation event condition on the time of the process
-//    for (size_t i = 0; i < n; ++i)
-//    {
-//        double prev_coalescent_age = 0.0;
-//        if ( i > 0 )
-//        {
-//            prev_coalescent_age = coalescent_ages[i-1];
-//        }
-//
-//        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
-//
-//        double sim_age = 0.0;
-//        bool was_coalescent_event = false;
-//        do
-//        {
-//            double theta = 1.0 / (pop_sizes[current_interval]);
-//            double lambda = n_pairs * theta;
-//            double u = RbStatistics::Exponential::rv( lambda, *rng);
-//            sim_age = prev_coalescent_age + u;
-//            was_coalescent_event = current_interval >= interval_change_points.size() || sim_age < interval_change_points[current_interval];
-//            if ( was_coalescent_event == false )
-//            {
-//                prev_coalescent_age = interval_change_points[current_interval];
-//                ++current_interval;
-//            }
-//
-//        } while ( was_coalescent_event == false );
-//
-//        coalescent_ages[i] = sim_age;
-//
-//        ++current_num_events_in_interval;
-//        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && current_interval < interval_change_points.size() )
-//        {
-//            interval_change_points[current_interval] = sim_age;
-//            current_num_events_in_interval = 0;
-//        }
-//
-//        --current_num_lineages;
-//    }
-//
-//    return coalescent_ages;
-//}
-
 
 
 /**
@@ -703,71 +628,6 @@ void PiecewiseCoalescent::touchSpecialization(const DagNode *affecter, bool touc
 }
 
 
-// @TODO: Sebastian: Might want to remove this if we end up not using it.
-///**
-// * Recompute the current interval change point vector and corresponding population size vector.
-// *
-// */
-//void PiecewiseCoalescent::updateDemographies( void ) const
-//{
-//    pop_sizes = Nes->getValue();
-//
-//    // we need to recompute the demographic functions
-//    const RbVector< DemographicFunction > dem_funs;
-//    DemographicFunction* current_demographic_function;
-//
-//    for (size_t interval_index = 0; interval_index < pop_sizes.size(); ++interval_index)
-//    {
-//        if (demographic_function_var == CONSTANT)
-//        {
-//            double this_pop_size = pop_sizes[interval_index];
-//
-//            const TypedDagNode<double>* theta = &pop_sizes[interval_index];
-//            current_demographic_function = &ConstantDemographicFunction(theta);
-//        }
-//        else if (demographic_function_var == LINEAR)
-//        {
-//            if (interval_index == 0)
-//            {
-//                const TypedDagNode<double>* N0 = pop_sizes[interval_index];
-//                const TypedDagNode<double>* N1 = pop_sizes[interval_index+1];
-//                const TypedDagNode<double>* t0 = 0.0;
-//                const TypedDagNode<double>* t1 = interval_change_points[interval_index];
-//
-//                current_demographic_function = &LinearDemographicFunction(N0, N1, t0, t1);
-//
-//            }
-//            else if (interval_index > 0 && interval_index < (pop_sizes.size()-1)){
-//                const TypedDagNode<double>* N0 = pop_sizes[interval_index];
-//                const TypedDagNode<double>* N1 = pop_sizes[interval_index+1];
-//                const TypedDagNode<double>* t0 = interval_change_points[interval_index-1];
-//                const TypedDagNode<double>* t1 = interval_change_points[interval_index];
-//
-//                current_demographic_function = &LinearDemographicFunction(N0, N1, t0, t1);
-//
-//            }
-//            else if (interval_index == (pop_sizes.size() -1)){
-//                const TypedDagNode<double>* theta = &pop_sizes[interval_index];
-//                current_demographic_function = &ConstantDemographicFunction(theta);
-//            }
-//            else {
-//                throw RbException("Something went wrong with the piecewise linear function.");
-//            }
-//
-//        }
-//        else
-//        {
-//            throw RbException("Please provide as demographic function either 'constant' or 'linear'.");
-//        }
-//
-//        dem_funs.push_back(current_demographic_function);
-//    }
-//
-//    demographies = dem_funs;
-//
-//}
-
-
 
 /**
  * Recompute the current interval change point vector and corresponding population size vector.
@@ -861,7 +721,6 @@ void PiecewiseCoalescent::updateIntervals( void ) const
             for (size_t i = 0; i < num_taxa-2; ++i)
             {
                 ++current_num_events_in_interval;
-//                if ( current_num_events_in_interval == num_events_per_interval )
                 if ( current_num_events_in_interval == number_events_per_interval->getValue()[current_interval] )
                 {
                     interval_change_points[current_interval] = coalescent_ages[i];
