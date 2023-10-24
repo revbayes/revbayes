@@ -264,6 +264,7 @@
 #include "Func_shortestDistance.h"
 #include "Func_sigmoid.h"
 #include "Func_sigmoidVector.h"
+#include "Func_SmoothenTimeline.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -289,6 +290,7 @@
 #include "Func_discretizeLognormalQuadrature.h"
 #include "Func_discretizeDistribution.h"
 #include "Func_discretizePositiveDistribution.h"
+#include "Func_discretizeProbabilityDistribution.h"
 #include "Func_dppConcFromMean.h"
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
@@ -586,8 +588,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
  		/* Statistics functions (in folder "functions/statistics") */
 
-    // helpers for Markov Random Field models
+        // helpers for Markov Random Field models
         addFunction( new Func_assembleContinuousMRF( )     );
+        addFunction( new Func_SmoothenTimeline( )     );
 
 		// some helper statistics for the DPP distribution
         addFunction( new Func_dppConcFromMean( )     );
@@ -601,6 +604,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_numUniqueInVector<Natural>( )  );
         addFunction( new Func_numUniqueInVector<Probability>( )  );
         addFunction( new Func_numUniqueInVector<Simplex>( )  );
+        
+        addFunction( new Func_discretizeDistribution( )            );
+        addFunction( new Func_discretizePositiveDistribution( )    );
+        addFunction( new Func_discretizeProbabilityDistribution( ) );
 
         // return a distcretized (by quantile) and normalized vector from a continuous distribution
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
