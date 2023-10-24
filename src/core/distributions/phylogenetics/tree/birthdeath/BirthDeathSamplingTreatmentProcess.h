@@ -56,7 +56,7 @@ namespace RevBayesCore {
                                                     Tree *t);  //!< Constructor
 
         // public member functions
-        BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                    //!< Create an independent clone
+        BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                      //!< Create an independent clone
         void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
 
     protected:
