@@ -65,10 +65,7 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     {
         ancestralstate_traces.push_back( ast_vector[i].getValue() );
     }
-    
-    // get the ancestral state tree trace
-    const TraceTree& tt = static_cast<const TraceTree&>( args[arg_index++].getVariable()->getRevObject() );
-    
+        
     // make a new tree summary object
     RevBayesCore::TraceTree tree_trace;
     const Argument& tt_arg = args[arg_index++];
@@ -82,7 +79,10 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     
     // get the filename for the tree with MAP character history
     RevBayesCore::path map_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
-    
+
+    // get the filename for the tree with posteriors for the MAP character history
+    RevBayesCore::path map_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
     // get the filename for the tree with shift probability for character history
     RevBayesCore::path map_shift_pp_filename = "";
     const Argument& map_shift_pp_filename_arg = args[arg_index++];
