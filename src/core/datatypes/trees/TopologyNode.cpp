@@ -1825,9 +1825,11 @@ void TopologyNode::setAge(double a, bool propagate)
         // The parent should be a bifurcating node.
         assert(parent->getNumberOfChildren() == 2);
 
-        // We can get away with doing nothing to the current node
-        // because we'll handle the current node while processing the parent.
-        parent->setAge(a);
+        // set my age
+        age = a;
+        
+        // Set the parent age
+        parent->setAge(a);      
 
         // These will be true AFTER the parent->setAge( ) call fixes them up.
         assert(getAge() == parent->getAge());
