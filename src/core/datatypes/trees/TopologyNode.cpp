@@ -1598,9 +1598,9 @@ bool TopologyNode::isSampledAncestor(  bool propagate ) const
 {
 
     bool sa = sampled_ancestor;
-    if( propagate == true )
+    if ( propagate == true )
     {
-        for(size_t i = 0; i < children.size(); i++)
+        for (size_t i = 0; i < children.size(); i++)
         {
             sa = sa || children[i]->isSampledAncestor(false);
         }
@@ -1817,6 +1817,7 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
+    
     // Sometimes the `sampled_ancestor` flag is set to `true` for nodes with 1 child.
     // For those nodes we want to set the age directly, not modify the parent.
     if ( isTipSampledAncestor() and propagate == true )
@@ -1824,7 +1825,7 @@ void TopologyNode::setAge(double a, bool propagate)
         // The parent should be a bifurcating node.
         assert(parent->getNumberOfChildren() == 2);
 
-        // We can get away with doing nothing to the nothing to current node
+        // We can get away with doing nothing to the current node
         // because we'll handle the current node while processing the parent.
         parent->setAge(a);
 
@@ -1858,14 +1859,7 @@ void TopologyNode::setAge(double a, bool propagate)
     // we also need to recompute the branch lengths of my children
     for (auto& child: children)
     {
-        if ( child->isTipSampledAncestor() )
-        {
-            child->setAge(a, false);
-        }
-        else
-        {
-            child->recomputeBranchLength();
-        }
+        child->recomputeBranchLength();
 
         // fire tree change event
         if ( tree != NULL )
