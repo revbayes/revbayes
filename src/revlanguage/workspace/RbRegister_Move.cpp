@@ -141,6 +141,9 @@
 //#include "Move_CorrelationMatrixReparameterization.h"
 //#include "Move_CorrelationMatrixExpansion.h"
 
+/* Moves on rate matrices */
+#include "Move_MPQRateMatrix.h"
+
 /* Moves on random adjacency graphs */
 #include "Move_GraphFlipEdge.h"
 #include "Move_GraphFlipClique.h"
@@ -332,6 +335,10 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
 
         /* Moves on matrices of real values */
         addType( new Move_ConjugateInverseWishart() );
+        
+        /* Moves on rate matrices (incl reversible jump) */
+        addType( new Move_MPQRateMatrix() );
+
 
         /* Moves of random adjacency graphs */
         addType( new Move_GraphFlipEdge() );

@@ -119,7 +119,8 @@ void RevBayesCore::ProbabilityDensityFunction<valueType>::swapParameterInternal(
 template <class valueType>
 void RevBayesCore::ProbabilityDensityFunction<valueType>::update( void )
 {
-    dist->setValue( new valueType(x->getValue()) );
+    valueType* tmp_clone = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( x->getValue() );
+    dist->setValue( tmp_clone );
     
     if ( useLog == true )
     {

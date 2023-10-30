@@ -6,7 +6,6 @@
 
 #include <gmpxx.h>
 
-#include "MatrixRational.h"
 #include "MatrixReal.h"
 #include "RateMatrix.h"
 
@@ -70,7 +69,7 @@ namespace RevBayesCore {
 //        void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
         
         // protected members available for derived classes
-        MatrixRational*                     the_rate_matrix;                                                                            //!< Holds the rate matrix
+//        MatrixRational*                     the_rate_matrix;                                                                            //!< Holds the rate matrix
         bool                                needs_update;
         std::vector<mpq_class>              stationary_frequencies;
         

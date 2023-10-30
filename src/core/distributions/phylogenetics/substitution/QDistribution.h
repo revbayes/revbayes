@@ -3,6 +3,7 @@
 
 #include "RateMatrix_Rational.h"
 
+#include "RbBoolean.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
@@ -21,7 +22,7 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class QDistribution : public TypedDistribution<RateGenerator> {
+    class QDistribution : public TypedDistribution<RateGenerator>, public MemberObject< Boolean > {
 //    class QDistribution : public TypedDistribution<RateGenerator> {
 
     public:
@@ -37,6 +38,7 @@ namespace RevBayesCore {
         double                                          computeLnProbability(void);                                             //!< Compute the log-transformed probability of the current value.
 
         // Parameter management functions
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Boolean &rv) const;     //!< Map the member methods to internal function calls
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);        //!< Swap a parameter
 
         void                                            keepSpecialization(DagNode *toucher);

@@ -95,7 +95,7 @@ namespace RevBayesCore {
         std::set<Taxon>                             mrca;
         std::vector<Taxon>                          taxa;
         bool                                        is_negative_constraint = false;
-        boost::optional<std::vector<Clade>>         optional_constraints;
+        boost::optional<std::vector<Clade> >        optional_constraints;
     };
     
     // Global functions using the class
