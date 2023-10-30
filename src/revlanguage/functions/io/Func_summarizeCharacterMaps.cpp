@@ -97,11 +97,13 @@ RevPtr<RevVariable> Func_summarizeCharacterMaps::execute( void )
 
     bool verbose = static_cast<const RlBoolean &>( args[6].getVariable()->getRevObject() ).getValue();
     
+    bool bwd_time = static_cast<const RlBoolean &>( args[7].getVariable()->getRevObject() ).getValue();
+    
     // summarize stochastic character maps
     RevBayesCore::JointAncestralStateTrace joint_trace(ancestralstate_traces, tree_trace);
     joint_trace.setBurnin(burnin);
 
-    joint_trace.summarizeCharacterMaps(input_tree, filename, verbose, sep);
+    joint_trace.summarizeCharacterMaps(input_tree, filename, verbose, sep, bwd_time);
 
     return NULL;
 }
@@ -128,6 +130,7 @@ const ArgumentRules& Func_summarizeCharacterMaps::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes  , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
         argumentRules.push_back( new Delimiter() );
         argumentRules.push_back( new ArgumentRule( "verbose"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "backward_time"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         
         rules_set = true;
     }
