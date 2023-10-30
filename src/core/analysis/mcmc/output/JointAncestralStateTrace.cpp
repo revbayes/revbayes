@@ -1239,7 +1239,7 @@ void JointAncestralStateTrace::computeMarginalCladogeneticStateProbs2(std::vecto
  * Helper function for characterMapTree() that traverses the tree from root to tips collecting stochastic character map samples.
  *
  */
-void JointAncestralStateTrace::recursivelyCollectCharacterMapSamples(size_t node_index, size_t map_parent_state, bool root, bool conditional, Tree &final_summary_tree, const std::vector<TopologyNode*> &summary_nodes, std::vector<std::string> &map_character_history, std::vector<std::string> &map_character_history_posteriors, std::vector<std::string> &map_character_history_shift_prob, ProgressBar &progress, size_t &num_finished_nodes, int NUM_TIME_SLICES, bool verbose)
+void JointAncestralStateTrace::recursivelyCollectCharacterMapSamples(size_t node_index, size_t map_parent_state, bool root, bool conditional, Tree &final_summary_tree, const std::vector<TopologyNode*> &summary_nodes, std::vector<std::string> &map_character_history, std::vector<std::string> &map_character_history_posteriors, std::vector<std::string> &map_character_history_shift_prob, ProgressBar &progress, size_t &num_finished_nodes, int NUM_TIME_SLICES, bool verbose, bool bwd_time)
 {
     
     double dt = final_summary_tree.getRoot().getMaxDepth() / double(NUM_TIME_SLICES);
@@ -1321,7 +1321,7 @@ void JointAncestralStateTrace::recursivelyCollectCharacterMapSamples(size_t node
             std::string character_history = parent_vector[j];
             
             // parse sampled SIMMAP string
-            std::vector< std::pair<size_t, double> > parent_branch_map = parseSIMMAPForNode(character_history);
+            std::vector< std::pair<size_t, double> > parent_branch_map = parseSIMMAPForNode(character_history, bwd_time);
             
             // finally check against the map state of the parent
             size_t parent_end_state = parent_branch_map[ parent_branch_map.size() - 1 ].first;
@@ -1351,7 +1351,7 @@ void JointAncestralStateTrace::recursivelyCollectCharacterMapSamples(size_t node
         std::string character_history = ancestralstate_vector[j];
         
         // parse sampled SIMMAP string
-        std::vector< std::pair<size_t, double> > this_branch_map = parseSIMMAPForNode(character_history);
+        std::vector< std::pair<size_t, double> > this_branch_map = parseSIMMAPForNode(character_history, bwd_time);
         
         if ( use_sample == true )
         {
@@ -1598,62 +1598,128 @@ Tree* JointAncestralStateTrace::characterMapTree(const Tree &input_summary_tree,
 
 /*
  * Helper function that parses a SIMMAP character history for a single branch.
- * These strings represent character histories for a single branch in the form
- * {state_2,time_in_state_2:state_1,time_in_state_1} where the states are
- * listed left to right from the tip to the root (backward time). We loop through
- * the string from right to left to store events in forward time (root to tip).
+ * These strings represent character histories for a single branch, either
+ *
+ * (i) in backward time (frontend: use_simmap_default = "True")
+ *     e.g., {2,0.1:1,1.9},
+ *     which is read {state_2,time_in_state_2:state_1,time_in_state_1},
+ *     where left means young (tips) and right means old (root)
+ *
+ * or
+ *
+ * (ii) in forward time (frontend: use_simmap_default = "False")
+ *      e.g., {1,1.9:2,0.1},
+ *      which is read {state_1,time_in_state_1:state_2,time_in_state_2},
+ *      where left means old (root) and right means young (tips)
+ *
+ *
+ * We loop through the string from right to left (in the case of i) or
+ * from left to right (in the case of ii), and store events in forward time
+ * (root to tip).
+ *
  * Returns vector of events: [<state_1, time_in_state_1>, <state_2, time_in_state_2>]
  */
-std::vector< std::pair<size_t, double> > JointAncestralStateTrace::parseSIMMAPForNode(std::string character_history)
-{
+std::vector< std::pair<size_t, double> > JointAncestralStateTrace::parseSIMMAPForNode(std::string character_history,
+                                                                                      bool bwd_time) {
     
     boost::trim(character_history);
     
     // Now parse the sampled SIMMAP string:
-    bool parsed_time = false;
+    bool parsed_first_element = false;
     std::vector< std::pair<size_t, double> > this_branch_map = std::vector< std::pair<size_t, double> >();
     std::pair<size_t, double> this_event = std::pair<size_t, double>();
     std::string state = "";
     std::string time = "";
-    size_t k = character_history.size();
+    size_t str_size = character_history.size();
+    size_t pos = 1;
+    size_t pos_stop_condition = 0;
+    
+    if (bwd_time) {
+        pos = str_size - 1;
+        // pos_stop_condition is 0
+    }
+    else {
+        // pos is 1
+        pos_stop_condition = str_size;
+    }
     
     while (true) {
-        
-        if ( k == (character_history.size() - 1) &&
-            std::string(1, character_history[0]).compare("{") != 0 &&
-            std::string(1, character_history[k]).compare("}") != 0 )
-        {
+        if ( ( (bwd_time && pos == (str_size - 1)) || (!bwd_time && pos == 1) ) &&
+              std::string(1, character_history[0]).compare("{") != 0 &&
+              std::string(1, character_history[pos]).compare("}") != 0
+            ) {
             throw RbException("Error while summarizing character maps: trace does not contain valid SIMMAP string.");
         }
-        else if ( std::string(1, character_history[k]).compare(",") == 0 )
-        {
-            parsed_time = true;
-            this_event.second = std::atof( time.c_str() );
+
+        else if (std::string(1, character_history[pos]).compare(",") == 0 ) {
+            parsed_first_element = true;
+            
+            // if backward in time (right-to-left), when it gets to comma ","
+            // it must have read through a time
+            if (bwd_time) {
+                this_event.second = std::atof( time.c_str() );
+            }
+            
+            // if forward in time (left-to-right), when it gets to comma ","
+            // it must have read through a state integer
+            else {
+                this_event.first = std::atoi( state.c_str() );
+            }
         }
-        else if ( std::string(1, character_history[k]).compare(":") == 0 || k == 0 )
-        {
-            this_event.first = std::atoi( state.c_str() );
+
+        else if ( std::string(1, character_history[pos]).compare(":") == 0 ||
+                 pos == pos_stop_condition ) {
+
+            if (bwd_time) {
+                this_event.first = std::atoi( state.c_str() );
+            }
+            
+            // forward time
+            else {
+                this_event.second = std::atof( time.c_str() );
+            }
+            
+            // youngest to oldest if bwd_time
+            // (oldest to youngest if forward time!!!)
             this_branch_map.push_back( this_event );
-            if (k == 0)
-            {
+            
+            // finished whole stochastic mapping string for this node!
+            if (pos == pos_stop_condition) {
                 break;
             }
-            else
-            {
+            
+            else {
                 state = "";
                 time = "";
-                parsed_time = false;
+                parsed_first_element = false;
             }
         }
-        else if ( parsed_time == false )
-        {
-            time = std::string(1, character_history[k]) + time;
+
+        else if ( parsed_first_element == false ) {
+            if (bwd_time) {
+                time = std::string(1, character_history[pos]) + time;
+            }
+            
+            // forward time
+            else {
+                state = state + std::string(1, character_history[pos]);
+            }
         }
-        else
-        {
-            state = std::string(1, character_history[k]) + state;
+
+        // parsed_first_element == true
+        else {
+            if (bwd_time) {
+                state = std::string(1, character_history[pos]) + state;
+            }
+            
+            // forward time
+            else {
+                time = time + std::string(1, character_history[pos]);
+            }
         }
-        k--;
+        
+        if (bwd_time) { pos--; }
+        else { pos++; }
     }
     
     return this_branch_map;
@@ -1665,7 +1731,7 @@ std::vector< std::pair<size_t, double> > JointAncestralStateTrace::parseSIMMAPFo
  * Summarizes sampled character histories for a vector of stochastic character map traces for each node of a given summary tree.
  *
  */
-void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const path& filename, bool verbose, std::string separator)
+void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const path& filename, bool verbose, std::string separator, bool bwd_time)
 {
     std::vector<TopologyNode*> summary_nodes;
     bool condition_on_tree = false;
@@ -1805,7 +1871,7 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
             std::string character_history = ancestralstate_vector[j];
             
             // parse sampled SIMMAP string
-            std::vector< std::pair<size_t, double> > this_branch_map = parseSIMMAPForNode(character_history);
+            std::vector< std::pair<size_t, double> > this_branch_map = parseSIMMAPForNode(character_history, bwd_time);
             
             double start_time = sample_tree.getNode( sample_clade_index ).getAge() + sample_tree.getNode( sample_clade_index ).getBranchLength();
             double end_time = sample_tree.getNode( sample_clade_index ).getAge();
@@ -1813,10 +1879,16 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
             double current_time = start_time;
             size_t current_state;
             size_t end_state;
-            if ( this_branch_map.size() > 0 )
-            {
-                current_state = this_branch_map[0].first;
-                end_state = this_branch_map[ this_branch_map.size() - 1 ].first;
+            if ( this_branch_map.size() > 0 ) {
+                if (bwd_time) {
+                    current_state = this_branch_map[0].first;
+                    end_state = this_branch_map[ this_branch_map.size() - 1 ].first;
+                }
+                // forward time
+                else {
+                    end_state = this_branch_map[0].first;
+                    current_state = this_branch_map[ this_branch_map.size() - 1 ].first;
+                }
             }
             else
             {
@@ -1955,6 +2027,8 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
             }
             
             // now check this node's children's start states to see if there were any cladogenetic transitions
+            //
+            // will call parseSIMMAPForNode() on children now
             std::vector<int> children_indices = sample_tree.getNode( sample_clade_index ).getChildrenIndices();
             
             for (int k = 0; k < children_indices.size(); k++)
@@ -1977,10 +2051,19 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
                 std::string character_history_child = ancestralstate_vector_child[j];
                 
                 // parse sampled SIMMAP string
-                std::vector< std::pair<size_t, double> > child_branch_map = parseSIMMAPForNode(character_history_child);
+                std::vector< std::pair<size_t, double> > child_branch_map = parseSIMMAPForNode(character_history_child, bwd_time);
                 
                 // get child's start state
-                size_t child_start_state = child_branch_map[0].first;
+                size_t child_start_state;
+                if (bwd_time) {
+                    child_start_state = child_branch_map[0].first;
+                }
+                // forward time
+                // child_branch_map should always be reversed here, but sometimes the
+                // stoch map logger fails to reverse the input string of the current function!!!
+                else {
+                    child_start_state = child_branch_map[(child_branch_map.size()-1)].first;
+                }
                 
                 if (end_state != child_start_state)
                 {
