@@ -22,7 +22,7 @@ using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
 RateMatrix_Rational::RateMatrix_Rational(size_t n) : RateMatrix(n),
-    the_rate_matrix( new MatrixRational(num_states) ),
+//    the_rate_matrix( NULL ),
     needs_update( true )
 {
 
@@ -34,7 +34,7 @@ RateMatrix_Rational::RateMatrix_Rational(size_t n) : RateMatrix(n),
 
 /** Copy constructor */
 RateMatrix_Rational::RateMatrix_Rational(const RateMatrix_Rational& m) : RateMatrix(m),
-    the_rate_matrix( new MatrixRational(*m.the_rate_matrix) ),
+//    the_rate_matrix( NULL ),
     needs_update( true )
 {
 
@@ -45,7 +45,7 @@ RateMatrix_Rational::RateMatrix_Rational(const RateMatrix_Rational& m) : RateMat
 RateMatrix_Rational::~RateMatrix_Rational(void)
 {
 
-    delete the_rate_matrix;
+//    delete the_rate_matrix;
 }
 
 
@@ -57,9 +57,9 @@ RateMatrix_Rational& RateMatrix_Rational::operator=(const RateMatrix_Rational &r
         // delegate to parent class
         RateMatrix::operator=( r );
 
-        delete the_rate_matrix;
-
-        the_rate_matrix      = new MatrixRational( *r.the_rate_matrix );
+//        delete the_rate_matrix;
+//
+//        the_rate_matrix      = new MatrixRational( *r.the_rate_matrix );
         needs_update         = true;
 
     }
@@ -75,7 +75,7 @@ double RateMatrix_Rational::averageRate(void) const
     mpq_class ave = 0;
     for (size_t i=0; i<num_states; ++i)
     {
-        ave += -stationary_frequencies[i] * (*the_rate_matrix)[i][i];
+//        ave += -stationary_frequencies[i] * (*the_rate_matrix)[i][i];
     }
     return ave.get_d();
 }
@@ -126,7 +126,7 @@ std::vector<double> RateMatrix_Rational::calculateStationaryFrequencies(void) co
     {
         for (size_t j=0; j<num_states; j++)
         {
-            QT[i][j] = (*the_rate_matrix)[j][i].get_d();
+//            QT[i][j] = (*the_rate_matrix)[j][i].get_d();
         }
     }
 
@@ -185,7 +185,7 @@ bool RateMatrix_Rational::checkTimeReversibity( void )
 
         for (size_t j=i+1; j<num_states; j++)
         {
-            if ( theStationaryFreqs[i] * (*the_rate_matrix)[i][j] != theStationaryFreqs[j] * (*the_rate_matrix)[j][i] )
+//            if ( theStationaryFreqs[i] * (*the_rate_matrix)[i][j] != theStationaryFreqs[j] * (*the_rate_matrix)[j][i] )
             {
                 return false;
             }
@@ -222,7 +222,8 @@ double RateMatrix_Rational::getRate(size_t from, size_t to, double rate) const
         throw RbException( "Index to RateMatrix.getRate() out of bounds" );
     }
 
-    return (*the_rate_matrix)[from][to].get_d() * rate;
+//    return (*the_rate_matrix)[from][to].get_d() * rate;
+    return -1;
 }
 
 
@@ -234,7 +235,8 @@ double RateMatrix_Rational::getRate(size_t from, size_t to, double age, double r
         throw RbException( "Index to RateMatrix.getRate() out of bounds" );
     }
 
-    return (*the_rate_matrix)[from][to].get_d() * rate;
+//    return (*the_rate_matrix)[from][to].get_d() * rate;
+    return -1;
 }
 
 //MatrixRational RateMatrix_Rational::getRateMatrix() const
@@ -254,7 +256,7 @@ void RateMatrix_Rational::rescaleToAverageRate(double r)
     {
         for (size_t j=0; j<num_states; j++)
         {
-            (*the_rate_matrix)[i][j] *= scale_factor;
+//            (*the_rate_matrix)[i][j] *= scale_factor;
         }
     }
 
@@ -276,11 +278,11 @@ void RateMatrix_Rational::setDiagonal(void)
 
             if (i != j)
             {
-                sum += (*the_rate_matrix)[i][j].get_d();
+//                sum += (*the_rate_matrix)[i][j].get_d();
             }
 
         }
-        (*the_rate_matrix)[i][i] = -sum;
+//        (*the_rate_matrix)[i][i] = -sum;
     }
 
     // set flags

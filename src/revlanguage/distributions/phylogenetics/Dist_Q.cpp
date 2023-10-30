@@ -20,6 +20,7 @@
 #include "RevVariable.h"
 #include "RlDagMemberFunction.h"
 #include "RlDeterministicNode.h"
+#include "RlDistributionMemberFunction.h"
 #include "RlStochasticNode.h"
 #include "RlTypedDistribution.h"
 #include "RlTypedFunction.h"
@@ -108,9 +109,22 @@ const TypeSpec& Dist_Q::getClassTypeSpec(void)
 std::string Dist_Q::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "beta";
+    std::string d_name = "Q";
     
     return d_name;
+}
+
+
+MethodTable Dist_Q::getDistributionMethods( void ) const
+{
+    
+    MethodTable methods = TypedDistribution< RateGenerator >::getDistributionMethods();
+    
+    // member functions
+    ArgumentRules* get_reversibility_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, RlBoolean >( "isReversible", this->variable, get_reversibility_arg_rules, true ) );
+    
+    return methods;
 }
 
 
@@ -118,18 +132,18 @@ std::string Dist_Q::getDistributionFunctionName( void ) const
 const MemberRules& Dist_Q::getParameterRules(void) const
 {
     
-    static MemberRules distUnifMemberRules;
+    static MemberRules dist_Q_member_rules;
     static bool rules_set = false;
     
     if ( !rules_set )
     {
-        distUnifMemberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec(), "The alpha shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        distUnifMemberRules.push_back( new ArgumentRule( "beta" , RealPos::getClassTypeSpec(), "The beta shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_Q_member_rules.push_back( new ArgumentRule( "alpha", ModelVector<RealPos>::getClassTypeSpec(), "The alpha shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_Q_member_rules.push_back( new ArgumentRule( "rho" , RealPos::getClassTypeSpec(), "The beta shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
     
-    return distUnifMemberRules;
+    return dist_Q_member_rules;
 }
 
 
