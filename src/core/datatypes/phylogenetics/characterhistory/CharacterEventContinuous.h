@@ -1,7 +1,7 @@
 #ifndef CharacterEventContinuous_H
 #define CharacterEventContinuous_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 #include <iosfwd>
 

@@ -9,7 +9,7 @@
 #ifndef BiogeographyCladogeneticBirthDeathFunction__
 #define BiogeographyCladogeneticBirthDeathFunction__
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <sstream>
 #include <vector>

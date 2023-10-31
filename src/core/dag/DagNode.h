@@ -1,7 +1,7 @@
 #ifndef DagNode_H
 #define DagNode_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <set>
 #include <vector>
@@ -12,6 +12,7 @@
 #include "RbOrderedSet.h"
 #include "SimulationConditions.h"
 #include "RbFileManager.h"
+#include "json.h"
 
 namespace RevBayesCore {
 
@@ -48,6 +49,7 @@ template <class valueType> class RbOrderedSet;
         virtual double                                              getLnProbabilityRatio(void) = 0;
         virtual size_t                                              getNumberOfElements(void) const = 0;                                                        //!< Get the number of elements for this value
         virtual std::string                                         getValueAsString(void) const = 0;                                                           //!< Get value as a string.
+        virtual json                                                getValueAsJSON(void) const = 0;                                                           //!< Get value as a string.
         virtual void                                                printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const = 0;       //!< Monitor/Print this variable
         virtual void                                                printStructureInfo(std::ostream &o, bool verbose=false) const = 0;                          //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
         virtual void                                                printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const = 0;    //!< Monitor/Print this variable

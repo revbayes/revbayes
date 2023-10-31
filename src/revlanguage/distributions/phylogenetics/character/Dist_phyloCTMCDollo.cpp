@@ -1,6 +1,6 @@
 #include "Dist_phyloCTMCDollo.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloCTMCSiteHomogeneousConditional.h"

@@ -9,7 +9,7 @@
 #ifndef CladogeneticProbabilityMatrix_Epoch_Epoch_h
 #define CladogeneticProbabilityMatrix_Epoch_Epoch_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <vector>
@@ -47,6 +47,7 @@ class Assignable;
         void                                                setEpochCladogeneticProbabilityMatrix(const CladogeneticProbabilityMatrix& cp, double t); //!< Update only epoch matrix at time t
         void                                                setEpochTimes(const RbVector<double> &t);                                                 //!< Directly set the epoch times
         
+	json                                                toJSON() const;
         virtual void                                        printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;            //!< print object for user (in user-formatted way)
         
     protected:

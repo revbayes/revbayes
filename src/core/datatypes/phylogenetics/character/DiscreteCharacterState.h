@@ -1,7 +1,7 @@
 #ifndef DiscreteCharacterState_H
 #define DiscreteCharacterState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 
