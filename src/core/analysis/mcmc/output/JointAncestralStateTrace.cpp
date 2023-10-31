@@ -1612,7 +1612,6 @@ Tree* JointAncestralStateTrace::characterMapTree(const Tree &input_summary_tree,
  *      which is read {state_1,time_in_state_1:state_2,time_in_state_2},
  *      where left means old (root) and right means young (tips)
  *
- *
  * We loop through the string from right to left (in the case of i) or
  * from left to right (in the case of ii), and store events in forward time
  * (root to tip).
@@ -1879,15 +1878,10 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
             size_t current_state;
             size_t end_state;
             if ( this_branch_map.size() > 0 ) {
-//                if (bwd_time) {
+                // it does not matter if bwd_time is true or false
+                // because the branch map will always be old -> young
                 current_state = this_branch_map[0].first;
                 end_state = this_branch_map[ this_branch_map.size() - 1 ].first;
-//                }
-                // forward time
-//                else {
-//                    end_state = this_branch_map[0].first;
-//                    current_state = this_branch_map[ this_branch_map.size() - 1 ].first;
-//                }
             }
             else
             {
@@ -2050,19 +2044,13 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
                 std::string character_history_child = ancestralstate_vector_child[j];
                 
                 // parse sampled SIMMAP string
-                std::vector< std::pair<size_t, double> > child_branch_map = parseSIMMAPForNode(character_history_child, bwd_time);
+                    std::vector< std::pair<size_t, double> > child_branch_map = parseSIMMAPForNode(character_history_child, bwd_time);
                 
                 // get child's start state
                 size_t child_start_state;
-                if (bwd_time) {
-                    child_start_state = child_branch_map[0].first;
-                }
-                // forward time
-                // child_branch_map should always be reversed here, but sometimes the
-                // stoch map logger fails to reverse the input string of the current function!!!
-                else {
-                    child_start_state = child_branch_map[(child_branch_map.size()-1)].first;
-                }
+                // it does not matter if bwd_time is true or false
+                // because the branch map will always be old -> young
+                child_start_state = child_branch_map[0].first;
                 
                 if (end_state != child_start_state)
                 {
