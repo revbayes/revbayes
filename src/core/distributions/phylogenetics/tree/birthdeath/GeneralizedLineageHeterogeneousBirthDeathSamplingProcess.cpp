@@ -870,6 +870,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditio
 
 }
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMapJSON(std::string& character_histories) {
+
+	// draw the ancestral states
+	character_histories = tp_ptr->drawHistoryJSON();
+
+}
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
 {

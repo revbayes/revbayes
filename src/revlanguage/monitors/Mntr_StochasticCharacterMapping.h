@@ -46,6 +46,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       ctmc;
         RevPtr<const RevVariable>                       include_simmap;
         RevPtr<const RevVariable>                       use_simmap_default;
+        RevPtr<const RevVariable>                       use_json;
         RevPtr<const RevVariable>                       index;
 
     };

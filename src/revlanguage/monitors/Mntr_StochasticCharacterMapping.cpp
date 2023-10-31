@@ -28,7 +28,9 @@
 #include "RbBoolean.h"
 #include "RlBoolean.h"
 #include "RlTree.h"
+#include "RlUserInterface.h"
 #include "StochasticCharacterMappingMonitor.h"
+#include "StochasticCharacterMappingJSONMonitor.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
 
@@ -65,6 +67,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     const std::string& file_name      = static_cast<const RlString        &>( filename->getRevObject()           ).getValue();
     bool               is             = static_cast<const RlBoolean       &>( include_simmap->getRevObject()     ).getValue();
     bool               sd             = static_cast<const RlBoolean       &>( use_simmap_default->getRevObject() ).getValue();
+    bool               js             = static_cast<const RlBoolean       &>( use_json->getRevObject()           ).getValue();
     const std::string& sep            = static_cast<const RlString        &>( separator->getRevObject()          ).getValue();
     unsigned int       print_gen      = (int)static_cast<const IntegerPos &>( printgen->getRevObject()           ).getValue();
     bool               app            = static_cast<const RlBoolean       &>( append->getRevObject()             ).getValue();
@@ -144,7 +147,11 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
             delete value;
             value = m;
         }
-        
+
+        if ( js ) {
+        	RBOUT("Warning: JSON output not implemented for CTMC; not including JSON output.");
+        }
+
     }
     else if ( model_type == "cdbdp" )
     {
@@ -157,18 +164,41 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
             delete value;
             value = m;
         }
+
+        if ( js ) {
+        	RBOUT("Warning: JSON output not implemented for CDBDP; not including JSON output.");
+        }
+
     }
     else if ( model_type == "glhbdsp" )
     {
     	if (data_type == "NaturalNumbers")
     	{
-            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
-            m->setAppend( app );
-            m->setPrintVersion( wv );
 
-            delete value;
-            value = m;
+    		if ( js ) {
+
+    			// use the JSON-format monitor
+                RevBayesCore::StochasticCharacterMappingJSONMonitor<RevBayesCore::NaturalNumbersState>* m;
+                m = new RevBayesCore::StochasticCharacterMappingJSONMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+                m->setAppend( app );
+                m->setPrintVersion( wv );
+
+                delete value;
+                value = m;
+
+    		} else {
+
+    			// use the standard stochastic map monitor
+                RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
+                m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+                m->setAppend( app );
+                m->setPrintVersion( wv );
+
+                delete value;
+                value = m;
+
+    		}
+
     	}
     }
     
@@ -228,6 +258,7 @@ const MemberRules& Mntr_StochasticCharacterMapping::getParameterRules(void) cons
         monitor_rules.push_back( new ArgumentRule("glhbdsp"        , TimeTree::getClassTypeSpec(),  "The lineage-heterogeneous birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         monitor_rules.push_back( new ArgumentRule("include_simmap" , RlBoolean::getClassTypeSpec(), "Should we log SIMMAP/phytools compatible newick strings? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
         monitor_rules.push_back( new ArgumentRule("use_simmap_default" , RlBoolean::getClassTypeSpec(), "Should we use the default SIMMAP/phytools event ordering? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
+        monitor_rules.push_back( new ArgumentRule("use_json" , RlBoolean::getClassTypeSpec(), "Should we output JSON-formatted stochastic maps? False by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(false) ) );
         monitor_rules.push_back( new ArgumentRule("index"          , Natural::getClassTypeSpec(), "The index of the character to be monitored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         // add the rules from the base class
@@ -285,6 +316,10 @@ void Mntr_StochasticCharacterMapping::setConstParameter(const std::string& name,
     else if ( name == "use_simmap_default" )
     {
         use_simmap_default = var;
+    }
+    else if ( name == "use_json" )
+    {
+    	use_json = var;
     }
     else if ( name == "index" )
     {
