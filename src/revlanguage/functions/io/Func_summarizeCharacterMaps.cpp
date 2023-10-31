@@ -130,7 +130,7 @@ const ArgumentRules& Func_summarizeCharacterMaps::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes  , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
         argumentRules.push_back( new Delimiter() );
         argumentRules.push_back( new ArgumentRule( "verbose"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        argumentRules.push_back( new ArgumentRule( "backward_time"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "use_simmap_default"   , RlBoolean::getClassTypeSpec()  , "Was the default SIMMAP/phytools event ordering (i.e., young/left -> old/right) used with mnStochasticCharacterMap()? True by default.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         
         rules_set = true;
     }
