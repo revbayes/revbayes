@@ -1679,8 +1679,7 @@ std::vector< std::pair<size_t, double> > JointAncestralStateTrace::parseSIMMAPFo
                 this_event.second = std::atof( time.c_str() );
             }
             
-            // youngest to oldest if bwd_time
-            // (oldest to youngest if forward time!!!)
+            // youngest to oldest if bwd_time OR fwd time!
             this_branch_map.push_back( this_event );
             
             // finished whole stochastic mapping string for this node!
@@ -1880,15 +1879,15 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
             size_t current_state;
             size_t end_state;
             if ( this_branch_map.size() > 0 ) {
-                if (bwd_time) {
-                    current_state = this_branch_map[0].first;
-                    end_state = this_branch_map[ this_branch_map.size() - 1 ].first;
-                }
+//                if (bwd_time) {
+                current_state = this_branch_map[0].first;
+                end_state = this_branch_map[ this_branch_map.size() - 1 ].first;
+//                }
                 // forward time
-                else {
-                    end_state = this_branch_map[0].first;
-                    current_state = this_branch_map[ this_branch_map.size() - 1 ].first;
-                }
+//                else {
+//                    end_state = this_branch_map[0].first;
+//                    current_state = this_branch_map[ this_branch_map.size() - 1 ].first;
+//                }
             }
             else
             {
