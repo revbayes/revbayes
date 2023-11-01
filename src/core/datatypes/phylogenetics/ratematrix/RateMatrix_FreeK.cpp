@@ -217,6 +217,8 @@ void RateMatrix_FreeK::calculateCijk(void)
 /** Calculate the transition probabilities */
 void RateMatrix_FreeK::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
+    assert(num_states == P.num_states);
+
     // The eigensystem code was returning NaN likelihood values when transition rates
     // were close to 0.0, so now we use the scaling and squaring method.
     double t = rate * (startAge - endAge);
