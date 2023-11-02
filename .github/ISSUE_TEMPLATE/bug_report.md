@@ -12,7 +12,7 @@ assignees: ''
 A  brief description of the suspected bug.
 
 **To Reproduce**
-Steps to reproduce the behavior. Please provide the code you entered to get the unexpected behavior.
+Please provide a script that reproduces the unexpected behavior, along with any data files needed to run the script.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
