@@ -1,0 +1,33 @@
+#NEXUS
+
+Begin data;
+	Dimensions ntax=23 nchar=11;
+	Format datatype=Continuous missing=?;
+	Matrix
+
+Alouatta_palliata                   3.95	3.87	8.87	8.58	7.00	7.15	5.23	6.07	5.95	6.01	7.00
+Aotus_trivirgatus                   2.87	2.78	6.95	6.84	6.71	6.59	4.96	4.34	5.59	4.48	5.89
+Callicebus_donacophilus             2.89	2.84	6.84	6.70	?	?	?	?	?	?	?
+Cebus_albifrons                     4.21	4.15	8.06	7.74	7.18	7.18	5.06	5.61	6.30	5.45	?
+Cheirogaleus_major                  1.79	1.73	6.08	5.89	5.90	5.90	4.17	3.85	?	2.90	?
+Chlorocebus_aethiops                4.26	4.08	8.39	8.02	6.94	7.51	5.09	5.20	5.88	5.75	6.94
+Colobus_guereza                     4.37	4.25	9.18	8.92	7.29	7.69	5.16	5.93	5.90	5.99	7.38
+Daubentonia_madagascariensis        3.78	3.85	7.87	7.82	6.78	?	5.12	5.28	6.82	4.69	7.34
+Galago_senegalensis	1.39	1.36	5.30	5.24	5.48	5.70	4.84	4.49	5.42	2.50	4.61
+Hylobates_lar	4.64	4.61	8.67	8.59	7.85	7.51	5.38	6.40	7.00	5.73	6.98
+Lemur_catta	3.20	2.98	7.70	7.70	6.39	6.82	4.91	5.02	5.90	4.26	?
+Lepilemur_hubbardorum	1.94	1.92	6.42	6.39	?	?	?	?	?	?	?
+Loris_tardigradus	1.77	1.78	5.26	5.26	5.94	5.90	5.11	5.01	5.66	2.40	4.93
+Macaca_mulatta	4.54	4.43	8.98	8.64	7.12	7.60	5.11	5.68	6.10	6.14	7.28
+Microcebus_murinus	0.39	0.50	4.14	4.21	5.49	5.49	4.11	3.61	4.29	1.79	?
+Nycticebus_coucang	2.40	2.26	6.52	6.44	6.36	?	5.24	5.18	6.20	3.88	6.25
+Otolemur_crassicaudatus	2.51	2.40	7.08	7.01	6.20	6.46	4.87	4.93	4.78	3.77	6.21
+Pan_paniscus	5.88	5.79	10.71	10.41	8.07	?	5.45	6.45	7.51	7.19	9.05
+Perodicticus_potto	2.55	2.47	6.69	6.77	6.30	6.30	5.14	4.77	5.29	3.78	?
+Propithecus_coquereli	3.25	3.22	7.98	8.00	6.82	6.82	5.00	5.01	6.29	4.28	?
+Saimiri_sciureus	3.19	3.18	6.75	6.61	6.91	7.51	5.08	5.18	5.90	4.67	6.00
+Tarsius_syrichta	1.28	1.18	4.90	4.76	?	?	5.19	4.42	?	3.25	?
+Varecia_variegata	3.53	3.44	8.20	8.17	6.40	6.41	4.60	4.72	5.90	4.47	7.97
+;
+End;
+

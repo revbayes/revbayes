@@ -1,5 +1,4 @@
 option('mpi', type : 'boolean', value : false, description: 'Compile with MPI')
-option('jupyter', type: 'boolean', value: false, description: 'Build rb-jupyter kernel')
 option('studio', type: 'boolean', value: false, description: 'Build gtk shell')
 option('openlibm', type: 'boolean', value: false, description: 'Require openlibm')
 option('static_boost', type: 'boolean', value: false, description: 'Require boost libraries to be static')

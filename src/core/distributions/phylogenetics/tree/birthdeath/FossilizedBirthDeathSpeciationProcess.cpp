@@ -73,9 +73,9 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     heterogeneous_beta               = NULL;
 
     heterogeneous_lambda_a = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inlambda_a);
-    homogeneous_lambda_a = dynamic_cast<const TypedDagNode<double >*>(inlambda_a);
-    heterogeneous_beta = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inbeta);
-    homogeneous_beta = dynamic_cast<const TypedDagNode<double >*>(inbeta);
+    homogeneous_lambda_a   = dynamic_cast<const TypedDagNode<double >*>(inlambda_a);
+    heterogeneous_beta     = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inbeta);
+    homogeneous_beta       = dynamic_cast<const TypedDagNode<double >*>(inbeta);
 
     addParameter( homogeneous_lambda_a );
     addParameter( heterogeneous_lambda_a );
@@ -86,13 +86,13 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
 
     RbException inconsistent_rates = RbException("Inconsistent number of rates in fossilized birth death process.");
 
-    if( heterogeneous_lambda_a != NULL )
+    if ( heterogeneous_lambda_a != NULL )
     {
         if ( timeline == NULL ) throw no_timeline_err;
 
         if ( heterogeneous_lambda_a->getValue().size() != num_intervals ) throw inconsistent_rates;
     }
-    if( heterogeneous_beta != NULL )
+    if ( heterogeneous_beta != NULL )
     {
         if ( timeline == NULL ) throw no_timeline_err;
 
@@ -144,7 +144,7 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) 
 {
     double lnProb = 0.0;
 
-    for(size_t i = 0; i < taxa.size(); i++)
+    for (size_t i = 0; i < taxa.size(); i++)
     {
         // include the anagenetic speciation density for descendants of sampled ancestors
         if ( I[i] == true )
@@ -651,7 +651,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
  *
  *
  */
-void FossilizedBirthDeathSpeciationProcess::prepareProbComputation()
+void FossilizedBirthDeathSpeciationProcess::prepareProbComputation( void ) const 
 {
     AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation();
 

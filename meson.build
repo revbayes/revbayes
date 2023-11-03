@@ -1,5 +1,5 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.2.1',
+        version: '1.2.2',
         default_options: [
           'buildtype=release',
           'cpp_std=c++17',
@@ -76,11 +76,6 @@ else
   mpi = dependency('', required: false)
 endif
 
-if get_option('jupyter')
-  rb_name += '-jupyter'
-  add_project_arguments(['-DRB_XCODE'], language : 'cpp')
-endif
-
 if get_option('rb-exe-name') != 'default'
   rb_name = get_option('rb-exe-name')
 endif
@@ -119,6 +114,8 @@ endif
 
 
 ############# libraries #################
+libdl = cpp.find_library('dl')
+
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
@@ -132,7 +129,7 @@ revlanguage = static_library('rb-revlanguage',
 libs = static_library('rb-lib',
                       libs_sources,
                       include_directories: [src_inc],
-                      dependencies: [boost])
+                      dependencies: [boost, libdl])
 
 help2yml = static_library('rb-help2yml',
                           help2yml_sources,
@@ -188,7 +185,6 @@ summary({'host': host_machine.system()
 
 summary({'exe name': rb_name,
          'mpi': get_option('mpi'),
-         'jupyter': get_option('jupyter'),
          'studio': get_option('studio'),
         },section: 'Options')
 

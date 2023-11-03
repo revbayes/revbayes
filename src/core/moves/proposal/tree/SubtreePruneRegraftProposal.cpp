@@ -94,11 +94,22 @@ bool SubtreePruneRegraftProposal::isDescendant(const TopologyNode &n, const Topo
  */
 double SubtreePruneRegraftProposal::doProposal( void )
 {
+    // reset flag
+    failed = false;
     
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
+    
+    // when the tree has fewer than 4 tips, nothing should be done
+    size_t num_tips = tau.getNumberOfTips();
+    size_t num_root_children = tau.getRoot().getNumberOfChildren();
+    if ( num_tips <= num_root_children)
+    {
+        failed = true;
+        return RbConstants::Double::neginf;
+    }
     
     // pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
@@ -231,6 +242,12 @@ void SubtreePruneRegraftProposal::printParameterSummary(std::ostream &o, bool na
  */
 void SubtreePruneRegraftProposal::undoProposal( void )
 {
+
+    // we undo the proposal only if it didn't fail
+    if ( failed == true )
+    {
+        return;
+    }
     
     // undo the proposal
     if (!prunedroot)

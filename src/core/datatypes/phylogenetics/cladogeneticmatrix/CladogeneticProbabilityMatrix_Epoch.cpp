@@ -99,6 +99,21 @@ void CladogeneticProbabilityMatrix_Epoch::printForUser( std::ostream &o, const s
     }
 }
 
+json CladogeneticProbabilityMatrix_Epoch::toJSON() const
+{
+    json epochs;
+
+    for (size_t i = 0; i < epochTimes.size(); i++)
+    {
+	json epoch;
+	epoch["endTime"] = epochTimes[i];
+	epoch["matrix"] = epochCladogeneticProbabilityMatrices[i].toJSON();
+	epochs.push_back(epoch);
+    }
+
+    return epochs;
+}
+
 void CladogeneticProbabilityMatrix_Epoch::setEpochCladogeneticProbabilityMatrix(const RbVector<CladogeneticProbabilityMatrix>& cp)
 {
     epochCladogeneticProbabilityMatrices = cp;

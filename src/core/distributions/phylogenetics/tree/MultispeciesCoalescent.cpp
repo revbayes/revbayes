@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -43,7 +43,13 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
 {
     if ( k == 1 ) return 0.0;
 
-    double theta = 1.0 / getNe( index );
+    double theta = 2.0 / getNe( index );
+
+    // if (index == 0) {
+    //     std::cout << "----------------\nstart age: " << begin_age << std::endl;
+    //     std::cout << "end age: " << end_age << std::endl;
+    //     std::cout << "N: " << getNe(index) << std::endl;
+    // }
 
     double ln_prob_coal = 0;
     double current_time = begin_age;
@@ -54,10 +60,14 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         // a is the time between the previous and the current coalescences
         double a = times[i] - current_time;
 
+        // std::cout << "t: " << a << std::endl;
+
         current_time = times[i];
 
         // get the number j of individuals we had before the current coalescence
         size_t j = k - i;
+
+        // std::cout << "j: " << j << std::endl;
 
         // compute the number of pairs: pairs = C(j choose 2) = j * (j-1.0) / 2.0
         double n_pairs = j * (j-1.0) / 2.0;
@@ -66,8 +76,10 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         // add the density for this coalescent event
         //lnProbCoal += log( lambda ) - lambda * a;
         //Corrected version:
+
+        // std::cout << "term: " << log( theta ) - lambda * a << std::endl;
+
         ln_prob_coal += log( theta ) - lambda * a;
-        //ln_prob_coal += log( 2 * theta ) - lambda * a;
     }
 
     // compute the probability of no coalescent event in the final part of the branch
@@ -77,9 +89,16 @@ double MultispeciesCoalescent::computeLnCoalescentProbability(size_t k, const st
         double final_interval = end_age - current_time;
         size_t j = k - times.size();
 
+        // std::cout << "final: " << final_interval << std::endl;
+        // std::cout << "j: " << j << std::endl;
+
         double n_pairs = j * (j-1.0) / 2.0;
         ln_prob_coal -= n_pairs * theta * final_interval;
+
+        // std::cout << "term: " << n_pairs * theta * final_interval << std::endl;
     }
+
+    // std::cout << "ln prob coal: " << ln_prob_coal << std::endl;
 
     return ln_prob_coal;
 }

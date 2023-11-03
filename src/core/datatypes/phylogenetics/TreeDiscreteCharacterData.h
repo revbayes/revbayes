@@ -24,7 +24,6 @@ namespace RevBayesCore {
     public:
         TreeDiscreteCharacterData();                                                                                                    //!< Default constructor
         
-        
         // implemented methods of the Cloneable interface
         TreeDiscreteCharacterData*                              clone(void) const;
         

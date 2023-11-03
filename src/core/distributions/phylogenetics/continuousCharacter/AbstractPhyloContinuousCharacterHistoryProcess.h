@@ -1,7 +1,7 @@
 #ifndef AbstractPhyloContinuousCharacterHistoryProcess_H
 #define AbstractPhyloContinuousCharacterHistoryProcess_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractPhyloContinuousCharacterProcess.h"

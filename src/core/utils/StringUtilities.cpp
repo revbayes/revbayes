@@ -17,7 +17,7 @@
 
 #include "StringUtilities.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <iomanip>
 
 #include <algorithm>

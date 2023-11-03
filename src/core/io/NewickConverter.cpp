@@ -1,7 +1,7 @@
 #include "NewickConverter.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <sstream>
 #include <vector>
 #include <string>
@@ -25,7 +25,7 @@ NewickConverter::~NewickConverter()
 
 
 
-Tree* NewickConverter::convertFromNewick(std::string const &n, bool reindex)
+Tree* NewickConverter::convertFromNewick(std::string const &n)
 {
 
     // create and allocate the tree object
@@ -52,26 +52,23 @@ Tree* NewickConverter::convertFromNewick(std::string const &n, bool reindex)
             {
                 trimmed += c;
             }
-
         }
-
     }
 
     // construct the tree starting from the root
     TopologyNode *root = createNode( trimmed, nodes, brlens );
 
     // set up the tree
-    t->setRoot( root, reindex );
+    t->setRoot( root, true );
+
+    // try to set node indices from attributes
+    t->tryReadIndicesFromParameters(true);
 
     // set the branch lengths
     for (size_t i = 0; i < nodes.size(); ++i)
     {
         t->getNode( nodes[i]->getIndex() ).setBranchLength( brlens[i] );
     }
-
-    // make all internal nodes bifurcating
-    // this is important for fossil trees which have sampled ancestors
-    t->makeInternalNodesBifurcating( reindex, true );
 
     // trees with 2-degree root nodes should not be rerooted
     t->setRooted( root->getNumberOfChildren() == 2 );
@@ -80,17 +77,12 @@ Tree* NewickConverter::convertFromNewick(std::string const &n, bool reindex)
     // hence, tell the root to use branch lengths and not ages (with recursive call)
     root->setUseAges(false, true);
     
-    // if this tree is ultrametric, then we should use ages and transform so!
-    if ( t->isUltrametric() == true )
-    {
-        root->setUseAges(true, true);
-    }
-
     // return the tree, the caller is responsible for destruction
     return t;
 }
 
-
+// This routine has 4 copies of attribute parsing from comments -- 2 for node attributes, and 2 for branch attributes.
+// Probably "index" should only be handled in node attributes.  And perhaps only allowed there too, since its a magic attribute.
 
 TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens) {
 
@@ -102,6 +94,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
     ss.get(c);
 
     // the initial character has to be '('
+    //   fixme: actually, the string 'a;' is valid newick.
     if ( c != '(')
     {
         throw RbException("Error while converting Newick tree. We expected an opening parenthesis, but didn't get one. Problematic string: " + n);
@@ -187,20 +180,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
                     paramValue += char( ss.get() );
                 }
 
-				if (paramName == "index")
-                {
-					// subtract by 1 to correct RevLanguage 1-based indexing
-                    childNode->setIndex( atoi(paramValue.c_str()) - 1 );
-
-                }
-                else if (paramName=="species")
-                {
-                    childNode->setSpeciesName(paramValue);
-				}
-                else
-                {
-                    childNode->addNodeParameter(paramName, paramValue);
-                }
+                childNode->addNodeParameter_(paramName, paramValue);
 
             } while ( (c = char( ss.peek() ) ) == ',' );
 
@@ -270,20 +250,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
                     paramValue += char( ss.get() );
                 }
 
-                if (paramName=="index")
-                {
-                    // subtract by 1 to correct RevLanguage 1-based indexing
-                    childNode->setIndex( atoi(paramValue.c_str()) - 1 );
-                }
-                else if (paramName=="species")
-                {
-                    childNode->setSpeciesName(paramValue);
-                }
-                else
-                {
-                    childNode->addBranchParameter(paramName, paramValue);
-                }
-
+                childNode->addBranchParameter(paramName, paramValue);
 
             } while ( (c = char( ss.peek() )) != ']' );
 
@@ -357,21 +324,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
                 paramValue += char( ss.get() );
             }
 
-			if (paramName=="index")
-            {
-				// subtract by 1 to correct RevLanguage 1-based indexing
-				node->setIndex( atoi(paramValue.c_str()) - 1 );
-
-			}
-            else if (paramName=="species")
-            {
-				node->setSpeciesName(paramValue);
-            }
-            else
-            {
-                node->addNodeParameter(paramName, paramValue);
-            }
-
+            node->addNodeParameter_(paramName, paramValue);
 
         } while ( (c = char( ss.peek() )) == ',' );
 
@@ -443,21 +396,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
                 paramValue += char( ss.get() );
             }
 
-            if (paramName=="index")
-            {
-                // subtract by 1 to correct RevLanguage 1-based indexing
-                node->setIndex( atoi(paramValue.c_str()) - 1 );
-
-            }
-            else if (paramName=="species")
-            {
-                node->setSpeciesName(paramValue);
-            }
-            else
-            {
-                node->addBranchParameter(paramName, paramValue);
-            }
-
+            node->addBranchParameter(paramName, paramValue);
 
         } while ( (c = char( ss.peek() )) != ']' );
 

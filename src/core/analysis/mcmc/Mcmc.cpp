@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -603,7 +603,7 @@ void Mcmc::initializeSampler( bool prior_only )
             if ( RbMath::isAComputableNumber(ln_prob) == false )
             {
                 std::stringstream ss;
-                ss << "Could not compute lnProb for node " << the_node->getName() << "." << std::endl;
+                ss << "Could not compute lnProb for node '" << the_node->getName() << "': lnProb = "<< ln_prob << std::endl;
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
@@ -779,7 +779,13 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
             }
         }
     }
-    
+
+    // We need to touch these so that their probabilities get recomputed.
+    for(auto& node: nodes)
+    {
+        node->touch();
+    }
+
     // assemble the new filename
     path mcmc_checkpoint_file_name = appendToStem( checkpoint_file_name, "_mcmc");
 

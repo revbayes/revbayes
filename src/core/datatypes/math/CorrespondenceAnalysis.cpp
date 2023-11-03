@@ -39,7 +39,7 @@
 
 #include "CorrespondenceAnalysis.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "DualityDiagram.h"

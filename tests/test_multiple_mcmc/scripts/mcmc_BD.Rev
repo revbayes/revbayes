@@ -1,0 +1,154 @@
+################################################################################
+#
+# RevBayes Script: Bayesian inference of diversification rates under a
+#                   conditioned birth-death-shift model
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(1234)
+
+#######################
+# Reading in the Data #
+#######################
+
+dataset = "primates"
+
+# Read in the observed phylogeny
+observed_phylogeny <- readTrees("data/"+dataset+".tree")[1]
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+taxa <- observed_phylogeny.taxa()
+
+# create moves and monitor vectors
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+
+####################
+# Create the rates #
+####################
+
+# first we create the standard deviation of the rates between intervals
+# draw the sd from an exponential distribution
+speciation ~ dnExponential(1.0)
+moves.append( mvScale(speciation,weight=10.0) )
+
+extinction <- 0.0
+
+
+rho <- 1.0
+
+
+timetree ~ dnBirthDeath(rootAge=observed_phylogeny.rootAge(), lambda=speciation, mu=extinction, rho=rho, samplingStrategy="uniform", condition="survival", taxa=taxa)
+
+### clamp the model with the "observed" tree
+timetree.clamp(observed_phylogeny)
+
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(rho)
+
+### set up the monitors that will output parameter values to file and screen 
+monitors.append( mnModel(filename="output/Yule.log",printgen=1, separator = TAB) )
+monitors.append( mnScreen(printgen=10, extinction, speciation) )
+
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+
+### run the MCMC ###
+mymcmc.run(generations=200)
+
+
+clear()
+
+
+
+
+
+
+
+#######################
+# Reading in the Data #
+#######################
+
+dataset = "primates"
+
+# Read in the observed phylogeny
+observed_phylogeny <- readTrees("data/"+dataset+".tree")[1]
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+taxa <- observed_phylogeny.taxa()
+
+# set my move index
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+
+####################
+# Create the rates #
+####################
+
+# first we create the standard deviation of the rates between intervals
+# draw the sd from an exponential distribution
+speciation ~ dnExponential(1.0)
+moves.append( mvScale(speciation,weight=10.0) )
+
+extinction ~ dnExponential(1.0)
+moves.append( mvScale(extinction,weight=10.0) )
+
+
+rho <- 1.0
+
+
+timetree ~ dnBirthDeath(rootAge=observed_phylogeny.rootAge(), lambda=speciation, mu=extinction, rho=rho, samplingStrategy="uniform", condition="survival", taxa=taxa)
+
+### clamp the model with the "observed" tree
+timetree.clamp(observed_phylogeny)
+
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(rho)
+
+### set up the monitors that will output parameter values to file and screen 
+monitors.append( mnModel(filename="output/BD.log",printgen=1, separator = TAB) )
+monitors.append( mnScreen(printgen=10, extinction, speciation) )
+
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+
+### run the MCMC ###
+mymcmc.run(generations=200)
+
+
+
+## quit ##
+q()
