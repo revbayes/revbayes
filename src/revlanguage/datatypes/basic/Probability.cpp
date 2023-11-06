@@ -26,7 +26,7 @@ Probability::Probability( double x ) : RealPos( x )
     
     if ( x < 0.0 || x > 1.0)
     {
-        throw RbException() << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities (0,1)";
+        throw RbException() << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities [0,1]";
     }
     
 }
@@ -35,7 +35,8 @@ Probability::Probability( double x ) : RealPos( x )
 /** Construct from double */
 Probability::Probability( RevBayesCore::TypedDagNode<double> *x ) : RealPos( x )
 {
-    
+    if (x->getValue() < 0 or x->getValue() > 1)
+	throw RbException() << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities [0,1]";
 }
 
 
@@ -169,6 +170,9 @@ void Probability::setConstParameter(const std::string& name, const RevPtr<const 
     if ( name == "x" )
     {
         real = var;
+	RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( real->getRevObject() ).getDagNode();
+	if (x->getValue() < 0 or x->getValue() > 1)
+	    throw RbException() << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities [0,1]";
     }
     else
     {
