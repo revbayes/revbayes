@@ -1,0 +1,56 @@
+################################################################################
+#
+# RevBayes script for calculating likelihood 
+# under the null Multispecies Coalescent model and 
+# under the Multispecies Coalescent with Migration model.
+#
+# authors: Wenjie Zhu
+#
+################################################################################
+
+
+# Read in species tree and gene trees
+species_tree <- readTrees("/home/wenjie/projects/revbayes_dev/rb-mscm/tests/test_MSC_Migration/data/species_3taxa.tree")[1]
+gene_tree <- readTrees("/home/wenjie/projects/revbayes_dev/rb-mscm/tests/test_MSC_Migration/data/gene_3taxa_1ind.tree")[1]
+
+# Set useful variables
+TIME_UNIT <- 1E6
+taxon_map <- readTaxonData("/home/wenjie/projects/revbayes_dev/rb-mscm/tests/test_MSC_Migration/data/map_3taxa_1ind.txt")
+q <- fnFreeSymmetricRateMatrix([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], rescaled=FALSE)
+
+pow_list <- seq(1,5.2,0.2)
+
+# for (i in 1:pow_list.size()) {
+    i <- 1
+    NE[i] <- 0.0001 * (10^(pow_list[i]))
+
+    ##################
+    # Null MSC model #
+    ##################
+
+    # msc_gene_tree ~ dnMultiSpeciesCoalescent(speciesTree=species_tree, Ne=NE[i], taxa=taxon_map)
+    # msc_gene_tree.setValue( gene_tree )
+
+    # msc_likelihoods[i] <- msc_gene_tree.lnProbability()
+    
+
+    #######################
+    # MSC-migration model #
+    #######################
+
+    # migration_gene_tree ~ dnMultispeciesCoalescentMigration(speciesTree=species_tree, Ne=NE[i], Q=q, rate=1/TIME_UNIT, taxa=taxon_map)
+    migration_gene_tree ~ dnMultispeciesCoalescentMigration(speciesTree=species_tree, Ne=NE[i], Q=q, rate=1, taxa=taxon_map)
+    migration_gene_tree.setValue( gene_tree )
+
+
+    migration_likelihoods[i] <- migration_gene_tree.lnProbability()
+
+# }
+
+# "Likelihood under the Null MSC:"
+# msc_likelihoods
+
+"Likelihood under the MSC-Migration:"
+migration_likelihoods
+
+q()
