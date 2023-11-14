@@ -191,7 +191,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
     // the final probability is the probability of no coalescent event, which is at present time P(no coal|t=0) = 1.0
     probabilities[num_populations*num_individuals] = 1.0;
     
-    // we need to get all the species ages
+    // we need to get all the individual ages (coalescent times)
     std::multimap<double, TopologyNode * > individual_ages_2_nodes;
 //    std::set<TopologyNode * > current_individuals;
     for (std::vector< TopologyNode *>::const_iterator it = individual_tree_nodes.begin(); it != individual_tree_nodes.end(); ++it)
@@ -226,7 +226,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
     std::vector<double> thetas = std::vector<double>(num_populations, 0.0);
     for (size_t i=0; i<num_populations; ++i)
     {
-        thetas[i] = 1.0 / getNe( i );
+        thetas[i] = 1.0 / getNe( i ); // for diploid: 1.0 / getNe( i ) / 2.0
     }
     const RateGenerator* migration_rate_matrix = &Q->getValue();
     double overall_migration_rate = delta->getValue();
@@ -252,7 +252,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             next_speciation_age = RbConstants::Double::inf;
         }
         
-        // get the next speciation age
+        // get the next coalescent age
         if ( it_individual_ages != individual_ages_2_nodes.end() )
         {
             // there is at least one more coalescent event, so we take it
@@ -287,7 +287,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
         if ( next_coalescent_age < next_speciation_age )
         {
             // get the individual node that represent the coalescent event
-            TopologyNode* this_individual = it_individual_ages->second;
+            TopologyNode* this_individual = it_individual_ages->second; // ? first
             
             // get the index of the left and right coalescing individuals
             size_t left_coalescing_individual  = this_individual->getChild(0).getIndex();
@@ -322,13 +322,13 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             // move the iterater of the individual ages
             ++it_individual_ages;
         }
-        else if ( RbMath::isFinite(next_speciation_age) )
+        else if ( RbMath::isFinite(next_speciation_age) ) // else
         {
             // this was a speciation event
             // we need to reorder the probabilities and lineages
             
-            // get the individual node that represent the coalescent event
-            TopologyNode* this_species = it_species_ages->second;
+            // get the individual node that represent the speciation event
+            TopologyNode* this_species = it_species_ages->second; // ? first
             
             
             // get the index of the left and right coalescing individuals
