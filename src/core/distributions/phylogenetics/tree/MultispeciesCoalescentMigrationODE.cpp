@@ -49,11 +49,11 @@ void MultispeciesCoalescentMigrationODE::operator()(const std::vector< double > 
                 if ( j != k )
                 {
                     // get the rate that the individual migrates from k to j
-                    migration_prob += Q->getRate(k, j, 0, rate) * x[i*num_populations+k]; // i*num_populations+k
+                    migration_prob += Q->getRate(k, j, 0, rate) * x[i*num_populations+k];
                     leaving_rate -= Q->getRate(j, k, 0, rate);
                 }
             }
-            migration_prob += leaving_rate * x[i*num_populations+j];  // i*num_populations+j; // +=
+            migration_prob += leaving_rate * x[i*num_populations+j];
             dxdt[i*num_populations+j] = migration_prob; 
             
         } // end-for over all populations for this individual

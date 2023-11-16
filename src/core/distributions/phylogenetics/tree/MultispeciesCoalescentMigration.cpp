@@ -158,7 +158,9 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
     const std::vector< TopologyNode* >& species_tree_nodes = sp.getNodes();
     const std::vector< TopologyNode* >& individual_tree_nodes = this->getValue().getNodes();
     
+    // the number of branches in the tree
     size_t num_populations = sp.getNumberOfTips()*2-1;
+    // the number of individuals, including ancestral individuals
     size_t num_individuals = num_taxa*2-1;
     
     // first let's create a map from species names to the nodes of the species tree
@@ -187,6 +189,8 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
     
     // create a vector of probabilities
     // the first #pop * #ind are the probs that an individual i is in population j, which are all initialized to 0.0
+    // we order this vector for each individual, that is, each individual has a block of #pop elements for the probability of being in population j
+    // there are #ind of these blocks
     std::vector<double> probabilities = std::vector<double>(num_populations*num_individuals + 1, 0.0);
     // the final probability is the probability of no coalescent event, which is at present time P(no coal|t=0) = 1.0
     probabilities[num_populations*num_individuals] = 1.0;
@@ -265,7 +269,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             next_coalescent_age = RbConstants::Double::inf;
         }
         
-        // TODO: this might now be necessary but I'm doing this to be sure
+        // TODO: this might not be necessary but I'm doing this to be sure
         // we need to reset the probability of no coalescent event
         probabilities[num_populations*num_individuals] = 1.0;
         
@@ -275,8 +279,12 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
         MultispeciesCoalescentMigrationODE ode = MultispeciesCoalescentMigrationODE(thetas, migration_rate_matrix, overall_migration_rate, num_individuals, num_populations);
 
         typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
-        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ), ode, probabilities, previous_event_age, next_event_age, dt );
+        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-9, 1E-9, stepper_type() ), ode, probabilities, previous_event_age, next_event_age, dt );
+//        boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , probabilities , previous_event_age , next_event_age , dt );
         
+        //    boost::numeric::odeint::bulirsch_stoer< std::vector< double > > stepper(1E-7, 0.0, 0.0, 0.0);
+        //    boost::numeric::odeint::integrate_adaptive( stepper, ode, state, begin_age, end_age, dt );
+
         // add the probability that there was no coalescent event until then
         ln_probability += log( probabilities[num_populations*num_individuals] );
         
@@ -348,6 +356,10 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             
             // move the iterater of the speciation ages
             ++it_species_ages;
+        }
+        else
+        {
+            throw RbException("Wenjie, we should not reach this code!");
         }
         
         // update the event age
