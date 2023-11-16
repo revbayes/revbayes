@@ -10,45 +10,62 @@
 
 
 # Read in species tree and gene trees
-species_tree <- readTrees("/home/wenjie/projects/revbayes_dev/rb-mscm/tests/test_MSC_Migration/data/species_3taxa.tree")[1]
-gene_tree <- readTrees("/home/wenjie/projects/revbayes_dev/rb-mscm/tests/test_MSC_Migration/data/gene_3taxa_1ind.tree")[1]
+species_tree <- readTrees("../data/species_3taxa.tree")[1]
+gene_tree <- readTrees("../data/gene_3taxa_1ind.tree")[1]
 
 # Set useful variables
 TIME_UNIT <- 1E6
-taxon_map <- readTaxonData("/home/wenjie/projects/revbayes_dev/rb-mscm/tests/test_MSC_Migration/data/map_3taxa_1ind.txt")
+taxon_map <- readTaxonData("../data/map_3taxa_1ind.txt")
 q <- fnFreeSymmetricRateMatrix([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], rescaled=FALSE)
 
 pow_list <- seq(1,5.2,0.2)
 
-# for (i in 1:pow_list.size()) {
-    i <- 1
-    NE[i] <- 0.0001 * (10^(pow_list[i]))
+# parameters for inverse-gamma model
+taxon_map_list[1] <- taxon_map
+gene_tree_list[1] <- gene_tree
+
+for (i in 1:pow_list.size()) {
+
+    NE[i] <- 0.01 * (10^(pow_list[i]))
+
+    ##########################################
+    # Null MSC model with Inverse-Gamma prior#
+    ##########################################
+
+    mscig_gene_tree ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=species_tree, shape=3, scale=2*NE[i], num_genes=1, taxa=taxon_map_list)
+    mscig_gene_tree.setValue( gene_tree_list )
+
+    mscig_likelihoods[i] <- mscig_gene_tree.lnProbability()
 
     ##################
     # Null MSC model #
     ##################
 
-    # msc_gene_tree ~ dnMultiSpeciesCoalescent(speciesTree=species_tree, Ne=NE[i], taxa=taxon_map)
-    # msc_gene_tree.setValue( gene_tree )
+    msc_gene_tree ~ dnMultiSpeciesCoalescent(speciesTree=species_tree, Ne=NE[i], taxa=taxon_map)
+    msc_gene_tree.setValue( gene_tree )
 
-    # msc_likelihoods[i] <- msc_gene_tree.lnProbability()
+    msc_likelihoods[i] <- msc_gene_tree.lnProbability()
     
 
     #######################
     # MSC-migration model #
     #######################
 
-    # migration_gene_tree ~ dnMultispeciesCoalescentMigration(speciesTree=species_tree, Ne=NE[i], Q=q, rate=1/TIME_UNIT, taxa=taxon_map)
     migration_gene_tree ~ dnMultispeciesCoalescentMigration(speciesTree=species_tree, Ne=NE[i], Q=q, rate=1, taxa=taxon_map)
     migration_gene_tree.setValue( gene_tree )
 
-
     migration_likelihoods[i] <- migration_gene_tree.lnProbability()
 
-# }
+}
 
-# "Likelihood under the Null MSC:"
-# msc_likelihoods
+"Ne:"
+NE
+
+"Likelihood under the MSC-InverseGamma:"
+mscig_likelihoods
+
+"Likelihood under the Null MSC:"
+msc_likelihoods
 
 "Likelihood under the MSC-Migration:"
 migration_likelihoods
