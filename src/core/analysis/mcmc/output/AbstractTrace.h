@@ -1,7 +1,7 @@
 #ifndef AbstractTrace_H
 #define AbstractTrace_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "Cloneable.h"
 

@@ -1,7 +1,8 @@
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>
+#include <ostream>
 #include <iostream>
 #include <limits>
 #include <set>
@@ -1575,4 +1576,65 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
 
     }
 
+}
+
+
+
+/**
+ * Make sure that the starting tree used to initialize serial-sampling birth-death analyses satisfies specified age constraints, and assign min/max ages to its tips
+ * @param treeToChange user-supplied starting tree to be modified
+ * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
+ */
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy)
+{
+    // Check that the user-supplied tree contains the same number of tips as the vector of taxa
+    size_t tip_num = treeToChange.getNumberOfTips();
+    size_t tax_num = taxaToCopy.size();
+    
+    if (tip_num != tax_num)
+    {
+        throw RbException("Number of tips in the initial tree does not match the number of taxa.");
+    }
+    
+    // Check that the tip labels of the user-supplied tree match those of the vector of taxa
+    std::vector<std::string> tip_names = treeToChange.getSpeciesNames();
+    std::vector<std::string> taxon_names;
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        taxon_names.push_back( taxaToCopy[i].getSpeciesName() );
+    }
+    
+    std::sort(tip_names.begin(), tip_names.end());
+    std::sort(taxon_names.begin(), taxon_names.end());
+    if (tip_names != taxon_names)
+    {
+        throw RbException("Tip names of the initial tree do not match the taxon names.");
+    }
+    
+    // Check that the ages of the taxa in the user-supplied tree fall within their age uncertainty ranges
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
+        double min_age = taxaToCopy[i].getMinAge();
+        double max_age = taxaToCopy[i].getMaxAge();
+        // Get the age of the tree tip of the same name
+        double tip_age = treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge();
+
+        if (tip_age < min_age || tip_age > max_age)
+        {
+            std::ostringstream s;
+            s << "The age of tip '" << taxaToCopy[i].getSpeciesName() << "' in the initial tree is outside of specified bounds.";
+            throw RbException( s.str() );
+        }
+    }
+    
+    // Alter the tip age values of treeToChange in place
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        std::string tip_name = taxaToCopy[i].getName();
+        treeToChange.setTaxonObject( tip_name, taxaToCopy[i] );
+    }
+    
+    RevBayesCore::Tree *p = &treeToChange;
+    return p;
 }

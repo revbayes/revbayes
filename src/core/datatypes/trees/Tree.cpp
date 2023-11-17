@@ -799,7 +799,10 @@ size_t Tree::getNumberOfInteriorNodes( void ) const
 
     if ( isRooted() )
     {
-        return preliminaryNumIntNodes - 1;
+	if (preliminaryNumIntNodes > 1)
+	    return preliminaryNumIntNodes - 1;
+	else
+	    return 0;
     }
     else
     {
@@ -1402,7 +1405,15 @@ bool Tree::tryReadIndicesFromParameters(bool remove)
             // 4. Set the index if there is one.
             if (value)
             {
-                int index = stoi(*value) - 1;
+		int index = -1;
+		try
+		{
+		    index = stoi(*value) - 1;
+		}
+		catch (...)
+		{
+		    throw RbException()<<"tryReadIndicesFromParameters: index '"<<*value<<"' is not an integer";
+		}
 
                 if (index < 0)
                     throw RbException()<<"tryReadIndicesFromParameters: Negative node index "<<index;
@@ -1419,22 +1430,34 @@ bool Tree::tryReadIndicesFromParameters(bool remove)
         {
             failure = e.getMessage();
         }
+	catch (std::exception& e)
+	{
+	    failure = e.what();
+	}
+	catch (...)
+	{
+	    failure = "tryReadIndicesFromParameters: unhandled exception";
+	}
     }
 
+    // 5. Report failure message.
     if (failure)
     {
-        RBOUT(*failure + ".  Ignoring indices.");
+        RBOUT("Warning: " + *failure + ".  Ignoring indices.");
 
         has_indices = false;
     }
 
-    // 5.If the tree is empty, set has_indices to false.
-    if (not has_indices)
+    // 6.If the tree is empty, set has_indices to false.
+    if (not has_indices.has_value())
         has_indices = false;
 
-    // 6. If we set the indices
+
+    // 7. If we set the indices
     if (*has_indices)
     {
+	// If we get here, we know that every node had a unique index.
+
         nodes = nodes2;
 
         for(int i=0;i < nodes.size(); i++)
@@ -1447,7 +1470,7 @@ bool Tree::tryReadIndicesFromParameters(bool remove)
             assert(nodes[i]->getIndex() == i);
     }
 
-    // 7. Did we successfully set indices from parameters?
+    // 8. Did we successfully set indices from parameters?
     return *has_indices;
 }
 
@@ -1471,7 +1494,7 @@ void Tree::orderNodesByIndex( void )
     std::vector<bool> used = std::vector<bool>(nodes.size(),false);
     for (int i = 0; i < nodes.size(); i++)
     {
-        if ( nodes[i]->getIndex() > nodes.size() )
+        if ( nodes[i]->getIndex() >= nodes.size() )
         {
             throw RbException("Problem while working with tree: Node had bad index. Index was '" + StringUtilities::to_string( nodes[i]->getIndex() ) + "' while there are only '" + StringUtilities::to_string( nodes.size() ) + "' nodes in the tree.");
         }
@@ -1527,6 +1550,11 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
         StringUtilities::fillWithSpaces(s, l, left);
     }
     o << s;
+}
+
+json Tree::toJSON() const
+{
+    return this->getNewickRepresentation(false);
 }
 
 void Tree::collapseSampledAncestors()

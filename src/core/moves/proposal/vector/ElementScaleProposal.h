@@ -1,7 +1,7 @@
 #ifndef ElementScaleProposal_H
 #define ElementScaleProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 
