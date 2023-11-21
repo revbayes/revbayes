@@ -230,7 +230,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
     std::vector<double> thetas = std::vector<double>(num_populations, 0.0);
     for (size_t i=0; i<num_populations; ++i)
     {
-        thetas[i] = 1.0 / getNe( i ); // for diploid: 1.0 / getNe( i ) / 2.0
+        thetas[i] = 2.0 / getNe( i ); 
     }
     const RateGenerator* migration_rate_matrix = &Q->getValue();
     double overall_migration_rate = delta->getValue();
@@ -295,7 +295,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
         if ( next_coalescent_age < next_speciation_age )
         {
             // get the individual node that represent the coalescent event
-            TopologyNode* this_individual = it_individual_ages->second; // ? first
+            TopologyNode* this_individual = it_individual_ages->second; 
             
             // get the index of the left and right coalescing individuals
             size_t left_coalescing_individual  = this_individual->getChild(0).getIndex();
@@ -336,7 +336,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             // we need to reorder the probabilities and lineages
             
             // get the individual node that represent the speciation event
-            TopologyNode* this_species = it_species_ages->second; // ? first
+            TopologyNode* this_species = it_species_ages->second; 
             
             
             // get the index of the left and right coalescing individuals
@@ -581,7 +581,7 @@ void MultispeciesCoalescentMigration::simulateTree( void )
             if ( num_ind_this_pop > 1 )
             {
                 double branch_ne = drawNe( this_population );
-                double theta = 1.0 / branch_ne;
+                double theta = 2.0 / branch_ne;
 
                 double n_pairs = num_ind_this_pop * (num_ind_this_pop-1) / 2.0;
                 double lambda = n_pairs * theta;
