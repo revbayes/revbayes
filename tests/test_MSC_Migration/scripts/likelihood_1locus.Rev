@@ -51,7 +51,7 @@ for (i in 1:pow_list.size()) {
     # MSC-migration model #
     #######################
 
-    migration_gene_tree ~ dnMultispeciesCoalescentMigration(speciesTree=species_tree, Ne=NE[i], Q=q, rate=1, taxa=taxon_map)
+    migration_gene_tree ~ dnMultiSpeciesCoalescentMigration(speciesTree=species_tree, Ne=NE[i], Q=q, rate=1, taxa=taxon_map)
     migration_gene_tree.setValue( gene_tree )
 
     migration_likelihoods[i] <- migration_gene_tree.lnProbability()

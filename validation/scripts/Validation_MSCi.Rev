@@ -62,7 +62,7 @@ moves.append(mvScale(delta,1,true,1.0) )
 for (i in 1:num_loci) {
    # The gene trees from the multispecies coalescent process
    # The taxon names in the gene trees are the same as in the species tree
-   geneTree[i] ~ dnMultispeciesCoalescentMigration(speciesTree=primate_tree, Ne=Ne, Q=mig_rates, rate=delta, taxa=taxa)
+   geneTree[i] ~ dnMultiSpeciesCoalescentMigration(speciesTree=primate_tree, Ne=Ne, Q=mig_rates, rate=delta, taxa=taxa)
    geneTree[i].clamp(geneTree[i])
 }
 

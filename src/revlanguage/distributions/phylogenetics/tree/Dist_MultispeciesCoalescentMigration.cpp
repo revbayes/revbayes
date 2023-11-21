@@ -153,7 +153,7 @@ const TypeSpec& Dist_MultispeciesCoalescentMigration::getClassTypeSpec(void)
 std::string Dist_MultispeciesCoalescentMigration::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "MultispeciesCoalescentMigration";
+    std::string d_name = "MultiSpeciesCoalescentMigration";
 
     return d_name;
 }
