@@ -526,6 +526,7 @@ void MultispeciesCoalescentMigration::simulateTree( void )
 
     for (std::vector< Taxon >::iterator it = taxa.begin(); it != taxa.end(); ++it)
     {
+        
         TopologyNode *n = new TopologyNode( *it );
         const std::string &species_name = n->getSpeciesName();
         
