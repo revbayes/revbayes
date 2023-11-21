@@ -1,0 +1,89 @@
+################################################################################
+#
+# RevBayes Validation Test: Multispecies coalescent with migration process
+#
+# Model: Multispecies coalescent with migration with constant effective population size.
+#        We test whether we can estimate the population size, given fixed species tree and gene trees.
+#
+#
+# authors: Wenjie Zhu & Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 20
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in an ultrametric tree
+
+primate_tree <- readTrees( "data/primates_small.tre" )[1]
+
+
+####################
+# Useful variables #
+####################
+
+num_loci = 5
+
+# Get some useful variables from the data. We need these later on.
+n_species <- primate_tree.ntips()
+taxa <- primate_tree.taxa()
+n_branches <- 2 * n_species - 1 # number of branches in a rooted tree
+
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+
+###################
+# Gene-Tree model #
+###################
+
+# We assume a single effective population size for the entire species tree.
+Ne ~ dnLognormal(ln(10),sd=0.587)
+moves.append(mvScale(Ne,1,true,1.0) )
+
+mig_rates <- fnJC( n_species * (n_species+1) / 2  )
+
+delta ~ dnLognormal(ln(0.002),sd=0.587)
+moves.append(mvScale(delta,1,true,1.0) )
+
+
+for (i in 1:num_loci) {
+   # The gene trees from the multispecies coalescent process
+   # The taxon names in the gene trees are the same as in the species tree
+   geneTree[i] ~ dnMultispeciesCoalescentMigration(speciesTree=primate_tree, Ne=Ne, Q=mig_rates, rate=delta, taxa=taxa)
+   geneTree[i].clamp(geneTree[i])
+}
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( primate_tree )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_MSCi" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()
