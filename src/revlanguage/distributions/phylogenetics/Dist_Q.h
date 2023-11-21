@@ -53,7 +53,7 @@ namespace RevLanguage {
     private:
         RevPtr<const RevVariable>                       alpha;
         RevPtr<const RevVariable>                       rho;
-        
+
     };
     
 }

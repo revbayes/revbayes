@@ -45,6 +45,7 @@ public:
     std::vector<mpq_class>& getExchangeabilityRates(void) { return r; }
     bool                    getIsReversible(void) { return isReversible; }
     std::vector<mpq_class>& getPi(void) { return pi; }
+    std::vector<double>     getRates(void) const ;
     void                    initializeTimeReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng);
     void                    initializeNonReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng);
     void                    nonreversibilize(mpq_class& u1, mpq_class& u2, mpq_class& u3);
@@ -54,9 +55,12 @@ public:
     void                    setIsReversible(bool tf) { isReversible = tf; }
     void                    setPi(std::vector<mpq_class>& f);
     double                  updateNonReversibleRates(RandomNumberGenerator* rng, double alpha0);
+    double                  updateNonReversibleRatesSingle(RandomNumberGenerator* rng, double alpha0);
     double                  updateExchangeabilityRates(RandomNumberGenerator* rng, double alpha0);
+    double                  updateExchangeabilityRatesSingle(RandomNumberGenerator* rng, double alpha0);
     double                  updateStationaryFrequencies(RandomNumberGenerator* rng, double alpha0);
-    
+    double                  updateStationaryFrequenciesSingle(RandomNumberGenerator* rng, double alpha0);
+
     // virtual methods from RateMatrix
     double                  averageRate(void) const;                                                                //!< Calculate the average rate
     void                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrixrate matrix
@@ -68,7 +72,6 @@ public:
     void                    setDiagonal(void) { throw RbException("We do not support to set the diagonal of a non-reversible rate matrix."); }                                                                      //!< Set the diagonal such that each row sums to zero
     void                    update(void);                                                                           //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
 
-    
     
 private:
     void                    computeLandU(RateMatrix_MPQ& aMat, RateMatrix_MPQ& lMat, RateMatrix_MPQ& uMat);

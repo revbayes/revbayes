@@ -46,7 +46,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_uniformTopologyBranchLength::Dist_uniformTopologyBranchLength() : TypedDistribution<BranchLengthTree>()
+Dist_uniformTopologyBranchLength::Dist_uniformTopologyBranchLength() : TypedDistribution<Tree>()
 {
     
 }
@@ -92,7 +92,7 @@ RevBayesCore::UniformTopologyBranchLengthDistribution* Dist_uniformTopologyBranc
     
     
     bool r = false;
-//    r = static_cast<const RlBoolean &>( rooted->getRevObject() ).getValue();
+    r = static_cast<const RlBoolean &>( rooted->getRevObject() ).getValue();
     
     RevBayesCore::UniformTopologyBranchLengthDistribution* d = new RevBayesCore::UniformTopologyBranchLengthDistribution( t, og, blp, r);
     
@@ -162,7 +162,7 @@ const MemberRules& Dist_uniformTopologyBranchLength::getParameterRules(void) con
         member_rules.push_back( new ArgumentRule( "taxa"       , ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa that will be used for the tips.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "outgroup"   , Clade::getClassTypeSpec(), "The clade (consisting of one or more taxa) used as an outgroup.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         member_rules.push_back( new ArgumentRule( "branchLengthDistribution", TypedDistribution<RealPos>::getClassTypeSpec(), "The base distribution for the branch lengths.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-//        memberRules.push_back( new ArgumentRule( "rooted",         RlBoolean::getClassTypeSpec(), "Is the distribution over rooted topologies?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+        member_rules.push_back( new ArgumentRule( "rooted",         RlBoolean::getClassTypeSpec(), "Is the distribution over rooted topologies?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         
         rules_set = true;
     }
