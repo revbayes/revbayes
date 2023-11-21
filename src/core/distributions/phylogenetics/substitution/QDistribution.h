@@ -22,12 +22,14 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class QDistribution : public TypedDistribution<RateGenerator>, public MemberObject< Boolean > {
+    class QDistribution : public TypedDistribution<RateGenerator>, public MemberObject< Boolean >, public MemberObject< Simplex >, public MemberObject< RbVector<double> > {
 //    class QDistribution : public TypedDistribution<RateGenerator> {
 
     public:
         QDistribution (const TypedDagNode<RbVector<double> >* alpha,
-                       const TypedDagNode<double>* rho);                                                                        //!< Constructor
+                       double log_rho_rev,
+                       double log_rho_nr
+                       );                                                                        //!< Constructor
         
         // public member functions
         QDistribution*               clone(void) const;                                                                         //!< Create an independent clone
@@ -39,6 +41,8 @@ namespace RevBayesCore {
 
         // Parameter management functions
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Boolean &rv) const;     //!< Map the member methods to internal function calls
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);        //!< Swap a parameter
 
         void                                            keepSpecialization(DagNode *toucher);
@@ -52,7 +56,8 @@ namespace RevBayesCore {
 
         bool                                            is_reversible;                  //!< Indicates whether the current value is reversible
         const TypedDagNode<RbVector<double> >*          alpha;                          //!< parameter for the prior on the stationary frequencies
-        const TypedDagNode<double>*                     rho;                            //!< parameter for the probability of being time reversible
+        double                                          log_rho_reversible;             //!< parameter for the probability of being time reversible
+        double                                          log_rho_non_reversible;         //!< parameter for the probability of being time reversible
 
     };
 }

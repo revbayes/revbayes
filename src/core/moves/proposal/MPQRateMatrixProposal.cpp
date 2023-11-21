@@ -125,11 +125,15 @@ double MPQRateMatrixProposal::doProposal( void ) {
         double u = rng->uniform01();
         if (u < 0.55)
             {
-            lnProb = updateStationaryFrequencies();
+            double u2 = rng->uniform01();
+            bool all = u2 < 0.25;
+            lnProb = updateStationaryFrequencies(all);
             }
         else if (u >= 0.55 && u < 0.90)
             {
-            lnProb = updateExchangabilityRates();
+            double u2 = rng->uniform01();
+            bool all = u2 < 0.166;
+            lnProb = updateExchangabilityRates(all);
             }
         else
             {
@@ -142,7 +146,9 @@ double MPQRateMatrixProposal::doProposal( void ) {
         double u = rng->uniform01();
         if (u < 0.90)
             {
-            lnProb = updateNonreversibleRates();
+            double u2 = rng->uniform01();
+            bool all = u2 < 0.1;
+            lnProb = updateNonreversibleRates(all);
             }
         else
             {
@@ -236,7 +242,7 @@ void MPQRateMatrixProposal::tune( double rate ) {
 }
 
 
-double MPQRateMatrixProposal::updateExchangabilityRates(void) {
+double MPQRateMatrixProposal::updateExchangabilityRates(bool all) {
     
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -249,13 +255,21 @@ double MPQRateMatrixProposal::updateExchangabilityRates(void) {
     // store old values
     stored_Q = Q;
 
-    // update and return log probability of Hastings ratio
-    return Q.updateExchangeabilityRates(rng, 100.0);
+    if ( all = true )
+    {
+        // update and return log probability of Hastings ratio
+        return Q.updateExchangeabilityRates(rng, 100.0);
+    }
+    else
+    {
+        // update and return log probability of Hastings ratio
+        return Q.updateExchangeabilityRatesSingle(rng, 50);
+    }
 }
 
 
 
-double MPQRateMatrixProposal::updateNonreversibleRates(void) {
+double MPQRateMatrixProposal::updateNonreversibleRates(bool all) {
     
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -268,8 +282,16 @@ double MPQRateMatrixProposal::updateNonreversibleRates(void) {
     // store old values
     stored_Q = Q;
 
-    // update and return log probability of Hastings ratio
-    return Q.updateNonReversibleRates(rng, 500.0);
+    if ( all == true )
+    {
+        // update and return log probability of Hastings ratio
+        return Q.updateNonReversibleRates(rng, 500.0);
+    }
+    else
+    {
+        // update and return log probability of Hastings ratio
+        return Q.updateNonReversibleRates(rng, 50.0);
+    }
 }
 
 double MPQRateMatrixProposal::updateToNonReversible(void) {
@@ -409,7 +431,7 @@ double MPQRateMatrixProposal::updateToReversible(void) {
     return lnRv + lnJacobian;
 }
 
-double MPQRateMatrixProposal::updateStationaryFrequencies(void) {
+double MPQRateMatrixProposal::updateStationaryFrequencies(bool all) {
 
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -421,8 +443,17 @@ double MPQRateMatrixProposal::updateStationaryFrequencies(void) {
 
     // store old values
     stored_Q = Q;
+    
+    if ( all == true )
+    {
+        // update and return log probability of Hastings ratio
+        return Q.updateStationaryFrequencies(rng, 100.0);
+    }
+    else
+    {
+        // update and return log probability of Hastings ratio
+        return Q.updateStationaryFrequenciesSingle(rng, 50.0);
+    }
 
-    // update and return log probability of Hastings ratio
-    return Q.updateStationaryFrequencies(rng, 100.0);
 }
 

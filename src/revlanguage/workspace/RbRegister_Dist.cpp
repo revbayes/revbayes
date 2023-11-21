@@ -421,7 +421,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );
 
         // uniform topology with branch lengths distribution
-        AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
+        AddDistribution< Tree                       >( new Dist_uniformTopologyBranchLength() );
 
 		// empirical tree distributions
 		AddDistribution< Tree                       >( new Dist_empiricalTree() );

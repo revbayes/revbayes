@@ -8,12 +8,13 @@ using namespace RevBayesCore;
 
 
 QDistribution::QDistribution (const TypedDagNode<RbVector<double> >* a,
-                              const TypedDagNode<double>* r) : TypedDistribution<RateGenerator>( new RateMatrix_MPQ() ),
+                              double lrr,
+                              double lrnr) : TypedDistribution<RateGenerator>( new RateMatrix_MPQ() ),
 alpha( a ),
-rho( r )
+log_rho_reversible( lrr ),
+log_rho_non_reversible( lrnr )
 {
     addParameter( alpha );
-    addParameter( rho );
     
     if ( alpha->getValue().size() != 4 )
     {
@@ -38,8 +39,7 @@ double QDistribution::computeLnProbability(void)
     
     // get the current value for alpha (prior on stationary frequencies)
     const std::vector<double>& curr_alpha = alpha->getValue();
-    double model_prob = rho->getValue();
-    
+        
     // compute the prior on the stationary frequencies
     std::vector<mpq_class>& pi = my_rate_matrix.getPi();
     std::vector<double> bf(4);
@@ -53,13 +53,15 @@ double QDistribution::computeLnProbability(void)
         {
         ln_prob += log(120.0);
         ln_prob += log(4.0) + 0.5 * log(3.0);
-        ln_prob += log( model_prob );
+        ln_prob += log_rho_reversible;
+            
         }
     else
         {
         ln_prob += log(40320.0);
         ln_prob -= 0.5 * log(6.0);
-        ln_prob += log( 1.0 - model_prob );
+        ln_prob += log_rho_non_reversible;
+
         }
 
     
@@ -85,16 +87,48 @@ void QDistribution::executeMethod(const std::string &n, const std::vector<const 
 }
 
 
+void QDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, Simplex &rv) const
+{
+
+    if ( n == "getPi" )
+    {
+
+        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        rv = my_rate_matrix.getStationaryFrequencies();
+
+    }
+    else
+    {
+        throw RbException("The Q-Distribution does not have a member method called '" + n + "'.");
+    }
+
+}
+
+
+void QDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
+{
+
+    if ( n == "getRates" )
+    {
+
+        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        rv = my_rate_matrix.getRates();
+
+    }
+    else
+    {
+        throw RbException("The Q-Distribution does not have a member method called '" + n + "'.");
+    }
+
+}
+
+
 void QDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
     if (oldP == alpha)
     {
         alpha = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
-    }
-    else if (oldP == rho)
-    {
-        rho = static_cast<const TypedDagNode< double >* >( newP );
     }
     
 }
@@ -111,12 +145,12 @@ void QDistribution::redrawValue(void)
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
-    
-    double model_prob = rho->getValue();
+
     const std::vector<double>& curr_alpha = alpha->getValue();
     
-    double u = rng->uniform01();
-    if ( u < model_prob )
+    double u = log( rng->uniform01() );
+    
+    if ( u < log_rho_reversible )
     {
         my_rate_matrix.initializeTimeReversibleModel(curr_alpha, rng);
     }

@@ -61,8 +61,12 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution( void ) const
     
     // get the parameters
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a   = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* b   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
-    RevBayesCore::QDistribution* d          = new RevBayesCore::QDistribution(a, b);
+        
+    double tmp   = static_cast<const Real &>( rho->getRevObject() ).getDagNode()->getValue();
+    double log_rho_reversible     = tmp;
+    double log_rho_non_reversible = log( 1.0 - exp(log_rho_reversible) );
+        
+    RevBayesCore::QDistribution* d          = new RevBayesCore::QDistribution(a, log_rho_reversible, log_rho_non_reversible);
     
     return d;
 }
@@ -123,7 +127,13 @@ MethodTable Dist_Q::getDistributionMethods( void ) const
     // member functions
     ArgumentRules* get_reversibility_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_Q, RlBoolean >( "isReversible", this->variable, get_reversibility_arg_rules, true ) );
-    
+
+    ArgumentRules* get_pi_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, Simplex >( "getPi", this->variable, get_pi_arg_rules, true ) );
+
+    ArgumentRules* get_rates_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, ModelVector<RealPos> >( "getRates", this->variable, get_rates_arg_rules, true ) );
+
     return methods;
 }
 
@@ -137,9 +147,9 @@ const MemberRules& Dist_Q::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_Q_member_rules.push_back( new ArgumentRule( "alpha", ModelVector<RealPos>::getClassTypeSpec(), "The alpha shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_Q_member_rules.push_back( new ArgumentRule( "rho" , RealPos::getClassTypeSpec(), "The beta shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
+        dist_Q_member_rules.push_back( new ArgumentRule( "alpha",  ModelVector<RealPos>::getClassTypeSpec(), "The alpha shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_Q_member_rules.push_back( new ArgumentRule( "rho" , Real::getClassTypeSpec(), "The log probability of the reversible model.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
         rules_set = true;
     }
     

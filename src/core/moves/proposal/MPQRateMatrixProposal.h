@@ -48,9 +48,9 @@ template <class variableType> class StochasticNode;
         void                                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
         
     private:
-        double                                              updateExchangabilityRates(void);
-        double                                              updateNonreversibleRates(void);
-        double                                              updateStationaryFrequencies(void);
+        double                                              updateExchangabilityRates(bool all);
+        double                                              updateNonreversibleRates(bool all);
+        double                                              updateStationaryFrequencies(bool all);
         double                                              updateToNonReversible(void);
         double                                              updateToReversible(void);
         Polyhedron                                          poly;

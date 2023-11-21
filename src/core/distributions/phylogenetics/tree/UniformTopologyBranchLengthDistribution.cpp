@@ -263,6 +263,8 @@ void UniformTopologyBranchLengthDistribution::setValue(RevBayesCore::Tree *v, bo
 
     value->getTreeChangeEventHandler().removeListener( this );
     
+    v->getRoot().setUseAges(false, true);
+    
     // delegate to super class
     TypedDistribution<Tree>::setValue( v, force );
     

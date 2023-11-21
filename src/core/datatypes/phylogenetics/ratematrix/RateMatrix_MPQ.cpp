@@ -4,11 +4,12 @@
 #include "RbException.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
+#include "DistributionBeta.h"
 #include "DistributionDirichlet.h"
 #include "RbMathVector.h"
 #include "TransitionProbabilityMatrix.h"
 
-#define MIN_FREQ    10e-8
+#define MIN_FREQ    10e-3
 
 
 using namespace RevBayesCore;
@@ -269,6 +270,11 @@ void RateMatrix_MPQ::calculateTransitionProbabilities(double startAge, double en
     
     //
     
+    moveToDouble();
+    
+    // now update the eigensystem
+    const_cast<RateMatrix_MPQ*>(this)->updateEigenSystem();
+    
     double t = rate * (startAge - endAge);
     if ( theEigenSystem->isComplex() == false )
     {
@@ -373,6 +379,25 @@ double RateMatrix_MPQ::getRate(size_t from, size_t to, double rate) const
     return (*this)(from,to).get_d() * rate;
 }
 
+std::vector<double> RateMatrix_MPQ::getRates(void) const
+{
+    std::vector<double> tmp(12);
+    
+    size_t k=0;
+    for (int i=0;i<4;i++)
+    {
+        for (int j=0;j<4;j++)
+        {
+            if ( i != j )
+            {
+                tmp[k++] = (*this)(i,j).get_d();
+            }
+        }
+    }
+
+    
+    return tmp;
+}
 
 std::vector<double> RateMatrix_MPQ::getStationaryFrequencies(void) const
 {
@@ -841,6 +866,89 @@ double RateMatrix_MPQ::updateNonReversibleRates(RandomNumberGenerator* rng, doub
     return lnProposalProb;
 }
 
+double RateMatrix_MPQ::updateNonReversibleRatesSingle(RandomNumberGenerator* rng, double alpha0) {
+
+    if (isReversible == true)
+        throw(RbException("Can only update the 12 rates (directly) for non-reversible models"));
+    
+    // update the frequencies
+    size_t index = size_t(rng->uniform01() * 12);
+    // update the rates
+    std::vector<double> oldDiagRates(12);
+    std::vector<double> newDiagRates(12);
+    std::vector<double> oldRates(2);
+    std::vector<double> alphaForward(2);
+    std::vector<double> alphaReverse(2);
+    
+    double sum = 0.0;
+    for (int i=0, k=0; i<4; i++)
+        {
+        for (int j=0; j<4; j++)
+            {
+            if (i != j)
+                {
+                oldDiagRates[k] = (*this)(i,j).get_d();
+                sum += oldDiagRates[k];
+                k++;
+                }
+            }
+        }
+    for (int i=0; i<12; i++)
+        oldDiagRates[i] /= sum;
+    
+    alphaForward[0] = oldDiagRates[index] * alpha0;
+    alphaForward[1] = (1.0-oldDiagRates[index]) * alpha0;
+    
+    oldRates[0] = oldDiagRates[index];
+    oldRates[1] = (1.0 - oldDiagRates[index]);
+    
+    std::vector<double> newRates = RevBayesCore::RbStatistics::Dirichlet::rv(alphaForward, *rng);
+    RbMath::normalizeToMin(newRates, MIN_FREQ);
+    
+    alphaReverse[0] = newRates[0] * alpha0;
+    alphaReverse[1] = newRates[1] * alpha0;
+    
+    double rescale_factor = newRates[1] / oldRates[1];
+    for ( int i=0; i<12; ++i )
+    {
+        newDiagRates[i] = oldDiagRates[i] * rescale_factor;
+    }
+    newDiagRates[index] = newRates[0];
+    
+    // update the rate matrix
+    for (int i=0, k=0; i<4; i++)
+        {
+        mpq_class sumQ;
+        for (int j=0; j<4; j++)
+            {
+            if (i != j)
+                {
+                (*this)(i,j) = newDiagRates[k];
+                sumQ += (*this)(i,j);
+                k++;
+                }
+            }
+        (*this)(i,i) = -sumQ;
+        }
+    
+    // update pi for new rate matrix
+    calculateStationaryFrequencies(pi);
+    
+    // rescale rate matrix so average rate is one
+    mpq_class averageRate;
+    calculateAverageRate(averageRate);
+    mpq_class factor = 1 / averageRate;
+    for (int i=0; i<4; i++)
+        for (int j=0; j<4; j++)
+            (*this)(i,j) *= factor;
+
+    // return the log of the proposal probability
+    double lnProposalProb = RbStatistics::Dirichlet::lnPdf(alphaReverse, oldRates)-
+    RbStatistics::Dirichlet::lnPdf(alphaForward, newRates);
+    lnProposalProb += (12-2)*log(rescale_factor);
+    return lnProposalProb;
+}
+
 double RateMatrix_MPQ::updateExchangeabilityRates(RandomNumberGenerator* rng, double alpha0) {
 
     if (isReversible == false)
@@ -905,11 +1013,96 @@ double RateMatrix_MPQ::updateExchangeabilityRates(RandomNumberGenerator* rng, do
     return lnProposalProb;
 }
 
+double RateMatrix_MPQ::updateExchangeabilityRatesSingle(RandomNumberGenerator* rng, double alpha0) {
+
+    if (isReversible == false)
+        throw(RbException("Can only update the exchangability rates for time reversible models"));
+    
+    // update the frequencies
+    size_t index = size_t(rng->uniform01() * 6);
+    
+    // update the rates
+    std::vector<double> oldRates(2);
+    std::vector<double> alphaForward(2);
+    std::vector<double> alphaReverse(2);
+    
+    oldRates[0] = r[index].get_d();
+    oldRates[1] = (1.0-oldRates[0]);
+    
+    alphaForward[0] = oldRates[0] * alpha0;
+    alphaForward[1] = oldRates[1] * alpha0;
+
+    std::vector<double> newRates = RbStatistics::Dirichlet::rv(alphaForward, *rng);
+    RbMath::normalizeToMin(newRates, MIN_FREQ);
+
+    alphaReverse[0] = newRates[0] * alpha0;
+    alphaReverse[1] = newRates[1] * alpha0;
+
+    double rescale_factor = newRates[1] / oldRates[1];
+    
+    mpq_class sum;
+    for (int i=0; i<6; ++i)
+    {
+        if ( i == index )
+        {
+            r[i] = newRates[0];
+        }
+        else
+        {
+            r[i] *= rescale_factor;
+        }
+        sum += r[i];
+    }
+    for (int i=0; i<6; ++i)
+    {
+        r[i] /= sum;
+    }
+    
+    // update the off-diagonal components of the rate matrix
+    for (int i=0, k=0; i<4; i++)
+        {
+        for (int j=i+1; j<4; j++)
+            {
+            (*this)(i,j) = r[k] * pi[j];
+            (*this)(j,i) = r[k] * pi[i];
+            k++;
+            }
+        }
+
+    // update the diagonals and calculate the average rate
+    mpq_class averageRate;
+    for (int i=0; i<4; i++)
+        {
+        sum = 0;
+        for (int j=0; j<4; j++)
+            {
+            if (i != j)
+                sum += (*this)(i,j);
+            }
+        (*this)(i,i) = -sum;
+        averageRate += pi[i] * sum;
+        }
+        
+    // rescale such that the average rate is one
+    mpq_class factor = 1 / averageRate;
+    for (int i=0; i<4; i++)
+        for (int j=0; j<4; j++)
+            (*this)(i,j) *= factor;
+
+    // return the log of the proposal probability
+    double lnProposalProb = RbStatistics::Dirichlet::lnPdf(alphaReverse, oldRates) -
+                            RbStatistics::Dirichlet::lnPdf(alphaForward, newRates);
+    lnProposalProb += (6-2) * log(rescale_factor);
+    
+    return lnProposalProb;
+}
+
 double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, double alpha0) {
 
     if (isReversible == false)
         throw(RbException("Can only update the stationary frequencies (directly) for time reversible models"));
                 
+    
     // update the frequencies
     std::vector<double> oldFreqs(4);
     std::vector<double> alphaForward(4);
@@ -965,4 +1158,95 @@ double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, d
     double lnProposalProb = RbStatistics::Dirichlet::lnPdf(alphaReverse, oldFreqs)-
                             RbStatistics::Dirichlet::lnPdf(alphaForward, newFreqs);
     return lnProposalProb;
+}
+
+
+
+double RateMatrix_MPQ::updateStationaryFrequenciesSingle(RandomNumberGenerator* rng, double alpha0) {
+
+    if (isReversible == false)
+        throw(RbException("Can only update the stationary frequencies (directly) for time reversible models"));
+                
+    // update the frequencies
+    size_t index = size_t(rng->uniform01() * 4);
+    
+    std::vector<double> oldFreqs(2);
+    std::vector<double> alphaForward(2);
+    std::vector<double> alphaReverse(2);
+    
+    oldFreqs[0] = pi[index].get_d();
+    oldFreqs[1] = 1.0 - oldFreqs[0];
+
+    alphaForward[0] = oldFreqs[0] * alpha0;
+    alphaForward[1] = oldFreqs[1] * alpha0;
+
+    double newFreq = RbStatistics::Beta::rv(alphaForward[0], alphaForward[1], *rng);
+
+    if ( newFreq < MIN_FREQ )
+    {
+        newFreq = MIN_FREQ;
+    }
+    if ( (1.0-newFreq) < MIN_FREQ )
+    {
+        newFreq = 1.0-MIN_FREQ;
+    }
+    
+    
+    alphaReverse[0] = newFreq * alpha0;
+    alphaReverse[1] = (1.0-newFreq) * alpha0;
+
+    // change to GMP rationals
+    mpq_class factor = oldFreqs[0] / newFreq;
+    mpq_class sum;
+    for (int i=0; i<4; ++i)
+    {
+        if ( i != index )
+        {
+            pi[i] *= factor;
+            sum += pi[i];
+        }
+    }
+    pi[index] = 1 - sum;
+    
+    // update the off-diagonal components of the rate matrix
+    for (int i=0, k=0; i<4; i++)
+        {
+        for (int j=i+1; j<4; j++)
+            {
+            (*this)(i,j) = r[k] * pi[j];
+            (*this)(j,i) = r[k] * pi[i];
+            k++;
+            }
+        }
+
+    // update the diagonals and calculate the average rate
+    mpq_class averageRate;
+    for (int i=0; i<4; i++)
+        {
+        sum = 0;
+        for (int j=0; j<4; j++)
+            {
+            if (i != j)
+                sum += (*this)(i,j);
+            }
+        (*this)(i,i) = -sum;
+        averageRate += pi[i] * sum;
+        }
+        
+    // rescale such that the average rate is one
+    factor = 1 / averageRate;
+    for (int i=0; i<4; i++)
+        for (int j=0; j<4; j++)
+            (*this)(i,j) *= factor;
+
+    // return the log of the proposal probability
+    double forward = RbStatistics::Beta::lnPdf(alphaForward[0], alphaForward[1], newFreq);
+    double backward = RbStatistics::Beta::lnPdf(alphaReverse[0], alphaReverse[1], oldFreqs[0]);
+    
+    double ln_Hastings_ratio = backward - forward;
+    
+    // include the Jacobian for the scaling of the other values
+    ln_Hastings_ratio += (4 - 2) * log(oldFreqs[0] / newFreq);
+    
+    return ln_Hastings_ratio;
 }
