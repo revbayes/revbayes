@@ -59,6 +59,20 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
+MESSAGE("  GMP: ")
+if ("${GMP}" STREQUAL "ON")
+   #-DGMP_Dir=/path/to/GMP/install/root
+   #add_definitions(-DDEBUG_MPI_MCA)
+   # Require MPI for this project:
+#   find_package(GMP REQUIRED)
+#   find_library(GMP)
+#   include_directories(${GMP_INCLUDE_PATH})
+#   set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${GMP_COMPILE_FLAGS}")
+#   set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${GMP_LINK_FLAGS}")
+   MESSAGE("  GMP: ${GMP_INCLUDE_PATH}")
+endif()
+
+
 ##### rpath: where to find shared libraries #####
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
@@ -216,7 +230,14 @@ endif()
   target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
 target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
 # Link the target to other libraries.  Some variables can be empty.
-target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
+# Use the package PkgConfig to detect GMP headers/library files
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GMP REQUIRED IMPORTED_TARGET gmp)
+
+include_directories(${GMP_INCLUDE_DIRS})
+link_directories(${GMP_LIBRARY_DIRS})
+add_definitions(${GMP_CFLAGS_OTHER})      # Add other flags to the compiler
+TARGET_LINK_LIBRARIES(${RB_EXEC_NAME} ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES} ${GMP_LIBRARIES})
 
 set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
 
