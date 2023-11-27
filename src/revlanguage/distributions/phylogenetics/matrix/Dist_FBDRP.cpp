@@ -1,18 +1,16 @@
-#include "Dist_FBDRP.h"
-
 #include <math.h>
-#include <cstddef>
+#include <stddef.h>
 #include <iosfwd>
 #include <string>
 #include <vector>
 
-#include "FossilizedBirthDeathRangeProcess.h"
-
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "Dist_FBDRP.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
+#include "FossilizedBirthDeathRangeProcess.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -28,7 +26,6 @@
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
-#include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlDagMemberFunction.h"
 #include "RlDeterministicNode.h"
@@ -52,7 +49,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_FBDRP::Dist_FBDRP() : FossilizedBirthDeathRangeProcess<MatrixReal>()
+Dist_FBDRP::Dist_FBDRP() : TypedDistribution<MatrixReal >()
 {
     
 }
@@ -86,7 +83,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     // get the parameters
     
     // sampling condition
-    const std::string& cond  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
@@ -98,8 +95,15 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     // fossilization rate
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
 
+    // fossil counts
+    RevBayesCore::DagNode* c = NULL;
+    if ( fossil_counts->getRevObject() != RevNullObject::getInstance() )
+    {
+        c = fossil_counts->getRevObject().getDagNode();
+    }
+
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
 
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
@@ -108,11 +112,10 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
+    bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, false, use_bds);
-    
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, c, r, rt, cond, t, pa);
+
     return d;
 }
 
@@ -125,7 +128,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
 const std::string& Dist_FBDRP::getClassType( void )
 {
     
-    static std::string rev_type = "Dist_FBDRP";
+    static std::string rev_type = "Dist_FBDRMatrix";
     
     return rev_type;
 }
@@ -154,7 +157,7 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "FBDRP" );
+    a_names.push_back( "FBDRMatrix" );
     
     return a_names;
 }
@@ -170,7 +173,7 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
 std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathRange";
+    std::string d_name = "FossilizedBirthDeathRangeMatrix";
     
     return d_name;
 }
@@ -195,12 +198,31 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "BDS", RlBoolean::getClassTypeSpec(), "Assume complete lineage sampling? (BDS model of Silvestro et al. 2019)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
-        // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
-        dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
+        std::vector<TypeSpec> paramTypes;
+        paramTypes.push_back( RealPos::getClassTypeSpec() );
+        paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process (from oldest to youngest).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        std::vector<TypeSpec> intTypes;
+        intTypes.push_back( Natural::getClassTypeSpec() );
+        intTypes.push_back( ModelVector<Natural>::getClassTypeSpec() );
+        intTypes.push_back( ModelVector<ModelVector<Natural> >::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "k",   intTypes, "The fossil observation counts (total or [interval] or [interval][species]).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        std::vector<std::string> optionsCondition;
+        optionsCondition.push_back( "time" );
+        optionsCondition.push_back( "survival" );
+        dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
+        dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with stratigraphic ranges used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
+        dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+
         rules_set = true;
     }
     
@@ -234,14 +256,45 @@ const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
  */
 void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-
-    if ( name == "BDS" )
+    if ( name == "lambda" )
     {
-        bds = var;
+        lambda = var;
+    }
+    else if ( name == "mu" )
+    {
+        mu = var;
+    }
+    else if ( name == "psi" )
+    {
+        psi = var;
+    }
+    else if ( name == "rho" )
+    {
+        rho = var;
+    }
+    else if ( name == "timeline" )
+    {
+        timeline = var;
+    }
+    else if ( name == "k" )
+    {
+        fossil_counts = var;
+    }
+    else if ( name == "taxa" )
+    {
+        taxa = var;
+    }
+    else if ( name == "condition" )
+    {
+        condition = var;
+    }
+    else if ( name == "binary" )
+    {
+        presence_absence = var;
     }
     else
     {
-       FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
+        TypedDistribution<MatrixReal >::setConstParameter(name, var);
     }
-
+    
 }

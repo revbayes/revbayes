@@ -138,14 +138,12 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
 
     AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
 
-    // touching handled by the distribution
-    //stored_ages = dist->getAges();
+    throw RbException("FBDResampleAge move is not implemented yet");
 
-    size_t i = rng->uniform01() * dist->getAges().size();
-
-    dist->resampleAge(i);
-
-    variable->addTouchedElementIndex(i);
+    //TODO properly implement following lines
+    //size_t i = rng->uniform01() * dist->getAges().size();
+    //dist->resampleAge(i);
+    //variable->addTouchedElementIndex(i);
 
     return 0.0;
 
