@@ -2,6 +2,8 @@
 
 using namespace RevBayesCore;
 
+
+
 Vertex::Vertex(void) : Vector() {
 
     from = nullptr;
