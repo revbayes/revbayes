@@ -1,0 +1,89 @@
+################################################################################
+#
+# RevBayes script for simulating gene trees under the
+# multispecies coalescent with migration model.
+#
+# authors: Wenjie Zhu
+#
+################################################################################
+
+
+# setOption("printNodeIndex","false")
+seed(123456)
+# Read in species tree
+species_tree <- readTrees("data/species_3taxa.tree")[1]
+NUM_SPECIES <- species_tree.ntips()
+TAXA_LIST <- species_tree.taxa()
+NUM_MIG <- NUM_SPECIES * (NUM_SPECIES+1)
+
+# Create useful variables
+NUM_INDV <- 1 # step 2
+NUM_GENES <- 1000
+TIME_UNIT <- 1E6
+# Universal population size
+NE <- 1E6
+NE <- NE / TIME_UNIT
+
+
+# ##################
+# # Null MSC model #
+# ##################
+
+# # Simulate gene trees under null MSC model
+# for (i in 1:NUM_GENES) {
+#     "Simulating gene " + i + "..."
+
+#     # # More than 1 individual 
+#     # for (j in 1:NUM_SPECIES) {
+#     #     for (k in 1:NUM_INDV) {
+#     #        taxa[i][(j-1) * NUM_INDV + k] <- taxon(taxonName=TAXA_LIST[j].getSpeciesName() + "_" + k, speciesName=TAXA_LIST[j].getSpeciesName())
+#     #     }
+#     # }
+
+#     # 1 individual per population
+#     for (j in 1:NUM_SPECIES) {
+#         taxa[i][j] <- taxon(taxonName=TAXA_LIST[j].getSpeciesName(), speciesName=TAXA_LIST[j].getSpeciesName())
+#     }
+
+#     gene_trees_sim[i] ~ dnMultiSpeciesCoalescent(speciesTree=species_tree, Ne=NE, taxa=taxa[i])
+
+#     # Write simulated gene trees to file
+#     # write(gene_trees_sim[i], "\n", filename="data/null_msc_gene.trees", append=TRUE, separator="")
+#     write(gene_trees_sim[i].rootAge(), "\n", filename="data/root_msc.txt", append=TRUE, separator="")
+# }
+
+
+#######################
+# MSC-migration model #
+#######################
+
+# Migration rate matrix
+# q <- fnJC(mig_rates <- fnJC( NUM_MIG ))
+q <- fnFreeSymmetricRateMatrix([5, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0], rescaled=FALSE)
+# q <- fnFreeSymmetricRateMatrix([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], rescaled=FALSE)
+
+# Simulate gene trees under MSC-migration model
+for (i in 1:NUM_GENES) {
+    "Simulating gene " + i + "..."
+
+    # # More than 1 individual 
+    # for (j in 1:NUM_SPECIES) {
+    #     for (k in 1:NUM_INDV) {
+    #        taxa[i][(j-1) * NUM_INDV + k] <- taxon(taxonName=TAXA_LIST[j].getSpeciesName() + "_" + k, speciesName=TAXA_LIST[j].getSpeciesName())
+    #     }
+    # }
+
+    # 1 individual per population
+    for (j in 1:NUM_SPECIES) {
+        taxa[i][j] <- taxon(taxonName=TAXA_LIST[j].getSpeciesName(), speciesName=TAXA_LIST[j].getSpeciesName())
+    }
+
+    gene_trees_sim[i] ~ dnMultiSpeciesCoalescentMigration(speciesTree=species_tree, Ne=NE, Q=q, rate=1, taxa=taxa[i])
+
+    # Write simulated gene trees to file
+    # write(gene_trees_sim[i], "\n", filename="data/msc_migration_gene.trees", append=TRUE, separator="")
+    write(gene_trees_sim[i].rootAge(), "\n", filename="data/root_mscm.txt", append=TRUE, separator="")
+}
+
+
+q()

@@ -1,0 +1,139 @@
+################################################################################
+#
+# RevBayes Validation Test: Multispecies coalescent process
+#
+# Model: Multispecies coalescent with Inverse-Gamma prior for effective population sizes.
+#        We test whether we can estimate the Inverse-Gamma scale parameter, given fixed species tree and gene trees.
+#
+#
+# authors: Wenjie Zhu & Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 100
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in an ultrametric tree
+
+primate_tree <- readTrees( "data/primates_small.tre" )[1]
+
+
+####################
+# Useful variables #
+####################
+
+num_loci = 20
+
+# Get some useful variables from the data. We need these later on.
+n_species <- primate_tree.ntips()
+taxa <- primate_tree.taxa()
+n_branches <- 2 * n_species - 1 # number of branches in a rooted tree
+
+# parameters for inverse-gamma model
+for (i in 1:num_loci) {
+   taxon_list[i] <- taxa
+}
+
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+
+
+###################
+# Gene-Tree model #
+###################
+
+# # We assume a single effective population size for the entire species tree.
+# Ne ~ dnLognormal(ln(100),sd=0.587)
+# moves.append(mvScale(Ne,1,true,1.0) )
+
+
+####################
+# Population sizes #
+####################
+
+alpha <- 3.0
+# beta ~ dnLognormal(ln(100),sd=0.587)
+beta <- 100.0
+
+
+# The gene trees from the multispecies coalescent process with inverse gamma prior
+# The taxon names in the gene trees are the same as in the species tree
+geneTree ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=primate_tree, shape=alpha, scale=beta, num_genes=num_loci, taxa=taxon_list)
+# geneTree[i] ~ dnMultiSpeciesCoalescent(speciesTree=primate_tree, Ne=Ne, taxa=taxa)
+geneTree.clamp(geneTree)
+
+
+######################
+# Species Tree model #
+######################
+
+# Specify a prior on the diversification and turnover rate
+diversification <- 0.1 #~ dnExp(1)
+turnover <- 0.1 #~ dnExp(1)
+
+# now transform the diversification and turnover rates into speciation and extinction rates
+speciation := diversification + turnover
+extinction := turnover
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root <- primate_tree.rootAge()
+
+sampling_fraction <- 1.0
+
+# construct a variable for the tree drawn from a birth death process
+start_tree = maximumTree(geneTree)
+start_tree.rescale(0.99)
+
+psi ~ dnBDP(lambda=speciation, mu=extinction, rootAge=abs(start_tree.rootAge()), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
+
+psi.setValue( start_tree )
+
+
+#############################
+# Moves on the species tree #
+#############################
+moves.append( mvNarrow(psi, weight=5.0) )
+moves.append( mvNNI(psi, weight=1.0) )
+moves.append( mvFNPR(psi, weight=3.0) )
+moves.append( mvSubtreeScale(psi, weight=3.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=15.0) )
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( psi )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_MSCIG" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.1)
+validation.summarize(coverageProbability=0.2)
+validation.summarize(coverageProbability=0.3)
+validation.summarize(coverageProbability=0.4)
+validation.summarize(coverageProbability=0.5)
+validation.summarize(coverageProbability=0.6)
+validation.summarize(coverageProbability=0.7)
+validation.summarize(coverageProbability=0.8)
+validation.summarize(coverageProbability=0.9)
+
+
+# you may want to quit RevBayes now
+q()

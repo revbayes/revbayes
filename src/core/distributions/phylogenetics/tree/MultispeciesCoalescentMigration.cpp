@@ -71,7 +71,7 @@ MultispeciesCoalescentMigration::~MultispeciesCoalescentMigration()
 }
 
 
-
+// CHECK: where is this method used
 void MultispeciesCoalescentMigration::attachTimes(Tree *psi, std::vector<TopologyNode *> &tips, size_t index, const std::vector<double> &times) {
     
     if (index < num_taxa-1)
@@ -150,7 +150,7 @@ MultispeciesCoalescentMigration* MultispeciesCoalescentMigration::clone( void ) 
     return new MultispeciesCoalescentMigration( *this );
 }
 
-
+// CHECK: after checking simulateTree()
 double MultispeciesCoalescentMigration::computeLnProbability( void )
 {
     
@@ -379,7 +379,6 @@ double MultispeciesCoalescentMigration::drawNe( size_t index )
 }
 
 
-
 double MultispeciesCoalescentMigration::getNe(size_t index) const
 {
     
@@ -415,7 +414,7 @@ void MultispeciesCoalescentMigration::redrawValue( void )
     
 }
 
-
+// Create maps for current time population and individuals
 void MultispeciesCoalescentMigration::resetTipAllocations( void )
 {
     
@@ -489,8 +488,6 @@ void MultispeciesCoalescentMigration::setValue(Tree *v, bool f )
 }
 
 
-
-
 void MultispeciesCoalescentMigration::simulateTree( void )
 {
     
@@ -499,9 +496,31 @@ void MultispeciesCoalescentMigration::simulateTree( void )
     
     const Tree &sp = species_tree->getValue();
     const std::vector< TopologyNode* > &species_tree_nodes = sp.getNodes();
-    // first let's create a map from species names to the nodes of the species tree
+    // For externals, create a map from species names to the nodes of the species tree
     std::map<std::string, TopologyNode * > species_names_2_nodes;
+    // For internals, create a multimap from species ages to the nodes of the species tree
     std::multimap<double, TopologyNode * > species_ages_2_nodes;
+    // Record birth age of every population
+    std::vector<size_t> birth_age_of_population = std::vector<size_t>(species_tree_nodes.size(), 0);
+    // Record death age of every population
+    std::vector<size_t> death_age_of_population = std::vector<size_t>(species_tree_nodes.size(), 0);
+
+    for (std::vector< TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
+    {
+        TopologyNode *the_species_node = *it;
+        size_t sp_node_index = the_species_node->getIndex();
+        // birth age
+        birth_age_of_population[sp_node_index] = the_species_node->getAge();
+
+        // death age
+        TopologyNode *sp_parent_node = &the_species_node->getParent();
+        double death_age = RbConstants::Double::inf;;
+        if (!the_species_node->isRoot())
+        {
+            death_age = sp_parent_node->getAge();
+        }
+        death_age_of_population[sp_node_index] = death_age;        
+    }
 
     for (std::vector< TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
     {
@@ -519,9 +538,11 @@ void MultispeciesCoalescentMigration::simulateTree( void )
         }
     }
     
-    
+    // For externals, create a map from species node index to a vector of individuals existing in this branch/population
     std::map< size_t, std::vector< TopologyNode* > > individuals_per_branch;
+    // Create a map from individuals to the population (species tree nodes index)
     std::map< TopologyNode*, size_t> individuals_2_population;
+    // Record #ind in every population
     std::vector<size_t> num_individuals_in_population = std::vector<size_t>(species_tree_nodes.size(), 0);
 
     for (std::vector< Taxon >::iterator it = taxa.begin(); it != taxa.end(); ++it)
@@ -555,6 +576,9 @@ void MultispeciesCoalescentMigration::simulateTree( void )
     TopologyNode *root = NULL;
     double current_time = 0.0;
     std::multimap<double, TopologyNode *>::const_iterator it = species_ages_2_nodes.begin();
+    
+    // something wrong with this while loop
+    // sometimes it cann't get out of the loop
     while ( individuals_2_population.size() > 1 )
     {
         
@@ -565,15 +589,29 @@ void MultispeciesCoalescentMigration::simulateTree( void )
             sp_node = it->second;
             species_age = it->first;
         }
-        
+
+        // create a vector for recording population existing between current time to the next speciation event
+        std::vector<size_t> contemporary_population;
+        for (size_t this_population=0; this_population<species_tree_nodes.size(); ++this_population) 
+        {
+            if ( birth_age_of_population[this_population] <= current_time && death_age_of_population[this_population] >= species_age) 
+            {
+            contemporary_population.push_back(this_population);
+            }
+        }
+
         enum EVENT_TYPE { COALESCENT, MIGRATION, NO_EVENT };
         
         EVENT_TYPE next_event_type = NO_EVENT;
         size_t next_event_node = 0;
         double next_event_time = RbConstants::Double::inf;
-        for (size_t this_population=0; this_population<species_tree_nodes.size(); ++this_population)
+
+        // TODO: 
+        // should only loop over populations existing between current time to next speciation event, not all populations
+        // for (size_t this_population=0; this_population<species_tree_nodes.size(); ++this_population)
+        for (size_t ctp_pop_index=0; ctp_pop_index<contemporary_population.size(); ++ctp_pop_index)
         {
-            
+            size_t this_population = contemporary_population[ctp_pop_index];
             // first we simulate coalescent events
             size_t num_ind_this_pop = num_individuals_in_population[ this_population ];
             
@@ -600,18 +638,22 @@ void MultispeciesCoalescentMigration::simulateTree( void )
             
             
             // compute the overall migration rate
-            double migration_rate = 0.0;
-            for (size_t alternative_population=0; alternative_population<species_tree_nodes.size()-1; ++alternative_population)
+            double migration_rate = 0.0; 
+            // Same as above for coalescent, loop over only populations existing between current time to next speciation event
+            // for (size_t alternative_population=0; alternative_population<species_tree_nodes.size()-1; ++alternative_population)
+            for (size_t alt_pop_index=0; alt_pop_index<contemporary_population.size()-1; ++alt_pop_index)
             {
+                size_t alternative_population = contemporary_population[alt_pop_index];
                 
-                if ( this_population != alternative_population && this_population != species_tree_nodes.size()-1 )
+                if ( this_population != alternative_population && this_population != species_tree_nodes.size()-1 ) // Check if the sencond part is necessary
                 {
                     migration_rate += getMigrationRate(this_population, alternative_population);
                 }
                 
             }
+
             // we need to multiply the rate with the number of individuals
-            migration_rate *= num_individuals_in_population[ this_population ];
+            migration_rate *= num_ind_this_pop;
             
             // draw the next migration event time
             double next_migration_time = current_time + RbStatistics::Exponential::rv( migration_rate, *rng);
@@ -626,7 +668,7 @@ void MultispeciesCoalescentMigration::simulateTree( void )
             }
             
         } // end-for over all populations
-        
+
         
 //        const TopologyNode *sp_parent_node = NULL;
 ////        double branch_length = RbConstants::Double::inf;
@@ -652,7 +694,12 @@ void MultispeciesCoalescentMigration::simulateTree( void )
                         individuals_at_current_branch.push_back( it->first );
                     }
                 }
-                // randomly coalesce two lineages
+
+                // std::vector<TopologyNode*> individuals_at_current_branch = individuals_per_branch[ next_event_node ];
+
+
+                // randomly choose two lineages to coalesce
+                // remove both lineages from the population
                 size_t index = static_cast<size_t>( floor(rng->uniform01()*individuals_at_current_branch.size()) );
                 TopologyNode *left = individuals_at_current_branch[index];
                 individuals_at_current_branch.erase( individuals_at_current_branch.begin() + index);
@@ -660,7 +707,8 @@ void MultispeciesCoalescentMigration::simulateTree( void )
                 index = static_cast<size_t>( floor(rng->uniform01()*individuals_at_current_branch.size()) );
                 TopologyNode *right = individuals_at_current_branch[index];
                 individuals_at_current_branch.erase( individuals_at_current_branch.begin() + index);
-            
+
+                // add a new ancestral lineage to the population
                 TopologyNode *new_parent = new TopologyNode();
                 new_parent->addChild(left);
                 left->setParent(new_parent);
@@ -682,6 +730,7 @@ void MultispeciesCoalescentMigration::simulateTree( void )
             {
                 // second, we simulate migration events
                 
+                // get all lineages in current population
                 std::vector<TopologyNode*> individuals_at_current_branch;
                 for ( std::multimap<TopologyNode *, size_t>::const_iterator it = individuals_2_population.begin(); it != individuals_2_population.end(); ++it)
                 {
@@ -693,23 +742,33 @@ void MultispeciesCoalescentMigration::simulateTree( void )
                 
                 size_t this_population = next_event_node;
                 
+                // calculate the migration rate going out of current population
                 double total_migration_rate = 0.0;
-                for (size_t alternative_population=0; alternative_population<individuals_per_branch.size(); ++alternative_population)
+
+                for (size_t alt_pop_index=0; alt_pop_index<contemporary_population.size(); ++alt_pop_index)
                 {
+                    size_t alternative_population = contemporary_population[alt_pop_index];
+
+                // for (size_t alternative_population=0; alternative_population<individuals_per_branch.size(); ++alternative_population)
+                // {
                     
-                    if ( this_population != alternative_population )
+                    if ( this_population != alternative_population && this_population != species_tree_nodes.size()-1 ) // Compare it to line 615 to check if the second part is necessary
                     {
                         total_migration_rate += getMigrationRate(this_population, alternative_population);
                     }
                     
                 }
                 
+                // Determine the migration destination population
                 size_t target_population = 0;
                 double remaining_migration_rate = total_migration_rate * rng->uniform01();
-                for (size_t alternative_population=0; alternative_population<individuals_per_branch.size(); ++alternative_population)
+                // for (size_t alternative_population=0; alternative_population<individuals_per_branch.size(); ++alternative_population)
+                // {
+                for (size_t alt_pop_index=0; alt_pop_index<contemporary_population.size(); ++alt_pop_index)
                 {
+                    size_t alternative_population = contemporary_population[alt_pop_index];
                     
-                    if ( this_population != alternative_population )
+                    if ( this_population != alternative_population && this_population != species_tree_nodes.size()-1 )
                     {
                         remaining_migration_rate -= getMigrationRate(this_population, alternative_population);
                     }
@@ -762,7 +821,6 @@ void MultispeciesCoalescentMigration::simulateTree( void )
         
         current_time = next_event_time;
     }
-    
     // the time tree object (topology + times)
     Tree *psi = new Tree();
     
