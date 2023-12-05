@@ -501,9 +501,9 @@ void MultispeciesCoalescentMigration::simulateTree( void )
     // For internals, create a multimap from species ages to the nodes of the species tree
     std::multimap<double, TopologyNode * > species_ages_2_nodes;
     // Record birth age of every population
-    std::vector<size_t> birth_age_of_population = std::vector<size_t>(species_tree_nodes.size(), 0);
+    std::vector<double> birth_age_of_population = std::vector<double>(species_tree_nodes.size(), 0);
     // Record death age of every population
-    std::vector<size_t> death_age_of_population = std::vector<size_t>(species_tree_nodes.size(), 0);
+    std::vector<double> death_age_of_population = std::vector<double>(species_tree_nodes.size(), 0);
 
     for (std::vector< TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
     {
@@ -513,13 +513,13 @@ void MultispeciesCoalescentMigration::simulateTree( void )
         birth_age_of_population[sp_node_index] = the_species_node->getAge();
 
         // death age
-        TopologyNode *sp_parent_node = &the_species_node->getParent();
-        double death_age = RbConstants::Double::inf;;
+        double death_age = RbConstants::Double::inf;
         if (!the_species_node->isRoot())
         {
+            TopologyNode *sp_parent_node = &the_species_node->getParent();
             death_age = sp_parent_node->getAge();
         }
-        death_age_of_population[sp_node_index] = death_age;        
+        death_age_of_population[sp_node_index] = death_age;
     }
 
     for (std::vector< TopologyNode *>::const_iterator it = species_tree_nodes.begin(); it != species_tree_nodes.end(); ++it)
