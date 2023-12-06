@@ -96,9 +96,9 @@ cd ${SYSROOT}
 # libwinpthread-git-9.0.0.6090.ad98746a-1
 # We can use the libwinpthread-1 from the cross-compiler instead of download it.
 
-PKGS="boost-1.81.0-2
+PKGS="boost-1.83.0-2
 openlibm-0.8.1-1
-dlfcn-1.3.1-1
+dlfcn-1.4.1-1
 "
 
 if [ "${gtk}" = "true" ] ; then
@@ -120,6 +120,7 @@ if [ "${gtk}" = "true" ] ; then
     iconv-1.17-3
     jasper-4.0.0-1
     libdatrie-0.2.13-3
+    libdeflate-1.19-1
     libffi-3.4.4-1
     libiconv-1.16-2
     libjpeg-turbo-3.0.1-1
