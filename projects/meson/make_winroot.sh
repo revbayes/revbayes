@@ -107,7 +107,7 @@ if [ "${gtk}" = "true" ] ; then
     brotli-1.0.9-4
     bzip2-1.0.8-2
     cairo-1.17.6-2
-    expat-2.4.6-1
+    expat-2.5.0-1
     fontconfig-2.13.96-1
     freetype-2.11.1-2
     fribidi-1.0.11-1
