@@ -117,7 +117,7 @@ if [ "${gtk}" = "true" ] ; then
     graphite2-1.3.14-2
     gtk2-2.24.33-4
     harfbuzz-3.4.0-1
-    iconv-1.16-2
+    iconv-1.17-3
     jasper-2.0.33-1
     libdatrie-0.2.13-1
     libffi-3.3-4
@@ -127,11 +127,11 @@ if [ "${gtk}" = "true" ] ; then
     libthai-0.1.29-1
     libtiff-4.3.0-7
     lzo2-2.10-2
-    pango-1.50.4-1
+    pango-1.50.14-4
     pcre-8.45-1
-    pixman-0.40.0-2
-    xz-5.2.5-2
-    zlib-1.2.11-9
+    pixman-0.42.2-1
+    xz-5.4.5-1
+    zlib-1.3-1
 "
 fi
 
