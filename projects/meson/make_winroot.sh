@@ -133,6 +133,7 @@ if [ "${gtk}" = "true" ] ; then
     pixman-0.42.2-1
     xz-5.4.5-1
     zlib-1.3-1
+    zstd-1.5.5-1
 "
 fi
 
