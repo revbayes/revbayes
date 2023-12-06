@@ -54,7 +54,7 @@ cat > "${CROSSNAME}" <<EOF
 ${COMPILER_LINES}
 ar = 'x86_64-w64-mingw32-ar'
 strip = 'x86_64-w64-mingw32-strip'
-pkgconfig = 'pkg-config'
+pkg-config = 'pkg-config'
 exe_wrapper = 'wine64' # A command used to run generated executables.
 
 # why do we still need these? shouldn't they get added automatically if we find boost?
