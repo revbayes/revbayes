@@ -126,6 +126,7 @@ if [ "${gtk}" = "true" ] ; then
     libpng-1.6.40-1
     libthai-0.1.29-3
     libtiff-4.6.0-1
+    libwebp-1.3.2-1
     lzo2-2.10-2
     pango-1.50.14-4
     pcre2-10.42-1
