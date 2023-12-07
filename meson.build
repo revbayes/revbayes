@@ -1,11 +1,11 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.0.12',
+        version: '1.2.2',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++14',
+          'cpp_std=c++17',
           'b_ndebug=if-release'
         ],
-        meson_version: '>= 0.53',
+        meson_version: '>= 0.57',
         license: 'GPLv2')
 
 cpp = meson.get_compiler('cpp')
@@ -55,61 +55,99 @@ boost_modules = [ 'regex',
                   'date_time',
                   'serialization']
 
-want_static = get_option('static')
-
 # This doesn't build an internal boost from the internal copy, yet.
-boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: want_static)
+if get_option('static_boost')
+  boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: true)
+else
+  boost = dependency('boost', modules : boost_modules, version: '>=1.71')
+endif
 
-openlibm = dependency('openlibm', static: want_static)
+if get_option('openlibm')
+  openlibm = dependency('openlibm')
+else
+  openlibm = dependency('', required: false)
+endif
 
 rb_name = 'rb'
 if get_option('mpi')
   add_project_arguments(['-DRB_MPI'], language: 'cpp')
-  mpi = dependency('mpi', language: 'cpp', static: want_static)
+  mpi = dependency('mpi', language: 'cpp')
 else
   mpi = dependency('', required: false)
 endif
 
-if get_option('jupyter')
-  rb_name += '-jupyter'
-  add_project_arguments(['-DRB_XCODE'], language : 'cpp')
+if get_option('rb-exe-name') != 'default'
+  rb_name = get_option('rb-exe-name')
 endif
 
 ####
 subdir('src')
 
-############# executables #################
+##### rpath: where to find shared libraries #####
+extra_rpath = ''
+if target_machine.system() == 'linux'
+  # This allows an installed structure of
+  #
+  # RevBayes/
+  #    bin/
+  #       rb
+  #    lib/
+  #       RevBayes/
+  #          *.so
+  # To find the shared libs from inside bin/ we use $ORIGIN/../lib/RevBayes/
+  #
+  extra_rpath = '$ORIGIN/../lib/RevBayes/'
+elif target_machine.system() == 'darwin'
+  # If ever we make an App bundle, the structure might be
+  #
+  # RevBayes.app/
+  #    Contents/
+  #       MacOS/
+  #          rb
+  #       PlugIns/
+  #          *.dylib
+  #
+  # So, at that point, we might add "@loaderpath/../Plugins/"
+  #
+  extra_rpath = '@loaderpath/../lib/RevBayes/;@loaderpath/../Plugins/'
+endif
+
+
+############# libraries #################
+libdl = cpp.find_library('dl')
+
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
-                      dependencies: [mpi])
+                      dependencies: [boost,mpi])
 
 revlanguage = static_library('rb-revlanguage',
                              revlanguage_sources,
                              include_directories: [src_inc],
-                             dependencies: [mpi])
+                             dependencies: [boost,mpi])
 
 libs = static_library('rb-lib',
                       libs_sources,
-                      include_directories: [src_inc])
+                      include_directories: [src_inc],
+                      dependencies: [boost, libdl])
+
+help2yml = static_library('rb-help2yml',
+                          help2yml_sources,
+                          include_directories: [src_inc],
+                          dependencies: [boost])
 
 ############# executables #################
-
-maybe_link_static = []
-if want_static
-  maybe_link_static = ['-static']
-endif
 
 rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
                 dependencies: [boost, mpi, openlibm],
-                link_args: maybe_link_static,
+                install_rpath: extra_rpath,
                 install: true)
 
 if get_option('studio')
-  gtk2 = dependency('gtk+-2.0', static: want_static)
+  gtk2 = dependency('gtk+-2.0')
   cmd = static_library('rb-cmd',
                        cmd_sources,
                        include_directories: [src_inc],
@@ -122,11 +160,23 @@ if get_option('studio')
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
                          dependencies: [boost, mpi, gtk2, openlibm],
+                         install_rpath: extra_rpath,
                          install: true)
 
 endif
 
 subdir('tests')
+
+if get_option('help2yml')
+
+  executable(rb_name+'help2yml',
+             ['src/help2yml/main.cpp'],
+             link_with: [core, revlanguage, libs, help2yml],
+             include_directories: [src_inc],
+             dependencies: [boost, mpi],
+             install_rpath: extra_rpath,
+             install: true)
+endif
 
 ####
 
@@ -135,7 +185,6 @@ summary({'host': host_machine.system()
 
 summary({'exe name': rb_name,
          'mpi': get_option('mpi'),
-         'jupyter': get_option('jupyter'),
          'studio': get_option('studio'),
         },section: 'Options')
 
@@ -155,4 +204,5 @@ endif
 summary({'optimization': get_option('optimization'),
          'debug': get_option('debug'),
          'assertions': assertions_enabled,
+         'openlibm': get_option('openlibm')
         },section: 'Configuration')

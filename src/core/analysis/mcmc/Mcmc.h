@@ -71,7 +71,7 @@ namespace RevBayesCore {
         void                                                setChainPosteriorHeat(double v);                                                        //!< Set the heating temparature of the posterior of the chain
         void                                                setChainPriorHeat(double v);
         void                                                setChainIndex(size_t idx);                                                              //!< Set the index of the chain
-        void                                                setCheckpointFile(const std::string &f);
+        void                                                setCheckpointFile(const path &f);
         void                                                setLikelihoodHeat(double v);                                                            //!< Set the heating temparature of the likelihood of the chain
         void                                                setModel(Model *m, bool redraw);
         void                                                setMoves(const RbVector<Move> &mvs);
@@ -94,7 +94,7 @@ namespace RevBayesCore {
         double                                              chain_posterior_heat;
         double                                              chain_prior_heat;
         size_t                                              chain_idx;
-        std::string                                         checkpoint_file_name;
+        path                                                checkpoint_file_name;
         Model*                                              model;
         RbVector<Monitor>                                   monitors;
         RbVector<Move>                                      moves;

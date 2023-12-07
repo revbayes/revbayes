@@ -1,7 +1,7 @@
 #ifndef HomologousCharacterData_H
 #define HomologousCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "AbstractCharacterData.h"
@@ -33,7 +33,7 @@ class AbstractTaxonData;
         virtual HomologousCharacterData*        clone(void) const = 0;
         
         // methods of the Serializable interface
-        void                                    writeToFile(const std::string &dir, const std::string &fn) const = 0;
+        void                                    writeToFile(const path &dir, const std::string &fn) const = 0;
 
         // pure virtual CharacterData functions
         virtual void                            concatenate(const AbstractCharacterData &d, std::string type = "") = 0;         //!< Concatenate two sequences

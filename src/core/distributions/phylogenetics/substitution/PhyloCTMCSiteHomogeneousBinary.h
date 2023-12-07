@@ -1,7 +1,7 @@
 #ifndef PhyloCTMCSiteHomogeneousBinary_H
 #define PhyloCTMCSiteHomogeneousBinary_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 
@@ -14,9 +14,9 @@
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "RbException.h"
 #include "TypedDistribution.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
-class RbBitSet;
 class Tree;
 template <class valueType> class TypedDagNode;
 

@@ -20,7 +20,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractNonHomolog
         o << "=";
     o << std::endl;
     
-    o << "Origination:                   " << x.getFileName() << std::endl;
+    o << "Origination:                   " << x.getFilename().filename().string() << std::endl;
     o << "Number of taxa:                " << x.getNumberOfTaxa() << std::endl;
     o << "Number of included taxa:       " << x.getNumberOfIncludedTaxa() << std::endl;
     o << "Datatype:                      " << x.getDataType() << std::endl;

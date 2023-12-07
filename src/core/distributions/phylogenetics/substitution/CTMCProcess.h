@@ -396,7 +396,7 @@ void RevBayesCore::CTMCProcess<charType>::computeSiteLikelihoodsPerSiteRateAndMa
                             for ( size_t i=0; i<val.size(); ++i )
                             {
                                 // check whether we observed this state
-                                if ( val.isSet(i) == true )
+                                if ( val.test(i) == true )
                                 {
                                     // add the probability
                                     tmp += *d;
@@ -426,7 +426,7 @@ void RevBayesCore::CTMCProcess<charType>::computeSiteLikelihoodsPerSiteRateAndMa
 //                            for ( size_t i=0; i<val.size(); ++i )
 //                            {
 //                                // check whether we observed this state
-//                                if ( val.isSet(i) == true )
+//                                if ( val.test(i) == true )
 //                                {
 //                                    // add the probability
 //                                    tmp += *d * weights[i] ;

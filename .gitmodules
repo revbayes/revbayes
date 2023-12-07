@@ -1,3 +1,3 @@
-[submodule "tests"]
-	path = tests
-	url = https://github.com/revbayes/tests.git
+[submodule "tests/revbayes.github.io"]
+	path = tests/revbayes.github.io
+	url = https://github.com/revbayes/revbayes.github.io

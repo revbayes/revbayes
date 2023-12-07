@@ -6,6 +6,8 @@
 #include <map>
 #include <utility>
 
+#include "DiscretizedContinuousState.h"
+#include "DistributionNormal.h"
 #include "ContinuousTaxonData.h"
 #include "NclReader.h"
 #include "NexusWriter.h"
@@ -16,6 +18,8 @@
 #include "AbstractCharacterData.h"
 #include "AbstractTaxonData.h"
 #include "Cloneable.h"
+#include "DiscretizedContinuousCharacterData.h"
+#include "HomologousDiscreteCharacterData.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "Taxon.h"
@@ -186,6 +190,164 @@ ContinuousCharacterData* ContinuousCharacterData::clone( void ) const
     
     return new ContinuousCharacterData(*this);
 }
+
+DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter(double error, long num_bins, double cushion_width) const
+{
+	// create the new matrix
+	size_t num_chars     = this->getNumberOfCharacters();
+    size_t num_sequences = this->taxa.size();
+    DiscretizedContinuousCharacterData *disc_char_data = new DiscretizedContinuousCharacterData();
+
+    // or each character, compute the bins and dx
+    std::vector< std::vector<double> > bins;
+    std::vector< std::vector<std::string> > state_labels;
+    std::vector<double> dx;
+    for(size_t iC = 0; iC < num_chars; ++iC)
+    { // loop over characters
+
+		// compute the extent (and midpoint)
+		double min_val = std::numeric_limits<double>::max();
+		double max_val = std::numeric_limits<double>::min();
+
+		for(size_t iS = 0; iS < num_sequences; ++iS)
+		{
+			// get the data for this taxon
+			const ContinuousTaxonData& seq = this->getTaxonData(iS);
+			const double& org_char = seq[iC];
+
+			// if the character is not missing
+			if ( RevBayesCore::RbMath::isNan(org_char) == false )
+			{
+				// check if this is an extremum
+				if ( org_char > max_val ) {
+					max_val = org_char;
+				} else if ( org_char < min_val ) {
+					min_val = org_char;
+				}
+			}
+		}
+
+		// compute the midpoint
+		double midpoint = (max_val + min_val) / 2.0;
+
+		// compute the range
+		double range = max_val - min_val;
+
+		// compute the cushion range
+		double cushion_range = range * cushion_width;
+
+		// compute the extrema of the cushion
+		double cush_min = midpoint - cushion_range / 2.0;
+		double cush_max = midpoint + cushion_range / 2.0;
+
+		// compute the bin size
+		dx.push_back( cushion_range / double(num_bins - 1) );
+
+		// compute the bin points
+		std::vector<double> these_bins(num_bins);
+		for(size_t i = 0; i < num_bins; ++i)
+		{
+			these_bins[i] = cush_min + double(i) * dx[iC];
+		}
+		bins.push_back( these_bins );
+
+		// create the state labels
+		std::vector<std::string> these_state_labels;
+		for(size_t i = 0; i < num_bins; ++i)
+		{
+			these_state_labels.push_back( std::to_string(these_bins[i]) );
+		}
+		state_labels.push_back( these_state_labels );
+
+    }
+
+    // for each taxon, compute the character data
+    for(size_t iS = 0; iS < num_sequences; ++iS)
+    {
+		// get the data for this taxon
+		const ContinuousTaxonData& seq = this->getTaxonData(iS);
+
+		// create the new taxon data
+		DiscreteTaxonData<DiscretizedContinuousState> discretized_taxon_data = DiscreteTaxonData<DiscretizedContinuousState>( seq.getTaxon() );
+
+		for(size_t iC = 0; iC < num_chars; ++iC)
+		{ // loop over characters
+
+			// get this character
+			const double& org_char = seq[iC];
+
+			// get the bins for this character
+			std::vector<double> &these_bins = bins[iC];
+
+			// create the new character
+			DiscretizedContinuousState discretized_state(state_labels[iC], these_bins, dx[iC]);
+
+			if ( RevBayesCore::RbMath::isNan(org_char) == true )
+			{
+				discretized_state.setMissingState(true);
+			}
+			else if ( error == 0.0 )
+			{ // if the sd is 0, assign the character in the closest point
+
+				// get the bins on either side
+				std::vector<double>::iterator upper_bound = std::upper_bound( these_bins.begin(), these_bins.end(), org_char );
+				std::vector<double>::iterator lower_bound = upper_bound - 1;
+
+				// get the index for the closest bin
+				size_t bin_index;
+				if (org_char - *lower_bound > *upper_bound - org_char)
+				{ // closer to upper bound
+					bin_index = upper_bound - these_bins.begin();
+				}
+				else
+				{ // closer to lower bound
+					bin_index = lower_bound - these_bins.begin();
+				}
+
+				// compute the density at each point
+				std::vector<double> density(num_bins, 0.0);
+				density[bin_index] = 1.0 / dx[iC];
+
+				// set the weights
+				discretized_state.setWeights(density);
+			}
+			else
+			{ // otherwise, compute the density at each point
+
+				// we assume the density is normal with mean equal to the measurement
+				// and SD equal to the standard deviation of the measurement
+				double mean = org_char;
+				double sd   = error;
+
+				// compute the density at each point
+				std::vector<double> density(num_bins);
+				for(size_t iX = 0; iX < num_bins; ++iX)
+				{
+					double left  = these_bins[iX] - dx[iC] * 0.5;
+					double right = these_bins[iX] + dx[iC] * 0.5;
+					density[iX]  = (RbStatistics::Normal::cdf(mean, sd, right) - RbStatistics::Normal::cdf(mean, sd, left)) / dx[iC];
+//					density[iX] = RbStatistics::Normal::pdf(mean, sd, these_bins[iX]); // the old way of compute the value for each point
+				}
+
+				// set the weights
+				discretized_state.setWeights(density);
+			}
+
+			// add the discretizd character to the taxon data
+			discretized_taxon_data.addCharacter( discretized_state );
+
+		} // end loop over characters
+
+		// add the taxon data to the alignment
+		disc_char_data->addTaxonData( discretized_taxon_data );
+
+    }
+
+    // return the discretized data
+    return disc_char_data;
+
+}
+
 
 
 /**
@@ -1231,10 +1393,10 @@ void ContinuousCharacterData::includeCharacter(size_t i)
 }
 
 
-void ContinuousCharacterData::initFromFile(const std::string &dir, const std::string &fn)
+void ContinuousCharacterData::initFromFile(const path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".nex");
+    create_directories(dir);
     
     // get the global instance of the NCL reader and clear warnings from its warnings buffer
     NclReader reader = NclReader();
@@ -1246,7 +1408,7 @@ void ContinuousCharacterData::initFromFile(const std::string &dir, const std::st
     suffix += "|unknown";
     myFileType += suffix;
         
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename , myFileType );
     ContinuousCharacterData *coreM = static_cast<ContinuousCharacterData *>( m_i[0] );
 
     *this = *coreM;
@@ -1317,6 +1479,12 @@ void ContinuousCharacterData::printForComplexStoring( std::ostream &o, const std
     throw RbException( "Complex printing has not yet been implemented for this datatype" );
 }
 
+//!< print object with maximum precision
+json ContinuousCharacterData::toJSON() const
+{
+    throw RbException( "Complex printing has not yet been implemented for this datatype" );
+}
+
 
 
 /**
@@ -1352,12 +1520,12 @@ void ContinuousCharacterData::restoreCharacter(size_t i)
 }
 
 
-void ContinuousCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
+void ContinuousCharacterData::writeToFile(const path &dir, const std::string &fn) const
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
-    fm.createDirectoryForFile();
+    path filename = dir / (fn + ".nex");
+    create_directories(dir);
     
-    NexusWriter nw( fm.getFullFileName() );
+    NexusWriter nw( filename );
     nw.openStream(false);
     
     nw.writeNexusBlock( *this );

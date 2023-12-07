@@ -11,7 +11,8 @@
 #include "RevPtr.h"
 #include "TypeSpec.h"
 #include "boost/algorithm/string/trim.hpp"
-
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -23,7 +24,7 @@ extern "C" {
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -39,15 +40,18 @@ const char* prompt = default_prompt;
 
 using namespace RevLanguage;
 
-std::vector<std::string> getFileList(const std::string &path)
+namespace fs = boost::filesystem;
+
+std::vector<std::string> getFileList(const RevBayesCore::path& dir)
 {
+    std::vector<RevBayesCore::path> filenames;
+
+    RevBayesCore::setStringWithNamesOfFilesInDirectory( RevBayesCore::current_path() / dir, filenames, false );
+
     std::vector<std::string> v;
-    
-    RbSettings& s = RbSettings::userSettings();
-    const std::string& wd = s.getWorkingDirectory();
-    
-    RevBayesCore::RbFileManager fm = RevBayesCore::RbFileManager(wd, path);
-    fm.setStringWithNamesOfFilesInDirectory( v, false );
+
+    for(auto& filename: filenames)
+        v.push_back( filename.string() );
     
     return v;
 }
@@ -298,13 +302,37 @@ int printFunctionParameters(const char *buf, size_t len, char c)
     return 0;
 }
 
+namespace RevClient
+{
+
+int interpret(const std::string& command)
+{
+    size_t bsz = command.size();
+#ifdef RB_MPI
+    MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
+
+    char * buffer = new char[bsz+1];
+    buffer[bsz] = 0;
+    for (int i = 0; i < bsz; i++)
+        buffer[i] = command[i];
+#ifdef RB_MPI
+    MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
+#endif
+
+    std::string tmp = std::string( buffer );
+
+    return RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
+}
+
 /**
  * Main application loop.
  * 
  */
-void RevClient::startInterpretor( void )
+void startInterpreter( void )
 {
-    
+    // If we aren't using MPI, this will be zero.
+    // If we are using MPI, it will be zero for the first process.
     int pid = 0;
 #ifdef RB_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
@@ -321,7 +349,12 @@ void RevClient::startInterpretor( void )
     }
     
     /* callback for printing function signatures on opening bracket*/
-    linenoiseSetCharacterCallback(printFunctionParameters, '(');
+
+    // Currently disabled because
+    // (i) it doesn't seem to do anything at the moment: pi.function_name is never set.
+    // (ii) it makes parsing go crazy if the '(' is inside a string.
+
+    // linenoiseSetCharacterCallback(printFunctionParameters, '(');
 
     int result = 0;
     std::string commandLine;
@@ -386,23 +419,7 @@ void RevClient::startInterpretor( void )
             }
         }
         
-        size_t bsz = commandLine.size();
-#ifdef RB_MPI
-        MPI_Bcast(&bsz, 1, MPI_INT, 0, MPI_COMM_WORLD);
-#endif
-            
-        char * buffer = new char[bsz+1];
-        buffer[bsz] = 0;
-        for (int i = 0; i < bsz; i++)
-            buffer[i] = commandLine[i];
-#ifdef RB_MPI
-        MPI_Bcast(buffer, (int)bsz, MPI_CHAR, 0, MPI_COMM_WORLD);
-#endif
-            
-        std::string tmp = std::string( buffer );
-            
-        result = RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
-
+        result = interpret(commandLine);
 
         /* The typed string is returned as a malloc() allocated string by
          * linenoise, so the user needs to free() it. */
@@ -415,4 +432,51 @@ void RevClient::startInterpretor( void )
     }
     
     
+}
+
+void startJupyterInterpreter( void )
+{
+    // If we aren't using MPI, this will be zero.
+    // If we are using MPI, it will be zero for the first process.
+    int pid = 0;
+#ifdef RB_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+#endif
+    
+    /* Declare things we need */
+    int result = 0;
+    std::string commandLine = "";
+
+    for (;;)
+    {
+        /* Print prompt based on state after previous iteration */
+        if ( pid == 0 )
+        {
+            if (result == 0 || result == 2)
+            {
+                std::cout << "> ";
+            }
+            else
+            {
+                std::cout << "+ ";
+            }
+
+            /* Get the line */
+            std::string line = "";
+            if (not std::getline(std::cin, line)) return;
+
+            if (result == 0 || result == 2)
+            {
+                commandLine = line;
+            }
+            else if (result == 1)
+            {
+                commandLine += ";" + line;
+            }
+        }
+
+        result = RevClient::interpret(commandLine);
+    }
+}
+
 }

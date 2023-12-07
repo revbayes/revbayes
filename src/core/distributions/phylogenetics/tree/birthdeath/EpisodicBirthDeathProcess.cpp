@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "Clade.h"
 #include "DivergenceTimeCDF.h"
 #include "EpisodicBirthDeathProcess.h"
 #include "RandomNumberFactory.h"

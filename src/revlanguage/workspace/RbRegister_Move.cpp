@@ -25,7 +25,7 @@
 
 #include <sstream>
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 /* Files including helper classes */
@@ -176,6 +176,7 @@
 // #include "Move_PathCharacterHistoryRejectionSample.h"
 #include "Move_CharacterHistory.h"
 
+#include "Move_ResampleFBD.h"
 
 #include "Move_BirthDeathEventContinuous.h"
 #include "Move_BirthDeathEventDiscrete.h"
@@ -189,6 +190,14 @@
 #include "Move_MultiValueEventBirthDeath.h"
 #include "Move_MultiValueEventScale.h"
 #include "Move_MultiValueEventSlide.h"
+
+#include "Move_OrderedEventTimeSlide.h"
+#include "Move_OrderedEventBirthDeath.h"
+#include "Move_OrderedEventSlide.h"
+#include "Move_OrderedEventScale.h"
+#include "Move_OrderedEventVectorSlide.h"
+#include "Move_OrderedEventVectorScale.h"
+
 
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
 #include "Move_BranchRateNodeValueScale.h"
@@ -218,6 +227,7 @@
 #include "Move_RateAgeProposal.h"
 #include "Move_RateAgeSubtreeProposal.h"
 #include "Move_RootTimeScaleBactrian.h"
+#include "Move_RootTimeSlide.h"
 #include "Move_RootTimeSlideUniform.h"
 #include "Move_SpeciesNarrowExchange.h"
 #include "Move_SpeciesNodeTimeSlideUniform.h"
@@ -386,6 +396,17 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_MultiValueEventSlide()                         );
 
 
+        addType( new Move_OrderedEventTimeSlide()                        );
+        addType( new Move_OrderedEventBirthDeath()                       );
+        addType( new Move_OrderedEventSlide<Real>()                      );
+        addType( new Move_OrderedEventSlide<RealPos>()                   );
+        addType( new Move_OrderedEventSlide<Probability>()               );
+        addType( new Move_OrderedEventScale<RealPos>()                   );
+        addType( new Move_OrderedEventVectorSlide<ModelVector<Real>>()        );
+        addType( new Move_OrderedEventVectorSlide<ModelVector<RealPos>>()     );
+        addType( new Move_OrderedEventVectorSlide<ModelVector<Probability>>() );
+        addType( new Move_OrderedEventVectorScale<ModelVector<RealPos>>()     );
+
 
         addType( new Move_BirthDeathEventContinuous()                    );
         addType( new Move_BirthDeathEventDiscrete()                      );
@@ -418,6 +439,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RateAgeBetaShift()                 );
         addType( new Move_RateAgeProposal()                  );
         addType( new Move_RateAgeSubtreeProposal()           );
+        addType( new Move_RootTimeSlide()                    );
         addType( new Move_RootTimeScaleBactrian()            );
         addType( new Move_RootTimeSlideUniform()             );
         addType( new Move_SubtreeScale()                     );
@@ -452,6 +474,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
 //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
 
+        addType( new Move_ResampleFBD()                      );
     }
     catch(RbException& rbException)
     {

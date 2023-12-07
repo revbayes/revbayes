@@ -77,7 +77,49 @@ void AbstractHomologousDiscreteCharacterData::fillMissingSitesMask(std::vector<s
 }
 
 
-void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
+void AbstractHomologousDiscreteCharacterData::excludeMissingSites( void )
+{
+
+    size_t num_taxa  = getNumberOfTaxa();
+    size_t num_sites = getNumberOfCharacters();
+    
+    for ( size_t site=0; site<num_sites; ++site)
+    {
+        
+        bool all_missing = true;
+        
+        const std::string &taxon_name_first = getTaxonNameWithIndex( 0 );
+        AbstractDiscreteTaxonData& taxon_first = getTaxonData( taxon_name_first );
+
+        DiscreteCharacterState &ref = taxon_first.getCharacter(site);
+
+        for (size_t i = 0; i < num_taxa; ++i)
+        {
+
+            const std::string &taxon_name = getTaxonNameWithIndex( i );
+            AbstractDiscreteTaxonData& taxon = getTaxonData( taxon_name );
+
+            DiscreteCharacterState &c = taxon.getCharacter(site);
+            
+            if ( !( c.isGapState() == true || c.isMissingState() == true || c.isAmbiguous() == true ) )
+            {
+                all_missing = false;
+                break;
+            }
+                        
+        }
+        
+        if ( all_missing == true )
+        {
+            excludeCharacter( site );
+        }
+
+    }
+    
+}
+
+
+void AbstractHomologousDiscreteCharacterData::replaceRandomSitesByMissingData( double p )
 {
 
     size_t num_taxa  = getNumberOfTaxa();
@@ -107,22 +149,23 @@ void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
 }
 
 
-void AbstractHomologousDiscreteCharacterData::writeToFile(const std::string &dir, const std::string &fn) const
+void AbstractHomologousDiscreteCharacterData::writeToFile(const path &dir, const std::string &fn) const
 {
+    create_directories(dir);
+
     if (this->getDataType() == "NaturalNumbers")
     {
         // NEXUS does not support NaturalNumbers so write tab delimited file
-        RbFileManager fm = RbFileManager(dir, fn + ".tsv");
+        path filename = dir / (fn + ".tsv");
         RevBayesCore::DelimitedCharacterDataWriter writer; 
-        writer.writeData(fm.getFullFileName(), *this);
+        writer.writeData( filename, *this);
     }
     else
     {
         // otherwise write NEXUS file
-        RbFileManager fm = RbFileManager(dir, fn + ".nex");
-        fm.createDirectoryForFile();
+        path filename = dir / (fn + ".nex");
         
-        NexusWriter nw( fm.getFullFileName() );
+        NexusWriter nw( filename );
         nw.openStream(false);
         
         nw.writeNexusBlock( *this );
@@ -144,7 +187,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractHomologous
         o << "=";
     o << std::endl;
     
-    o << "Origination:                   " << x.getFileName() << std::endl;
+    o << "Origination:                   " << x.getFilename().filename() << std::endl;
     o << "Number of taxa:                " << x.getNumberOfTaxa() << std::endl;
     o << "Number of included taxa:       " << x.getNumberOfIncludedTaxa() << std::endl;
     o << "Number of characters:          " << x.getNumberOfCharacters() << std::endl;

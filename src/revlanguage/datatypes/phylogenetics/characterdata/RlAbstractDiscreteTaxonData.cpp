@@ -1,6 +1,6 @@
 #include "RlAbstractDiscreteTaxonData.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "MemberProcedure.h"
@@ -102,7 +102,7 @@ RevPtr<RevVariable> AbstractDiscreteTaxonData::executeMethod(std::string const &
         RevObject* element = new DiscreteCharacterState( this->dag_node->getValue().getCharacter( size_t(index.getValue()) - 1) );
         return new RevVariable( element );
     }
-    else if ( name == "[]")
+    else if ( name == "nchar")
     {
         found = true;
             

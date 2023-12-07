@@ -11,23 +11,22 @@
 #include "YAMLHelpRenderer.h"
 #include "Workspace.h"
 
+using namespace RevBayesCore;
+
 int main(int argc, const char * argv[])
 {
-    std::string prefix = "";
+    path file = "help.yml";
 
     if( argc > 1 )
     {
-        prefix = std::string(argv[1]);
-    }
-    
-    std::string file = prefix + "/help.yml";
+        path prefix = std::string(argv[1]);
 
-    RevBayesCore::RbFileManager fm( file );
-
-    if ( fm.testDirectory() == false )
-    {
-        std::cerr << "Error: Directory " << prefix << " does not exist" << std::endl;
-        exit(1);
+        if (not is_directory(prefix))
+        {
+            std::cerr << "Error: Directory " << prefix << " does not exist" << std::endl;
+            exit(1);
+        }
+        file = prefix / file;
     }
 
     std::string function_entry_result, type_entry_result, dist_entry_result, mntr_entry_result, move_entry_result, tmp;
@@ -42,7 +41,7 @@ int main(int argc, const char * argv[])
     std::cout << std::endl << "Generating help files..." << std::endl;
 
     std::fstream fs;
-    fs.open(file, std::fstream::out | std::fstream::trunc );
+    fs.open(file.string(), std::fstream::out | std::fstream::trunc );
 
     const std::set<std::string> &functionEntryNames = help.getFunctionEntries();
     const std::set<std::string> &typeEntryNames = help.getTypeEntries();

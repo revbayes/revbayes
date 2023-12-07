@@ -1,7 +1,7 @@
 #ifndef Parser_H
 #define Parser_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <list>
 #include <string>
 #include <sstream>
@@ -139,7 +139,7 @@ namespace RevLanguage {
 }
 
 // Global call-back function for flex-generated code
-void rrinput(char* buf, size_t& result, size_t maxsize);
+void rrinput(char* buf, int& result, size_t maxsize);
 
 // Global command buffer string stream for rrinput
 extern std::stringstream rrcommand;
@@ -151,6 +151,6 @@ extern bool foundEOF;
 
 // Global column and token length variables for flex
 extern size_t yycolumn;
-extern size_t yyleng;
+extern int    yyleng;
 
 #endif

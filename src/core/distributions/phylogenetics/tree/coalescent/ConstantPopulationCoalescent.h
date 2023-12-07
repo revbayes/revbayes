@@ -17,12 +17,14 @@ namespace RevBayesCore {
      *
      *
      * The constant population size coalescent process is the simplest available coalescent process.
-     * It contains only a single parameter NE, the population size.
+     * It contains only a single additional parameter from the abstract class.
      *
+     * @param Ne the population size
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-01-17, version 1.0
+     * @copydoc RevBayesCore::AbstractCoalescent
+     *
+     * @see RevBayesCore::AbstractCoalescent for the parent class
+     *
      *
      */
     class ConstantPopulationCoalescent : public AbstractCoalescent {
@@ -47,7 +49,7 @@ namespace RevBayesCore {
         
         
         // members
-        const TypedDagNode<double>*                         Ne;
+        const TypedDagNode<double>*                         Ne; //!< The effective population size
         
     };
     

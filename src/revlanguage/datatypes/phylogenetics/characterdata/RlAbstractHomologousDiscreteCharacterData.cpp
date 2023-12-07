@@ -1,6 +1,6 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "RlAbstractDiscreteTaxonData.h"
@@ -18,6 +18,7 @@
 #include "RlUserInterface.h"
 #include "RbBitSet.h"
 #include "AbstractDiscreteTaxonData.h"
+#include "HomologousDiscreteCharacterData.h"
 #include "Argument.h"
 #include "ArgumentRules.h"
 #include "DiscreteCharacterState.h"
@@ -234,6 +235,18 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Simplex(ebf) );
     }
+    else if (name == "getInvariantSiteIndices")
+    {
+        found = true;
+
+        const RevObject& argument = args[0].getVariable()->getRevObject();
+        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+
+        std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
+        std::vector<long> inv_vect(begin(tmp), end(tmp));
+
+        return new RevVariable( new ModelVector<Natural>(inv_vect) );
+    }
     else if (name == "getNumInvariantSites")
     {
         found = true;
@@ -315,7 +328,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                         const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
                         for (size_t k = 0; k < state.size(); k++)
                         {
-                            if (state.isSet(k) && k +1 > max)
+                            if (state.test(k) && k +1 > max)
                             {
                                 max = static_cast<int>(k)+1;
                             }
@@ -425,13 +438,29 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Natural(num_taxa) );
     }
-    else if (name == "removeRandomSites")
+    else if (name == "removeExcludedCharacters")
+    {
+        found = true;
+        
+        this->dag_node->getValue().removeExcludedCharacters();
+        
+        return NULL;
+    }
+    else if (name == "excludeMissingSites")
+    {
+        found = true;
+        
+        this->dag_node->getValue().excludeMissingSites();
+        
+        return NULL;
+    }
+    else if (name == "replaceRandomSitesByMissingData")
     {
         found = true;
         
         double missing = static_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
 
-        this->dag_node->getValue().removeRandomSites(missing);
+        this->dag_node->getValue().replaceRandomSitesByMissingData(missing);
 
         
         return NULL;
@@ -519,57 +548,60 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
         for (size_t i = 0; i < nChars; i++)
         {
-            RevBayesCore::RbBitSet observed(v.getNumberOfStates());
-            size_t max = 0;
-            for (size_t j = 0; j < nTaxa; j++)
+            // only set state number partition for previously included characters
+            if ( !v.isCharacterExcluded(i) )
             {
-                const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
-                if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
+                RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+                size_t max = 0;
+                for (size_t j = 0; j < nTaxa; j++)
                 {
-                    if (td.getCharacter(i).getNumberObservedStates() > 1)
+                    const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                    if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
                     {
-                        const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
-                        for (size_t k = 0; k < state.size(); k++)
+                        if (td.getCharacter(i).getNumberObservedStates() > 1)
                         {
-                            if (state.isSet(k) )
+                            const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
+                            for (size_t k = 0; k < state.size(); k++)
                             {
-                                observed.set(k);
-
-                                if ( k > max )
+                                if (state.test(k) )
                                 {
-                                    max = k;
+                                    observed.set(k);
+
+                                    if ( k > max )
+                                    {
+                                        max = k;
+                                    }
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        size_t k = td.getCharacter(i).getStateIndex();
-
-                        observed.set(k);
-
-                        if (k > max)
+                        else
                         {
-                            max = k;
+                            size_t k = td.getCharacter(i).getStateIndex();
+
+                            observed.set(k);
+
+                            if (k > max)
+                            {
+                                max = k;
+                            }
                         }
                     }
                 }
-            }
 
-            if ( observed.getNumberSetBits() != max + 1 )
-            {
-                warn = true;
+                if ( observed.count() != max + 1 )
+                {
+                    warn = true;
+                }
+                
+                if (max + 1 == n)
+                {
+                    v.includeCharacter(i);
+                }
+                else
+                {
+                    v.excludeCharacter(i);
+                }
             }
-
-            if ( max + 1 == n)
-            {
-                v.includeCharacter(i);
-            }
-            else
-            {
-                v.excludeCharacter(i);
-            }
-
         }
 
         if ( warn == true )
@@ -600,57 +632,61 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         for (size_t i = 0; i < nChars; i++)
         {
-            RevBayesCore::RbBitSet observed(v.getNumberOfStates());
-            size_t max = 0;
-            for (size_t j = 0; j < nTaxa; j++)
+            // only set state number partition for previously included characters
+            if ( !v.isCharacterExcluded(i) )
             {
-                const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
-                if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
+                RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+                size_t max = 0;
+                for (size_t j = 0; j < nTaxa; j++)
                 {
-                    if (td.getCharacter(i).getNumberObservedStates() > 1)
+                    const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                    if ( td.getCharacter(i).isMissingState() == false && td.getCharacter(i).isGapState() == false)
                     {
-                        const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
-                        for (size_t k = 0; k < state.size(); k++)
+                        if (td.getCharacter(i).getNumberObservedStates() > 1)
                         {
-                            if (state.isSet(k) )
+                            const RevBayesCore::RbBitSet& state = td.getCharacter(i).getState();
+                            for (size_t k = 0; k < state.size(); k++)
                             {
-                                observed.set(k);
-
-                                if ( k > max )
+                                if (state.test(k) )
                                 {
-                                    max = k;
+                                    observed.set(k);
+
+                                    if ( k > max )
+                                    {
+                                        max = k;
+                                    }
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        size_t k = td.getCharacter(i).getStateIndex();
-
-                        observed.set(k);
-
-                        if (k > max)
+                        else
                         {
-                            max = k;
+                            size_t k = td.getCharacter(i).getStateIndex();
+
+                            observed.set(k);
+
+                            if (k > max)
+                            {
+                                max = k;
+                            }
                         }
                     }
                 }
-            }
 
-            if ( observed.getNumberSetBits() != max + 1 )
-            {
-                warn = true;
-            }
-
-            for (size_t x = 0; x < v.getNumberOfStates(); x++)
-            {
-                if ( max == x)
+                if ( observed.count() != max + 1 )
                 {
-                    matVec[x]->includeCharacter(i);
+                    warn = true;
                 }
-                else
+
+                for (size_t x = 0; x < v.getNumberOfStates(); x++)
                 {
-                    matVec[x]->excludeCharacter(i);
+                    if ( !v.isCharacterExcluded(i) && max == x ) // only consider previously included characters
+                    {
+                        matVec[x]->includeCharacter(i);
+                    }
+                    else
+                    {
+                        matVec[x]->excludeCharacter(i);
+                    }
                 }
             }
         }
@@ -767,6 +803,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* getStateDescriptionsArgRules             = new ArgumentRules();
     ArgumentRules* ishomologousArgRules                     = new ArgumentRules();
     ArgumentRules* invSitesArgRules                         = new ArgumentRules();
+    ArgumentRules* invSiteIndicesArgRules                   = new ArgumentRules();
     ArgumentRules* mask_missing_arg_rules                   = new ArgumentRules();
     ArgumentRules* maxGcContentArgRules                     = new ArgumentRules();
     ArgumentRules* maxInvariableBlockLengthArgRules         = new ArgumentRules();
@@ -779,7 +816,9 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* minPairwiseDifferenceArgRules            = new ArgumentRules();
     ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
     ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
-    ArgumentRules* remove_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* remove_excluded_characters_arg_rules     = new ArgumentRules();
+    ArgumentRules* replace_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* exclude_missing_sites_arg_rules           = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2               = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules            = new ArgumentRules();
@@ -808,6 +847,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
 //    comp_site_freq_spec_arg_rules->push_back(           new ArgumentRule( "ambigAreDerived"  , RlBoolean::getClassTypeSpec()          , "Should we treat ambiguous characters as derived?",    ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     expandCharactersArgRules->push_back(                new ArgumentRule( "factor"           , Natural::getClassTypeSpec()            , "The factor by which the state space is expanded.",    ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     invSitesArgRules->push_back(                        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
+    invSiteIndicesArgRules->push_back(                  new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     mask_missing_arg_rules->push_back(       new ArgumentRule("ref",        AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The reference dataset/alignment which we use for applying the mask of missing sites.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     maxGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     maxInvariableBlockLengthArgRules->push_back(        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
@@ -821,7 +861,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     meanGcContentByCodonPositionArgRules->push_back(    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     numInvariableBlocksArgRules->push_back(             new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     num_taxaMissingSequenceArgRules->push_back(         new ArgumentRule( "x" ,     Probability::getClassTypeSpec()          , "The percentage/threshold for the missing sequence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
-    remove_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    replace_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     translateCharactersArgRules->push_back(             new ArgumentRule( "type" ,     RlString::getClassTypeSpec()          , "The character type into which we want to translate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     varGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     varGcContentByCodonPositionArgRules->push_back(     new ArgumentRule( "index" , Natural::getClassTypeSpec()          , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
@@ -833,9 +873,11 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "computeSiteFrequencySpectrum",           ModelVector<Natural>::getClassTypeSpec(), comp_site_freq_spec_arg_rules     ) );
     methods.addFunction( new MemberProcedure( "computeStateFrequencies",                MatrixReal::getClassTypeSpec(),     compStateFreqArgRules           ) );
     methods.addFunction( new MemberProcedure( "computeMultinomialProfileLikelihood",    Real::getClassTypeSpec(),           compMultiLikeArgRules           ) );
+    methods.addFunction( new MemberProcedure( "excludeMissingSites",                     RlUtils::Void,                      exclude_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
+    methods.addFunction( new MemberProcedure( "getInvariantSiteIndices",                ModelVector<Natural>::getClassTypeSpec(), invSiteIndicesArgRules           ) );
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
     methods.addFunction( new MemberProcedure( "getPairwiseDifference",                  DistanceMatrix::getClassTypeSpec(), getPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "getStateDescriptions",                   ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules ) );
@@ -849,9 +891,10 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "minPairwiseDifference",                  Natural::getClassTypeSpec(),        minPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "meanGcContent",                          Probability::getClassTypeSpec(),    meanGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "meanGcContentByCodonPosition",           Probability::getClassTypeSpec(),    meanGcContentByCodonPositionArgRules                ) );
-    methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules         ) );
-    methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules         ) );
-    methods.addFunction( new MemberProcedure( "removeRandomSites",                      RlUtils::Void,                      remove_random_sites_arg_rules   ) );
+    methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules     ) );
+    methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules ) );
+    methods.addFunction( new MemberProcedure( "removeExcludedCharacters",               RlUtils::Void,                    remove_excluded_characters_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "replaceRandomSitesByMissingData",        RlUtils::Void,                      replace_random_sites_arg_rules   ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
     methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );

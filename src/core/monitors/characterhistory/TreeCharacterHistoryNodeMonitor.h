@@ -29,7 +29,7 @@ namespace RevBayesCore {
 
     public:
         // Constructors and Destructors
-        TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, unsigned long g, const std::string &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
+        TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
 
         // new TreeCharacterHistoryNodeMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
 
@@ -64,7 +64,7 @@ namespace RevBayesCore {
         StochasticNode<AbstractHomologousDiscreteCharacterData>* variable;
         TypedDagNode<Tree>*                 tree;
         std::set<DagNode *>                 nodeVariables;
-        std::string                         filename;
+        path                                filename;
         std::string                         separator;
         bool                                posterior;
         bool                                prior;
@@ -81,7 +81,7 @@ namespace RevBayesCore {
 
 /* Constructor */
 template<class charType>
-RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, unsigned long g, const std::string &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
+RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, unsigned long g, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
 Monitor(g,t),
 outStream(),
 variable(s),
@@ -581,15 +581,13 @@ void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::monitor(unsigned l
 template<class charType>
 void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::openStream(bool reopen)
 {
-    
-    RbFileManager fm = RbFileManager(filename);
-    fm.createDirectoryForFile();
+    createDirectoryForFile( filename );
     
     // open the stream to the file
     if (append)
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out | std::fstream::app);
+        outStream.open( filename.string(), std::fstream::out | std::fstream::app);
     else
-        outStream.open( fm.getFullFileName().c_str(), std::fstream::out);
+        outStream.open( filename.string(), std::fstream::out);
 }
 
 /** Print header for monitored values */

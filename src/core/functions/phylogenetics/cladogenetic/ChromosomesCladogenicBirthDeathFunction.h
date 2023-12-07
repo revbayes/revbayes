@@ -7,7 +7,7 @@
 #ifndef ChromosomesCladogenicBirthDeathFunction__
 #define ChromosomesCladogenicBirthDeathFunction__
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <map>
 

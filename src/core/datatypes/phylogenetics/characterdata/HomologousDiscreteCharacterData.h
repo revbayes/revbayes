@@ -39,7 +39,7 @@ namespace RevBayesCore {
         HomologousDiscreteCharacterData<charType>*          clone(void) const;
         
         // implemented methods of the Serializable interface
-        void                                                initFromFile( const std::string &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
+        void                                                initFromFile( const path &dir, const std::string &fn );                     //!< Read and resurrect this object from a file in its default format.
         void                                                initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
 
         // CharacterData functions
@@ -57,6 +57,7 @@ namespace RevBayesCore {
         std::vector<double>                                 getEmpiricalBaseFrequencies(void) const;                                    //!< Compute the empirical base frequencies
         const std::set<size_t>&                             getExcludedCharacters(void) const;                                          //!< Returns the name of the file the data came from
         std::vector<size_t>                                 getIncludedSiteIndices(void) const;
+        std::vector<size_t>                                 getInvariantSiteIndices(bool excl) const;                                   //!< Get the indices of invariant characters in this matrix
         size_t                                              getMaxObservedStateIndex(void) const;                                       //!< Get the number of observed states for the characters in this matrix
         size_t                                              getNumberOfCharacters(void) const;                                          //!< Number of characters
         size_t                                              getNumberOfIncludedCharacters(void) const;                                  //!< Number of characters
@@ -938,6 +939,57 @@ std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::get
 
 
 
+/**
+ * Get the indices of invariant characters in taxon data object.
+ * This is regardless of whether the character are included or excluded.
+ *
+ * \return    The total number of characters
+ */
+template<class charType>
+std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::getInvariantSiteIndices(bool exclude_missing) const
+{
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> inv_site_indices;
+    size_t nt = this->getNumberOfTaxa();
+
+    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
+    size_t nc = firstTaxonData.getNumberOfCharacters();
+    for (size_t j=0; j<nc; j++)
+    {
+        const DiscreteCharacterState* a = &firstTaxonData[j];
+        size_t k = 1;
+        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
+        {
+            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
+            a = &td[j];
+            ++k;
+        }
+        
+        bool invariant = true;
+        for (size_t i=1; i<nt; i++)
+        {
+            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
+            const DiscreteCharacterState& b = secondTaxonData[j];
+            
+            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
+            {
+                invariant &= (*a == b);
+            }
+
+        }
+        
+        if ( invariant == true )
+        {
+            inv_site_indices.push_back( j + 1 );
+        }
+
+    }
+    
+    return inv_site_indices;
+}
+
+
 
 /** 
  * Get the number of characters in taxon data object. 
@@ -1015,7 +1067,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMaxObservedSt
     int max;
     for (max = int(observed.size()) - 1; max >= 0; max--)
     {
-        if (observed.isSet(max))
+        if (observed.test(max))
         {
             break;
         }
@@ -1053,49 +1105,15 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfState
 
 
 /**
- * Get the set of excluded character indices.
+ * Get the number of invariant characters.
  *
- * \return    The excluded character indices.
+ * \return    The number of invariant sites.
  */
 template<class charType>
 size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfInvariantSites(bool exclude_missing) const
 {
-    size_t invSites = 0;
-    size_t nt = this->getNumberOfTaxa();
-
-    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
-    size_t nc = firstTaxonData.getNumberOfCharacters();
-    for (size_t j=0; j<nc; j++)
-    {
-        const DiscreteCharacterState* a = &firstTaxonData[j];
-        size_t k = 1;
-        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
-        {
-            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
-            a = &td[j];
-            ++k;
-        }
-        
-        bool invariant = true;
-        for (size_t i=1; i<nt; i++)
-        {
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
-            const DiscreteCharacterState& b = secondTaxonData[j];
-            
-            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
-            {
-                invariant &= (*a == b);
-            }
-
-        }
-        
-        if ( invariant == true )
-        {
-            ++invSites;
-        }
-
-    }
-    
+    std::vector<size_t> inv_site_indices = this->getInvariantSiteIndices(exclude_missing);
+    size_t invSites = inv_site_indices.size();
     return invSites;
 }
 
@@ -1480,9 +1498,9 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::includeCharacter(s
  *
  */
 template<class charType>
-void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const std::string &dir, const std::string &fn)
+void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const RevBayesCore::path &dir, const std::string &fn)
 {
-    RbFileManager fm = RbFileManager(dir, fn + ".nex");
+    auto filepath = dir / (fn + ".nex");
     
     // get an instance of the NCL reader
     NclReader reader = NclReader();
@@ -1495,7 +1513,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
     myFileType += suffix;
     
     // read the content of the file now
-    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( fm.getFullFileName(), myFileType );
+    std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filepath, myFileType );
     
     if ( m_i.size() < 1 )
     {
@@ -1504,7 +1522,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
         {
             std::cerr << "NCL-Warning:\t\t" << *it << std::endl;
         }
-        throw RbException("Could not read character data matrix from file \"" + fm.getFullFileName() + "\".");
+        throw RbException()<<"Could not read character data matrix from file "<<filepath<<".";
     }
     
     HomologousDiscreteCharacterData<charType> *coreM = static_cast<HomologousDiscreteCharacterData<charType> *>( m_i[0] );

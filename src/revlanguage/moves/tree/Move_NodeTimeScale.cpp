@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 will freyman. All rights reserved.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 

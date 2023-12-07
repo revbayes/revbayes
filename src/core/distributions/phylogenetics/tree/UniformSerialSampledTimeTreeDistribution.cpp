@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -116,7 +116,6 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 		leftChild->setParent(parent);
 		rightChild->setParent(parent);
 		parent->setAge( current_time );
-		parent->setNodeType( false, false, true );
 		active_nodes.push_back(parent);
 		nodes.push_back(parent);
 
@@ -334,7 +333,6 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
         node->setAge(taxa[i].getAge());
-        node->setNodeType( true, false, false );
         node->setTaxon(taxa[i]);
         // add to tips
         nodes.push_back(node);

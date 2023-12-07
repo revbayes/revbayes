@@ -38,14 +38,15 @@
 
 #include "Clade.h"
 #include "RbBitSet.h"
+#include "RbConstants.h"
 
 #include "TreeChangeEventMessage.h"
 #include "Taxon.h"
-#include "TaxonMap.h"
 
 #include <vector>
 #include <map>
 #include <string>
+#include <boost/optional.hpp>
 
 namespace RevBayesCore {
     
@@ -54,31 +55,42 @@ namespace RevBayesCore {
     class TopologyNode  {
         
     public:
-        TopologyNode(size_t indx=0);                                                                                                    //!< Default constructor with optional index
-        TopologyNode(const std::string& n, size_t indx=0);                                                                              //!< Constructor with name and optional index
-        TopologyNode(const Taxon& t, size_t indx=0);                                                                                    //!< Constructor with taxon and optional index
+        TopologyNode();                                                                                                                 //!< Default constructor with no index
+        TopologyNode(size_t indx);                                                                                                      //!< Default constructor with index
+        TopologyNode(const std::string& n, const boost::optional<size_t>& indx = {});                                                   //!< Constructor with name and optional index
+        TopologyNode(const Taxon& t, const boost::optional<size_t>& indx = {});                                                         //!< Constructor with taxon and optional index
         TopologyNode(const TopologyNode &n);                                                                                            //!< Copy constructor
         virtual                                    ~TopologyNode(void);                                                                 //!< Destructor
         TopologyNode&                               operator=(const TopologyNode& n);
-        
-        
+
+
         // Basic utility functions
         TopologyNode*                               clone(void) const;                                                                  //!< Clone object
         bool                                        equals(const TopologyNode& node) const;                                             //!< Test whether this is the same node
-        
+
         // public methods
+        void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
+
         void                                        addBranchParameter(const std::string &n, double p);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
-        void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
+
         void                                        addNodeParameter(const std::string &n, double p);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
+        void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
-		void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
+        void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
+
+        bool                                        hasNodeComment(const std::string& comment) const;                                   //!< Checks for a comment -- maybe not of the form key=value.
+        bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
+        std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
+        std::optional<std::string>                  eraseNodeParameter(const std::string& name);                                        //!< Erases a node parameter if present, returning the value.
+
+
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
-		void                                        clearNodeParameters(void);
+        void                                        clearNodeParameters(void);
         virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
         std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
@@ -98,6 +110,7 @@ namespace RevBayesCore {
         const std::vector<TopologyNode*>&           getChildren(void) const;
         std::vector<int>                            getChildrenIndices(void) const;                                                     //!< Return children indices
         Clade                                       getClade(void) const;                                                               //!< Get the clade this node represents
+        bool                                        hasIndex(void) const;                                                               //!< Does the node have an index
         size_t                                      getIndex(void) const;                                                               //!< Get index of node
         void                                        getIndicesOfNodesInSubtree(bool countTips, std::vector<size_t>* indices) const;                                                               //!< Get index of node
         std::string                                 getIndividualName() const;                                                             //!< Get the species name for the node
@@ -118,6 +131,7 @@ namespace RevBayesCore {
         size_t                                      getNumberOfChildren(void) const;                                                    //!< Returns the number of children
         size_t                                      getNumberOfShiftEvents(void) const;
         size_t                                      getNumberOfNodesInSubtree(bool tips) const;
+        size_t                                      getDegree() const;                                                                  //!< Returns the degree of the node
         TopologyNode&                               getParent(void);                                                                    //!< Returns the node's parent
         const TopologyNode&                         getParent(void) const;                                                              //!< Returns the node's parent
         std::string                                 getSpeciesName() const;                                                             //!< Get the species name for the node
@@ -133,9 +147,9 @@ namespace RevBayesCore {
         bool                                        isFossil(void) const;                                                               //!< Is node a fossil?
         bool                                        isInternal(void) const;                                                             //!< Is node internal?
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
-        bool                                        isSampledAncestor(bool propagate=false) const;                                                      //!< Is node (or a child node) a sampled ancestor?
+        bool                                        isSampledAncestor(bool propagate=false) const;                                      //!< Is node (or a child node) a sampled ancestor?
+        bool                                        isTipSampledAncestor() const;                                                       //!< Is node (or a child node) a sampled ancestor?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        bool                                        isUltrametric(double& depth) const;                                                 //!< Check if the subtree subtending from this node is ultramtric.
         void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
@@ -149,16 +163,14 @@ namespace RevBayesCore {
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
         void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
-  		void										setNodeType(bool tip, bool root, bool interior); //SK
         void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
         void                                        setSpeciesName(std::string const &n);                                               //!< Set the species name of this node
         void                                        setTaxon(Taxon const &t);                                                           //!< Set the taxon of this node
-        void                                        setTaxonIndices(const TaxonMap &tm);                                                //!< Set the indices of the taxa from the taxon map
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
-        
+
         // internal helper functions
         bool getBurstSpeciation(void) const { return burst_speciation; }
         bool getSamplingEvent(void) const { return sampling_event; }
@@ -168,42 +180,40 @@ namespace RevBayesCore {
         void setSamplingEvent(bool tf) { sampling_event = tf; }
         void setSerialSampling(bool tf) { serial_sampling = tf; }
         void setSerialSpeciation(bool tf) { serial_speciation = tf; }
-                
+
     protected:
 
-        bool burst_speciation;
-        bool sampling_event;
-        bool serial_sampling;
-        bool serial_speciation;
-        
+        bool burst_speciation = false;
+        bool sampling_event = false;
+        bool serial_sampling = false;
+        bool serial_speciation = false;
+
         // helper methods
-        virtual std::string                         buildNewickString(bool simmap, bool round);                                                     //!< compute the newick string for a tree rooting at this node
-        
+        std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
+
         // protected members
-        bool                                        use_ages;
-        double                                      age;
-        double                                      branch_length;
+        bool                                        use_ages = true;
+        double                                      age = RbConstants::Double::nan;
+        double                                      branch_length = RbConstants::Double::nan;
         std::vector<TopologyNode*>                  children;                                                                           //!< Vector holding the node's children. Note that the parent owns the children but not the other way around.
-        TopologyNode*                               parent;                                                                             //!< Pointer to the parent of the node. It is a regular pointer instead of a super smart pointer to avoid loops in the reference counting.
-        Tree*                                       tree;                                                                               //!< A pointer to the tree for convinience access
+        TopologyNode*                               parent = nullptr;                                                                   //!< Pointer to the parent of the node. It is a regular pointer instead of a super smart pointer to avoid loops in the reference counting.
+        Tree*                                       tree = nullptr;                                                                     //!< A pointer to the tree for convinience access
         Taxon                                       taxon;                                                                              //!< Taxon of the node, i.e. identifier/taxon name, plus species it comes from
 
-        size_t                                      index;                                                                              //!< Node index
-        bool                                        interior_node;
-        bool                                        root_node;
-        bool                                        tip_node;
-        bool                                        sampled_ancestor;
-        
+        boost::optional<size_t>                     index;                                                                              //!< Node index
+        bool                                        sampled_ancestor = false;
+
         // information for newick representation
         std::vector<std::string>                    node_comments;
         std::vector<std::string>                    branch_comments;
-       
+
         // for stochastic maps
         std::vector<double>                         time_in_states;
-        size_t                                      num_shift_events;
-        
+        size_t                                      num_shift_events = 0;
+
 //        RevLanguage::RevPtr<TaxonMap>               taxon_map;
-        
+
      // std::map<std::string,std::string>           nodeFields;
      // std::map<std::string,std::string>           branchFields;
     };
