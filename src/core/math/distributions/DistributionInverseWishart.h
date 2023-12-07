@@ -9,7 +9,7 @@
 #define	DISTRIBUTIONINVERSEWISHART_H
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "MatrixReal.h"

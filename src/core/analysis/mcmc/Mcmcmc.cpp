@@ -66,51 +66,6 @@ using namespace RevBayesCore;
 
 using std::string;
 
-double Mcmcmc::heatForChain(int i) const
-{
-    return chain_heats[i];
-}
-
-bool Mcmcmc::isColdChain(int i) const
-{
-    return heatForChain(i) == 1.0;
-}
-
-double Mcmcmc::heatForIndex(int i) const
-{
-    // Can we just maintain a sorted list of chain heats that is always valid?
-    std::vector<double> tmp_chain_heats = chain_heats;
-    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-    return tmp_chain_heats[i];
-}
-
-int Mcmcmc::heatIndexForChain(int j) const
-{
-    std::vector<double> tmp_chain_heats = chain_heats;
-    std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
-
-    return std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
-}
-
-int Mcmcmc::chainForHeatIndex(int i) const
-{
-    return std::find(chain_heats.begin(), chain_heats.end(), heatForIndex(i)) - chain_heats.begin();
-/*
-    // 1. Start with [0 .. num_chains-1]
-    std::vector<int> tmp_heat_ranks;
-    for(int i=0;i<num_chains;i++)
-        tmp_heat_ranks.push_back(i);
-
-    // 2. Chains with greater heat come first.
-    sort(tmp_heat_ranks.begin(),
-         tmp_heat_ranks.end(),
-         [&](int j, int k) { return chain_heats[j] > chain_heats[k];} );
-
-    // 3. Get the chain index for heat index i;
-    return tmp_heat_ranks[i];
-*/
-}
-
 Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor> &mn, std::string sT, size_t nc, size_t si, double dt, size_t ntries, bool th, double tht, std::string sm, std::string smo) : MonteCarloSampler( ),
     num_chains(nc),
     schedule_type(sT),
@@ -163,7 +118,7 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     
     // assign chains to processors, instantiate Mcmc objects
     base_chain = new Mcmc(m, mv, mn, ntries);
-    
+    base_chain->setActivePID(this->pid, 1);
     
     // initialize the individual chains
     initializeChains();
@@ -259,19 +214,24 @@ void Mcmcmc::addMonitor(const Monitor &m)
     
 }
 
-
-double Mcmcmc::computeBeta(double d, size_t idx)
+int Mcmcmc::chainForHeatIndex(int i) const
 {
-    
-    return 1.0 / (1.0+delta*idx);
+    return std::find(chain_heats.begin(), chain_heats.end(), heatForIndex(i)) - chain_heats.begin();
+/*
+    // 1. Start with [0 .. num_chains-1]
+    std::vector<int> tmp_heat_ranks;
+    for(int i=0;i<num_chains;i++)
+        tmp_heat_ranks.push_back(i);
+
+    // 2. Chains with greater heat come first.
+    sort(tmp_heat_ranks.begin(),
+         tmp_heat_ranks.end(),
+         [&](int j, int k) { return chain_heats[j] > chain_heats[k];} );
+
+    // 3. Get the chain index for heat index i;
+    return tmp_heat_ranks[i];
+*/
 }
-
-
-Mcmcmc* Mcmcmc::clone(void) const
-{
-    return new Mcmcmc(*this);
-}
-
 
 void Mcmcmc::checkpoint( void ) const
 {
@@ -287,6 +247,20 @@ void Mcmcmc::checkpoint( void ) const
     }
     
 }
+
+
+Mcmcmc* Mcmcmc::clone(void) const
+{
+    return new Mcmcmc(*this);
+}
+
+
+double Mcmcmc::computeBeta(double d, size_t idx)
+{
+    
+    return 1.0 / (1.0+delta*idx);
+}
+
 
 
 void Mcmcmc::disableScreenMonitor( bool all, size_t rep )
@@ -396,12 +370,38 @@ std::string Mcmcmc::getStrategyDescription( void ) const
     return description;
 }
 
+double Mcmcmc::heatForIndex(int i) const
+{
+    // Can we just maintain a sorted list of chain heats that is always valid?
+    std::vector<double> tmp_chain_heats = chain_heats;
+    sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
+    return tmp_chain_heats[i];
+}
+
+double Mcmcmc::heatForChain(int i) const
+{
+    return chain_heats[i];
+}
+
+int Mcmcmc::heatIndexForChain(int j) const
+{
+    std::vector<double> tmp_chain_heats = chain_heats;
+    std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
+
+    return std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
+}
+
+bool Mcmcmc::isColdChain(int i) const
+{
+    return heatForChain(i) == 1.0;
+}
+
 
 void Mcmcmc::initializeChains(void)
 {
     
     double processors_per_chain = double(num_processes) / double(num_chains);
-    
+
     for (size_t i = 0; i < num_chains; ++i)
     {
         // all chains know heat-order and chain-processor schedules

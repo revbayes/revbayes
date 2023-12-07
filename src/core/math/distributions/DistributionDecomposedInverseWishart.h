@@ -8,7 +8,7 @@
 #ifndef DISTRIBUTIONDECOMPOSEDINVERSEWISHART_H
 #define	DISTRIBUTIONDECOMPOSEDINVERSEWISHART_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "MatrixReal.h"
 

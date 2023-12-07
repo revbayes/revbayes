@@ -64,10 +64,12 @@ namespace RevBayesCore {
         // public Tree methods
         void                                                addBranchParameter(const std::string &n, const std::vector<double> &p, bool io);
         void                                                addNodeParameter(const std::string &n, const std::vector<double> &p, bool io);
-		void                                                addNodeParameter(const std::string &n, const std::vector<std::string> &p, bool io);
+        void                                                addNodeParameter(const std::string &n, const std::vector<std::string> &p, bool io);
         void                                                clearParameters(void);                                                                              //!< Clear both the current node and branch parameters
         void                                                clearBranchParameters(void);
-		void                                                clearNodeParameters(void);
+        void                                                clearNodeParameters(void);
+        bool                                                tryReadIndicesFromParameters(bool remove=false);
+        void                                                writeIndicesToParameters();
 
         void                                                collapseNegativeBranchLengths(double length);                                                       //!< Don't allow parents to be younger than their children (TimeTrees only)
         bool                                                containsClade(const TopologyNode &n, bool unrooted) const;
@@ -88,7 +90,7 @@ namespace RevBayesCore {
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>*                              getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
         std::vector<long>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
-        size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of nodes in the Tree
+        size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of non-root internal nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfExtantTips(void) const;                                                                  //!< Get the number of extant tip nodes in the Tree
         size_t                                              getNumberOfExtinctTips(void) const;                                                                 //!< Get the number of extinct tip nodes in the Tree
@@ -122,14 +124,16 @@ namespace RevBayesCore {
         bool                                                isBroken(void) const;                                                                               //!< Is this tree ultrametric?
         bool                                                isNegativeConstraint(void) const;                                                                   //!< Is this tree used as a negative constraint?
         bool                                                isRooted(void) const;                                                                               //!< Is the Tree rooted
-        bool                                                isUltrametric(void) const;                                                                          //!< Is this tree ultrametric?
+        bool                                                isTimeTree(void) const;                                                                             //!< Is this a time tree?
         void                                                makeInternalNodesBifurcating(bool reindex, bool fossils_only);                                                         //!< Make all the internal nodes bifurcating.
         void                                                makeRootBifurcating(const Clade& o, bool reindex);                                                         //!< Make all the internal nodes bifurcating.
         void                                                orderNodesByIndex();
+        json                                                toJSON() const;             //!< Prints tree for user
         void                                                printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;             //!< Prints tree for user
         void                                                printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing without rounding
         void                                                printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing with rounding (mainly checkpointing) 
         void                                                pruneTaxa(const RbBitSet& bs);
+        void                                                collapseSampledAncestors();
         void                                                renumberNodes(const Tree &reference);                                                               //!< Change node ids to be as in reference
         void                                                reroot(const Clade& o, bool make_bifurcating, bool reindex);                                                        //!< Re-root the tree with the given outgroup
         void                                                reroot(const std::string& outgroup, bool make_bifurcating, bool reindex);                                                  //!< Re-root the tree with the given outgroup

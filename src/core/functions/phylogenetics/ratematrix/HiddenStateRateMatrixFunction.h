@@ -1,7 +1,7 @@
 #ifndef HiddenStateRateMatrixFunction_H
 #define HiddenStateRateMatrixFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedFunction.h"
 #include "RateGenerator.h"

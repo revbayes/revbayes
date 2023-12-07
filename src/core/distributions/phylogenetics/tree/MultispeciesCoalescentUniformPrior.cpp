@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <vector>
 #include <boost/math/special_functions/expint.hpp>
@@ -51,18 +51,12 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
     double current_time = begin_age;
 
     size_t n = times.size();
-    double nt = n;
-
-    // std::cout << "theta max: " << theta_max << std::endl;
-    // std::cout << "n: " << n << std::endl;
+    double nc = n; // This is the number of coalescences, i.e., (m-n)
 
     for (size_t i=0; i<n; ++i)
     {
         // now we do the computation
         // a is the time between the previous and the current coalescences
-
-        // std::cout << "current time: " << current_time << std::endl;
-
         double a = times[i] - current_time;
         current_time = times[i];
 
@@ -71,9 +65,6 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         double n_pairs = j * (j-1.0);
 
         fn += a * n_pairs;
-        //
-        // std::cout << "j: " << j << std::endl;
-        // std::cout << "fn += " << a * n_pairs << std::endl;
     }
 
     // compute the probability of no coalescent event in the final part of the branch
@@ -84,52 +75,67 @@ double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t
         size_t j = k - times.size();
         double n_pairs = j * (j-1.0);
         fn += final_interval * n_pairs;
-        //
-        // std::cout << "final interval: " << final_interval << std::endl;
-        // std::cout << "j: " << j << std::endl;
-        // std::cout << "fn += " << final_interval * n_pairs << std::endl;
     }
+
+    // Now calculate the likelihood
+    double ln_prob_coal = 0.0;
+
+    // double ngc = getNumberOfGeneCopies();
+    double integral_limit = 2.0 * fn / theta_max;
+    double upper_incomplete_gamma = 0.0;
+
+    if ( nc == 2 )
+    {
+        upper_incomplete_gamma = recursiveIncompleteGamma( nc-2.0, integral_limit );
+    }
+    else
+    {
+        double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, nc-2.0, RbMath::lnGamma( nc-2.0 ) ) * RbMath::gamma( nc-2.0 );
+        upper_incomplete_gamma = RbMath::gamma( nc-2.0 ) - lower_incomplete_gamma;
+    }
+
+    ln_prob_coal += RbConstants::LN2 + (( -nc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
+
 
     // If we've gotten to the last node of the tree, then we can calculate the likelihood
     // for the entire gene tree given the species tree using the total number of gene
     // copies and the total coalescent rate over the entire genealogy
-    double ln_prob_coal = 0.0;
 
-    double num_tips = getNumberOfSpeciesTreeTips();
+    // double num_tips = getNumberOfSpeciesTreeTips();
 
-    if ( index == 2*(num_tips-1) )
-    {
-        double ngc = getNumberOfGeneCopies();
-        double integral_limit = 2 * fn / theta_max;
+    // if ( index == 2*(num_tips-1) )
+    // {
+    //     double ngc = getNumberOfGeneCopies();
+    //     double integral_limit = 2 * fn / theta_max;
+    //
+    //     // std::cout << "fn total: " << fn << std::endl;
+    //     // std::cout << "ngc: " << ngc << std::endl;
+    //     // std::cout << "integral limit: " << integral_limit << std::endl;
+    //
+    //     double upper_incomplete_gamma = 0.0;
+    //     if ( ngc <= 2 )
+    //     {
+    //         upper_incomplete_gamma = recursiveIncompleteGamma( ngc-2.0, integral_limit );
+    //     }
+    //     else
+    //     {
+    //         double lower_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2.0, RbMath::lnGamma( ngc-2.0 ) ) * RbMath::gamma( ngc-2.0 );
+    //         upper_incomplete_gamma = RbMath::gamma( ngc-2.0 ) - lower_incomplete_gamma;
+    //     }
+    //
+    //     ln_prob_coal += RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
+    //
+    //     // Remember to reset the total coalescent rate so that we don't just keep adding to it
+    //     // because we're now done with it for this particular gene tree
+    //     resetFn();
+    // }
+    // // Otherwise we don't change the likelihood because we haven't finished adding up the
+    // // total coalescent rate over the genealogy
+    // else
+    // {
+    //     ln_prob_coal += 0.0;
+    // }
 
-        // std::cout << "fn total: " << fn << std::endl;
-        // std::cout << "ngc: " << ngc << std::endl;
-        // std::cout << "integral limit: " << integral_limit << std::endl;
-
-        double upper_incomplete_gamma = 0.0;
-        if ( ngc <= 2 )
-        {
-            upper_incomplete_gamma = recursiveIncompleteGamma( ngc-2.0, integral_limit );
-        }
-        else
-        {
-            upper_incomplete_gamma = RbMath::incompleteGamma( integral_limit, ngc-2.0, false, false );
-        }
-
-        ln_prob_coal += RbConstants::LN2 + (( -ngc+2 ) * log( fn )) + log( upper_incomplete_gamma ) - log( theta_max );
-
-        // Remember to reset the total coalescent rate so that we don't just keep adding to it
-        // because we're now done with it for this particular gene tree
-        resetFn();
-    }
-    // Otherwise we don't change the likelihood because we haven't finished adding up the
-    // total coalescent rate over the genealogy
-    else
-    {
-        ln_prob_coal += 0.0;
-    }
-
-    // std::cout << "ln prob coal: " << ln_prob_coal << "\n" << std::endl;
 
     return ln_prob_coal;
 }

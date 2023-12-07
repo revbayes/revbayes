@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 
 #include "MatrixReal.h"
 #include "RateMatrix_Tamura92.h"

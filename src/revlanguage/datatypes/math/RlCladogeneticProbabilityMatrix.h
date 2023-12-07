@@ -9,7 +9,7 @@
 #ifndef RlCladogeneticProbabilityMatrix_h
 #define RlCladogeneticProbabilityMatrix_h
 
-#include <stdio.h>
+#include <cstdio>
 #include "MatrixReal.h"
 #include "ModelObject.h"
 #include "CladogeneticProbabilityMatrix.h"

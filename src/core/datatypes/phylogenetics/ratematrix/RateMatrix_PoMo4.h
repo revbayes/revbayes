@@ -24,7 +24,7 @@
 #ifndef RateMatrix_PoMo4_H
 #define RateMatrix_PoMo4_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"

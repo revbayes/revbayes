@@ -101,11 +101,13 @@ extern int yydebug;
     LE = 302,                      /* LE  */
     EQ = 303,                      /* EQ  */
     NE = 304,                      /* NE  */
-    END_OF_INPUT = 305,            /* END_OF_INPUT  */
-    UNOT = 306,                    /* UNOT  */
-    UMINUS = 307,                  /* UMINUS  */
-    UPLUS = 308,                   /* UPLUS  */
-    UAND = 309                     /* UAND  */
+    PIPE = 305,                    /* PIPE  */
+    PIPE_PLACEHOLDER = 306,        /* PIPE_PLACEHOLDER  */
+    END_OF_INPUT = 307,            /* END_OF_INPUT  */
+    UNOT = 308,                    /* UNOT  */
+    UMINUS = 309,                  /* UMINUS  */
+    UPLUS = 310,                   /* UPLUS  */
+    UAND = 311                     /* UAND  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -161,17 +163,19 @@ extern int yydebug;
 #define LE 302
 #define EQ 303
 #define NE 304
-#define END_OF_INPUT 305
-#define UNOT 306
-#define UMINUS 307
-#define UPLUS 308
-#define UAND 309
+#define PIPE 305
+#define PIPE_PLACEHOLDER 306
+#define END_OF_INPUT 307
+#define UNOT 308
+#define UMINUS 309
+#define UPLUS 310
+#define UAND 311
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 80 "./grammar.y"
+#line 83 "./grammar.y"
 
     char*                                           c_string;
     std::string*                                    string;
@@ -187,7 +191,7 @@ union YYSTYPE
     std::list<RevLanguage::SyntaxLabeledExpr*>*     argumentList;
     std::list<RevLanguage::SyntaxFormal*>*          formalList;
 
-#line 191 "./grammar.tab.h"
+#line 195 "./grammar.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
