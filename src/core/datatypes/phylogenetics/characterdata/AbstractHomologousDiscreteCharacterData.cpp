@@ -77,7 +77,7 @@ void AbstractHomologousDiscreteCharacterData::fillMissingSitesMask(std::vector<s
 }
 
 
-void AbstractHomologousDiscreteCharacterData::removeMissingSites( void )
+void AbstractHomologousDiscreteCharacterData::excludeMissingSites( void )
 {
 
     size_t num_taxa  = getNumberOfTaxa();
@@ -119,7 +119,7 @@ void AbstractHomologousDiscreteCharacterData::removeMissingSites( void )
 }
 
 
-void AbstractHomologousDiscreteCharacterData::removeRandomSites( double p )
+void AbstractHomologousDiscreteCharacterData::replaceRandomSitesByMissingData( double p )
 {
 
     size_t num_taxa  = getNumberOfTaxa();
