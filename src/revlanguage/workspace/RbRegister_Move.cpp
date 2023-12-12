@@ -145,6 +145,7 @@
 
 /* Moves on rate matrices */
 #include "Move_MPQRateMatrix.h"
+#include "Move_MPQTree.h"
 
 /* Moves on random adjacency graphs */
 #include "Move_GraphFlipEdge.h"
@@ -357,6 +358,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         
         /* Moves on rate matrices (incl reversible jump) */
         addType( new Move_MPQRateMatrix() );
+        addType( new Move_MPQTree() );
 
 
         /* Moves of random adjacency graphs */
