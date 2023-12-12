@@ -258,7 +258,7 @@ double MPQRateMatrixProposal::updateExchangabilityRates(bool all) {
     if ( all = true )
     {
         // update and return log probability of Hastings ratio
-        return Q.updateExchangeabilityRates(rng, 100.0);
+        return Q.updateExchangeabilityRates(rng, 100.0, 0.5);
     }
     else
     {
@@ -285,12 +285,12 @@ double MPQRateMatrixProposal::updateNonreversibleRates(bool all) {
     if ( all == true )
     {
         // update and return log probability of Hastings ratio
-        return Q.updateNonReversibleRates(rng, 500.0);
+        return Q.updateNonReversibleRates(rng, 500.0, 0.5);
     }
     else
     {
         // update and return log probability of Hastings ratio
-        return Q.updateNonReversibleRates(rng, 50.0);
+        return Q.updateNonReversibleRatesSingle(rng, 50.0);
     }
 }
 
@@ -447,7 +447,7 @@ double MPQRateMatrixProposal::updateStationaryFrequencies(bool all) {
     if ( all == true )
     {
         // update and return log probability of Hastings ratio
-        return Q.updateStationaryFrequencies(rng, 100.0);
+        return Q.updateStationaryFrequencies(rng, 100.0, 0.5);
     }
     else
     {

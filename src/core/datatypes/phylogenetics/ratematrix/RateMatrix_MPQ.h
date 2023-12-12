@@ -54,11 +54,11 @@ public:
     void                    setExchangeabilityRates(void);
     void                    setIsReversible(bool tf) { isReversible = tf; }
     void                    setPi(std::vector<mpq_class>& f);
-    double                  updateNonReversibleRates(RandomNumberGenerator* rng, double alpha0);
+    double                  updateNonReversibleRates(RandomNumberGenerator* rng, double alpha0, double offset);
     double                  updateNonReversibleRatesSingle(RandomNumberGenerator* rng, double alpha0);
-    double                  updateExchangeabilityRates(RandomNumberGenerator* rng, double alpha0);
+    double                  updateExchangeabilityRates(RandomNumberGenerator* rng, double alpha0, double offset);
     double                  updateExchangeabilityRatesSingle(RandomNumberGenerator* rng, double alpha0);
-    double                  updateStationaryFrequencies(RandomNumberGenerator* rng, double alpha0);
+    double                  updateStationaryFrequencies(RandomNumberGenerator* rng, double alpha0, double offset);
     double                  updateStationaryFrequenciesSingle(RandomNumberGenerator* rng, double alpha0);
 
     // virtual methods from RateMatrix

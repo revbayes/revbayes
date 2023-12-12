@@ -108,6 +108,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
+        // if we are in the reversible model, the also check that the grandparent is not the root
     } while ( node->isRoot() || node->getParent().isRoot() );
     
     TopologyNode& parent = node->getParent();

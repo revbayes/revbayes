@@ -9,7 +9,7 @@
 #include "RbMathVector.h"
 #include "TransitionProbabilityMatrix.h"
 
-#define MIN_FREQ    10e-3
+#define MIN_FREQ    10e-8
 
 
 using namespace RevBayesCore;
@@ -802,7 +802,7 @@ void RateMatrix_MPQ::update( void )
     
 }
 
-double RateMatrix_MPQ::updateNonReversibleRates(RandomNumberGenerator* rng, double alpha0) {
+double RateMatrix_MPQ::updateNonReversibleRates(RandomNumberGenerator* rng, double alpha0, double offset) {
 
     if (isReversible == true)
         throw(RbException("Can only update the 12 rates (directly) for non-reversible models"));
@@ -827,11 +827,11 @@ double RateMatrix_MPQ::updateNonReversibleRates(RandomNumberGenerator* rng, doub
     for (int i=0; i<12; i++)
         oldRates[i] /= sum;
     for (int i=0; i<12; i++)
-        alphaForward[i] = oldRates[i] * alpha0;
+        alphaForward[i] = oldRates[i] * alpha0 + offset;
     std::vector<double> newRates = RevBayesCore::RbStatistics::Dirichlet::rv(alphaForward, *rng);
     RbMath::normalizeToMin(newRates, MIN_FREQ);
     for (int i=0; i<12; i++)
-        alphaReverse[i] = newRates[i] * alpha0;
+        alphaReverse[i] = newRates[i] * alpha0 + offset;
         
     // update the rate matrix
     for (int i=0, k=0; i<4; i++)
@@ -949,7 +949,7 @@ double RateMatrix_MPQ::updateNonReversibleRatesSingle(RandomNumberGenerator* rng
     return lnProposalProb;
 }
 
-double RateMatrix_MPQ::updateExchangeabilityRates(RandomNumberGenerator* rng, double alpha0) {
+double RateMatrix_MPQ::updateExchangeabilityRates(RandomNumberGenerator* rng, double alpha0, double offset) {
 
     if (isReversible == false)
         throw(RbException("Can only update the exchangability rates for time reversible models"));
@@ -961,11 +961,11 @@ double RateMatrix_MPQ::updateExchangeabilityRates(RandomNumberGenerator* rng, do
     for (int i=0; i<6; i++)
         oldRates[i] = r[i].get_d();
     for (int i=0; i<6; i++)
-        alphaForward[i] = oldRates[i] * alpha0;
+        alphaForward[i] = oldRates[i] * alpha0 + offset;
     std::vector<double> newRates = RbStatistics::Dirichlet::rv(alphaForward, *rng);
     RbMath::normalizeToMin(newRates, MIN_FREQ);
     for (int i=0; i<6; i++)
-        alphaReverse[i] = newRates[i] * alpha0;
+        alphaReverse[i] = newRates[i] * alpha0 + offset;
         
     r[0] = newRates[0];
     r[1] = newRates[1];
@@ -1097,7 +1097,7 @@ double RateMatrix_MPQ::updateExchangeabilityRatesSingle(RandomNumberGenerator* r
     return lnProposalProb;
 }
 
-double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, double alpha0) {
+double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, double alpha0, double offset) {
 
     if (isReversible == false)
         throw(RbException("Can only update the stationary frequencies (directly) for time reversible models"));
@@ -1110,11 +1110,11 @@ double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, d
     for (int i=0; i<4; i++)
         oldFreqs[i] = pi[i].get_d();
     for (int i=0; i<4; i++)
-        alphaForward[i] = oldFreqs[i] * alpha0;
+        alphaForward[i] = oldFreqs[i] * alpha0 + offset;
     std::vector<double> newFreqs = RbStatistics::Dirichlet::rv(alphaForward, *rng);
     RbMath::normalizeToMin(newFreqs, MIN_FREQ);
     for (int i=0; i<4; i++)
-        alphaReverse[i] = newFreqs[i] * alpha0;
+        alphaReverse[i] = newFreqs[i] * alpha0 + offset;
 
     // change to GMP rationals
     pi[0] = newFreqs[0];
