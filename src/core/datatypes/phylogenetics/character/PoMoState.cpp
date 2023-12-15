@@ -37,7 +37,6 @@ PoMoState::PoMoState(size_t n, size_t vps, const std::string &s, const std::stri
     {
         setState(s);
     }
-    
 }
 
 
@@ -587,7 +586,8 @@ void PoMoState::setStateFixed(size_t total_num_samples, size_t count_first_allel
     index_single_state = state_index;
     num_observed_states = 1;
     state.set(state_index);
-    
+
+
 }
 
 
@@ -637,7 +637,7 @@ void PoMoState::setStateSampled(size_t total_num_samples, size_t count_first_all
     index_single_state = state_index;
     num_observed_states = 1;
     state.set(state_index);
-    
+
 }
 
 
@@ -688,3 +688,9 @@ void PoMoState::setWeighted( bool tf )
 {
     weighted = tf;
 }
+void PoMoState::setWeighting( PoMoState::WEIGHTING weight_type )
+{
+    weighting = weight_type;
+}
+
+

@@ -2,7 +2,9 @@
  * @file
  * This file contains the declaration of RateMatrix_PoMoKN, which is a
  * class that holds a rate matrix combining population-level polymorphisms
- * with inter-species divergence. Presented in Dominik Schrempf, Bui Quang Minh, Nicola De Maio, Arndt von Haeseler, Carolin Kosiol. Reversible polymorphism-aware phylogenetic models and their application to tree inference. Journal of Theoretical Biology, 2016.
+ * with inter-species divergence. Presented in Dominik Schrempf, Bui Quang Minh, Nicola De Maio, Arndt von Haeseler,
+ * Carolin Kosiol. Reversible polymorphism-aware phylogenetic models and their application to tree inference.
+ * Journal of Theoretical Biology, 2016.
  * Parameters:
  * Q_mut: A GTR instantaneous mutation matrix.
  * N: effective population size.
@@ -69,7 +71,7 @@ namespace RevBayesCore {
         long                                        N;
         std::vector<double>                         mu;   
         std::vector<double>                         phi;    
-        std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
+//        std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
 
     };
 

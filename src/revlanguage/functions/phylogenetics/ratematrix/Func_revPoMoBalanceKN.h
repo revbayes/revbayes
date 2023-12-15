@@ -1,5 +1,5 @@
-#ifndef Func_revPoMoBalance4N_H
-#define Func_revPoMoBalance4N_H
+#ifndef Func_revPoMoBalanceKN_H
+#define Func_revPoMoBalanceKN_H
 
 #include "RlRateMatrix.h"
 #include "RlTypedFunction.h"
@@ -8,27 +8,28 @@
 #include <string>
 
 namespace RevLanguage {
-    
+
     /**
-     * The RevLanguage wrapper of the HKY rate matrix function.
+     * The RevLanguage wrapper of the revPoMoBalanceKN rate matrix function.
      *
-     * The RevLanguage wrapper of the HKY rate matrix connects
-     * the variables/parameters of the function and creates the internal HkyRateMatrixFunction object.
-     * Please read the HkyRateMatrixFunction.h for more info.
+     * The RevLanguage wrapper of the revPoMoBalanceKN rate matrix connects
+     * the variables/parameters of the function and creates the internal Func_revPoMoBalanceKN object.
      *
+     * @brief Declaration of RateMatrix_revPoMoBalanceKN, a reversible matrix combining polymorphisms,
+     * substitutions and the balancing selection
      *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-08-14, version 1.0
+     * @copyright Copyright 2023-
+     * @author The RevBayes Development Core Team (Svitlana Braichenko)
+     * @since 2023-12-12, version 1.2.2
      *
      */
-    class Func_revPoMoBalance4N : public TypedFunction<RateMatrix> {
+    class Func_revPoMoBalanceKN : public TypedFunction<RateMatrix> {
         
     public:
-        Func_revPoMoBalance4N( void );
+        Func_revPoMoBalanceKN( void );
         
         // Basic utility functions
-        Func_revPoMoBalance4N*                                                   clone(void) const;                                          //!< Clone the object
+        Func_revPoMoBalanceKN*                                                   clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev

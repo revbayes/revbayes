@@ -25,7 +25,8 @@ phi( in_k, 1.0 )
 }
 */
 
-/** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual population size */
+/** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual
+ * population size */
 RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr)  : 
 AbstractRateMatrix( num_states ), 
 K( in_k ),
@@ -287,7 +288,8 @@ RateMatrix_PoMoKN* RateMatrix_PoMoKN::clone( void ) const
 
 std::vector<double> RateMatrix_PoMoKN::getStationaryFrequencies( void ) const
 {
-  return stationaryVector;
+//  return stationaryVector;
+    return calculateStationaryFrequencies();
 }
 
 

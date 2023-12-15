@@ -12,7 +12,7 @@
 namespace RevBayesCore {
     
     /**
-     * @brief HKY rate matrix function.
+     * @brief PoMo rate matrix function.
      *
      * This function creates the HKY rates matrix object by setting the transition-transversion parameter kappa
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.

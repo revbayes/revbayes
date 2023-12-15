@@ -41,12 +41,13 @@ namespace RevBayesCore {
         const std::vector<double>&      getWeights( void ) const;                            //!< Get the weight of the state
         bool                            isWeighted( void ) const;
         void                            setWeighted( bool tf );
+        void                            setWeighting( WEIGHTING weight_type );
         bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
         bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
         bool                            isStateIncludedInAscertainmentBiasCorrection(void) const;  //!< Is the currently set state included in ascertainment bias correction
         void                            setGapState(bool tf);                               //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
-        
+
     private:
         size_t                          computeIndexBiallelic(size_t f, size_t s) const;    //!< Compute the basic index when this biallelic frequency starts
         void                            populateWeightedStatesForMonoallelicState(size_t id1, int sum); //!< Sets the weights of all the states compatible with a monoallelic state
