@@ -40,7 +40,9 @@ namespace RevBayesCore {
 																 const size_t                  num_states_,
 																 bool                          use_origin_,
 																 bool                          zero_indexed_,
-																 size_t                        n_proc_);
+																 size_t                        n_proc_,
+																 double                        abs_tol_,
+																 double                        rel_tol_);
 
         // pure virtual member functions
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
@@ -85,6 +87,7 @@ namespace RevBayesCore {
         double current_ln_prob = 0.0;
         double old_ln_prob = 0.0;
         bool   probability_dirty = true;
+        bool   tp_can_reset = true;
 
         // tensorphylo interface
         size_t                                    n_proc;

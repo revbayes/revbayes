@@ -29,7 +29,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const size_t                                                    num_states_,
 	bool                                                            use_origin_,
 	bool                                                            zero_indexed_,
-	size_t                                                          n_proc_
+	size_t                                                          n_proc_,
+	double                                                          abs_tol_,
+    double                                                          rel_tol_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
 	n_proc(n_proc_),
 	taxa(taxa_),
@@ -57,8 +59,11 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// turn on/off debug
 	tp_ptr->setConditionalProbCompatibilityMode(false);
 	tp_ptr->setNumberOfThreads(n_proc);
+	tp_ptr->setAbsoluteTolerance(abs_tol_);
+	tp_ptr->setRelativeTolerance(rel_tol_);
 	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
 //	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
+//	tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
 
 	// add the parameters
 	addParameter(age);
@@ -249,6 +254,9 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
     // tp_ptr->writeStateToFile("params.dat");
 	// tp_ptr->loadStateFromFile("state.dat");
     current_ln_prob = tp_ptr->computeLogLikelihood();
+
+    // we are now able to reset tp approximator
+    tp_can_reset = true;
 
     // flag the likelihood as up-to-date
     probability_dirty = false;
@@ -973,6 +981,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
     zeta_dirty           = false;
     old_ln_prob          = current_ln_prob; // make sure we don't accidently restore the outdated likelihood
 
+    // tell tp to keep the approximator
+    if (tp_can_reset) {
+    	tp_ptr->keepSchedulerAndApproximator();
+    	tp_can_reset = false;
+    }
+
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters(bool force)
@@ -999,6 +1013,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(const DagNode *restorer)
 {
 
+    // reset the flags
+    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+    {
+        (*it) = false;
+    }
+
     if ( restorer == age )
     {
         if ( use_origin == false)
@@ -1011,30 +1031,26 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
             dag_node->touchAffected();
         }
 
-        // update the tree
-        updateTree();
-        tree_dirty = false;
+//        // reset the tree
+//        if (tp_can_reset) {
+//        	updateTree(true);
+//        }
+
     }
     
     // MJL added 230307
     if ( restorer == this->dag_node )
     {
-        // update the tree
-        updateTree();
-        tree_dirty = false;
+
+//        // reset the tree
+//        if (tp_can_reset) {
+//        	updateTree(true);
+//        }
 
         // make sure we update the likelihood
 //        probability_dirty = true;
 
     }
-
-    // reset the flags
-    // NOTE: we don't want to mark anything as clean because tensorphylo still needs to recompute
-    // partial likelihoods for these nodes. we only set as clean when we accept the move
-//    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-//    {
-//        (*it) = false;
-//    }
 
     if ( restorer != this->dag_node )
     {
@@ -1086,6 +1102,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     	{
     		zeta_dirty = true;
     	}
+    }
+
+    // reset scheduler and approximator on tp side
+    if ( tp_can_reset ) {
+    	tp_ptr->resetSchedulerAndApproximator();
+    	tp_can_reset = false;
     }
 
     // clean the likelihood
@@ -1207,6 +1229,9 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
+
+    // we don't need to reset tp approximator yet
+    tp_can_reset = false;
 
     if ( affecter == age )
     {

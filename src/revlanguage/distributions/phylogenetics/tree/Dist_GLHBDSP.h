@@ -49,6 +49,10 @@ namespace RevLanguage {
 
     private:
 
+        // tolerances
+        RevPtr<const RevVariable> abs_tol;          //!< The absolute tolerance of the integrator
+        RevPtr<const RevVariable> rel_tol;          //!< The relative tolerance of the integrator
+
         // number of processors
         RevPtr<const RevVariable>  n_proc;          //!< The number of processors for parallel calculations
 
