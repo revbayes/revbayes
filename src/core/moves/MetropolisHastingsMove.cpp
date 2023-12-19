@@ -484,8 +484,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         // finally add the Hastings ratio
         double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
+    	double u = GLOBAL_RNG->uniform01();
+
         if (ln_acceptance_ratio >= 0.0)
         {
+
 
             if ( ln_posterior_ratio < -1000 )
                 throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
@@ -521,7 +524,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         {
             double r = exp(ln_acceptance_ratio);
             // Accept or reject the move
-            double u = GLOBAL_RNG->uniform01();
+//            double u = GLOBAL_RNG->uniform01();
             if (u < r)
             {
                 
