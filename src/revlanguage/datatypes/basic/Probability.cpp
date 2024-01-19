@@ -36,7 +36,7 @@ Probability::Probability( RevBayesCore::TypedDagNode<double> *x ) : RealPos( x )
 void Probability::validate(double x) const
 {
     if (x < 0 or x > 1)
-	throw RbException() << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities [0,1]";
+	throw RbException() << std::setprecision(17) << "Creation of " << getClassType() << " with value x=" << x << " outside standard probabilities [0,1]";
 }
 
 void Probability::validate() const
