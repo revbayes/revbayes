@@ -12,6 +12,7 @@
 #include "ArgumentRules.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
+#include "Integer.h"
 #include "ModelObject.h"
 #include "Natural.h"
 #include "RbVector.h"
@@ -49,9 +50,20 @@ Func_cladogeneticSpeciationRateMatrix* Func_cladogeneticSpeciationRateMatrix::cl
 RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* Func_cladogeneticSpeciationRateMatrix::createFunction( void ) const
 {
    
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events = static_cast<const ModelVector<ModelVector<Natural> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    // verify that all events are non-negative integers
+    const ModelVector<ModelVector<Integer> >& tmp_events  = static_cast<const ModelVector<ModelVector<Integer> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    
+    for (size_t i = 0; i < tmp_events.size(); i++) {
+        for (size_t j = 0; j < tmp_events.size(); j++) {
+            assert(tmp_events[i][j] >= 0);
+        }
+    }
+
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events = static_cast<const ModelVector<ModelVector<Integer> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     int n_states = (int)static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    
+   
     
     RevBayesCore::CladogeneticSpeciationRateMatrixFunction* f = new RevBayesCore::CladogeneticSpeciationRateMatrixFunction( events, spec_rates, n_states );
     
@@ -69,7 +81,7 @@ const ArgumentRules& Func_cladogeneticSpeciationRateMatrix::getArgumentRules( vo
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "cladogenetic_events", ModelVector<ModelVector<Natural> >::getClassTypeSpec(), "A vector of cladogenetic event types. Each type is in the form [ancestral_state, daughter1_state, daughter2_state].", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "cladogenetic_events", ModelVector<ModelVector<Integer> >::getClassTypeSpec(), "A vector of cladogenetic event types. Each type is in the form [ancestral_state, daughter1_state, daughter2_state].", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "speciation_rates", ModelVector<RealPos>::getClassTypeSpec() , "The speciation rates that correspond to the different cladogenetic event types.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "num_states", Natural::getClassTypeSpec(), "The number of states.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
