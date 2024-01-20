@@ -174,7 +174,10 @@ if ("${STATIC_BOOST}" STREQUAL "ON")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-message("Searching for BOOST:")
+# MJL: added to allow compile between C++17 and Boost 1.7x.x
+#      seems like newer versions of boost will not use this deprecated function
+add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+
 find_package(Boost
 1.71.0
 COMPONENTS regex
