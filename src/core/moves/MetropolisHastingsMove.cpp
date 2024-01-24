@@ -418,6 +418,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     }
 
+    auto variable_name = nodes[0]->getName();
+
     // then we recompute the probability for all the affected nodes
     for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
     {
