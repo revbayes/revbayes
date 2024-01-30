@@ -1,5 +1,5 @@
-#ifndef PhyloOrnsteinUhlenbeckREML_H
-#define PhyloOrnsteinUhlenbeckREML_H
+#ifndef PhyloOrnsteinUhlenbeckPruning_H
+#define PhyloOrnsteinUhlenbeckPruning_H
 
 #include "AbstractPhyloBrownianProcess.h"
 #include "TreeChangeEventListener.h"
@@ -15,16 +15,16 @@ namespace RevBayesCore {
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2015-01-23, version 1.0
      */
-    class PhyloOrnsteinUhlenbeckREML : public AbstractPhyloContinuousCharacterProcess, public TreeChangeEventListener {
+    class PhyloOrnsteinUhlenbeckPruning : public AbstractPhyloContinuousCharacterProcess, public TreeChangeEventListener {
         
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> *t, size_t nSites );
-        virtual                                                            ~PhyloOrnsteinUhlenbeckREML(void);                                                              //!< Virtual destructor
+        PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<Tree> *t, size_t nSites );
+        virtual                                                            ~PhyloOrnsteinUhlenbeckPruning(void);                                                              //!< Virtual destructor
         
         // public member functions
         // pure virtual
-        virtual PhyloOrnsteinUhlenbeckREML*                                 clone(void) const;                                                                      //!< Create an independent clone
+        virtual PhyloOrnsteinUhlenbeckPruning*                                 clone(void) const;                                                                      //!< Create an independent clone
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
         void                                                                setRootState(const TypedDagNode< double >* s);

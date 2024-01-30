@@ -7,7 +7,7 @@
 
 #include "ConstantNode.h"
 #include "DistributionNormal.h"
-#include "PhyloOrnsteinUhlenbeckREML.h"
+#include "PhyloOrnsteinUhlenbeckPruning.h"
 #include "RandomNumberFactory.h"
 #include "RbException.h"
 #include "StochasticNode.h"
@@ -29,7 +29,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
+PhyloOrnsteinUhlenbeckPruning::PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
@@ -69,7 +69,7 @@ PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> 
  * TreeChangeEventHandler, we need to remove ourselves as a reference and possibly delete tau
  * when we die. All other parameters are handled by others.
  */
-PhyloOrnsteinUhlenbeckREML::~PhyloOrnsteinUhlenbeckREML( void )
+PhyloOrnsteinUhlenbeckPruning::~PhyloOrnsteinUhlenbeckPruning( void )
 {
     // We don't delete the params, because they might be used somewhere else too. The model needs to do that!
     
@@ -83,14 +83,14 @@ PhyloOrnsteinUhlenbeckREML::~PhyloOrnsteinUhlenbeckREML( void )
 
 
 
-PhyloOrnsteinUhlenbeckREML* PhyloOrnsteinUhlenbeckREML::clone( void ) const
+PhyloOrnsteinUhlenbeckPruning* PhyloOrnsteinUhlenbeckPruning::clone( void ) const
 {
     
-    return new PhyloOrnsteinUhlenbeckREML( *this );
+    return new PhyloOrnsteinUhlenbeckPruning( *this );
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeBranchAlpha(size_t branch_idx) const
+double PhyloOrnsteinUhlenbeckPruning::computeBranchAlpha(size_t branch_idx) const
 {
     
     // get the selection rate for the branch
@@ -108,7 +108,7 @@ double PhyloOrnsteinUhlenbeckREML::computeBranchAlpha(size_t branch_idx) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeBranchSigma(size_t branch_idx) const
+double PhyloOrnsteinUhlenbeckPruning::computeBranchSigma(size_t branch_idx) const
 {
     
     // get the drift rate for the branch
@@ -126,7 +126,7 @@ double PhyloOrnsteinUhlenbeckREML::computeBranchSigma(size_t branch_idx) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeBranchTheta(size_t branch_idx) const
+double PhyloOrnsteinUhlenbeckPruning::computeBranchTheta(size_t branch_idx) const
 {
     
     // get the optimum (theta) for the branch
@@ -144,7 +144,7 @@ double PhyloOrnsteinUhlenbeckREML::computeBranchTheta(size_t branch_idx) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeRootState( void ) const
+double PhyloOrnsteinUhlenbeckPruning::computeRootState( void ) const
 {
     
     // get the root-state parameter
@@ -154,7 +154,7 @@ double PhyloOrnsteinUhlenbeckREML::computeRootState( void ) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeLnProbability( void )
+double PhyloOrnsteinUhlenbeckPruning::computeLnProbability( void )
 {
     
     // we need to check here if we still are listining to this tree for change events
@@ -187,7 +187,7 @@ double PhyloOrnsteinUhlenbeckREML::computeLnProbability( void )
 
 
 
-void PhyloOrnsteinUhlenbeckREML::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
+void PhyloOrnsteinUhlenbeckPruning::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
 {
     
     // call a recursive flagging of all node above (closer to the root) and including this node
@@ -196,7 +196,7 @@ void PhyloOrnsteinUhlenbeckREML::fireTreeChangeEvent( const TopologyNode &n, con
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::keepSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -213,7 +213,7 @@ void PhyloOrnsteinUhlenbeckREML::keepSpecialization( const DagNode* affecter )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
+void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
     
     // check for recomputation
@@ -351,7 +351,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
 
 
 
-void PhyloOrnsteinUhlenbeckREML::recursivelyFlagNodeDirty( const TopologyNode &n )
+void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode &n )
 {
     
     // we need to flag this node and all ancestral nodes for recomputation
@@ -381,7 +381,7 @@ void PhyloOrnsteinUhlenbeckREML::recursivelyFlagNodeDirty( const TopologyNode &n
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::resetValue( void )
+void PhyloOrnsteinUhlenbeckPruning::resetValue( void )
 {
     
     // check if the vectors need to be resized
@@ -442,7 +442,7 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::restoreSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -468,7 +468,7 @@ void PhyloOrnsteinUhlenbeckREML::restoreSpecialization( const DagNode* affecter 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<double> *a)
+void PhyloOrnsteinUhlenbeckPruning::setAlpha(const TypedDagNode<double> *a)
 {
     
     // remove the old parameter first
@@ -493,7 +493,7 @@ void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<double> *a)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<RbVector<double> > *a)
+void PhyloOrnsteinUhlenbeckPruning::setAlpha(const TypedDagNode<RbVector<double> > *a)
 {
     
     // remove the old parameter first
@@ -518,7 +518,7 @@ void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<RbVector<double> > 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setRootState(const TypedDagNode<double> *s)
+void PhyloOrnsteinUhlenbeckPruning::setRootState(const TypedDagNode<double> *s)
 {
     
     // remove the old parameter first
@@ -537,7 +537,7 @@ void PhyloOrnsteinUhlenbeckREML::setRootState(const TypedDagNode<double> *s)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<double> *s)
+void PhyloOrnsteinUhlenbeckPruning::setSigma(const TypedDagNode<double> *s)
 {
     
     // remove the old parameter first
@@ -562,7 +562,7 @@ void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<double> *s)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<RbVector<double> > *s)
+void PhyloOrnsteinUhlenbeckPruning::setSigma(const TypedDagNode<RbVector<double> > *s)
 {
     
     // remove the old parameter first
@@ -587,7 +587,7 @@ void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<RbVector<double> > 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<double> *t)
+void PhyloOrnsteinUhlenbeckPruning::setTheta(const TypedDagNode<double> *t)
 {
     
     // remove the old parameter first
@@ -612,7 +612,7 @@ void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<double> *t)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<RbVector<double> > *t)
+void PhyloOrnsteinUhlenbeckPruning::setTheta(const TypedDagNode<RbVector<double> > *t)
 {
     
     // remove the old parameter first
@@ -637,7 +637,7 @@ void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<RbVector<double> > 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
+void PhyloOrnsteinUhlenbeckPruning::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
     
     // get the children of the node
@@ -715,7 +715,7 @@ void PhyloOrnsteinUhlenbeckREML::simulateRecursively( const TopologyNode &node, 
 }
 
 
-std::vector<double> PhyloOrnsteinUhlenbeckREML::simulateRootCharacters(size_t n)
+std::vector<double> PhyloOrnsteinUhlenbeckPruning::simulateRootCharacters(size_t n)
 {
     
     std::vector<double> chars = std::vector<double>(num_sites, 0);
@@ -728,7 +728,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckREML::simulateRootCharacters(size_t n)
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
+double PhyloOrnsteinUhlenbeckPruning::sumRootLikelihood( void )
 {
     // get the root node
     const TopologyNode &root = this->tau->getValue().getRoot();
@@ -750,7 +750,7 @@ double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::touchSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -809,7 +809,7 @@ void PhyloOrnsteinUhlenbeckREML::touchSpecialization( const DagNode* affecter, b
 
 
 /** Swap a parameter of the distribution */
-void PhyloOrnsteinUhlenbeckREML::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void PhyloOrnsteinUhlenbeckPruning::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
     if (oldP == this->tau)
