@@ -1,9 +1,9 @@
-#include "Dist_PhyloOrnsteinUhlenbeckREML.h"
+#include "Dist_PhyloOrnsteinUhlenbeckPruning.h"
 
 #include <cstddef>
 #include <ostream>
 
-#include "PhyloOrnsteinUhlenbeckREML.h"
+#include "PhyloOrnsteinUhlenbeckPruning.h"
 #include "RlTree.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
@@ -22,27 +22,27 @@ namespace RevBayesCore { template <class valueType> class RbVector; }
 using namespace RevLanguage;
 
 
-Dist_PhyloOrnsteinUhlenbeckREML::Dist_PhyloOrnsteinUhlenbeckREML() : TypedDistribution< ContinuousCharacterData >()
+Dist_PhyloOrnsteinUhlenbeckPruning::Dist_PhyloOrnsteinUhlenbeckPruning() : TypedDistribution< ContinuousCharacterData >()
 {
     
 }
 
 
-Dist_PhyloOrnsteinUhlenbeckREML::~Dist_PhyloOrnsteinUhlenbeckREML()
+Dist_PhyloOrnsteinUhlenbeckPruning::~Dist_PhyloOrnsteinUhlenbeckPruning()
 {
     
 }
 
 
 
-Dist_PhyloOrnsteinUhlenbeckREML* Dist_PhyloOrnsteinUhlenbeckREML::clone( void ) const
+Dist_PhyloOrnsteinUhlenbeckPruning* Dist_PhyloOrnsteinUhlenbeckPruning::clone( void ) const
 {
     
-    return new Dist_PhyloOrnsteinUhlenbeckREML(*this);
+    return new Dist_PhyloOrnsteinUhlenbeckPruning(*this);
 }
 
 
-RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_PhyloOrnsteinUhlenbeckREML::createDistribution( void ) const
+RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_PhyloOrnsteinUhlenbeckPruning::createDistribution( void ) const
 {
     
     // get the parameters
@@ -50,7 +50,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     
-    RevBayesCore::PhyloOrnsteinUhlenbeckREML *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckREML(tau, n);
+    RevBayesCore::PhyloOrnsteinUhlenbeckPruning *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckPruning(tau, n);
     
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
@@ -107,16 +107,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
 
 /* Get Rev type of object */
-const std::string& Dist_PhyloOrnsteinUhlenbeckREML::getClassType(void)
+const std::string& Dist_PhyloOrnsteinUhlenbeckPruning::getClassType(void)
 {
     
-    static std::string rev_type = "Dist_PhyloOrnsteinUhlenbeckREML";
+    static std::string rev_type = "Dist_PhyloOrnsteinUhlenbeckPruning";
     
     return rev_type;
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& Dist_PhyloOrnsteinUhlenbeckREML::getClassTypeSpec(void)
+const TypeSpec& Dist_PhyloOrnsteinUhlenbeckPruning::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Distribution::getClassTypeSpec() ) );
@@ -132,17 +132,17 @@ const TypeSpec& Dist_PhyloOrnsteinUhlenbeckREML::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_PhyloOrnsteinUhlenbeckREML::getDistributionFunctionName( void ) const
+std::string Dist_PhyloOrnsteinUhlenbeckPruning::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "PhyloOrnsteinUhlenbeckREML";
+    std::string d_name = "PhyloOrnsteinUhlenbeckPruning";
     
     return d_name;
 }
 
 
 /** Return member rules (no members) */
-const MemberRules& Dist_PhyloOrnsteinUhlenbeckREML::getParameterRules(void) const
+const MemberRules& Dist_PhyloOrnsteinUhlenbeckPruning::getParameterRules(void) const
 {
     
     static MemberRules dist_member_rules;
@@ -182,7 +182,7 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckREML::getParameterRules(void) cons
 }
 
 
-const TypeSpec& Dist_PhyloOrnsteinUhlenbeckREML::getTypeSpec( void ) const
+const TypeSpec& Dist_PhyloOrnsteinUhlenbeckPruning::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();
@@ -192,7 +192,7 @@ const TypeSpec& Dist_PhyloOrnsteinUhlenbeckREML::getTypeSpec( void ) const
 
 
 /** Print value for user */
-void Dist_PhyloOrnsteinUhlenbeckREML::printValue(std::ostream& o) const
+void Dist_PhyloOrnsteinUhlenbeckPruning::printValue(std::ostream& o) const
 {
     
     o << "PhyloOrnsteinUhlenbeckProcess(tree=";
@@ -229,7 +229,7 @@ void Dist_PhyloOrnsteinUhlenbeckREML::printValue(std::ostream& o) const
 
 
 /** Set a member variable */
-void Dist_PhyloOrnsteinUhlenbeckREML::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Dist_PhyloOrnsteinUhlenbeckPruning::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
     if ( name == "tree" )

@@ -1,5 +1,5 @@
-#ifndef Dist_PhyloOrnsteinUhlenbeckREML_H
-#define Dist_PhyloOrnsteinUhlenbeckREML_H
+#ifndef Dist_PhyloOrnsteinUhlenbeckPruning_H
+#define Dist_PhyloOrnsteinUhlenbeckPruning_H
 
 #include <math.h>
 #include <iosfwd>
@@ -27,14 +27,14 @@
 namespace RevLanguage {
 class TypeSpec;
     
-    class Dist_PhyloOrnsteinUhlenbeckREML :  public TypedDistribution< ContinuousCharacterData > {
+    class Dist_PhyloOrnsteinUhlenbeckPruning :  public TypedDistribution< ContinuousCharacterData > {
         
     public:
-        Dist_PhyloOrnsteinUhlenbeckREML( void );
-        virtual ~Dist_PhyloOrnsteinUhlenbeckREML();
+        Dist_PhyloOrnsteinUhlenbeckPruning( void );
+        virtual ~Dist_PhyloOrnsteinUhlenbeckPruning();
         
         // Basic utility functions
-        Dist_PhyloOrnsteinUhlenbeckREML*                clone(void) const;                                                                      //!< Clone the object
+        Dist_PhyloOrnsteinUhlenbeckPruning*                clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
