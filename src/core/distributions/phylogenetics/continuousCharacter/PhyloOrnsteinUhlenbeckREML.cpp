@@ -257,21 +257,17 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             
             // get the scaled branch lengths
             double v_left  = 0;
-//            if ( j == 1 )
-//            {
                 double bl_left = left->getBranchLength();
                 double sigma_left = computeBranchSigma(left_index);
                 double alpha_left = computeBranchAlpha(left_index);
                 if ( alpha_left > 1E-20 )
                 {
-//                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (1.0 - exp(-2.0*alpha_left*bl_left) );
                     v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
                 }
                 else
                 {
                     v_left = (sigma_left*sigma_left) * bl_left;
                 }
-//            }
             
             double bl_right = right.getBranchLength();
             double sigma_right = computeBranchSigma(right_index);
@@ -279,7 +275,6 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double v_right =0.0;
             if ( alpha_right > 1E-20 )
             {
-//                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (1.0 - exp(-2.0*alpha_right*bl_right) );
                 v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
             }
             else
@@ -316,14 +311,10 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)* exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
                 
                 double lnl_node = log( z_node );
-//                lnl_node -= RbConstants::LN_SQRT_2PI - log( sqrt( var_node ) );
-//                lnl_node -= ( (contrast-mu_node[i])*(contrast-mu_node[i]) ) / (2.0*var_node);
-//                lnl_node -= ( mu_node[i]*mu_node[i] ) / (2.0*var_node);
                 
                 if ( node.isRoot() == true )
                 {
                     double root_state = computeRootState();
-                    // dnorm(root.x, vals[1], sqrt(vals[2]), TRUE)
                     lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt((var_left*var_right) / (var_left+var_right)), mu_node[i]);
                 }
                 
