@@ -256,7 +256,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             
             // calculate the variance along the branch
-            double v_left  = 0;
+            double v_left  = 0.0;
             double bl_left = left->getBranchLength();
             double sigma_left = computeBranchSigma(left_index);
             double alpha_left = computeBranchAlpha(left_index);
@@ -269,10 +269,10 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 v_left = (sigma_left*sigma_left) * bl_left;
             }
         
+            double v_right = 0.0;
             double bl_right = right.getBranchLength();
             double sigma_right = computeBranchSigma(right_index);
             double alpha_right = computeBranchAlpha(right_index);
-            double v_right =0.0;
             if ( alpha_right > 1E-20 )
             {
                 v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
@@ -304,8 +304,6 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double var_node = (var_left*var_right) / (var_left+var_right);
             this->variances[this->active_likelihood[node_index]][node_index] = var_node;
             
-           
-            double stdev = sqrt(var_left+var_right);
             for (int i=0; i<this->num_sites; i++)
             {
                 // ii) computing the mean at the node
@@ -314,22 +312,29 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 double mean_ancestor = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
                 mu_node[i] = mean_ancestor; 
                 
-                // get the site specific rate of evolution
-                double standDev = this->computeSiteRate(i) * stdev;
-                
                 // compute the contrasts for this site and node
                 double contrast = mean_left - mean_right;
                 
-                // compute the probability for the contrasts at this node
                 // iii) computing the (log) normalizing factor at the node
-                double norm_factor  = exp(alpha_left*bl_left+alpha_right*bl_right)* exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
+                // 
+                // unlike in FitzJohn(2012) supplement eq. (6), we don't propagate the 
+                // normalizing factors (1/z_left) and (1/z_right) of the left and
+                // right subtrees, since this can lead to underflow. Instead we store the log
+                // normalizing factors, and add them to the partial log likelihoods
+                double a = alpha_left*bl_left + alpha_right*bl_right;
+                double b = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
+                double log_norm_factor = a + b - 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
                 
-                double lnl_node = log( norm_factor );
+                double lnl_node = log_norm_factor;
                 
                 if ( node.isRoot() == true )
                 {
+                    // if the assumed root state is equal to the optimum at the root, then
+                    // this pruning algorithm is 100% equivalent to the likelihood obtained
+                    // using generalized least squares with a variance-covariance matrix
+                    // for the residuals (r = y - theta), also called the vcv-method (introduced in Hansen 1997)
                     double root_state = computeRootState();
-                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt((var_left*var_right) / (var_left+var_right)), mu_node[i]);
+                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_node), mu_node[i]);
                 }
                 
                 // sum up the probabilities of the contrasts
