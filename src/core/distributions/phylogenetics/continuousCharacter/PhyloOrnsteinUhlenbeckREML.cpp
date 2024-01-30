@@ -31,7 +31,7 @@ using namespace RevBayesCore;
 
 PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
@@ -59,7 +59,7 @@ PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> 
     // now we need to reset the value
     this->redrawValue();
     
-    // we need to reset the contrasts
+    // we need to reset the means and variances
     resetValue();
 }
 
@@ -223,7 +223,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
         dirty_nodes[node_index] = false;
         
         std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &mu_node            = this->contrasts[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &mu_node            = this->means[this->active_likelihood[node_index]][node_index];
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -247,9 +247,9 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
             
-            // get the per node and site contrasts
-            const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &mu_right = this->contrasts[this->active_likelihood[right_index]][right_index];
+            // get the per node and site means
+            const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
             
             // get the propagated uncertainties
             double delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
@@ -366,7 +366,7 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
     
     // check if the vectors need to be resized
     partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    means = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
 
     // create a vector with the correct site indices
@@ -397,8 +397,8 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
             {
                 ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
                 double &c = taxon.getCharacter(site_indices[site]);
-                contrasts[0][(*it)->getIndex()][site] = c;
-                contrasts[1][(*it)->getIndex()][site] = c;
+                means[0][(*it)->getIndex()][site] = c;
+                means[1][(*it)->getIndex()][site] = c;
                 contrast_uncertainty[0][(*it)->getIndex()] = 0;
                 contrast_uncertainty[1][(*it)->getIndex()] = 0;
             }
