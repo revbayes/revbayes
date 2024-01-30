@@ -309,11 +309,9 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 // ii) computing the mean at the node
                 double mean_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
                 double mean_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
-                double mean_ancestor = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
-                mu_node[i] = mean_ancestor; 
+                double mean_node = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
+                mu_node[i] = mean_node; 
                 
-                // compute the contrasts for this site and node
-                double contrast = mean_left - mean_right;
                 
                 // iii) computing the (log) normalizing factor at the node
                 // 
@@ -321,10 +319,13 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 // normalizing factors (1/z_left) and (1/z_right) of the left and
                 // right subtrees, since this can lead to underflow. Instead we store the log
                 // normalizing factors, and add them to the partial log likelihoods
-                double a = alpha_left*bl_left + alpha_right*bl_right;
-                double b = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
-                double log_norm_factor = a + b - 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
-                
+                double log_nf_left  = alpha_left  * bl_left;
+                double log_nf_right = alpha_right * bl_right;
+                double contrast = mean_left - mean_right;
+                double a = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
+                double b = 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
+
+                double log_norm_factor = log_nf_left + log_nf_right + a - b;
                 double lnl_node = log_norm_factor;
                 
                 if ( node.isRoot() == true )
@@ -337,7 +338,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                     lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_node), mu_node[i]);
                 }
                 
-                // sum up the probabilities of the contrasts
+                // sum up the probabilities of the subtrees
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
                 
             } // end for-loop over all sites
