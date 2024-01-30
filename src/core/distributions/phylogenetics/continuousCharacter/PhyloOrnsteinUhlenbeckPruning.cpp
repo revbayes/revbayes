@@ -252,6 +252,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
             
             // get the variances for the left and right subtrees
+            // the name "delta" comes from Felsenstein (2004; Fig.23.3, page 407)
             double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
             double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             
