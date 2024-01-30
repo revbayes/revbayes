@@ -33,7 +33,6 @@ PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> 
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
-    normalizing_constants( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) )
@@ -225,8 +224,6 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
         
         std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node            = this->contrasts[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &norm_const_node    = this->normalizing_constants[this->active_likelihood[node_index]][node_index];
-        
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -253,10 +250,6 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             // get the per node and site contrasts
             const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &mu_right = this->contrasts[this->active_likelihood[right_index]][right_index];
-            
-            // get the per node and site normalizing constants
-            const std::vector<double> &norm_const_left  = this->normalizing_constants[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &norm_const_right = this->normalizing_constants[this->active_likelihood[right_index]][right_index];
             
             // get the propagated uncertainties
             double delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
@@ -320,10 +313,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 double contrast = m_left - m_right;
                 
                 // compute the probability for the contrasts at this node
-                double z_left  = norm_const_left[i];
-                double z_right = norm_const_right[i];
-                double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)/(z_left*z_right) * exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
-                norm_const_node[i] = 1.0;
+                double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)* exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
                 
                 double lnl_node = log( z_node );
 //                lnl_node -= RbConstants::LN_SQRT_2PI - log( sqrt( var_node ) );
@@ -387,7 +377,6 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
     partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    normalizing_constants = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -421,8 +410,6 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
                 contrasts[1][(*it)->getIndex()][site] = c;
                 contrast_uncertainty[0][(*it)->getIndex()] = 0;
                 contrast_uncertainty[1][(*it)->getIndex()] = 0;
-                normalizing_constants[0][(*it)->getIndex()][site] = 1.0;
-                normalizing_constants[1][(*it)->getIndex()][site] = 1.0;
             }
         }
     }
