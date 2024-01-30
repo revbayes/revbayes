@@ -56,7 +56,7 @@ namespace RevBayesCore {
         // the likelihoods
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     means;
-        std::vector<std::vector<double> >                                   contrast_uncertainty;
+        std::vector<std::vector<double> >                                   variances;
         std::vector<size_t>                                                 active_likelihood;
         
         // convenience variables available for derived classes too

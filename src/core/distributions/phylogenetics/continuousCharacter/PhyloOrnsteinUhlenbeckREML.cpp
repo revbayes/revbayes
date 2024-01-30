@@ -32,7 +32,7 @@ using namespace RevBayesCore;
 PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
+    variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) )
@@ -247,13 +247,13 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
             
-            // get the per node and site means
+            // get the means for the left and right subtrees
             const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
             
-            // get the propagated uncertainties
-            double delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
-            double delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
+            // get the variances for the left and right subtrees
+            double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
+            double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             
             // get the scaled branch lengths
             double v_left  = 0;
@@ -288,7 +288,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             
             // set delta_node = (t_l*t_r)/(t_l+t_r);
             double var_node = (var_left*var_right) / (var_left+var_right);
-            this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = var_node;
+            this->variances[this->active_likelihood[node_index]][node_index] = var_node;
             
             double theta_left   = computeBranchTheta( left_index );
             double theta_right  = computeBranchTheta( right_index );
@@ -367,7 +367,7 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
     // check if the vectors need to be resized
     partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     means = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    variances = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -399,8 +399,8 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
                 double &c = taxon.getCharacter(site_indices[site]);
                 means[0][(*it)->getIndex()][site] = c;
                 means[1][(*it)->getIndex()][site] = c;
-                contrast_uncertainty[0][(*it)->getIndex()] = 0;
-                contrast_uncertainty[1][(*it)->getIndex()] = 0;
+                variances[0][(*it)->getIndex()] = 0;
+                variances[1][(*it)->getIndex()] = 0;
             }
         }
     }
