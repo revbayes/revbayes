@@ -255,20 +255,20 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
             double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             
-            // get the scaled branch lengths
+            // calculate the variance along the branch
             double v_left  = 0;
-                double bl_left = left->getBranchLength();
-                double sigma_left = computeBranchSigma(left_index);
-                double alpha_left = computeBranchAlpha(left_index);
-                if ( alpha_left > 1E-20 )
-                {
-                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
-                }
-                else
-                {
-                    v_left = (sigma_left*sigma_left) * bl_left;
-                }
-            
+            double bl_left = left->getBranchLength();
+            double sigma_left = computeBranchSigma(left_index);
+            double alpha_left = computeBranchAlpha(left_index);
+            if ( alpha_left > 1E-20 )
+            {
+                v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
+            }
+            else
+            {
+                v_left = (sigma_left*sigma_left) * bl_left;
+            }
+        
             double bl_right = right.getBranchLength();
             double sigma_right = computeBranchSigma(right_index);
             double alpha_right = computeBranchAlpha(right_index);
@@ -282,35 +282,49 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 v_right = (sigma_right*sigma_right) * bl_right;
             }
             
-            // add the propagated uncertainty to the branch lengths
-            double var_left  = (v_left)  + delta_left  * exp(2.0*alpha_left *bl_left);
-            double var_right = (v_right) + delta_right * exp(2.0*alpha_right*bl_right);
-            
-            // set delta_node = (t_l*t_r)/(t_l+t_r);
-            double var_node = (var_left*var_right) / (var_left+var_right);
-            this->variances[this->active_likelihood[node_index]][node_index] = var_node;
+            // add the branch variance with the variance of the subtrees
+            //                 (this branch)       (subtree)     (normalizing factor)
+            double var_left  = v_left            + delta_left  * exp(2.0*alpha_left *bl_left);
+            double var_right = v_right           + delta_right * exp(2.0*alpha_right*bl_right);
             
             double theta_left   = computeBranchTheta( left_index );
             double theta_right  = computeBranchTheta( right_index );
+           
+            // the next steps are setting up the Gaussian variable
+            // according to the steps outlined in the supplement of 
+            // FitzJohn (2012, Methods in Ecol Evol). The Gaussian variable
+            // has three components (equation 6)
+            //
+            // i) a variance
+            // ii) a mean
+            // iii) a normalizing factor
+
             
+            // i) computing the variance at the node
+            double var_node = (var_left*var_right) / (var_left+var_right);
+            this->variances[this->active_likelihood[node_index]][node_index] = var_node;
+            
+           
             double stdev = sqrt(var_left+var_right);
             for (int i=0; i<this->num_sites; i++)
             {
-                
-                double m_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
-                double m_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
-                mu_node[i] = (m_left*var_right + m_right*var_left) / (var_left+var_right);
+                // ii) computing the mean at the node
+                double mean_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
+                double mean_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
+                double mean_ancestor = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
+                mu_node[i] = mean_ancestor; 
                 
                 // get the site specific rate of evolution
                 double standDev = this->computeSiteRate(i) * stdev;
                 
                 // compute the contrasts for this site and node
-                double contrast = m_left - m_right;
+                double contrast = mean_left - mean_right;
                 
                 // compute the probability for the contrasts at this node
-                double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)* exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
+                // iii) computing the (log) normalizing factor at the node
+                double norm_factor  = exp(alpha_left*bl_left+alpha_right*bl_right)* exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
                 
-                double lnl_node = log( z_node );
+                double lnl_node = log( norm_factor );
                 
                 if ( node.isRoot() == true )
                 {
