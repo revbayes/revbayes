@@ -255,14 +255,14 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
             double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             
-            // calculate the variance along the branch
+            // calculate the variance accounting for the branch
             double v_left  = 0.0;
             double bl_left = left->getBranchLength();
             double sigma_left = computeBranchSigma(left_index);
             double alpha_left = computeBranchAlpha(left_index);
             if ( alpha_left > 1E-20 )
             {
-                v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
+                v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * expm1(2.0*alpha_left*bl_left);
             }
             else
             {
@@ -275,7 +275,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double alpha_right = computeBranchAlpha(right_index);
             if ( alpha_right > 1E-20 )
             {
-                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
+                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * expm1(2.0*alpha_right*bl_right);
             }
             else
             {
@@ -283,7 +283,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             }
             
             // add the branch variance with the variance of the subtrees
-            //                 (this branch)       (subtree)     (normalizing factor)
+            //                 (this branch)       (                 subtree                )
             double var_left  = v_left            + delta_left  * exp(2.0*alpha_left *bl_left);
             double var_right = v_right           + delta_right * exp(2.0*alpha_right*bl_right);
             
