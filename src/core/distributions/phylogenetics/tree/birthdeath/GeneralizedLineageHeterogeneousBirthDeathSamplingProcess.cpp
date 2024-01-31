@@ -61,7 +61,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	tp_ptr->setNumberOfThreads(n_proc);
 	tp_ptr->setAbsoluteTolerance(abs_tol_);
 	tp_ptr->setRelativeTolerance(rel_tol_);
-	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
+//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
 //	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
 //	tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
 
@@ -1537,8 +1537,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 
 		// set the tree
 //		dirty_nodes = std::vector<bool>(dirty_nodes.size(), true);
-		tp_ptr->setTree(var, dirty_nodes);
-//		tp_ptr->setTree(var);
+//		tp_ptr->setTree(var, dirty_nodes);
+		tp_ptr->setTree(var); // MRM 1/31/2024: disabling dirty flagging for now
 
 		// mark tree as clean
 		tree_dirty = false;
