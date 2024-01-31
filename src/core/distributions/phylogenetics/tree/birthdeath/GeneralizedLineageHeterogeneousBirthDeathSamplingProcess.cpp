@@ -791,7 +791,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     // clear memory
-    delete v;
+//    delete v; // MRM 1/31/2024: why are we deleting this? we should never be responsible for deleting a pointer from outside
 
     // set the taxon data
     for(size_t i = 0; i < num_taxa; ++i)
