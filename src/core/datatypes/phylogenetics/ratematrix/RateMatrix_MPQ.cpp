@@ -14,7 +14,7 @@
 
 using namespace RevBayesCore;
 
-RateMatrix_MPQ::RateMatrix_MPQ(void) : RateMatrix( 4 ) {
+RateMatrix_MPQ::RateMatrix_MPQ(void) : RateMatrix(4) {
 
     q = new mpq_class[16];
     endBuffer = q + 16;
@@ -29,7 +29,7 @@ RateMatrix_MPQ::RateMatrix_MPQ(void) : RateMatrix( 4 ) {
     isReversible = false;
 }
 
-RateMatrix_MPQ::RateMatrix_MPQ(const RateMatrix_MPQ& m) : RateMatrix( m ) {
+RateMatrix_MPQ::RateMatrix_MPQ(const RateMatrix_MPQ& m) : RateMatrix(m) {
     
     this->isReversible = m.isReversible;
     
@@ -41,7 +41,6 @@ RateMatrix_MPQ::RateMatrix_MPQ(const RateMatrix_MPQ& m) : RateMatrix( m ) {
     c_ijk                = m.c_ijk;
     cc_ijk               = m.cc_ijk;
     theEigenSystem->setRateMatrixPtr(the_rate_matrix);
-
     
     pi.resize(4);
     r.resize(6);
@@ -65,7 +64,6 @@ RateMatrix_MPQ::~RateMatrix_MPQ(void) {
     delete [] q;
     delete the_rate_matrix;
     delete theEigenSystem;
-
 }
 
 RateMatrix_MPQ& RateMatrix_MPQ::operator=(const RateMatrix_MPQ& rhs) {
@@ -173,15 +171,12 @@ void RateMatrix_MPQ::adjust(void) {
         }
 }
 
+double RateMatrix_MPQ::averageRate(void) const {
 
-double RateMatrix_MPQ::averageRate(void) const
-{
     mpq_class tmp;
     calculateAverageRate( tmp );
-    
     return tmp.get_d();
 }                                                                //!< Calculate the average rate
-
 
 void RateMatrix_MPQ::calculateAverageRate(mpq_class& ave) const {
 
@@ -190,45 +185,43 @@ void RateMatrix_MPQ::calculateAverageRate(mpq_class& ave) const {
         ave += -(pi[i] * (*this)(i,i));
 }
 
-
 /** Do precalculations on eigenvectors */
-void RateMatrix_MPQ::calculateCijk(void)
-{
+void RateMatrix_MPQ::calculateCijk(void) {
     
     if ( theEigenSystem->isComplex() == false )
-    {
+        {
         // real case
         const MatrixReal& ev  = theEigenSystem->getEigenvectors();
         const MatrixReal& iev = theEigenSystem->getInverseEigenvectors();
         double* pc = &c_ijk[0];
         for (size_t i=0; i<num_states; i++)
-        {
-            for (size_t j=0; j<num_states; j++)
             {
-                for (size_t k=0; k<num_states; k++)
+            for (size_t j=0; j<num_states; j++)
                 {
+                for (size_t k=0; k<num_states; k++)
+                    {
                     *(pc++) = ev[i][k] * iev[k][j];
+                    }
                 }
             }
         }
-    }
     else
-    {
+        {
         // complex case
         const MatrixComplex& cev  = theEigenSystem->getComplexEigenvectors();
         const MatrixComplex& ciev = theEigenSystem->getComplexInverseEigenvectors();
         std::complex<double>* pc = &cc_ijk[0];
         for (size_t i=0; i<num_states; i++)
-        {
-            for (size_t j=0; j<num_states; j++)
             {
-                for (size_t k=0; k<num_states; k++)
+            for (size_t j=0; j<num_states; j++)
                 {
+                for (size_t k=0; k<num_states; k++)
+                    {
                     *(pc++) = cev[i][k] * ciev[k][j];
+                    }
                 }
             }
         }
-    }
 }
 
 void RateMatrix_MPQ::calculateStationaryFrequencies(std::vector<mpq_class>& f) {
@@ -265,10 +258,7 @@ void RateMatrix_MPQ::calculateStationaryFrequencies(std::vector<mpq_class>& f) {
         this->pi[i] = f[i];
 }
 
-void RateMatrix_MPQ::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
-{
-    
-    //
+void RateMatrix_MPQ::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const {
     
     moveToDouble();
     
@@ -277,16 +267,14 @@ void RateMatrix_MPQ::calculateTransitionProbabilities(double startAge, double en
     
     double t = rate * (startAge - endAge);
     if ( theEigenSystem->isComplex() == false )
-    {
+        {
         tiProbsEigens(t, P);
-    }
+        }
     else
-    {
+        {
         tiProbsComplexEigens(t, P);
-    }
-    
+        }
 }
-
 
 void RateMatrix_MPQ::calculateWeights(std::vector<mpq_class>& wts) {
 
@@ -326,13 +314,10 @@ bool RateMatrix_MPQ::check(void) {
     return true;
 }
 
+RateMatrix_MPQ* RateMatrix_MPQ::clone( void ) const {
 
-RateMatrix_MPQ* RateMatrix_MPQ::clone( void ) const
-{
     return new RateMatrix_MPQ( *this );
 }
-
-
 
 void RateMatrix_MPQ::computeLandU(RateMatrix_MPQ& aMat, RateMatrix_MPQ& lMat, RateMatrix_MPQ& uMat) {
 
@@ -368,47 +353,40 @@ void RateMatrix_MPQ::computeLandU(RateMatrix_MPQ& aMat, RateMatrix_MPQ& lMat, Ra
         }
 }
 
-double RateMatrix_MPQ::getRate(size_t from, size_t to, double age, double rate) const
-{
+double RateMatrix_MPQ::getRate(size_t from, size_t to, double age, double rate) const {
+
     return (*this)(from,to).get_d() * rate;
 }
 
+double RateMatrix_MPQ::getRate(size_t from, size_t to, double rate) const {
 
-double RateMatrix_MPQ::getRate(size_t from, size_t to, double rate) const
-{
     return (*this)(from,to).get_d() * rate;
 }
 
-std::vector<double> RateMatrix_MPQ::getRates(void) const
-{
+std::vector<double> RateMatrix_MPQ::getRates(void) const {
+
     std::vector<double> tmp(12);
-    
     size_t k=0;
     for (int i=0;i<4;i++)
-    {
-        for (int j=0;j<4;j++)
         {
-            if ( i != j )
+        for (int j=0;j<4;j++)
             {
+            if ( i != j )
+                {
                 tmp[k++] = (*this)(i,j).get_d();
+                }
             }
         }
-    }
-
-    
     return tmp;
 }
 
-std::vector<double> RateMatrix_MPQ::getStationaryFrequencies(void) const
-{
+std::vector<double> RateMatrix_MPQ::getStationaryFrequencies(void) const {
+
     std::vector<double> tmp(4);
     for (int i=0;i<4;i++)
         tmp[i] = pi[i].get_d();
-    
     return tmp;
 }
-
-
 
 void RateMatrix_MPQ::initializeTimeReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng) {
 
@@ -472,7 +450,6 @@ void RateMatrix_MPQ::initializeTimeReversibleModel(const std::vector<double>& al
     setExchangeabilityRates();
 }
 
-
 void RateMatrix_MPQ::initializeNonReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng) {
 
     isReversible = false;
@@ -500,9 +477,7 @@ void RateMatrix_MPQ::initializeNonReversibleModel(const std::vector<double>& alp
             }
             (*this)(i,i) = -sum;
         }
-    
-    
-    
+        
     // calculate the stationary frequencies
     calculateStationaryFrequencies( this->pi );
     
@@ -525,16 +500,13 @@ void RateMatrix_MPQ::initializeNonReversibleModel(const std::vector<double>& alp
     for (int i=0; i<4; i++)
         for (int j=0; j<4; j++)
             (*this)(i,j) *= factor;
-            
 }
 
-void RateMatrix_MPQ::moveToDouble( void ) const
-{
+void RateMatrix_MPQ::moveToDouble( void ) const {
     
     for (int i=0; i<4;i++)
         for (int j=0;j<4;j++)
             (*the_rate_matrix)[i][j] = (*this)(i,j).get_d();
-    
 }
 
 void RateMatrix_MPQ::nonreversibilize(mpq_class& u1, mpq_class& u2, mpq_class& u3) {
@@ -589,7 +561,6 @@ void RateMatrix_MPQ::nonreversibilize(mpq_class& u1, mpq_class& u2, mpq_class& u
     // the average rate should remain one
     if (averageRate != 1)
         throw(RbException("Average rate should be one when moving to nonreversible model"));
-    
 }
 
 void RateMatrix_MPQ::print(void) {
@@ -681,10 +652,8 @@ void RateMatrix_MPQ::setPi(std::vector<mpq_class>& f) {
         this->pi[i] = f[i];
 }
 
-
 /** Calculate the transition probabilities for the real case */
-void RateMatrix_MPQ::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
-{
+void RateMatrix_MPQ::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const {
     
     // get a reference to the eigenvalues
     const std::vector<double>& eigenValue = theEigenSystem->getRealEigenvalues();
@@ -692,40 +661,38 @@ void RateMatrix_MPQ::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
     // precalculate the product of the eigenvalue and the branch length
     std::vector<double> eigValExp(num_states);
     for (size_t s=0; s<num_states; s++)
-    {
+        {
         eigValExp[s] = exp(eigenValue[s] * t);
-    }
+        }
     
     // calculate the transition probabilities
     const double* ptr = &c_ijk[0];
     double*         p = P.theMatrix;
     for (size_t i=0; i<num_states; i++)
-    {
+        {
         double rowsum = 0.0;
         for (size_t j=0; j<num_states; j++, ++p)
-        {
+            {
             double sum = 0.0;
             for (size_t s=0; s<num_states; s++)
-            {
+                {
                 sum += (*ptr++) * eigValExp[s];
-            }
+                }
             
             sum = (sum < 0.0) ? 0.0 : sum;
             rowsum += sum;
             (*p) = sum;
-        }
+            }
 
         // Normalize transition probabilities for row to sum to 1.0
         double* p2 = p - num_states;
         for (size_t j=0; j<num_states; j++, ++p2)
             *p2 /= rowsum;
-    }
+        }
 }
 
-
 /** Calculate the transition probabilities for the complex case */
-void RateMatrix_MPQ::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
-{
+void RateMatrix_MPQ::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const {
     
     // get a reference to the eigenvalues
     const std::vector<double>& eigenValueReal = theEigenSystem->getRealEigenvalues();
@@ -734,18 +701,18 @@ void RateMatrix_MPQ::tiProbsComplexEigens(double t, TransitionProbabilityMatrix&
     // precalculate the product of the eigenvalue and the branch length
     std::vector<std::complex<double> > ceigValExp(num_states);
     for (size_t s=0; s<num_states; s++)
-    {
+        {
         std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
         ceigValExp[s] = exp(ev * t);
-    }
+        }
     
     // calculate the transition probabilities
     const std::complex<double>* ptr = &cc_ijk[0];
     for (size_t i=0; i<num_states; i++)
-    {
+        {
         double rowsum = 0.0;
         for (size_t j=0; j<num_states; j++)
-        {
+            {
             std::complex<double> sum = std::complex<double>(0.0, 0.0);
             for (size_t s=0; s<num_states; s++)
                 sum += (*ptr++) * ceigValExp[s];
@@ -753,11 +720,11 @@ void RateMatrix_MPQ::tiProbsComplexEigens(double t, TransitionProbabilityMatrix&
             double real_sum = (sum.real() < 0.0) ? 0.0 : sum.real();
             P[i][j] = real_sum;
             rowsum += real_sum;
-        }
+            }
         // Normalize transition probabilities for row to sum to 1.0
         for (size_t j=0; j<num_states; j++)
             P[i][j] /= rowsum;
-    }
+        }
 }
 
 void RateMatrix_MPQ::transposeMatrix(const RateMatrix_MPQ& a, RateMatrix_MPQ& t) {
@@ -768,17 +735,13 @@ void RateMatrix_MPQ::transposeMatrix(const RateMatrix_MPQ& a, RateMatrix_MPQ& t)
 }
 
 /** Update the eigen system */
-void RateMatrix_MPQ::updateEigenSystem(void)
-{
+void RateMatrix_MPQ::updateEigenSystem(void) {
     
     theEigenSystem->update();
     calculateCijk();
-    
 }
 
-
-void RateMatrix_MPQ::update( void )
-{
+void RateMatrix_MPQ::update(void) {
     
 //    if ( needs_update )
 //    {
@@ -909,10 +872,10 @@ double RateMatrix_MPQ::updateNonReversibleRatesSingle(RandomNumberGenerator* rng
     alphaReverse[1] = newRates[1] * alpha0;
     
     double rescale_factor = newRates[1] / oldRates[1];
-    for ( int i=0; i<12; ++i )
-    {
+    for (int i=0; i<12; ++i)
+        {
         newDiagRates[i] = oldDiagRates[i] * rescale_factor;
-    }
+        }
     newDiagRates[index] = newRates[0];
     
     // update the rate matrix
@@ -1042,21 +1005,21 @@ double RateMatrix_MPQ::updateExchangeabilityRatesSingle(RandomNumberGenerator* r
     
     mpq_class sum;
     for (int i=0; i<6; ++i)
-    {
+        {
         if ( i == index )
-        {
+            {
             r[i] = newRates[0];
-        }
+            }
         else
-        {
+            {
             r[i] *= rescale_factor;
-        }
+            }
         sum += r[i];
-    }
+        }
     for (int i=0; i<6; ++i)
-    {
+        {
         r[i] /= sum;
-    }
+        }
     
     // update the off-diagonal components of the rate matrix
     for (int i=0, k=0; i<4; i++)
@@ -1160,8 +1123,6 @@ double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, d
     return lnProposalProb;
 }
 
-
-
 double RateMatrix_MPQ::updateStationaryFrequenciesSingle(RandomNumberGenerator* rng, double alpha0) {
 
     if (isReversible == false)
@@ -1183,13 +1144,13 @@ double RateMatrix_MPQ::updateStationaryFrequenciesSingle(RandomNumberGenerator* 
     double newFreq = RbStatistics::Beta::rv(alphaForward[0], alphaForward[1], *rng);
 
     if ( newFreq < MIN_FREQ )
-    {
+        {
         newFreq = MIN_FREQ;
-    }
+        }
     if ( (1.0-newFreq) < MIN_FREQ )
-    {
+        {
         newFreq = 1.0-MIN_FREQ;
-    }
+        }
     
     
     alphaReverse[0] = newFreq * alpha0;
@@ -1199,13 +1160,13 @@ double RateMatrix_MPQ::updateStationaryFrequenciesSingle(RandomNumberGenerator* 
     mpq_class factor = oldFreqs[0] / newFreq;
     mpq_class sum;
     for (int i=0; i<4; ++i)
-    {
-        if ( i != index )
         {
+        if ( i != index )
+            {
             pi[i] *= factor;
             sum += pi[i];
+            }
         }
-    }
     pi[index] = 1 - sum;
     
     // update the off-diagonal components of the rate matrix

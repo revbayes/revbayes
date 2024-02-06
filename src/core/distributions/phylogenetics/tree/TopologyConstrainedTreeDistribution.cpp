@@ -499,7 +499,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
             dirty_nodes[node.getIndex()] = false;
         }
         
-        return RbBitSet( value->getNumberOfTips(), true );
+        return RbBitSet( value->getNumberOfTips() ).set();
     }
     else
     {
