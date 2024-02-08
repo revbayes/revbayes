@@ -263,7 +263,18 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
-
+//    std::cout << "performing MH proposal with name: " << std::endl;
+//    std::cout << proposal->getProposalName() << std::endl;
+//    std::cout << "  nodes: ";
+//    for(std::vector<DagNode*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
+//    	std::cout << "\t" << (*it)->getName();
+//    }
+//    std::cout << "\n";
+//    std::cout << "  affected nodes: ";
+//    for(std::vector<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it) {
+//    	std::cout << "\t" << (*it)->getName();
+//    }
+//    std::cout << "\n" << std::endl;
 
     // --------------------------
     //
