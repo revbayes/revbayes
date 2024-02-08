@@ -235,6 +235,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
 
+//	auto child_nodes = dag_node->getChildren();
+//	RbOrderedSet<DagNode*> affected;
+//	age->getAffectedNodes(affected);
+
+//	const std::vector<DagNode*>& affected_nodes = dag_node->getChildren();
+
+//	dag_node->initiateGetAffectedNodes( age );
+
 	// make sure we need to recompute
 	if ( probability_dirty == false )
 	{
@@ -916,7 +924,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditio
 }
 
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter)
 {
     if ( affecter == age )
     {
@@ -1028,7 +1036,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
         if ( dag_node != NULL )
         {
-            dag_node->touchAffected();
+            dag_node->restoreAffected();
         }
 
 //        // reset the tree
