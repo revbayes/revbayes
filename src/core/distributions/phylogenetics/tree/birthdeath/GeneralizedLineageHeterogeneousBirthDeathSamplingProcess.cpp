@@ -1239,7 +1239,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 {
 
     // we don't need to reset tp approximator yet
-    tp_can_reset = false;
+//    tp_can_reset = false;
 
     if ( affecter == age )
     {
