@@ -946,10 +946,8 @@ void Mcmc::nextCycle(bool advance_cycle)
     for (size_t i=0; i<proposals; ++i)
     {
 
-//    	if ( generation == 15 ) {
-//
+//    	if ( generation == 124 ) {
 //    		std::cout << "stop" << std::endl;
-//
 //    	}
 
         // Get the move

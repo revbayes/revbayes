@@ -254,9 +254,6 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 }
 
-
-
-
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
     
