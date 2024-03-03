@@ -156,6 +156,14 @@ double RateMatrix_Biogeography::averageRate(void) const
     return ave / num_states;
 }
 
+std::string RateMatrix_Biogeography::bitsToString( std::vector<unsigned> b ) const
+{
+    std::stringstream ss;
+    for (size_t i = 0; i < b.size(); i++) {
+        ss << b[i];
+    }
+    return ss.str();
+}
 
 
 void RateMatrix_Biogeography::fillRateMatrix( void )
@@ -171,10 +179,10 @@ void RateMatrix_Biogeography::fillRateMatrix( void )
     {
         unsigned startState = (unsigned)i;
         
-        // get range size weights
-        int n = 0;
-        for (size_t j = 0; j < statesToBitsByNumOn[i].size(); j++)
-            n += statesToBitsByNumOn[i][j];
+//        // get range size weights
+//        int n = 0;
+//        for (size_t j = 0; j < statesToBitsByNumOn[i].size(); j++)
+//            n += statesToBitsByNumOn[i][j];
         
         double sum = 0.0;
         
@@ -188,21 +196,12 @@ void RateMatrix_Biogeography::fillRateMatrix( void )
             
             std::vector<unsigned> b1 = statesToBitsByNumOn[startState];
             std::vector<unsigned> b2 = statesToBitsByNumOn[endState];
-            
-//            std::cout << getRangeStr(b1) << "->" << getRangeStr(b2) << " " << (lossOrGain[i][j]==0 ? "LOSS" : "GAIN") << " :\n";
-            
+             
             // extinction
             if (lossOrGain[i][j] == 0)
             {
                 unsigned changed_area = changedAreas[i][j];
-                std::vector<unsigned> affecting_areas = affectingAreas[i][j];
-                
-                for (size_t k = 0; k < affecting_areas.size(); k++)
-                {
-                    double vt = extirpationRates[changed_area];
-//                        std::cout << "\t" << vt << "dr[ " <<  affecting_areas[k] << " ][ " << changed_area << "]\n";
-                    v += vt;
-                }
+                v = extirpationRates[changed_area];
             }
             // dispersal
             else if (lossOrGain[i][j] == 1)
@@ -212,25 +211,23 @@ void RateMatrix_Biogeography::fillRateMatrix( void )
                 
                 for (size_t k = 0; k < affecting_areas.size(); k++)
                 {
-                    double vt = dispersalRates[ affecting_areas[k] ][changed_area];
-//                    std::cout << "\t" << vt << "dr[ " <<  affecting_areas[k] << " ][ " << changed_area << "]\n";
-                    v += vt;
+                    v += dispersalRates[ affecting_areas[k] ][changed_area];
                 }
             }
-//            std::cout << "\tsum = " << sum << "\n";
                         
             // store value
             m[ startState ][ endState ] = v;
             
             // accumulate diagonal sum
-            sum += v;
+            if (startState != endState) {
+                sum += v;
+            }
 
         }
         
         // set diagonal
         m[startState][startState] = -sum;
     }
-//    std::cout << m << "\n";
     
     // set flags
     needs_update = true;
@@ -369,22 +366,14 @@ std::vector<double> RateMatrix_Biogeography::getStationaryFrequencies(void) cons
 
 void RateMatrix_Biogeography::makeBits(void)
 {
-    
+
+    // initial states/containers
     size_t num_all_states = (size_t)pow(2,numCharacters);
     bitsByNumOn.resize(numCharacters+1);
-    
-    
-//    if (includeNullRangeAsState == true) {
-//        statesToBitsByNumOn.resize(num_all_states);
-//    }
-//    else {
-        statesToBitsByNumOn.resize(num_all_states-1);
-//    }
+    statesToBitsByNumOn.resize(num_all_states-1);
     bits = std::vector<std::vector<unsigned> >(num_all_states, std::vector<unsigned>(numCharacters, 0));
     
-//    if (includeNullRangeAsState) {
-//        bitsByNumOn[0].push_back(bits[0]);
-//    }
+    // store bit-patterns by number of bits on
     for (size_t i = 1; i < num_all_states; i++)
     {
         size_t m = i;
@@ -418,8 +407,6 @@ void RateMatrix_Biogeography::makeBits(void)
     {
         bitsToStatesByNumOn[ statesToBitsByNumOn[i] ] = (unsigned)i;
     }
-    
-
     
 }
 
@@ -615,3 +602,13 @@ void RateMatrix_Biogeography::update( void ) {
     }
 }
 
+RbVector<std::string> RateMatrix_Biogeography::getStateDescriptions(void) const {
+    
+    RbVector<std::string> v;
+    std::stringstream ss;
+    for (size_t state_int = 0; state_int < num_states; state_int++) {
+        std::string state_bitstr = bitsToString(statesToBitsByNumOn[state_int]);
+        v.push_back(state_bitstr);
+    }
+    return v;
+}

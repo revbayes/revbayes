@@ -81,7 +81,7 @@ void FeatureInformedRateFunction::update( void )
         for (size_t j = 0; j < numDim1; j++) {
             for (size_t k = 0; k < numDim2; k++) {
 //                if (std::isnan(cf[i][j][k]) == false) {
-                if (cf[i][j][k] >= 0) {
+                if (cf[i][j][k] == 1) {
                     rates[j][k] *= cp_i;
                 }
             }
