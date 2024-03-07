@@ -18,8 +18,8 @@ jobs:
                ubuntu-gcc-11,
                ubuntu-gcc-12,
                ubuntu-clang-13,
-               macos-xcode-13,
-               macos-xcode-14,
+               macos-xcode-14-intel,
+               macos-xcode-14-arm,
                windows
                ]
 
@@ -61,18 +61,18 @@ jobs:
             version: "13"
             mpi: false
 
-          - name: macos-xcode-13
-            os: macos-latest
-            compiler: xcode
-            version: "13"
-            mpi: false
-
-          - name: macos-xcode-14
-            os: macos-12
+          - name: macos-xcode-14-intel
+            os: macos-13
             compiler: xcode
             version: "14"
             mpi: false
-  
+
+          - name: macos-xcode-14-arm
+            os: macos-14
+            compiler: xcode
+            version: "14"
+            mpi: false
+
           - name: windows
             os: ubuntu-latest
             compiler: idk
