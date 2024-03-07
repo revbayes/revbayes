@@ -97,7 +97,7 @@ jobs:
       if: runner.os == 'Linux' && matrix.name != 'windows'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libcairo2-dev ccache libopenlibm-dev
+        sudo apt-get install -y ccache libopenlibm-dev
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
           echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
@@ -120,13 +120,13 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          brew install pkg-config pandoc boost ccache coreutils openlibm
+          brew install pkg-config boost ccache coreutils openlibm
 
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
       run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix zstd
+          sudo apt-get install -y ccache dos2unix zstd
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
           sudo -H pip3 install meson
           sudo -H pip3 install ninja
