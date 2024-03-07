@@ -66,17 +66,22 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         txNames[i] = avgDistMat.getTaxa()[i].getName();
     }
     
+    std::vector<size_t> ADMind( avgDistMat.getSize() );
+    for(size_t i = 0; i < txNames.size(); i++)
+    {
+        ADMind[i] = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
+    }
+
     double dist = 0;
-    
+
     for (size_t i=0; i<avgDistMat.getSize(); i++)
     {
-        size_t rowInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
         for (size_t j=0; j<i; j++)
         {
-            size_t colInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[j].getName() ));
             if (z.getMask()[i][j])
             {
-                dist += pow(z.getDistanceMatrix()[i][j] - avgDistMat.getDistanceMatrix()[rowInd][colInd], 2.0);
+                double difference = z.getDistanceMatrix()[i][j] - avgDistMat.getDistanceMatrix()[ ADMind[i] ][ ADMind[j] ];
+                dist += difference * difference;
             }
         }
     }
@@ -201,17 +206,22 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
         txNames[i] = distMat.getTaxa()[i].getName();
     }
     
+    std::vector<size_t> DMind( distMat.getSize() );
+    for(size_t i = 0; i < txNames.size(); i++)
+    {
+        DMind[i] = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
+    }
+    
     double dist = 0;
     
     for (size_t i=0; i<distMat.getSize(); i++)
     {
-        size_t rowInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
         for (size_t j=0; j<i; j++)
         {
-            size_t colInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[j].getName() ));
             if (z.getMask()[i][j])
             {
-                dist += pow(z.getDistanceMatrix()[i][j] - distMat[rowInd][colInd], 2.0);
+                double difference = z.getDistanceMatrix()[i][j] - distMat[ DMind[i] ][ DMind[j] ];
+                dist += difference * difference;
             }
         }
     }
