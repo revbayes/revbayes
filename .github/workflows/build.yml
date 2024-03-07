@@ -30,54 +30,63 @@ jobs:
             compiler: gcc
             version: "9"
             mpi: false
+            arch: linux64
 
           - name: ubuntu-gcc-9-mpi
             os: ubuntu-latest
             compiler: gcc
             version: "9"
             mpi: true
+            arch: linux64
 
           - name: ubuntu-gcc-10
             os: ubuntu-latest
             compiler: gcc
             version: "10"
             mpi: false
+            arch: linux64
 
           - name: ubuntu-gcc-11
             os: ubuntu-latest
             compiler: gcc
             version: "11"
             mpi: false
+            arch: linux64
 
           - name: ubuntu-gcc-12
             os: ubuntu-22.04
             compiler: gcc
             version: "12"
             mpi: false
+            arch: linux64
 
           - name: ubuntu-clang-13
             os: ubuntu-latest
             compiler: clang
             version: "13"
             mpi: false
+            arch: linux64
 
           - name: macos-xcode-14-intel
             os: macos-13
             compiler: xcode
             version: "14"
             mpi: false
+            arch: mac-intel64
 
           - name: macos-xcode-14-arm
             os: macos-14
             compiler: xcode
             version: "14"
             mpi: false
+            arch: mac-arm64
 
           - name: windows
             os: ubuntu-latest
             compiler: idk
             version: "9000"
             mpi: false
+            arch: win64
 
 
     runs-on: ${{ matrix.os }}
@@ -183,14 +192,18 @@ jobs:
       if: matrix.name != 'windows'
       env:
         USE_MPI: ${{ matrix.mpi }}
-        OSX_VERSION_MIN: "10.14"
+        OSX_VERSION_MIN: "12.1"
       run: |
-        if [ ${{ matrix.arch }} = "mac64" ] && [ -n "${OSX_VERSION_MIN}" ]; then
-          MIN="-mmacosx-version-min=${OSX_VERSION_MIN}"
-          export CFLAGS="$CFLAGS $MIN"
-          export CXXFLAGS="$CXXFLAGS $MIN"
-          export LDFLAGS="$LDFLAGS $MIN"
+        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
+          export BOOST_ROOT=/opt/homebrew
         fi
+
+        # if [ ${{ runner.os }} = "macOS" ] && [ -n "${OSX_VERSION_MIN}" ]; then
+        #   MIN="-mmacosx-version-min=${OSX_VERSION_MIN}"
+        #   export CFLAGS="$CFLAGS $MIN"
+        #   export CXXFLAGS="$CXXFLAGS $MIN"
+        #   export LDFLAGS="$LDFLAGS $MIN"
+        # fi
 
         ccache -p
         ccache -s
