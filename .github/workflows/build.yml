@@ -198,14 +198,14 @@ jobs:
         OSX_VERSION_MIN: "12.1"
       run: |
         if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
-          echo BOOST_ROOT=/opt/homebrew >> $GITHUB_ENV
+          export BOOST_ROOT=/opt/homebrew
         fi
 
         # if [ ${{ runner.os }} = "macOS" ] && [ -n "${OSX_VERSION_MIN}" ]; then
         #   MIN="-mmacosx-version-min=${OSX_VERSION_MIN}"
-        #   echo CFLAGS="$CFLAGS $MIN" >> $GITHUB_ENV
-        #   echo CXXFLAGS="$CXXFLAGS $MIN" >> $GITHUB_ENV
-        #   echo LDFLAGS="$LDFLAGS $MIN" >> $GITHUB_ENV
+        #   export CFLAGS="$CFLAGS $MIN"
+        #   export CXXFLAGS="$CXXFLAGS $MIN"
+        #   export LDFLAGS="$LDFLAGS $MIN"
         # fi
 
         ccache -p
