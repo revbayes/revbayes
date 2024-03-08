@@ -99,6 +99,7 @@
 #include "Func_maximumTree.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
+#include "Func_PhyloBranchRates.h"
 #include "Func_phyloDiversity.h"
 #include "Func_PhylogeneticIndependentContrasts.h"
 #include "Func_PhylogeneticIndependentContrastsMultiSample.h"
@@ -429,6 +430,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_maximumTree()                                     );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
+        addFunction( new Func_PhyloBranchRates()                                );
         addFunction( new Func_phyloDiversity()                                  );
         addFunction( new Func_PhylogeneticIndependentContrasts()                );
         addFunction( new Func_PhylogeneticIndependentContrastsMultiSample()     );

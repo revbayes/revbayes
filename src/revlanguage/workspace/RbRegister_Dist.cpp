@@ -155,6 +155,7 @@
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
 #include "Dist_PhyloMultivariateBrownianREML.h"
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
+#include "Dist_PhyloNodeStateBM.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
 #include "Dist_PhyloOrnsteinUhlenbeckREML.h"
@@ -304,6 +305,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloBranchRateBM()                             );
         AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloBranchRateOU()                             );
+
+        AddDistribution< ModelVector<Real>          >( new Dist_PhyloNodeStateBM()                              );
 
         // brownian motion
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloBrownian()                                 );
