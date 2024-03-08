@@ -117,9 +117,9 @@ double MPQTreeProposal::doProposal( void ) {
     double lnProb = 0.0;
     if (Q.getIsReversible() == true)
         {
-        // update GTR model
+        // update the tree length or branch lengths
         double u = rng->uniform01();
-        if (u < 0.1)
+        if ( u < 0.1 )
             {
             last_move = TREE_LENGTH;
             lnProb = updateTreeLength();
@@ -132,9 +132,9 @@ double MPQTreeProposal::doProposal( void ) {
         }
     else
         {
-        // update non-reversible model
+        // update non-reversible model (tree length, branch lengths or root position)
         double u = rng->uniform01();
-        if (u < 0.1)
+        if ( u < 0.1 )
             {
             last_move = TREE_LENGTH;
             lnProb = updateTreeLength();
@@ -160,7 +160,8 @@ double MPQTreeProposal::doProposal( void ) {
 /**
  *
  */
-void MPQTreeProposal::prepareProposal( void ) {
+void MPQTreeProposal::prepareProposal( void ) 
+{
     
 }
 
@@ -173,7 +174,8 @@ void MPQTreeProposal::prepareProposal( void ) {
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void MPQTreeProposal::printParameterSummary(std::ostream &o, bool name_only) const {
+void MPQTreeProposal::printParameterSummary(std::ostream &o, bool name_only) const 
+{
     
     o << "lambda = ";
     if (name_only == false)
@@ -190,7 +192,8 @@ void MPQTreeProposal::printParameterSummary(std::ostream &o, bool name_only) con
  * where complex undo operations are known/implement, we need to revert
  * the value of the variable/DAG-node to its original value.
  */
-void MPQTreeProposal::undoProposal( void ) {
+void MPQTreeProposal::undoProposal( void ) 
+{
     
     RateMatrix_MPQ& v = static_cast<RateMatrix_MPQ&>( q_matrix->getValue() );
     
@@ -249,7 +252,8 @@ void MPQTreeProposal::undoProposal( void ) {
  * \param[in]     oldN     The old variable that needs to be replaced.
  * \param[in]     newN     The new RevVariable.
  */
-void MPQTreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN) {
+void MPQTreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN) 
+{
     
     if ( oldN == q_matrix )
     {
@@ -330,22 +334,71 @@ double MPQTreeProposal::updateBranchLengths() {
     return ln_hastings_ratio;
 }
 
-double MPQTreeProposal::updateRootPosition(void) {
+double MPQTreeProposal::updateRootPosition(void) 
+{
     
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
+    size_t num_nodes = tau.getNumberOfNodes();
+    
+    double tree_length = tau.getTreeLength();
+    
+    double u = rng->uniform01() * tree_length;
+    
+    double sum = 0.0;
+    
+    size_t node_index = 0;
+    // loop over all nodes
+    for ( ; node_index < num_nodes; ++node_index)
+    {
+        // get the i-th node
+        const TopologyNode& n = tau.getNode( node_index );
+
+        if ( n.isRoot() == false )
+        {
+            // add the branch length
+            sum += n.getBranchLength();
+        }
+        
+        if ( sum > u )
+        {
+            break;
+        }
+    }
     
     stored_root_index = tau.getRoot().getIndex();
     
-    // pick a random node which is not the root
-    TopologyNode* node = NULL;
-    do {
-        double u = rng->uniform01();
-        size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(index);
-    } while ( node->isRoot() == true && node->getParent().isRoot() == false );
+    // get the node that we have picked
+    TopologyNode& node = tau.getNode( node_index );
+    
+    std::vector<TopologyNode*> marked_nodes;
+    markNodes(marked_nodes, &node);
+    
+    TopologyNode* current_root = &tau.getRoot();
+    
+    for (size_t i=marked_nodes.size(); i > 1; --i)
+    {
+        TopologyNode* this_node = marked_nodes[i-1];
+        
+        TopologyNode* other_child = &current_root->getChild(0);
+        if ( this_node == other_child )
+        {
+            other_child = &current_root->getChild(1);
+        }
+        
+        
+        this_node->addChild(other_child);
+        other_child->setParent( this_node );
+        
+        current_root->removeChild(other_child);
+        
+        TopologyNode* new_root_desc = marked_nodes[i-2];
+        new_root_desc->setParent( current_root );
+        current_root->addChild( new_root_desc );
+    }
+    
     
     // reset parent/child relationships
     tau.reverseParentChild( *node );
@@ -356,6 +409,18 @@ double MPQTreeProposal::updateRootPosition(void) {
     
     
     return 0.0;
+}
+
+void MPQTreeProposal::markNodes(std::vector<TopologyNode *> &markedNodes, TopologyNode *curr_node)
+{
+
+    if ( curr_node->isRoot() == false )
+    {
+        
+        markedNodes.push_back( curr_node );
+        markedNodes( markedNodes, &curr_node->getParent() );
+        
+    }
 }
 
 double MPQTreeProposal::updateTreeLength() {
