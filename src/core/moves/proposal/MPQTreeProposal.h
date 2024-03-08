@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <iosfwd>
 #include <gmpxx.h>
+#include <set>
 
 #include "Polyhedron.h"
 #include "Proposal.h"
@@ -13,6 +14,8 @@
 namespace RevBayesCore {
 class DagNode;
 class Tree;
+class TopologyNode;
+
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
 template <class variableType> class StochasticNode;
@@ -54,7 +57,8 @@ template <class variableType> class StochasticNode;
         double                                              updateBranchLengths(void);          //!< Update single branch
         double                                              updateTreeLength(void);
         double                                              updateRootPosition(void);
-                
+        
+        void                                                markNodes( std::vector<TopologyNode*>& markedNodes, TopologyNode* curr_node );
         // parameters
         TypedDagNode<RateGenerator>*                        q_matrix;
         StochasticNode<Tree>*                               tree;
