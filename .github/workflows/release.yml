@@ -27,13 +27,13 @@ jobs:
     needs: create_release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: 3.8
-    - uses: eWaterCycle/setup-singularity@v7
+        python-version: 3.12.0
+    - uses: eWaterCycle/setup-apptainer@v2
       with:
-        singularity-version: 3.8.3
+        singularity-version: 1.2.5
 
     - name: Get version
       id: get_version
@@ -45,7 +45,7 @@ jobs:
       run: |
         cd projects/singularity
         PACKAGE=revbayes-${{ steps.get_version.outputs.version }}-linux64-singularity.simg
-        singularity build --fakeroot ~/${PACKAGE} Singularity
+        singularity build --fakeroot  --build-arg version=${{ steps.get_version.outputs.version }} ~/${PACKAGE} Singularity
         echo "archive_name=${PACKAGE}" >> $GITHUB_OUTPUT
         echo "archive_path=${HOME}/${PACKAGE}" >> $GITHUB_OUTPUT
 
@@ -64,7 +64,8 @@ jobs:
     strategy:
       matrix:
         name: [ubuntu-gcc-9,
-               macos-xcode-13,
+               macos-xcode-14-intel,
+               macos-xcode-14-arm,
                windows
                ]
 
@@ -76,12 +77,19 @@ jobs:
             mpi: false
             arch: "linux64"
 
-          - name: macos-xcode-13
-            os: macos-latest
+          - name: macos-xcode-14-intel
+            os: macos-13
             compiler: xcode
-            version: "13"
+            version: "14"
             mpi: false
-            arch: "mac64"
+            arch: "mac-intel64"
+
+          - name: macos-xcode-14-arm
+            os: macos-14
+            compiler: xcode
+            version: "14"
+            mpi: false
+            arch: "mac-arm64"
   
           - name: windows
             os: ubuntu-latest
@@ -93,16 +101,16 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: 3.8
+        python-version: 3.12.0
 
     - name: Install (Linux)
       if: runner.os == 'Linux' && matrix.name != 'windows'
       run: |
         sudo apt-get update
-        sudo apt-get install -y pandoc libcairo2-dev ccache
+        sudo apt-get install -y ccache
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
           echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
@@ -125,14 +133,14 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          brew install pkg-config pandoc boost ccache coreutils
-          ccache --set-config=cache_dir=$HOME/.ccache
+          brew install pkg-config boost ccache coreutils
+          if [[ $(uname -m) == 'arm64' ]] ; then echo "BOOST_ROOT=/opt/homebrew" >> $GITHUB_ENV ; fi
 
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
       run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc libcairo2-dev ccache dos2unix zstd
+          sudo apt-get install -y ccache dos2unix zstd
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
           sudo -H pip3 install meson
           sudo -H pip3 install ninja
@@ -143,6 +151,11 @@ jobs:
     - name: Prepare ccache timestamp
       id: ccache_cache_timestamp
       run: |
+        ccache --set-config=cache_dir=$HOME/.ccache
+
+        export CMAKE_C_COMPILER_LAUNCHER=ccache
+        export CMAKE_CXX_COMPILER_LAUNCHER=ccache
+
         if [ "$RUNNER_OS" = "Linux" ] ; then
           stamp=$(date '+%s')
         else
@@ -212,11 +225,14 @@ jobs:
       env:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
-        PREFIX=${HOME}/local
         CXX=x86_64-w64-mingw32-g++-posix
+        PREFIX=${HOME}/local
         WINROOT=/home/runner/win_root
-        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dstudio=true
+        /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dstudio=true
+        ccache -p
+        ccache -s
         /usr/local/bin/ninja -C build install
+        ccache -s
         cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
