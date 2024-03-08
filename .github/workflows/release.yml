@@ -1,4 +1,4 @@
-name: Build and test
+name: Upload release artifacts
 
 on:
   push:
