@@ -123,9 +123,8 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
+          brew link --overwrite python@3.12
           brew install pkg-config boost coreutils openlibm
-
-          echo HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 >> $GITHUB_ENV
           brew install ccache
 
           if [[ $(uname -m) == 'arm64' ]] ; then echo "BOOST_ROOT=/opt/homebrew" >> $GITHUB_ENV ; fi
