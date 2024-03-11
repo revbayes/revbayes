@@ -9,6 +9,8 @@
 #include "DistributionExponentialError.h"
 
 #include <cmath>
+#include <numeric>
+#include <algorithm>
 
 #include "DistributionDirichlet.h"
 #include "RandomNumberGenerator.h"
@@ -20,6 +22,28 @@
 #include "DistanceMatrix.h"
 
 using namespace RevBayesCore;
+
+/*!
+ * Helper function for index sorting, inspired by the following Stack Overflow posts:
+ * Lukasz Wiklendt, https://stackoverflow.com/a/12399290 and
+ * vsoftco, https://stackoverflow.com/a/37732329
+ *
+ * \brief Index sorting.
+ * \param v is a vector that we want to sort and return indices of.
+ * \return Vector of sorted indices.
+ * \throws Does not throw an error.
+ */
+std::vector<size_t> stringSortIndices(const std::vector<std::string>& v)
+{
+    std::vector<size_t> result( v.size() );
+    std::iota(result.begin(), result.end(), 0);
+    std::sort(result.begin(), result.end(),
+              [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; }
+             );
+    return result;
+}
+
+
 
 /*!
  * This function calculates the probability density for a distance matrix
@@ -60,17 +84,20 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         return RbConstants::Double::neginf;
     }
     
-    std::vector<std::string> txNames( avgDistMat.getSize() );
-    for(size_t i = 0; i < txNames.size(); i++)
+    std::vector<std::string> admNames( avgDistMat.getSize() );
+    for(size_t i = 0; i < admNames.size(); i++)
     {
-        txNames[i] = avgDistMat.getTaxa()[i].getName();
+        admNames[i] = avgDistMat.getTaxa()[i].getName();
     }
     
-    std::vector<size_t> ADMind( avgDistMat.getSize() );
-    for(size_t i = 0; i < txNames.size(); i++)
+    std::vector<std::string> zNames( z.getSize() );
+    for(size_t i = 0; i < zNames.size(); i++)
     {
-        ADMind[i] = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
+        zNames[i] = z.getTaxa()[i].getName();
     }
+    
+    std::vector<size_t> ix0 = stringSortIndices(admNames);
+    std::vector<size_t> ix1 = stringSortIndices(zNames);
 
     double dist = 0;
 
@@ -80,7 +107,7 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         {
             if (z.getMask()[i][j])
             {
-                double difference = z.getDistanceMatrix()[i][j] - avgDistMat.getDistanceMatrix()[ ADMind[i] ][ ADMind[j] ];
+                double difference = z.getDistanceMatrix()[ ix0[i] ][ ix0[j] ] - avgDistMat.getDistanceMatrix()[ ix1[i] ][ ix1[j] ];
                 dist += difference * difference;
             }
         }
@@ -200,17 +227,20 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
         return RbConstants::Double::neginf;
     }
     
-    std::vector<std::string> txNames( distMat.getSize() );
-    for(size_t i = 0; i < txNames.size(); i++)
+    std::vector<std::string> dmNames( distMat.getSize() );
+    for(size_t i = 0; i < dmNames.size(); i++)
     {
-        txNames[i] = distMat.getTaxa()[i].getName();
+        dmNames[i] = distMat.getTaxa()[i].getName();
     }
     
-    std::vector<size_t> DMind( distMat.getSize() );
-    for(size_t i = 0; i < txNames.size(); i++)
+    std::vector<std::string> zNames( z.getSize() );
+    for(size_t i = 0; i < zNames.size(); i++)
     {
-        DMind[i] = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
+        zNames[i] = z.getTaxa()[i].getName();
     }
+    
+    std::vector<size_t> ix0 = stringSortIndices(zNames);
+    std::vector<size_t> ix1 = stringSortIndices(dmNames);
     
     double dist = 0;
     
@@ -220,7 +250,7 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
         {
             if (z.getMask()[i][j])
             {
-                double difference = z.getDistanceMatrix()[i][j] - distMat[ DMind[i] ][ DMind[j] ];
+                double difference = z.getDistanceMatrix()[ ix0[i] ][ ix0[j] ] - distMat[ ix1[i] ][ ix1[j] ];
                 dist += difference * difference;
             }
         }
