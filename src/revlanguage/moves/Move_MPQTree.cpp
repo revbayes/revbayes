@@ -91,7 +91,7 @@ const TypeSpec& Move_MPQTree::getClassTypeSpec(void) {
 std::string Move_MPQTree::getMoveName( void ) const {
 
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "MPQRateMatrix";
+    std::string c_name = "MPQTree";
     
     return c_name;
 }
