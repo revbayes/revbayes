@@ -5,7 +5,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "MPQRateMatrixProposal.h"
+#include "MPQTreeProposal.h"
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -60,7 +60,7 @@ void Move_MPQTree::constructInternalObject( void ) {
 
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::MPQRateMatrixProposal(n);
+    RevBayesCore::Proposal *p = new RevBayesCore::MPQTreeProposal(n, t);
     value = new RevBayesCore::MetropolisHastingsMove(p,w,tu);
 
 }
