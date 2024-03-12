@@ -111,7 +111,8 @@ double MPQRateMatrixProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double MPQRateMatrixProposal::doProposal( void ) {
+double MPQRateMatrixProposal::doProposal( void ) 
+{
     
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -165,7 +166,8 @@ double MPQRateMatrixProposal::doProposal( void ) {
 /**
  *
  */
-void MPQRateMatrixProposal::prepareProposal( void ) {
+void MPQRateMatrixProposal::prepareProposal( void ) 
+{
     
 }
 
@@ -178,7 +180,8 @@ void MPQRateMatrixProposal::prepareProposal( void ) {
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void MPQRateMatrixProposal::printParameterSummary(std::ostream &o, bool name_only) const {
+void MPQRateMatrixProposal::printParameterSummary(std::ostream &o, bool name_only) const 
+{
     
     o << "lambda = ";
     if (name_only == false)
@@ -195,7 +198,8 @@ void MPQRateMatrixProposal::printParameterSummary(std::ostream &o, bool name_onl
  * where complex undo operations are known/implement, we need to revert
  * the value of the variable/DAG-node to its original value.
  */
-void MPQRateMatrixProposal::undoProposal( void ) {
+void MPQRateMatrixProposal::undoProposal( void ) 
+{
     
     RateMatrix_MPQ& v = static_cast<RateMatrix_MPQ&>( variable->getValue() );
 
