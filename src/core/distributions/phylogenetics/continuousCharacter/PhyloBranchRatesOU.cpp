@@ -47,6 +47,7 @@ PhyloBranchRatesOU* PhyloBranchRatesOU::clone(void) const
 double PhyloBranchRatesOU::computeLnProbability(void)
 {
     size_t n_nodes = tau->getValue().getNumberOfNodes();
+    
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);
     if ( this->value->size() != (n_nodes-1) )
     {
@@ -80,12 +81,16 @@ double PhyloBranchRatesOU::recursiveLnProb( const TopologyNode& node, std::vecto
         {
             return RbConstants::Double::neginf;
         }
+        
         double ln_node_value = log(node_value);
         double t = node.getBranchLength();
         double e = exp(-alpha->getValue() * t);
         double e2 = exp(-2 * alpha->getValue() * t);
         double ln_mean = e * ln_parent_value + (1 - e) * theta->getValue();
         double stand_dev = sigma->getValue() * sqrt((1 - e2) / 2 / alpha->getValue());
+        
+        ln_mean = ln_parent_value; // + drift->getValue() * node.getBranchLength();
+        stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
         
         ln_prob += RbStatistics::Normal::lnPdf(ln_node_value, stand_dev, ln_mean) - ln_node_value;
         
@@ -117,6 +122,7 @@ void PhyloBranchRatesOU::simulate()
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);
     node_values[n_nodes-1] = root_state->getValue();
     recursiveSimulate(tau->getValue().getRoot(), node_values);
+    
 }
 
 
@@ -138,12 +144,15 @@ void PhyloBranchRatesOU::recursiveSimulate(const TopologyNode& node, std::vector
         double e2 = exp(-2 * alpha->getValue() * t);
         double ln_mean = e * ln_parent_value + (1 - e) * theta->getValue();
         double stand_dev = sigma->getValue() * sqrt((1 - e2) / 2 / alpha->getValue());
+        
+        ln_mean = ln_parent_value;
+        stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
 
         // simulate the new Val
         RandomNumberGenerator* rng = GLOBAL_RNG;
         parent_values[index] = exp(RbStatistics::Normal::rv( ln_mean, stand_dev, *rng));
         (*this->value)[index] = (parent_values[parent_index] + parent_values[index]) / 2.0;
-                
+        
     }
     
     // propagate forward

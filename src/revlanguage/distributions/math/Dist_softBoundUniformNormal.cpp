@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "SoftBoundUniformNormalDistribution.h"
 #include "Dist_softBoundUniformNormal.h"
+#include "OptionRule.h"
 #include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -14,6 +15,7 @@
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RlString.h"
 #include "RlContinuousDistribution.h"
 #include "RlDistribution.h"
 #include "TypeSpec.h"
@@ -52,7 +54,11 @@ RevBayesCore::SoftBoundUniformNormalDistribution* Dist_SoftBoundUniformNormal::c
     RevBayesCore::TypedDagNode<double>* ma          = static_cast<const Real &>( max->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* s           = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* p           = static_cast<const Probability &>( prob->getRevObject() ).getDagNode();
-    RevBayesCore::SoftBoundUniformNormalDistribution*   d    = new RevBayesCore::SoftBoundUniformNormalDistribution(mi, ma, s, p);
+    
+    // condition
+    const std::string& bound                        = static_cast<const RlString &>( boundary->getRevObject() ).getValue();
+
+    RevBayesCore::SoftBoundUniformNormalDistribution*   d    = new RevBayesCore::SoftBoundUniformNormalDistribution(mi, ma, s, p, bound);
     
     return d;
 }
@@ -129,20 +135,26 @@ std::string Dist_SoftBoundUniformNormal::getDistributionFunctionName( void ) con
 const MemberRules& Dist_SoftBoundUniformNormal::getParameterRules(void) const
 {
     
-    static MemberRules distNormMemberRules;
+    static MemberRules dist_member_rules;
     static bool rules_set = false;
     
-    if ( !rules_set )
+    if ( rules_set == false )
     {
-        distNormMemberRules.push_back( new ArgumentRule( "min", Real::getClassTypeSpec()       , "The min value of the uniform distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY  ) );
-        distNormMemberRules.push_back( new ArgumentRule( "max", Real::getClassTypeSpec()       , "The max value of the uniform distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY  ) );
-        distNormMemberRules.push_back( new ArgumentRule( "sd" , RealPos::getClassTypeSpec()    , "The standard deviation of the normal distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY  ) );
-        distNormMemberRules.push_back( new ArgumentRule( "p"  , Probability::getClassTypeSpec(), "The probability of being within the uniform distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "min", Real::getClassTypeSpec()       , "The min value of the uniform distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY  ) );
+        dist_member_rules.push_back( new ArgumentRule( "max", Real::getClassTypeSpec()       , "The max value of the uniform distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY  ) );
+        dist_member_rules.push_back( new ArgumentRule( "sd" , RealPos::getClassTypeSpec()    , "The standard deviation of the normal distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY  ) );
+        dist_member_rules.push_back( new ArgumentRule( "p"  , Probability::getClassTypeSpec(), "The probability of being within the uniform distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
+        std::vector<std::string> boundary_types;
+        boundary_types.push_back( "both" );
+        boundary_types.push_back( "upper" );
+        boundary_types.push_back( "lower" );
+        dist_member_rules.push_back( new OptionRule( "boundary", new RlString("both"), boundary_types, "Which boundary should be soft?" ) );
+
         rules_set = true;
     }
     
-    return distNormMemberRules;
+    return dist_member_rules;
 }
 
 
@@ -161,7 +173,8 @@ const TypeSpec& Dist_SoftBoundUniformNormal::getTypeSpec( void ) const
 
 
 /** Print value for user */
-void Dist_SoftBoundUniformNormal::printValue(std::ostream& o) const {
+void Dist_SoftBoundUniformNormal::printValue(std::ostream& o) const 
+{
     
     o << "unifSBN(min=";
     if ( min != NULL ) {
@@ -193,6 +206,15 @@ void Dist_SoftBoundUniformNormal::printValue(std::ostream& o) const {
     if ( prob != NULL )
     {
         o << prob->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", boundary=";
+    if ( boundary != NULL )
+    {
+        o << boundary->getName();
     }
     else
     {
@@ -230,6 +252,10 @@ void Dist_SoftBoundUniformNormal::setConstParameter(const std::string& name, con
     else if ( name == "p" )
     {
         prob = var;
+    }
+    else if ( name == "boundary" )
+    {
+        boundary = var;
     }
     else
     {
