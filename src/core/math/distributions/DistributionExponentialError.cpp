@@ -33,7 +33,7 @@ using namespace RevBayesCore;
  * \return Vector of sorted indices.
  * \throws Does not throw an error.
  */
-std::vector<size_t> stringSortIndices(const std::vector<std::string>& v)
+std::vector<size_t> RbStatistics::ExponentialError::stringSortIndices(const std::vector<std::string>& v)
 {
     std::vector<size_t> result( v.size() );
     std::iota(result.begin(), result.end(), 0);
