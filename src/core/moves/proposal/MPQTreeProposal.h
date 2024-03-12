@@ -73,6 +73,11 @@ template <class variableType> class StochasticNode;
 
         //!< The two indices of the last modified element.
 //        RateMatrix_MPQ                                      stored_Q;
+        // store variables for the root position update
+        double                                              stored_root_branch_length_fraction;
+        double                                              stored_new_root_branch_length;
+        TopologyNode*                                       stored_root_node;
+        
         double                                              stored_branch_length;
         size_t                                              stored_branch_index;
         double                                              stored_scaling_factor;

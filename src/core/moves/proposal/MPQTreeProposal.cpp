@@ -231,16 +231,52 @@ void MPQTreeProposal::undoProposal( void )
     else if ( last_move == ROOT_POSITION )
     {
         Tree& tau = tree->getValue();
-        
-        // pick a random node which is not the root
-        TopologyNode& node = tau.getNode( stored_root_index );
-        
-        // reset parent/child relationships
-        tau.reverseParentChild( node );
-        node.setParent( NULL );
 
-        // set the new root
-        tau.setRoot( &node, false );
+        // now mark the nodes from the selected node to the root
+        std::vector<TopologyNode*> marked_nodes;
+        markNodes(marked_nodes, stored_root_node);
+        
+        TopologyNode* current_root = &tau.getRoot();
+        
+        TopologyNode* new_root_node = &current_root->getChild(0);
+        if ( new_root_node == marked_nodes[0] )
+        {
+            new_root_node = &current_root->getChild(1);
+        }
+        double old_root_branch_length = current_root->getChild(0).getBranchLength() + current_root->getChild(1).getBranchLength();
+                
+        // set the branch length of the old root
+        new_root_node->setBranchLength( stored_new_root_branch_length );
+        
+        for (size_t i=marked_nodes.size(); i > 1; --i)
+        {
+            // get the last node towards the chose new root
+            TopologyNode* this_node = marked_nodes[i-1];
+            
+            TopologyNode* other_child = &current_root->getChild(0);
+            if ( this_node == other_child )
+            {
+                other_child = &current_root->getChild(1);
+            }
+            
+            // move this node towards the other side of the root
+            this_node->addChild(other_child);
+            other_child->setParent( this_node );
+            
+            current_root->removeChild(other_child);
+            
+            TopologyNode* new_root_desc = marked_nodes[i-2];
+            new_root_desc->setParent( current_root );
+            current_root->addChild( new_root_desc );
+            
+            
+            // now lets set the branch length
+            // we simply move it over from the previous descendant of this node
+            this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
+        }
+        
+        stored_root_node->setBranchLength( stored_root_branch_length_fraction );
+        
     }
 
 }
@@ -281,7 +317,8 @@ void MPQTreeProposal::setProposalTuningParameter(double tp)
  * If it is too large, then we increase the proposal size,
  * and if it is too small, then we decrease the proposal size.
  */
-void MPQTreeProposal::tune( double rate ) {
+void MPQTreeProposal::tune( double rate ) 
+{
     
 //    if ( rate > 0.44 )
 //        {
@@ -297,7 +334,8 @@ void MPQTreeProposal::tune( double rate ) {
 
 
 
-double MPQTreeProposal::updateBranchLengths() {
+double MPQTreeProposal::updateBranchLengths() 
+{
     
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -334,7 +372,8 @@ double MPQTreeProposal::updateBranchLengths() {
     return ln_hastings_ratio;
 }
 
-double MPQTreeProposal::updateRootPosition(void) 
+
+double MPQTreeProposal::updateRootPosition(void)
 {
     
     // Get a pointer to the random number generator
@@ -373,13 +412,29 @@ double MPQTreeProposal::updateRootPosition(void)
     // get the node that we have picked
     TopologyNode& node = tau.getNode( node_index );
     
+    // now mark the nodes from the selected node to the root
     std::vector<TopologyNode*> marked_nodes;
     markNodes(marked_nodes, &node);
     
     TopologyNode* current_root = &tau.getRoot();
     
+    stored_root_node = &current_root->getChild(0);
+    if ( stored_root_node == marked_nodes[0] )
+    {
+        stored_root_node = &current_root->getChild(1);
+    }
+    double old_root_branch_length = current_root->getChild(0).getBranchLength() + current_root->getChild(1).getBranchLength();
+    stored_root_branch_length_fraction = stored_root_node->getBranchLength();
+    
+    // store the reverse move probability
+    double ln_hastings_ratio = log( old_root_branch_length );
+    
+    // set the branch length of the old root
+    stored_root_node->setBranchLength( old_root_branch_length );
+    
     for (size_t i=marked_nodes.size(); i > 1; --i)
     {
+        // get the last node towards the chose new root
         TopologyNode* this_node = marked_nodes[i-1];
         
         TopologyNode* other_child = &current_root->getChild(0);
@@ -388,7 +443,7 @@ double MPQTreeProposal::updateRootPosition(void)
             other_child = &current_root->getChild(1);
         }
         
-        
+        // move this node towards the other side of the root
         this_node->addChild(other_child);
         other_child->setParent( this_node );
         
@@ -397,19 +452,23 @@ double MPQTreeProposal::updateRootPosition(void)
         TopologyNode* new_root_desc = marked_nodes[i-2];
         new_root_desc->setParent( current_root );
         current_root->addChild( new_root_desc );
+        
+        
+        // now lets set the branch length
+        // we simply move it over from the previous descendant of this node
+        this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
     }
     
+    stored_new_root_branch_length = node.getBranchLength();
+    double new_root_branch_fraction = rng->uniform01() * stored_new_root_branch_length;
+    node.setBranchLength( new_root_branch_fraction );
+    marked_nodes[1]->setBranchLength( stored_new_root_branch_length - new_root_branch_fraction );
     
-    // reset parent/child relationships
-    tau.reverseParentChild( *node );
-    node->setParent( NULL );
-
-    // set the new root
-    tau.setRoot( node, false );
-    
-    
-    return 0.0;
+    ln_hastings_ratio -= log(stored_new_root_branch_length);
+        
+    return ln_hastings_ratio;
 }
+
 
 void MPQTreeProposal::markNodes(std::vector<TopologyNode *> &markedNodes, TopologyNode *curr_node)
 {
@@ -418,12 +477,15 @@ void MPQTreeProposal::markNodes(std::vector<TopologyNode *> &markedNodes, Topolo
     {
         
         markedNodes.push_back( curr_node );
-        markedNodes( markedNodes, &curr_node->getParent() );
+        markNodes( markedNodes, &curr_node->getParent() );
         
     }
+    
 }
 
-double MPQTreeProposal::updateTreeLength() {
+
+double MPQTreeProposal::updateTreeLength()
+{
 
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
