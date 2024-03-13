@@ -1569,7 +1569,11 @@ void Tree::printNode(TopologyNode* p, int indent) {
             printNode(d, indent + 3);
             for (int i=0; i<indent; i++)
                 std::cerr << " ";
-            std::cerr << p->getIndex() << " ( ";
+            std::cerr << p->getIndex() << " -- ";
+            if (p != root)
+                std::cerr << p->getParent().getIndex() << " ";
+            else
+                std::cerr << "null ";
             for (int i=0; i<pChildren.size(); i++)
                 std::cerr << pChildren[i]->getIndex() << " ";
             std::cerr << ")" << std::endl;
