@@ -1561,16 +1561,18 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
 
 void Tree::printNode(TopologyNode* p, int indent) {
 
-    const std::vector<TopologyNode*>& pChildren = p->getChildren();
-    for (TopologyNode* d : pChildren)
+    if (p != nullptr)
         {
-        printNode(d, indent + 3);
-        std::cerr << p->getIndex() << " ( ";
-        for (int i=0; i<pChildren.size(); i++)
-            std::cerr << pChildren[i]->getIndex() << " ";
-        std::cerr << ")" << std::endl;
+        const std::vector<TopologyNode*>& pChildren = p->getChildren();
+        for (TopologyNode* d : pChildren)
+            {
+            printNode(d, indent + 3);
+            std::cerr << p->getIndex() << " ( ";
+            for (int i=0; i<pChildren.size(); i++)
+                std::cerr << pChildren[i]->getIndex() << " ";
+            std::cerr << ")" << std::endl;
+            }
         }
-
 }
 
 json Tree::toJSON() const
