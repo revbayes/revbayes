@@ -35,7 +35,8 @@ using namespace RevBayesCore;
 MPQTreeProposal::MPQTreeProposal( TypedDagNode<RateGenerator> *q, StochasticNode<Tree>* t ) : Proposal(),
 q_matrix( q ),
 tree( t ),
-tuning_branch_length( 0.1 )
+tuning_branch_length( 0.1 ),
+tuning_tree_length( 0.01 )
 {
 
     // tell the base class to add the node
@@ -47,7 +48,8 @@ tuning_branch_length( 0.1 )
 MPQTreeProposal::MPQTreeProposal( const MPQTreeProposal& p ) : Proposal( p ),
 q_matrix( p.q_matrix ),
 tree( p.tree ),
-tuning_branch_length( p.tuning_branch_length )
+tuning_branch_length( p.tuning_branch_length ),
+tuning_tree_length( p.tuning_tree_length )
 {
         
     // tell the base class to add the node
@@ -231,51 +233,92 @@ void MPQTreeProposal::undoProposal( void )
     else if ( last_move == ROOT_POSITION )
     {
         Tree& tau = tree->getValue();
+        
+        TopologyNode& node = *stored_root_node;
 
         // now mark the nodes from the selected node to the root
         std::vector<TopologyNode*> marked_nodes;
-        markNodes(marked_nodes, stored_root_node);
+        markNodes(marked_nodes, &node);
         
         TopologyNode* current_root = &tau.getRoot();
         
         TopologyNode* new_root_node = &current_root->getChild(0);
-        if ( new_root_node == marked_nodes[0] )
+        if ( new_root_node == marked_nodes[ marked_nodes.size()-1 ] )
         {
             new_root_node = &current_root->getChild(1);
         }
         double old_root_branch_length = current_root->getChild(0).getBranchLength() + current_root->getChild(1).getBranchLength();
-                
-        // set the branch length of the old root
-        new_root_node->setBranchLength( stored_new_root_branch_length );
         
-        for (size_t i=marked_nodes.size(); i > 1; --i)
+        // set the branch length of the old root
+        new_root_node->setBranchLength( old_root_branch_length );
+        
+        
+        // check if we pick a descendant of the root
+        if ( node.getParent().isRoot() == true )
         {
-            // get the last node towards the chose new root
-            TopologyNode* this_node = marked_nodes[i-1];
-            
-            TopologyNode* other_child = &current_root->getChild(0);
-            if ( this_node == other_child )
+            if ( marked_nodes.size() != 1 )
             {
-                other_child = &current_root->getChild(1);
+                throw RbException("We somehow screwed up!");
             }
             
-            // move this node towards the other side of the root
-            this_node->addChild(other_child);
-            other_child->setParent( this_node );
             
-            current_root->removeChild(other_child);
+            size_t index_sibling = 0;
+            if ( &current_root->getChild(index_sibling) == &node )
+            {
+                index_sibling = 1;
+            }
+            double old_total_root_branch_length = node.getBranchLength() + current_root->getChild(index_sibling).getBranchLength();
+
+            node.setBranchLength( stored_first_root_branch_length );
+            current_root->getChild(index_sibling).setBranchLength( stored_second_root_branch_length );
+
+        }
+        else if ( marked_nodes.size() < 2 )
+        {
+            throw RbException("We somehow screwed up! We have too few marked nodes.");
+        }
+        else
+        {
             
-            TopologyNode* new_root_desc = marked_nodes[i-2];
-            new_root_desc->setParent( current_root );
-            current_root->addChild( new_root_desc );
+            for (size_t i=marked_nodes.size(); i > 1; --i)
+            {
+                // get the last node towards the chose new root
+                TopologyNode* this_node = marked_nodes[i-1];
+                
+                TopologyNode* other_child = &current_root->getChild(0);
+                if ( this_node == other_child )
+                {
+                    other_child = &current_root->getChild(1);
+                }
+                
+                // move this node towards the other side of the root
+                this_node->addChild(other_child);
+                other_child->setParent( this_node );
+                
+                current_root->removeChild(other_child);
+                
+                TopologyNode* new_root_desc = marked_nodes[i-2];
+                new_root_desc->setParent( current_root );
+                current_root->addChild( new_root_desc );
+                this_node->removeChild(new_root_desc);
+
+                
+                
+                // now lets set the branch length
+                // we simply move it over from the previous descendant of this node
+                this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
+            }
             
-            
-            // now lets set the branch length
-            // we simply move it over from the previous descendant of this node
-            this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
+//            double old_root_branch_length = node.getBranchLength();
+            node.setBranchLength( stored_first_root_branch_length );
+            marked_nodes[1]->setBranchLength( stored_second_root_branch_length );
         }
         
-        stored_root_node->setBranchLength( stored_root_branch_length_fraction );
+        
+        
+        
+        
+//        tau.debugPrint();
         
     }
 
@@ -380,6 +423,13 @@ double MPQTreeProposal::updateRootPosition(void)
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
+    
+//    std::cerr << tau.getNewickRepresentation() << std::endl;
+//    std::cerr << std::endl;
+//    tau.debugPrint();
+//    std::cerr << std::endl;
+
+    
     size_t num_nodes = tau.getNumberOfNodes();
     
     double tree_length = tau.getTreeLength();
@@ -419,12 +469,13 @@ double MPQTreeProposal::updateRootPosition(void)
     TopologyNode* current_root = &tau.getRoot();
     
     stored_root_node = &current_root->getChild(0);
-    if ( stored_root_node == marked_nodes[0] )
+    if ( stored_root_node == marked_nodes[ marked_nodes.size()-1 ] )
     {
         stored_root_node = &current_root->getChild(1);
     }
     double old_root_branch_length = current_root->getChild(0).getBranchLength() + current_root->getChild(1).getBranchLength();
-    stored_root_branch_length_fraction = stored_root_node->getBranchLength();
+    stored_first_root_branch_length  = stored_root_node->getBranchLength();
+    stored_second_root_branch_length = old_root_branch_length - stored_first_root_branch_length;
     
     // store the reverse move probability
     double ln_hastings_ratio = log( old_root_branch_length );
@@ -432,40 +483,76 @@ double MPQTreeProposal::updateRootPosition(void)
     // set the branch length of the old root
     stored_root_node->setBranchLength( old_root_branch_length );
     
-    for (size_t i=marked_nodes.size(); i > 1; --i)
+    // check if we pick a descendant of the root
+    if ( node.getParent().isRoot() == true )
     {
-        // get the last node towards the chose new root
-        TopologyNode* this_node = marked_nodes[i-1];
-        
-        TopologyNode* other_child = &current_root->getChild(0);
-        if ( this_node == other_child )
+        if ( marked_nodes.size() != 1 )
         {
-            other_child = &current_root->getChild(1);
+            throw RbException("We somehow screwed up!");
         }
         
-        // move this node towards the other side of the root
-        this_node->addChild(other_child);
-        other_child->setParent( this_node );
+        double new_root_branch_fraction = rng->uniform01() * old_root_branch_length;
+        node.setBranchLength( new_root_branch_fraction );
         
-        current_root->removeChild(other_child);
+        size_t index_sibling = 0;
+        if ( &current_root->getChild(index_sibling) == &node )
+        {
+            index_sibling = 1;
+        }
+        current_root->getChild(index_sibling).setBranchLength( old_root_branch_length - new_root_branch_fraction );
+
+    }
+    else if ( marked_nodes.size() < 2 )
+    {
+        throw RbException("We somehow screwed up! We have too few marked nodes.");
+    }
+    else
+    {
         
-        TopologyNode* new_root_desc = marked_nodes[i-2];
-        new_root_desc->setParent( current_root );
-        current_root->addChild( new_root_desc );
+        for (size_t i=marked_nodes.size(); i > 1; --i)
+        {
+            // get the last node towards the chose new root
+            TopologyNode* this_node = marked_nodes[i-1];
+            
+            TopologyNode* other_child = &current_root->getChild(0);
+            if ( this_node == other_child )
+            {
+                other_child = &current_root->getChild(1);
+            }
+            
+            // move this node towards the other side of the root
+            this_node->addChild(other_child);
+            other_child->setParent( this_node );
+            
+            current_root->removeChild(other_child);
+            
+            TopologyNode* new_root_desc = marked_nodes[i-2];
+            new_root_desc->setParent( current_root );
+            current_root->addChild( new_root_desc );
+            this_node->removeChild(new_root_desc);
+
+            
+            
+            // now lets set the branch length
+            // we simply move it over from the previous descendant of this node
+            this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
+        }
         
+//        stored_new_root_branch_length = node.getBranchLength();
+        double new_total_root_branch_length = node.getBranchLength();
+        double new_root_branch_fraction = rng->uniform01() * new_total_root_branch_length;
+        node.setBranchLength( new_root_branch_fraction );
+        marked_nodes[1]->setBranchLength( new_total_root_branch_length - new_root_branch_fraction );
         
-        // now lets set the branch length
-        // we simply move it over from the previous descendant of this node
-        this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
+        ln_hastings_ratio -= log(new_total_root_branch_length);
     }
     
-    stored_new_root_branch_length = node.getBranchLength();
-    double new_root_branch_fraction = rng->uniform01() * stored_new_root_branch_length;
-    node.setBranchLength( new_root_branch_fraction );
-    marked_nodes[1]->setBranchLength( stored_new_root_branch_length - new_root_branch_fraction );
     
-    ln_hastings_ratio -= log(stored_new_root_branch_length);
-        
+    
+//    tau.debugPrint();
+//    std::cerr << tau.getNewickRepresentation() << std::endl << std::endl;
+
+//    return RbConstants::Double::neginf;
     return ln_hastings_ratio;
 }
 
@@ -513,7 +600,6 @@ double MPQTreeProposal::updateTreeLength()
             nodes[i]->setBranchLength( new_branch_length );
         }
     }
-
     
     // compute the Hastings ratio
     double ln_hastings_ratio = log( scaling_factor ) * (num_nodes-1);
