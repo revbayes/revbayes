@@ -57,8 +57,16 @@ RevBayesCore::SoftBoundUniformNormalDistribution* Dist_SoftBoundUniformNormal::c
     
     // condition
     const std::string& bound                        = static_cast<const RlString &>( boundary->getRevObject() ).getValue();
-
-    RevBayesCore::SoftBoundUniformNormalDistribution*   d    = new RevBayesCore::SoftBoundUniformNormalDistribution(mi, ma, s, p, bound);
+    RevBayesCore::SoftBoundUniformNormalDistribution::BOUNDS soft_bounds = RevBayesCore::SoftBoundUniformNormalDistribution::BOTH;
+    if ( bound == "upper" )
+    {
+        soft_bounds = RevBayesCore::SoftBoundUniformNormalDistribution::UPPER;
+    }
+    else if ( bound == "lower" )
+    {
+        soft_bounds = RevBayesCore::SoftBoundUniformNormalDistribution::LOWER;
+    }
+    RevBayesCore::SoftBoundUniformNormalDistribution*   d    = new RevBayesCore::SoftBoundUniformNormalDistribution(mi, ma, s, p, soft_bounds);
     
     return d;
 }
