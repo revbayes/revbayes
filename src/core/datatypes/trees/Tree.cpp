@@ -270,7 +270,10 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
 void Tree::debugPrint(void)
 {
 
+    std::cerr << "Tree:" << std::endl;
     printNode(root, 0);
+    
+    std::cerr << "TL:\t" << getTreeLength() << std::endl;
 }
 
 
@@ -1576,7 +1579,7 @@ void Tree::printNode(TopologyNode* p, int indent) {
                 std::cerr << "null ";
             for (int i=0; i<pChildren.size(); i++)
                 std::cerr << pChildren[i]->getIndex() << " ";
-            std::cerr << ")" << std::endl;
+            std::cerr << ") := " << p->getBranchLength() << std::endl;
             }
         }
 }
