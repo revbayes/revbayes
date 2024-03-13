@@ -1567,6 +1567,8 @@ void Tree::printNode(TopologyNode* p, int indent) {
         for (TopologyNode* d : pChildren)
             {
             printNode(d, indent + 3);
+            for (int i=0; i<indent; i++)
+                std::cerr << " ";
             std::cerr << p->getIndex() << " ( ";
             for (int i=0; i<pChildren.size(); i++)
                 std::cerr << pChildren[i]->getIndex() << " ";
