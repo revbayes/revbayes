@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <iostream>
 #include <algorithm>
 
 #include "DistributionDirichlet.h"
@@ -96,8 +97,8 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         zNames[i] = z.getTaxa()[i].getName();
     }
     
-    std::vector<size_t> ix0 = stringSortIndices(admNames);
-    std::vector<size_t> ix1 = stringSortIndices(zNames);
+    std::vector<size_t> ix0 = stringSortIndices(zNames);
+    std::vector<size_t> ix1 = stringSortIndices(admNames);
 
     double dist = 0;
 
@@ -105,7 +106,7 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
     {
         for (size_t j=0; j<i; j++)
         {
-            if (z.getMask()[i][j])
+            if (z.getMask()[ ix0[i] ][ ix0[j] ])
             {
                 double difference = z.getDistanceMatrix()[ ix0[i] ][ ix0[j] ] - avgDistMat.getDistanceMatrix()[ ix1[i] ][ ix1[j] ];
                 dist += difference * difference;
@@ -248,7 +249,7 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
     {
         for (size_t j=0; j<i; j++)
         {
-            if (z.getMask()[i][j])
+            if (z.getMask()[ ix0[i] ][ ix0[j] ])
             {
                 double difference = z.getDistanceMatrix()[ ix0[i] ][ ix0[j] ] - distMat[ ix1[i] ][ ix1[j] ];
                 dist += difference * difference;
