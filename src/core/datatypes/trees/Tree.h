@@ -68,6 +68,7 @@ namespace RevBayesCore {
         void                                                clearParameters(void);                                                                              //!< Clear both the current node and branch parameters
         void                                                clearBranchParameters(void);
         void                                                clearNodeParameters(void);
+        void                                                debugPrint(void);
         bool                                                tryReadIndicesFromParameters(bool remove=false);
         void                                                writeIndicesToParameters();
 
@@ -165,7 +166,7 @@ namespace RevBayesCore {
         void                                                fillNodesByPhylogeneticTraversal(TopologyNode* node);               //!< fill the nodes vector by a preorder traversal recursively starting with this node.
         bool                                                recursivelyPruneTaxa(TopologyNode*, const RbBitSet&);
         void                                                reindexNodes();
-
+        void                                                printNode(TopologyNode* p, int indent);
         // private members
         TopologyNode*                                       root = nullptr;
         std::vector<TopologyNode*>                          nodes;                                                                  //!< Vector of pointers to all nodes
