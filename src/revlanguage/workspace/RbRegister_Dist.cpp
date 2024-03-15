@@ -141,6 +141,9 @@
 #include "Dist_phyloCTMCClado.h"
 #include "Dist_phyloCTMCDollo.h"
 
+/* Branch rate priors (in folder "distributions/phylogenetics") */
+#include "Dist_Q.h"
+
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
 /* Trait evolution models (in folder "distributions/phylogenetics/branchrates") */
@@ -293,7 +296,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
+        AddDistribution< RateGenerator              >( new Dist_Q()                                             );
 
+        
         /* Branch rate processes (in folder "distributions/phylogenetics/branchrate") */
 
         // white noise process
@@ -416,7 +421,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopology() );
 
         // uniform topology with branch lengths distribution
-        AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
+        AddDistribution< Tree                       >( new Dist_uniformTopologyBranchLength() );
 
 		// empirical tree distributions
 		AddDistribution< Tree                       >( new Dist_empiricalTree() );

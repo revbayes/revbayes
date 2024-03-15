@@ -267,6 +267,16 @@ bool Tree::containsClade(const TopologyNode &n, bool unrooted) const
 }
 
 
+void Tree::debugPrint(void)
+{
+
+    std::cerr << "Tree:" << std::endl;
+    printNode(root, 0);
+    
+    std::cerr << "TL:\t" << getTreeLength() << std::endl;
+}
+
+
 /**
  * Drop the tip node with the given name.
  * The name should correspond to the taxon name, not the species name.
@@ -1550,6 +1560,28 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
         StringUtilities::fillWithSpaces(s, l, left);
     }
     o << s;
+}
+
+void Tree::printNode(TopologyNode* p, int indent) {
+
+    if (p != nullptr)
+        {
+        const std::vector<TopologyNode*>& pChildren = p->getChildren();
+        for (TopologyNode* d : pChildren)
+            {
+            printNode(d, indent + 3);
+            for (int i=0; i<indent; i++)
+                std::cerr << " ";
+            std::cerr << p->getIndex() << " -- ";
+            if (p != root)
+                std::cerr << p->getParent().getIndex() << " ";
+            else
+                std::cerr << "null ";
+            for (int i=0; i<pChildren.size(); i++)
+                std::cerr << pChildren[i]->getIndex() << " ";
+            std::cerr << ") := " << p->getBranchLength() << std::endl;
+            }
+        }
 }
 
 json Tree::toJSON() const

@@ -81,7 +81,7 @@ namespace RevLanguage {
         // Member variables
 
         // variables related to building the components of a vector
-        boost::optional<std::vector<RevPtr<RevVariable>>> vector_var_elements;          //!< Elements if this is a vector variable.
+        boost::optional<std::vector<RevPtr<RevVariable> > > vector_var_elements;          //!< Elements if this is a vector variable.
         mutable bool            needs_building = false;                                 //!< Do we need to construct the revobject?
 
         bool                    is_element_var = false;                                 //!< Is this variable an element of a vector?
@@ -89,7 +89,7 @@ namespace RevLanguage {
         bool                    is_workspace_var = false;                               //!< Is this a workspace variable?
         std::string             name;                                                   //!< Name of variable
         mutable size_t          ref_count = 0;                                          //!< Reference count used by RevPtr
-        RevPtr<RevVariable>     referenced_variable = nullptr;                          //!< Smart pointer to referenced variable
+        RevPtr<RevVariable>     referenced_variable = NULL;                          //!< Smart pointer to referenced variable
         RevObject*              rev_object = nullptr;                                   //!< Pointer to the Rev object inside the variable
         TypeSpec                required_type_spec;                                     //!< Required type of the object
     };

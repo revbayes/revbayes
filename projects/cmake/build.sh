@@ -34,6 +34,7 @@ debug="false"
 travis="false"
 mpi="false"
 cmd="false"
+gmp="false"
 help2yml="false"
 boost_root=""
 boost_lib=""
@@ -124,6 +125,11 @@ fi
 
 if [ "$mpi" = "true" ] ; then
     cmake_args="-DMPI=ON $cmake_args"
+fi
+
+if [ "$gmp" = "true" ] ; then
+    cmake_args="-DGMP=ON $cmake_args"
+    cmake_args="-DGMP_Dir=/opt/homebrew/Cellar/gmp/6.2.1_1/lib $cmake_args"
 fi
 
 if [ "$cmd" = "true" ] ; then
@@ -248,4 +254,3 @@ if [ -e  GitVersion_backup.cpp ] ; then
     cp GitVersion_backup.cpp ../../src/revlanguage/utils/GitVersion.cpp
     rm GitVersion_backup.cpp
 fi
-

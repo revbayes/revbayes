@@ -85,6 +85,8 @@ RevLanguage::StochasticNode<valueType>::StochasticNode( const std::string& n, Re
         methods.insertInheritedMethods( distMethods );
     }
     
+    methods.insertInheritedMethods( rlDistribution->getDistributionMethods() );
+    
 }
 
 

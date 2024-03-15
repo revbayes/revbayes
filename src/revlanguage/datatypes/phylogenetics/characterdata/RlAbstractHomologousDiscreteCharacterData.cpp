@@ -780,8 +780,8 @@ const TypeSpec& AbstractHomologousDiscreteCharacterData::getTypeSpec( void ) con
 void AbstractHomologousDiscreteCharacterData::initMethods( void )
 {
 
-        // add the DAG node member methods
-        // note that this is a sage case because all DAG nodes are member objects
+    // add the DAG node member methods
+    // note that this is a sage case because all DAG nodes are member objects
     if ( dag_node != NULL )
     {
         const MethodTable &dagMethods = dynamic_cast<RevMemberObject*>( dag_node )->getMethods();
