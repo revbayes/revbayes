@@ -62,7 +62,7 @@ ReversibilityAwareBranchLengthScaleProposal* ReversibilityAwareBranchLengthScale
  */
 const std::string& ReversibilityAwareBranchLengthScaleProposal::getProposalName( void ) const
 {
-    static std::string name = "TreeScale";
+    static std::string name = "ReversibilityAwareBranchLengthScale";
     
     return name;
 }

@@ -478,7 +478,7 @@ double MPQTreeProposal::updateRootPosition(void)
     stored_second_root_branch_length = old_root_branch_length - stored_first_root_branch_length;
     
     // store the reverse move probability
-    double ln_hastings_ratio = log( old_root_branch_length );
+//    double ln_hastings_ratio = log( old_root_branch_length );
     
     // set the branch length of the old root
     stored_root_node->setBranchLength( old_root_branch_length );
@@ -544,7 +544,7 @@ double MPQTreeProposal::updateRootPosition(void)
         node.setBranchLength( new_root_branch_fraction );
         marked_nodes[1]->setBranchLength( new_total_root_branch_length - new_root_branch_fraction );
         
-        ln_hastings_ratio -= log(new_total_root_branch_length);
+//        ln_hastings_ratio -= log(new_total_root_branch_length);
     }
     
     
@@ -553,7 +553,8 @@ double MPQTreeProposal::updateRootPosition(void)
 //    std::cerr << tau.getNewickRepresentation() << std::endl << std::endl;
 
 //    return RbConstants::Double::neginf;
-    return ln_hastings_ratio;
+//    return ln_hastings_ratio;
+    return 0.0;
 }
 
 
