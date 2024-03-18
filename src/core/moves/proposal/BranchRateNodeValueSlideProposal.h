@@ -1,40 +1,42 @@
-#ifndef ScaleBactrianProposal_H
-#define ScaleBactrianProposal_H
+#ifndef BranchRateNodeValueSlideProposal_H
+#define BranchRateNodeValueSlideProposal_H
 
-#include <set>
-#include <string>
+#include <iosfwd>
 
-#include "SimpleProposal.h"
+#include "Proposal.h"
+#include "TypedDagNode.h"
 #include "StochasticNode.h"
+#include "RbVector.h"
+#include "Tree.h"
 
 namespace RevBayesCore {
     
     /**
-     * The scaling operator. 
+     * The scaling operator.
      *
      * A scaling proposal draws a random uniform number u ~ unif (-0.5,0.5)
-     * and scales the current vale by a scaling factor
+     * and Slides the current vale by a scaling factor
      * sf = exp( lambda * u )
      * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Andrew Magee)
+     * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2009-09-08, version 1.0
      *
      */
-    class ScaleBactrianProposal : public SimpleProposal<double> {
+    class BranchRateNodeValueSlideProposal : public Proposal {
         
     public:
-        ScaleBactrianProposal( StochasticNode<double> *n, double l, double p=0.44);                                                                    //!<  constructor
+        BranchRateNodeValueSlideProposal( StochasticNode< RbVector<double> > *n, TypedDagNode< Tree > *t, double l, double p=0.44);                                                                    //!<  constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
-        ScaleBactrianProposal*              clone(void) const;                                                                  //!< Clone object
+        BranchRateNodeValueSlideProposal*   clone(void) const;                                                                  //!< Clone object
+        double                              doProposal(void);                                                                   //!< Perform proposal
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
         void                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        double                              propose(double &v);                                                                  //!< Perform proposal
         void                                setProposalTuningParameter(double tp);
         void                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                undoProposal(void);                                                                 //!< Reject the proposal
@@ -47,7 +49,10 @@ namespace RevBayesCore {
     private:
         // parameters
         
-        double                              storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
+        StochasticNode< RbVector<double> >* variable;                                                                           //!< The variable the Proposal is working on
+        TypedDagNode<Tree>*                 tree;                                                                           //!< The variable the Proposal is working on
+        double                              stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
+        size_t                              stored_index;                                                                        //!< The stored value of the Proposal used for rejections.
         double                              lambda;                                                                             //!< The scaling parameter of the Proposal
 
     };

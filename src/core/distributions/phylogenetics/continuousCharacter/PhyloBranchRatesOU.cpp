@@ -1,6 +1,6 @@
-#include "PhyloBranchRatesBM.h"
+#include "PhyloBranchRatesOU.h"
 
-#include <cstddef>
+#include <stddef.h>
 #include <cmath>
 
 #include "DistributionNormal.h"
@@ -17,11 +17,12 @@ using namespace RevBayesCore;
 
 
 // constructor(s)
-PhyloBranchRatesBM::PhyloBranchRatesBM(const TypedDagNode< Tree > *t, const TypedDagNode< double >* r, const TypedDagNode< double >* s, const TypedDagNode< double >* d): TypedDistribution< RbVector<double> >(new RbVector<double>(t->getValue().getNumberOfNodes()-1,0.0)),
-    tau( t ),
-    root_state( r ),
-    sigma( s ),
-    drift( d )
+PhyloBranchRatesOU::PhyloBranchRatesOU(const TypedDagNode< Tree > *tr, const TypedDagNode< double >* ro, const TypedDagNode< double >* si, const TypedDagNode< double >* al, const TypedDagNode< double >* th): TypedDistribution< RbVector<double> >(new RbVector<double>(tr->getValue().getNumberOfNodes()-1,0.0)),
+    tau( tr ),
+    root_state( ro ),
+    sigma( si ),
+    alpha( al ),
+    theta( th )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -29,23 +30,24 @@ PhyloBranchRatesBM::PhyloBranchRatesBM(const TypedDagNode< Tree > *t, const Type
     addParameter( tau );
     addParameter( root_state );
     addParameter( sigma );
-    addParameter( drift );
+    addParameter( alpha );
+    addParameter( theta );
     
     simulate();
 }
 
 
 
-PhyloBranchRatesBM* PhyloBranchRatesBM::clone(void) const
+PhyloBranchRatesOU* PhyloBranchRatesOU::clone(void) const
 {
-    return new PhyloBranchRatesBM( *this );
+    return new PhyloBranchRatesOU( *this );
 }
 
 
-double PhyloBranchRatesBM::computeLnProbability(void)
+double PhyloBranchRatesOU::computeLnProbability(void)
 {
     size_t n_nodes = tau->getValue().getNumberOfNodes();
-
+    
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);
     if ( this->value->size() != (n_nodes-1) )
     {
@@ -55,12 +57,12 @@ double PhyloBranchRatesBM::computeLnProbability(void)
     double ln_prob = recursiveLnProb(tau->getValue().getRoot(), node_values);
     
     ln_prob += (n_nodes-1) * RbConstants::LN2;
-    
+
     return ln_prob;
 }
 
 
-double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vector<double> &parent_values )
+double PhyloBranchRatesOU::recursiveLnProb( const TopologyNode& node, std::vector<double> &parent_values )
 {
     
     double ln_prob = 0.0;
@@ -70,19 +72,26 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
     {
         
         // x ~ normal(x_up, sigma^2 * branchLength)
-        size_t parent_index = node.getParent().getIndex();
-        double parent_value = parent_values[parent_index];
+        size_t parent_index    = node.getParent().getIndex();
+        double parent_value    = parent_values[parent_index];
         double ln_parent_value = log( parent_value );
         double branch_rate = (*this->value)[ index ];
-        // rate = (x+x_parent) / 2
         double node_value = 2*branch_rate - parent_value;
         if ( node_value < 0.0 )
         {
             return RbConstants::Double::neginf;
         }
+        
         double ln_node_value = log(node_value);
-        double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
-        double ln_mean = ln_parent_value; // + drift->getValue() * node.getBranchLength();
+        double t = node.getBranchLength();
+        double e = exp(-alpha->getValue() * t);
+        double e2 = exp(-2 * alpha->getValue() * t);
+        double ln_mean = e * ln_parent_value + (1 - e) * theta->getValue();
+        double stand_dev = sigma->getValue() * sqrt((1 - e2) / 2 / alpha->getValue());
+        
+        ln_mean = ln_parent_value; // + drift->getValue() * node.getBranchLength();
+        stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
+        
         ln_prob += RbStatistics::Normal::lnPdf(ln_node_value, stand_dev, ln_mean) - ln_node_value;
         
         parent_values[index] = node_value;
@@ -100,23 +109,24 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
     
 }
 
-void PhyloBranchRatesBM::redrawValue(void)
+void PhyloBranchRatesOU::redrawValue(void)
 {
     simulate();
 }
 
 
-void PhyloBranchRatesBM::simulate()
+void PhyloBranchRatesOU::simulate()
 {
     
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);
     node_values[n_nodes-1] = root_state->getValue();
     recursiveSimulate(tau->getValue().getRoot(), node_values);
+    
 }
 
 
-void PhyloBranchRatesBM::recursiveSimulate(const TopologyNode& node, std::vector<double> &parent_values)
+void PhyloBranchRatesOU::recursiveSimulate(const TopologyNode& node, std::vector<double> &parent_values)
 {
     
     size_t index = node.getIndex();
@@ -127,10 +137,17 @@ void PhyloBranchRatesBM::recursiveSimulate(const TopologyNode& node, std::vector
         // x ~ normal(x_up, sigma^2 * branchLength)
         
         size_t parent_index = node.getParent().getIndex();
-        double ln_parent_value = log( parent_values[parent_index] );
-        double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
-        double ln_mean = ln_parent_value; // + drift->getValue() * node.getBranchLength();
+
+        double ln_parent_value = log(parent_values[parent_index]);
+        double t = node.getBranchLength();
+        double e  = exp(-alpha->getValue() * t);
+        double e2 = exp(-2 * alpha->getValue() * t);
+        double ln_mean = e * ln_parent_value + (1 - e) * theta->getValue();
+        double stand_dev = sigma->getValue() * sqrt((1 - e2) / 2 / alpha->getValue());
         
+        ln_mean = ln_parent_value;
+        stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
+
         // simulate the new Val
         RandomNumberGenerator* rng = GLOBAL_RNG;
         parent_values[index] = exp(RbStatistics::Normal::rv( ln_mean, stand_dev, *rng));
@@ -148,7 +165,7 @@ void PhyloBranchRatesBM::recursiveSimulate(const TopologyNode& node, std::vector
 }
 
 /** Swap a parameter of the distribution */
-void PhyloBranchRatesBM::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void PhyloBranchRatesOU::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
     if ( oldP == tau )
@@ -166,9 +183,14 @@ void PhyloBranchRatesBM::swapParameterInternal(const DagNode *oldP, const DagNod
         sigma = static_cast< const TypedDagNode<double> * >( newP );
     }
     
-    if ( oldP == drift )
+    if ( oldP == alpha )
     {
-        drift = static_cast< const TypedDagNode< double > * >( newP );
+        alpha = static_cast< const TypedDagNode< double > * >( newP );
+    }
+    
+    if ( oldP == theta )
+    {
+        theta = static_cast< const TypedDagNode< double > * >( newP );
     }
     
 }

@@ -112,17 +112,21 @@ double RevBayesCore::IndependentPriorProposal<valueType>::doProposal( void )
 {
 
     stored_value = variable->getValue();
+    
+    double ln_back_prob = variable->getLnProbability();
 
     variable->getDistribution().redrawValue();
 
     variable->touch( true );
+    
+    double ln_forw_prob = variable->getLnProbability();
 
     if (metropolisHastings == false)
     {
         return RbConstants::Double::inf;
     }
 
-    return 0.0;
+    return ln_back_prob - ln_forw_prob;
 }
 
 

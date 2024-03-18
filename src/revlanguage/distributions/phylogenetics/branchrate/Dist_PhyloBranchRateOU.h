@@ -1,33 +1,27 @@
-#ifndef Dist_SoftBoundUniformNormal_H
-#define Dist_SoftBoundUniformNormal_H
+#ifndef Dist_PhyloBranchRateOU_H
+#define Dist_PhyloBranchRateOU_H
 
-#include "SoftBoundUniformNormalDistribution.h"
-#include "RlContinuousDistribution.h"
+#include <iostream>
+
+
+#include "PhyloBranchRatesOU.h"
+#include "ModelVector.h"
+#include "RlTypedDistribution.h"
+#include "RealPos.h"
 
 namespace RevLanguage {
-    
-    
-    /**
-     * The RevLanguage wrapper of the uniform distribution with normal soft bounds.
-     *
-     * The RevLanguage wrapper of the uniform distribution with normal soft bounds takes care of create the internal distribution object
-     * and provides the RevLanguage object that can be used within Rev.
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-11-20, version 1.0
-     *
-     */
-    class Dist_SoftBoundUniformNormal : public ContinuousDistribution {
+
+    class Dist_PhyloBranchRateOU : public TypedDistribution< ModelVector<RealPos> > {
         
     public:
-        Dist_SoftBoundUniformNormal( void );
+                                                        Dist_PhyloBranchRateOU( void ) {};
+        virtual                                        ~Dist_PhyloBranchRateOU() {};
         
         // Basic utility functions
-        Dist_SoftBoundUniformNormal*                    clone(void) const;                                                                      //!< Clone the object
+        Dist_PhyloBranchRateOU*                         clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
+        std::vector<std::string>                        getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
         const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
@@ -35,7 +29,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::SoftBoundUniformNormalDistribution*   createDistribution(void) const;
+        RevBayesCore::PhyloBranchRatesOU*               createDistribution(void) const;
         
     protected:
         
@@ -44,12 +38,12 @@ namespace RevLanguage {
         
     private:
         
-        RevPtr<const RevVariable>                       min;
-        RevPtr<const RevVariable>                       max;
-        RevPtr<const RevVariable>                       sd;
-        RevPtr<const RevVariable>                       prob;
-        RevPtr<const RevVariable>                       boundary;
-
+        RevPtr<const RevVariable>                       tree;
+        RevPtr<const RevVariable>                       root_state;
+        RevPtr<const RevVariable>                       sigma;
+        RevPtr<const RevVariable>                       alpha;
+        RevPtr<const RevVariable>                       theta;
+        
     };
     
 }
