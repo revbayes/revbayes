@@ -48,20 +48,19 @@ namespace RevBayesCore {
     public:
         // constructors and destructor
         virtual                                        ~TypedDistribution(void);
-        
-//        typedef variableType            rbValueType;
-
-        
+               
         // public methods
         virtual const RevBayesCore::RbVector<variableType>&         getParameterValues(void) const;
         variableType&                                               getValue(void);                                                             //!< Get the current value (non-const)
         const variableType&                                         getValue(void) const;                                                       //!< Get the current value
         StochasticNode<variableType>*                               getStochasticNode(void);                                                    //!< Get the stochastic node holding this distribution
+        void                                                        setOwnsValue(bool tf);                                                      //!< Set if we own the current value
         virtual void                                                setStochasticNode(StochasticNode<variableType> *n);                         //!< Set the stochastic node holding this distribution
         
         // virtual methods
         virtual void                                                setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
-        
+//        virtual void                                                setValue(variableType *v);                    //!< Set the current value, e.g. attach an observation (clamp)
+
         // pure virtual public methods
         virtual TypedDistribution*                                  clone(void) const = 0;                                                      //!< Clone the distribution
         virtual double                                              computeLnProbability(void) = 0;                                             //!< Clone the ln probability density
@@ -80,6 +79,7 @@ namespace RevBayesCore {
         
         // inheritable attributes
         StochasticNode<variableType>*                               dag_node;                                                                   //!< The stochastic node holding this distribution. This is needed for delegated calls to the DAG, such as getAffected(), ...
+        bool                                                        owns_value;
         variableType*                                               value;
         
     };
@@ -100,7 +100,8 @@ namespace RevBayesCore {
 template <class variableType>
 RevBayesCore::TypedDistribution<variableType>::TypedDistribution(variableType *v) : Distribution(), 
     dag_node( NULL ),
-    value( v ) 
+    value( v ),
+    owns_value( true )
 {
     
 }
@@ -108,7 +109,8 @@ RevBayesCore::TypedDistribution<variableType>::TypedDistribution(variableType *v
 template <class variableType>
 RevBayesCore::TypedDistribution<variableType>::TypedDistribution(const TypedDistribution &d) : Distribution(d), 
     dag_node( NULL ),
-    value( Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *d.value ) )
+    value( d.owns_value ? Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *d.value ) : d.value ),
+    owns_value( d.owns_value )
 {
     
 }
@@ -117,7 +119,10 @@ template <class variableType>
 RevBayesCore::TypedDistribution<variableType>::~TypedDistribution( void )
 {
     
-    delete value;
+    if ( owns_value == true )
+    {
+        delete value;
+    }
     
 }
 
@@ -131,10 +136,18 @@ RevBayesCore::TypedDistribution<variableType>& RevBayesCore::TypedDistribution<v
     {
         // call base class
         Distribution::operator=( d );
+
+        // clean up if necessary
+        if ( owns_value == true )
+        {
+            delete value;
+        }
+        
+        // copy member variables
+        owns_value = d.owns_value;
         
         // make my own copy of the value (we rely on proper implementation of assignment operators)
-        delete value;
-        value = Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *d.value );
+        value = ( owns_value ? Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *d.value ) : d.value );
     }
     
     return *this;
@@ -180,6 +193,25 @@ void RevBayesCore::TypedDistribution<variableType>::redrawValue(SimulationCondit
 }
 
 template <class variableType>
+void RevBayesCore::TypedDistribution<variableType>::setOwnsValue(bool tf)
+{
+    
+    // create our own copy of the value if we didn't own it before
+    if ( value != NULL && owns_value == false && tf == true )
+    {
+        value = Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *value );
+    }
+
+    // delete the value if we are not supposed to own it anymore
+    if ( value != NULL && owns_value == true && tf == false )
+    {
+        delete value;
+    }
+    
+    owns_value = tf;
+}
+
+template <class variableType>
 void RevBayesCore::TypedDistribution<variableType>::setStochasticNode( StochasticNode<variableType> *n )
 {
     
@@ -191,13 +223,12 @@ void RevBayesCore::TypedDistribution<variableType>::setValue( variableType *v, b
 {
     
     // free memory
-    if (value != v)
+    if ( value != v && owns_value == true )
     {
         delete value;
     }
     
     value = v;
-    
 }
 
 
