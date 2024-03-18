@@ -762,8 +762,7 @@ void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
     psi->setRoot(root, true);
 
     // finally store the new value
-    delete value;
-    value = psi;
+    setValue( psi );
 
 }
 
