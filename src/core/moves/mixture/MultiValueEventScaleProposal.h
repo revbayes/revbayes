@@ -1,7 +1,7 @@
 #ifndef MultiValueEventScaleProposal_H
 #define MultiValueEventScaleProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

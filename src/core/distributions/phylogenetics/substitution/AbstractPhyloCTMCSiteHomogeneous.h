@@ -867,7 +867,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             
             if ( c < 0 || c >= this->num_chars )
             {
-                throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
+                throw RbException() << "Possible bug: Invar sites with ambiguous chars at site " << i << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
             }
             invariant_site_index[i].push_back(c);
 
@@ -2101,11 +2101,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
             }
 
             // get the ambiguous character's bitset for the tip taxon
-            RbBitSet bs = RbBitSet(this->num_chars, true);
-            if ( c.isMissingState() == false )
-            {
+            RbBitSet bs = RbBitSet(this->num_chars);
+            if ( c.isMissingState() )
+                bs.set(); // set to all 1s.
+            else
                 bs = c.getState();
-            }
 
             // iterate over possible end states for each site given start state
             for (size_t j = 0; j < this->num_chars; j++)

@@ -138,6 +138,7 @@ StochasticCharacterMappingMonitor<characterType>* StochasticCharacterMappingMoni
 template<class characterType>
 void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     size_t num_nodes;
 
@@ -211,6 +212,8 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
 template<class characterType>
 void StochasticCharacterMappingMonitor<characterType>::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
     std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
 
     // iterate through all tree nodes and make header with node index

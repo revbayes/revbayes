@@ -1,7 +1,7 @@
 #ifndef CharacterEventDiscrete_H
 #define CharacterEventDiscrete_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <iosfwd>
 
 #include "CharacterEvent.h"

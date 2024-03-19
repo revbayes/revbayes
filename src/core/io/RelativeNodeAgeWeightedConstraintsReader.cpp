@@ -1,6 +1,6 @@
 #include "RelativeNodeAgeWeightedConstraintsReader.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 
 #include "RbException.h"

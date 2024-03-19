@@ -14,7 +14,7 @@
 #ifndef RlStringUtilities_H
 #define RlStringUtilities_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <sstream> // IWYU pragma: keep
 #include <vector>
 

@@ -1,7 +1,7 @@
 #include "RateMatrix_Kimura80.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 
 #include "TransitionProbabilityMatrix.h"
 #include "Assignable.h"

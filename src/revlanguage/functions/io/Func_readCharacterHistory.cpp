@@ -64,7 +64,7 @@ RevPtr<RevVariable> Func_readCharacterHistory::execute( void )
             continue;
         }
         
-        RevBayesCore::CharacterHistoryDiscrete *simmap_tree = con.convertSimmapFromNewick( line, false );
+        RevBayesCore::CharacterHistoryDiscrete *simmap_tree = con.convertSimmapFromNewick( line );
         histories.push_back( *simmap_tree );
     }
     

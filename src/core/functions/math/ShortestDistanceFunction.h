@@ -1,7 +1,7 @@
 #ifndef ShortestDistanceFunction_h
 #define ShortestDistanceFunction_h
 
-#include <stdio.h>
+#include <cstdio>
 #include <set>
 #include <vector>
 #include "RbVector.h"

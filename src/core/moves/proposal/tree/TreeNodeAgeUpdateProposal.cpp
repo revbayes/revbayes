@@ -1,6 +1,6 @@
 #include "TreeNodeAgeUpdateProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <set>
 

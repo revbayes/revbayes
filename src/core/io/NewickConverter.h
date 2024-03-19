@@ -37,8 +37,9 @@ namespace RevBayesCore {
         NewickConverter();
         virtual                    ~NewickConverter();
     
-        Tree*                       convertFromNewick(const std::string &n, bool reindex = true );
-        CharacterHistoryDiscrete*   convertSimmapFromNewick(const std::string &n, bool reindex = true );
+        Tree*                       convertFromNewick(const std::string &n);
+        CharacterHistoryDiscrete*   convertSimmapFromNewick(const std::string &n );
+
 
     private:
         TopologyNode*           createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens);

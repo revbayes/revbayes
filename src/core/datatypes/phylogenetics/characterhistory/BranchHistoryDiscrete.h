@@ -1,7 +1,7 @@
 #ifndef BranchHistoryDiscrete_H
 #define BranchHistoryDiscrete_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <set>
 
