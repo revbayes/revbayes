@@ -736,16 +736,16 @@ double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
     const TopologyNode &root = this->tau->getValue().getRoot();
     
     // get the index of the root node
-    size_t node_index = root.getIndex();
+    size_t root_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_node = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+    std::vector<double> &p_root = this->partial_likelihoods[this->active_likelihood[root_index]][root_index];
     
     // sum the log-likelihoods for all sites together
     double sum_partial_probs = 0.0;
     for (size_t site = 0; site < this->num_sites; ++site)
     {
-        sum_partial_probs += p_node[site];
+        sum_partial_probs += p_root[site];
     }
     
     return sum_partial_probs;

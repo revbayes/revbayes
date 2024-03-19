@@ -129,6 +129,10 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
 
     // construct the tree starting from the root
     TopologyNode *root = createSimmapNode( trimmed, nodes, brlens, histories );
+    nodes.push_back( root );
+    brlens.push_back( 0.0 );
+    BranchHistoryDiscrete* root_history = new BranchHistoryDiscrete(1,0,0);
+    histories.push_back( root_history );
 
     // set up the tree
     t->setRoot( root, reindex );
@@ -644,7 +648,7 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
 
                     // read the parameter name
                     std::string duration_str = "";
-                    while ( ss.good() && (c = char( ss.peek() ) ) != ';' && c != '}' )
+                    while ( ss.good() && (c = char( ss.peek() ) ) != ';' && c != '}' && c != ':' )
                     {
                         duration_str += char( ss.get() );
                     }
@@ -652,7 +656,7 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
                     times.push_back( duration );
                     time += duration;
 
-                } while ( (c = char( ss.peek() ) ) == ';' );
+                } while ( (c = char( ss.peek() ) ) == ';' || c == ':' );
 
                 // ignore the final '}'
                 if ( (c = char( ss.peek( ) ) ) == '}' )
@@ -667,7 +671,7 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
                 }
             }
             
-            nodes.push_back( node );
+            nodes.push_back( childNode );
             brlens.push_back( time );
             histories.push_back( history );
         }
@@ -703,63 +707,63 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
     }
     node->setName( lbl );
 
-    // read the optional branch length
-    if ( char( ss.peek() ) == ':' )
-    {
-        
-        ss.ignore();
-            
-        // the total branch time
-        std::string time = "";
-            
-        // read the node character history
-        if ( ss.peek() == '{' )
-        {
-            std::vector<size_t> states;
-            std::vector<double> times;
-            do
-            {
-                ss.ignore();
-                
-                // read the state
-                std::string state_str = "";
-                while ( ss.good() && (c = char( ss.peek() ) ) != ',' && c != '}')
-                {
-                    state_str += char( ss.get() );
-                }
-                size_t state = StringUtilities::asIntegerNumber( state_str );
-                states.push_back( state );
-
-                // ignore the equal sign between parameter name and value
-                if ( ss.peek() == ',')
-                {
-                    ss.ignore();
-                }
-
-                // read the parameter name
-                std::string duration_str = "";
-                while ( ss.good() && (c = char( ss.peek() ) ) != ';' && c != '}' )
-                {
-                    duration_str += char( ss.get() );
-                }
-                double duration = atof( duration_str.c_str() );
-                times.push_back( duration );
-                time += duration;
-
-            } while ( (c = char( ss.peek() ) ) == ';' );
-
-            // ignore the final '}'
-            if ( (c = char( ss.peek( ) ) ) == '}' )
-            {
-                ss.ignore();
-            }
-        }
-    }
-    else
-    {
-        nodes.push_back( node );
-        brlens.push_back( 0.0 );
-    }
+//    // read the optional branch length
+//    if ( char( ss.peek() ) == ':' )
+//    {
+//        
+//        ss.ignore();
+//            
+//        // the total branch time
+//        std::string time = "";
+//            
+//        // read the node character history
+//        if ( ss.peek() == '{' )
+//        {
+//            std::vector<size_t> states;
+//            std::vector<double> times;
+//            do
+//            {
+//                ss.ignore();
+//                
+//                // read the state
+//                std::string state_str = "";
+//                while ( ss.good() && (c = char( ss.peek() ) ) != ',' && c != '}')
+//                {
+//                    state_str += char( ss.get() );
+//                }
+//                size_t state = StringUtilities::asIntegerNumber( state_str );
+//                states.push_back( state );
+//
+//                // ignore the equal sign between parameter name and value
+//                if ( ss.peek() == ',')
+//                {
+//                    ss.ignore();
+//                }
+//
+//                // read the parameter name
+//                std::string duration_str = "";
+//                while ( ss.good() && (c = char( ss.peek() ) ) != ';' && c != '}' )
+//                {
+//                    duration_str += char( ss.get() );
+//                }
+//                double duration = atof( duration_str.c_str() );
+//                times.push_back( duration );
+//                time += duration;
+//
+//            } while ( (c = char( ss.peek() ) ) == ';' );
+//
+//            // ignore the final '}'
+//            if ( (c = char( ss.peek( ) ) ) == '}' )
+//            {
+//                ss.ignore();
+//            }
+//        }
+//    }
+//    else
+//    {
+//        nodes.push_back( node );
+//        brlens.push_back( 0.0 );
+//    }
 
 
     return node;
