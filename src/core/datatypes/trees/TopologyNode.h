@@ -101,7 +101,7 @@ namespace RevBayesCore {
         std::string                                 fillCladeIndices(std::map<std::string,size_t> &clade_index_map) const;              //!< Fill this map recursively with all clade indices.
         void                                        fireTreeChangeEvent(const unsigned& m = RevBayesCore::TreeChangeEventMessage::DEFAULT);
         double                                      getAge(void) const;                                                                 //!< Get the age (time ago from present) for this node
-        RbBitSet                                    getAllClades(std::vector<RbBitSet> &taxa, size_t n, bool io) const;                 //!< Fill all the taxon bitset
+        RbBitSet                                    getAllClades(std::vector<RbBitSet> &all_clades, size_t n, bool io) const;           //!< Fill the taxon bitset for all clades in this tree
         const std::vector<std::string>&             getBranchParameters(void) const;                                                    //!< Get the branch length leading towards this node
         double                                      getBranchLength(void) const;                                                        //!< Get the branch length leading towards this node
         size_t                                      getCladeIndex(const TopologyNode* c) const;
