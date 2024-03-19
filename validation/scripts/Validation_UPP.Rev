@@ -1,0 +1,106 @@
+################################################################################
+#
+# RevBayes Validation Test: Relaxed clock model under the UPP model.
+#
+# Model: The uniform partition model
+#        from a constant-rate birth-death process with uniform sampling.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 50
+NUM_MCMC_ITERATIONS       = 100
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readDiscreteCharacterData("data/bears_cytb.nex")
+data.excludeAll()
+data.includeCharacter(1:200)
+
+# Get some useful variables from the data. We need these later on.
+taxa       <- data.taxa()
+n_taxa     <- data.ntaxa()
+n_branches <- n_taxa*2 - 2
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4)
+
+
+
+##############
+# Tree model #
+##############
+
+psi <- readTrees("data/bears_extant.tre")[1]
+
+
+###############
+# clock model #
+###############
+
+clock_mean ~ dnLognormal( ln(2E-2), sd=0.587405 )
+moves.append( mvScale(clock_mean, weight=2) )
+
+# Each branch can have up to 5 rates associated with it -- one for each partition
+rate_cats := fnDiscretizeDistribution( dnLognormal( ln(clock_mean), sd=0.587405 ), n_branches )
+
+
+clock_rates ~ dnUPP( rate_cats, include_zero=FALSE )
+moves.append( mvUPPAllocation(clock_rates, weight=n_branches*2) )
+
+# Monitor how many unique relative rates each branch picks up over the course of the analysis:
+rates_per_branch := fnNumUniqueInVector(clock_rates)
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clock_rates, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
+# We do not need any monitors, so we create only the empty vector.
+monitors = VectorMonitors()
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_UPP" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()

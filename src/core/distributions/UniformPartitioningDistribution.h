@@ -47,6 +47,12 @@ namespace RevBayesCore {
         void                                                setValue(valueType *v, bool f=false);
         void                                                setValueAssignments(std::vector<int> v);
         
+        // special handling of state changes
+        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
+        void                                                keepSpecialization(const DagNode* affecter);
+        void                                                restoreSpecialization(const DagNode *restorer);
+        void                                                touchSpecialization(const DagNode *toucher, bool touchAll);
+
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -70,6 +76,7 @@ namespace RevBayesCore {
 
 #include "Assign.h"
 #include "Assignable.h"
+#include "DagNode.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbMathCombinatorialFunctions.h"
@@ -208,6 +215,18 @@ void RevBayesCore::UniformPartitioningDistribution<valueType>::executeMethod(con
 }
 
 
+template <class mixtureType>
+void RevBayesCore::UniformPartitioningDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+{
+    // only delegate when the toucher was our parameters
+    if ( affecter == parameter_values && this->dag_node != NULL )
+    {
+        this->dag_node->initiateGetAffectedNodes( affected );
+    }
+    
+}
+
+
 template <class valueType>
 int RevBayesCore::UniformPartitioningDistribution<valueType>::getCurrentIndex( void ) const
 {
@@ -332,6 +351,37 @@ std::vector<int> RevBayesCore::UniformPartitioningDistribution<valueType>::getVa
 }
 
 
+template <class mixtureType>
+void RevBayesCore::UniformPartitioningDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
+{
+    // only do this when the toucher was our parameters
+    if ( affecter == parameter_values && this->dag_node != NULL )
+    {
+        this->dag_node->keepAffected();
+    }
+    
+}
+
+
+template <class mixtureType>
+void RevBayesCore::UniformPartitioningDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
+{
+    
+    // only do this when the toucher was our parameters
+    if ( restorer == parameter_values )
+    {
+        assignValues();
+
+        if ( this->dag_node != NULL )
+        {
+            this->dag_node->restoreAffected();
+        }
+        
+    }
+    
+}
+
+
 template <class valueType>
 RevBayesCore::RbVector<valueType>* RevBayesCore::UniformPartitioningDistribution<valueType>::simulate()
 {
@@ -407,6 +457,24 @@ void RevBayesCore::UniformPartitioningDistribution<valueType>::setValue(valueTyp
     
     // delegate class
     TypedDistribution<valueType>::setValue( v, force );
+}
+
+
+template <class valueType>
+void RevBayesCore::UniformPartitioningDistribution<valueType>::touchSpecialization( const DagNode *toucher, bool touchAll )
+{
+    // only do this when the toucher was our parameters
+    if ( toucher == parameter_values )
+    {
+        assignValues();
+        
+        if ( this->dag_node != NULL )
+        {
+            this->dag_node->touchAffected();
+        }
+        
+    }
+    
 }
 
 
