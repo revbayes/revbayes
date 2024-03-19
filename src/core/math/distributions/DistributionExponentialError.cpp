@@ -10,7 +10,6 @@
 
 #include <cmath>
 #include <numeric>
-#include <iostream>
 #include <algorithm>
 
 #include "DistributionDirichlet.h"
@@ -30,16 +29,16 @@ using namespace RevBayesCore;
  * vsoftco, https://stackoverflow.com/a/37732329
  *
  * \brief Index sorting.
- * \param v is a vector that we want to sort and return indices of.
- * \return Vector of sorted indices.
+ * \param v is a vector that we want to sort and return the indices of sorted elements.
+ * \return Vector of indices of the sorted elements of v.
  * \throws Does not throw an error.
  */
-std::vector<size_t> RbStatistics::ExponentialError::stringSortIndices(const std::vector<std::string>& v)
+std::vector<uint32_t> RbStatistics::ExponentialError::stringSortIndices(const std::vector<std::string>& v)
 {
-    std::vector<size_t> result( v.size() );
+    std::vector<uint32_t> result( v.size() );
     std::iota(result.begin(), result.end(), 0);
     std::sort(result.begin(), result.end(),
-              [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; }
+              [&v](uint32_t i1, uint32_t i2) { return v[i1] < v[i2]; }
              );
     return result;
 }
@@ -97,18 +96,22 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         zNames[i] = z.getTaxa()[i].getName();
     }
     
-    std::vector<size_t> ix0 = stringSortIndices(zNames);
-    std::vector<size_t> ix1 = stringSortIndices(admNames);
+    std::vector<uint32_t> ix0 = stringSortIndices(zNames);
+    std::vector<uint32_t> ix1 = stringSortIndices(admNames);
 
     double dist = 0;
 
-    for (size_t i=0; i<avgDistMat.getSize(); i++)
+    for (size_t i = 0; i < avgDistMat.getSize(); i++)
     {
-        for (size_t j=0; j<i; j++)
+        uint32_t k = ix0[i];
+        uint32_t m = ix1[i];
+        for (size_t j = 0; j < i; j++)
         {
-            if (z.getMask()[ ix0[i] ][ ix0[j] ])
+            uint32_t l = ix0[j];
+            uint32_t n = ix1[j];
+            if (z.getMask()[k][l])
             {
-                double difference = z.getDistanceMatrix()[ ix0[i] ][ ix0[j] ] - avgDistMat.getDistanceMatrix()[ ix1[i] ][ ix1[j] ];
+                double difference = z.getDistanceMatrix()[k][l] - avgDistMat.getDistanceMatrix()[m][n];
                 dist += difference * difference;
             }
         }
@@ -227,31 +230,35 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
     {
         return RbConstants::Double::neginf;
     }
-    
+
     std::vector<std::string> dmNames( distMat.getSize() );
     for(size_t i = 0; i < dmNames.size(); i++)
     {
         dmNames[i] = distMat.getTaxa()[i].getName();
     }
-    
+
     std::vector<std::string> zNames( z.getSize() );
     for(size_t i = 0; i < zNames.size(); i++)
     {
         zNames[i] = z.getTaxa()[i].getName();
     }
     
-    std::vector<size_t> ix0 = stringSortIndices(zNames);
-    std::vector<size_t> ix1 = stringSortIndices(dmNames);
+    std::vector<uint32_t> ix0 = stringSortIndices(zNames);
+    std::vector<uint32_t> ix1 = stringSortIndices(dmNames);
     
     double dist = 0;
     
-    for (size_t i=0; i<distMat.getSize(); i++)
+    for (size_t i = 0; i < distMat.getSize(); i++)
     {
-        for (size_t j=0; j<i; j++)
+        uint32_t k = ix0[i];
+        uint32_t m = ix1[i];
+        for (size_t j = 0; j < i; j++)
         {
-            if (z.getMask()[ ix0[i] ][ ix0[j] ])
+            uint32_t l = ix0[j];
+            uint32_t n = ix1[j];
+            if (z.getMask()[k][l])
             {
-                double difference = z.getDistanceMatrix()[ ix0[i] ][ ix0[j] ] - distMat[ ix1[i] ][ ix1[j] ];
+                double difference = z.getDistanceMatrix()[k][l] - distMat[m][n];
                 dist += difference * difference;
             }
         }
