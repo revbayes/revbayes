@@ -10,7 +10,7 @@
 #include "ModelVector.h"
 #include "NewickConverter.h"
 #include "RlCharacterHistory.h"
-#include "RLString.h"
+#include "RlString.h"
 #include "RlTree.h"
 #include "WorkspaceToCoreWrapperObject.h"
 
