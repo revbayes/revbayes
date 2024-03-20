@@ -12,7 +12,9 @@
 #include <vector>
 #include <limits>
 
+#include "BranchHistory.h"
 #include "Clade.h"
+#include "CharacterHistory.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
 #include "RbSettings.h"
@@ -501,7 +503,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
  * Build newick string.
  * If simmap = true build a newick string compatible with SIMMAP and phytools.
  */
-std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
+std::string TopologyNode::buildNewickString( bool simmap, bool round )
 {
     // create the newick string
     std::stringstream o;
@@ -520,6 +522,72 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
     buildNewick(o, simmap);
 
     return o.str();
+}
+
+
+
+
+std::ostream& TopologyNode::buildNewickSimmap( std::ostream& o, const CharacterHistory& h) const
+{
+    // ensure we have an updated copy of branch_length variables
+    if ( not isRoot() )
+    {
+        const_cast<TopologyNode*>(this)->recomputeBranchLength();
+    }
+
+    // 1. Write out the child newicks if there are any.
+    if (not isTip())
+    {
+        o << "(";
+        for (size_t i=0; i< children.size(); i++)
+        {
+            if (i > 0)
+            {
+                o << ",";
+            }
+            children[i]->buildNewickSimmap(o, h);
+        }
+        o << ")";
+    }
+
+    // 2. Write out the node name is there is any.
+    if (children.size() < 2)
+        o << taxon.getName();
+
+    if ( isRoot() == false )
+    {
+        
+        const BranchHistory& bh = h.getHistory( getIndex() );
+        const std::multiset<CharacterEvent*,CharacterEventCompare>& node_history = bh.getHistory();
+        
+        double total_branch_length = getBranchLength();
+        double used_branch_length  = 0.0;
+        double end_age             = getAge();
+        
+        // make SIMMAP string
+        o << ":{";
+        std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it = node_history.begin();
+        for (; it != node_history.end(); ++it)
+        {
+            const CharacterEvent* this_event = *it;
+            o << this_event->getStateStr() << "," << (this_event->getAge() - end_age - used_branch_length);
+            used_branch_length += this_event->getAge() - end_age - used_branch_length;
+            o << ":";
+        }
+        const std::vector<CharacterEvent*>& parent_chars = bh.getParentCharacters();
+        o << parent_chars[0]->getStateStr() << "," << (total_branch_length - used_branch_length) << "}";
+        
+    }
+    
+
+    // 5. Write ";" if we're done with the tree.
+    if ( isRoot() )
+    {
+        // FIXME - move to caller?
+        o << ";";
+    }
+
+    return o;
 }
 
 
@@ -608,6 +676,28 @@ std::string TopologyNode::computePlainNewick( void ) const
 std::string TopologyNode::computeSimmapNewick( bool round )
 {
     return buildNewickString( true, round );
+}
+
+std::string TopologyNode::computeSimmapNewick(const CharacterHistory& h, bool round) const
+{
+    
+    // create the newick string
+    std::stringstream o;
+
+    std::fixed(o);
+    // depending on the value of round, get standard precision or maximum
+    if (round)
+    {
+        o.precision( 6 );
+    }
+    else
+    {
+        o.precision( std::numeric_limits<double>::digits10 );
+    }
+
+    buildNewickSimmap(o, h);
+
+    return o.str();
 }
 
 

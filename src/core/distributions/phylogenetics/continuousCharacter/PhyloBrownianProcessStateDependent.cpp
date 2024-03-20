@@ -9,7 +9,7 @@
 #include "BranchHistory.h"
 #include "ConstantNode.h"
 #include "DistributionNormal.h"
-#include "PhyloOrnsteinUhlenbeckStateDependent.h"
+#include "PhyloBrownianProcessStateDependent.h"
 #include "RandomNumberFactory.h"
 #include "RbException.h"
 #include "StochasticNode.h"
@@ -32,34 +32,27 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloBrownianProcessStateDependent::PhyloBrownianProcessStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     num_sites( ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
-    normalizing_constants( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) ) ),
+    contrast_uncertainty_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
-    character_histories( ch )
+    character_histories( ch ),
+    use_missing_data(false)
 {
     // initialize default parameters
-    root_state                  = new ConstantNode<double>("", new double(0.0) );
-    homogeneous_alpha           = new ConstantNode<double>("", new double(0.0) );
     homogeneous_sigma           = new ConstantNode<double>("", new double(1.0) );
-    homogeneous_theta           = new ConstantNode<double>("", new double(0.0) );
-    state_dependent_alpha       = NULL;
     state_dependent_sigma       = NULL;
-    state_dependent_theta       = NULL;
     
     
     // add parameters
-    addParameter( homogeneous_alpha );
     addParameter( homogeneous_sigma );
-    addParameter( homogeneous_theta );
     addParameter( character_histories );
-    addParameter( root_state );
     
     // now we need to reset the value
     this->redrawValue();
@@ -74,7 +67,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
  * TreeChangeEventHandler, we need to remove ourselves as a reference and possibly delete tau
  * when we die. All other parameters are handled by others.
  */
-PhyloOrnsteinUhlenbeckStateDependent::~PhyloOrnsteinUhlenbeckStateDependent( void )
+PhyloBrownianProcessStateDependent::~PhyloBrownianProcessStateDependent( void )
 {
     // We don't delete the params, because they might be used somewhere else too. The model needs to do that!
     
@@ -88,22 +81,22 @@ PhyloOrnsteinUhlenbeckStateDependent::~PhyloOrnsteinUhlenbeckStateDependent( voi
 
 
 
-PhyloOrnsteinUhlenbeckStateDependent* PhyloOrnsteinUhlenbeckStateDependent::clone( void ) const
+PhyloBrownianProcessStateDependent* PhyloBrownianProcessStateDependent::clone( void ) const
 {
     
-    return new PhyloOrnsteinUhlenbeckStateDependent( *this );
+    return new PhyloBrownianProcessStateDependent( *this );
 }
 
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::computeBranchTime( size_t nide_idx, double brlen )
+double PhyloBrownianProcessStateDependent::computeBranchTime( size_t node_idx, double brlen )
 {
     
     // get the clock rate for the branch
     double branch_time = 1.0;
 //    if ( this->heterogeneous_clock_rates != NULL )
 //    {
-//        double sigma = this->heterogeneous_clock_rates->getValue()[nide_idx];
+//        double sigma = this->heterogeneous_clock_rates->getValue()[node_idx];
 //        branch_time = sigma * sigma * brlen;
 //    }
 //    else
@@ -116,25 +109,18 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeBranchTime( size_t nide_idx,
 }
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::computeStateDependentAlpha(size_t state_idx) const
+double PhyloBrownianProcessStateDependent::computeSiteRate( size_t site_idx )
 {
     
-    // get the selection rate for the branch
-    double a;
-    if ( this->state_dependent_alpha != NULL )
-    {
-        a = this->state_dependent_alpha->getValue()[state_idx];
-    }
-    else
-    {
-        a = this->homogeneous_alpha->getValue();
-    }
+    double rate = 1.0;
     
-    return a;
+    return rate;
 }
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::computeStateDependentSigma(size_t state_idx) const
+
+
+double PhyloBrownianProcessStateDependent::computeStateDependentSigma(size_t state_idx) const
 {
     
     // get the drift rate for the branch
@@ -152,35 +138,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeStateDependentSigma(size_t s
 }
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::computeStateDependentTheta(size_t state_idx) const
-{
-    
-    // get the optimum (theta) for the branch
-    double t;
-    if ( this->state_dependent_theta != NULL )
-    {
-        t = this->state_dependent_theta->getValue()[state_idx];
-    }
-    else
-    {
-        t = this->homogeneous_theta->getValue();
-    }
-    
-    return t;
-}
-
-
-double PhyloOrnsteinUhlenbeckStateDependent::computeRootState( size_t state_index ) const
-{
-    
-    // get the root-state parameter
-    double root_state_value = this->root_state->getValue();
-    
-    return root_state_value;
-}
-
-
-double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
+double PhyloBrownianProcessStateDependent::computeLnProbability( void )
 {
     
 //    // we need to check here if we still are listining to this tree for change events
@@ -214,7 +172,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 
 
 
-//void PhyloOrnsteinUhlenbeckStateDependent::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
+//void PhyloBrownianProcessStateDependent::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
 //{
 //
 //    // call a recursive flagging of all node above (closer to the root) and including this node
@@ -223,7 +181,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 //}
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessStateDependent::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -240,8 +198,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* af
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
+void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
+    bool use_missing_data = false;
     
     // check for recomputation
     if ( node.isTip() == false && dirty_nodes[node_index] == true )
@@ -251,7 +210,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
         
         std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node            = this->contrasts[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &norm_const_node    = this->normalizing_constants[this->active_likelihood[node_index]][node_index];
         
         
         // get the number of children
@@ -280,87 +238,49 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &mu_right = this->contrasts[this->active_likelihood[right_index]][right_index];
             
-            // get the per node and site normalizing constants
-            const std::vector<double> &norm_const_left  = this->normalizing_constants[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &norm_const_right = this->normalizing_constants[this->active_likelihood[right_index]][right_index];
-            
-            // get the propagated uncertainties
-            double delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
-            double delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
-            
-            
-            // @TODO: maybe change later to allow for more characters/sites.
-            double current_mu_left  = mu_left[0];
-            double current_mu_right = mu_right[0];
-            
-            double lnl_left  = 0.0;
-            double lnl_right = 0.0;
-
-            
             // get character history for tree
             const CharacterHistory& current_history = character_histories->getValue();
-            
-            // get branch history for node
-            const BranchHistory& bh_left = current_history.getHistory(left_index);
-            const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_left = bh_left.getHistory();
-            
-//            size_t previous_state_left = state_begin_left;
-            double begin_time_left = left->getAge();
-            
-            for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_left.begin(); it!=hist_left.end(); ++it)
+
+            // get the scaled branch lengths
+            double v_left  = 0;
+            // only compute the left branch if we didn't already
+            if ( j == 1 )
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
-                double event_time = event->getAge();
-                //            event_time = end_time;
-                //            double time_interval = event_time - begin_time;
+                double begin_time_left = left->getAge();
                 
-                // we need to set the current rate category
-                size_t current_state = event->getState();
+                // get branch history for node
+                const BranchHistory& bh_left = current_history.getHistory(left_index);
+                const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_left = bh_left.getHistory();
                 
-                
-                double v_left  = 0;
-                double time_left = event_time - begin_time_left;
-                double sigma_left = computeStateDependentSigma( current_state );
-                double alpha_left = computeStateDependentAlpha( current_state );
-                double theta_left = computeStateDependentTheta( current_state );
-                
-                if ( alpha_left > 1E-20 )
+                for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_left.begin(); it!=hist_left.end(); ++it)
                 {
-                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*time_left) - 1.0 );
+                    CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                    double event_time = event->getAge();
+                    
+                    // we need to set the current rate category
+                    size_t current_state = event->getState();
+                    
+                    double time_left = event_time - begin_time_left;
+                    double sigma_left = computeStateDependentSigma( current_state );
+                    
+                    v_left += (sigma_left*sigma_left) * time_left;
+                    
+                    // update our variables
+                    begin_time_left     = event_time;
                 }
-                else
-                {
-                    v_left = (sigma_left*sigma_left) * time_left;
-                }
-                
-                double var_left  = (v_left)  + delta_left  * exp(2.0*alpha_left *time_left);
-                
-                // now store the constrast variance for this part of the branch
-                delta_left = var_left;
-                
-                double m_left   = exp(1.0 * time_left  * alpha_left ) * (current_mu_left  - theta_left)  + theta_left;
-                current_mu_left = m_left;
-                
-                // update our variables
-                begin_time_left     = event_time;
-                
-                // update lnl left
-                // log_nf_left = log_nf_left + sub_bl_left[[i]] * alpha[[state]]
-                lnl_left += time_left * alpha_left;
+                size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+                double sigma_left = computeStateDependentSigma( last_state_left );
+                v_left += (sigma_left*sigma_left) * (node.getAge() - begin_time_left);
             }
-            size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
             
-            
-            
+            // get the scaled branch lengths (right side)
+            double v_right  = 0;
+            double begin_time_right = right.getAge();
             
             // get branch history for node
             const BranchHistory& bh_right = current_history.getHistory(right_index);
             const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_right = bh_right.getHistory();
-            
-//            size_t state_begin_right  = static_cast<CharacterEventDiscrete*>(bh_right.getChildCharacters()[0])->getState();
 
-//            size_t previous_state_right = state_begin_right;
-            double begin_time_right = right.getAge();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_right.begin(); it!=hist_right.end(); ++it)
             {
                 CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
@@ -369,114 +289,109 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 // we need to set the current rate category
                 size_t current_state = event->getState();
                 
-                
-                double v_right  = 0;
                 double time_right = event_time - begin_time_right;
                 double sigma_right = computeStateDependentSigma( current_state );
-                double alpha_right = computeStateDependentAlpha( current_state );
-                double theta_right = computeStateDependentTheta( current_state );
                 
-                if ( alpha_right > 1E-20 )
-                {
-                    v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*time_right) - 1.0 );
-                }
-                else
-                {
-                    v_right = (sigma_right*sigma_right) * time_right;
-                }
-                
-                double var_right  = (v_right)  + delta_right  * exp(2.0*alpha_right *time_right);
-                
-                // now store the constrast variance for this part of the branch
-                delta_right = var_right;
-                
-                double m_right   = exp(1.0 * time_right  * alpha_right ) * (current_mu_right  - theta_right)  + theta_right;
-                current_mu_right = m_right;
+                v_right += (sigma_right*sigma_right) * time_right;
                 
                 // update our variables
                 begin_time_right     = event_time;
-                
-                // update lnl left
-                // log_nf_left = log_nf_left + sub_bl_left[[i]] * alpha[[state]]
-                lnl_right += time_right * alpha_right;
             }
             size_t last_state_right  = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
+            double sigma_right = computeStateDependentSigma( last_state_right );
+            v_right += (sigma_right*sigma_right) * (node.getAge() - begin_time_right);
 
-            
-            
-            
-            // get the scaled branch lengths
-            double v_left  = 0;
-//            if ( j == 1 )
-//            {
-                double bl_left = node.getAge() - begin_time_left;
-                double sigma_left = computeStateDependentSigma(last_state_left);
-                double alpha_left = computeStateDependentAlpha(last_state_left);
-                if ( alpha_left > 1E-20 )
+            // get the propagated uncertainties
+            double delta_left   = 0.0;
+            double delta_right  = 0.0;
+            double t_left       = 0.0;
+            double t_right      = 0.0;
+            double stdev        = 0.0;
+            if ( use_missing_data == false )
+            {
+                delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
+                delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
+
+                // add the propagated uncertainty to the branch lengths
+                t_left  = v_left  + delta_left;
+                t_right = v_right + delta_right;
+
+                // set delta_node = (t_l*t_r)/(t_l+t_r);
+                this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = (t_left*t_right) / (t_left+t_right);
+
+                stdev = sqrt(t_left+t_right);
+            }
+
+            for (int site=0; site<this->num_sites; ++site)
+            {
+
+                if ( use_missing_data == true )
                 {
-                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
+//                    delta_left  = this->contrast_uncertainty_per_site[this->active_likelihood[left_index]][left_index][site];
+//                    delta_right = this->contrast_uncertainty_per_site[this->active_likelihood[right_index]][right_index][site];
+
+                    // add the propagated uncertainty to the branch lengths
+                    t_left  = v_left  + delta_left;
+                    t_right = v_right + delta_right;
+
+                    // set delta_node = (t_l*t_r)/(t_l+t_r);
+//                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = (t_left*t_right) / (t_left+t_right);
+                    
+                    stdev = sqrt(t_left+t_right);
+                }
+                
+                if ( use_missing_data == true && missing_data[left_index][site] == true && missing_data[right_index][site] == true )
+                {
+                    missing_data[node_index][site] = true;
+                    
+                    p_node[site]  = p_left[site] + p_right[site];
+                    mu_node[site] = RbConstants::Double::nan;
+
+                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = 0.0;
+                }
+                else if ( use_missing_data == true && missing_data[left_index][site] == true && missing_data[right_index][site] == false )
+                {
+                    missing_data[node_index][site] = false;
+                    
+                    p_node[site]  = p_left[site] + p_right[site];
+                    mu_node[site] = mu_right[site];
+                    
+                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = t_right;
+
+                }
+                else if ( use_missing_data == true && missing_data[left_index][site] == false && missing_data[right_index][site] == true )
+                {
+                    missing_data[node_index][site] = false;
+                    
+                    p_node[site]  = p_left[site] + p_right[site];
+                    mu_node[site] = mu_left[site];
+                    
+                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = t_left;
                 }
                 else
                 {
-                    v_left = (sigma_left*sigma_left) * bl_left;
+
+                    // get the site specific rate of evolution
+                    double standDev = this->computeSiteRate(site) * stdev;
+
+                    // compute the contrasts for this site and node
+                    double contrast = mu_left[site] - mu_right[site];
+
+                    // compute the probability for the contrasts at this node
+                    double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+
+                    // sum up the probabilities of the contrasts
+                    p_node[site] = lnl_node + p_left[site] + p_right[site];
+                    
+                    mu_node[site] = (mu_left[site]*t_right + mu_right[site]*t_left) / (t_left+t_right);
+                    
+                    if ( use_missing_data == true )
+                    {
+                        missing_data[node_index][site] = false;
+                        this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = (t_left*t_right) / (t_left+t_right);
+                    }
+                    
                 }
-//            }
-            
-            double bl_right = node.getAge() - begin_time_right;
-            double sigma_right = computeStateDependentSigma(last_state_right);
-            double alpha_right = computeStateDependentAlpha(last_state_right);
-            double v_right = 0.0;
-            if ( alpha_right > 1E-20 )
-            {
-                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
-            }
-            else
-            {
-                v_right = (sigma_right*sigma_right) * bl_right;
-            }
-            
-            // add the propagated uncertainty to the branch lengths
-            double var_left  = (v_left)  + delta_left  * exp(2.0*alpha_left *bl_left);
-            double var_right = (v_right) + delta_right * exp(2.0*alpha_right*bl_right);
-            
-            // set delta_node = (t_l*t_r)/(t_l+t_r);
-            double var_node = (var_left*var_right) / (var_left+var_right);
-            this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = var_node;
-            
-            double theta_left   = computeStateDependentTheta( last_state_left  );
-            double theta_right  = computeStateDependentTheta( last_state_right );
-            
-            double stdev = sqrt(var_left+var_right);
-            for (int i=0; i<this->num_sites; i++)
-            {
-                
-                double m_left   = exp(1.0 * bl_left  * alpha_left ) * (current_mu_left  - theta_left)  + theta_left;
-                double m_right  = exp(1.0 * bl_right * alpha_right) * (current_mu_right - theta_right) + theta_right;
-                mu_node[i] = (m_left*var_right + m_right*var_left) / (var_left+var_right);
-                
-                // compute the contrasts for this site and node
-                double contrast = m_left - m_right;
-                
-                // compute the probability for the contrasts at this node
-                double z_left  = norm_const_left[i];
-                double z_right = norm_const_right[i];
-                double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)/(z_left*z_right) * exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
-                norm_const_node[i] = 1.0;
-                
-                double lnl_node = log( z_node ) + lnl_left + lnl_right;
-//                lnl_node -= RbConstants::LN_SQRT_2PI - log( sqrt( var_node ) );
-//                lnl_node -= ( (contrast-mu_node[i])*(contrast-mu_node[i]) ) / (2.0*var_node);
-//                lnl_node -= ( mu_node[i]*mu_node[i] ) / (2.0*var_node);
-                
-                if ( node.isRoot() == true )
-                {
-                    double root_state = computeRootState( last_state_left );
-                    // dnorm(root.x, vals[1], sqrt(vals[2]), TRUE)
-                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt((var_left*var_right) / (var_left+var_right)), mu_node[i]);
-                }
-                
-                // sum up the probabilities of the contrasts
-                p_node[i] = lnl_node + p_left[i] + p_right[i];
                 
             } // end for-loop over all sites
             
@@ -488,7 +403,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
 
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::recursivelyFlagNodeDirty( const TopologyNode &n )
+void PhyloBrownianProcessStateDependent::recursivelyFlagNodeDirty( const TopologyNode &n )
 {
     
     // we need to flag this node and all ancestral nodes for recomputation
@@ -518,7 +433,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursivelyFlagNodeDirty( const Topol
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::redrawValue(void)
+void PhyloBrownianProcessStateDependent::redrawValue(void)
 {
     // delete the old value first
     delete this->value;
@@ -559,14 +474,13 @@ void PhyloOrnsteinUhlenbeckStateDependent::redrawValue(void)
 
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
+void PhyloBrownianProcessStateDependent::resetValue( void )
 {
     
     // check if the vectors need to be resized
     partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     contrasts               = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrast_uncertainty    = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    normalizing_constants   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
+    missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -586,8 +500,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
         ++site_index;
     }
     
-    const Tree& tau = character_histories->getValue().getTree();
-    std::vector<TopologyNode*> nodes = tau.getNodes();
+    // first we check for missing data
+    use_missing_data = false;
+    std::vector<TopologyNode*> nodes = this->character_histories->getValue().getTree().getNodes();
     for (size_t site = 0; site < this->num_sites; ++site)
     {
         
@@ -596,13 +511,53 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
             if ( (*it)->isTip() )
             {
                 ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
-                double &c = taxon.getCharacter(site_indices[site]);
+                
+                double c = taxon.getCharacter(site_indices[site]);
+                
+                if ( RbMath::isFinite(c) == false )
+                {
+                    missing_data[(*it)->getIndex()][site] = true;
+                    use_missing_data = true;
+                }
+                
+            }
+        }
+    }
+    
+    if ( use_missing_data == true )
+    {
+        contrast_uncertainty.clear();
+        contrast_uncertainty_per_site   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    }
+    else
+    {
+        contrast_uncertainty_per_site.clear();
+        contrast_uncertainty            = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    }
+                
+    for (size_t site = 0; site < this->num_sites; ++site)
+    {
+        
+        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+        {
+            if ( (*it)->isTip() )
+            {
+                ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
+                
+                double c = taxon.getCharacter(site_indices[site]);
+                
+                if ( use_missing_data == false )
+                {
+                    contrast_uncertainty[0][(*it)->getIndex()] = 0;
+                    contrast_uncertainty[1][(*it)->getIndex()] = 0;
+                }
+                else
+                {
+                    contrast_uncertainty_per_site[0][(*it)->getIndex()][site] = 0;
+                    contrast_uncertainty_per_site[1][(*it)->getIndex()][site] = 0;
+                }
                 contrasts[0][(*it)->getIndex()][site] = c;
                 contrasts[1][(*it)->getIndex()][site] = c;
-                contrast_uncertainty[0][(*it)->getIndex()] = 0;
-                contrast_uncertainty[1][(*it)->getIndex()] = 0;
-                normalizing_constants[0][(*it)->getIndex()][site] = 1.0;
-                normalizing_constants[1][(*it)->getIndex()][site] = 1.0;
             }
         }
     }
@@ -614,17 +569,18 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
         (*it) = true;
     }
     
-    // flip the active likelihood pointers
+    // set the active likelihood pointers
     for (size_t index = 0; index < changed_nodes.size(); ++index)
     {
         active_likelihood[index] = 0;
-        changed_nodes[index] = true;
+        changed_nodes[index] = false;
     }
     
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::restoreSpecialization( const DagNode* affecter )
+
+void PhyloBrownianProcessStateDependent::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -650,76 +606,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::restoreSpecialization( const DagNode*
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<double> *a)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_alpha );
-    this->removeParameter( state_dependent_alpha );
-    homogeneous_alpha       = NULL;
-    state_dependent_alpha   = NULL;
-    
-    
-    // set the value
-    homogeneous_alpha = a;
-    
-    // add the new parameter
-    this->addParameter( homogeneous_alpha );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<double> > *a)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_alpha );
-    this->removeParameter( state_dependent_alpha );
-    homogeneous_alpha       = NULL;
-    state_dependent_alpha   = NULL;
-    
-    
-    // set the value
-    state_dependent_alpha   = a;
-    
-    // add the new parameter
-    this->addParameter( state_dependent_alpha );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckStateDependent::setRootState(const TypedDagNode<double> *s)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( root_state );
-    root_state = s;
-    
-    // add the new parameter
-    this->addParameter( root_state );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<double> *s)
+void PhyloBrownianProcessStateDependent::setSigma(const TypedDagNode<double> *s)
 {
     
     // remove the old parameter first
@@ -744,7 +631,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<double> *
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<double> > *s)
+void PhyloBrownianProcessStateDependent::setSigma(const TypedDagNode<RbVector<double> > *s)
 {
     
     // remove the old parameter first
@@ -769,57 +656,8 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<double> *t)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_theta );
-    this->removeParameter( state_dependent_theta );
-    homogeneous_theta        = NULL;
-    state_dependent_theta    = NULL;
-    
-    
-    // set the value
-    homogeneous_theta = t;
-    
-    // add the new parameter
-    this->addParameter( homogeneous_theta );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
-}
 
-
-void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<RbVector<double> > *t)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_theta );
-    this->removeParameter( state_dependent_theta );
-    homogeneous_theta        = NULL;
-    state_dependent_theta    = NULL;
-    
-    
-    // set the value
-    state_dependent_theta = t;
-    
-    // add the new parameter
-    this->addParameter( state_dependent_theta );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckStateDependent::setValue(ContinuousCharacterData *v, bool force)
+void PhyloBrownianProcessStateDependent::setValue(ContinuousCharacterData *v, bool force)
 {
     
     // delegate to the parent class
@@ -834,7 +672,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setValue(ContinuousCharacterData *v, 
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
+void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
     
     // get the children of the node
@@ -861,12 +699,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
         // get the branch specific rate
         double branch_sigma = computeStateDependentSigma( 0 );
         
-        // get the branch specific optimum (theta)
-        double branch_theta = computeStateDependentTheta( 0 );
-        
-        // get the branch specific optimum (theta)
-        double branch_alpha = computeStateDependentAlpha( 0 );
-        
         ContinuousTaxonData &taxon = taxa[ child.getIndex() ];
         for ( size_t i = 0; i < num_sites; ++i )
         {
@@ -875,22 +707,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
             
             // compute the standard deviation for this site
             double branch_rate = branch_time;
+            double m = parent_state;
             
-            double e = exp(-branch_alpha * branch_rate);
-            double e2 = exp(-2.0 * branch_alpha * branch_rate);
-            double m = e * parent_state + (1 - e) * branch_theta;
-            
-            double stand_dev = 0.0;
-            if ( branch_alpha > 1E-10 )
-            {
-                double sigma_square = branch_sigma * branch_sigma;
-                stand_dev = sqrt( (sigma_square / (2.0*branch_alpha)*(1.0 - e2)) );
-            }
-            else
-            {
-                // compute the standard deviation for this site
-                stand_dev = branch_sigma * sqrt(branch_rate);
-            }
+            double stand_dev = branch_sigma * sqrt(branch_rate);
             
             // create the character
             double c = RbStatistics::Normal::rv( m, stand_dev, *rng);
@@ -914,21 +733,20 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
 }
 
 
-std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters(size_t n)
+std::vector<double> PhyloBrownianProcessStateDependent::simulateRootCharacters(size_t n)
 {
     
     std::vector<double> chars = std::vector<double>(num_sites, 0);
     for (size_t i=0; i<num_sites; ++i)
     {
-        // @TODO: need to take the root states from the character history
-        chars[i] = computeRootState( 0 );
+        chars[i] = 0.0;
     }
     
     return chars;
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data )
+void PhyloBrownianProcessStateDependent::simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data )
 {
     
     const Tree& tau = character_histories->getValue().getTree();
@@ -941,7 +759,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateTipSamples( const std::vector
 }
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::sumRootLikelihood( void )
+double PhyloBrownianProcessStateDependent::sumRootLikelihood( void )
 {
     // get the root node
     const Tree& tau = character_histories->getValue().getTree();
@@ -964,7 +782,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessStateDependent::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     const Tree& tau = character_histories->getValue().getTree();
 
@@ -1024,22 +842,8 @@ void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* a
 
 
 /** Swap a parameter of the distribution */
-void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void PhyloBrownianProcessStateDependent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    
-    if (oldP == root_state)
-    {
-        root_state = static_cast<const TypedDagNode< double >* >( newP );
-    }
-    
-    if (oldP == homogeneous_alpha)
-    {
-        homogeneous_alpha = static_cast<const TypedDagNode< double >* >( newP );
-    }
-    else if (oldP == state_dependent_alpha)
-    {
-        state_dependent_alpha = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
-    }
     
     if (oldP == homogeneous_sigma)
     {
@@ -1048,15 +852,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *
     else if (oldP == state_dependent_sigma)
     {
         state_dependent_sigma = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
-    }
-    
-    if (oldP == homogeneous_theta)
-    {
-        homogeneous_theta = static_cast<const TypedDagNode< double >* >( newP );
-    }
-    else if (oldP == state_dependent_theta)
-    {
-        state_dependent_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
     }
     
     if (oldP == character_histories)

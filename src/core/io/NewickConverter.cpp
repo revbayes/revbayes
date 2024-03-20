@@ -12,6 +12,7 @@
 #include "StringUtilities.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
 
 using namespace RevBayesCore;
 
@@ -85,10 +86,9 @@ Tree* NewickConverter::convertFromNewick(std::string const &n)
 }
 
 
-CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::string &n)
+CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::string& n)
 {
     bool reindex = true;
-
 
     // create and allocate the tree object
     Tree *t = new Tree();
@@ -129,11 +129,14 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
 
     // set up the tree
     t->setRoot( root, reindex );
+    
+    std::vector<BranchHistory*> sorted_histories = std::vector<BranchHistory*>(histories.size(), NULL);
 
     // set the branch lengths
     for (size_t i = 0; i < nodes.size(); ++i)
     {
         t->getNode( nodes[i]->getIndex() ).setBranchLength( brlens[i] );
+        sorted_histories[ nodes[i]->getIndex() ] = histories[i];
     }
 
     // make all internal nodes bifurcating
@@ -146,17 +149,39 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
     // make this tree first a branch length tree
     // hence, tell the root to use branch lengths and not ages (with recursive call)
     root->setUseAges(false, true);
+    root->setUseAges(true, true);
+
+    double max_depth = root->getMaxDepth();
+
+    // recursive creation of the tree
+    TreeUtilities::setAgesRecursively( *root, max_depth );
     
+    // update the ages of the character change events
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+        double this_node_age = nodes[i]->getAge();
+        BranchHistory* this_history = histories[i];
+        const std::multiset<CharacterEvent*,CharacterEventCompare>& old_history = this_history->getHistory();
+        std::multiset<CharacterEvent*,CharacterEventCompare> new_history;
+        std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it = old_history.begin();
+        for (; it != old_history.end(); ++it)
+        {
+            CharacterEvent* this_event = (*it)->clone();
+            this_event->setAge( this_event->getAge() + this_node_age );
+            new_history.insert( this_event );
+        }
+        this_history->setHistory( new_history );
+    }
+
 //    // if this tree is ultrametric, then we should use ages and transform so!
 //    if ( t->isUltrametric() == true )
 //    {
 //        root->setUseAges(true, true);
 //    }
     
-    
     CharacterHistoryDiscrete* new_char_hist = new CharacterHistoryDiscrete();
     new_char_hist->setTree( t );
-    new_char_hist->setHistory( histories );
+    new_char_hist->setHistory( sorted_histories );
 
     // return the tree, the caller is responsible for destruction
     return new_char_hist;
@@ -595,8 +620,8 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
                         duration_str += char( ss.get() );
                     }
                     double duration = atof( duration_str.c_str() );
-                    times.push_back( duration );
                     time += duration;
+                    times.push_back( time );
 
                 } while ( (c = char( ss.peek() ) ) == ';' || c == ':' );
 
@@ -608,9 +633,21 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
                 
                 for ( size_t i=1; i<states.size(); ++i )
                 {
-                    CharacterEventDiscrete* this_hist_event = new CharacterEventDiscrete(0, states[i], times[i]);
+                    CharacterEventDiscrete* this_hist_event = new CharacterEventDiscrete(0, states[i-1], times[i-1]);
                     history->addEvent( this_hist_event );
                 }
+                
+                // add the parent and child histories
+                std::vector<CharacterEvent*> child_characters;
+                CharacterEventDiscrete* this_child_char = new CharacterEventDiscrete(0, states[0], 1.0);
+                child_characters.push_back( this_child_char );
+                history->setChildCharacters( child_characters );
+
+                std::vector<CharacterEvent*> parent_characters;
+                CharacterEventDiscrete* this_parent_char = new CharacterEventDiscrete(0, states[states.size()-1], 0.0);
+                parent_characters.push_back( this_parent_char );
+                history->setParentCharacters( parent_characters );
+
             }
             
             nodes.push_back( childNode );

@@ -42,7 +42,7 @@ namespace RevBayesCore {
         CharacterEvent(const CharacterEvent& c);
 
         size_t                              site_index;                                        // from 0 to N character ("sites")
-        double                              age;                                               // from 0 to 1
+        double                              age;
         size_t                              event_type;
         
         

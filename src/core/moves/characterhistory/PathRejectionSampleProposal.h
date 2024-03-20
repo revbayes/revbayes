@@ -82,7 +82,7 @@ namespace RevBayesCore {
         const TypedDagNode<RateGenerator>*                          q_map_site;
         const TypedDagNode<RateGeneratorSequence>*                  q_map_sequence;
 
-        std::multiset<CharacterEvent*,CharacterEventCompare>        storedHistory;
+        std::multiset<CharacterEvent*,CharacterEventCompare>        stored_history;
 
         const TopologyNode*                                         node;
 
@@ -153,7 +153,7 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::cleanProposal( void )
     // delete old events
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
     std::vector<CharacterEvent*> events;
-    for (it_h = storedHistory.rbegin(); it_h != storedHistory.rend(); ++it_h)
+    for (it_h = stored_history.rbegin(); it_h != stored_history.rend(); ++it_h)
     {
         if (lambda == 1.0)
         {
@@ -169,13 +169,12 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::cleanProposal( void )
         CharacterEvent* e = events[i];
         delete e;
     }
-
-    storedHistory.clear();
+    stored_history.clear();
     sampledCharacters.clear();
     
     sampled_characters_assigned = false;
     node_assigned = false;
-
+    
 }
 
 /**
@@ -261,7 +260,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
     // lnL for final non-event
     double sr = rm.getSumOfRates(currState, counts, currAge, branchRate);
     lnP -= sr * (currAge - endAge);
-
+    
     return lnP;
 }
 
@@ -289,12 +288,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::getProposalTuningPar
 template<class charType>
 double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
 {
-    
-//    if ( node->isRoot() && !useTail )
-//    {
-//        return 0.0;
-//    }
-    
+        
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >( &ctmc->getDistribution() );
     if ( p == NULL )
     {
@@ -393,9 +387,12 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     }
     
     // assign values back to model for likelihood
-    if (lambda == 1.0) {
-        bh->updateHistory(proposed_histories);
-    } else {
+    if (lambda == 1.0) 
+    {
+        bh->setHistory(proposed_histories);
+    }
+    else
+    {
         bh->updateHistory(proposed_histories, sampledCharacters);
     }
     
@@ -457,44 +454,71 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
     {
         throw RbException("Failed cast.");
     }
-
-    storedHistory.clear();
-
+    
+    // make sure the stored history is properly cleaned (no memory leaks)
+    std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
+    std::vector<CharacterEvent*> old_events;
+    for (it_h = stored_history.rbegin(); it_h != stored_history.rend(); ++it_h)
+    {
+        if (lambda == 1.0)
+        {
+            old_events.push_back( *it_h );
+        }
+        else if (sampledCharacters.find( (*it_h)->getSiteIndex() ) != sampledCharacters.end())
+        {
+            old_events.push_back( *it_h );
+        }
+    }
+    for ( size_t i=0; i<old_events.size(); ++i )
+    {
+        CharacterEvent* e = old_events[i];
+        delete e;
+    }
+    stored_history.clear();
+    
     storedLnProb = 0.0;
     proposedLnProb = 0.0;
-
+    
     // only pick a random node if it wasn't assigned
     if ( node_assigned == false )
     {
         const Tree &tau = p->getTree();
         size_t num_nodes = tau.getNumberOfNodes();
-
+        
         size_t node_index = 0;
-//        do {
-            node_index = GLOBAL_RNG->uniform01() * num_nodes;
-            node = &tau.getNode(node_index);
-            
-//        } while ( node->isRoot() == true && !useTail );
+        //        do {
+        node_index = GLOBAL_RNG->uniform01() * num_nodes;
+        node = &tau.getNode(node_index);
+        
+        //        } while ( node->isRoot() == true && !useTail );
     }
     
-    if (node->isRoot()) {
-//        std::cout << "root node!\n";
-//        std::cout << "\n";
-    }
-
-
+    
     BranchHistory* bh = &p->getHistory(*node);
+    //    stored_history = history;
     const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh->getHistory();
-    storedHistory = history;
-
+    for (it_h = history.rbegin(); it_h != history.rend(); ++it_h)
+    {
+        if (lambda == 1.0)
+        {
+            stored_history.insert( (*it_h)->clone() );
+        }
+        else if (sampledCharacters.find( (*it_h)->getSiteIndex() ) != sampledCharacters.end())
+        {
+            stored_history.insert( (*it_h)->clone() );
+        }
+    }
+    
+    
     // determine sampled characters
-    if (!sampled_characters_assigned) {
+    if (!sampled_characters_assigned)
+    {
         sampledCharacters = sampleCharacters(lambda);
     }
     
     // flag node as dirty
     const_cast<TopologyNode*>(node)->fireTreeChangeEvent(RevBayesCore::TreeChangeEventMessage::CHARACTER_HISTORY);
-
+    
     // compute backwards proposal probability
     double x = computeLnProposal(*node, *bh);
     storedLnProb = x;
@@ -638,7 +662,6 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::undoProposal( void )
     
     // delete new events
     BranchHistory* bh = &p->getHistory(*node);
-    //    bh->print();
     
     std::multiset<CharacterEvent*,CharacterEventCompare> proposed_history = bh->getHistory();
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
@@ -664,18 +687,16 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::undoProposal( void )
     const_cast<TopologyNode*>(node)->fireTreeChangeEvent(RevBayesCore::TreeChangeEventMessage::CHARACTER_HISTORY);
     
     // swap current value and stored value
-    bh->setHistory(storedHistory);
+    bh->setHistory(stored_history);
 
     // clear old histories
     proposed_history.clear();
-    storedHistory.clear();
+    stored_history.clear();
     sampledCharacters.clear();
     
     sampled_characters_assigned = false;
     node_assigned = false;
-
-    
-    
+        
 }
 
 

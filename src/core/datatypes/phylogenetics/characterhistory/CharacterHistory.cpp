@@ -7,6 +7,7 @@
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "BranchHistory.h"
+#include "Tree.h"
 
 namespace RevBayesCore { class CharacterEvent; }
 
@@ -142,6 +143,22 @@ void CharacterHistory::addEvent( CharacterEvent *e, size_t branch_index)
 }
 
 
+/**
+ * Clear the internal histories
+ */
+void CharacterHistory::clear( void )
+{
+    
+    for (size_t i=0; i<histories.size(); ++i)
+    {
+        BranchHistory *bh = histories[i];
+        delete bh;
+    }
+    histories.clear();
+    
+}
+
+
 
 /**
  * Get the history for a branch.
@@ -179,6 +196,12 @@ size_t CharacterHistory::getNumberEvents( void ) const
 const Tree& CharacterHistory::getTree( void ) const
 {
     return *tree;
+}
+
+
+bool CharacterHistory::hasTree( void ) const
+{
+    return tree != NULL;
 }
 
 
@@ -243,7 +266,7 @@ void CharacterHistory::removeEvent( CharacterEvent *e, size_t branch_index)
 }
 
 
-void CharacterHistory::setHistory(const std::vector<BranchHistory *> &h)
+void CharacterHistory::setHistory(const std::vector<BranchHistory *>& h)
 {
     histories = h;
 }
@@ -251,7 +274,10 @@ void CharacterHistory::setHistory(const std::vector<BranchHistory *> &h)
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const CharacterHistory& x)
 {
-    o << "character history";
+    if ( x.hasTree() )
+    {
+        o << x.getTree().getRoot().computeSimmapNewick(x, true);
+    }
     
     return o;
 }

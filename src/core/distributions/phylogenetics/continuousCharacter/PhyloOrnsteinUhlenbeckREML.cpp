@@ -271,8 +271,8 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 double alpha_left = computeBranchAlpha(left_index);
                 if ( alpha_left > 1E-20 )
                 {
-//                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (1.0 - exp(-2.0*alpha_left*bl_left) );
-                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
+                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (1.0 - exp(-2.0*alpha_left*bl_left) );
+//                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
                 }
                 else
                 {
@@ -283,11 +283,11 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             double bl_right = right.getBranchLength();
             double sigma_right = computeBranchSigma(right_index);
             double alpha_right = computeBranchAlpha(right_index);
-            double v_right =0.0;
+            double v_right = 0.0;
             if ( alpha_right > 1E-20 )
             {
-//                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (1.0 - exp(-2.0*alpha_right*bl_right) );
-                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
+                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (1.0 - exp(-2.0*alpha_right*bl_right) );
+//                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
             }
             else
             {
@@ -312,9 +312,6 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
                 double m_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
                 double m_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
                 mu_node[i] = (m_left*var_right + m_right*var_left) / (var_left+var_right);
-                
-                // get the site specific rate of evolution
-                double standDev = this->computeSiteRate(i) * stdev;
                 
                 // compute the contrasts for this site and node
                 double contrast = m_left - m_right;

@@ -51,6 +51,7 @@
 namespace RevBayesCore {
     
     class Tree;
+    class CharacterHistory;
     
     class TopologyNode  {
         
@@ -94,6 +95,7 @@ namespace RevBayesCore {
         virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
         std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(const CharacterHistory& h, bool round = true) const;            //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
@@ -190,6 +192,7 @@ namespace RevBayesCore {
 
         // helper methods
         std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::ostream&                               buildNewickSimmap(std::ostream&, const CharacterHistory& h) const;                  //!< compute the newick string for a tree rooting at this node
         std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
 
         // protected members

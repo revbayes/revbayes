@@ -129,7 +129,7 @@ RevBayesCore::GeneralTreeHistoryCtmc<charType>::GeneralTreeHistoryCtmc(const Typ
     this->addParameter( siteRates );
     this->addParameter( homogeneousCladogeneticProbabilityMatrix );
     
-    this->useDirtyNodes = true;
+    this->use_dirty_nodes = true;
     
 }
 

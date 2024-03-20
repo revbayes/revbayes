@@ -48,9 +48,9 @@ class CharacterEvent;
         void                                                            print(const TopologyNode* nd=NULL) const;
 
         // setters
-        void                                                            setParentCharacters(const std::set<CharacterEvent*>& s);
+//        void                                                            setParentCharacters(const std::set<CharacterEvent*>& s);
         void                                                            setParentCharacters(const std::vector<CharacterEvent*>& s);
-        void                                                            setChildCharacters(const std::set<CharacterEvent*>& s);
+//        void                                                            setChildCharacters(const std::set<CharacterEvent*>& s);
         void                                                            setChildCharacters(const std::vector<CharacterEvent*>& s);
         void                                                            setHistory(const std::set<CharacterEvent*,CharacterEventCompare>& s);
         void                                                            setHistory(const std::multiset<CharacterEvent*,CharacterEventCompare>& s);
