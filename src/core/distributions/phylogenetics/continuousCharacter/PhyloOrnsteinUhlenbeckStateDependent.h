@@ -33,6 +33,7 @@ namespace RevBayesCore {
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setTheta(const TypedDagNode< double >* t);
         void                                                                setTheta(const TypedDagNode< RbVector< double > >* t);
+        void                                                                setObservationVariance(const TypedDagNode< double >* t);
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
 
         // non-virtual
@@ -77,6 +78,8 @@ namespace RevBayesCore {
         double                                                              computeStateDependentAlpha(size_t idx) const;
         double                                                              computeStateDependentSigma(size_t idx) const;
         double                                                              computeStateDependentTheta(size_t idx) const;
+        double                                                              computeObservationVariance() const;
+
         
         const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;
 
@@ -88,6 +91,7 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           state_dependent_sigma;
         const TypedDagNode< RbVector< double > >*                           state_dependent_theta;
 
+        const TypedDagNode< double >*                                       observation_variance;
     };
     
 }

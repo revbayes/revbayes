@@ -90,6 +90,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         dist->setSigma( s );
     }
     
+     // set observation variance
+    RevBayesCore::TypedDagNode< double >* ov = static_cast<const RealPos &>( observation_variance->getRevObject() ).getDagNode();
+    dist->setObservationVariance( ov );
     
     // set the root states
     //    if ( rootStates->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
@@ -190,7 +193,12 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         rootStateTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
         Real *defaultRootStates = new Real(0.0);
         dist_member_rules.push_back( new ArgumentRule( "rootStates" , rootStateTypes, "The vector of root states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootStates ) );
+         
+        std::vector<TypeSpec> observation_varianceTypes;
+        observation_varianceTypes.push_back( RealPos::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "observation_variance" , observation_varianceTypes, "The observation variance of the trait (in units of trait^2).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
         
+
         dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
         
         rules_set = true;
@@ -265,6 +273,10 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     else if ( name == "sigma" )
     {
         sigma = var;
+    }
+    else if ( name == "observation_variance" )
+    {
+        observation_variance = var;
     }
     else if ( name == "rootStates" )
     {
