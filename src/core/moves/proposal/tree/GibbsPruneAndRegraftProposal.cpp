@@ -175,7 +175,7 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
     }
     
     std::vector<double> weights = std::vector<double>(new_brothers.size(), 0.0);
-    double sumOfWeights = 0.0;
+    double sum_of_weights = 0.0;
     for (size_t i = 0; i<new_brothers.size(); ++i)
     {
         // get the new brother
@@ -195,7 +195,7 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
             likelihoodRatio += (*it)->getLnProbability();
         }
         weights[i] = exp(priorRatio + likelihoodRatio + offset);
-        sumOfWeights += weights[i];
+        sum_of_weights += weights[i];
         
         // undo proposal
         pruneAndRegraft(newBro, &brother, parent, *newGrandparent);
@@ -204,18 +204,15 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
         variable->restore();
     }
     
-    if (sumOfWeights <= 1E-100 || sumOfWeights != sumOfWeights)
+    double ran = rng->uniform01() * sum_of_weights;
+    
+    if ( RbMath::isFinite(sum_of_weights) == false || sum_of_weights <= 1E-100 || ran <= 0.0 )
     {
-        // hack
-        // the proposals have such a small likelihood that they can be neglected
-        // or sumOfWeights is NaN 
-        //        throw new OperatorFailedException("Couldn't find another proposal with a decent likelihood.");
         failed = true;
         
         return 0.0;
     }
     
-    double ran = rng->uniform01() * sumOfWeights;
     size_t index = 0;
     while (ran > 0.0)
     {
@@ -234,8 +231,8 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
     
     double forward = weights[index];
     
-    double forwardProb = (forward / sumOfWeights);
-    double backwardProb = (backward / (sumOfWeights - forward + backward));
+    double forwardProb = (forward / sum_of_weights);
+    double backwardProb = (backward / (sum_of_weights - forward + backward));
     double hastingsRatio = log(backwardProb / forwardProb);
     
     return hastingsRatio;
