@@ -219,4 +219,6 @@ namespace RevBayesCore {
     };
 }
 
+std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node);
+
 #endif
