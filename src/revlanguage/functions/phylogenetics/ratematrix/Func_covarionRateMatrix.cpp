@@ -8,7 +8,7 @@
 
 #include "Func_covarionRateMatrix.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "CovarionRateMatrixFunction.h"
 #include "RealPos.h"

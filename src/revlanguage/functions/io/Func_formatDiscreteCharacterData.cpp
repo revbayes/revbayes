@@ -8,7 +8,7 @@
 
 #include "Func_formatDiscreteCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <vector>
 

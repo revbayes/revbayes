@@ -139,6 +139,7 @@ AncestralStateMonitor<characterType>* AncestralStateMonitor<characterType>::clon
 template<class characterType>
 void AncestralStateMonitor<characterType>::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
     // convert 'ctmc' from a DagNode to a StochasticNode so that we can call ctmc->getDistribution()
     StochasticNode<PhyloCTMCSiteHomogeneous<characterType> > *char_stoch = (StochasticNode<PhyloCTMCSiteHomogeneous<characterType> >*) ctmc;
@@ -200,6 +201,7 @@ void AncestralStateMonitor<characterType>::monitorVariables(unsigned long gen)
 template<class characterType>
 void AncestralStateMonitor<characterType>::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 	
 	std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
 	

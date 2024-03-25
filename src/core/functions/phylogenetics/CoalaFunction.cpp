@@ -1,6 +1,6 @@
 #include "CoalaFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "Cloneable.h"
 #include "RbVectorImpl.h"

@@ -363,7 +363,8 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 extinction = pExtinction(0.0, node.getAge());
             }
             
-            RbBitSet obs_state(num_states, true);
+            RbBitSet obs_state(num_states);
+            obs_state.set();
             bool gap = true;
 
             if ( tree->hasCharacterData() == true )
@@ -1812,6 +1813,7 @@ double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double
  */
 void StateDependentSpeciationExtinctionProcess::redrawValue( void )
 {
+
     size_t attempts = 0;    
     //while (attempts < 100000)
     while (attempts < 10000)

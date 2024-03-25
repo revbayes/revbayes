@@ -25,7 +25,7 @@
 
 #include <sstream>
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 /* Files including helper classes */
@@ -228,6 +228,7 @@
 #include "Move_RateAgeProposal.h"
 #include "Move_RateAgeSubtreeProposal.h"
 #include "Move_RootTimeScaleBactrian.h"
+#include "Move_RootTimeSlide.h"
 #include "Move_RootTimeSlideUniform.h"
 #include "Move_SpeciesNarrowExchange.h"
 #include "Move_SpeciesNodeTimeSlideUniform.h"
@@ -438,6 +439,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RateAgeBetaShift()                 );
         addType( new Move_RateAgeProposal()                  );
         addType( new Move_RateAgeSubtreeProposal()           );
+        addType( new Move_RootTimeSlide()                    );
         addType( new Move_RootTimeScaleBactrian()            );
         addType( new Move_RootTimeSlideUniform()             );
         addType( new Move_SubtreeScale()                     );

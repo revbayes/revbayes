@@ -214,6 +214,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         ModelVector<RealPos> *n = new ModelVector<RealPos>( es );
         return new RevVariable( n );
     }
+    else if (name == "getNodeIndex")
+    {
+        found = true;
+        
+        RevBayesCore::Clade tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        
+        tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
+        
+        return new RevVariable( new Natural( this->dag_node->getValue().getMrca( tmp ).getIndex() + 1 ) );
+    }
     else if ( name == "getPSSP" )
     {
         found = true;
@@ -520,6 +530,10 @@ void Tree::initMethods( void )
     ArgumentRules* nodeNameArgRules = new ArgumentRules();
     nodeNameArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "nodeName", RlString::getClassTypeSpec(),  nodeNameArgRules ) );
+
+    ArgumentRules* get_node_index_arg_rules = new ArgumentRules();
+    get_node_index_arg_rules->push_back( new ArgumentRule( "node", Clade::getClassTypeSpec(), "The clade representing this node.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "getNodeIndex", Natural::getClassTypeSpec(),  get_node_index_arg_rules ) );
 
     ArgumentRules* tip_index_arg_rules = new ArgumentRules();
     std::vector<TypeSpec> tip_index_arg_types;

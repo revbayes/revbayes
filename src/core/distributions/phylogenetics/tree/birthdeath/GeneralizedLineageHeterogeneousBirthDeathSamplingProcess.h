@@ -132,6 +132,7 @@ namespace RevBayesCore {
         std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< RateGenerator > &obj);
         std::vector< std::vector< std::vector<double> > >                 RbToStd(const RbVector< MatrixReal > &obj);
         std::vector< std::map< std::vector<unsigned>, double > >          RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj);
+        void                                                              checkTimesAreAscending(const RbVector<double> &obj);
 
         // taxa
         std::vector<Taxon> taxa;

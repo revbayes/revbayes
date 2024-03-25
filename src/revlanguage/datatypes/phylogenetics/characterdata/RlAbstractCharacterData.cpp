@@ -1,6 +1,6 @@
 #include "RlAbstractCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <string>
 
