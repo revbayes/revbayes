@@ -1484,7 +1484,8 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::hasSiteMatrixMixt
 {
 	bool ret = false;
 
-	if ( this->site_matrix_probs != NULL ) {
+	if ( this->site_matrix_probs != NULL ) 
+    {
 		ret = this->site_matrix_probs->getValue().size() > 1;
 	}
 
@@ -4094,7 +4095,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
-    else if ( affecter != tau && affecter != site_rates_probs && affecter != site_matrix_probs) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter != tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touch_all = true;
     }
