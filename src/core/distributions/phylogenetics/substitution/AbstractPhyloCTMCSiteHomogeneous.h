@@ -185,6 +185,8 @@ namespace RevBayesCore {
         std::vector<bool>                                                   pmat_changed_nodes;
         mutable std::vector<bool>                                           pmat_dirty_nodes;
         
+        bool                                                                mixture_probs_dirty;
+        
         // offsets for nodes
         size_t                                                              activePmatrixOffset;
         size_t                                                              pmatNodeOffset;
@@ -341,7 +343,8 @@ gap_match_clamped( gapmatch ),
 template_state(),
 has_ancestral_states(false),
 sampled_site_rate_component( 0 ),
-sampled_site_matrix_component( 0 )
+sampled_site_matrix_component( 0 ),
+mixture_probs_dirty( true )
 
 {
 
@@ -443,7 +446,8 @@ gap_match_clamped( n.gap_match_clamped ),
 template_state( n.template_state ),
 has_ancestral_states( n.has_ancestral_states ),
 sampled_site_rate_component( n.sampled_site_rate_component ),
-sampled_site_matrix_component( n.sampled_site_matrix_component )
+sampled_site_matrix_component( n.sampled_site_matrix_component ),
+mixture_probs_dirty( n.mixture_probs_dirty )
 {
 
     // initialize with default parameters
@@ -968,6 +972,10 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         // sum the partials up
         this->lnProb = sumRootLikelihood();
 
+    }
+    else if ( mixture_probs_dirty == true )
+    {
+        this->lnProb = sumRootLikelihood();
     }
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
@@ -2364,6 +2372,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
     {
         (*it) = false;
     }
+    
+    mixture_probs_dirty = false;
 
 }
 
@@ -2712,6 +2722,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
             pmat_changed_nodes[index] = false;
         }
     }
+
+    mixture_probs_dirty = false;
 
 }
 
@@ -4094,7 +4106,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
-    else if ( affecter != tau && affecter != site_rates_probs && affecter != site_matrix_probs) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter == site_rates_probs || affecter == site_matrix_probs )
+    {
+        mixture_probs_dirty = true;
+    }
+    else if ( affecter != tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touch_all = true;
     }
