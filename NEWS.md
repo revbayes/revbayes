@@ -1,3 +1,12 @@
+# RevBayes 1.2.2 (Jun 7, 2023)
+
+## Features
+  * We now use a flag (-j) instead of a separate executable for Jupyter mode.
+  * Matrices can be added, subtracted, and negated.
+  * Allow computing SSE likelihoods using TensorPhylo
+  * Add pipe operator: `x |> f(y)` now yields `f(x,y)`.
+  * ... and many bug fixes.
+
 # RevBayes 1.2.1 "Peitenimi" (Nov 7, 2022)
 
 ## Speed & memory

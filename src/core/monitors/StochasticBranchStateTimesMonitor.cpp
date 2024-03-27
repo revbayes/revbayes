@@ -1,6 +1,6 @@
 #include "StochasticBranchStateTimesMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "StochasticNode.h"
@@ -66,6 +66,7 @@ StochasticBranchStateTimesMonitor* StochasticBranchStateTimesMonitor::clone(void
  */
 void StochasticBranchStateTimesMonitor::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
     size_t num_nodes = tree->getValue().getNumberOfNodes();
@@ -93,6 +94,7 @@ void StochasticBranchStateTimesMonitor::monitorVariables(unsigned long gen)
  */
 void StochasticBranchStateTimesMonitor::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
     std::vector<double> time_in_states = sse->getTimeInStates(); 

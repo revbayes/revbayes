@@ -18,7 +18,7 @@
 #ifndef EigenSystem_H
 #define EigenSystem_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <complex>
 #include <vector>
 

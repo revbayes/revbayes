@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include <set>
 
 #include "Proposal.h"
 #include "Simplex.h"

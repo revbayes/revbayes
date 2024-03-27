@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <set>
 #include <string>
@@ -45,7 +45,7 @@ AbstractHomologousDiscreteCharacterData& TreeDiscreteCharacterData::getCharacter
 
 const AbstractHomologousDiscreteCharacterData& TreeDiscreteCharacterData::getCharacterData( void ) const
 {
-    
+
     return *character_data;
 }
 
@@ -112,9 +112,9 @@ void TreeDiscreteCharacterData::initFromString(const std::string &s)
     throw RbException("Cannot initialize a tree with a discrete character data matrix from a string.");
 }
 
-
 void TreeDiscreteCharacterData::setCharacterData( AbstractHomologousDiscreteCharacterData *d )
 {
+    delete character_data;
     character_data = d;
 }
 

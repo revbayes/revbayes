@@ -20,6 +20,7 @@
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "TaxonMap.h"
 #include "TreeChangeEventHandler.h"
@@ -798,7 +799,10 @@ size_t Tree::getNumberOfInteriorNodes( void ) const
 
     if ( isRooted() )
     {
-        return preliminaryNumIntNodes - 1;
+	if (preliminaryNumIntNodes > 1)
+	    return preliminaryNumIntNodes - 1;
+	else
+	    return 0;
     }
     else
     {
@@ -1171,20 +1175,17 @@ void Tree::initFromFile( const path &dir, const std::string &fn )
 void Tree::initFromString(const std::string &s)
 {
     NewickConverter converter;
-    Tree* bl_tree = converter.convertFromNewick( s, false );
-    if ( bl_tree->isUltrametric() == true )
+    Tree* bl_tree = converter.convertFromNewick( s );
+    if (isTimeTree())
     {
-        Tree *tree = TreeUtilities::convertTree( *bl_tree, false );
-        
-        *this = *tree;
-
+        auto time_tree = TreeUtilities::convertTree(*bl_tree, false);
         delete bl_tree;
-        delete tree;
+        *this = *time_tree;
+        delete time_tree;
     }
     else
     {
         *this = *bl_tree;
-
         delete bl_tree;
     }
 }
@@ -1264,38 +1265,32 @@ bool Tree::isRooted(void) const
     return rooted;
 }
 
-
-bool Tree::isUltrametric( void ) const
+bool Tree::isTimeTree(void) const
 {
+    bool any_node_times = false;
+    bool all_node_times = true;
 
-    if ( root->doesUseAges() == true )
+    for(auto& node: nodes)
     {
-        double tip_age = getTipNode( 0 ).getAge();
-        for (size_t i = 1; i < getNumberOfTips(); ++i)
-        {
-
-            if ( std::fabs(tip_age-getTipNode(i).getAge()) > 1E-4 )
-            {
-                return false;
-            }
-
-        }
-        
-    }
-    else
-    {
-
-        double d = 0;
-        return root->isUltrametric(d);
-
+        if (not std::isnan(node->getAge()))
+            any_node_times = true;
+        else
+            all_node_times = false;
     }
 
-    return true;
+    if (any_node_times and not all_node_times)
+        throw RbException()<<"isTimeTree: only some nodes have node times!";
+
+    return all_node_times;
 }
-
 
 void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
 {
+    // If reindex is false, then makeInternalNodesBifurcating will either
+    // * do nothing (if no sampled ancestors)
+    // * crash ( if there are sampled ancestors)
+    assert(reindex);
+
     // delegate the call to the nodes which will make the tree bifurcating recursively.
     getRoot().makeBifurcating( as_fossils );
 
@@ -1349,7 +1344,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
             tmp->setParent (new_child);
             //  tmp->setBranchLength(newBl) ;
         }
-    
+
         root->addChild(new_child);
         new_child->setParent( root );
         new_child->setAge(new_age);
@@ -1373,6 +1368,121 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
 } 
 
 
+bool Tree::tryReadIndicesFromParameters(bool remove)
+{
+    // This routine assumes that the nodes array already contains the tree nodes.
+
+    // If we want to allow for nodes NOT having valid indices, we could do
+    // `setupIndices( not *has_indices )` instead of conditionally doing orderNodesByIndex().
+
+    std::optional<bool> has_indices;
+
+    std::vector<TopologyNode*> nodes2(nodes.size(), nullptr);
+
+    std::optional<std::string> failure;
+
+    for (auto& node: nodes)
+    {
+        // 1. Get the index as a string, optionally erasing it from the parameters.
+        std::optional<std::string> value;
+        if (remove)
+            value = node->eraseNodeParameter("index");
+        else
+            value = node->getNodeParameter("index");
+
+        try
+        {
+            // 2. Does this node have an index?
+            bool has_index = value.has_value();
+
+            // 3. Complain if some nodes have indices and some do not.
+            if (not has_indices)
+                has_indices = has_index;
+
+            if (has_index != *has_indices)
+                throw RbException()<<"readIndexFromParameter: Some nodes have an index parameter, and some do not!";
+
+            // 4. Set the index if there is one.
+            if (value)
+            {
+		int index = -1;
+		try
+		{
+		    index = stoi(*value) - 1;
+		}
+		catch (...)
+		{
+		    throw RbException()<<"tryReadIndicesFromParameters: index '"<<*value<<"' is not an integer";
+		}
+
+                if (index < 0)
+                    throw RbException()<<"tryReadIndicesFromParameters: Negative node index "<<index;
+                else if (index >= nodes2.size())
+                    throw RbException()<<"tryReadIndicesFromParameters: Tree only has "<<nodes.size()<<" nodes, but got index "<<index;
+                else if (nodes2[index] != nullptr)
+                    throw RbException()<<"tryReadIndicesFromParameters: Node index "<<index<<" used twice!";
+
+                nodes2[index] = node;
+            }
+        }
+        // NB - If remove == true, then we can't quit.  We have to finish erasing the "index" parameter from all nodes.
+        catch (RbException& e)
+        {
+            failure = e.getMessage();
+        }
+	catch (std::exception& e)
+	{
+	    failure = e.what();
+	}
+	catch (...)
+	{
+	    failure = "tryReadIndicesFromParameters: unhandled exception";
+	}
+    }
+
+    // 5. Report failure message.
+    if (failure)
+    {
+        RBOUT("Warning: " + *failure + ".  Ignoring indices.");
+
+        has_indices = false;
+    }
+
+    // 6.If the tree is empty, set has_indices to false.
+    if (not has_indices.has_value())
+        has_indices = false;
+
+
+    // 7. If we set the indices
+    if (*has_indices)
+    {
+	// If we get here, we know that every node had a unique index.
+
+        nodes = nodes2;
+
+        for(int i=0;i < nodes.size(); i++)
+            nodes[i]->setIndex(i);
+    }
+    else
+    {
+        // We assume the nodes have valid indices that we can fall back on if reading indices fails.
+        for(int i=0;i<nodes.size();i++)
+            assert(nodes[i]->getIndex() == i);
+    }
+
+    // 8. Did we successfully set indices from parameters?
+    return *has_indices;
+}
+
+
+void Tree::writeIndicesToParameters()
+{
+    for (auto& node: nodes)
+    {
+        node->setNodeParameter("index",std::to_string(node->getIndex()+1));
+    }
+}
+
 
 // method to order nodes by their existing index
 // used when reading in tree with existing node indexes we need to keep
@@ -1384,7 +1494,7 @@ void Tree::orderNodesByIndex( void )
     std::vector<bool> used = std::vector<bool>(nodes.size(),false);
     for (int i = 0; i < nodes.size(); i++)
     {
-        if ( nodes[i]->getIndex() > nodes.size() )
+        if ( nodes[i]->getIndex() >= nodes.size() )
         {
             throw RbException("Problem while working with tree: Node had bad index. Index was '" + StringUtilities::to_string( nodes[i]->getIndex() ) + "' while there are only '" + StringUtilities::to_string( nodes.size() ) + "' nodes in the tree.");
         }
@@ -1440,6 +1550,24 @@ void Tree::printForComplexStoring ( std::ostream &o, const std::string &sep, int
         StringUtilities::fillWithSpaces(s, l, left);
     }
     o << s;
+}
+
+json Tree::toJSON() const
+{
+    return this->getNewickRepresentation(false);
+}
+
+void Tree::collapseSampledAncestors()
+{
+    for(auto& node: nodes)
+    {
+        if (node->isTipSampledAncestor())
+        {
+            node->getParent().setTaxon(node->getTaxon());
+            node->getParent().removeChild(node);
+        }
+    }
+    setRoot(root, true);
 }
 
 void Tree::pruneTaxa(const RbBitSet& prune_map )
@@ -1780,8 +1908,8 @@ void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reind
 
 void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
-	// reset parent/child relationships
-	reverseParentChild( n.getParent() );
+    // reset parent/child relationships
+    reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
     // if we have a trifurcation at the root, we need to change it into a bifurcation
@@ -1789,15 +1917,15 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     {
         // first, we make the root bifurcating
         makeRootBifurcating(n.getClade(), reindex);
-        
+
         // second, we make all other nodes bifurcating
         makeInternalNodesBifurcating(reindex, true);
         
     } // end-if we do not want to make the tree bifurcating
 
 
-	// set the new root
-	setRoot( &n.getParent(), reindex );
+    // set the new root
+    setRoot( &n.getParent(), reindex );
 
 }
 

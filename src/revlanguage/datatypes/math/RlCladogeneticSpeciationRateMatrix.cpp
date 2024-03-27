@@ -11,16 +11,21 @@
 
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "RlCladogeneticSpeciationRateMatrix.h"
+#include "RlCladogeneticProbabilityMatrix.h"
 #include "ConstantNode.h"
 #include "DagNode.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
 #include "IndirectReferenceFunction.h"
+#include "MemberFunction.h"
 #include "ModelObject.h"
+#include "ModelVector.h"
+#include "RealPos.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlConstantNode.h"
+#include "RlMemberFunction.h"
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
@@ -63,7 +68,44 @@ CladogeneticSpeciationRateMatrix* CladogeneticSpeciationRateMatrix::clone() cons
 /* Map calls to member methods */
 RevPtr<RevVariable> CladogeneticSpeciationRateMatrix::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
-    ; // do nothing for now
+    
+    if (name == "getSpeciationRateSumsPerState")
+    {
+        found = true;
+        std::vector<double> v = this->dag_node->getValue().getSpeciationRateSumPerState();
+        return new RevVariable( new ModelVector<RealPos>( v ) );
+    }
+    else if (name == "getCladogeneticProbabilityMatrix")
+    {
+        found = true;
+        RevBayesCore::CladogeneticProbabilityMatrix p = this->dag_node->getValue().getCladogeneticProbabilityMatrix();
+        return new RevVariable( new CladogeneticProbabilityMatrix( p ) );
+    }
+    else if (name == "getRate")
+    {
+        found = true;
+
+        // create state for anc -> ch1, ch2
+        std::vector<unsigned> state;
+        unsigned anc_state = unsigned( static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() );
+        unsigned ch1_state = unsigned( static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue() );
+        unsigned ch2_state = unsigned( static_cast<const Natural&>( args[2].getVariable()->getRevObject() ).getValue() );
+        state.push_back(anc_state);
+        state.push_back(ch1_state);
+        state.push_back(ch2_state);
+
+        // get rate event map
+        const std::map< std::vector<unsigned>, double >& rates = this->dag_node->getValue().getEventMap();
+        
+        double v = 0.0;
+        auto it = rates.find(state);
+        if (it != rates.end()) {
+            v = it->second;
+        }
+
+        return new RevVariable( new RealPos( v ) );
+    }
+    
     return ModelObject<RevBayesCore::CladogeneticSpeciationRateMatrix>::executeMethod( name, args, found );
 }
 
@@ -93,5 +135,19 @@ const TypeSpec& CladogeneticSpeciationRateMatrix::getTypeSpec(void) const {
 }
 
 void CladogeneticSpeciationRateMatrix::initMethods(void) {
-    ; // do nothing
+    
+    ArgumentRules* speciationRateSumPerStateArgRules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<CladogeneticSpeciationRateMatrix, ModelVector<RealPos> >( "getSpeciationRateSumPerState", this, speciationRateSumPerStateArgRules ) );
+
+    ArgumentRules* cladogeneticProbabilityMatrixArgRules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<CladogeneticSpeciationRateMatrix, CladogeneticProbabilityMatrix>( "getCladogeneticProbabilityMatrix", this, cladogeneticProbabilityMatrixArgRules ) );
+
+    ArgumentRules* getEventsArgRules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<CladogeneticSpeciationRateMatrix, ModelVector<ModelVector<Natural> > >( "getEvents", this, getEventsArgRules ) );
+    
+    ArgumentRules* getRateArgRules = new ArgumentRules();
+    getRateArgRules->push_back(new ArgumentRule( "ancestorState", Natural::getClassTypeSpec(), "The state of the ancestral lineage before cladogenesis.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    getRateArgRules->push_back(new ArgumentRule( "childState1", Natural::getClassTypeSpec(), "The state of the first child lineage after cladogenesis.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    getRateArgRules->push_back(new ArgumentRule( "childState2", Natural::getClassTypeSpec(), "The state of the second child lineage after cladogenesis.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    methods.addFunction( new MemberFunction<CladogeneticSpeciationRateMatrix, RealPos>( "getRate", this, getRateArgRules ) );
 }

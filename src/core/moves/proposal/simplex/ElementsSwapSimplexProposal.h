@@ -2,6 +2,7 @@
 #define ElementsSwapSimplexProposal_H
 
 #include <iosfwd>
+#include <set>
 
 #include "Proposal.h"
 #include "Simplex.h"

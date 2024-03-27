@@ -689,11 +689,9 @@ std::vector<double> operator*(const MatrixReal& A, const std::vector<double> &b)
  * @param  A The matrix operand
  * @return A copy of the operand
  */
-MatrixReal operator+(const MatrixReal& A) {
+MatrixReal MatrixReal::operator+() const {
     
-	MatrixReal B = A;
-    
-    return B;
+    return *this;
 }
 
 
@@ -703,18 +701,19 @@ MatrixReal operator+(const MatrixReal& A) {
  * @param A The matrix operand
  * @return -A (the negative of the operand)
  */
-MatrixReal operator-(const MatrixReal& A) {
-    
-	MatrixReal B = A;
-	for (size_t i=0; i<B.getNumberOfRows(); i++)
+
+MatrixReal MatrixReal::operator-() const
+{
+    MatrixReal B = *this;
+    for (size_t i=0; i<B.getNumberOfRows(); i++)
     {
-		for (size_t j=0; j<B.getNumberOfColumns(); j++)
+        for (size_t j=0; j<B.getNumberOfColumns(); j++)
         {
-			B[i][j] = -B[i][j];
+            B[i][j] = -B[i][j];
         }
     }
     
-	return B;
+    return B;
 }
 
 

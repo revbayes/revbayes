@@ -6,7 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>

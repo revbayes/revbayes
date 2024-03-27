@@ -1,7 +1,7 @@
 #ifndef NormalDistribution_H
 #define NormalDistribution_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ContinuousDistribution.h"
 

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <iosfwd>
 #include <map>
@@ -222,7 +222,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         // clade constraint has only one match
-        if (monophyly_constraints[i].isOptionalConstraint() == false)
+        if (monophyly_constraints[i].hasOptionalConstraints() == false)
         {
             RbBitSet b( value->getNumberOfTips() );
             for (size_t j = 0; j < monophyly_constraints[i].size(); j++)
@@ -384,7 +384,7 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
     {
         
         std::vector<Clade> constraints;
-        if ( monophyly_constraints[i].isOptionalConstraint() == true )
+        if ( monophyly_constraints[i].hasOptionalConstraints() == true )
         {
             constraints = monophyly_constraints[i].getOptionalConstraints();
         }
@@ -499,7 +499,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
             dirty_nodes[node.getIndex()] = false;
         }
         
-        return RbBitSet( value->getNumberOfTips(), true );
+        return RbBitSet( value->getNumberOfTips() ).set();
     }
     else
     {
@@ -747,7 +747,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
-            if ( monophyly_constraint.isOptionalConstraint() == true )
+            if ( monophyly_constraint.hasOptionalConstraints() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
@@ -1036,13 +1036,16 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     {
         
         // set ages for optional constraints
-        std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
-        monophyly_constraints[i].setOptionalConstraints( optional_constraints );
+        if ( monophyly_constraints[i].hasOptionalConstraints() == true )
+        {
+            std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
+            monophyly_constraints[i].setOptionalConstraints( optional_constraints );
+        }
         // populate sorted clades vector
         if ( monophyly_constraints[i].size() > 1 && monophyly_constraints[i].size() < num_taxa )
         {
         
-            if ( monophyly_constraints[i].isOptionalConstraint() == true )
+            if ( monophyly_constraints[i].hasOptionalConstraints() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );

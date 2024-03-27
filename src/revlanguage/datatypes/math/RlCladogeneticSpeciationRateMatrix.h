@@ -7,7 +7,7 @@
 #ifndef RlCladogeneticSpeciationRateMatrix_h
 #define RlCladogeneticSpeciationRateMatrix_h
 
-#include <stdio.h>
+#include <cstdio>
 #include "MatrixReal.h"
 #include "ModelObject.h"
 #include "CladogeneticSpeciationRateMatrix.h"

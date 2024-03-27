@@ -24,7 +24,7 @@ extern "C" {
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -349,7 +349,12 @@ void startInterpreter( void )
     }
     
     /* callback for printing function signatures on opening bracket*/
-    linenoiseSetCharacterCallback(printFunctionParameters, '(');
+
+    // Currently disabled because
+    // (i) it doesn't seem to do anything at the moment: pi.function_name is never set.
+    // (ii) it makes parsing go crazy if the '(' is inside a string.
+
+    // linenoiseSetCharacterCallback(printFunctionParameters, '(');
 
     int result = 0;
     std::string commandLine;

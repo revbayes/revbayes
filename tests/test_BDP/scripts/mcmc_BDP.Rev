@@ -1,0 +1,84 @@
+################################################################################
+#
+# RevBayes Integration Test: Constant-rate birth-death process
+#
+# Model: A constant-rate birth-death process with complete taxon sampling.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_MCMC_ITERATIONS       = 1000
+
+seed(12345)
+
+
+#######################
+# Reading in the Data #
+#######################
+
+# read in the tree which is our observation
+tree <- readTrees( "data/primates.tree" )[1]
+
+# Get some useful variables from the data. We need these later on.
+taxa <- tree.taxa()
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+# Specify a prior on the diversification and turnover rate
+diversification ~ dnExp(1)
+turnover ~ dnExp(1)
+
+# now transform the diversification and turnover rates into speciation and extinction rates
+speciation := diversification + turnover
+extinction := turnover
+
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root <- tree.rootAge()
+
+sampling_fraction <- 1.0
+
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves.append( mvSlide(diversification,delta=1,tune=true,weight=1) )
+moves.append( mvSlide(turnover,delta=1,tune=true,weight=1) )
+moves.append( mvScale(diversification,lambda=1,tune=true,weight=1) )
+moves.append( mvScale(turnover,lambda=1,tune=true,weight=1) )
+
+# construct a variable for the tree drawn from a birth death process
+psi ~ dnBDP(lambda=speciation, mu=extinction, rootAge=abs(root), rho=sampling_fraction, taxa=taxa, condition="nTaxa" )
+psi.clamp( tree )
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( root )
+
+
+
+monitors.append( mnModel(filename="output/primates_BDP.log",printgen=1, separator = TAB) )
+monitors.append( mnScreen(diversification, turnover, printgen=NUM_MCMC_ITERATIONS/10) )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=NUM_MCMC_ITERATIONS)
+
+
+# you may want to quit RevBayes now
+q()

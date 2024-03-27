@@ -363,7 +363,8 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 extinction = pExtinction(0.0, node.getAge());
             }
             
-            RbBitSet obs_state(num_states, true);
+            RbBitSet obs_state(num_states);
+            obs_state.set();
             bool gap = true;
 
             if ( tree->hasCharacterData() == true )
@@ -540,7 +541,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         }
         
     }
-    
+
 }
 
 
@@ -585,7 +586,11 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     {
         node_likelihood[i] = left_likelihoods[i];
 
-        if ( use_cladogenetic_events == true && speciation_node == true )
+        // MRM 03/23/2020: the root is a cladogenetic event, so the
+        // cladogenetic events should be included at the root. right now,
+        // I am just forcing the cladogenetic events at the root, but there
+        // may be a better solution.
+		if ( use_cladogenetic_events == true && speciation_node == true )
         {
 
             double like_sum = 0.0;
@@ -1808,6 +1813,7 @@ double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double
  */
 void StateDependentSpeciationExtinctionProcess::redrawValue( void )
 {
+
     size_t attempts = 0;    
     //while (attempts < 100000)
     while (attempts < 10000)

@@ -28,7 +28,7 @@
 
 #include "EigenSystem.h"
 
-#include <assert.h>
+#include <cassert>
 #include <math.h>
 #include <vector>
 

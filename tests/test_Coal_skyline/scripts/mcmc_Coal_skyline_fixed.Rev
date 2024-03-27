@@ -1,0 +1,80 @@
+################################################################################
+#
+# RevBayes Script: Bayesian inference of diversification rates under a
+#                   conditioned birth-death-shift model
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(1234)
+
+#######################
+# Reading in the Data #
+#######################
+
+dataset = "primates"
+
+# Read in the observed phylogeny
+observed_phylogeny <- readTrees("data/"+dataset+".tree")[1]
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+taxa <- observed_phylogeny.taxa()
+n_taxa <- observed_phylogeny.ntips()
+
+# initialize the moves and monitors vectors
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+NUM_INTERVALS = ceil(n_taxa / 5)
+for (i in 1:NUM_INTERVALS) {
+
+    pop_size[i] ~ dnUniform(0,1E6)
+    pop_size[i].setValue(100.0)
+    moves.append( mvScale(pop_size[i], lambda=0.1, tune=true, weight=2.0) )
+
+}
+
+
+### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
+psi ~ dnCoalescentSkyline(theta=pop_size, method="events", taxa=taxa)
+
+interval_times := psi.getIntervalAges()
+
+root_height := psi.rootAge()
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+### set up the monitors that will output parameter values to file and screen 
+monitors.append( mnModel(filename="output/coal_skyline_fixed.log",printgen=1, separator = TAB) )
+monitors.append( mnScreen(printgen=1, pop_size) )
+
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves)
+
+### run the MCMC ###
+mymcmc.run(generations=20)
+
+
+
+## quit ##
+q()

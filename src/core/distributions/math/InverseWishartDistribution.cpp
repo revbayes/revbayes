@@ -2,7 +2,7 @@
 
 #include "InverseWishartDistribution.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RandomNumberFactory.h"
 #include "DistributionInverseWishart.h"

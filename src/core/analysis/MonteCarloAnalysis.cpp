@@ -445,7 +445,7 @@ void MonteCarloAnalysis::resetReplicates( const MPI_Comm &analysis_comm )
 void MonteCarloAnalysis::resetReplicates( void )
 #endif
 {
-    
+
     // free the runs
     MonteCarloSampler *m = NULL;
     for (size_t i = 0; i < replicates; ++i)
@@ -482,11 +482,13 @@ void MonteCarloAnalysis::resetReplicates( void )
 
         replicate_indices_start[i] = this_replicate_start;
         replicate_indices_end[i]   = size_t( fmin( fmax(this_replicate_start+1,this_replicate_end), replicates ) );
-
+        
     }
     
     // create replicate Monte Carlo samplers
     bool no_sampler_set = true;
+    // making sure that initially only one core is used per sampler
+    m->setActivePID( pid, 1 );
     for (size_t i = 0; i < replicates; ++i)
     {
         size_t replicate_pid_start = num_processes;
@@ -512,14 +514,18 @@ void MonteCarloAnalysis::resetReplicates( void )
         if ( pid >= replicate_pid_start && pid <= replicate_pid_end )
         {
             no_sampler_set = false;
-            
+
             if ( i == 0 )
             {
                 runs[i] = m;
+//                runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );
             }
             else
             {
+
                 runs[i] = m->clone();
+//                runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );
+
             }
             
             runs[i]->setActivePID( replicate_pid_start, number_processes_per_replicate );
@@ -792,7 +798,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         converged &= numConvergenceRules > 0;
         
     } while ( finished == false && converged == false);
-
     
 #ifdef RB_MPI
     // wait until all replicates complete

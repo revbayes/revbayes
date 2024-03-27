@@ -23,8 +23,6 @@ namespace RevBayesCore {
         
     public:
         
-        //CladogeneticProbabilityMatrixFunction( const TypedDagNode< RbVector< double > >* sr, unsigned mc );
-//        CladogeneticProbabilityMatrixFunction( int n_states );
         CladogeneticProbabilityMatrixFunction( const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states );
         virtual                                                                         ~CladogeneticProbabilityMatrixFunction(void);
         
