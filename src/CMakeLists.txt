@@ -59,6 +59,15 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
+## Prevent the error "Could NOT find Threads" when we search for BOOST.
+IF(APPLE)
+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+    set(CMAKE_HAVE_THREADS_LIBRARY 1)
+    set(CMAKE_USE_WIN32_THREADS_INIT 0)
+    set(CMAKE_USE_PTHREADS_INIT 1)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+ENDIF()
+
 ##### rpath: where to find shared libraries #####
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
