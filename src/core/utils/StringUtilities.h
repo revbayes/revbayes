@@ -15,6 +15,7 @@
 #define RlStringUtilities_H
 
 #include <cstddef>
+#include <cstdint>
 #include <sstream> // IWYU pragma: keep
 #include <vector>
 
@@ -39,6 +40,7 @@ namespace StringUtilities {
     std::string                 oneLiner(const std::string& input, size_t maxLen);                                  //!< Get a one-liner of specified length
     void                        replaceSubstring(std::string& str, const std::string& oldStr, const std::string& newStr);
     void                        replaceAllOccurrences(std::string& str, char old_ch, char new_ch);
+    std::vector<uint32_t>       stringSortIndices(const std::vector<std::string>& v);                               //!< Get the indices of the sorted elements of a vector of strings
     void                        stringSplit(std::string str, std::string delim, std::vector<std::string>& results, bool trim = false); //!< Split a string into pieces
     void                        toLower(std::string& str);                                                          //!< Convert string's characters to lower case
     std::string                 toString(double x, int digits=6);                                                   //!< Convert string's characters to lower case
