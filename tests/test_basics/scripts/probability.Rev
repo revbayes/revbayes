@@ -16,3 +16,5 @@ y
 # And this succeeds
 z ~ dnBinomial(size=10,p=Probability(1 - (y/10)))
 z
+
+q()
