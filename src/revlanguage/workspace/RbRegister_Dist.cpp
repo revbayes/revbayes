@@ -156,7 +156,7 @@
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
-#include "Dist_PhyloOrnsteinUhlenbeckREML.h"
+#include "Dist_PhyloOrnsteinUhlenbeckPruning.h"
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
 #include "Dist_PhyloWhiteNoise.h"
 
@@ -314,7 +314,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianMultiSampleREML()      );
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloOrnsteinUhlenbeck()                        );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                     );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckREML()                    );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()              );
 
         // multivariate brownian motion
