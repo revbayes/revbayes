@@ -212,7 +212,7 @@ jobs:
         CXX=x86_64-w64-mingw32-g++-posix
         PREFIX=${HOME}/local
         WINROOT=/home/runner/win_root
-        /usr/local/bin/meson build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
         ccache -p
         ccache -s
         /usr/local/bin/ninja -C build install

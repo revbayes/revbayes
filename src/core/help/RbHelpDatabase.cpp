@@ -295,10 +295,10 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBimodalNormal")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_strings[string("dnBimodalNormal")][string("title")] = string(R"(Bernoulli Distribution)");
 	help_arrays[string("dnBinomial")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBinomial")][string("description")] = string(R"(Binomial probability distribution of x successes in n trials.)");
-	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial probability distribution defines the number of success in n trials, where each trial has the same success probability p. The probability is given by (n choose x) p^(x) * (1-p)^(n-p))");
+	help_strings[string("dnBinomial")][string("description")] = string(R"(Binomial probability distribution of x successes in size trials.)");
+	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial probability distribution defines the number of success in size trials, where each trial has the same success probability p. The probability is given by (size choose x) p^(x) * (1-p)^(size-p))");
 	help_strings[string("dnBinomial")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
-x ~ dnBinomial(n=10,p)
+x ~ dnBinomial(size=10,p)
 x.clamp(8)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
 monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
@@ -475,11 +475,12 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("dnExponential")][string("description")] = string(R"(Exponential distribution with rate equal to ‘lambda’.)");
 	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution has density:
 
-f(x) = 1/r * exp(-lambda*x)
+f(x) = lambda * exp(-lambda*x)
 
 where lambda is the rate parameter.)");
 	help_strings[string("dnExponential")][string("example")] = string(R"(# we set a rate parameter
-rate <- 10.0# we create an exponentially distributed random variable
+rate <- 10.0
+# we create an exponentially distributed random variable
 x ~ dnExponential(lambda=rate)
 # compute the probability of the variable
 x.probability())");
@@ -779,7 +780,7 @@ for (g in 1:n_genes) {
         taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
     }
   }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, rate=beta, taxa=taxons[g])
+  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, scale=beta, taxa=taxons[g])
   print(geneTrees[g])
 }
 # We can save the species tree and the gene trees:

@@ -378,7 +378,7 @@ template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setValue(mixtureType *v, bool force)
 {
     
-    delete this->value;
+    if(v != this->value) delete this->value;
     
     if ( force == false )
     {

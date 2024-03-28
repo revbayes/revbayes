@@ -204,6 +204,11 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
+            if ( burnin >= rv->getValue()[i].getValue().size() )
+            {
+                throw RbException("Specified burnin equals or exceeds the total number of trees in the trace.");
+            }
+            
             (*rv)[i].getValue().setBurnin(burnin);
         }
     }
@@ -256,8 +261,8 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
-        burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
+        burninTypes.push_back( Probability::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
 
         argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
