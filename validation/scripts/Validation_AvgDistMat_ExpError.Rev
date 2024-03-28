@@ -37,18 +37,6 @@ extinction <- 0.09
 tree_height <- 1.0
 species <- simTree(4).taxa()
 
-# Construct a variable for the tree drawn from the birth-death process specified above
-
-true_tree <- rBDP(n=1, lambda=speciation, mu=extinction, rootAge=tree_height, condition="nTaxa", taxa=species)
-
-# Get its distance matrix
-
-dist_matrices[1] := fnTreePairwiseDistances(true_tree[1])
-
-# Convert to an "average" distance matrix
-
-ADM := fnAverageDistanceMatrix(dist_matrices)
-
 #############
 # Inference #
 #############
@@ -73,7 +61,7 @@ exp_error_dist ~ dnExponentialError(distMat=mat, lambda=0.005)
 
 # Clamp to the data
 
-exp_error_dist.clamp(ADM)
+exp_error_dist.clamp( exp_error_dist )
 
 #########
 # Model #
