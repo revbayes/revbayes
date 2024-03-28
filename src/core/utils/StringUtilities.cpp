@@ -18,6 +18,7 @@
 #include "StringUtilities.h"
 
 #include <cstdio>
+#include <cstdint>
 #include <iomanip>
 
 #include <algorithm>
