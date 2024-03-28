@@ -117,12 +117,12 @@ if [ "${gtk}" = "true" ] ; then
     graphite2-1.3.14-2
     gtk2-2.24.33-6
     harfbuzz-8.3.0-1
-    iconv-1.17-3
+    iconv-1.17-4
+    libiconv-1.17-4
     jasper-4.0.0-1
     libdatrie-0.2.13-3
     libdeflate-1.19-1
     libffi-3.4.4-1
-    libiconv-1.16-2
     libjpeg-turbo-3.0.1-1
     libpng-1.6.40-1
     libthai-0.1.29-3
