@@ -15,6 +15,7 @@
 #define RlStringUtilities_H
 
 #include <cstddef>
+#include <cstdint>
 #include <sstream> // IWYU pragma: keep
 #include <vector>
 
