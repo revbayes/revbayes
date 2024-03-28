@@ -199,7 +199,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             if ( the_var->getRevObject().isType( *it ) )
             {
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
-                return Argument( valueVar, arg.getLabel(), false );
+                return Argument( valueVar, arg.getLabel(), true );
             }
             else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
             {
@@ -207,7 +207,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
 
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,the_var->getName() ) );
-                return Argument( valueVar, arg.getLabel(), false );
+                return Argument( valueVar, arg.getLabel(), true );
                 
             }
         } // if (by-value)
@@ -389,6 +389,10 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         once = true;
     }
+    if ( nodeType == STOCHASTIC || nodeType == DETERMINISTIC )
+    {
+        once = false;
+    }
     
     if ( nodeType == STOCHASTIC && the_var->getRevObject().getDagNode()->getDagNodeType() != RevBayesCore::DagNode::STOCHASTIC )
     {
@@ -399,51 +403,46 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         return -1;
     }
 
+    
+    // we need to store and check all arg types
+    std::vector<double> penalties;
     for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
     {
-        if ( the_var->getRevObject().isType( *it ) )
+        const TypeSpec& req_arg_type_spec = *it;
+        if ( the_var->getRevObject().isType( req_arg_type_spec ) )
         {
             return 0.0;
         }
-        
+            
         double penalty = -1;
         // make sure that we only perform type casting when the variable will not be part of a model graph
         if ( once == true || the_var->getRevObject().isConstant() == true )
         {
-            penalty = the_var->getRevObject().isConvertibleTo( *it, once );
+            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
         }
-        
-        if ( penalty != -1 && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+            
+        if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
-            return penalty;
+            penalties.push_back( penalty );
         }
         else if ( penalty != -1 && evalType == BY_VALUE )
         {
-            return penalty;
+            penalties.push_back( penalty );
         }
-
-//        else if ( once == true &&
-////                 !var->isAssignable() &&
-//                  the_var->getRevObject().isConvertibleTo( *it, true ) != -1 &&
-//                  (*it).isDerivedOf( the_var->getRequiredTypeSpec() )
-//                )
-//        {
-//            return the_var->getRevObject().isConvertibleTo( *it, true );
-//        }
         else if ( nodeType != STOCHASTIC )
         {
             
             const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
-            const TypeSpec& typeTo   = *it;
+            const TypeSpec& typeTo   = req_arg_type_spec;
             
             // create the function name
             std::string function_name = "_" + typeFrom.getType() + "2" + typeTo.getType();
-            
+                
             // Package arguments
             std::vector<Argument> args;
             Argument theArg = Argument( the_var, "arg" );
             args.push_back( the_var );
-            
+                
             Environment& env = Workspace::globalWorkspace();
             try
             {
@@ -457,10 +456,23 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             }
 
         }
+            
+    }
         
+    // check which one was the best penalty
+    double best_penalty = -1;
+    for (size_t i=0; i<penalties.size(); ++i)
+    {
+        if ( penalties[i] != -1 )
+        {
+            if (best_penalty == -1 || best_penalty > penalties[i])
+            {
+                best_penalty = penalties[i];
+            }
+        }
     }
     
-    return -1;
+    return best_penalty;
 }
 
 
