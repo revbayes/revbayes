@@ -494,6 +494,26 @@ string StringUtilities::join(const vector<string>& ss, const string& sep)
     return o.str();
 }
 
+/*!
+ * Utility function for index sorting, inspired by the following Stack Overflow posts:
+ * Lukasz Wiklendt, https://stackoverflow.com/a/12399290 and
+ * vsoftco, https://stackoverflow.com/a/37732329
+ *
+ * \brief Index sorting.
+ * \param v is a vector that we want to sort and return the indices of sorted elements.
+ * \return Vector of indices of the sorted elements of v. We use uint32_t rather than size_t to speed up memory access.
+ * \throws Does not throw an error.
+ */
+std::vector<uint32_t> StringUtilities::stringSortIndices(const std::vector<std::string>& v)
+{
+    std::vector<uint32_t> result( v.size() );
+    std::iota(result.begin(), result.end(), 0);
+    std::sort(result.begin(), result.end(),
+              [&v](uint32_t i1, uint32_t i2) { return v[i1] < v[i2]; }
+             );
+    return result;
+}
+
 /**
  * Utility function for dividing string into pieces
  * If no delimiter is specified, then the string is split on whitespace.

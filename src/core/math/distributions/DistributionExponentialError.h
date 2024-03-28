@@ -25,8 +25,6 @@ namespace RevBayesCore {
         
         namespace ExponentialError {
         
-            std::vector<uint32_t>       stringSortIndices(const std::vector<std::string>& v);                                          /*!< Get the indices of the sorted elements of a vector of strings */
-        
             // exponential error of parameters avgDistMat and lambda
             double                      pdf(const AverageDistanceMatrix& avgDistMat, double lambda, const AverageDistanceMatrix& z);   /*!< Exponential error probability density */
             double                      lnPdf(const AverageDistanceMatrix& avgDistMat, double lambda, const AverageDistanceMatrix& z); /*!< Exponential error log_e probability density */

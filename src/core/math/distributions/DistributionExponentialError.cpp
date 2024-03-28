@@ -18,30 +18,11 @@
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "StringUtilities.h"
 #include "AverageDistanceMatrix.h"
 #include "DistanceMatrix.h"
 
 using namespace RevBayesCore;
-
-/*!
- * Helper function for index sorting, inspired by the following Stack Overflow posts:
- * Lukasz Wiklendt, https://stackoverflow.com/a/12399290 and
- * vsoftco, https://stackoverflow.com/a/37732329
- *
- * \brief Index sorting.
- * \param v is a vector that we want to sort and return the indices of sorted elements.
- * \return Vector of indices of the sorted elements of v.
- * \throws Does not throw an error.
- */
-std::vector<uint32_t> RbStatistics::ExponentialError::stringSortIndices(const std::vector<std::string>& v)
-{
-    std::vector<uint32_t> result( v.size() );
-    std::iota(result.begin(), result.end(), 0);
-    std::sort(result.begin(), result.end(),
-              [&v](uint32_t i1, uint32_t i2) { return v[i1] < v[i2]; }
-             );
-    return result;
-}
 
 
 
@@ -96,8 +77,8 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         zNames[i] = z.getTaxa()[i].getName();
     }
     
-    std::vector<uint32_t> ix0 = stringSortIndices(zNames);
-    std::vector<uint32_t> ix1 = stringSortIndices(admNames);
+    std::vector<uint32_t> ix0 = StringUtilities::stringSortIndices(zNames);
+    std::vector<uint32_t> ix1 = StringUtilities::stringSortIndices(admNames);
 
     double dist = 0;
 
@@ -243,8 +224,8 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
         zNames[i] = z.getTaxa()[i].getName();
     }
     
-    std::vector<uint32_t> ix0 = stringSortIndices(zNames);
-    std::vector<uint32_t> ix1 = stringSortIndices(dmNames);
+    std::vector<uint32_t> ix0 = StringUtilities::stringSortIndices(zNames);
+    std::vector<uint32_t> ix1 = StringUtilities::stringSortIndices(dmNames);
     
     double dist = 0;
     
