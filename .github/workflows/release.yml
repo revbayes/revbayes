@@ -154,31 +154,12 @@ jobs:
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
 
-    - name: Prepare ccache timestamp
-      id: ccache_cache_timestamp
-      run: |
-        ccache --set-config=cache_dir=$HOME/.ccache
-
-        export CMAKE_C_COMPILER_LAUNCHER=ccache
-        export CMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-        if [ "$RUNNER_OS" = "Linux" ] ; then
-          stamp=$(date '+%s')
-        else
-          stamp=$(gdate '+%s')
-        fi
-        echo "${stamp}"
-        echo "timestamp=${stamp}" >> $GITHUB_OUTPUT
-
-    - name: ccache cache files
-#      uses: actions/cache@v2
-#     We want to cache the build artifacts whether or not the tests succeed.
-      uses: pat-s/always-upload-cache@v3.0.11
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
       with:
-         path: ~/.ccache
-         key: ${{ matrix.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+         key: ${{ matrix.name }}
          restore-keys: |
-           ${{ matrix.name }}-ccache-
+           ${{ matrix.name }}
 
     - name: Compile static BOOST libs (Linux & Mac)
       if: matrix.name != 'windows'
