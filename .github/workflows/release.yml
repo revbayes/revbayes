@@ -28,9 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: 3.8
     - uses: eWaterCycle/setup-singularity@v7
       with:
         singularity-version: 3.8.3
