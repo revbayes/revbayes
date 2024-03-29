@@ -201,9 +201,7 @@ jobs:
         meson setup build
         echo ::endgroup::
 
-        cd projects/cmake
-        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
-        cmake --install build
+        meson install -C build
 
         ccache -s
 
