@@ -6,6 +6,13 @@ on:
       - "*"
 
 jobs:
+  # The scripts actions/create-release and actions/upload-release-asset are unmaintained.
+  # So eventually we need to change how the release is generated.
+  # For examples of the new way, see:
+  #  * https://gist.github.com/youhide/121750fc4878801ea8e908080b535beb
+  #  * https://www.lucavall.in/blog/how-to-create-a-release-with-multiple-artifacts-from-a-github-actions-workflow-using-the-matrix-strategy
+  #  * https://github.com/lucavallin/vodo/blob/main/.github/workflows/release.yml
+
   create_release:
     name: Create release
     runs-on: ubuntu-latest
