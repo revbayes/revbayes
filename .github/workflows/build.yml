@@ -197,7 +197,7 @@ jobs:
 
         # Check meson setup (but not build).
         echo ::group::Test meson setup
-        ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dmpi=${{ matrix.mpi }}
+        ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dopenlibm=true -Dmpi=${{ matrix.mpi }}
         meson setup build
         echo ::endgroup::
 
