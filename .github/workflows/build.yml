@@ -97,15 +97,21 @@ jobs:
       if: runner.os == 'Linux' && matrix.name != 'windows'
       run: |
         sudo apt-get update
-        sudo apt-get install -y ccache libopenlibm-dev
+        sudo apt-get install -y ccache libopenlibm-dev meson
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
           sudo apt-get install -y g++-${{ matrix.version }}
           echo "C_COMPILER=gcc-${{ matrix.version }}" >> $GITHUB_ENV
           echo "CXX_COMPILER=g++-${{ matrix.version }}" >> $GITHUB_ENV
+
+          echo "CC=ccache gcc-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX=ccache g++-${{ matrix.version }}" >> $GITHUB_ENV
         else
           sudo apt-get install -y clang-${{ matrix.version }}
           echo "C_COMPILER=clang-${{ matrix.version }}" >> $GITHUB_ENV
           echo "CXX_COMPILER=clang++-${{ matrix.version }}" >> $GITHUB_ENV
+
+          echo "CC=ccache clang-${{ matrix.version }}" >> $GITHUB_ENV
+          echo "CXX=ccache clang++-${{ matrix.version }}" >> $GITHUB_ENV
         fi
         if [ "${{ matrix.mpi }}" = true ] ; then
           sudo apt-get install libopenmpi-dev
@@ -120,7 +126,7 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          brew install pkg-config boost ccache coreutils openlibm
+          brew install pkg-config boost ccache coreutils openlibm meson
 
     - name: Install (Windows meson cross compile)
       if: matrix.name == 'windows'
@@ -207,6 +213,12 @@ jobs:
 
         ccache -p
         ccache -s
+
+        # Check meson setup (but not build).
+        echo ::group::Test meson setup
+        ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dmpi=${{ matrix.mpi }}
+        meson build
+        echo ::endgroup::
 
         cd projects/cmake
         ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
