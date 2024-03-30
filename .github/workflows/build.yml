@@ -198,7 +198,7 @@ jobs:
         # Check meson setup (but not build).
         echo ::group::Test meson setup
         CXXFLAGS="$CXXFLAGS -ffp-contract=off"
-        if [[ $(uname -m) != 'arm64' ]] ; then CXXFLAGS="$CXXFLAGS -mfp-math=sse" ; fi
+        if [[ $(uname -m) != 'arm64' ]] ; then CXXFLAGS="$CXXFLAGS -mfpmath=sse" ; fi
 
         ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dopenlibm=true -Dmpi=${{ matrix.mpi }}
         meson setup build
