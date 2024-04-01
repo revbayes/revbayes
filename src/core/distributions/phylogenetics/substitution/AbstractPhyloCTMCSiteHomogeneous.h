@@ -964,11 +964,10 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         {
             throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
         }
-
-        // sum the partials up
-        this->lnProb = sumRootLikelihood();
-
     }
+
+    // sum the partials up
+    this->lnProb = sumRootLikelihood();
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( in_mcmc_mode == false )
@@ -4094,7 +4093,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
-    else if ( affecter != tau && affecter != site_rates_probs && affecter != site_matrix_probs) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter == site_rates_probs || affecter == site_matrix_probs )
+    {
+	// This doesn't affect the cached conditional likelihoods (so don't touch all of them).
+	// But it does affect the final likelihood (so we need to recompute that).
+    }
+    else if ( affecter != tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touch_all = true;
     }
