@@ -32,7 +32,7 @@ CollapseExpandFossilBranchProposal::CollapseExpandFossilBranchProposal( Stochast
     // tell the base class to add the node
     addNode( tau );
     addNode( origin );
-    
+    if(! tau->getDistribution().allowsSA()) throw new RbException("Setup includes a move for sampled ancestors but the corresponding tree distribution doesn't allow sampled ancestors");
 }
 
 

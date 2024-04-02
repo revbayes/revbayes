@@ -68,6 +68,8 @@ namespace RevBayesCore {
         virtual void                                                redrawValue(SimulationCondition c);                                         //!< Draw a new random value from the distribution
         virtual void                                                redrawValue(void) = 0;                                                      //!< Draw a new random value from the distribution
 
+        virtual bool                                                allowsSA(void) { return false; }
+
     protected:
         TypedDistribution(variableType *v);
         TypedDistribution(const TypedDistribution &d);
