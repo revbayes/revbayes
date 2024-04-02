@@ -33,23 +33,24 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        void                                                    addSamplingRemovalAndBurstRules(MemberRules&) const;
-        
+        void                                                    addSamplingAndRemovalRules(MemberRules&) const;
+        void                                                    addBurstRules(MemberRules &dist_member_rules) const;
+
     private:
 
         RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate(s)
         RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               phi;                                                                                    //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               r;                                                                                      //!< The taxon sampling fraction(s)
-        RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The speciation rate(s)
-        RevPtr<const RevVariable>                               Mu;                                                                                     //!< The extinction rate(s)
-        RevPtr<const RevVariable>                               Phi;                                                                                    //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               r_event;                                                                                //!< The serial sampling rate(s)
+        RevPtr<const RevVariable>                               r;                                                                                      //!< The treatment/removal probability(s)
+        RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The burst speciation rate(s)
+        RevPtr<const RevVariable>                               Mu;                                                                                     //!< The mass extinction rate(s)
+        RevPtr<const RevVariable>                               Phi;                                                                                    //!< The event sampling rate(s)
+        RevPtr<const RevVariable>                               r_event;                                                                                //!< The event treatment/removal probability(s) - R, uses same timeline as Phi
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval change times
         RevPtr<const RevVariable>                               lambda_timeline;                                                                        //!< The speciation rate change times
         RevPtr<const RevVariable>                               mu_timeline;                                                                            //!< The extinction rate change times
         RevPtr<const RevVariable>                               phi_timeline;                                                                           //!< The serial sampling rate change times
-        RevPtr<const RevVariable>                               r_timeline;                                                                             //!< The change times for the death upon sampling probabilities
+        RevPtr<const RevVariable>                               r_timeline;                                                                             //!< The change times for the treatment/removal probabilities
         RevPtr<const RevVariable>                               Lambda_timeline;                                                                        //!< The burst times
         RevPtr<const RevVariable>                               Mu_timeline;                                                                            //!< The mass extinction times
         RevPtr<const RevVariable>                               Phi_timeline;                                                                           //!< The event sampling times

@@ -8,7 +8,7 @@ namespace RevLanguage {
     /**
      * RevLanguage wrapper of the phylodynamic Birth-Death Sampling Treatment Process
      * 
-     * Helper distribution for phylodynamic applications, with removal probability = 1 (i.e. sampling = death) and extant sampling = 0 by default, 
+     * Helper distribution of the BDSTP for phylodynamic applications, with removal probability = 1 (i.e. sampling = death) and extant sampling = 0 by default, 
      * and no bursts or mass extinctions
      * 
      */
@@ -24,7 +24,8 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        void                                                    addSamplingRemovalAndBurstRules(MemberRules&) const;
+        void                                                    addSamplingAndRemovalRules(MemberRules&) const;
+        void                                                    addBurstRules(MemberRules &dist_member_rules) const;
     };
 
 }

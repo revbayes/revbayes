@@ -304,11 +304,12 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "lambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "muTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
         std::vector<std::string> aliases_serial_sampling_timeline;
         aliases_serial_sampling_timeline.push_back("phiTimeline");
         aliases_serial_sampling_timeline.push_back("psiTimeline");
         dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
         std::vector<std::string> aliases_event_sampling_timeline;
         aliases_event_sampling_timeline.push_back("PhiTimeline");
         aliases_event_sampling_timeline.push_back("rhoTimeline");
@@ -322,7 +323,8 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
-        addSamplingRemovalAndBurstRules(dist_member_rules);
+        addSamplingAndRemovalRules(dist_member_rules);
+        addBurstRules(dist_member_rules);
         
         rules_set = true;
     }
@@ -330,12 +332,12 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
     return dist_member_rules;
 }
 
-void RevLanguage::Dist_BDSTP::addSamplingRemovalAndBurstRules(MemberRules& dist_member_rules) const
+void Dist_BDSTP::addSamplingAndRemovalRules(MemberRules& dist_member_rules) const
 {
     std::vector<TypeSpec> event_sampling_paramTypes;
     event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
     event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-    
+
     std::vector<std::string> aliases_event_sampling;
     aliases_event_sampling.push_back("Phi");
     aliases_event_sampling.push_back("rho");
@@ -343,17 +345,25 @@ void RevLanguage::Dist_BDSTP::addSamplingRemovalAndBurstRules(MemberRules& dist_
 
     std::vector<TypeSpec> other_event_paramTypes;
     other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-    dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-    dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
     dist_member_rules.push_back( new ArgumentRule( "R",       other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
-    dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa give birth with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-    dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa die with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );       
 
     std::vector<TypeSpec> rTypes;
     rTypes.push_back( Probability::getClassTypeSpec() );
     rTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
     dist_member_rules.push_back( new ArgumentRule( "r",       rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+}
+
+void Dist_BDSTP::addBurstRules(MemberRules& dist_member_rules) const
+{
+    std::vector<TypeSpec> other_event_paramTypes;
+    other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
+    dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+    dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa give birth with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa die with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );       
 }
 
 

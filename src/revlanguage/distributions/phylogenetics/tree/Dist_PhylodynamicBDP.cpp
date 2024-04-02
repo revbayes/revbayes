@@ -68,7 +68,7 @@ std::string Dist_PhylodynamicBDP::getDistributionFunctionName( void ) const
     return d_name;
 }
 
-void RevLanguage::Dist_PhylodynamicBDP::addSamplingRemovalAndBurstRules(MemberRules& dist_member_rules) const
+void RevLanguage::Dist_PhylodynamicBDP::addSamplingAndRemovalRules(MemberRules& dist_member_rules) const
 {
     std::vector<TypeSpec> event_sampling_paramTypes;
     event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
@@ -87,6 +87,11 @@ void RevLanguage::Dist_PhylodynamicBDP::addSamplingRemovalAndBurstRules(MemberRu
     rTypes.push_back( Probability::getClassTypeSpec() );
     rTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
     dist_member_rules.push_back( new ArgumentRule( "r",       rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
+    dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+}
+
+void Dist_PhylodynamicBDP::addBurstRules(MemberRules& dist_member_rules) const
+{ // do nothing - no bursts or mass extinctions in phylodynamics
 }
 
 /**
