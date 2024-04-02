@@ -33,8 +33,8 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        void                                                    addSamplingAndRemovalRules(MemberRules&) const;
-        void                                                    addBurstRules(MemberRules &dist_member_rules) const;
+        virtual void                                            addSamplingAndRemovalRules(MemberRules&) const;
+        virtual void                                            addBurstRules(MemberRules &dist_member_rules) const;
 
     private:
 

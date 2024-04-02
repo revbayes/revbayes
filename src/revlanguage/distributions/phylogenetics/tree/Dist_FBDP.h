@@ -24,8 +24,8 @@ namespace RevLanguage {
 
     protected:
 
-        void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        void                                                    addSamplingAndRemovalRules(MemberRules&) const;
+        virtual void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
+        virtual void                                            addSamplingAndRemovalRules(MemberRules&) const;
 
     };
 
