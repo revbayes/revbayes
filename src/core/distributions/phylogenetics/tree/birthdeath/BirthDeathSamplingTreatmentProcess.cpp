@@ -1957,7 +1957,7 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
     }
 }
 
-bool BirthDeathSamplingTreatmentProcess::allowSA() {
+bool BirthDeathSamplingTreatmentProcess::allowsSA() {
     for(auto removal : r) {
         if(removal < 1.0 - DBL_EPSILON) return true;
     }
