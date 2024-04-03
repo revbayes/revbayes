@@ -68,6 +68,16 @@ std::string Dist_PhylodynamicBDP::getDistributionFunctionName( void ) const
     return d_name;
 }
 
+/**
+ * Get the member rules used to create the constructor of this object.
+ *
+ * Changes from the BDSTP default are:
+ * (1) r is no longer required, defaults to 1 (but can be changed)
+ * (2) rho/Phi is no longer required, defaults to 0 (but can be changed)
+ * (3) No burst or mass extinctions
+ *
+ * \return The member rules.
+ */
 const MemberRules& Dist_PhylodynamicBDP::getParameterRules(void) const
 {
 

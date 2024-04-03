@@ -45,7 +45,6 @@ using namespace RevLanguage;
  */
 Dist_BDSTP::Dist_BDSTP() : BirthDeathProcess()
 {
-
 }
 
 
@@ -207,6 +206,11 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     return d;
 }
 
+/**
+ * Gets the removal probability from the r node.
+ *
+ * Necessary for using a fixed r in the FBD process.
+ */
 RevBayesCore::DagNode* Dist_BDSTP::getRemovalProbability( void ) const {
     return r->getRevObject().getDagNode();
 }
@@ -274,10 +278,10 @@ std::string Dist_BDSTP::getDistributionFunctionName( void ) const
 /**
  * Get the member rules used to create the constructor of this object.
  *
- * The member rules of the constant-rate birth-death process are:
- * (1) the speciation rate lambda which must be a positive real.
- * (2) the extinction rate mu that must be a positive real.
- * (3) all member rules specified by BirthDeathProcess.
+ * The member rules of the BDSTP process are:
+ * (1) Required arguments: lambda, mu, rho/Phi, r, phi/psi, taxa and start_age
+ * (2) Optional arguments: Lambda and Mu for burst/mass extinctions, R for mass sampling, conditioning
+ * (3) Optional argument: global timeline or parameter-specific timelines for any of the other arguments
  *
  * \return The member rules.
  */
@@ -317,6 +321,11 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
     return dist_member_rules;
 }
 
+/**
+ * Adds the member rules common to all variants of the BDSTP (default, FBD and phylodynamic)
+ *
+ * \param The member rules.
+ */
 void Dist_BDSTP::addCommonRules(MemberRules& dist_member_rules) const
 {
         std::vector<std::string> aliases;
@@ -358,6 +367,11 @@ void Dist_BDSTP::addCommonRules(MemberRules& dist_member_rules) const
         dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 }
 
+/**
+ * Adds the member rules specific to burst/mass extinctions (default and FBD processes only)
+ *
+ * \param The member rules.
+ */
 void Dist_BDSTP::addBurstRules(MemberRules& dist_member_rules) const
 {
     std::vector<TypeSpec> other_event_paramTypes;

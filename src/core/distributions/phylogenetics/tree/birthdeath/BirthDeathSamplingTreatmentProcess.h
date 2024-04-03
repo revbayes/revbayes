@@ -58,7 +58,8 @@ namespace RevBayesCore {
         // public member functions
         BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                    //!< Create an independent clone
         void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
-        bool                                            allowsSA();
+        bool                                            allowsSA();                                                             //!< Checks if distribution is compatible with sampled ancestors
+
 
     protected:
         // Parameter management functions

@@ -70,10 +70,22 @@ std::string Dist_FBDP::getDistributionFunctionName( void ) const
     return d_name;
 }
 
+/**
+ * Gets a fixed removal probability r = 0.
+ */
 RevBayesCore::DagNode* Dist_FBDP::getRemovalProbability( void ) const {
     return new ConstantNode<double>("r", new double(0.0) );
 }
 
+/**
+ * Get the member rules used to create the constructor of this object.
+ *
+ * Changes from the BDSTP default are:
+ * (1) r is no longer required, fixed to 0
+ * (2) No mass sampling events
+ *
+ * \return The member rules.
+ */
 const MemberRules& Dist_FBDP::getParameterRules(void) const
 {
 

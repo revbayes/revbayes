@@ -33,9 +33,9 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        virtual void                                            addCommonRules(MemberRules&) const;
-        virtual void                                            addBurstRules(MemberRules &dist_member_rules) const;
-        virtual RevBayesCore::DagNode*                          getRemovalProbability( void ) const;
+        virtual void                                            addCommonRules(MemberRules&) const;                                                     //!< Add argument rules common to all BDSTP versions (default, FBD, phylodynamic)
+        virtual void                                            addBurstRules(MemberRules &dist_member_rules) const;                                    //!< Add argument rules for burst/mass extinction events
+        virtual RevBayesCore::DagNode*                          getRemovalProbability( void ) const;                                                    //!< Get removal probability
 
     private:
 
