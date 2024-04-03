@@ -33,8 +33,9 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        virtual void                                            addSamplingAndRemovalRules(MemberRules&) const;
+        virtual void                                            addCommonRules(MemberRules&) const;
         virtual void                                            addBurstRules(MemberRules &dist_member_rules) const;
+        virtual RevBayesCore::DagNode*                          getRemovalProbability( void ) const;
 
     private:
 

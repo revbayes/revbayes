@@ -68,31 +68,42 @@ std::string Dist_PhylodynamicBDP::getDistributionFunctionName( void ) const
     return d_name;
 }
 
-void RevLanguage::Dist_PhylodynamicBDP::addSamplingAndRemovalRules(MemberRules& dist_member_rules) const
+const MemberRules& Dist_PhylodynamicBDP::getParameterRules(void) const
 {
-    std::vector<TypeSpec> event_sampling_paramTypes;
-    event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
-    event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
 
-    std::vector<std::string> aliases_event_sampling;
-    aliases_event_sampling.push_back("Phi");
-    aliases_event_sampling.push_back("rho");
-    dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling, event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
-        
-    std::vector<TypeSpec> other_event_paramTypes;
-    other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-    dist_member_rules.push_back( new ArgumentRule( "R",       other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    static MemberRules dist_member_rules;
+    static bool rules_set = false;
 
-    std::vector<TypeSpec> rTypes;
-    rTypes.push_back( Probability::getClassTypeSpec() );
-    rTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-    dist_member_rules.push_back( new ArgumentRule( "r",       rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
-    dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    if ( rules_set == false )
+    {
+        Dist_BDSTP::addCommonRules(dist_member_rules);
+        // no burst or mass extinctions
+
+        std::vector<TypeSpec> event_sampling_paramTypes;
+        event_sampling_paramTypes.push_back(Probability::getClassTypeSpec());
+        event_sampling_paramTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
+
+        std::vector<std::string> aliases_event_sampling;
+        aliases_event_sampling.push_back("Phi");
+        aliases_event_sampling.push_back("rho");
+        dist_member_rules.push_back(new ArgumentRule(aliases_event_sampling, event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0)));
+
+        std::vector<TypeSpec> other_event_paramTypes;
+        other_event_paramTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
+        dist_member_rules.push_back(new ArgumentRule("R", other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL));
+
+        std::vector<TypeSpec> rTypes;
+        rTypes.push_back(Probability::getClassTypeSpec());
+        rTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
+        dist_member_rules.push_back(new ArgumentRule("r", rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0)));
+        dist_member_rules.push_back(new ArgumentRule("rTimeline", ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL));
+
+        rules_set = true;
+    }
+
+    return dist_member_rules;
 }
 
-void Dist_PhylodynamicBDP::addBurstRules(MemberRules& dist_member_rules) const
-{ // do nothing - no bursts or mass extinctions in phylodynamics
-}
 
 /**
  * Set a member variable.

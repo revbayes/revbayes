@@ -20,12 +20,11 @@ namespace RevLanguage {
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
         std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
+        const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)
 
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        virtual void                                            addSamplingAndRemovalRules(MemberRules&) const;
-        virtual void                                            addBurstRules(MemberRules &dist_member_rules) const;
     };
 
 }
