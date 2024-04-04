@@ -36,6 +36,7 @@
 
 using namespace RevBayesCore;
 
+namespace views = ranges::views;
 
 /*
  * TreeSummary constructor
@@ -1656,7 +1657,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples)
+    for (const auto& [clade, count]: clade_samples | views::reverse)
     {
         float cladeFreq = count / totalSamples;
         if (cladeFreq < cutoff)  break;
