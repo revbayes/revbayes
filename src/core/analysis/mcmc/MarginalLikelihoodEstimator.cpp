@@ -97,7 +97,11 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
             
                 continue;
             }
-        
+
+            // check for broken lines
+            if( columns.size() <= powerColumnIndex || columns.size() <= likelihoodColumnIndex ) 
+                throw RbException() << "Please check format of file " << fn << ", missing power and likelihood columns in some lines";
+
             // get the power entry
             std::string tmp = columns[powerColumnIndex];
             double p = atof( tmp.c_str() );
