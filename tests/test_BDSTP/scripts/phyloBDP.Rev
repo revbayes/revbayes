@@ -57,10 +57,6 @@ moves.append( mvScale(extinction_rate, lambda=1,    weight=1) )
 diversification := speciation_rate - extinction_rate
 turnover := extinction_rate/speciation_rate
 
-# Fix the probability of sampling parameter (rho) to 1, #
-# because all extant bears are represented in this analysis #
-rho <- 1.0
-
 # Assume an exponential prior on the rate of sampling fossils (psi) #
 psi ~ dnExponential(10) 
 
@@ -82,16 +78,7 @@ moves.append( mvSlide(origin_time, delta=1,    weight=5.0) )
 
 
 ### Define the tree-prior distribution as the fossilized birth-death process ###
-fbd_dist = dnPhylodynamicBDSTP(origin=origin_time, lambda=speciation_rate, mu=extinction_rate, r=0.5, psi=psi, rho=rho, taxa=taxa)
-
-# The will be a random variable of a constrained topology distribution that is governed by the FBD #
-# this distribution will generate FBD trees that match the monophyly constraints defined above #
-clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus", 
-                      "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus", 
-                      "Ursus_abstrusus", "Ursus_spelaeus")
-
-constraints = v(clade_ursinae)
-fbd_tree ~ dnConstrainedTopology(fbd_dist, constraints=constraints)
+fbd_tree ~ dnPhylodynamicBDSTP(origin=origin_time, lambda=speciation_rate, mu=extinction_rate, psi=psi, taxa=taxa)
 
 # Specify moves on the tree and node times #
 # These moves update the tree topology 
@@ -262,7 +249,7 @@ monitors.append( mnScreen(printgen=10, age_extant, num_samp_anc, origin_time) )
 mymcmc = mcmc(mymodel, monitors, moves)
 
 # Run the MCMC #
-mymcmc.run(generations=30)
+mymcmc.run(generations=20)
 
 # Load the tree trace
 treetrace = readTreeTrace("output/BDSTP.trees", treetype="clock")
