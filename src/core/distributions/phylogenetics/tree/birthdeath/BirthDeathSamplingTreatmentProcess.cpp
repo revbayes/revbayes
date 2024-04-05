@@ -1956,3 +1956,17 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
 }
+
+/**
+ * Checks if removal probabilities set for this distribution are compatible with sampled ancestors
+ * (i.e. removal < 1)
+ */
+bool BirthDeathSamplingTreatmentProcess::allowsSA() {
+    for(auto removal : r) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    for(auto removal : r_event) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    return false;
+}

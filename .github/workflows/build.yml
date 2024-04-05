@@ -268,7 +268,7 @@ jobs:
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
-        path: tests
+        path: tests/test_*
 
     - name: Upload testiphy files if they failed
       uses: actions/upload-artifact@v3
