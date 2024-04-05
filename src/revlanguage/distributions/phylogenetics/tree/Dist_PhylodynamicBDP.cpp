@@ -48,6 +48,7 @@ std::vector<std::string> Dist_PhylodynamicBDP::getDistributionFunctionAliases( v
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
+    a_names.push_back( "PhylodynamicBDP" );
     a_names.push_back( "PhylodynamicBDSTP" );
     return a_names;
 }
