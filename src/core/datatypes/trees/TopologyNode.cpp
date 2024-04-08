@@ -1581,6 +1581,8 @@ bool TopologyNode::isRoot( void ) const
 
 bool TopologyNode::isSampledAncestor(  bool propagate ) const
 {
+    // Only tips can have the sampled_ancestor flag set.
+    assert(not sampled_ancestor or isTip());
 
     bool sa = sampled_ancestor;
     if( propagate == true )
@@ -1950,9 +1952,10 @@ void TopologyNode::setUseAges(bool tf, bool recursive)
 
 void TopologyNode::setSampledAncestor(bool tf)
 {
-
     sampled_ancestor = tf;
 
+    // Only tips can have the sampled_ancestor flag set.
+    assert(not sampled_ancestor or isTip());
 }
 
 
