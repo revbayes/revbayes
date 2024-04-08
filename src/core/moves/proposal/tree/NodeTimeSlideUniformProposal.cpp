@@ -111,11 +111,15 @@ double NodeTimeSlideUniformProposal::doProposal( void )
     }
 
     // pick a random node which is not the root and neithor the direct descendant of the root
-    TopologyNode* node;
+    storedNode = nullptr;
+    TopologyNode* node = nullptr;
+    int i=0;
     do {
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
+        i++;
+        if (i> 100) throw RbException(RbException::SKIP_PROPOSAL);
     } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
     
     TopologyNode& parent = node->getParent();
@@ -178,7 +182,8 @@ void NodeTimeSlideUniformProposal::undoProposal( void )
 {
     
     // undo the proposal
-    storedNode->setAge( storedAge );
+    if (storedNode)
+	storedNode->setAge( storedAge );
     
 }
 
