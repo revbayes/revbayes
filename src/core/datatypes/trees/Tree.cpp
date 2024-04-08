@@ -1561,7 +1561,7 @@ void Tree::collapseSampledAncestors()
 {
     for(auto& node: nodes)
     {
-        if (node->isTipSampledAncestor())
+        if (node->isSampledAncestor())
         {
             node->getParent().setTaxon(node->getTaxon());
             node->getParent().removeChild(node);
