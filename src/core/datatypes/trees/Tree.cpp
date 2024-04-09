@@ -918,7 +918,7 @@ std::vector<Taxon> Tree::getTaxa() const
     std::vector< Taxon > taxa;
     for (auto& node: nodes)
     {
-        if (node->isTip() or node->isSampledAncestor())
+        if (node->isTip() or node->getNumberOfChildren() == 1)
         {
             Taxon taxon = node->getTaxon();
             taxon.setAge(node->getAge());
