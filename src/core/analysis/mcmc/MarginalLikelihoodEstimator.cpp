@@ -106,7 +106,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
             // get the power entry
             std::string tmp = columns[powerColumnIndex];
             try {
-                p = std::stof( tmp.c_str() );
+                p = std::stod( tmp.c_str() );
             } catch (std::invalid_argument&) {
                 throw RbException() << "Please check format of file " << fn << ", non-numeric input in power column";
             }
@@ -121,10 +121,10 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
             // get the likelihood entry
             tmp = columns[likelihoodColumnIndex];
             try {
-                l = std::stof(tmp.c_str());
+                l = std::stod(tmp.c_str());
             } catch (std::invalid_argument&) {
                 throw RbException() << "Please check format of file " << fn << ", non-numeric input in likelihood column";
-            }
+}
             likelihoodSamples[index-1].push_back( l );
 
         }
