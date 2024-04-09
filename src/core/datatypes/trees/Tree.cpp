@@ -2092,10 +2092,8 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
     }
 
     // 5. Check that all the taxon labels are used exactly once.
-    for(auto& taxon_count: use_count)
+    for(auto& [taxon, count]: use_count)
     {
-        auto& taxon = taxon_count.first;
-        auto& count = taxon_count.second;
         if (count < 1)
         {
             for(auto& node: nodes)
