@@ -580,6 +580,14 @@ std::string TopologyNode::computeNewick( bool round )
 /* Build newick string */
 std::string TopologyNode::computePlainNewick( void ) const
 {
+    /* NOTE: Representing a topology as with WITH NO ANNOTATIONS
+     * means that we have to represent sampled ancestors as
+     * out-degree-1 nodes.
+     *
+     * If you want to build a tree object from that, you may
+     * need to call tree->makeInternalNodesBifurcating(true,true).
+     */
+
     // test whether this is a internal or external node
     if ( isTip() )
     {
@@ -588,15 +596,20 @@ std::string TopologyNode::computePlainNewick( void ) const
     }
     else
     {
-        // Can we do this unconditionally?
-        // That is, do we ever have taxon names for non-sampled ancestors?
-        string node_name;
-        if (sampled_ancestor and getNumberOfChildren() == 1)
-            node_name = taxon.getName();
+	// If this is non-empty, then there is a taxon here.  Right?
+        string node_name = taxon.getName();
 
         std::vector<std::string> child_newicks;
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
-            child_newicks.push_back( getChild(i).computePlainNewick() );
+	{
+	    if (getChild(i).isSampledAncestor())
+	    {
+		assert(node_name == "");
+		node_name = getChild(i).taxon.getName();
+	    }
+	    else
+		child_newicks.push_back( getChild(i).computePlainNewick() );
+	}
 
         sort(child_newicks.begin(), child_newicks.end());
 
