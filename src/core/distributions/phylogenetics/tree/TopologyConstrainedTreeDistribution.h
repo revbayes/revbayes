@@ -11,15 +11,6 @@
 namespace RevBayesCore {
     
     /**
-     * @file
-     * This file contains the declaration of the random variable class for constant rate birth-death process.
-     *
-     * @brief Declaration of the constant rate Birth-Death process class.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-01-17, version 1.0
-     *
      */
     class TopologyConstrainedTreeDistribution : public TypedDistribution<Tree>, TreeChangeEventListener {
         
@@ -43,7 +34,7 @@ namespace RevBayesCore {
         void                                                setBackbone( const TypedDagNode<Tree> *backbone_one=NULL, const TypedDagNode<RbVector<Tree> > *backbone_many=NULL);
         virtual void                                        setStochasticNode(StochasticNode<Tree> *n);                                                         //!< Set the stochastic node holding this distribution
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
-        
+        virtual bool                                        allowsSA(void) { return base_distribution->allowsSA(); }                                            //!< Checks if distribution is compatible with sampled ancestors
         
     protected:
         
