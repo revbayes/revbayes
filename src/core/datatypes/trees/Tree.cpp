@@ -2070,7 +2070,7 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
     int next_non_taxon_index = use_count.size();
     for(auto& node: nodes)
     {
-        if (node->isTip() or node->isSampledAncestor())
+        if (node->isTip() or node->getNumberOfChildren() == 1)
         {
             // 3a. If this is a tip or sampled ancester, check that we have an index for it.
             auto& taxon = node->getTaxon();
