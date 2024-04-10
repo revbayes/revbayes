@@ -41,7 +41,7 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (none/survival/#Taxa).
  * \param[in]    tn             Taxa.
  */
-FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(const TypedDagNode<double> *ra,
+FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(const TypedDagNode<double> *root_age,
                                                                                            const DagNode *inspeciation,
                                                                                            const DagNode *inextinction,
                                                                                            const DagNode *inpsi,
@@ -50,13 +50,37 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                                                            const TypedDagNode< RbVector<double> > *intimes,
                                                                                            const std::string &incondition,
                                                                                            const std::vector<Taxon> &intaxa,
-                                                                                           bool uo,
-                                                                                           bool pa,
-                                                                                           bool ex) :
-    AbstractBirthDeathProcess(ra, incondition, intaxa, uo, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, pa),
-    extended(ex)
+                                                                                           bool use_origin,
+                                                                                           bool presence_absence,
+                                                                                           bool extended,
+                                                                                           Tree* initial_tree) :
+    AbstractBirthDeathProcess(root_age, incondition, intaxa, use_origin, initial_tree),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, presence_absence),
+    extended(extended)
 {
+    if (initial_tree != nullptr)
+    {
+        try
+        {
+            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *initial_tree, taxa );
+            value = my_tree->clone();
+        }
+        catch (RbException &e)
+        {
+            value = nullptr;
+            // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
+            // a nonexistent starting_tree
+            throw RbException( e.getMessage() );
+        }
+    }
+    else
+    {
+        // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+        RevBayesCore::Tree *my_tree = (new StartingTreeSimulator).simulateTree( taxa, new RbVector<Clade>() );
+        // store the new value
+        value = my_tree;
+    }
+    
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
         addParameter(*it);

@@ -33,7 +33,7 @@ namespace RevBayesCore {
         using AbstractBirthDeathProcess::taxa;
 
     public:
-        FossilizedBirthDeathSpeciationProcess (const TypedDagNode<double>* ra,
+        FossilizedBirthDeathSpeciationProcess (const TypedDagNode<double>* root_age,
                                                       const DagNode *speciation,
                                                       const DagNode *extinction,
                                                       const DagNode *psi,
@@ -42,12 +42,13 @@ namespace RevBayesCore {
                                                       const TypedDagNode<RbVector<double> > *times,
                                                       const std::string &condition,
                                                       const std::vector<Taxon> &taxa,
-                                                      bool uo,
-                                                      bool pa,
-                                                      bool ex );  //!< Constructor
+                                                      bool use_origin,
+                                                      bool presence_absence,
+                                                      bool extended,
+                                                      Tree *initial_tree);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathSpeciationProcess*   clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
 
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
 
