@@ -1,0 +1,60 @@
+# --> Setup <--
+
+seed(12345)
+
+data = readDiscreteCharacterData("data/sim1.fasta")
+
+myTree <- readBranchLengthTrees("data/test2.tree")
+
+numCategories <- 2
+
+moves    = VectorMoves()
+
+monitors = VectorMonitors()
+
+# --> Model <--
+
+for ( i in 1:numCategories ) {
+
+    er <- v(1,1,1,1,1,1)
+
+    pi_prior[i] <- rep(1,4)
+
+    pi[i] ~ dnDirichlet(pi_prior[i])
+
+    moves.append(mvBetaSimplex(pi[i], weight=4.0))
+
+    moves.append(mvDirichletSimplex(pi[i], weight=2.0))
+
+    Q[i] := fnGTR(simplex(er),simplex(pi[i]))
+}
+
+mix_prior <- rep(1, numCategories) # set to high and low?
+
+mix ~ dnDirichlet(mix_prior) # was dnSortedDirichlet
+
+moves.append(mvBetaSimplex(mix, weight=4)) # was mvSortedBetaSimplex
+
+# number of categories - one pi for each
+
+pi_1 := pi[1]
+
+pi_2 := pi[2]
+
+# And then the dnPhyloCTMC is just defined using the list of Q matrices (Q) and their weights (mix):
+
+psi <- myTree[1]
+
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, type="DNA", siteMatrices=mix)
+
+seq.clamp(data)
+
+mymodel = model(psi)
+
+monitors.append( mnModel(filename="output/sitespecific.log",printgen=1, separator = TAB))
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+mymcmc.run(generations=100)
+
+q()
