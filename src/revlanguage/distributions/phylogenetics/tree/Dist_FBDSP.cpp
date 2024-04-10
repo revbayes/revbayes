@@ -84,6 +84,13 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDSP::createDistribution( void ) 
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
+    // tree for initialization
+    RevBayesCore::Tree* init = NULL;
+    if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
+    {
+        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+    }
+
     // speciation rate
     RevBayesCore::DagNode* l = lambda->getRevObject().getDagNode();
     // extinction rate
@@ -111,7 +118,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDSP::createDistribution( void ) 
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, c, r, rt, cond, t, uo, pa, ex);
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, c, r, rt, cond, t, uo, pa, ex, init);
 
     return d;
 }
@@ -220,7 +227,8 @@ const MemberRules& Dist_FBDSP::getParameterRules(void) const
         optionsCondition.push_back( "survival" );
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
+        dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+
         dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
@@ -293,6 +301,10 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "extended" )
     {
         extended = var;
+    }
+    else if ( name == "initialTree" )
+    {
+        initial_tree = var;
     }
     else
     {

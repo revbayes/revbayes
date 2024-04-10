@@ -52,6 +52,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               presence_absence;
         RevPtr<const RevVariable>                               extended;
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
+        RevPtr<const RevVariable>                               initial_tree;
 
     };
     

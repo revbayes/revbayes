@@ -16,11 +16,13 @@
 #include "AbstractBirthDeathProcess.h"
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "RbException.h"
+#include "StartingTreeSimulator.h"
 #include "StringUtilities.h"
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
@@ -75,8 +77,10 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     }
     else
     {
+        RbVector<Clade> constr;
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
-        RevBayesCore::Tree *my_tree = (new StartingTreeSimulator).simulateTree( taxa, new RbVector<Clade>() );
+        StartingTreeSimulator simulator;
+        RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
         // store the new value
         value = my_tree;
     }
