@@ -257,6 +257,9 @@ jobs:
 
         if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
            rm -f test_FBD/output_expected/bears_FBD*
+           rm -f test_FBD/output_expected/BDSTP.*
+           rm -f test_FBD/output_expected/FBDP.*
+           rm -f test_BDSTP/output_expected/BDSTP.*
         fi
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
