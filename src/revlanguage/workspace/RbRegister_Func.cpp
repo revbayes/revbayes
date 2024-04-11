@@ -147,6 +147,7 @@
 
 #include "Func_X2RateMatrix.h"
 
+#include "Func_certifyPolyhedron.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -586,8 +587,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
  		/* Statistics functions (in folder "functions/statistics") */
 
-    // helpers for Markov Random Field models
+        // helpers for Markov Random Field models
         addFunction( new Func_assembleContinuousMRF( )     );
+        
+        // function for checking the polyhedron volume
+        addFunction( new Func_certifyPolyhedron( ) );
 
 		// some helper statistics for the DPP distribution
         addFunction( new Func_dppConcFromMean( )     );

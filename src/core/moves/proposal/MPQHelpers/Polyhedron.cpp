@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <iostream>
 #include <map>
 
 #include "DistributionDirichlet.h"
@@ -167,6 +168,33 @@ void Polyhedron::calculateTetrahedronVolume(Vector* v1, Vector* v2, Vector* v3, 
     //vol /= 6;                  // this will be taken care of in the probability density with a Gamma factor of 3! = 6
     if (vol < 0)
         vol = -vol;
+}
+
+void Polyhedron::certify(void) {
+
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    
+    std::vector<double> alphaPi(4, 0.25);
+    std::vector<double> alphaR(6, 1.0);
+    
+    std::vector<double> r = RbStatistics::Dirichlet::rv(alphaR, *rng);
+    std::vector<double> pi = RbStatistics::Dirichlet::rv(alphaPi, *rng);
+    std::vector<mpq_class> wts(6);
+    mpq_class sum = 0;
+    for (int i=0, k=0; i<4; i++)
+        {
+        for (int j=i+1; j<4; j++)
+            {
+            wts[k] = (pi[i] * r[k] + pi[j] * r[k]) / 2.0;
+            sum += wts[k];
+            k++;
+            }
+        }
+    sum *= 2;
+    for (int i=0; i<6; i++)
+        wts[i] /= sum;
+    setWeights(wts);
+    std::cout << sumJacobians.get_d() << std::endl;
 }
 
 void Polyhedron::clearTetrahedraMap(void) {
