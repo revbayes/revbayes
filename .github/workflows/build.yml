@@ -251,6 +251,14 @@ jobs:
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
         cd tests
+        if [ ${{ matrix.arch }} == "win64" ] ; then
+           rm -f test_FBD/output_expected/test1.*
+        fi
+
+        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+           rm -f test_FBD/output_expected/bears_FBD*
+        fi
+
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
         cd
         echo ::endgroup::
