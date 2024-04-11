@@ -308,8 +308,8 @@ void CollapseExpandFossilBranchProposal::undoProposal( void )
         }
         else
         {
-            storedNode->setSampledAncestor( true );
             storedNode->getParent().setAge( storedAge );
+            storedNode->setSampledAncestor( true );
         }
     }
     
