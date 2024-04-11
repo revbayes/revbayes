@@ -598,7 +598,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
         // is child a new species?
         // set start time at this node
-        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestor() ) )
+        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestorTip() ) )
         {
             double age = node.getAge(); // y_{a(i)}
 

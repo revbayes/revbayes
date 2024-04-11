@@ -494,7 +494,7 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
     }
 
     // set the node flags
-    tn.setSampledAncestor( n.isSampledAncestor() );
+    tn.setSampledAncestor( n.isSampledAncestorTip() );
 
     // remember the node
     nodes.push_back( &tn );

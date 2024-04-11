@@ -576,7 +576,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 
       double t = n.getAge();
 
-      if ( n.isTip() && n.isFossil() && n.isSampledAncestor() )
+      if ( n.isTip() && n.isFossil() && n.isSampledAncestorTip() )
       {
         // node is sampled ancestor
           int at_event = whichIntervalTime(t);
@@ -591,7 +591,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               event_sampled_ancestor_ages[at_event].push_back(t);
           }
       }
-      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestor() )
+      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestorTip() )
       {
           // node is serial leaf
           int at_event = whichIntervalTime(t);
@@ -620,7 +620,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               serial_tip_ages.push_back(0.0);
           }
       }
-      else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
       {
           if ( n.isRoot() == false || use_origin == true )
           {
@@ -638,7 +638,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               }
           }
       }
-      else if ( n.isInternal() && n.getChild(0).isSampledAncestor() && n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && n.getChild(0).isSampledAncestorTip() && n.getChild(1).isSampledAncestorTip() )
       {
           return true;
       }

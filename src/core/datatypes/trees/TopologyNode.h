@@ -147,7 +147,7 @@ namespace RevBayesCore {
         bool                                        isFossil(void) const;                                                               //!< Is node a fossil?
         bool                                        isInternal(void) const;                                                             //!< Is node internal?
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
-        bool                                        isSampledAncestor() const;                                                          //!< Is node a tip sampled ancestor?
+        bool                                        isSampledAncestorTip() const;                                                       //!< Is node a tip sampled ancestor?
         bool                                        isSampledAncestorParent() const;                                                    //!< Is child node a tip a sampled ancestor?
         bool                                        isSampledAncestorTipOrParent() const;                                               //!< Is node or child node a tip a sampled ancestor?
         bool                                        isSampledAncestorKnuckle() const;                                                   //!< Does this one have only one child?
@@ -204,7 +204,7 @@ namespace RevBayesCore {
         Taxon                                       taxon;                                                                              //!< Taxon of the node, i.e. identifier/taxon name, plus species it comes from
 
         boost::optional<size_t>                     index;                                                                              //!< Node index
-        bool                                        sampled_ancestor = false;
+        bool                                        sampled_ancestor_tip = false;
 
         // information for newick representation
         std::vector<std::string>                    node_comments;

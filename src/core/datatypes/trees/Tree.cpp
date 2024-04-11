@@ -478,7 +478,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
         rv = 0;
         for (size_t i=0; i< num_tips; i++)
         {
-            rv += nodes[i]->isSampledAncestor();
+            rv += nodes[i]->isSampledAncestorTip();
         }
     }
     else if (n == "colless")
@@ -861,7 +861,7 @@ size_t Tree::getNumberOfSampledAncestors( void ) const
     size_t num_sa = 0;
     for (size_t i = 0; i < num_tips; i++)
     {
-        num_sa += nodes[i]->isSampledAncestor();
+        num_sa += nodes[i]->isSampledAncestorTip();
     }
 
     return num_sa;
@@ -1561,7 +1561,7 @@ void Tree::collapseSampledAncestors()
 {
     for(auto& node: nodes)
     {
-        if (node->isSampledAncestor())
+        if (node->isSampledAncestorTip())
         {
             node->getParent().setTaxon(node->getTaxon());
             node->getParent().removeChild(node);

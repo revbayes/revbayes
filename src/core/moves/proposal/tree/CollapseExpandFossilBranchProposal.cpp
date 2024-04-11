@@ -124,7 +124,7 @@ double CollapseExpandFossilBranchProposal::doProposal( void )
     storedNode = fossils[ size_t(u*fossils.size()) ];
     
     double hr = 0;
-    if ( storedNode->isSampledAncestor() == true )
+    if ( storedNode->isSampledAncestorTip() == true )
     {
         hr += expandBranch( *storedNode );
     }
@@ -301,7 +301,7 @@ void CollapseExpandFossilBranchProposal::undoProposal( void )
     // undo the proposal (only if succeeded)
     if ( failed == false)
     {
-        if ( storedNode->isSampledAncestor() == true )
+        if ( storedNode->isSampledAncestorTip() == true )
         {
             storedNode->setSampledAncestor( false );
             storedNode->getParent().setAge( storedAge );

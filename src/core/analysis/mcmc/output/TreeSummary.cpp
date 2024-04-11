@@ -836,7 +836,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
             if ( clock == true )
             {
-                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestor() ) )
+                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestorTip() ) )
                 {
                     std::string label = "age_" + StringUtilities::toString( (int)(report.node_ages_HPD * 100) ) + "%_HPD";
                     n->addNodeParameter(label, interval);
@@ -889,7 +889,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
     {
         n.getTaxa(taxa);
 
-        if ( rooted && n.isSampledAncestor() )
+        if ( rooted && n.isSampledAncestorTip() )
         {
             sampled_ancestor_counts[n.getTaxon()]++;
 
@@ -904,7 +904,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
             child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
 
-            if ( rooted && child_node.isSampledAncestor() )
+            if ( rooted && child_node.isSampledAncestorTip() )
             {
                 mrca.insert(child_node.getTaxon());
             }
