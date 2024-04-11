@@ -119,7 +119,7 @@ double AddRemoveTipProposal::doProposal( void )
             if ( ( extinct == true && node->isFossil() == true && node->isSampledAncestor() == sampled_ancestors ) ||
                 (  extant == true && node->isFossil() == false ) )
             {
-                if( ( node->isSampledAncestor() == false && node->getParent().isSampledAncestor(true) == true ) == false )
+                if( ( node->isSampledAncestor() == false && node->getParent().isSampledAncestorTipOrParent() == true ) == false )
                     tips.push_back(node);
             }
         }

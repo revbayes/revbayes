@@ -322,7 +322,7 @@ std::vector<size_t> IndependentTopologyProposal::recursivelyRank( const Topology
         ln_num_rankings += RbMath::lnChoose(ranking.size(), child_ranking.size());
     }
 
-    if( n.isSampledAncestor(true) == false )
+    if( n.isSampledAncestorTipOrParent() == false )
     {
         // put the current node at the highest rank
         ranking.push_back( n.getIndex() );

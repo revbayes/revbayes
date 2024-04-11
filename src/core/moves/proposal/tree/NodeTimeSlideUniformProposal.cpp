@@ -120,7 +120,7 @@ double NodeTimeSlideUniformProposal::doProposal( void )
         node = &tau.getNode(index);
         i++;
         if (i> 100) throw RbException(RbException::SKIP_PROPOSAL);
-    } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestorTipOrParent() );
     
     TopologyNode& parent = node->getParent();
     

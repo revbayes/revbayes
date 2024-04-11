@@ -1592,21 +1592,46 @@ bool TopologyNode::isRoot( void ) const
 }
 
 
-bool TopologyNode::isSampledAncestor(  bool propagate ) const
+bool TopologyNode::isSampledAncestor() const
 {
     // Only tips can have the sampled_ancestor flag set.
     assert(not sampled_ancestor or isTip());
 
-    bool sa = sampled_ancestor;
-    if( propagate == true )
-    {
-        for(size_t i = 0; i < children.size(); i++)
-        {
-            sa = sa || children[i]->isSampledAncestor(false);
-        }
-    }
+    return sampled_ancestor;
+}
 
-    return sa;
+
+bool TopologyNode::isSampledAncestorParent() const
+{
+    // Only tips can have the sampled_ancestor flag set.
+    assert(not sampled_ancestor or isTip());
+
+    for(auto child: children)
+	if (child->isSampledAncestor())
+	    return true;
+
+    return false;
+}
+
+
+bool TopologyNode::isSampledAncestorTipOrParent() const
+{
+    return isSampledAncestor() or isSampledAncestorParent();
+}
+
+
+// This function exists partly to distinguish "real" sampled ancestors
+// from the parent/tip "fake" sampled ancestors.
+bool TopologyNode::isSampledAncestorKnuckle() const
+{
+    // Only tips can have the sampled_ancestor flag set.
+    assert(not sampled_ancestor or isTip());
+
+    // This function intentionally does NOT query the sampled_ancestor flag.
+    // One question is whether we should require there to be a Taxon present here to be
+    //   considered a sampled ancestor.
+    
+    return getNumberOfChildren() == 1;
 }
 
 

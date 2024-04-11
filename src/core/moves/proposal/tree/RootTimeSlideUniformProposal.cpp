@@ -118,7 +118,7 @@ double RootTimeSlideUniformProposal::doProposal( void )
     double my_new_age = (origin->getValue() - child_Age) * rng->uniform01() + child_Age;
     
     // set the age
-    if (not root->isSampledAncestor(true))
+    if (not root->isSampledAncestorTipOrParent())
 	root->setAge( my_new_age );
     
     return 0.0;

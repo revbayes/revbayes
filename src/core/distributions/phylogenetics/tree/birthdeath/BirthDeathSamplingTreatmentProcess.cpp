@@ -318,7 +318,7 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
     // if conditioning on root, root node must be a "true" bifurcation event
     else
     {
-        if ( root->isSampledAncestor(true) )
+        if ( root->isSampledAncestorTipOrParent() )
         {
             return RbConstants::Double::neginf;
         }

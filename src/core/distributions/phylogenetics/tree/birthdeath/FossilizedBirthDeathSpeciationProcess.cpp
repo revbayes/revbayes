@@ -570,7 +570,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
     std::vector<TopologyNode* > children = node.getChildren();
 
-    bool sa = node.isSampledAncestor(true);
+    bool sa = node.isSampledAncestorTipOrParent();
 
     for(int c = 0; c < children.size(); c++)
     {
