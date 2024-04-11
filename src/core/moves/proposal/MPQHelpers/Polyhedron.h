@@ -151,6 +151,7 @@ namespace RevBayesCore {
     public:
                             Polyhedron(void);
                             Polyhedron(const Polyhedron& p) = delete;
+        void                certify(void);
         void                setAlphaT(double x) { alphaT = x; }
         double              lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt);
         double              lnProbabilityReverse(std::vector<mpq_class>& W, Vector& pt);
