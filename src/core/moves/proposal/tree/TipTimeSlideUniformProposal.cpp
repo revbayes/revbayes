@@ -135,7 +135,7 @@ double TipTimeSlideUniformProposal::doProposal( void )
     double min_age = 0.0;
 
     // adjust min and max age if sampled ancestor
-    if (node->isSampledAncestor())
+    if (node->isSampledAncestorTip())
     {
         TopologyNode *sibling = &parent.getChild( 0 );
         if ( sibling == node )

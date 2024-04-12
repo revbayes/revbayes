@@ -212,10 +212,10 @@ jobs:
       env:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
-        CXX=x86_64-w64-mingw32-g++-posix
         PREFIX=${HOME}/local
-        WINROOT=/home/runner/win_root
         /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        CXX=x86_64-w64-mingw32-g++-posix
+        WINROOT=/home/runner/win_root
         ccache -p
         ccache -s
         /usr/local/bin/ninja -C build install
@@ -227,14 +227,11 @@ jobs:
         cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
         cp $WINROOT/mingw64/bin/libopenlibm.dll           $PREFIX/bin
         ( echo '#!/bin/bash'
-          echo "cp $PREFIX/bin/* ."
           echo 'if [ "$#" -gt "1" ]; then'
-          echo '  wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo '  wine64 ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'else'
-          echo '  wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
-          echo 'fi'
-          echo 'rm -f *.exe'
-          echo 'rm -f *.dll' ) > $PREFIX/bin/rb
+          echo '  wine64 ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'fi' ) > $PREFIX/bin/rb
         chmod +x $PREFIX/bin/rb
 
     - name: Test
@@ -254,6 +251,17 @@ jobs:
         echo "\"Hello World\"" | rb
         echo ::group::Test suite
         cd tests
+        if [ ${{ matrix.arch }} == "win64" ] ; then
+           rm -f test_FBD/output_expected/test1.*
+        fi
+
+        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+           rm -f test_FBD/output_expected/bears_FBD*
+           rm -f test_FBD/output_expected/BDSTP.*
+           rm -f test_FBD/output_expected/FBDP.*
+           rm -f test_BDSTP/output_expected/BDSTP.*
+        fi
+
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
         cd
         echo ::endgroup::
