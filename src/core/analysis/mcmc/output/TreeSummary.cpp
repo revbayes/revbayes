@@ -836,7 +836,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
             if ( clock == true )
             {
-                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestor() ) )
+                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestorTip() ) )
                 {
                     std::string label = "age_" + StringUtilities::toString( (int)(report.node_ages_HPD * 100) ) + "%_HPD";
                     n->addNodeParameter(label, interval);
@@ -889,7 +889,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
     {
         n.getTaxa(taxa);
 
-        if ( rooted && n.isSampledAncestor() )
+        if ( rooted && n.isSampledAncestorTip() )
         {
             sampled_ancestor_counts[n.getTaxon()]++;
 
@@ -904,7 +904,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
             child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
 
-            if ( rooted && child_node.isSampledAncestor() )
+            if ( rooted && child_node.isSampledAncestorTip() )
             {
                 mrca.insert(child_node.getTaxon());
             }
@@ -956,6 +956,7 @@ MatrixReal TreeSummary::computeConnectivity(double credible_interval_size, const
         sample_count.push_back( freq );
 
         Tree* current_tree = converter.convertFromNewick( newick );
+        current_tree->makeInternalNodesBifurcating(true, true);
         unique_trees.push_back( current_tree );
         
 //        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1051,6 +1052,7 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
         sample_count.push_back( freq );
 
         Tree* current_tree = converter.convertFromNewick( newick );
+        current_tree->makeInternalNodesBifurcating(true, true);
         unique_trees.push_back( current_tree );
         
         std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1301,6 +1303,7 @@ std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bo
         total_prob += p;
 
         Tree* current_tree = converter.convertFromNewick( newick );
+        current_tree->makeInternalNodesBifurcating(true, true);
         unique_trees.push_back( *current_tree );
         delete current_tree;
         if ( total_prob >= credible_interval_size )
@@ -1548,6 +1551,7 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
     std::string bestNewick = tree_samples.rbegin()->first;
     NewickConverter converter;
     Tree* tmp_best_tree = converter.convertFromNewick( bestNewick );
+    tmp_best_tree->makeInternalNodesBifurcating(true,true);
 
     Tree* tmp_tree = NULL;
 
@@ -1600,6 +1604,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
 
             NewickConverter converter;
             Tree* tmp_tree = converter.convertFromNewick( newick );
+            tmp_tree->makeInternalNodesBifurcating(true, true);
             if ( clock == true )
             {
                 best_tree = TreeUtilities::convertTree( *tmp_tree );
