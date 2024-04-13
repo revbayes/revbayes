@@ -49,12 +49,12 @@ template <class valueType> class TypedDagNode;
         void                                        initialize(void);
         
         // members
-        const TypedDagNode<Tree>*                   tree;
+        const TypedDagNode<Tree>*                   tree = nullptr;
         Clade                                       clade;
-        bool                                        initialized;
-        bool                                        stem_age;
-        int                                         index;
-        size_t                                      taxa_count;
+        bool                                        initialized = false;
+        bool                                        stem_age = false;
+        int                                         index = -1;
+        size_t                                      taxa_count = -1;
     };
     
 }

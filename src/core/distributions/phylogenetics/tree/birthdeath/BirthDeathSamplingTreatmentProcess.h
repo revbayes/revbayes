@@ -93,30 +93,30 @@ namespace RevBayesCore {
         int                                             whichIntervalTime(double t) const;                                      //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
 
         // members
-        bool                                            using_global_timeline;
+        bool                                            using_global_timeline = false;
 
-        const TypedDagNode<double >*                    homogeneous_lambda;                                    //!< The homogeneous birth rates.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_lambda;                                  //!< The heterogeneous birth rates.
-        const TypedDagNode<double >*                    homogeneous_mu;                                        //!< The homogeneous death rates.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_mu;                                      //!< The heterogeneous death rates.
-        const TypedDagNode<double >*                    homogeneous_r;                                         //!< The homogeneous conditional probability of death upon treatment.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_r;                                       //!< The heterogeneous conditional probability of death upon treatment.
-        const TypedDagNode<double >*                    homogeneous_phi;                                       //!< The homogeneous sampling rates.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_phi;                                     //!< The heterogeneous sampling rates.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_Lambda;                                  //!< The heterogeneous birth burst rates.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_Mu;                                      //!< The heterogeneous death burst (mass extinction) probabilities.
-        const TypedDagNode<double >*                    homogeneous_Phi;                                       //!< The probability of sampling a tip at the present.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_Phi;                                     //!< The probability of sampling individuals at set time intervals.
-        const TypedDagNode<RbVector<double> >*          heterogeneous_R;                                       //!< The heterogeneous conditional probability of death upon treatment.
+        const TypedDagNode<double >*                    homogeneous_lambda = nullptr;                          //!< The homogeneous birth rates.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_lambda = nullptr;                        //!< The heterogeneous birth rates.
+        const TypedDagNode<double >*                    homogeneous_mu = nullptr;                              //!< The homogeneous death rates.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_mu = nullptr;                            //!< The heterogeneous death rates.
+        const TypedDagNode<double >*                    homogeneous_r = nullptr;                               //!< The homogeneous conditional probability of death upon treatment.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_r = nullptr;                             //!< The heterogeneous conditional probability of death upon treatment.
+        const TypedDagNode<double >*                    homogeneous_phi = nullptr;                             //!< The homogeneous sampling rates.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_phi = nullptr;                           //!< The heterogeneous sampling rates.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_Lambda = nullptr;                        //!< The heterogeneous birth burst rates.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_Mu = nullptr;                            //!< The heterogeneous death burst (mass extinction) probabilities.
+        const TypedDagNode<double >*                    homogeneous_Phi = nullptr;                             //!< The probability of sampling a tip at the present.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_Phi = nullptr;                           //!< The probability of sampling individuals at set time intervals.
+        const TypedDagNode<RbVector<double> >*          heterogeneous_R = nullptr;                             //!< The heterogeneous conditional probability of death upon treatment.
 
-        const TypedDagNode<RbVector<double> >*          interval_times_global;                                 //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_speciation;                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_extinction;                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_sampling;                               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_treatment;                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_event_speciation;                       //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_event_extinction;                       //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        const TypedDagNode<RbVector<double> >*          interval_times_event_sampling;                         //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_global = nullptr;                       //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_speciation = nullptr;                   //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_extinction = nullptr;                   //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_sampling = nullptr;                     //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_treatment = nullptr;                    //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_event_speciation = nullptr;             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_event_extinction = nullptr;             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        const TypedDagNode<RbVector<double> >*          interval_times_event_sampling = nullptr;               //!< The user-specified non-zero times of the instantaneous events and rate shifts.
 
         mutable std::vector<double>                     lambda_times;                                          //!< The user-specified non-zero times of the instantaneous events and rate shifts.
         mutable std::vector<double>                     mu_times;                                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
@@ -134,8 +134,8 @@ namespace RevBayesCore {
         mutable std::vector<double>                     serial_bifurcation_times;                              //!< The ages of all bifurcation events in the tree NOT at a burst event
         mutable std::vector<std::vector<double> >       event_bifurcation_times;                               //!< The ages of all bifurcation events in the tree at burst events
 
-        mutable double                                  offset;                                                //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
-        int                                             num_extant_taxa;
+        mutable double                                  offset = 0.0;                                          //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
+        int                                             num_extant_taxa = -1;
 
         mutable std::vector<double>                     lambda;
         mutable std::vector<double>                     mu;

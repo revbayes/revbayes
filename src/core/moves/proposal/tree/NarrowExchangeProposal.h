@@ -52,14 +52,14 @@ template <class variableType> class StochasticNode;
     private:
         
         // parameters
-        StochasticNode<Tree>*                   variable;                                                       //!< The variable the proposal is working on
-        StochasticNode< RbVector<Tree> >*       vector_variable;                                                //!< The alternative variable the proposal is working on
+        StochasticNode<Tree>*                   variable = nullptr;                                             //!< The variable the proposal is working on
+        StochasticNode< RbVector<Tree> >*       vector_variable = nullptr;                                      //!< The alternative variable the proposal is working on
 
         // stored objects to undo proposal
-        bool                                    failed;
-        size_t                                  tree_index;
-        TopologyNode*                           storedChosenNode;
-        TopologyNode*                           storedUncle;
+        bool                                    failed = false;
+        size_t                                  tree_index = -1;
+        TopologyNode*                           storedChosenNode = nullptr;
+        TopologyNode*                           storedUncle = nullptr;
     };
     
 }

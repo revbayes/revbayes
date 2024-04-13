@@ -49,13 +49,13 @@ template <class variableType> class StochasticNode;
         bool                                    isDescendant(const TopologyNode &n, const TopologyNode &p);
 
         // parameters
-        StochasticNode<Tree>*                   tree;                                                   //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                   tree = nullptr;                                             //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
-        bool                                    failed;
-        TopologyNode*                           storedChoosenNode;
-        TopologyNode*                           storedBrother;
-        bool                                    prunedroot;
+        bool                                    failed = false;
+        TopologyNode*                           storedChoosenNode = nullptr;
+        TopologyNode*                           storedBrother = nullptr;
+        bool                                    prunedroot = false;
     };
     
 }

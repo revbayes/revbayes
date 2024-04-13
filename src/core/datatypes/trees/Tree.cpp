@@ -297,9 +297,9 @@ void Tree::dropTipNode( size_t index )
         return;
     }
     TopologyNode &parent        = node.getParent();
-    TopologyNode &grand_parent  = parent.getParent();
     if (parent.isRoot() == false)
     {
+	TopologyNode &grand_parent  = parent.getParent();
         TopologyNode *sibling = &parent.getChild( 0 );
         if ( sibling == &node )
         {

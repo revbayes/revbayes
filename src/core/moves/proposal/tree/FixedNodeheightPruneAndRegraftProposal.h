@@ -55,18 +55,18 @@ namespace RevBayesCore {
         void                                    findNewBrothers(std::vector<TopologyNode*> &b, TopologyNode &p, TopologyNode *n);
 
         // parameters
-        StochasticNode<Tree>*                   variable;                                                           //!< The variable the Proposal is working on
-        StochasticNode< RbVector<Tree> >*       vector_variable;                                                    //!< The alternative variable the proposal is working on
+        StochasticNode<Tree>*                   variable = nullptr;                                                 //!< The variable the Proposal is working on
+        StochasticNode< RbVector<Tree> >*       vector_variable = nullptr;                                          //!< The alternative variable the proposal is working on
 
         // stored objects to undo proposal
-        bool                                    failed;
-        size_t                                  tree_index;
-        TopologyNode*                           storedBrother;
-        TopologyNode*                           storedNewBrother;
+        bool                                    failed = false;
+        size_t                                  tree_index = -1;
+        TopologyNode*                           storedBrother = nullptr;
+        TopologyNode*                           storedNewBrother = nullptr;
 
-        size_t                                  storedBrotherPos;
-        size_t                                  storedNewBrotherPos;
-        size_t                                  storedParentPos;
+        size_t                                  storedBrotherPos = -1;
+        size_t                                  storedNewBrotherPos = -1;
+        size_t                                  storedParentPos = -1;
     };
     
 }

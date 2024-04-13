@@ -47,14 +47,14 @@ template <class variableType> class StochasticNode;
     private:
         
         // member variables
-        StochasticNode<Tree>*                               tree;
+        StochasticNode<Tree>*                               tree = nullptr;
         
         // stored objects to undo proposal
-        TopologyNode*                                       stored_node_A;
-        TopologyNode*                                       stored_node_B;
-        bool                                                picked_root_branch;
-        bool                                                picked_uncle;
-        bool                                                failed;
+        TopologyNode*                                       stored_node_A = nullptr;
+        TopologyNode*                                       stored_node_B = nullptr;
+        bool                                                picked_root_branch = false;
+        bool                                                picked_uncle = false;
+        bool                                                failed = false;
         
     };
     

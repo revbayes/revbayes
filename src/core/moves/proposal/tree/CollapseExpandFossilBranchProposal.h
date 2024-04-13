@@ -49,13 +49,13 @@ namespace RevBayesCore {
     private:
         
         // parameters
-        StochasticNode<Tree>*                   tau;                                                        //!< The variable the Proposal is working on
-        TypedDagNode<double>*                   origin;                                                     //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                   tau = nullptr;                                              //!< The variable the Proposal is working on
+        TypedDagNode<double>*                   origin = nullptr;                                           //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
-        TopologyNode*                           storedNode;
-        double                                  storedAge;
-        bool                                    failed;
+        TopologyNode*                           storedNode = nullptr;
+        double                                  storedAge = -1;
+        bool                                    failed = false;
     
     };
     

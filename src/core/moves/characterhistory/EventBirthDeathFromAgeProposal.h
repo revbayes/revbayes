@@ -47,13 +47,13 @@ namespace RevBayesCore {
     private:
         // parameters
         
-        StochasticNode<Tree>*                   variable;                                                                           //!< The variable the Proposal is working on
-        AbstractCharacterHistoryBirthDeathProcess* distribution;
+        StochasticNode<Tree>*                   variable = nullptr;                                                                 //!< The variable the Proposal is working on
+        AbstractCharacterHistoryBirthDeathProcess* distribution = nullptr;
         
-        CharacterEvent*                         stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
-        size_t                                  stored_branch_index;
-        bool                                    was_birth_proposal;                                                                              //!< The value we propose.
-        bool                                    by_height;
+        CharacterEvent*                         stored_value = nullptr;                                                             //!< The stored value of the Proposal used for rejections.
+        size_t                                  stored_branch_index = -1;
+        bool                                    was_birth_proposal = false;                                                         //!< The value we propose.
+        bool                                    by_height = false;
     };
     
 }

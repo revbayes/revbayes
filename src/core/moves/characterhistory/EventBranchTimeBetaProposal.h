@@ -44,15 +44,15 @@ namespace RevBayesCore {
     private:
         // parameters
         
-        StochasticNode<Tree>*                           variable;                                                                           //!< The variable the Proposal is working on
-        AbstractCharacterHistoryBirthDeathProcess*      distribution;
-        double                                          delta;
-        double                                          offset;
+        StochasticNode<Tree>*                           variable = nullptr;                                                                 //!< The variable the Proposal is working on
+        AbstractCharacterHistoryBirthDeathProcess*      distribution = nullptr;
+        double                                          delta = -1;
+        double                                          offset = -1;
 
-        CharacterEvent*                                 stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
-        double                                          stored_age;                                                                              //!< The value we propose.
-        size_t                                          stored_branch_index;                                                                              //!< The value we propose.
-        bool                                            failed;
+        CharacterEvent*                                 stored_value = nullptr;                                                             //!< The stored value of the Proposal used for rejections.
+        double                                          stored_age = -1;                                                                    //!< The value we propose.
+        size_t                                          stored_branch_index = -1;                                                           //!< The value we propose.
+        bool                                            failed = false;
     };
     
 }

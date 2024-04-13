@@ -50,12 +50,12 @@ template <class variableType> class StochasticNode;
     private:
         
         // parameters
-        StochasticNode<Tree>*                   variable;                                                   //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                   variable = nullptr;                                         //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
-        bool                                    failed;
-        TopologyNode*                           storedChosenNode;
-        TopologyNode*                           storedUncle;
+        bool                                    failed = false;
+        TopologyNode*                           storedChosenNode = nullptr;
+        TopologyNode*                           storedUncle = nullptr;
         std::vector<double>                     storedAges;
     
     };

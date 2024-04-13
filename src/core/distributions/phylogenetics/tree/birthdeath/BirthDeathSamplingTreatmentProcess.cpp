@@ -75,23 +75,6 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     interval_times_event_sampling(event_sampling_timeline),
     offset( 0.0 )
 {
-    // initialize all the pointers to NULL
-    homogeneous_lambda   = NULL;
-    homogeneous_mu       = NULL;
-    homogeneous_phi      = NULL;
-    homogeneous_r        = NULL;
-    // homogeneous_Lambda   = NULL;
-    // homogeneous_Mu       = NULL;
-    homogeneous_Phi      = NULL;
-    heterogeneous_lambda = NULL;
-    heterogeneous_mu     = NULL;
-    heterogeneous_phi    = NULL;
-    heterogeneous_r      = NULL;
-    heterogeneous_Lambda = NULL;
-    heterogeneous_Mu     = NULL;
-    heterogeneous_Phi    = NULL;
-    heterogeneous_R      = NULL;
-
     //@TODO @SEBASTIAN: sometime we might want to allow "homogeneous" aka scalar Mu/Lambda
 
     // We use a global timeline if

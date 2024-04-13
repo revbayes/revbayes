@@ -43,15 +43,15 @@ namespace RevBayesCore {
     private:
         // parameters
         
-        StochasticNode<Tree>*                           variable;                                                                           //!< The variable the Proposal is working on
-        ConditionedBirthDeathShiftProcessContinuous*    distribution;
+        StochasticNode<Tree>*                           variable = nullptr;                                                                 //!< The variable the Proposal is working on
+        ConditionedBirthDeathShiftProcessContinuous*    distribution = nullptr;
 
-        double                                          lambda;
+        double                                          lambda = -1;
         
-        CharacterEventContinuous*                       stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
-        double                                          stored_rate;                                                                              //!< The value we propose.
-        size_t                                          stored_index;                                                                              //!< The value we propose.
-        bool                                            failed;
+        CharacterEventContinuous*                       stored_value = nullptr;                                                              //!< The stored value of the Proposal used for rejections.
+        double                                          stored_rate = -1;                                                                    //!< The value we propose.
+        size_t                                          stored_index = -1;                                                                   //!< The value we propose.
+        bool                                            failed = false;
 
 };
     
