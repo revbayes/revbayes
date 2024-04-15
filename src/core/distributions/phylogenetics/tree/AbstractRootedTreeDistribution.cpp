@@ -186,7 +186,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
         {
             if( the_node.isTip() )
             {
-                if ( the_node.isSampledAncestor() == true )
+                if ( the_node.isSampledAncestorTip() == true )
                 {
                     if ( the_node.getAge() - the_node.getParent().getAge() != 0 )
                     {
@@ -375,7 +375,7 @@ std::vector<double> AbstractRootedTreeDistribution::getAgesOfTipsFromMostRecentS
     {
         
         const TopologyNode& n = *(nodes[i]);
-        if ( n.isTip() == true && n.isSampledAncestor() == false )
+        if ( n.isTip() == true && n.isSampledAncestorTip() == false )
         {
             double t = n.getAge() - minTipAge;
             ages.push_back(t);
