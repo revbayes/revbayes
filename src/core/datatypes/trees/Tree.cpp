@@ -1665,8 +1665,14 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
         }
 
         root = retained_children.back();
-        root->addChild(retained_children.front());
-        retained_children.front()->setParent(root);
+        if(root->isTip()) { // cannot use tip as the new root, so pick the other one
+            root = retained_children.front();
+            root->addChild(retained_children.back());
+            retained_children.back()->setParent(root);
+        } else { // otherwise, proceed normally
+            root->addChild(retained_children.front());
+            retained_children.front()->setParent(root);
+        }
     }
     // if there are still at least 2 retained children, then return
     else if( children.size() - pruned_children.size() < 2 )
