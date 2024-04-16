@@ -120,7 +120,7 @@ double FossilTipTimeUniformProposal::doProposal( void )
     // set the max age either to the boundary or the parent max age
     max_age = fmin(max_age, parent_age);
 
-    if ( node->isSampledAncestor() == true )
+    if ( node->isSampledAncestorTip() == true )
     {
         TopologyNode *sibling = &parent.getChild( 0 );
         if ( sibling == node )
