@@ -21,3 +21,5 @@ for ( i in 1:num_trees ) {
     
     write( i, TAB, tmp[i], "\n", sep="", append=(i>1), file="output/new_pruned.trees" )
 }
+
+q()
