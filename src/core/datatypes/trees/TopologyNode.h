@@ -147,8 +147,10 @@ namespace RevBayesCore {
         bool                                        isFossil(void) const;                                                               //!< Is node a fossil?
         bool                                        isInternal(void) const;                                                             //!< Is node internal?
         bool                                        isRoot(void) const;                                                                 //!< Is node root?
-        bool                                        isSampledAncestor(bool propagate=false) const;                                      //!< Is node (or a child node) a sampled ancestor?
-        bool                                        isTipSampledAncestor() const;                                                       //!< Is node (or a child node) a sampled ancestor?
+        bool                                        isSampledAncestorTip() const;                                                       //!< Is node a tip sampled ancestor?
+        bool                                        isSampledAncestorParent() const;                                                    //!< Is child node a tip a sampled ancestor?
+        bool                                        isSampledAncestorTipOrParent() const;                                               //!< Is node or child node a tip a sampled ancestor?
+        bool                                        isSampledAncestorKnuckle() const;                                                   //!< Does this one have only one child?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
         void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
@@ -202,7 +204,7 @@ namespace RevBayesCore {
         Taxon                                       taxon;                                                                              //!< Taxon of the node, i.e. identifier/taxon name, plus species it comes from
 
         boost::optional<size_t>                     index;                                                                              //!< Node index
-        bool                                        sampled_ancestor = false;
+        bool                                        sampled_ancestor_tip = false;
 
         // information for newick representation
         std::vector<std::string>                    node_comments;

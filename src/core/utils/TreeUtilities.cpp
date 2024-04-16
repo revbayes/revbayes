@@ -494,7 +494,7 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
     }
 
     // set the node flags
-    tn.setSampledAncestor( n.isSampledAncestor() );
+    tn.setSampledAncestor( n.isSampledAncestorTip() );
 
     // remember the node
     nodes.push_back( &tn );
@@ -521,13 +521,8 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
         constructTimeTreeRecursively(*new_child, child, nodes, ages, a);
     }
 
-    // Mark knuckles as sampled ancestors
-    if ( tn.getNumberOfChildren() == 1 )
-    {
-        tn.setSampledAncestor( true );
-    }
-    // Mark nodes on a 0-length branch as sampled ancestors, and also their parents.
-    else if ( tn.getNumberOfChildren() == 2)
+    // Mark tip nodes on a 0-length branch as sampled ancestors
+    if ( tn.getNumberOfChildren() == 2)
     {
         // The time-tree doesn't have any branch lengths or ages yet, so we have to look
         // at the branch-length tree that we are copying from.
