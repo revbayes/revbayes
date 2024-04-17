@@ -734,9 +734,12 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
         {
             for (size_t k = j + 1; k != taxa.size(); ++k)
             {
-                sumMatrix[matInd][matInd] += matvect[mat].getMatrix()[j][k] * (*weights)[mat]; // by symmetry
-                divisorMatrix[matInd][matInd] += (*weights)[mat];                              // by symmetry
-                mask[matInd][matInd] = true;                                              // by symmetry
+                sumMatrix[ matInd[j] ][ matInd[k] ] += matvect[mat].getMatrix()[j][k] * (*weights)[mat];
+                sumMatrix[ matInd[k] ][ matInd[j] ] += matvect[mat].getMatrix()[j][k] * (*weights)[mat]; // by symmetry
+                divisorMatrix[ matInd[j] ][ matInd[k] ] += (*weights)[mat];
+                divisorMatrix[ matInd[k] ][ matInd[j] ] += (*weights)[mat];                              // by symmetry
+                mask[ matInd[j] ][ matInd[k] ] = true;
+                mask[ matInd[k] ][ matInd[j] ] = true;                                                   // by symmetry
             }
         }
     }
