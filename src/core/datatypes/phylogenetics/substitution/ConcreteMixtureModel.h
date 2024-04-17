@@ -9,9 +9,9 @@ namespace RevBayesCore {
 
     class Tree;
 
-    struct ConcreteMixtureModel: public SubstitutionMixtureModel
+    struct ConcreteMixtureModel: public SiteMixtureModel
     {
-        std::vector<std::unique_ptr<SubstitutionMixtureModel>> sub_models;
+        std::vector<std::unique_ptr<SiteMixtureModel>> sub_models;
         std::vector<double> fractions;
 
         ConcreteMixtureModel* clone() const;
@@ -29,11 +29,11 @@ namespace RevBayesCore {
         ConcreteMixtureModel& operator=(const ConcreteMixtureModel&);
         ConcreteMixtureModel(const ConcreteMixtureModel&);
 
-        ConcreteMixtureModel(const std::vector<std::unique_ptr<SubstitutionMixtureModel>>& m, const std::vector<double>& fs);
+        ConcreteMixtureModel(const std::vector<std::unique_ptr<SiteMixtureModel>>& m, const std::vector<double>& fs);
     };
 
 
-    ConcreteMixtureModel* scaled_mixture(const SubstitutionMixtureModel& sub_model, const std::vector<double>& fs, const std::vector<double>& rs);
+    ConcreteMixtureModel* scaled_mixture(const SiteMixtureModel& sub_model, const std::vector<double>& fs, const std::vector<double>& rs);
 }
 
 #endif

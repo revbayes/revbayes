@@ -84,7 +84,7 @@ optional<double> UnitMixtureModel::rate() const
 // assignment operator / copy constructor
 UnitMixtureModel& UnitMixtureModel::operator=(const UnitMixtureModel& m)
 {
-    SubstitutionMixtureModel::operator=(m);
+    SiteMixtureModel::operator=(m);
     generator = unique_ptr<RateGenerator>(m.generator->clone());
     frequencies = m.frequencies;
     _scale = m._scale;
@@ -92,7 +92,7 @@ UnitMixtureModel& UnitMixtureModel::operator=(const UnitMixtureModel& m)
 }
 
 UnitMixtureModel::UnitMixtureModel(const UnitMixtureModel& m)
-    :SubstitutionMixtureModel(m)
+    :SiteMixtureModel(m)
 {
     operator=(m);
 }
@@ -101,7 +101,7 @@ UnitMixtureModel::UnitMixtureModel(const UnitMixtureModel& m)
 // move assignment operator / move  constructor
 UnitMixtureModel& UnitMixtureModel::operator=(UnitMixtureModel&& m)
 {
-    SubstitutionMixtureModel::operator=(std::move(m));
+    SiteMixtureModel::operator=(std::move(m));
     generator = std::move(m.generator);
     frequencies = m.frequencies;
     _scale = m._scale;
@@ -109,7 +109,7 @@ UnitMixtureModel& UnitMixtureModel::operator=(UnitMixtureModel&& m)
 }
 
 UnitMixtureModel::UnitMixtureModel(UnitMixtureModel&& m)
-    :SubstitutionMixtureModel(m)
+    :SiteMixtureModel(m)
 {
     operator=(std::move(m));
 }
@@ -117,7 +117,7 @@ UnitMixtureModel::UnitMixtureModel(UnitMixtureModel&& m)
 
 // constructors
 UnitMixtureModel::UnitMixtureModel(const RateMatrix& m, double s)
-    :SubstitutionMixtureModel(1, m.getNumberOfStates()),
+    :SiteMixtureModel(1, m.getNumberOfStates()),
      generator( unique_ptr<RateGenerator>(m.clone()) ),
      frequencies (m.getStationaryFrequencies()),
      _scale(s)
@@ -126,7 +126,7 @@ UnitMixtureModel::UnitMixtureModel(const RateMatrix& m, double s)
 }
 
 UnitMixtureModel::UnitMixtureModel(const RateMatrix& m, const vector<double>& freqs, double s)
-    :SubstitutionMixtureModel(1, m.getNumberOfStates()),
+    :SiteMixtureModel(1, m.getNumberOfStates()),
      generator( unique_ptr<RateGenerator>(m.clone()) ),
      frequencies(freqs),
      _scale(s)
@@ -135,7 +135,7 @@ UnitMixtureModel::UnitMixtureModel(const RateMatrix& m, const vector<double>& fr
 }
 
 UnitMixtureModel::UnitMixtureModel(const RateGenerator& g, const vector<double>& freqs, double s)
-    :SubstitutionMixtureModel(1, g.getNumberOfStates()),
+    :SiteMixtureModel(1, g.getNumberOfStates()),
      generator( unique_ptr<RateGenerator>(g.clone()) ),
      frequencies(freqs),
      _scale(s)

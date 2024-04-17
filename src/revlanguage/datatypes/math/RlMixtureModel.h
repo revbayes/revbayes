@@ -1,8 +1,8 @@
 /**
  * @file
- * This file contains the declaration of the RevLanguage wrapper of the SubstitutionMixtureModel class.
+ * This file contains the declaration of the RevLanguage wrapper of the SiteMixtureModel class.
  *
- * @brief Declaration of RlSubstitutionMixtureModel
+ * @brief Declaration of RlSiteMixtureModel
  *
  * (c) Copyright 2009-
  * @date Last modified: $Date: 2012-08-06 20:14:22 +0200 (Mon, 06 Aug 2012) $
@@ -15,8 +15,8 @@
  * $Id: Real.h 1746 2012-08-06 18:14:22Z hoehna $
  */
 
-#ifndef RlSubstitutionMixtureModel_H
-#define RlSubstitutionMixtureModel_H
+#ifndef RlSiteMixtureModel_H
+#define RlSiteMixtureModel_H
 
 #include <ostream>
 #include <vector>
@@ -25,7 +25,7 @@
 #include "MixtureModel.h"
 #include "RevPtr.h"
 
-namespace RevBayesCore { class SubstitutionMixtureModel; }
+namespace RevBayesCore { class SiteMixtureModel; }
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 namespace RevLanguage {
@@ -33,17 +33,17 @@ class Argument;
 class RevVariable;
 class TypeSpec;
 
-    class SubstitutionMixtureModel : public ModelObject<RevBayesCore::SubstitutionMixtureModel> {
+    class SiteMixtureModel : public ModelObject<RevBayesCore::SiteMixtureModel> {
 
     public:
 
-        SubstitutionMixtureModel(void);                                                                                             //!< Default constructor
-        SubstitutionMixtureModel(const RevBayesCore::SubstitutionMixtureModel& m);                                                  //!< Default constructor
-        SubstitutionMixtureModel(RevBayesCore::SubstitutionMixtureModel *m);                                                        //!< Default constructor
-        SubstitutionMixtureModel(RevBayesCore::TypedDagNode<RevBayesCore::SubstitutionMixtureModel> *m);                            //!< Default constructor
+        SiteMixtureModel(void);                                                                                             //!< Default constructor
+        SiteMixtureModel(const RevBayesCore::SiteMixtureModel& m);                                                  //!< Default constructor
+        SiteMixtureModel(RevBayesCore::SiteMixtureModel *m);                                                        //!< Default constructor
+        SiteMixtureModel(RevBayesCore::TypedDagNode<RevBayesCore::SiteMixtureModel> *m);                            //!< Default constructor
 
         // Basic utility functions
-        SubstitutionMixtureModel*           clone(void) const;                                                                      //!< Clone object
+        SiteMixtureModel*           clone(void) const;                                                                      //!< Clone object
         static const std::string&           getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&              getClassTypeSpec(void);                                                                 //!< Get class type spec
         const TypeSpec&                     getTypeSpec(void) const;                                                                //!< Get language type of the object

@@ -114,7 +114,7 @@ namespace RevBayesCore {
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
         void                                                                setPInv(const TypedDagNode< double > *);
-        void                                                                setMixtureModel(const TypedDagNode< SubstitutionMixtureModel > *mm);
+        void                                                                setMixtureModel(const TypedDagNode< SiteMixtureModel > *mm);
         void                                                                setRateMatrix(const TypedDagNode< RateGenerator > *rm);
         void                                                                setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm);
         void                                                                setRootFrequencies(const TypedDagNode< Simplex > *f);
@@ -234,7 +234,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode< double >*                                       homogeneous_clock_rate = nullptr;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates = nullptr;
-        const TypedDagNode< SubstitutionMixtureModel >*                     mixture_model = nullptr;
+        const TypedDagNode< SiteMixtureModel >*                     mixture_model = nullptr;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix = nullptr;
         const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices = nullptr;
         const TypedDagNode< Simplex >*                                      root_frequencies = nullptr;
@@ -1550,7 +1550,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     {
         auto& model = mixture_model->getValue();
         int m = sampled_site_rate_component;
-        success = const_cast<SubstitutionMixtureModel&>(model).simulateStochasticMapping(tau->getValue(), node_index, m, clock_rate, transition_states, transition_times);
+        success = const_cast<SiteMixtureModel&>(model).simulateStochasticMapping(tau->getValue(), node_index, m, clock_rate, transition_states, transition_times);
     }
     else
     {
@@ -3191,7 +3191,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMixtureModel(const TypedDagNode< SubstitutionMixtureModel> *mm)
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMixtureModel(const TypedDagNode< SiteMixtureModel> *mm)
 {
 
     // remove the old parameter first
@@ -4004,7 +4004,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
     }
     else if (oldP == mixture_model)
     {
-        mixture_model = static_cast<const TypedDagNode< SubstitutionMixtureModel >* >( newP );
+        mixture_model = static_cast<const TypedDagNode< SiteMixtureModel >* >( newP );
     }
     else if (oldP == homogeneous_rate_matrix)
     {

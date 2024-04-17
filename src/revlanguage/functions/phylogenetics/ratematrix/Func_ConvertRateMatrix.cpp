@@ -43,7 +43,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_ConvertRateMatrix::Func_ConvertRateMatrix( void ) : TypedFunction<SubstitutionMixtureModel>( )
+Func_ConvertRateMatrix::Func_ConvertRateMatrix( void ) : TypedFunction<SiteMixtureModel>( )
 {
 }
 
@@ -60,11 +60,11 @@ Func_ConvertRateMatrix* Func_ConvertRateMatrix::clone( void ) const
 }
 
 
-Core::TypedFunction< Core::SubstitutionMixtureModel >* Func_ConvertRateMatrix::createFunction( void ) const
+Core::TypedFunction< Core::SiteMixtureModel >* Func_ConvertRateMatrix::createFunction( void ) const
 {
     Core::TypedDagNode< Core::RateGenerator >* model = dynamic_cast<const RateMatrix &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-    return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( ConvertRateMatrixFunc, model);
+    return Core::generic_function_ptr< Core::SiteMixtureModel >( ConvertRateMatrixFunc, model);
 }
 
 
@@ -109,7 +109,7 @@ const TypeSpec& Func_ConvertRateMatrix::getClassTypeSpec(void)
 std::string Func_ConvertRateMatrix::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "_RateMatrix2SubstitutionMixtureModel";
+    std::string f_name = "_RateMatrix2SiteMixtureModel";
 
     return f_name;
 }

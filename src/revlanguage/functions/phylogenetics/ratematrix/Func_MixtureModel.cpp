@@ -32,7 +32,7 @@ using std::unique_ptr;
 
 namespace Core = RevBayesCore;
 
-Core::ConcreteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SubstitutionMixtureModel>& models,
+Core::ConcreteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SiteMixtureModel>& models,
                                              const Core::Simplex& fractions,
                                              const Core::RbVector<double>& scales)
 {
@@ -45,10 +45,10 @@ Core::ConcreteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::Substitu
     if (scales.size() != models.size())
         throw RbException()<<"Got "<<models.size()<<" models but "<<scales.size()<<" scaling factors.";
 
-    vector<unique_ptr<Core::SubstitutionMixtureModel>> model_ptrs;
+    vector<unique_ptr<Core::SiteMixtureModel>> model_ptrs;
     for(int i=0;i<models.size();i++)
     {
-        auto model_ptr = std::unique_ptr<Core::SubstitutionMixtureModel>(models[i].clone());
+        auto model_ptr = std::unique_ptr<Core::SiteMixtureModel>(models[i].clone());
         model_ptr->scale(scales[i]);
         model_ptrs.push_back( std::move(model_ptr) );
     }
@@ -56,7 +56,7 @@ Core::ConcreteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::Substitu
     return new Core::ConcreteMixtureModel(model_ptrs, fractions);
 }
 
-RevBayesCore::ConcreteMixtureModel* MixtureModelFunc2(const RevBayesCore::RbVector<RevBayesCore::SubstitutionMixtureModel>& models,
+RevBayesCore::ConcreteMixtureModel* MixtureModelFunc2(const RevBayesCore::RbVector<RevBayesCore::SiteMixtureModel>& models,
                                                       const RevBayesCore::Simplex& fractions)
 {
     vector<double> scales(models.size(), 1.0);
@@ -67,7 +67,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_MixtureModel::Func_MixtureModel( void ) : TypedFunction<SubstitutionMixtureModel>( )
+Func_MixtureModel::Func_MixtureModel( void ) : TypedFunction<SiteMixtureModel>( )
 {
 }
 
@@ -84,19 +84,19 @@ Func_MixtureModel* Func_MixtureModel::clone( void ) const
 }
 
 
-Core::TypedFunction< Core::SubstitutionMixtureModel >* Func_MixtureModel::createFunction( void ) const
+Core::TypedFunction< Core::SiteMixtureModel >* Func_MixtureModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::RbVector<Core::SubstitutionMixtureModel> >* models = static_cast<const ModelVector<SubstitutionMixtureModel> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::RbVector<Core::SiteMixtureModel> >* models = static_cast<const ModelVector<SiteMixtureModel> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
     Core::TypedDagNode< Core::Simplex >* fractions = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     if (auto& scales_var = *args[2].getVariable(); scales_var.getRevObject() != RevNullObject::getInstance())
     {
         Core::TypedDagNode< Core::RbVector<double> >* scales = dynamic_cast<const ModelVector<RealPos> &>( scales_var.getRevObject() ).getDagNode();
-        return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( MixtureModelFunc, models, fractions, scales );
+        return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFunc, models, fractions, scales );
     }
     else
-        return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( MixtureModelFunc2, models, fractions );
+        return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFunc2, models, fractions );
 }
 
 
@@ -108,7 +108,7 @@ const ArgumentRules& Func_MixtureModel::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "models"    , ModelVector<SubstitutionMixtureModel>::getClassTypeSpec(), "The mixture models to mix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "models"    , ModelVector<SiteMixtureModel>::getClassTypeSpec(), "The mixture models to mix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "fractions" , Simplex::getClassTypeSpec(), "The probability of each model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "rates"     , ModelVector<RealPos>::getClassTypeSpec(), "The rate to scale each model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, nullptr) );
 

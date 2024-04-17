@@ -71,7 +71,7 @@ vector<double> gamma_rates(double a, int nCats, bool median)
     return rates;
 }
 
-Core::ConcreteMixtureModel* GammaRateModelFunc(const Core::SubstitutionMixtureModel& submodel, double a, int nCats, Core::Boolean median)
+Core::ConcreteMixtureModel* GammaRateModelFunc(const Core::SiteMixtureModel& submodel, double a, int nCats, Core::Boolean median)
 {
     using namespace RevBayesCore;
 
@@ -92,7 +92,7 @@ using namespace RevLanguage;
 
 
 /** default constructor */
-Func_GammaRateModel::Func_GammaRateModel( void ) : TypedFunction<SubstitutionMixtureModel>( )
+Func_GammaRateModel::Func_GammaRateModel( void ) : TypedFunction<SiteMixtureModel>( )
 {
 }
 
@@ -109,14 +109,14 @@ Func_GammaRateModel* Func_GammaRateModel::clone( void ) const
 }
 
 
-Core::TypedFunction< Core::SubstitutionMixtureModel >* Func_GammaRateModel::createFunction( void ) const
+Core::TypedFunction< Core::SiteMixtureModel >* Func_GammaRateModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::SubstitutionMixtureModel >* submodel = dynamic_cast<const SubstitutionMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::SiteMixtureModel >* submodel = dynamic_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     Core::TypedDagNode< double >* a = dynamic_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     Core::TypedDagNode< long >* nCats = dynamic_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     Core::TypedDagNode< Core::Boolean >* median = dynamic_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
 
-    return Core::generic_function_ptr< Core::SubstitutionMixtureModel >( GammaRateModelFunc, submodel, a, nCats, median);
+    return Core::generic_function_ptr< Core::SiteMixtureModel >( GammaRateModelFunc, submodel, a, nCats, median);
 }
 
 
@@ -128,7 +128,7 @@ const ArgumentRules& Func_GammaRateModel::getArgumentRules( void ) const
 
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "submodel"       , SubstitutionMixtureModel::getClassTypeSpec(), "Sub-model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "submodel"       , SiteMixtureModel::getClassTypeSpec(), "Sub-model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "alpha"          , RealPos::getClassTypeSpec(), "The alpha parameter of the gamma distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "n"              , Integer::getClassTypeSpec(), "The number of bins to approximate the gamma distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Integer(4) ) );
         argumentRules.push_back( new ArgumentRule( "median"         , RlBoolean::getClassTypeSpec(), "Should we use the median (or the mean)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean(false) ) );

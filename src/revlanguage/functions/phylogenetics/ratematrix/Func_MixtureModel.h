@@ -27,20 +27,20 @@ class TypeSpec;
      * @since 2022-09-22, version 1.0
      *
      */
-    class Func_MixtureModel: public TypedFunction<SubstitutionMixtureModel> {
+    class Func_MixtureModel: public TypedFunction<SiteMixtureModel> {
 
     public:
         Func_MixtureModel( void );
 
         // Basic utility functions
-        Func_MixtureModel*                                                clone(void) const;                                          //!< Clone the object
+        Func_MixtureModel*                                                  clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
         const TypeSpec&                                                     getTypeSpec(void) const;                                    //!< Get the type spec of the instance
 
         // Function functions you have to override
-        RevBayesCore::TypedFunction< RevBayesCore::SubstitutionMixtureModel >*  createFunction(void) const;                             //!< Create a function object
+        RevBayesCore::TypedFunction< RevBayesCore::SiteMixtureModel >*      createFunction(void) const;                                 //!< Create a function object
         const ArgumentRules&                                                getArgumentRules(void) const;                               //!< Get argument rules
 
     };
