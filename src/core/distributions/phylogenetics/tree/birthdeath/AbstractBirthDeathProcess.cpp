@@ -6,10 +6,11 @@
 #include <vector>
 
 #include "AbstractBirthDeathProcess.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "TopologyNode.h"
-#include "AbstractRootedTreeDistribution.h"
 #include "Tree.h"
 
 namespace RevBayesCore { class Taxon; }
@@ -125,11 +126,12 @@ std::vector<double> AbstractBirthDeathProcess::simulateDivergenceTimes(size_t n,
     
     for (size_t i = 0; i < n; ++i)
     {
-        double t = 0.0;
-
-        do {
-            t = simulateDivergenceTime(origin, present);
-        } while ( t < min );
+        double t = simulateDivergenceTime(origin, present);
+        if(t < min) {
+            auto rng = GLOBAL_RNG;
+            double u = rng->uniform01();
+            t = min + u*(origin-min);
+        }
 
         times[i] = t;
     }
