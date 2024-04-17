@@ -134,6 +134,7 @@
 #include "Func_chromosomesPloidy.h"
 
 #include "Func_ConvertRateMatrix.h"
+#include "Func_ConvertVectorRateMatrix.h"
 
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
@@ -308,7 +309,6 @@
 /** Initialize global workspace */
 void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 {
-
     try
     {
         ///////////////////////////////////////////
@@ -326,6 +326,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_chromosomesPloidy()                           );
 
         addFunction( new Func_ConvertRateMatrix()                           );
+        addFunction( new Func_ConvertVectorRateMatrix()                     );
 
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
