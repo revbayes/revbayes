@@ -126,7 +126,14 @@ std::vector<double> AbstractBirthDeathProcess::simulateDivergenceTimes(size_t n,
     
     for (size_t i = 0; i < n; ++i)
     {
-        double t = simulateDivergenceTime(origin, present);
+        double t = 0.0;
+        int ntries = 0;
+        
+        do { 
+            t = simulateDivergenceTime(origin, present);
+            ntries ++;
+        } while (t < min && ntries < 1000);
+
         if(t < min) {
             auto rng = GLOBAL_RNG;
             double u = rng->uniform01();
