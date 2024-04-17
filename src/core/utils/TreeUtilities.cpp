@@ -1580,7 +1580,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * @param treeToChange user-supplied starting tree to be modified
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, int agePrecision)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();
@@ -1606,14 +1606,16 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
         throw RbException("Tip names of the initial tree do not match the taxon names.");
     }
     
+    double factor = pow(10.0, agePrecision);
+    
     // Check that the ages of the taxa in the user-supplied tree fall within their age uncertainty ranges
     for (size_t i = 0; i < tax_num; ++i)
     {
         // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
-        double min_age = taxaToCopy[i].getMinAge();
-        double max_age = taxaToCopy[i].getMaxAge();
+        double min_age = std::round(taxaToCopy[i].getMinAge() * factor) / factor;
+        double max_age = std::round(taxaToCopy[i].getMaxAge() * factor) / factor;
         // Get the age of the tree tip of the same name
-        double tip_age = treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge();
+        double tip_age = std::round(treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge() * factor) / factor;
 
         if (tip_age < min_age || tip_age > max_age)
         {
