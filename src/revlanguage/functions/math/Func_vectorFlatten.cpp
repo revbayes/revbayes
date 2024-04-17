@@ -7,34 +7,15 @@
 //
 
 
-#include <iosfwd>
-#include <vector>
-
 #include "ArgumentRule.h"
 #include "Func_vectorFlatten.h"
 #include "Real.h"
-#include "RealPos.h"
-#include "RlDeterministicNode.h"
 #include "VectorFlattenFunction.h"
-#include "TypedDagNode.h"
-#include "TypeSpec.h"
-#include "Argument.h"
-#include "ArgumentRules.h"
-#include "ConstantNode.h"
-#include "DagNode.h"
-#include "DeterministicNode.h"
-#include "DynamicNode.h"
-#include "IndirectReferenceFunction.h"
-#include "ModelObject.h"
 #include "ModelVector.h"
 #include "RbVector.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
-#include "RlConstantNode.h"
-#include "RlFunction.h"
 #include "RlTypedFunction.h"
-#include "TypedFunction.h"
-#include "UserFunctionNode.h"
 
 
 using namespace RevLanguage;
@@ -42,7 +23,7 @@ using namespace RevLanguage;
 
 /** Default constructor */
 Func_vectorFlatten::Func_vectorFlatten( void ) :
-TypedFunction<ModelVector<RealPos> >()
+TypedFunction<ModelVector<Real> >()
 {
 }
 

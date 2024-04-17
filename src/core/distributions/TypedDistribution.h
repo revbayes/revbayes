@@ -59,8 +59,8 @@ namespace RevBayesCore {
         
         // virtual methods
         virtual void                                                setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
-//        virtual void                                                setValue(variableType *v);                    //!< Set the current value, e.g. attach an observation (clamp)
-
+        virtual bool                                                allowsSA(void) { return false; }                                            //!< Checks if distribution is compatible with sampled ancestors
+        
         // pure virtual public methods
         virtual TypedDistribution*                                  clone(void) const = 0;                                                      //!< Clone the distribution
         virtual double                                              computeLnProbability(void) = 0;                                             //!< Clone the ln probability density
