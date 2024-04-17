@@ -689,7 +689,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // gather all taxa across all source matrices into a single vector
     std::vector<RevBayesCore::Taxon> allTaxa;
 
-    for(RbConstIterator<DistanceMatrix> it = matvect.begin(); it != matvect.end(); ++it)
+    for (RbConstIterator<DistanceMatrix> it = matvect.begin(); it != matvect.end(); ++it)
     {
         allTaxa.insert(allTaxa.end(), it->getTaxa().begin(), it->getTaxa().end());
     }
@@ -697,7 +697,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // convert the vector of taxa into a vector of strings for easier sorting
     std::vector<std::string> allNames( allTaxa.size() );
 
-    for(size_t i = 0; i < allTaxa.size(); i++)
+    for (size_t i = 0; i < allTaxa.size(); i++)
     {
         allNames[i] = allTaxa[i].getName();
     }
@@ -705,7 +705,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // get rid of duplicates by converting from vector to unordered_set
     boost::unordered_set<std::string> uniqueNames;
 
-    for(size_t j = 0; j < allNames.size(); j++)
+    for (size_t j = 0; j < allNames.size(); j++)
     {
         uniqueNames.insert(allNames[j]);
     }
@@ -720,23 +720,23 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // initialize the corresponding Boolean matrix of the right dimensions, filled with 'false'
     RevBayesCore::MatrixBoolean mask = MatrixBoolean( allNames.size() );
 
-    for(size_t mat = 0; mat != matvect.size(); ++mat)
+    for (size_t mat = 0; mat != matvect.size(); ++mat)
     {
         std::vector<Taxon> taxa = matvect[mat].getTaxa();
+        std::vector<size_t> matInd( taxa.size() );
         
-        for(size_t i = 0; i != taxa.size(); i++)
+        for (size_t i = 0; i != taxa.size(); i++)
         {
-            size_t rowInd = std::distance(allNames.begin(), std::find(allNames.begin(), allNames.end(), taxa[i].getName()));
-            
-            for(size_t j = i + 1; j != taxa.size(); ++j)
+            matInd[i] = std::distance( allNames.begin(), std::find( allNames.begin(), allNames.end(), taxa[i].getName() ) );
+        }
+        
+        for (size_t j = 0; j != taxa.size(); j++)
+        {
+            for (size_t k = j + 1; k != taxa.size(); ++k)
             {
-                size_t colInd = std::distance(allNames.begin(), std::find(allNames.begin(), allNames.end(), taxa[j].getName()));
-                sumMatrix[rowInd][colInd] += matvect[mat].getMatrix()[i][j] * (*weights)[mat];
-                sumMatrix[colInd][rowInd] += matvect[mat].getMatrix()[i][j] * (*weights)[mat]; // by symmetry
-                divisorMatrix[rowInd][colInd] += (*weights)[mat];
-                divisorMatrix[colInd][rowInd] += (*weights)[mat];                              // by symmetry
-                mask[rowInd][colInd] = true;
-                mask[colInd][rowInd] = true;                                                   // by symmetry
+                sumMatrix[matInd][matInd] += matvect[mat].getMatrix()[j][k] * (*weights)[mat]; // by symmetry
+                divisorMatrix[matInd][matInd] += (*weights)[mat];                              // by symmetry
+                mask[matInd][matInd] = true;                                              // by symmetry
             }
         }
     }
@@ -744,11 +744,11 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // divide the sum matrix by the divisor matrix
     RevBayesCore::MatrixReal averageMatrix = MatrixReal( allNames.size() );
 
-    for(size_t i = 0; i != averageMatrix.getNumberOfRows(); i++)
+    for (size_t i = 0; i != averageMatrix.getNumberOfRows(); i++)
     {
-        for(size_t j = 0; j != averageMatrix.getNumberOfColumns(); j++)
+        for (size_t j = 0; j != averageMatrix.getNumberOfColumns(); j++)
         {
-            if(divisorMatrix[i][j] > 0.0)
+            if (divisorMatrix[i][j] > 0.0)
             {
                 averageMatrix[i][j] = sumMatrix[i][j]/divisorMatrix[i][j];
             }
