@@ -7,7 +7,7 @@
 
 #include "ConstantNode.h"
 #include "DistributionNormal.h"
-#include "PhyloOrnsteinUhlenbeckREML.h"
+#include "PhyloOrnsteinUhlenbeckPruning.h"
 #include "RandomNumberFactory.h"
 #include "RbException.h"
 #include "StochasticNode.h"
@@ -29,11 +29,10 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
+PhyloOrnsteinUhlenbeckPruning::PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
-    normalizing_constants( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) ) ),
+    means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) )
@@ -60,7 +59,7 @@ PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> 
     // now we need to reset the value
     this->redrawValue();
     
-    // we need to reset the contrasts
+    // we need to reset the means and variances
     resetValue();
 }
 
@@ -70,7 +69,7 @@ PhyloOrnsteinUhlenbeckREML::PhyloOrnsteinUhlenbeckREML(const TypedDagNode<Tree> 
  * TreeChangeEventHandler, we need to remove ourselves as a reference and possibly delete tau
  * when we die. All other parameters are handled by others.
  */
-PhyloOrnsteinUhlenbeckREML::~PhyloOrnsteinUhlenbeckREML( void )
+PhyloOrnsteinUhlenbeckPruning::~PhyloOrnsteinUhlenbeckPruning( void )
 {
     // We don't delete the params, because they might be used somewhere else too. The model needs to do that!
     
@@ -84,14 +83,14 @@ PhyloOrnsteinUhlenbeckREML::~PhyloOrnsteinUhlenbeckREML( void )
 
 
 
-PhyloOrnsteinUhlenbeckREML* PhyloOrnsteinUhlenbeckREML::clone( void ) const
+PhyloOrnsteinUhlenbeckPruning* PhyloOrnsteinUhlenbeckPruning::clone( void ) const
 {
     
-    return new PhyloOrnsteinUhlenbeckREML( *this );
+    return new PhyloOrnsteinUhlenbeckPruning( *this );
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeBranchAlpha(size_t branch_idx) const
+double PhyloOrnsteinUhlenbeckPruning::computeBranchAlpha(size_t branch_idx) const
 {
     
     // get the selection rate for the branch
@@ -109,7 +108,7 @@ double PhyloOrnsteinUhlenbeckREML::computeBranchAlpha(size_t branch_idx) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeBranchSigma(size_t branch_idx) const
+double PhyloOrnsteinUhlenbeckPruning::computeBranchSigma(size_t branch_idx) const
 {
     
     // get the drift rate for the branch
@@ -127,7 +126,7 @@ double PhyloOrnsteinUhlenbeckREML::computeBranchSigma(size_t branch_idx) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeBranchTheta(size_t branch_idx) const
+double PhyloOrnsteinUhlenbeckPruning::computeBranchTheta(size_t branch_idx) const
 {
     
     // get the optimum (theta) for the branch
@@ -145,7 +144,7 @@ double PhyloOrnsteinUhlenbeckREML::computeBranchTheta(size_t branch_idx) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeRootState( void ) const
+double PhyloOrnsteinUhlenbeckPruning::computeRootState( void ) const
 {
     
     // get the root-state parameter
@@ -155,7 +154,7 @@ double PhyloOrnsteinUhlenbeckREML::computeRootState( void ) const
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::computeLnProbability( void )
+double PhyloOrnsteinUhlenbeckPruning::computeLnProbability( void )
 {
     
     // we need to check here if we still are listining to this tree for change events
@@ -188,7 +187,7 @@ double PhyloOrnsteinUhlenbeckREML::computeLnProbability( void )
 
 
 
-void PhyloOrnsteinUhlenbeckREML::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
+void PhyloOrnsteinUhlenbeckPruning::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
 {
     
     // call a recursive flagging of all node above (closer to the root) and including this node
@@ -197,7 +196,7 @@ void PhyloOrnsteinUhlenbeckREML::fireTreeChangeEvent( const TopologyNode &n, con
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::keepSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter )
 {
     
     // reset all flags
@@ -214,7 +213,7 @@ void PhyloOrnsteinUhlenbeckREML::keepSpecialization( const DagNode* affecter )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
+void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
     
     // check for recomputation
@@ -224,9 +223,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
         dirty_nodes[node_index] = false;
         
         std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &mu_node            = this->contrasts[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &norm_const_node    = this->normalizing_constants[this->active_likelihood[node_index]][node_index];
-        
+        std::vector<double> &mu_node            = this->means[this->active_likelihood[node_index]][node_index];
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -250,94 +247,99 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
             const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
             
-            // get the per node and site contrasts
-            const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &mu_right = this->contrasts[this->active_likelihood[right_index]][right_index];
+            // get the means for the left and right subtrees
+            const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
             
-            // get the per node and site normalizing constants
-            const std::vector<double> &norm_const_left  = this->normalizing_constants[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &norm_const_right = this->normalizing_constants[this->active_likelihood[right_index]][right_index];
+            // get the variances for the left and right subtrees
+            // the name "delta" comes from Felsenstein (2004; Fig.23.3, page 407)
+            double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
+            double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             
-            // get the propagated uncertainties
-            double delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
-            double delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
-            
-            // get the scaled branch lengths
-            double v_left  = 0;
-//            if ( j == 1 )
-//            {
-                double bl_left = left->getBranchLength();
-                double sigma_left = computeBranchSigma(left_index);
-                double alpha_left = computeBranchAlpha(left_index);
-                if ( alpha_left > 1E-20 )
-                {
-//                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (1.0 - exp(-2.0*alpha_left*bl_left) );
-                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
-                }
-                else
-                {
-                    v_left = (sigma_left*sigma_left) * bl_left;
-                }
-//            }
-            
+            // calculate the variance accounting for the branch
+            double v_left  = 0.0;
+            double bl_left = left->getBranchLength();
+            double sigma_left = computeBranchSigma(left_index);
+            double alpha_left = computeBranchAlpha(left_index);
+            if ( alpha_left > 1E-20 )
+            {
+                v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * expm1(2.0*alpha_left*bl_left);
+            }
+            else
+            {
+                v_left = (sigma_left*sigma_left) * bl_left;
+            }
+        
+            double v_right = 0.0;
             double bl_right = right.getBranchLength();
             double sigma_right = computeBranchSigma(right_index);
             double alpha_right = computeBranchAlpha(right_index);
-            double v_right =0.0;
             if ( alpha_right > 1E-20 )
             {
-//                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (1.0 - exp(-2.0*alpha_right*bl_right) );
-                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
+                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * expm1(2.0*alpha_right*bl_right);
             }
             else
             {
                 v_right = (sigma_right*sigma_right) * bl_right;
             }
             
-            // add the propagated uncertainty to the branch lengths
-            double var_left  = (v_left)  + delta_left  * exp(2.0*alpha_left *bl_left);
-            double var_right = (v_right) + delta_right * exp(2.0*alpha_right*bl_right);
-            
-            // set delta_node = (t_l*t_r)/(t_l+t_r);
-            double var_node = (var_left*var_right) / (var_left+var_right);
-            this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = var_node;
+            // add the branch variance with the variance of the subtrees
+            //                 (this branch)       (                 subtree                )
+            double var_left  = v_left            + delta_left  * exp(2.0*alpha_left *bl_left);
+            double var_right = v_right           + delta_right * exp(2.0*alpha_right*bl_right);
             
             double theta_left   = computeBranchTheta( left_index );
             double theta_right  = computeBranchTheta( right_index );
+           
+            // the next steps are setting up the Gaussian variable
+            // according to the steps outlined in the supplement of 
+            // FitzJohn (2012, Methods in Ecol Evol). The Gaussian variable
+            // has three components (equation 6)
+            //
+            // i) a variance
+            // ii) a mean
+            // iii) a normalizing factor
+
             
-            double stdev = sqrt(var_left+var_right);
+            // i) computing the variance at the node
+            double var_node = (var_left*var_right) / (var_left+var_right);
+            this->variances[this->active_likelihood[node_index]][node_index] = var_node;
+            
             for (int i=0; i<this->num_sites; i++)
             {
+                // ii) computing the mean at the node
+                double mean_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
+                double mean_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
+                double mean_node = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
+                mu_node[i] = mean_node; 
                 
-                double m_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
-                double m_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
-                mu_node[i] = (m_left*var_right + m_right*var_left) / (var_left+var_right);
                 
-                // get the site specific rate of evolution
-                double standDev = this->computeSiteRate(i) * stdev;
-                
-                // compute the contrasts for this site and node
-                double contrast = m_left - m_right;
-                
-                // compute the probability for the contrasts at this node
-                double z_left  = norm_const_left[i];
-                double z_right = norm_const_right[i];
-                double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)/(z_left*z_right) * exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
-                norm_const_node[i] = 1.0;
-                
-                double lnl_node = log( z_node );
-//                lnl_node -= RbConstants::LN_SQRT_2PI - log( sqrt( var_node ) );
-//                lnl_node -= ( (contrast-mu_node[i])*(contrast-mu_node[i]) ) / (2.0*var_node);
-//                lnl_node -= ( mu_node[i]*mu_node[i] ) / (2.0*var_node);
+                // iii) computing the (log) normalizing factor at the node
+                // 
+                // unlike in FitzJohn(2012) supplement eq. (6), we don't propagate the 
+                // normalizing factors (1/z_left) and (1/z_right) of the left and
+                // right subtrees, since this can lead to underflow. Instead we store the log
+                // normalizing factors, and add them to the partial log likelihoods
+                double log_nf_left  = alpha_left  * bl_left;
+                double log_nf_right = alpha_right * bl_right;
+                double contrast = mean_left - mean_right;
+                double a = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
+                double b = 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
+
+                double log_norm_factor = log_nf_left + log_nf_right + a - b;
+                double lnl_node = log_norm_factor;
                 
                 if ( node.isRoot() == true )
                 {
+                    // if the assumed root state is equal to the optimum at the root, then
+                    // this pruning algorithm is 100% equivalent to the likelihood obtained
+                    // using generalized least squares with a variance-covariance matrix
+                    // for the residuals (r = y - theta), also called the vcv-method (introduced in Hansen 1997)
                     double root_state = computeRootState();
-                    // dnorm(root.x, vals[1], sqrt(vals[2]), TRUE)
-                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt((var_left*var_right) / (var_left+var_right)), mu_node[i]);
+                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_node), mu_node[i]);
                 }
                 
-                // sum up the probabilities of the contrasts
+                // sum up the probabilities of the subtrees
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
                 
             } // end for-loop over all sites
@@ -350,7 +352,7 @@ void PhyloOrnsteinUhlenbeckREML::recursiveComputeLnProbability( const TopologyNo
 
 
 
-void PhyloOrnsteinUhlenbeckREML::recursivelyFlagNodeDirty( const TopologyNode &n )
+void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode &n )
 {
     
     // we need to flag this node and all ancestral nodes for recomputation
@@ -380,14 +382,13 @@ void PhyloOrnsteinUhlenbeckREML::recursivelyFlagNodeDirty( const TopologyNode &n
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::resetValue( void )
+void PhyloOrnsteinUhlenbeckPruning::resetValue( void )
 {
     
     // check if the vectors need to be resized
     partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    normalizing_constants = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
+    means = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    variances = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -417,12 +418,10 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
             {
                 ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
                 double &c = taxon.getCharacter(site_indices[site]);
-                contrasts[0][(*it)->getIndex()][site] = c;
-                contrasts[1][(*it)->getIndex()][site] = c;
-                contrast_uncertainty[0][(*it)->getIndex()] = 0;
-                contrast_uncertainty[1][(*it)->getIndex()] = 0;
-                normalizing_constants[0][(*it)->getIndex()][site] = 1.0;
-                normalizing_constants[1][(*it)->getIndex()][site] = 1.0;
+                means[0][(*it)->getIndex()][site] = c;
+                means[1][(*it)->getIndex()][site] = c;
+                variances[0][(*it)->getIndex()] = 0;
+                variances[1][(*it)->getIndex()] = 0;
             }
         }
     }
@@ -444,7 +443,7 @@ void PhyloOrnsteinUhlenbeckREML::resetValue( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::restoreSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affecter )
 {
     
     // reset the flags
@@ -470,7 +469,7 @@ void PhyloOrnsteinUhlenbeckREML::restoreSpecialization( const DagNode* affecter 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<double> *a)
+void PhyloOrnsteinUhlenbeckPruning::setAlpha(const TypedDagNode<double> *a)
 {
     
     // remove the old parameter first
@@ -495,7 +494,7 @@ void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<double> *a)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<RbVector<double> > *a)
+void PhyloOrnsteinUhlenbeckPruning::setAlpha(const TypedDagNode<RbVector<double> > *a)
 {
     
     // remove the old parameter first
@@ -520,7 +519,7 @@ void PhyloOrnsteinUhlenbeckREML::setAlpha(const TypedDagNode<RbVector<double> > 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setRootState(const TypedDagNode<double> *s)
+void PhyloOrnsteinUhlenbeckPruning::setRootState(const TypedDagNode<double> *s)
 {
     
     // remove the old parameter first
@@ -539,7 +538,7 @@ void PhyloOrnsteinUhlenbeckREML::setRootState(const TypedDagNode<double> *s)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<double> *s)
+void PhyloOrnsteinUhlenbeckPruning::setSigma(const TypedDagNode<double> *s)
 {
     
     // remove the old parameter first
@@ -564,7 +563,7 @@ void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<double> *s)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<RbVector<double> > *s)
+void PhyloOrnsteinUhlenbeckPruning::setSigma(const TypedDagNode<RbVector<double> > *s)
 {
     
     // remove the old parameter first
@@ -589,7 +588,7 @@ void PhyloOrnsteinUhlenbeckREML::setSigma(const TypedDagNode<RbVector<double> > 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<double> *t)
+void PhyloOrnsteinUhlenbeckPruning::setTheta(const TypedDagNode<double> *t)
 {
     
     // remove the old parameter first
@@ -614,7 +613,7 @@ void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<double> *t)
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<RbVector<double> > *t)
+void PhyloOrnsteinUhlenbeckPruning::setTheta(const TypedDagNode<RbVector<double> > *t)
 {
     
     // remove the old parameter first
@@ -639,7 +638,7 @@ void PhyloOrnsteinUhlenbeckREML::setTheta(const TypedDagNode<RbVector<double> > 
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
+void PhyloOrnsteinUhlenbeckPruning::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
     
     // get the children of the node
@@ -717,7 +716,7 @@ void PhyloOrnsteinUhlenbeckREML::simulateRecursively( const TopologyNode &node, 
 }
 
 
-std::vector<double> PhyloOrnsteinUhlenbeckREML::simulateRootCharacters(size_t n)
+std::vector<double> PhyloOrnsteinUhlenbeckPruning::simulateRootCharacters(size_t n)
 {
     
     std::vector<double> chars = std::vector<double>(num_sites, 0);
@@ -730,7 +729,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckREML::simulateRootCharacters(size_t n)
 }
 
 
-double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
+double PhyloOrnsteinUhlenbeckPruning::sumRootLikelihood( void )
 {
     // get the root node
     const TopologyNode &root = this->tau->getValue().getRoot();
@@ -752,7 +751,7 @@ double PhyloOrnsteinUhlenbeckREML::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckREML::touchSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -811,7 +810,7 @@ void PhyloOrnsteinUhlenbeckREML::touchSpecialization( const DagNode* affecter, b
 
 
 /** Swap a parameter of the distribution */
-void PhyloOrnsteinUhlenbeckREML::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void PhyloOrnsteinUhlenbeckPruning::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
     if (oldP == this->tau)
