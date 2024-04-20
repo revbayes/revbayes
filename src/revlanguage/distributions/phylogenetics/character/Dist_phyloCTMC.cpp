@@ -75,19 +75,36 @@ Dist_phyloCTMC* Dist_phyloCTMC::clone( void ) const
     return new Dist_phyloCTMC(*this);
 }
 
-
-RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* Dist_phyloCTMC::createDistribution( void ) const
+int Dist_phyloCTMC::computeNumberOfStates() const
 {
+    // we get the number of states from the rate matrix (we don't know, because PoMo is flexible about its rates)
+    if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+        return rm->getValue()[0].getNumberOfStates();
+    }
+    else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
+        return mm->getValue().getNumberOfStates();
+    }
+    else
+    {
+        RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+        return rm->getValue().getNumberOfStates();
+    }
+
+    return 1;
+}
+
+template <typename Dist>
+RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* Dist_phyloCTMC::setDistParameters(Dist* dist) const
+{
+    const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
 
     // get the parameters
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
-    const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
-    bool ambig = static_cast<const RlBoolean &>( treatAmbiguousAsGap->getRevObject() ).getValue();
     size_t nNodes = tau->getValue().getNumberOfNodes();
-    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
-    bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
-    bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_ratesNode = NULL;
     if ( site_rates != NULL && site_rates->getRevObject() != RevNullObject::getInstance() )
@@ -154,6 +171,88 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         use_site_matrices = static_cast<const RlBoolean &>( site_matrices->getRevObject() ).getDagNode()->getValue();
     }
 
+    // set the root frequencies (by default these are NULL so this is OK)
+    dist->setRootFrequencies( rf );
+
+    // set the probability for invariant site (by default this p_inv=0.0)
+    dist->setPInv( p_invNode );
+
+    // set the clock rates
+    if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+
+	// sanity check
+	if ( (nNodes-1) != clockRates->getValue().size() )
+	{
+	    throw RbException( "The number of clock rates does not match the number of branches" );
+	}
+
+	dist->setClockRate( clockRates );
+    }
+    else
+    {
+	RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+	dist->setClockRate( clockRate );
+    }
+    dist->setUseSiteMatrices(use_site_matrices, sp);
+
+    // set the rate matrix
+    if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
+    {
+	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+	if (use_site_matrices == false)
+	{
+	    // sanity check
+	    if ( (nNodes-1) != rm->getValue().size())
+	    {
+		throw RbException( "The number of substitution matrices does not match the number of branches" );
+	    }
+
+	    // sanity check
+	    if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
+	    {
+		throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
+	    }
+	}
+	dist->setRateMatrix( rm );
+    }
+    else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
+    {
+	RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
+	dist->setMixtureModel( mm );
+    }
+    else
+    {
+	RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+	dist->setRateMatrix( rm );
+    }
+
+    if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
+    {
+	dist->setSiteRates( site_ratesNode );
+    }
+        
+    if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
+    {
+	dist->setSiteRatesProbs( site_rates_probsNode );
+    }
+
+    return dist;
+}
+
+RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* Dist_phyloCTMC::createDistribution( void ) const
+{
+    const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
+
+    // get the parameters
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
+    bool ambig = static_cast<const RlBoolean &>( treatAmbiguousAsGap->getRevObject() ).getValue();
+    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
+    bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
+    bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
+
     if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
     {
         throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
@@ -163,492 +262,45 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     {
         RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        // set the clock rates
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-        
-
-        d = dist;
+	return setDistParameters(dist);
     }
     else if ( dt == "RNA" )
     {
         RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::RnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::RnaState>(tau, true, n, ambig, internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-        
-
-        d = dist;
+        return setDistParameters(dist);
     }
     else if ( dt == "AA" || dt == "Protein" )
     {
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, true, n, ambig, internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-        
-
-        d = dist;
+        return setDistParameters(dist);
     }
     else if ( dt == "Codon" )
     {
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::CodonState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::CodonState>(tau, 61, true, n, ambig, internal, gapmatch);
         
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-        
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-        
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-            
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-            
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-        
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-            
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-            
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-        
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-        
-        
-        d = dist;
+        return setDistParameters(dist);
     }
     else if ( dt == "Doublet" )
     {
         auto dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::DoubletState>(tau, 16, true, n, ambig, internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-
-        d = dist;
+        return setDistParameters(dist);
     }
     else if ( dt == "PoMo" )
     {
-
         // we get the number of states from the rate matrix (we don't know, because PoMo is flexible about its rates)
-        // set the rate matrix
-        size_t nChars = 1;
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-            nChars = rm->getValue()[0].getNumberOfStates();
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            nChars = mm->getValue().getNumberOfStates();
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            nChars = rm->getValue().getNumberOfStates();
-        }
+	int nChars = computeNumberOfStates();
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-        
-
-        d = dist;
+        return setDistParameters(dist);
     }
     else if ( dt == "Standard" )
     {
         // we get the number of states from the rates matrix
-        // set the rate matrix
-        size_t nChars = 1;
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-            nChars = rm->getValue()[0].getNumberOfStates();
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            nChars = mm->getValue().getNumberOfStates();
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            nChars = rm->getValue().getNumberOfStates();
-        }
+	int nChars = computeNumberOfStates();
 
         int cd = RevBayesCore::AscertainmentBias::ALL;
         // split the coding option on "|"
@@ -670,7 +322,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
-        if(cd == RevBayesCore::AscertainmentBias::ALL)
+        if (cd == RevBayesCore::AscertainmentBias::ALL)
         {
             dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
         }
@@ -679,187 +331,21 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             dist = new RevBayesCore::PhyloCTMCSiteHomogeneousConditional<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, RevBayesCore::AscertainmentBias::Coding(cd), internal, gapmatch);
         }
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-        
-
-        d = dist;
+        return setDistParameters(dist);
     }
     else if ( dt == "NaturalNumbers" )
     {
         // we get the number of states from the rates matrix
-        size_t n_chars = 1;
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-            n_chars = rm->getValue()[0].getNumberOfStates();
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            n_chars = rm->getValue().getNumberOfStates();
-        }
+	int nChars = computeNumberOfStates();
 
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, n_chars, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, nChars, true, n, ambig, internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-
-        d = dist;
+	return setDistParameters(dist);
     }
     else if ( dt == "Binary" || dt == "Restriction" )
     {
         // we get the number of states from the rates matrix
-        // set the rate matrix
-        size_t nChars = 1;
-
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-            nChars = rm->getValue()[0].getNumberOfStates();
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            nChars = mm->getValue().getNumberOfStates();
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            nChars = rm->getValue().getNumberOfStates();
-        }
+	int nChars = computeNumberOfStates();
 
         // sanity check
         if ( nChars != 2 )
@@ -923,80 +409,10 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         RevBayesCore::PhyloCTMCSiteHomogeneousBinary *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBinary(tau, true, (size_t)n, ambig, RevBayesCore::BinaryAscertainmentBias::Coding(cd), internal, gapmatch);
 
-        // set the root frequencies (by default these are NULL so this is OK)
-        dist->setRootFrequencies( rf );
-
-        // set the probability for invariant site (by default this p_inv=0.0)
-        dist->setPInv( p_invNode );
-
-        if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
-
-            // sanity check
-            if ( (nNodes-1) != clockRates->getValue().size() )
-            {
-                throw RbException( "The number of clock rates does not match the number of branches" );
-            }
-
-            dist->setClockRate( clockRates );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-            dist->setClockRate( clockRate );
-        }
-        dist->setUseSiteMatrices(use_site_matrices, sp);
-
-        // set the rate matrix
-        if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-
-            if (use_site_matrices == false)
-            {
-                // sanity check
-                if ( (nNodes-1) != rm->getValue().size())
-                {
-                    throw RbException( "The number of substitution matrices does not match the number of branches" );
-                }
-                
-                // sanity check
-                if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-                {
-                    throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-                }
-            }
-
-
-            dist->setRateMatrix( rm );
-        }
-        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-        }
-        else
-        {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-            dist->setRateMatrix( rm );
-        }
-
-        if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
-        {
-            dist->setSiteRates( site_ratesNode );
-        }
-        
-        if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
-        {
-            dist->setSiteRatesProbs( site_rates_probsNode );
-        }
-
-        d = dist;
+        return setDistParameters(dist);
     }
 
-
-    return d;
+    return nullptr;
 }
 
 
