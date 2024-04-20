@@ -161,16 +161,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
     if ( dt == "DNA" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist =
-        new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
-
-        if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
-        {
-            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-            dist->setMixtureModel( mm );
-            d = dist;
-            return d;
-        }
+        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );
@@ -188,7 +179,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             {
                 throw RbException( "The number of clock rates does not match the number of branches" );
             }
-            
+
             dist->setClockRate( clockRates );
         }
         else
@@ -217,6 +208,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
                 }
             }
             dist->setRateMatrix( rm );
+        }
+        else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
+        {
+            RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
+            dist->setMixtureModel( mm );
         }
         else
         {
