@@ -65,7 +65,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
                                                                         Tree *t,
-                                                                        int *age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        const TypedDagNode<long> *age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
