@@ -29,8 +29,10 @@ namespace RevBayesCore {
         
         // public member functions you may want to override
         double                                              computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
-        void                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
+        void                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                    //!< The tree has changed and we want to know which part.
+        virtual void                                        redrawValue(SimulationCondition c);                                                                 //!< Draw a new random value from the distribution
         virtual void                                        redrawValue(void);                                                                                  //!< Draw a new random value from the distribution
+        
         void                                                setBackbone( const TypedDagNode<Tree> *backbone_one=NULL, const TypedDagNode<RbVector<Tree> > *backbone_many=NULL);
         virtual void                                        setStochasticNode(StochasticNode<Tree> *n);                                                         //!< Set the stochastic node holding this distribution
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
@@ -54,7 +56,7 @@ namespace RevBayesCore {
         RbBitSet                                            recursivelyAddBackboneConstraints(const TopologyNode& node, size_t backbone_idx);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
-        Tree*                                               simulateRootedTree(void);
+        Tree*                                               simulateRootedTree(bool alwaysReturn);
         Tree*                                               simulateUnrootedTree(void);
 
 

@@ -117,9 +117,10 @@ void AbstractBirthDeathProcess::prepareProbComputation( void ) const
  * @param origin start time of the process
  * @param present stop time of the process
  * @param min minimum value of the simulated times
+ * @param alwaysReturn whether the simulation can return times which are not valid draws from the distribution (for initial values)
  * @return vector of simulated divergence times
  **/
-std::vector<double> AbstractBirthDeathProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
+std::vector<double> AbstractBirthDeathProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const
 {
 
     std::vector<double> times(n, 0.0);
@@ -135,6 +136,8 @@ std::vector<double> AbstractBirthDeathProcess::simulateDivergenceTimes(size_t n,
         } while (t < min && ntries < 1000);
 
         if(t < min) {
+            if(!alwaysReturn) throw RbException("No valid clade age found for simulated tree after 1000 tries.");
+
             auto rng = GLOBAL_RNG;
             double u = rng->uniform01();
             t = min + u*(origin-min);
