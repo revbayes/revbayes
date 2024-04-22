@@ -65,7 +65,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
                                                                         Tree *t,
-                                                                        int age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        int *age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -172,7 +172,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     {
         try
         {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
+            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, *age_check_precision );
             value = my_tree->clone();
         }
         catch (RbException &e)
