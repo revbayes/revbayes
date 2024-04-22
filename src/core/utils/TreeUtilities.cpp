@@ -1579,6 +1579,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * Make sure that the starting tree used to initialize serial-sampling birth-death analyses satisfies specified age constraints, and assign min/max ages to its tips
  * @param treeToChange user-supplied starting tree to be modified
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
+ * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
  */
 Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, int agePrecision)
 {
