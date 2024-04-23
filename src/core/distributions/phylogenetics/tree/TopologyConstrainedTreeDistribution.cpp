@@ -73,7 +73,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     value = &base_distribution->getValue();
     
     initializeBitSets();
-    redrawValue();
+    redrawValue( SimulationCondition::MCMC );
 }
 
 
