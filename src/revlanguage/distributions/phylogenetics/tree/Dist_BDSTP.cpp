@@ -94,10 +94,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     }
     
     // number of decimal places to use when checking the initial tree against taxon ages
-    RevBayesCore::TypedDagNode<long>* pr = NULL;
+    long* pr = NULL;
     if ( age_check_precision != nullptr )
     {
-        pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getDagNode();
+        *pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
     }
 
     RevBayesCore::AbstractBirthDeathProcess* d;
@@ -373,7 +373,7 @@ void Dist_BDSTP::addCommonRules(MemberRules& dist_member_rules) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(4) ) );
+        dist_member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
 }
 
 /**
