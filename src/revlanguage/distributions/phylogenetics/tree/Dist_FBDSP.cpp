@@ -66,9 +66,7 @@ Dist_FBDSP* Dist_FBDSP::clone( void ) const
  * \return A new internal distribution object.
  */
 RevBayesCore::AbstractBirthDeathProcess* Dist_FBDSP::createDistribution( void ) const
-{
-    throw RbException("FBD range process currently disabled due to invalid calculations.");
-    
+{    
     // get the parameters
     
     // the start age
