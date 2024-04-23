@@ -555,7 +555,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
     std::vector<TopologyNode* > children = node.getChildren();
 
-    bool sa = node.isSampledAncestor(true);
+    bool sa = node.isSampledAncestorTipOrParent();
 
     for(int c = 0; c < children.size(); c++)
     {
@@ -571,7 +571,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
         // is child a new species?
         // set start time at this node
-        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestor() ) )
+        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestorTip() ) )
         {
             b_i[i] = node.getAge(); // y_{a(i)}
 
