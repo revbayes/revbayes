@@ -94,10 +94,10 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     }
     
     // number of decimal places to use when checking the initial tree against taxon ages
-    long* pr = NULL;
-    if ( age_check_precision != nullptr )
+    long pr = NULL;
+    if ( age_check_precision != NULL )
     {
-        *pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
+        pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
     }
 
     RevBayesCore::AbstractBirthDeathProcess* d;
