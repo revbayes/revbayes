@@ -26,7 +26,7 @@ ConstantRateCompleteBirthDeathProcess::ConstantRateCompleteBirthDeathProcess(con
     addParameter( speciation );
     addParameter( extinction );
 
-    simulateTree();
+    simulateTree(true);
 }
 
 
