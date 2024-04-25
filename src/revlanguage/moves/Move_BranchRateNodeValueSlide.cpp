@@ -67,7 +67,8 @@ void Move_BranchRateNodeValueSlide::constructInternalObject( void )
     // now allocate a new sliding move
     double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tree_node = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
 
@@ -79,7 +80,7 @@ void Move_BranchRateNodeValueSlide::constructInternalObject( void )
 
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, t);
 
 }
 

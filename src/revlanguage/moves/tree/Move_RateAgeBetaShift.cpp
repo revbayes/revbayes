@@ -60,6 +60,8 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool at = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
@@ -86,7 +88,7 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
         
     }
     
-    value = new RevBayesCore::RateAgeBetaShift(t, rates, snode_rates, d, at, w);
+    value = new RevBayesCore::RateAgeBetaShift(t, rates, snode_rates, d, at, w, del);
 }
 
 

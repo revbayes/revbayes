@@ -51,14 +51,15 @@ namespace RevBayesCore {
         void                                                    performHillClimbingStep(double lHeat, double pHeat);                //!< Perform the move.
         void                                                    removeNode(DagNode* p);                                             //!< remove a node from the proposal
         void                                                    resetCounters(void);                                                //!< Reset the counters such as numTried.
+        virtual void                                            setDelay(size_t na);                                                //!< Set the number of iterations before using
         virtual void                                            setNumberAcceptedCurrentPeriod(size_t na);
         virtual void                                            setNumberAcceptedTotal(size_t na);
         void                                                    setNumberTriedCurrentPeriod(size_t nt);
         void                                                    setNumberTriedTotal(size_t nt);
         
     protected:
-        AbstractMove(double w, bool autoTune = false);                                              //!< Constructor
-        AbstractMove(const std::vector<DagNode*> &d, double w, bool autoTune = false);                                              //!< Constructor
+        AbstractMove(double w, size_t d=0, bool autoTune = false);                                              //!< Constructor
+        AbstractMove(const std::vector<DagNode*> &n, double w, size_t d=0, bool autoTune = false);                                              //!< Constructor
         AbstractMove(const AbstractMove &m);                                                                                        //!< Constructor
         
         // overloaded operators
@@ -78,6 +79,7 @@ namespace RevBayesCore {
         RbOrderedSet<DagNode*>                                  affected_nodes;                                                     //!< The affected nodes by this move.
         double                                                  weight;
         bool                                                    auto_tuning;
+        size_t                                                  delay;                                                              //!< Number of iterations before using
         size_t                                                  num_tried_current_period;                                           //!< Number of times tried
         size_t                                                  num_tried_total;                                                    //!< Number of times tried
 

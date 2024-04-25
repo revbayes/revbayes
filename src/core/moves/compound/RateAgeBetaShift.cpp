@@ -19,7 +19,7 @@
 
 using namespace RevBayesCore;
 
-RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, bool t, double w) : AbstractMove( w, t),
+RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, double w, size_t del, bool t) : AbstractMove( w, del, t),
     tree( tr ),
     rates_vec( v ),
     rates( sv ),

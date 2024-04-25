@@ -14,6 +14,7 @@
 #include "NodeRejectionSampleProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_CharacterHistory.h"
+#include "Natural.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RbException.h"
@@ -88,7 +89,8 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     double l        = static_cast<const Probability &>( lambda->getRevObject() ).getValue();
     std::string gt  = static_cast<const RlString &>( graph->getRevObject() ).getValue();
     std::string pt  = static_cast<const RlString &>( proposal->getRevObject() ).getValue();
-    double r        = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     // move/proposal parameters
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
@@ -255,7 +257,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     
     
     
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 

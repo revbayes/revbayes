@@ -15,6 +15,7 @@
 #include "RlBoolean.h"
 #include "CorrelationMatrixElementBetaProposal.h"
 #include "MetropolisHastingsMove.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -60,13 +61,14 @@ void Move_CorrelationMatrixSingleElementBeta::constructInternalObject( void )
     // now allocate a new sliding move
     double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixElementBetaProposal(n,a,r);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
 
 }
 

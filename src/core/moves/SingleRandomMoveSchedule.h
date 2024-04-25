@@ -25,7 +25,7 @@ template <class valueType> class RbVector;
     private:
         
         // Hidden member variables
-        double                                          sumOfWeights;
+        double                                          sum_of_weights;
         std::vector<double>                             weights;
     };
     

@@ -49,6 +49,8 @@ void Move_CorrelationMatrixReparameterization::constructInternalObject( void )
     delete value;
 
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( correlation_matrix->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
@@ -58,7 +60,7 @@ void Move_CorrelationMatrixReparameterization::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* mvbm_tdn  = static_cast<const RevLanguage::ContinuousCharacterData&>( mvbm->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* mvbm_sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* >(mvbm_tdn);
     
-    value = new RevBayesCore::CorrelationMatrixReparameterizationMove(n, var, mvbm_sn, false, w);
+    value = new RevBayesCore::CorrelationMatrixReparameterizationMove(n, var, mvbm_sn, w, del, false);
     
 }
 

@@ -30,7 +30,7 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-EllipticalSliceSamplingSimpleMove::EllipticalSliceSamplingSimpleMove( std::vector< StochasticNode<double> *> n, double window_, double weight_, bool t , bool fa) : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
+EllipticalSliceSamplingSimpleMove::EllipticalSliceSamplingSimpleMove( std::vector< StochasticNode<double> *> n, double window_, double weight_, size_t d, bool t , bool fa) : AbstractMove( std::vector<DagNode*>(), weight_ , d, t),
     variables( n ),
     window( window_ ),
     total_movement( 0.0 ),
