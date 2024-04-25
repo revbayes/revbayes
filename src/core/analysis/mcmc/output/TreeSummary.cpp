@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 #include <optional>
-#include "all.hpp"
+#include <range/v3/all.hpp>
 
 #include "NewickConverter.h"
 #include "ProgressBar.h"
