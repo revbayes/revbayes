@@ -1359,6 +1359,43 @@ Q := fnGTR(er,pi))");
 	help_strings[string("fnGTR")][string("name")] = string(R"(fnGTR)");
 	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S. Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences.  Lectures on Mathematics in the Life Sciences (1986). 17: 57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
 	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible rate matrix)");
+	help_arrays[string("fnGammaASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnGammaASRV")][string("description")] = string(R"(Add Gamma-distributed across-site rate variation (ASRV) to a submodel.)");
+	help_strings[string("fnGammaASRV")][string("details")] = string(R"(Each site evolves according to the specified submodel, but at an unknown rate
+that is Gamma distributed. If the submodel has m components, this function will
+return a model with m*n components.
+
+The continuous Gamma distribution is approximated with a mixture distribution
+over n discrete rates, each with probability 1/4.  The Gamma distribution is
+constrained to have a mean of 1, so as not to change the  branch lengths.
+It therefore has only a single parameter alpha -- the shape parameter.
+        - As alpha approaches infinity, rate variation goes to 0.
+        - If alpha = 1, then the rate is exponentially distributed.  Rate variation is substantial.
+        - As alpha approaches zero, many sites have rate 0, and many sites have a high rate.
+
+RateMatrix and RateGenerator submodels will automatically converted to a
+SiteMixtureModel with a single component.)");
+	help_strings[string("fnGammaASRV")][string("example")] = string(R"(alpha ~ dnExp(1/10) # Don't put too much prior belief on high rate variation.
+M := fnGammaASRV( fnGTR(er, pi), alpha, 4)
+M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)  # Nested functions can be expressed using pipes.
+seq ~ dnPhyloCTMC(psi, M, type="DNA")
+
+M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
+M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
+
+# The submodel can be a mixture model
+weights ~ dnDirichlet([1,1])
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+
+# Rate is a product of two Gamma-distributed variables.  For illustration only -- NOT recommended.
+M := fnJC(4) |> fnGammaASRV(alpha1,4) |> fnGammaASRV(alpha2,4)   # This has 16 components.)");
+	help_strings[string("fnGammaASRV")][string("name")] = string(R"(fnGammaASRV)");
+	help_references[string("fnGammaASRV")].push_back(RbHelpReference(R"(Yang, Z. (1994) Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: approximate methods)",R"(https://doi.org/10.1007/BF00160154 )",R"()"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
+	help_strings[string("fnGammaASRV")][string("title")] = string(R"(fnGammaASRV)");
 	help_strings[string("fnGeographicalDistance")][string("name")] = string(R"(fnGeographicalDistance)");
 	help_strings[string("fnHKY")][string("description")] = string(R"(The HKY85 model.)");
 	help_strings[string("fnHKY")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
