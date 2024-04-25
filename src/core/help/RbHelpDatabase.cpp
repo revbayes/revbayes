@@ -1573,6 +1573,29 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnTreePairwiseDistances")][string("name")] = string(R"(fnTreePairwiseDistances)");
 	help_strings[string("fnTreePairwiseNodalDistances")][string("name")] = string(R"(fnTreePairwiseNodalDistances)");
 	help_strings[string("fnTreeScale")][string("name")] = string(R"(fnTreeScale)");
+	help_strings[string("fnUnitMixture")][string("description")] = string(R"(Create a SiteMixtureModel from a RateMatrix or RateGenerator)");
+	help_strings[string("fnUnitMixture")][string("details")] = string(R"(This function creates a SiteMixtureModel with one component by specifying the
+rate and root frequencies for a RateGenerator.  The rate defaults to 1, leaving
+the underlying model unchanged.
+
+If the submodel is a RateMatrix, the root frequencies default to the equilibrium
+frequencies of the RateMatrix.  However, a RateGenerator may not have equilibrium
+frequencies, so the root frequencies must be specified explicitly.
+
+In many cases it is not necessary to explicitly call fnUnitMixture(), RevBayes can
+automatically convert a RateMatrix to a SiteMixtureModel.)");
+	help_strings[string("fnUnitMixture")][string("example")] = string(R"(M := fnUnitMixture( fnJC(4) )
+M := fnJC(4) |> fnUnitMixture()  # nested functions can be expressed using pipes.
+
+# Explicit conversion to SiteMixtureModel
+M := fnJC(4) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+# Implicit conversion to SiteMixtureModel
+M := fnJC(4) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+
+# Starting the model at non-equilibrium frequencies.
+M := fnJC(4) |> fnUnitMixture(rootFrequencies=pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
+	help_strings[string("fnUnitMixture")][string("name")] = string(R"(fnUnitMixture)");
+	help_strings[string("fnUnitMixture")][string("title")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUpperTriangle")][string("name")] = string(R"(fnUpperTriangle)");
 	help_strings[string("fnVT")][string("name")] = string(R"(fnVT)");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
