@@ -7,6 +7,7 @@
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_RandomDive.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -71,7 +72,8 @@ void Move_RandomDive::constructInternalObject( void )
     // now allocate a new sliding move
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
 
     Real* uReal = dynamic_cast<Real *>( &x->getRevObject() );
     Real* upReal = dynamic_cast<RealPos *>( &x->getRevObject() );
@@ -91,7 +93,7 @@ void Move_RandomDive::constructInternalObject( void )
 
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
     
 }
 

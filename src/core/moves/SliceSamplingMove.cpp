@@ -32,8 +32,8 @@ const double log_0 = RbConstants::Double::neginf;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, optional<double> lb, optional<double> ub, double window_, double weight_, BoundarySearchMethod s, bool t )
-    : AbstractMove( std::vector<DagNode*>(), weight_ ,t),
+SliceSamplingMove::SliceSamplingMove( StochasticNode<double> *n, optional<double> lb, optional<double> ub, double window_, double weight_, BoundarySearchMethod s, size_t d, bool t )
+    : AbstractMove( std::vector<DagNode*>(), weight_ , d, t),
       lower_bound(lb),
       upper_bound(ub),
       variable( n ),

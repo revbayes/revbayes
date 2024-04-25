@@ -72,6 +72,8 @@ void Move_EllipticalSliceSamplingLognormalIID::constructInternalObject( void )
     // now allocate a new sliding move
     double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
     double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     // Add the field parameters
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
@@ -97,7 +99,7 @@ void Move_EllipticalSliceSamplingLognormalIID::constructInternalObject( void )
     
     // finally create the internal move object
     
-    value = new RevBayesCore::EllipticalSliceSamplingLognormalIIDMove(n, m, s, window_, weight_ ,tune_);
+    value = new RevBayesCore::EllipticalSliceSamplingLognormalIIDMove(n, m, s, window_, weight_, del,tune_);
 }
 
 

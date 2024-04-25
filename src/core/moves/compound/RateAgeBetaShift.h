@@ -15,8 +15,9 @@ namespace RevBayesCore {
     class RateAgeBetaShift : public AbstractMove {
         
     public:
-        RateAgeBetaShift( StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> n, StochasticNode<RbVector<double> > *sn, double delta, bool t, double weight, double targetAcceptanceRate);                     //!< Constructor
+        RateAgeBetaShift( StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> n, StochasticNode<RbVector<double> > *sn, double delta, bool t, double weight, size_t del, double targetAcceptanceRate);                     //!< Constructor
         virtual                                ~RateAgeBetaShift(void);                                             //!< Destructor
+
         
         // Basic utility functions
         RateAgeBetaShift*                       clone(void) const;                                                  //!< Clone object

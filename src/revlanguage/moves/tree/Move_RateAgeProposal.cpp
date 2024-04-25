@@ -144,7 +144,8 @@ void Move_RateAgeProposal::constructInternalObject( void )
     // now allocate a new element scaling move
     double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
     // get the tree
@@ -154,7 +155,7 @@ void Move_RateAgeProposal::constructInternalObject( void )
     // finally create the internal move object
     RevBayesCore::RateAgeProposal *prop = new RevBayesCore::RateAgeProposal(n, a, r);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 

@@ -29,8 +29,8 @@ namespace RevBayesCore {
     public:
         enum BoundarySearchMethod { search_stepping_out, search_doubling };
 
-        SliceSamplingMove(StochasticNode<double> *p, boost::optional<double>, boost::optional<double>, double window_, double weight_, BoundarySearchMethod, bool autoTune = false);        //!< Constructor
-        virtual                                                 ~SliceSamplingMove(void);                                   //!< Destructor
+        SliceSamplingMove(StochasticNode<double> *p, boost::optional<double>, boost::optional<double>, double window_, double weight_, BoundarySearchMethod, size_t d=0, bool autoTune = false);        //!< Constructor
+        virtual                                                 ~SliceSamplingMove(void);                           //!< Destructor
 
         // public methods
         virtual SliceSamplingMove*                              clone(void) const;

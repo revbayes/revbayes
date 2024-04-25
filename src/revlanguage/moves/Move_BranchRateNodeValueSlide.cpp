@@ -1,24 +1,21 @@
-#include <cstddef>
+#include <stddef.h>
 #include <ostream>
 #include <string>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
+#include "BranchRateNodeValueSlideProposal.h"
 #include "MetropolisHastingsMove.h"
-#include "Move_Slide.h"
-#include "Natural.h"
+#include "ModelVector.h"
+#include "Move_BranchRateNodeValueSlide.h"
 #include "Probability.h"
-#include "Real.h"
+#include "RbVector.h"
 #include "RealPos.h"
 #include "RevObject.h"
-#include "SlideProposal.h"
-#include "SlideProposalContinuous.h"
+#include "RlTree.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
 #include "Move.h"
-#include "RbBoolean.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlMove.h"
@@ -34,9 +31,9 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Move_Slide::Move_Slide() : Move()
+Move_BranchRateNodeValueSlide::Move_BranchRateNodeValueSlide() : Move()
 {
-    
+
 }
 
 
@@ -46,10 +43,10 @@ Move_Slide::Move_Slide() : Move()
  *
  * \return A new copy of the move.
  */
-Move_Slide* Move_Slide::clone(void) const
+Move_BranchRateNodeValueSlide* Move_BranchRateNodeValueSlide::clone(void) const
 {
-    
-    return new Move_Slide(*this);
+
+    return new Move_BranchRateNodeValueSlide(*this);
 }
 
 
@@ -62,37 +59,29 @@ Move_Slide* Move_Slide::clone(void) const
  * constructor. The move constructor takes care of the proper hook-ups.
  *
  */
-void Move_Slide::constructInternalObject( void )
+void Move_BranchRateNodeValueSlide::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
-    
-    RevBayesCore::Proposal *p = NULL;
-    
+
     // now allocate a new sliding move
-    double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
+    double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *n = dynamic_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
-    if ( n != NULL )
-    {
-        p = new RevBayesCore::SlideProposalContinuous(n,d,r);
-    }
-    else
-    {
-        RevBayesCore::StochasticNode<double> *n2 = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
-        p = new RevBayesCore::SlideProposal(n2,d,r);
-        
-    }
+    
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tree_node = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *n = dynamic_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *>( tmp );
+    
+    
+    RevBayesCore::Proposal *p = new RevBayesCore::BranchRateNodeValueSlideProposal(n, tree_node, d, r);
+
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    
-    // finally create the internal move object
-    //    value = new RevBayesCore::Move_Slide(n, d, t, w);
-    
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
-    
+
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, t);
+
 }
 
 
@@ -101,11 +90,11 @@ void Move_Slide::constructInternalObject( void )
  *
  * \return The class' name.
  */
-const std::string& Move_Slide::getClassType(void)
+const std::string& Move_BranchRateNodeValueSlide::getClassType(void)
 {
-    
-    static std::string rev_type = "Move_Slide";
-    
+
+    static std::string rev_type = "Move_BranchRateNodeValueSlide";
+
     return rev_type;
 }
 
@@ -115,11 +104,11 @@ const std::string& Move_Slide::getClassType(void)
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Move_Slide::getClassTypeSpec(void)
+const TypeSpec& Move_BranchRateNodeValueSlide::getClassTypeSpec(void)
 {
-    
+
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
-    
+
     return rev_type_spec;
 }
 
@@ -129,11 +118,11 @@ const TypeSpec& Move_Slide::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Move_Slide::getMoveName( void ) const
+std::string Move_BranchRateNodeValueSlide::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "Slide";
-    
+    std::string c_name = "BranchRateNodeValueSlide";
+
     return c_name;
 }
 
@@ -141,33 +130,34 @@ std::string Move_Slide::getMoveName( void ) const
 /**
  * Get the member rules used to create the constructor of this object.
  *
- * The member rules of the slide move are:
- * (1) the variable which must be a real.
+ * The member rules of the Slide move are:
+ * (1) the variable which must be a positive real.
  * (2) the tuning parameter lambda that defines the size of the proposal (positive real)
  * (3) a flag whether auto-tuning should be used.
  *
  * \return The member rules.
  */
-const MemberRules& Move_Slide::getParameterRules(void) const
+const MemberRules& Move_BranchRateNodeValueSlide::getParameterRules(void) const
 {
-    
-    static MemberRules slidingmove_member_rules;
+
+    static MemberRules move_member_rules;
     static bool rules_set = false;
-    
+
     if ( !rules_set )
     {
-        slidingmove_member_rules.push_back( new ArgumentRule( "x"     , Real::getClassTypeSpec()     , "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        slidingmove_member_rules.push_back( new ArgumentRule( "delta" , RealPos::getClassTypeSpec()  , "The window size parameter.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos(1.0) ) );
-        slidingmove_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune the window size during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
-        
+        move_member_rules.push_back( new ArgumentRule( "x"     , ModelVector<RealPos>::getClassTypeSpec()  , "The variable this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "tree"  , Tree::getClassTypeSpec()  , "The tree for which the branch rates apply.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()  , "The strength of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune lambda during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
+
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        slidingmove_member_rules.insert( slidingmove_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
-        
+        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+
         rules_set = true;
     }
-    
-    return slidingmove_member_rules;
+
+    return move_member_rules;
 }
 
 
@@ -176,20 +166,20 @@ const MemberRules& Move_Slide::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Move_Slide::getTypeSpec( void ) const
+const TypeSpec& Move_BranchRateNodeValueSlide::getTypeSpec( void ) const
 {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
 }
 
 
 
-void Move_Slide::printValue(std::ostream &o) const
+void Move_BranchRateNodeValueSlide::printValue(std::ostream &o) const
 {
-    
-    o << "Slide(";
+
+    o << "BranchRateNodeValueSlide(";
     if (x != NULL)
     {
         o << x->getName();
@@ -199,7 +189,7 @@ void Move_Slide::printValue(std::ostream &o) const
         o << "?";
     }
     o << ")";
-    
+
 }
 
 
@@ -213,16 +203,20 @@ void Move_Slide::printValue(std::ostream &o) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Move_Slide::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Move_BranchRateNodeValueSlide::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-    
+
     if ( name == "x" )
     {
         x = var;
     }
-    else if ( name == "delta" )
+    else if ( name == "tree" )
     {
-        delta = var;
+        tree = var;
+    }
+    else if ( name == "lambda" )
+    {
+        lambda = var;
     }
     else if ( name == "tune" )
     {
@@ -232,5 +226,5 @@ void Move_Slide::setConstParameter(const std::string& name, const RevPtr<const R
     {
         Move::setConstParameter(name, var);
     }
-    
+
 }

@@ -26,8 +26,8 @@ namespace RevBayesCore {
     class EllipticalSliceSamplingSimpleMove : public AbstractMove {
 
     public:
-        EllipticalSliceSamplingSimpleMove(std::vector< StochasticNode<double> *> n, double window_, double weight_, bool autoTune = false, bool forceAccept = false);        //!< Constructor
-        virtual                                                 ~EllipticalSliceSamplingSimpleMove(void);                   //!< Destructor
+        EllipticalSliceSamplingSimpleMove(std::vector< StochasticNode<double> *> n, double window_, double weight_, size_t d, bool autoTune = false, bool forceAccept = false);        //!< Constructor
+        virtual                                                 ~EllipticalSliceSamplingSimpleMove(void);                           //!< Destructor
 
         // public methods
         virtual EllipticalSliceSamplingSimpleMove*              clone(void) const;

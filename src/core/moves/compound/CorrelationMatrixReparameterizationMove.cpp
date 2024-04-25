@@ -22,7 +22,7 @@ namespace RevBayesCore { class ContinuousCharacterData; }
 
 using namespace RevBayesCore;
 
-CorrelationMatrixReparameterizationMove::CorrelationMatrixReparameterizationMove(StochasticNode<MatrixReal> *cm, TypedDagNode<RbVector<double> > *v, StochasticNode<ContinuousCharacterData>* mv, bool t, double w) : AbstractMove( w, t),
+CorrelationMatrixReparameterizationMove::CorrelationMatrixReparameterizationMove(StochasticNode<MatrixReal> *cm, TypedDagNode<RbVector<double> > *v, StochasticNode<ContinuousCharacterData>* mv, double w, size_t d, bool t) : AbstractMove( w, d, t),
     correlation_matrix( cm ),
     variance( v ),
     mvbm( mv ),

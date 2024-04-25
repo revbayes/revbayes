@@ -1,11 +1,3 @@
-//
-//  Move_NodeTimeScale.cpp
-//  RevBayes
-//
-//  Created by will freyman on 8/13/15.
-//  Copyright (c) 2015 will freyman. All rights reserved.
-//
-
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -15,6 +7,7 @@
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_NodeTimeScale.h"
+#include "Natural.h"
 #include "NodeTimeScaleProposal.h"
 #include "Probability.h"
 #include "RealPos.h"
@@ -62,16 +55,19 @@ void Move_NodeTimeScale::constructInternalObject( void )
     
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+<<<<<<< HEAD
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeScaleProposal(tr, l);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, t);
 }
 
 /** Get Rev type of object */
