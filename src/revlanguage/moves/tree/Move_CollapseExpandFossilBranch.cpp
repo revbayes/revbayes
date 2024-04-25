@@ -6,6 +6,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_CollapseExpandFossilBranch.h"
+#include "Natural.h"
 #include "CollapseExpandFossilBranchProposal.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -55,9 +56,10 @@ void Move_CollapseExpandFossilBranch::constructInternalObject( void )
     RevBayesCore::TypedDagNode<double> *o = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CollapseExpandFossilBranchProposal( t, o );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 

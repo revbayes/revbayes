@@ -137,13 +137,14 @@ void Move_UpDownTreeScale::constructInternalObject( void )
     // now allocate a new up-down-scale move
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::UpDownScaleProposal *prop = new RevBayesCore::UpDownScaleProposal(l);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 

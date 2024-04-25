@@ -73,6 +73,7 @@ void Move_NarrowExchangeRateMatrix::constructInternalObject( void )
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 //    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( rate_matrices->getRevObject() ).getDagNode();
@@ -95,7 +96,7 @@ void Move_NarrowExchangeRateMatrix::constructInternalObject( void )
     }
     
     RevBayesCore::Proposal *p = new RevBayesCore::NarrowExchangeRateMatrixProposal(n,rm);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
     
 }
 

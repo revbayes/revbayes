@@ -116,6 +116,7 @@ void Move_AVMVN::constructInternalObject( void )
     // now allocate a new up-down-scale move
     double s = static_cast<const RealPos &>( sigmaSquared->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double e = static_cast<const Probability &>( epsilon->getRevObject() ).getValue();
     int n0   = static_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
     int c0   = static_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
@@ -126,7 +127,7 @@ void Move_AVMVN::constructInternalObject( void )
     // finally create the internal move object
     RevBayesCore::AVMVNProposal *prop = new RevBayesCore::AVMVNProposal(s, e, n0, c0, m);
 
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
 
 }
 

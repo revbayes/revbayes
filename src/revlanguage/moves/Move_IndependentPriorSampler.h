@@ -88,6 +88,7 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
     
     // now allocate a new independent prior sampler move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
@@ -95,7 +96,7 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
     bool mh = static_cast<const RlBoolean &>( metropolisHastings->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn, mh);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 }
 
 

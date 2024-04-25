@@ -1,11 +1,3 @@
-//
-//  Move_LevyJump.cpp
-//  revbayes-proj
-//
-//  Created by Michael Landis on 4/4/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -16,6 +8,7 @@
 #include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_LevyJump.h"
+#include "Natural.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -75,12 +68,13 @@ void Move_LevyJump::constructInternalObject( void )
     // now allocate a new sliding move
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpProposal(n,d);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
     
 }
 

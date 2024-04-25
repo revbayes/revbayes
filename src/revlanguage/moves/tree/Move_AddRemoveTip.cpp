@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_AddRemoveTip.h"
+#include "Natural.h"
 #include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -58,6 +59,8 @@ void Move_AddRemoveTip::constructInternalObject( void )
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
+    
     bool exa = static_cast<const RlBoolean &>( extant->getRevObject() ).getValue();
 
     bool exi = static_cast<const RlBoolean &>( extinct->getRevObject() ).getValue();
@@ -70,7 +73,7 @@ void Move_AddRemoveTip::constructInternalObject( void )
     }
 
     RevBayesCore::Proposal *p = new RevBayesCore::AddRemoveTipProposal( t, exa, exi, sa );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 

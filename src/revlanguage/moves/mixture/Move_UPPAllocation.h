@@ -85,13 +85,14 @@ void RevLanguage::Move_UPPAllocation<rlValueType>::constructInternalObject( void
     
     // now allocate a new vector-scale move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename rlValueType::valueType> >* tmp = static_cast<const ModelVector<rlValueType> &>( x->getRevObject() ).getDagNode();
     //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* tmp = static_cast<const ModelVector<valType> &>( x->getRevObject() ).getDagNode();
     //RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *>( tmp );
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename rlValueType::valueType> > *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::UPPAllocationProposal<typename rlValueType::valueType>( sn );
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 
 }
 

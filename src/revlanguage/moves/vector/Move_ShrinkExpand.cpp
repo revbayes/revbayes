@@ -59,6 +59,7 @@ void Move_ShrinkExpand::constructInternalObject( void )
     // now allocate a new vector-scale move
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = NULL;
     if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
@@ -97,7 +98,7 @@ void Move_ShrinkExpand::constructInternalObject( void )
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ShrinkExpandProposal(n,s,l);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 
