@@ -143,7 +143,7 @@ const TypeSpec& Func_MixtureModel::getClassTypeSpec(void)
 std::string Func_MixtureModel::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnMixture";
+    std::string f_name = "fnMixtureASRV";
 
     return f_name;
 }

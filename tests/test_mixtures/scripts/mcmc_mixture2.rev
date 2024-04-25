@@ -45,7 +45,7 @@ pi_2 := pi[2]
 
 psi <- myTree[1]
 
-Qs := fnMixture(Q, mix)
+Qs := fnMixtureASRV(Q, mix)
         
 seq ~ dnPhyloCTMC(tree=psi, Q=Qs, type="DNA")
 
