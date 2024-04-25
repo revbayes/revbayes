@@ -53,7 +53,8 @@ namespace RevBayesCore {
                                                     const std::string &cdt,
                                                     const std::vector<Taxon> &tn,
                                                     bool uo,
-                                                    Tree *t);  //!< Constructor
+                                                    Tree *t,
+                                                    long age_check_precision);  //!< Constructor
 
         // public member functions
         BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                    //!< Create an independent clone
