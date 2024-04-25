@@ -28,7 +28,6 @@ namespace RevBayesCore {
         ConcreteTimeReversibleRateMatrix(const ConcreteTimeReversibleRateMatrix& m) = default;
 
         // RateMatrix functions
-        virtual ConcreteTimeReversibleRateMatrix&               assign(const Assignable &m);
         ConcreteTimeReversibleRateMatrix*                       clone(void) const;
 
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;

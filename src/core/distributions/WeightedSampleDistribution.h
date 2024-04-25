@@ -69,7 +69,6 @@ namespace RevBayesCore {
     
 }
 
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 

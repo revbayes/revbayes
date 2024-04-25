@@ -11,7 +11,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "AminoAcidState.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "DiscreteCharacterState.h"
 #include "RbVector.h"
@@ -94,19 +93,6 @@ ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector
 ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const MatrixReal& ER, const vector<double>& pi, boost::optional<double> r)
     : ConcreteTimeReversibleRateMatrix( flatten_exchange_rates(ER), pi, r)
 {
-}
-
-ConcreteTimeReversibleRateMatrix& ConcreteTimeReversibleRateMatrix::assign(const Assignable &m)
-{
-    const ConcreteTimeReversibleRateMatrix *rm = dynamic_cast<const ConcreteTimeReversibleRateMatrix*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
 }
 
 ConcreteTimeReversibleRateMatrix* ConcreteTimeReversibleRateMatrix::clone( void ) const

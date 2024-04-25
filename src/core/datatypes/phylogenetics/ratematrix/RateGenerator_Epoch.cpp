@@ -20,7 +20,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "RateMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "RateGenerator.h"
@@ -44,21 +43,6 @@ RateGenerator_Epoch::~RateGenerator_Epoch(void)
 {
 
 }
-
-RateGenerator_Epoch& RateGenerator_Epoch::assign(const Assignable &m)
-{
-    
-    const RateGenerator_Epoch *rm = dynamic_cast<const RateGenerator_Epoch*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 /** Calculate the transition probabilities */
 void RateGenerator_Epoch::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const

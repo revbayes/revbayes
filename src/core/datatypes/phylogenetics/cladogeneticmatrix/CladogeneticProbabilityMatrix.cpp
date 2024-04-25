@@ -34,21 +34,6 @@ CladogeneticProbabilityMatrix::~CladogeneticProbabilityMatrix(void)
     ; // do nothing
 }
 
-CladogeneticProbabilityMatrix& CladogeneticProbabilityMatrix::assign(const Assignable &m)
-{
-    
-    const CladogeneticProbabilityMatrix *cp = dynamic_cast<const CladogeneticProbabilityMatrix*>(&m);
-    if ( cp != NULL )
-    {
-        return operator=(*cp);
-    }
-    else
-    {
-        throw RbException("Could not assign cladogenetic probability matrix.");
-    }
-}
-
-
 /*
 void CladogeneticProbabilityMatrix::calculateTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const
 {

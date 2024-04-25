@@ -53,7 +53,6 @@ namespace RevBayesCore {
 }
 
 
-#include "Assignable.h"
 #include "RbVector.h"
 
 
