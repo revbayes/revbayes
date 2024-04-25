@@ -89,6 +89,7 @@ c = a + b
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("RlRegionalFeatureLayer")][string("name")] = string(R"(RlRegionalFeatureLayer)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_strings[string("SiteMixtureModel")][string("name")] = string(R"(SiteMixtureModel)");
 	help_strings[string("StochasticMatrix")][string("name")] = string(R"(StochasticMatrix)");
 	help_strings[string("String")][string("name")] = string(R"(String)");
 	help_strings[string("TimeTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
@@ -1408,12 +1409,59 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnHostSwitchRateModifier")][string("name")] = string(R"(fnHostSwitchRateModifier)");
 	help_strings[string("fnInferAncestralPopSize")][string("name")] = string(R"(fnInferAncestralPopSize)");
 	help_strings[string("fnInfiniteSites")][string("name")] = string(R"(fnInfiniteSites)");
+	help_arrays[string("fnInvASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnInvASRV")][string("description")] = string(R"(Add an invariable-sites component to a submodel.)");
+	help_strings[string("fnInvASRV")][string("details")] = string(R"(This model specifies that some fraction pInv of sites are invariable.
+If the submodel has m components, this function will return a model with
+n+1 components.)");
+	help_strings[string("fnInvASRV")][string("example")] = string(R"(p_inv ~ dnUniform(0,1)
+M := fnInv( fnJC(4), p_inv)
+M := fnJC(4) |> fnInv(p_inv)  # Nested functions can be expressed using pipes.
+
+M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
+M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
+
+# Not recommended -- illustration only.  3 components.
+M := fnJC(4) |> fnInv(p2) |> fnInv(p2) # Fraction of invariable sites is p2 + (1-p2)*p2)");
+	help_strings[string("fnInvASRV")][string("name")] = string(R"(fnInvASRV)");
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
 	help_strings[string("fnK81")][string("name")] = string(R"(fnK81)");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
+	help_arrays[string("fnMixtureASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of submodels.)");
+	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the submodels. The probability that
+each site follows a particular submodel is specified by the fractions parameter.
+If the rates parameter is given, each submodel rate is multipled by the corresponding
+element of the rates vector.
+
+The number of components is the sum of the components of the individual submodels.)");
+	help_strings[string("fnMixtureASRV")][string("example")] = string(R"(# Two components with different frequencies
+pi1 ~ dnDirichlet([1,1,1,1])
+pi2 ~ dnDirichlet([1,1,1,1])
+weights ~ dnDirichlet([1,1])
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
+seq ~ dnPhyloCTMC(psi, M, type="DNA")
+
+# A free-rates model
+Q := fnJC(4)
+rates ~ dnDirichlet([1,1,1,1])
+weights ~ dnDirichlet([2,2,2,2])
+M := fnMixtureASRV([Q,Q,Q,Q], weights, rates*4)
+
+# Adding rate variation to the frequency-variation model.
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
+	help_strings[string("fnMixtureASRV")][string("name")] = string(R"(fnMixtureASRV)");
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_strings[string("fnMixtureASRV")][string("title")] = string(R"(fnMixtureASRV)");
 	help_strings[string("fnMixtureCladoProbs")][string("name")] = string(R"(fnMixtureCladoProbs)");
 	help_strings[string("fnMtMam")][string("name")] = string(R"(fnMtMam)");
 	help_strings[string("fnMtRev")][string("name")] = string(R"(fnMtRev)");
