@@ -1,7 +1,7 @@
 #ifndef SmoothenTimelineFunction_H
 #define SmoothenTimelineFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbVector.h"
 #include "TypedFunction.h"
