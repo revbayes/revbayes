@@ -43,6 +43,7 @@ void Move_VectorSingleElementScale::constructInternalObject( void )
     // now allocate a new sliding move
     double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* n = static_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
@@ -51,7 +52,7 @@ void Move_VectorSingleElementScale::constructInternalObject( void )
     RevBayesCore::Proposal *p = new RevBayesCore::VectorSingleElementScaleProposal(n, d);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);    
 }
 
 

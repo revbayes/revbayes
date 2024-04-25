@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_SpeciesTreeScale.h"
+#include "Natural.h"
 #include "SpeciesTreeScaleProposal.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
@@ -78,6 +79,7 @@ void Move_SpeciesTreeScale::constructInternalObject( void )
 
     // now allocate a new move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
@@ -90,7 +92,7 @@ void Move_SpeciesTreeScale::constructInternalObject( void )
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesTreeScaleProposal(st, ra, d);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, tune);
 
 }
 

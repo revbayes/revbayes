@@ -7,6 +7,7 @@
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_ElementSwapSimplex.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlSimplex.h"
@@ -52,12 +53,13 @@ void Move_ElementSwapSimplex::constructInternalObject( void )
     
     // now allocate a new move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = static_cast<const Simplex &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ElementSwapSimplexProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 

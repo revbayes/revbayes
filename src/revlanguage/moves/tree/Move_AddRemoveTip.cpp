@@ -2,21 +2,25 @@
 #include <ostream>
 #include <string>
 
+#include "AddRemoveTipProposal.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
-#include "Move_RootTimeScaleBactrian.h"
+#include "Move_AddRemoveTip.h"
 #include "Natural.h"
-#include "RootTimeScaleBactrianProposal.h"
+#include "RbException.h"
 #include "RealPos.h"
 #include "RevObject.h"
+#include "RlBoolean.h"
 #include "RlTimeTree.h"
 #include "TypeSpec.h"
 #include "Move.h"
+#include "RbBoolean.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlMove.h"
 #include "StochasticNode.h"
+#include "StringUtilities.h"
 
 namespace RevBayesCore { class Proposal; }
 namespace RevBayesCore { class Tree; }
@@ -25,7 +29,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Move_RootTimeScaleBactrian::Move_RootTimeScaleBactrian() : Move()
+Move_AddRemoveTip::Move_AddRemoveTip() : Move()
 {
     
 }
@@ -37,14 +41,14 @@ Move_RootTimeScaleBactrian::Move_RootTimeScaleBactrian() : Move()
  *
  * \return A new copy of the process.
  */
-Move_RootTimeScaleBactrian* Move_RootTimeScaleBactrian::clone(void) const
+Move_AddRemoveTip* Move_AddRemoveTip::clone(void) const
 {
     
-    return new Move_RootTimeScaleBactrian(*this);
+    return new Move_AddRemoveTip(*this);
 }
 
 
-void Move_RootTimeScaleBactrian::constructInternalObject( void )
+void Move_AddRemoveTip::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
@@ -54,24 +58,36 @@ void Move_RootTimeScaleBactrian::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::RootTimeScaleBactrianProposal( t );
+    bool exa = static_cast<const RlBoolean &>( extant->getRevObject() ).getValue();
+
+    bool exi = static_cast<const RlBoolean &>( extinct->getRevObject() ).getValue();
+
+    bool sa = static_cast<const RlBoolean &>( sampled_ancestors->getRevObject() ).getValue();
+
+    if (exa == false && exi == false)
+    {
+        throw(RbException("In mvAddRemoveTip, 'extant' and 'extinct' cannot both be false"));
+    }
+
+    RevBayesCore::Proposal *p = new RevBayesCore::AddRemoveTipProposal( t, exa, exi, sa );
     value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 
 /** Get Rev type of object */
-const std::string& Move_RootTimeScaleBactrian::getClassType(void)
+const std::string& Move_AddRemoveTip::getClassType(void)
 {
     
-    static std::string rev_type = "Move_RootTimeScaleBactrian";
+    static std::string rev_type = "Move_AddRemoveTip";
     
     return rev_type;
 }
 
 /** Get class type spec describing type of object */
-const TypeSpec& Move_RootTimeScaleBactrian::getClassTypeSpec(void)
+const TypeSpec& Move_AddRemoveTip::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
@@ -85,17 +101,17 @@ const TypeSpec& Move_RootTimeScaleBactrian::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Move_RootTimeScaleBactrian::getMoveName( void ) const
+std::string Move_AddRemoveTip::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "RootTimeScaleBactrian";
+    std::string c_name = "AddRemoveTip";
     
     return c_name;
 }
 
 
 /** Return member rules (no members) */
-const MemberRules& Move_RootTimeScaleBactrian::getParameterRules(void) const
+const MemberRules& Move_AddRemoveTip::getParameterRules(void) const
 {
     
     static MemberRules memberRules;
@@ -104,17 +120,15 @@ const MemberRules& Move_RootTimeScaleBactrian::getParameterRules(void) const
     if ( !rules_set )
     {
         
-        memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        
-        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
+        memberRules.push_back( new ArgumentRule( "tree"  , TimeTree::getClassTypeSpec(), "The tree on which this moves operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        memberRules.push_back( new ArgumentRule( "extant", RlBoolean::getClassTypeSpec(), "Should we add/remove extant tips?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+        memberRules.push_back( new ArgumentRule( "extinct", RlBoolean::getClassTypeSpec(), "Should we add/remove extinct tips?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+        memberRules.push_back( new ArgumentRule( "sa", RlBoolean::getClassTypeSpec(), "Should we add/remove extinct tips as sampled ancestors?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+
+
+        /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        for (size_t i = 0; i < inheritedRules.size(); ++i)
-        {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
-            {
-                memberRules.push_back( inheritedRules[i].clone() );
-            }
-        }
+        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
         
         rules_set = true;
     }
@@ -123,7 +137,7 @@ const MemberRules& Move_RootTimeScaleBactrian::getParameterRules(void) const
 }
 
 /** Get type spec */
-const TypeSpec& Move_RootTimeScaleBactrian::getTypeSpec( void ) const
+const TypeSpec& Move_AddRemoveTip::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -134,10 +148,10 @@ const TypeSpec& Move_RootTimeScaleBactrian::getTypeSpec( void ) const
 
 
 /** Get type spec */
-void Move_RootTimeScaleBactrian::printValue(std::ostream &o) const
+void Move_AddRemoveTip::printValue(std::ostream &o) const
 {
     
-    o << "Move_RootTimeScaleBactrian(";
+    o << "Move_AddRemoveTip(";
     if (tree != NULL)
     {
         o << tree->getName();
@@ -151,12 +165,24 @@ void Move_RootTimeScaleBactrian::printValue(std::ostream &o) const
 
 
 /** Set a NearestNeighborInterchange variable */
-void Move_RootTimeScaleBactrian::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Move_AddRemoveTip::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
     if ( name == "tree" )
     {
         tree = var;
+    }
+    else if ( name == "extant" )
+    {
+        extant = var;
+    }
+    else if ( name == "extinct" )
+    {
+        extinct = var;
+    }
+    else if ( name == "sa" )
+    {
+        sampled_ancestors = var;
     }
     else
     {

@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "IndependentPriorProposal.h"
 #include "MetropolisHastingsMove.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RlTree.h"
 #include "TypeSpec.h"
@@ -51,6 +52,7 @@ void Move_EmpiricalTree::constructInternalObject( void )
     
     // now allocate a new empirical tree move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
@@ -58,7 +60,7 @@ void Move_EmpiricalTree::constructInternalObject( void )
     bool mh = static_cast<const RlBoolean &>( metropolisHastings->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal<RevBayesCore::Tree>(t, mh);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
     
 }
 

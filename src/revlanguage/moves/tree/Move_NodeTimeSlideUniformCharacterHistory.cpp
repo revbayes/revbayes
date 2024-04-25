@@ -5,9 +5,9 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
-#include "Move_FNPRCharacterHistory.h"
+#include "Move_NodeTimeSlideUniformCharacterHistory.h"
 #include "Natural.h"
-#include "FixedNodeheightPruneAndRegraftCharacterHistoryProposal.h"
+#include "NodeTimeSlideUniformCharacterHistoryProposal.h"
 #include "RealPos.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlRateGenerator.h"
@@ -33,12 +33,7 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-/**
- * Default constructor.
- *
- * The default constructor does nothing except allocating the object.
- */
-Move_FNPRCharacterHistory::Move_FNPRCharacterHistory() : Move()
+Move_NodeTimeSlideUniformCharacterHistory::Move_NodeTimeSlideUniformCharacterHistory() : Move()
 {
     
 }
@@ -48,28 +43,17 @@ Move_FNPRCharacterHistory::Move_FNPRCharacterHistory() : Move()
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
  *
- * \return A new copy of the move.
+ * \return A new copy of the process.
  */
-Move_FNPRCharacterHistory* Move_FNPRCharacterHistory::clone(void) const
+Move_NodeTimeSlideUniformCharacterHistory* Move_NodeTimeSlideUniformCharacterHistory::clone(void) const
 {
     
-    return new Move_FNPRCharacterHistory(*this);
+	return new Move_NodeTimeSlideUniformCharacterHistory(*this);
 }
 
 
-/**
- * Create a new internal move object.
- *
- * This function simply dynamically allocates a new internal move object that is
- * associated with the variable (DAG-node). The internal move object is created by calling its
- * constructor and passing the move-parameters (the variable and other parameters) as arguments of the
- * constructor. The move constructor takes care of the proper hook-ups.
- *
- * \return A new internal distribution object.
- */
-void Move_FNPRCharacterHistory::constructInternalObject( void )
+void Move_NodeTimeSlideUniformCharacterHistory::constructInternalObject( void )
 {
-    
     // we free the memory first
     delete value;
     
@@ -88,59 +72,49 @@ void Move_FNPRCharacterHistory::constructInternalObject( void )
     
     if (mt == "DNA")
     {
-        RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::DnaState>(n,ctmc_sn);
+        RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::DnaState>(n,ctmc_sn);
         tmp_p->setRateGenerator( qmap_tdn );
         p = tmp_p;
     }
     else if (mt == "RNA")
     {
-        RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::RnaState>(n,ctmc_sn);
+        RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::RnaState>(n,ctmc_sn);
         tmp_p->setRateGenerator( qmap_tdn );
         p = tmp_p;
     }
     else if (mt == "AA" || mt == "Protein")
     {
-        RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::AminoAcidState>(n,ctmc_sn);
+        RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::AminoAcidState>(n,ctmc_sn);
         tmp_p->setRateGenerator( qmap_tdn );
         p = tmp_p;
     }
     else if (mt == "Standard")
     {
-        RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<RevBayesCore::StandardState>(n,ctmc_sn);
+        RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<RevBayesCore::StandardState>(n,ctmc_sn);
         tmp_p->setRateGenerator( qmap_tdn );
         p = tmp_p;
     }
     
     value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
-    
 }
 
 
-/**
- * Get Rev type of object
- *
- * \return The class' name.
- */
-const std::string& Move_FNPRCharacterHistory::getClassType(void)
+/** Get Rev type of object */
+const std::string& Move_NodeTimeSlideUniformCharacterHistory::getClassType(void)
 {
     
-    static std::string rev_type = "Move_FNPRCharacterHistory";
+    static std::string rev_type = "Move_NodeTimeSlideUniformCharacterHistory";
     
-    return rev_type;
+	return rev_type; 
 }
 
-
-/**
- * Get class type spec describing type of an object from this class (static).
- *
- * \return TypeSpec of this class.
- */
-const TypeSpec& Move_FNPRCharacterHistory::getClassTypeSpec(void)
+/** Get class type spec describing type of object */
+const TypeSpec& Move_NodeTimeSlideUniformCharacterHistory::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
     
-    return rev_type_spec;
+	return rev_type_spec; 
 }
 
 
@@ -149,24 +123,17 @@ const TypeSpec& Move_FNPRCharacterHistory::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Move_FNPRCharacterHistory::getMoveName( void ) const
+std::string Move_NodeTimeSlideUniformCharacterHistory::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "FNPRCharacterHistory";
+    std::string c_name = "NodeTimeSlideUniformCharacterHistory";
     
     return c_name;
 }
 
 
-/**
- * Get the member rules used to create the constructor of this object.
- *
- * The member rules of the scale move are:
- * (1) the variable which must be a time-tree.
- *
- * \return The member rules.
- */
-const MemberRules& Move_FNPRCharacterHistory::getParameterRules(void) const
+/** Return member rules (no members) */
+const MemberRules& Move_NodeTimeSlideUniformCharacterHistory::getParameterRules(void) const
 {
     
     static MemberRules memberRules;
@@ -174,19 +141,14 @@ const MemberRules& Move_FNPRCharacterHistory::getParameterRules(void) const
     
     if ( !rules_set )
     {
+        
         memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule( "ctmc", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The ctmc.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule( "qmap", RateGenerator::getClassTypeSpec(), "The rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
-        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
+        /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        for (size_t i = 0; i < inheritedRules.size(); ++i)
-        {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
-            {
-                memberRules.push_back( inheritedRules[i].clone() );
-            }
-        }
+        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
         
         rules_set = true;
     }
@@ -194,13 +156,8 @@ const MemberRules& Move_FNPRCharacterHistory::getParameterRules(void) const
     return memberRules;
 }
 
-
-/**
- * Get type-specification on this object (non-static).
- *
- * \return The type spec of this object.
- */
-const TypeSpec& Move_FNPRCharacterHistory::getTypeSpec( void ) const
+/** Get type spec */
+const TypeSpec& Move_NodeTimeSlideUniformCharacterHistory::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -209,13 +166,12 @@ const TypeSpec& Move_FNPRCharacterHistory::getTypeSpec( void ) const
 }
 
 
-/**
- * Print the value for the user.
- */
-void Move_FNPRCharacterHistory::printValue(std::ostream &o) const
+
+/** Get type spec */
+void Move_NodeTimeSlideUniformCharacterHistory::printValue(std::ostream &o) const
 {
     
-    o << "FNPRCharacterHistory(";
+    o << "Move_NodeTimeSlideUniformCharacterHistory(";
     if (tree != NULL)
     {
         o << tree->getName();
@@ -225,21 +181,11 @@ void Move_FNPRCharacterHistory::printValue(std::ostream &o) const
         o << "?";
     }
     o << ")";
-    
 }
 
 
-/**
- * Set a member variable.
- *
- * Sets a member variable with the given name and store the pointer to the variable.
- * The value of the variable might still change but this function needs to be called again if the pointer to
- * the variable changes. The current values will be used to create the distribution object.
- *
- * \param[in]    name     Name of the member variable.
- * \param[in]    var      Pointer to the variable.
- */
-void Move_FNPRCharacterHistory::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+/** Set a NearestNeighborInterchange variable */
+void Move_NodeTimeSlideUniformCharacterHistory::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
     if ( name == "tree" )
@@ -258,9 +204,5 @@ void Move_FNPRCharacterHistory::setConstParameter(const std::string& name, const
     {
         Move::setConstParameter(name, var);
     }
-    
+
 }
-
-
-
-

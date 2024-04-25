@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_ContinuousCharacterDataSlide.h"
 #include "Probability.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -54,6 +55,7 @@ void Move_ContinuousCharacterDataSlide::constructInternalObject( void )
     // now allocate a new vector-slide move
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* tmp = static_cast<const ContinuousCharacterData &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
@@ -62,7 +64,7 @@ void Move_ContinuousCharacterDataSlide::constructInternalObject( void )
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousCharacterDataSlideProposal(n, l);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, t);
     
 }
 

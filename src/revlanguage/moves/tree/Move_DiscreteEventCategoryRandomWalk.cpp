@@ -5,6 +5,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_DiscreteEventCategoryRandomWalk.h"
+#include "Natural.h"
 #include "DiscreteEventCategoryRandomWalkProposal.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
@@ -63,11 +64,12 @@ void Move_DiscreteEventCategoryRandomWalk::constructInternalObject( void )
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::DiscreteEventCategoryRandomWalkProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
     
 }
 

@@ -61,9 +61,10 @@ void Move_NodeTimeSlideUniformAgeConstrained::constructInternalObject( void )
 
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideUniformAgeConstrainedProposal( t, constr );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 

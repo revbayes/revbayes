@@ -66,6 +66,7 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
     // now allocate a new vector-slide move
     const RevBayesCore::RbVector<std::int64_t> &e = static_cast<const ModelVector<Natural> &>( indices->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double p = static_cast<const Probability &>( switch_probability->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
@@ -92,7 +93,7 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorBinarySwitchProposal(stoch_nodes, e, p);
     prop->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
 }
 
 

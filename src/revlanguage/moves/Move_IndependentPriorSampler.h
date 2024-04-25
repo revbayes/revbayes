@@ -95,7 +95,6 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
     
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
-
 }
 
 

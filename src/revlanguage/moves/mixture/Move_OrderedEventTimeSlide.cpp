@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_OrderedEventTimeSlide.h"
 #include "Probability.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -69,6 +70,7 @@ void Move_OrderedEventTimeSlide::constructInternalObject( void )
     
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = static_cast<const RlOrderedEventTimes &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *>( tmp );
     
@@ -82,7 +84,7 @@ void Move_OrderedEventTimeSlide::constructInternalObject( void )
     // set the target acceptance rate after construction
     prop->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop, w, tuning);
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, del, tuning);
 }
 
 
