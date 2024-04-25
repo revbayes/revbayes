@@ -32,7 +32,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     num_sites( ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
@@ -51,6 +51,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     state_dependent_alpha       = NULL;
     state_dependent_sigma       = NULL;
     state_dependent_theta       = NULL;
+    root_treatment              = rt;
     
     
     // add parameters
@@ -429,8 +430,25 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 
                 if ( node.isRoot() == true )
                 {
-                    double root_state = computeRootState( last_state_left );
-                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_node), mu_node[i]);
+                    if (root_treatment == OPTIMUM)
+                    {
+                        double theta = computeStateDependentTheta ( last_state_left );
+                        lnl_node += RbStatistics::Normal::lnPdf( theta, sqrt(var_node), mu_node[i]);
+                    }
+                    else if (root_treatment == EQUILIBRIUM)
+                    {
+                        double theta = computeStateDependentTheta(last_state_left);
+                        double sigma = computeStateDependentSigma(last_state_left);
+                        double alpha = computeStateDependentAlpha(last_state_left);
+                        double stationary_variance = sigma * sigma / (2 * alpha);
+                        lnl_node += 0 ;
+                        throw RbException( "likelihood calculation for equilibrium root treatment is not implemented yet");
+                    }
+                    else if (root_treatment == PARAMETER)
+                    {
+                        double root_state = computeRootState( last_state_left );
+                        lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_node), mu_node[i]);
+                    }
                 }
                 // sum up the log normalizing factors of the subtrees
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
@@ -788,10 +806,39 @@ void PhyloOrnsteinUhlenbeckStateDependent::setValue(ContinuousCharacterData *v, 
     
 }
 
+double PhyloOrnsteinUhlenbeckStateDependent::simulateEpisode(size_t state_index, double delta_t, double ancestral_value)
+{
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // get the parameter values
+    double sigma = computeStateDependentSigma(state_index);
+    double theta = computeStateDependentTheta(state_index);
+    double alpha = computeStateDependentAlpha(state_index);
+
+    // calculate the mean
+    double e = exp(-alpha * delta_t);
+    double mu = e * (ancestral_value - theta) + theta;
+
+    // calculate the variance
+    double sd;
+    if (alpha > 1e-10){
+        double stationary_var = (sigma * sigma) / (2 * alpha); 
+        double var = stationary_var * (1.0 - e * e); 
+        sd = sqrt(var);
+    }else{
+        sd = sigma * sqrt(delta_t);
+    }
+
+    // draw the new character state as a Gaussian random variable
+    double y = RbStatistics::Normal::rv(mu, sd, *rng);
+
+    return y;
+}
+
 
 void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
-    
+
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
     
@@ -800,7 +847,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
     const ContinuousTaxonData &parent = taxa[ node_index ];
     
     // simulate the sequence for each child
-    RandomNumberGenerator* rng = GLOBAL_RNG;
     for (std::vector< TopologyNode* >::const_iterator it = children.begin(); it != children.end(); ++it)
     {
         const TopologyNode &child = *(*it);
@@ -810,48 +856,67 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
         
         // get the branch specific rate
         double branch_time = computeBranchTime( child.getIndex(), branch_length );
-        
-        //@TODO: Need to change the simulation to actually use the states from the character history
-        
-        // get the branch specific rate
-        double branch_sigma = computeStateDependentSigma( 0 );
-        
-        // get the branch specific optimum (theta)
-        double branch_theta = computeStateDependentTheta( 0 );
-        
-        // get the branch specific optimum (theta)
-        double branch_alpha = computeStateDependentAlpha( 0 );
-        
+        const CharacterHistory& current_history = character_histories->getValue();
+        size_t child_index = child.getIndex();
+        const BranchHistory& bh = current_history.getHistory(child_index);
+
+        const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh.getHistory();
+
+        // compute the first episode
+        //double begin_time = child.getAge();
+
+
         ContinuousTaxonData &taxon = taxa[ child.getIndex() ];
+        // loop over the number of characters
         for ( size_t i = 0; i < num_sites; ++i )
         {
+            double youngest_time = child.getAge();
+            double begin_time = youngest_time;
+
+            // the episode states and times (if there was at least one discrete character state change)
+            // the loop is from young to old
+            // since it's pushed to the front of the deque,
+            // the array is in order of old to young
+
+            std::deque<double> times;
+            std::deque<size_t> states;
+
+            for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = history.begin(); iter != history.end(); ++iter)
+            {
+                // get the state change event
+                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);    
+
+                // calculate the times
+                double event_time = event->getAge();
+                double delta_t = event_time - begin_time;
+                begin_time = event_time;
+
+                // get the state index
+                size_t current_state = event->getState();
+
+                // save the 
+                times.push_front(delta_t);
+                states.push_front(current_state);
+            }
+
+            // do it again, since the iterator above only does n-1 of the episodes
+            size_t first_state = static_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
+            size_t first_delta_t = node.getAge() - begin_time;
+
+            times.push_front(first_delta_t);
+            states.push_front(first_state);
+
             // get the ancestral character for this site
-            double parent_state = parent.getCharacter( i );
-            
-            // compute the standard deviation for this site
-            double branch_rate = branch_time;
-            
-            double e = exp(-branch_alpha * branch_rate);
-            double e2 = exp(-2.0 * branch_alpha * branch_rate);
-            double m = e * parent_state + (1 - e) * branch_theta;
-            
-            double stand_dev = 0.0;
-            if ( branch_alpha > 1E-10 )
-            {
-                double sigma_square = branch_sigma * branch_sigma;
-                stand_dev = sqrt( (sigma_square / (2.0*branch_alpha)*(1.0 - e2)) );
+            double y = parent.getCharacter( i );
+
+            // simulate the episodes
+            for (size_t j = 0; j < times.size(); ++j){
+                double state = states[j];
+                double delta_t = times[j];
+                y = PhyloOrnsteinUhlenbeckStateDependent::simulateEpisode(state, delta_t, y);
             }
-            else
-            {
-                // compute the standard deviation for this site
-                stand_dev = branch_sigma * sqrt(branch_rate);
-            }
-            
-            // create the character
-            double c = RbStatistics::Normal::rv( m, stand_dev, *rng);
-            
-            // add the character to the sequence
-            taxon.addCharacter( c );
+
+            taxon.addCharacter(y);
         }
         
         if ( child.isTip() )
@@ -871,12 +936,45 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
 
 std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters(size_t n)
 {
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     std::vector<double> chars = std::vector<double>(num_sites, 0);
+
+    double theta, sigma, alpha, stationary_variance;
+    if (root_treatment == OPTIMUM || root_treatment == EQUILIBRIUM){
+
+        const Tree& tau = character_histories->getValue().getTree();
+        const TopologyNode &root = tau.getRoot();
+        const TopologyNode *left = &root.getChild(0);
+        size_t left_index = left->getIndex();
+        const CharacterHistory& left_history = character_histories->getValue();
+        const BranchHistory& bh_left = left_history.getHistory(left_index);
+        size_t root_state_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+        theta = computeStateDependentTheta(root_state_index);
+        sigma = computeStateDependentSigma(root_state_index);
+        alpha = computeStateDependentAlpha(root_state_index);
+        stationary_variance = sigma * sigma / (2 * alpha);
+    }
+
     for (size_t i=0; i<num_sites; ++i)
     {
-        // @TODO: need to take the root states from the character history
-        chars[i] = computeRootState( 0 );
+        if (root_treatment == OPTIMUM)
+        {
+            chars[i] = theta;
+        }
+        else if (root_treatment == EQUILIBRIUM)
+        {
+            double y = RbStatistics::Normal::rv(theta, sqrt(stationary_variance), *rng);
+            chars[i] = y;
+        }
+        else if (root_treatment == PARAMETER)
+        {
+            chars[i] = computeRootState( 0 );
+        }
+        else
+        {
+        throw RbException( "the rootTreatment has not been set properly" );
+        }
     }
     
     return chars;

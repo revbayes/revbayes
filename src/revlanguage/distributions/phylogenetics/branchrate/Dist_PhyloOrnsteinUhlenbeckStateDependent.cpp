@@ -11,9 +11,11 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "Real.h"
+#include "OptionRule.h"
 #include "RealPos.h"
 #include "RlCharacterHistory.h"
 #include "RlDistribution.h"
+#include "RlString.h"
 #include "StringUtilities.h"
 #include "Tree.h"
 #include "TypeSpec.h"
@@ -51,9 +53,23 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     
     const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
-    
-    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n);
-    
+
+
+   //    set the root treatment
+    const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
+    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr;
+    if (rt == "optimum"){
+        rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
+    }else if (rt == "equilibrium"){
+        rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::EQUILIBRIUM;
+    }else if (rt == "parameter"){
+        rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::PARAMETER;
+   }else{
+        throw RbException("argument rootTreatment must be one of \"optimum\", \"equilibrium\" or \"parameter\"");
+    }
+
+    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n, rtr);
+
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
@@ -89,20 +105,20 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
         dist->setSigma( s );
     }
-    
-    
+
     // set the root states
-    //    if ( rootStates->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
-    //    {
-    //        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rs = static_cast<const ModelVector<Real> &>( rootStates->getRevObject() ).getDagNode();
-    //        dist->setRootState( rs );
-    //    }
-    //    else
-    //    {
-    RevBayesCore::TypedDagNode< double >* rs = static_cast<const Real &>( root_states->getRevObject() ).getDagNode();
-    dist->setRootState( rs );
-    //    }
+    if (rt == "parameter"){
+        RevBayesCore::TypedDagNode< double >* rs;
+        rs = static_cast<const Real &>( root_states->getRevObject() ).getDagNode();
+        dist->setRootState( rs );
+    }
     
+    // @TODO: Need some way to check if rootTreatment = "parameter" is specified,
+    // then the user must also specify the random variable for the ancestral value
+    // and if not, then throw an error
+   
+    // @TODO: Likewise, don't allow specifying "optimum" or "equilibrium" and at
+    // the same time supplying a parameter for the ancestral value.
     return dist;
 }
 
@@ -190,9 +206,17 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         rootStateTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
         Real *defaultRootStates = new Real(0.0);
         dist_member_rules.push_back( new ArgumentRule( "rootStates" , rootStateTypes, "The vector of root states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootStates ) );
-        
+       
+        std::vector<std::string> options;
+        options.push_back( "optimum" );
+        options.push_back( "equilibrium" );
+        options.push_back( "parameter" );
+        dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), options, "whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
+        // setting the default
+        //RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
+
         dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
-        
+       
         rules_set = true;
     }
     
@@ -273,6 +297,10 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     else if ( name == "nSites" )
     {
         n_sites = var;
+    }
+    else if ( name == "rootTreatment" )
+    {
+        root_treatment = var;
     }
     else
     {

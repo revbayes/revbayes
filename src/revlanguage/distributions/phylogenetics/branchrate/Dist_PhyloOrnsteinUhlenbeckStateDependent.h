@@ -58,6 +58,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       theta;
         RevPtr<const RevVariable>                       sigma;
         RevPtr<const RevVariable>                       root_states;
+        RevPtr<const RevVariable>                       root_treatment;
         RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
         
