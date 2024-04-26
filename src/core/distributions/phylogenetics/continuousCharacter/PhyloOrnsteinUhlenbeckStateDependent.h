@@ -83,6 +83,7 @@ namespace RevBayesCore {
         double                                                              computeStateDependentSigma(size_t idx) const;
         double                                                              computeStateDependentTheta(size_t idx) const;
         double                                                              simulateEpisode(size_t state_index, double delta_t, double ancestral_value);
+        void                                                                computeEpisode(double &mu, double &variance, double &log_nf, size_t state_index, double time);  
 
         ROOT_TREATMENT                                                      root_treatment;  
 
