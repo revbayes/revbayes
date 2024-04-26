@@ -41,13 +41,22 @@ for (i in 1:NUM_INTERVALS) {
 
 }
 
+# next we specify a prior on the number of events per interval
+# we use a multinomial prior offset to have at least one event per interval
+# first, specify the offset
 num_events_pi <- rep(1, NUM_INTERVALS)
-num_e_simplex_init <- rep(1, NUM_INTERVALS)
 
+# next, specify the prior for the multinomial distribution
+num_e_simplex_init <- rep(1, NUM_INTERVALS)
 num_e_simplex <- simplex(num_e_simplex_init)
+
+# calculate the number of coalescent events that we distribute over the intervals
 n_multi <- n_taxa-1-NUM_INTERVALS
 
+# draw the coalescent events into intervals
 number_events_pi ~ dnMultinomial(p=num_e_simplex, size=n_multi)
+
+# compute the actual number of events per interval, so the drawn number plus offset
 final_number_events_pi := num_events_pi + number_events_pi
 
 moves.append( mvIidPrior(x=number_events_pi) )
