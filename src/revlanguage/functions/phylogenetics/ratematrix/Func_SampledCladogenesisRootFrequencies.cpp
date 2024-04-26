@@ -8,7 +8,7 @@
 
 #include "Func_SampledCladogenesisRootFrequencies.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RealPos.h"
 #include "RlMatrixReal.h"

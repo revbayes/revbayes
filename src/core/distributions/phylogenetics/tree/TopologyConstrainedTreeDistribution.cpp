@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <iosfwd>
 #include <map>
@@ -73,7 +73,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     value = &base_distribution->getValue();
     
     initializeBitSets();
-    redrawValue();
+    redrawValue( SimulationCondition::MCMC );
 }
 
 
@@ -222,7 +222,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         // clade constraint has only one match
-        if (monophyly_constraints[i].isOptionalConstraint() == false)
+        if (monophyly_constraints[i].hasOptionalConstraints() == false)
         {
             RbBitSet b( value->getNumberOfTips() );
             for (size_t j = 0; j < monophyly_constraints[i].size(); j++)
@@ -384,7 +384,7 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
     {
         
         std::vector<Clade> constraints;
-        if ( monophyly_constraints[i].isOptionalConstraint() == true )
+        if ( monophyly_constraints[i].hasOptionalConstraints() == true )
         {
             constraints = monophyly_constraints[i].getOptionalConstraints();
         }
@@ -499,7 +499,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
             dirty_nodes[node.getIndex()] = false;
         }
         
-        return RbBitSet( value->getNumberOfTips(), true );
+        return RbBitSet( value->getNumberOfTips() ).set();
     }
     else
     {
@@ -532,10 +532,11 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
 /**
  * Redraw the current value. We delegate this to the simulate method.
  */
-void TopologyConstrainedTreeDistribution::redrawValue( void )
+void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
 {
     
     Tree* new_value = NULL;
+    bool alwaysReturn = (c == SimulationCondition::MCMC);
     
     if ( starting_tree == NULL )
     {
@@ -550,7 +551,7 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
             
         if ( is_rooted == true )
         {
-            new_value = simulateRootedTree();
+            new_value = simulateRootedTree(alwaysReturn);
         }
         else
         {
@@ -584,7 +585,11 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
     stored_backbone_clades = active_backbone_clades;
 }
 
-
+void TopologyConstrainedTreeDistribution::redrawValue( void )
+{
+    // if no condition is specified, assume the most restrictive
+    redrawValue(SimulationCondition::VALIDATION);
+}
 
 
 void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *backbone_one, const TypedDagNode<RbVector<Tree> > *backbone_many)
@@ -697,7 +702,7 @@ void checkCladesConsistent(const std::vector<Clade>& clades)
 /**
  *
  */
-Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
+Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn )
 {
         
     // the time tree object (topology & times)
@@ -747,7 +752,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
-            if ( monophyly_constraint.isOptionalConstraint() == true )
+            if ( monophyly_constraint.hasOptionalConstraints() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraint.getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );
@@ -902,10 +907,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
 //            RandomNumberGenerator* rng = GLOBAL_RNG;
 
 //            clade_age = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
-            clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age);
+            clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age, alwaysReturn);
         }
 
-        tree_base_distribution->simulateClade(nodes_in_clade, clade_age, 0.0);
+        tree_base_distribution->simulateClade(nodes_in_clade, clade_age, 0.0, alwaysReturn);
         nodes.push_back( nodes_in_clade[0] );
 
         std::vector<Taxon> v_taxa;
@@ -1036,13 +1041,16 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     {
         
         // set ages for optional constraints
-        std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
-        monophyly_constraints[i].setOptionalConstraints( optional_constraints );
+        if ( monophyly_constraints[i].hasOptionalConstraints() == true )
+        {
+            std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
+            monophyly_constraints[i].setOptionalConstraints( optional_constraints );
+        }
         // populate sorted clades vector
         if ( monophyly_constraints[i].size() > 1 && monophyly_constraints[i].size() < num_taxa )
         {
         
-            if ( monophyly_constraints[i].isOptionalConstraint() == true )
+            if ( monophyly_constraints[i].hasOptionalConstraints() == true )
             {
                 std::vector<Clade> optional_constraints = monophyly_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );

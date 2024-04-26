@@ -9,7 +9,7 @@
 #define DISTRIBUTIONEXPONENTIALERROR_H
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iostream>
 

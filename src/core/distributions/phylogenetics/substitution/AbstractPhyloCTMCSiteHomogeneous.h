@@ -680,6 +680,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         std::map<std::string,size_t> patterns;
         for (size_t site = 0; site < num_sites; ++site)
         {
+            bool all_missing = true;
             // create the site pattern
             std::string pattern = "";
             for (auto& node: nodes)
@@ -688,42 +689,48 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 {
                     AbstractDiscreteTaxonData& taxon = value->getTaxonData( node->getName() );
                     CharacterState &c = taxon.getCharacter(site_indices[site]);
+                    all_missing &= (c.isMissingState() || c.isGapState());
                     pattern += c.getStringValue();
                 }
             }
-            // check if we have already seen this site pattern
-            std::map<std::string, size_t>::const_iterator index = patterns.find( pattern );
-            if ( index != patterns.end() )
+            
+            // only add this pattern if not all are missing
+            if ( all_missing == false )
             {
-                // we have already seen this pattern
-                // increase the frequency counter
-                pattern_counts[ index->second ]++;
+                // check if we have already seen this site pattern
+                std::map<std::string, size_t>::const_iterator index = patterns.find( pattern );
+                if ( index != patterns.end() )
+                {
+                    // we have already seen this pattern
+                    // increase the frequency counter
+                    pattern_counts[ index->second ]++;
 
-                // obviously this site isn't unique nor the first encounter
-                unique[site] = false;
+                    // obviously this site isn't unique nor the first encounter
+                    unique[site] = false;
 
-                // remember which pattern this site uses
-                site_pattern[site] = index->second;
-            }
-            else
-            {
-                // create a new pattern frequency counter for this pattern
-                pattern_counts.push_back(1);
-
-                // insert this pattern with the corresponding index in the map
-                patterns.insert( std::pair<std::string,size_t>(pattern,num_patterns) );
-
-                // remember which pattern this site uses
-                site_pattern[site] = num_patterns;
-
-                // increase the pattern counter
-                num_patterns++;
-
-                // add the index of the site to our pattern-index vector
-                indexOfSitePattern.push_back( site );
-
-                // flag that this site is unique (or the first occurence of this pattern)
-                unique[site] = true;
+                    // remember which pattern this site uses
+                    site_pattern[site] = index->second;
+                }
+                else
+                {
+                    // create a new pattern frequency counter for this pattern
+                    pattern_counts.push_back(1);
+                    
+                    // insert this pattern with the corresponding index in the map
+                    patterns.insert( std::pair<std::string,size_t>(pattern,num_patterns) );
+                    
+                    // remember which pattern this site uses
+                    site_pattern[site] = num_patterns;
+                    
+                    // increase the pattern counter
+                    num_patterns++;
+                    
+                    // add the index of the site to our pattern-index vector
+                    indexOfSitePattern.push_back( site );
+                    
+                    // flag that this site is unique (or the first occurence of this pattern)
+                    unique[site] = true;
+                }
             }
         }
     }
@@ -846,6 +853,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             {
                 if ( val.test(c) )
                 {
+                    if ( c < 0 || c >= this->num_chars )
+                    {
+                        throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds!";
+                    }
                     invariant_site_index[i].push_back(c);
                 }
             }
@@ -853,6 +864,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         else
         {
             unsigned long c = char_matrix[taxon_index][i];
+            
+            if ( c < 0 || c >= this->num_chars )
+            {
+                throw RbException() << "Possible bug: Invar sites with ambiguous chars at site " << i << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
+            }
             invariant_site_index[i].push_back(c);
 
             for (; taxon_index<length; ++taxon_index)
@@ -948,11 +964,10 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         {
             throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
         }
-
-        // sum the partials up
-        this->lnProb = sumRootLikelihood();
-
     }
+
+    // sum the partials up
+    this->lnProb = sumRootLikelihood();
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( in_mcmc_mode == false )
@@ -2085,11 +2100,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
             }
 
             // get the ambiguous character's bitset for the tip taxon
-            RbBitSet bs = RbBitSet(this->num_chars, true);
-            if ( c.isMissingState() == false )
-            {
+            RbBitSet bs = RbBitSet(this->num_chars);
+            if ( c.isMissingState() )
+                bs.set(); // set to all 1s.
+            else
                 bs = c.getState();
-            }
 
             // iterate over possible end states for each site given start state
             for (size_t j = 0; j < this->num_chars; j++)
@@ -3182,12 +3197,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
 
     this->resizeLikelihoodVectors();
 
-    if (rm != NULL && rm->getValue().size() != this->num_chars)
-    {
-        std::stringstream ss;
-        ss << "Rate generator dimensions (" << rm->getValue().size() << " do not match the number of character states (" << this->num_chars << ")";
-        throw(RbException(ss.str()));
-    }
+    if (rm != NULL && rm->getValue().size() != num_chars)
+        throw RbException()<<"Rate generator dimensions (" << rm->getValue().size() << " do not match the number of character states (" << this->num_chars << ")";
 
     // add the new parameter
     this->addParameter( homogeneous_rate_matrix );
@@ -3491,6 +3502,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     } // end-for over all mixtures
 
     double prob_invariant = getPInv();
+    
     double oneMinusPInv = 1.0 - prob_invariant;
     std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
     if ( prob_invariant > 0.0 )
@@ -3560,7 +3572,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                     {
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
-
+                    
                     rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
                 else
@@ -4077,7 +4089,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
-    else if ( affecter != tau && affecter != site_rates_probs && affecter != site_matrix_probs) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter == site_rates_probs || affecter == site_matrix_probs )
+    {
+	// This doesn't affect the cached conditional likelihoods (so don't touch all of them).
+	// But it does affect the final likelihood (so we need to recompute that).
+    }
+    else if ( affecter != tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touch_all = true;
     }
@@ -4197,6 +4214,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                 rm = &jc;
             }
 
+	    // The rm can change behind our back if the user redefines it.
+	    if (rm->size() != num_chars)
+		throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_chars<<" states";
+
             // now also get the site specific rates
             for (size_t j = 0; j < this->num_site_rates; ++j)
             {
@@ -4226,6 +4247,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         {
             rm = &jc;
         }
+
+	// The rm can change behind our back if the user redefines it.
+	if (rm->size() != num_chars)
+	    throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_chars<<" states";
 
         for (size_t j = 0; j < this->num_site_rates; ++j)
         {
@@ -4293,7 +4318,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             {
                 rm = &this->homogeneous_rate_matrix->getValue();
             }
-            
+
+	    // The rm can change behind our back if the user redefines it.
+	    if (rm->size() != num_chars)
+		throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_chars<<" states";
+
             for (size_t j = 0; j < this->num_site_rates; ++j)
             {
                 double r = 1.0;
@@ -4316,8 +4345,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         {
             rm = &this->homogeneous_rate_matrix->getValue();
         }
-        
-        for (size_t j = 0; j < this->num_site_rates; ++j)
+
+	// The rm can change behind our back if the user redefines it.
+	if (rm->size() != num_chars)
+	    throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_chars<<" states";
+
+	for (size_t j = 0; j < this->num_site_rates; ++j)
         {
             double r = 1.0;
             if ( this->rate_variation_across_sites == true )

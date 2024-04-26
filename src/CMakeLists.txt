@@ -35,7 +35,10 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
    # Not necessarily a bug:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
 elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(OPT_FLAGS "${OPT_FLAGS} -O2 -mfpmath=sse -ffp-contract=off")
+   set(OPT_FLAGS "${OPT_FLAGS} -O2 -ffp-contract=off")
+   if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|x64|i686|x32|AMD64")
+     set(OPT_FLAGS "${OPT_FLAGS} -mfpmath=sse")
+   endif()
    find_library(OPENLIBM openlibm)
    message("openlibm: ${OPENLIBM}")
 else()
@@ -59,9 +62,14 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
-if ("${JUPYTER}" STREQUAL "ON")
-   add_definitions(-DRB_XCODE)
-endif()
+## Prevent the error "Could NOT find Threads" when we search for BOOST.
+IF(APPLE)
+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+    set(CMAKE_HAVE_THREADS_LIBRARY 1)
+    set(CMAKE_USE_WIN32_THREADS_INIT 0)
+    set(CMAKE_USE_PTHREADS_INIT 1)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+ENDIF()
 
 ##### rpath: where to find shared libraries #####
 
@@ -171,64 +179,57 @@ message("  CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 message("  CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
 
 ############# executables #################
-# basic rev-bayes binary
 
+# Should we build help2yml?
 if ("${HELP}" STREQUAL "ON")
   add_subdirectory(help2yml)
 
   message("Building ${RB_EXEC_NAME}-help2yml")
   add_executable(${RB_EXEC_NAME}-help2yml ${PROJECT_SOURCE_DIR}/help2yml/main.cpp)
 
-  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES})
+  target_link_libraries(${RB_EXEC_NAME}-help2yml rb-help rb-parser rb-core rb-libs rb-parser ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
   set_target_properties(${RB_EXEC_NAME}-help2yml PROPERTIES PREFIX "../")
   if ("${MPI}" STREQUAL "ON")
     target_link_libraries(${RB_EXEC_NAME}-help2yml ${MPI_LIBRARIES})
   endif()
 endif()
 
-if ("${JUPYTER}" STREQUAL "ON")
-  message("Building rb-jupyter")
-  add_executable(rb-jupyter ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
+if ("${CMD_GTK}" STREQUAL "ON")
+  set(RB_EXEC_NAME "RevStudio")
+endif()
+message("Building ${RB_EXEC_NAME}")
 
-  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES})
-  set_target_properties(rb-jupyter PROPERTIES PREFIX "../")
-elseif ("${CMD_GTK}" STREQUAL "ON")
-  message("Building RevStudio")
+if ("${CMD_GTK}" STREQUAL "ON")
+  target_link_libraries(rb-jupyter rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
+
   # Use the package PkgConfig to detect GTK+ headers/library files
-  FIND_PACKAGE(PkgConfig REQUIRED)
-  PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0)
-  #PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK REQUIRED gtk+-2.0)
+  #pkg_check_modules(GTK REQUIRED gtk+-3.0)
 
   # Setup CMake to use GTK+, tell the compiler where to look for headers
   # and to the linker where to look for libraries
-  INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
-  LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
+  include_directories(${GTK_INCLUDE_DIRS})
+  link_directories(${GTK_LIBRARY_DIRS})
+  add_definitions(${GTK_CFLAGS_OTHER})      # Add other flags to the compiler
+  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
 
-  # Add other flags to the compiler
-  ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
-
-  # Add an executable compiled from hello.c
-  ADD_EXECUTABLE(RevStudio ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
-
-  # Link the target to the GTK+ libraries
-  TARGET_LINK_LIBRARIES(RevStudio rb-cmd-lib rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${GTK_LIBRARIES})
-
-  SET_TARGET_PROPERTIES(RevStudio PROPERTIES PREFIX "../")
-
+  # Look into the cmd directory
   add_subdirectory(cmd)
+  set(RB_CMD_LIB rb-cmd-lib)
+
+  # The GTK version uses a different main.cpp
+  add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/cmd/main.cpp)
 
 else()
-  message("Building ${RB_EXEC_NAME}")
-  add_executable(${RB_EXEC_NAME} ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
-
-  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM})
-
-  set_target_properties(${RB_EXEC_NAME} PROPERTIES PREFIX "../")
-
-  if ("${MPI}" STREQUAL "ON")
-    target_link_libraries(${RB_EXEC_NAME} ${MPI_LIBRARIES})
-  endif()
-
+  add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 endif()
+
+  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
+target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
+# Link the target to other libraries.  Some variables can be empty.
+target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
+
+set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

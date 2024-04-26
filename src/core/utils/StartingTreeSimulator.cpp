@@ -1,6 +1,6 @@
 #include "StartingTreeSimulator.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <iosfwd>
 #include <iterator>
@@ -84,30 +84,34 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
         // set ages for optional constraints
-        std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
-        for (size_t k = 0; k < optional_constraints.size(); k++)
+        if ( my_constraints[i].hasOptionalConstraints() == true )
         {
-            for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
+            std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
+            for (size_t k = 0; k < optional_constraints.size(); k++)
             {
-                for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
+                for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
                 {
-                    if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
+                    for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
                     {
+                        if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
+                        {
                         
-                        optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
-                        break;
+                            optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
+                            break;
+                        }
                     }
                 }
-            }
             
-        }
+            }
         
-        my_constraints[i].setOptionalConstraints( optional_constraints );
+            my_constraints[i].setOptionalConstraints( optional_constraints );
+        } // finished with the optional constrains, if they exist
+        
         // populate sorted clades vector
         if ( my_constraints[i].size() > 1 && my_constraints[i].size() < num_taxa )
         {
             
-            if ( my_constraints[i].isOptionalConstraint() == true )
+            if ( my_constraints[i].hasOptionalConstraints() == true )
             {
                 std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
                 size_t idx = (size_t)( GLOBAL_RNG->uniform01() * optional_constraints.size() );

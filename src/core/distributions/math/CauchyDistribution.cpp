@@ -26,7 +26,7 @@ CauchyDistribution::CauchyDistribution(const TypedDagNode<double> *l, const Type
     // this will also ensure that the parameters are not getting deleted before we do
     addParameter( location );
     addParameter( scale );
-    
+
     *value = RbStatistics::Cauchy::rv(location->getValue(), scale->getValue(), *GLOBAL_RNG);
 }
 
@@ -47,14 +47,14 @@ CauchyDistribution* CauchyDistribution::clone( void ) const {
 
 
 double CauchyDistribution::computeLnProbability( void ) {
-    
+
     double v = *value;
-    
+
     // check that the value is inside the boundaries
-    if ( v < location->getValue() )
-    {
-        return RbConstants::Double::neginf;
-    }
+    // if ( v < location->getValue() )
+    // {
+    //     return RbConstants::Double::neginf;
+    // }
 
     return RbStatistics::Cauchy::lnPdf(location->getValue(), scale->getValue(), *value);
 }

@@ -12,12 +12,15 @@ class RbException {
         enum                        ExceptionType { DEFAULT,
                                                     BUG,
                                                     MATH_ERROR,
+                                                    SKIP_PROPOSAL,
                                                     MISSING_VARIABLE,
                                                     QUIT };         //!< Exception types
 
-                                    RbException(void);                                      //!< Default constructor
+                                    RbException(void) = default;                            //!< Default constructor
                                     RbException(const std::string& msg);                    //!< Default with message 
                                     RbException(ExceptionType type, const std::string& msg="");//!< General constructor
+                                    RbException(RbException&&) = default;
+                                    RbException(const RbException&);
 
         // Regular functions
         ExceptionType               getExceptionType(void) const;                           //!< Get exception type
@@ -30,17 +33,15 @@ class RbException {
         RbException&                operator<<(const T&);
 
     private:
-	    ExceptionType               exception_type;                                         //!< Exception type
-	    std::string                 message;                                                //!< Error message
+	ExceptionType               exception_type = DEFAULT;                               //!< Exception type
+	std::ostringstream          message;                                                //!< Error message
     
 };
 
 template <typename T>
 RbException& RbException::operator<<(const T& t) {
-  std::ostringstream oss;
-  oss<<message<<t;
-  message = oss.str();
-  return *this;
+    message<<t;
+    return *this;
 }
 
 

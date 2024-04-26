@@ -7,7 +7,7 @@
 
 #include "ChromosomesPloidyCladogenicBirthDeathFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <utility>
 
 #include "CladogeneticSpeciationRateMatrix.h"

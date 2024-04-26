@@ -1,6 +1,6 @@
 #include "WattersonThetaFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbMathCombinatorialFunctions.h"
 #include "AbstractHomologousDiscreteCharacterData.h"

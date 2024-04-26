@@ -2,7 +2,7 @@
 #define MixtureCladogeneticStateFunction_h
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <map>
 
