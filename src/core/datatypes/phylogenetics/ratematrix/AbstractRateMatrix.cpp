@@ -567,7 +567,7 @@ double L1norm(const TransitionProbabilityMatrix& M)
 
 void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const
 {
-    assert(t >= 0);
+    assert(std::isnan(t) or t >= 0);
     assert(p.num_states == p.getNumberOfStates());
 
     // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:

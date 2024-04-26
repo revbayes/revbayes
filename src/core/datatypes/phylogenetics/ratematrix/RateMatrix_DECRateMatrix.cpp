@@ -24,7 +24,6 @@
 #include "RbException.h"
 #include "RbVector.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "GeneralRateMatrix.h"
 #include "RbVectorImpl.h"
 
@@ -170,20 +169,6 @@ RateMatrix_DECRateMatrix& RateMatrix_DECRateMatrix::operator=(const RateMatrix_D
     }
     
     return *this;
-}
-
-RateMatrix_DECRateMatrix& RateMatrix_DECRateMatrix::assign(const Assignable &m)
-{
-    const RateMatrix_DECRateMatrix *rm = dynamic_cast<const RateMatrix_DECRateMatrix*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-
 }
 
 double RateMatrix_DECRateMatrix::averageRate(void) const
