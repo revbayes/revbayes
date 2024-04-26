@@ -202,6 +202,15 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     {
 	RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
 	dist->setMixtureModel( mm );
+
+	if ( root_frequencies and root_frequencies->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMCClado: can't specify 'rootFrequencies' if Q if a SiteMixtureModel";
+
+	if ( site_rates and site_rates->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMCClado: can't specify 'siteRates' if Q if a SiteMixtureModel";
+
+	if ( p_inv and p_inv->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMCClado: can't specify 'pInv' if Q if a SiteMixtureModel";
     }
     else
     {
