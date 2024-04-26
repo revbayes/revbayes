@@ -430,10 +430,13 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 
                 if ( node.isRoot() == true )
                 {
+                    double var_root;
+                    double root_state;
                     if (root_treatment == OPTIMUM)
                     {
                         double theta = computeStateDependentTheta ( last_state_left );
-                        lnl_node += RbStatistics::Normal::lnPdf( theta, sqrt(var_node), mu_node[i]);
+                        var_root = var_node;
+                        root_state = theta;
                     }
                     else if (root_treatment == EQUILIBRIUM)
                     {
@@ -441,14 +444,15 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                         double sigma = computeStateDependentSigma(last_state_left);
                         double alpha = computeStateDependentAlpha(last_state_left);
                         double stationary_variance = sigma * sigma / (2 * alpha);
-                        lnl_node += 0 ;
-                        throw RbException( "likelihood calculation for equilibrium root treatment is not implemented yet");
+                        root_state = theta;
+                        var_root = var_node + stationary_variance;
                     }
                     else if (root_treatment == PARAMETER)
                     {
-                        double root_state = computeRootState( last_state_left );
-                        lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_node), mu_node[i]);
+                        root_state = computeRootState( last_state_left );
+                        var_root = var_node;
                     }
+                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_root), mu_node[i]);
                 }
                 // sum up the log normalizing factors of the subtrees
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
