@@ -32,7 +32,7 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
-        void                                                prepareProbComputation(void) const;
+        void                                                prepareProbComputation(void) const override;
         
         void                                                prepareRateIntegral(double end);                                                        //!< Compute the rate integral.
         void                                                prepareSurvivalProbability(double end, double r);                                       //!< Compute the rate integral.

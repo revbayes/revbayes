@@ -1,7 +1,8 @@
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 #include "Argument.h"
 #include "RbException.h"

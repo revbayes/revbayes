@@ -1,6 +1,6 @@
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "MultispeciesCoalescentMigrationODE.h"

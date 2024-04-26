@@ -1,7 +1,7 @@
 #ifndef AssembleOrder1ContinuousMRFFunction_H
 #define AssembleOrder1ContinuousMRFFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbVector.h"
 #include "TypedFunction.h"

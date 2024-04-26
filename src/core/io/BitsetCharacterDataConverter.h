@@ -43,7 +43,7 @@ namespace RevBayesCore {
         std::vector<std::vector<size_t> >                   statesToBitsByNumOn;
         std::map< std::vector<size_t>, size_t >             bitsToStatesByNumOn;
         std::vector<std::string>                            stateDescriptionsByNumOn;
-        std::vector<size_t> rangeSizes;
+        std::vector<size_t>                                 rangeSizes;
         
         HomologousDiscreteCharacterData<StandardState>  data;
         std::string                                     format;

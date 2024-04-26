@@ -1,4 +1,28 @@
 #!/bin/sh
+
+# NOTE: All configuration is now done via cmake.
+#
+#       * Configuration options to this file are translated into cmake variables and passed to cmake.
+#       * Options like -DKEY=VALUE are passed to cmake.
+#
+#       To debug configuration problems:
+#         * look at src/CMakeLists.txt
+#         * note what options this script passes to cmake (there's a log message)
+
+# NOTE: Overview of what this script does:
+# 1. Read command line flags
+# 2. Generate cmake variables from command-line flags.
+# 3. Create the build/ directory (if missing).
+# 4. Update the version number            --> src/revlanguage/utils/GitVersion.cpp
+# 5. Update the help database (if asked)  --> src/core/help/RbHelpDatabase.cpp
+# 6. Run ./regenerate.sh
+# 7. Run cmake <--- This is where the configuration actually happens
+# 8. Run make or ninja to do the build.
+# 9. Restore GitVersion.cpp from backup.
+
+# If you change this script, please update the list above.
+
+
 set -e
 
 all_args="$@"
@@ -11,7 +35,6 @@ travis="false"
 mpi="false"
 cmd="false"
 help2yml="false"
-jupyter="false"
 boost_root=""
 boost_lib=""
 boost_include=""
@@ -32,7 +55,6 @@ while echo $1 | grep ^- > /dev/null; do
 -ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--jupyter        <true|false>    : set to true if you want to build the jupyter version. Defaults to false.
 -help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
@@ -104,16 +126,20 @@ if [ "$mpi" = "true" ] ; then
     cmake_args="-DMPI=ON $cmake_args"
 fi
 
-if [ "$jupyter" = "true" ] ; then
-    cmake_args="-DJUPYTER=ON $cmake_args"
-fi
-
 if [ "$cmd" = "true" ] ; then
     cmake_args="-DCMD_GTK=ON $cmake_args"
 fi
 
 if [ "$travis" = "true" ] ; then
     cmake_args="-DCONTINUOUS_INTEGRATION=TRUE $cmake_args"
+fi
+
+if [ -n "$jupyter" ] ; then
+    echo "There is no longer a -jupyter <true|false> option to '$0'."
+    echo "Jupyter functionality is now part of the standard rb application."
+    echo
+    echo "Run '$0 -h' to see available options."
+    exit 1
 fi
 
 if [ -n "$boost_lib" ] && [ -n "$boost_include" ] ; then

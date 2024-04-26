@@ -17,7 +17,7 @@
 
 #include "RbMathGaussianElimination.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbMathMatrix.h"
 #include "MatrixComplex.h"

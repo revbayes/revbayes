@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -143,6 +143,18 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         double p = this->value->cladeProbability( c, verbose );
+        
+        return new RevVariable( new Probability( p ) );
+        
+    }
+    else if ( name == "jointCladeProbability" )
+    {
+        found = true;
+        
+        const RevBayesCore::RbVector<RevBayesCore::Clade> &c    = static_cast<const ModelVector<Clade> &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        
+        double p = this->value->jointCladeProbability( c, verbose );
         
         return new RevVariable( new Probability( p ) );
         
@@ -461,6 +473,11 @@ void TraceTree::initMethods( void )
     cladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "cladeProbability", Probability::getClassTypeSpec(), cladeProbArgRules) );
     
+    ArgumentRules* jointCladeProbArgRules = new ArgumentRules();
+    jointCladeProbArgRules->push_back( new ArgumentRule("clades", ModelVector<Clade>::getClassTypeSpec(), "The set of (monophyletic) clades.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    jointCladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "jointCladeProbability", Probability::getClassTypeSpec(), jointCladeProbArgRules) );
+   
     ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();
     getNumberSamplesArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
     this->methods.addFunction( new MemberProcedure( "getNumberSamples", Natural::getClassTypeSpec(), getNumberSamplesArgRules) );

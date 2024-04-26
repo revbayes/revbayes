@@ -41,7 +41,7 @@ dnMultiSpeciesCoalescentUniformPrior
 	        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
 	    }
 	  }
-	  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, rate=beta, taxa=taxons[g])
+	  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, scale=beta, taxa=taxons[g])
 	  print(geneTrees[g])
 	}
 	# We can save the species tree and the gene trees: 

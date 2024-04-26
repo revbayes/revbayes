@@ -1,10 +1,11 @@
-#include <float.h>
-#include <stddef.h>
+#include <cfloat>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include "AbstractBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
@@ -23,6 +24,7 @@
 #include "StartingTreeSimulator.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class Taxon; }
@@ -62,7 +64,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::string &cdt,
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
-                                                                        Tree *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        Tree *t,
+                                                                        long age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -114,25 +117,25 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( interval_times_global );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_speciation);
-    homogeneous_lambda = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
+    homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
 
     addParameter( homogeneous_lambda );
     addParameter( heterogeneous_lambda );
 
     heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_extinction);
-    homogeneous_mu = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
+    homogeneous_mu   = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
 
     addParameter( homogeneous_mu );
     addParameter( heterogeneous_mu );
 
     heterogeneous_phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_sampling);
-    homogeneous_phi = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
+    homogeneous_phi   = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
 
     addParameter( homogeneous_phi );
     addParameter( heterogeneous_phi );
 
     heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_treatment);
-    homogeneous_r = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
+    homogeneous_r   = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
 
     addParameter( homogeneous_r );
     addParameter( heterogeneous_r );
@@ -146,7 +149,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( heterogeneous_Mu );
 
     heterogeneous_Phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_sampling);
-    homogeneous_Phi = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);
+    homogeneous_Phi   = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);  
 
     addParameter( homogeneous_Phi );
     addParameter( heterogeneous_Phi );
@@ -165,8 +168,20 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
 
     delete value;
     
-    if (t != nullptr) {
-        value = t;
+    if (t != nullptr)
+    {
+        try
+        {
+            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
+            value = my_tree->clone();
+        }
+        catch (RbException &e)
+        {
+            value = nullptr;
+            // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
+            // a nonexistent starting_tree
+            throw RbException( e.getMessage() );
+        }
     }
     else
     {
@@ -304,7 +319,7 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
     // if conditioning on root, root node must be a "true" bifurcation event
     else
     {
-        if ( root->isSampledAncestor(true) )
+        if ( root->isSampledAncestorTipOrParent() )
         {
             return RbConstants::Double::neginf;
         }
@@ -562,7 +577,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 
       double t = n.getAge();
 
-      if ( n.isTip() && n.isFossil() && n.isSampledAncestor() )
+      if ( n.isTip() && n.isFossil() && n.isSampledAncestorTip() )
       {
         // node is sampled ancestor
           int at_event = whichIntervalTime(t);
@@ -577,7 +592,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               event_sampled_ancestor_ages[at_event].push_back(t);
           }
       }
-      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestor() )
+      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestorTip() )
       {
           // node is serial leaf
           int at_event = whichIntervalTime(t);
@@ -606,7 +621,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               serial_tip_ages.push_back(0.0);
           }
       }
-      else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
       {
           if ( n.isRoot() == false || use_origin == true )
           {
@@ -624,7 +639,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               }
           }
       }
-      else if ( n.isInternal() && n.getChild(0).isSampledAncestor() && n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && n.getChild(0).isSampledAncestorTip() && n.getChild(1).isSampledAncestorTip() )
       {
           return true;
       }
@@ -1473,7 +1488,15 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
+//            simulateTree();
+            
+            RbVector<Clade> constr;
+            // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+            StartingTreeSimulator simulator;
+            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            // store the new value
+            value = my_tree;
         }
     }
     else if ( condition == SimulationCondition::VALIDATION )
@@ -1543,7 +1566,6 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
 {
     // incorrect placeholder, there is no way to simulate an FBD tree consistent with fossil times, we use a coalescent simulator instead
 
-
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
@@ -1554,35 +1576,41 @@ double BirthDeathSamplingTreatmentProcess::simulateDivergenceTime(double origin,
     double b = lambda[i];
     double d = mu[i];
     double p_e = phi_event[i];
+    double x = b - d;
 
+    // make sure age is not negative, otherwise function doesn't work
+    assert(age >= 0);
 
     // get a random draw
     double u = rng->uniform01();
 
     // compute the time for this draw
     double t = 0.0;
-    if ( b > d )
+    if ( x > 0 )
     {
         if( p_e > 0.0 )
         {
-            t = ( log( ( (b-d) / (1 - (u)*(1-((b-d)*exp((d-b)*age))/(p_e*b+(b*(1-p_e)-d)*exp((d-b)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+            t = ( log( ( x / (1 - (u)*(1-(x*exp((-x)*age))/(p_e*b+(b*(1-p_e)-d)*exp((-x)*age) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  x;
         }
         else
         {
-            t = log( 1 - u * (exp(age*(d-b)) - 1) / exp(age*(d-b)) ) / (b-d);
+            t = log( (1 - u) * exp(-x * age) + u) / x + age;
         }
     }
     else
     {
         if( p_e > 0.0 )
         {
-            t = ( log( ( (b-d) / (1 - (u)*(1-(b-d)/(p_e*b*exp((b-d)*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  (b-d);
+            t = ( log( ( x / (1 - (u)*(1-x/(p_e*b*exp(x*age)+(b*(1-p_e)-d) ) ) ) - (b*(1-p_e)-d) ) / (p_e * b) ) )  /  x;
         }
         else
         {
-            t = log( 1 - u * (1 - exp(age*(b-d)))  ) / (b-d);
+            t = log( 1 - u * (1 - exp(age*x))  ) / x;
         }
     }
+
+    // make sure the result is in the right range
+    assert(0 <= t and t <= age);
 
     return present + t;
 }
@@ -1928,4 +1956,18 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
         // delegate the super-class
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
+}
+
+/**
+ * Checks if removal probabilities set for this distribution are compatible with sampled ancestors
+ * (i.e. removal < 1)
+ */
+bool BirthDeathSamplingTreatmentProcess::allowsSA() {
+    for(auto removal : r) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    for(auto removal : r_event) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    return false;
 }

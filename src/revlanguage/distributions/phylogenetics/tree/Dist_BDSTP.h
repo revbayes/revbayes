@@ -6,17 +6,11 @@
 namespace RevLanguage {
 
     /**
-     * The RevLanguage wrapper of the constant-rate Fossilized-Birth-Death Process
+     * The RevLanguage wrapper of the Birth-Death-Sampling-Treatment Process
      *
      * The RevLanguage wrapper of the episodic or constant-rate birth-death-sampling-treatment process connects
-     * the variables/parameters of the process and creates the internal EpisodicBirthDeathSamplingTreatmentProcess object.
-     * Please read the EpisodicBirthDeathSamplingTreatmentProcess.h for more info.
-     *
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2014-01-26, version 1.0
-     *c
+     * the variables/parameters of the process and creates the internal BirthDeathSamplingTreatmentProcess object.
+     * Please read the BirthDeathSamplingTreatmentProcess.h for more info.
      */
     class Dist_BDSTP : public BirthDeathProcess {
 
@@ -39,28 +33,32 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-
+        virtual void                                            addCommonRules(MemberRules&) const;                                                     //!< Add argument rules common to all BDSTP versions (default, FBD, phylodynamic)
+        virtual void                                            addBurstRules(MemberRules &dist_member_rules) const;                                    //!< Add argument rules for burst/mass extinction events
+        virtual RevBayesCore::DagNode*                          getRemovalProbability( void ) const;                                                    //!< Get removal probability
 
     private:
 
         RevPtr<const RevVariable>                               lambda;                                                                                 //!< The speciation rate(s)
         RevPtr<const RevVariable>                               mu;                                                                                     //!< The extinction rate(s)
         RevPtr<const RevVariable>                               phi;                                                                                    //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               r;                                                                                    //!< The taxon sampling fraction(s)
-        RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The speciation rate(s)
-        RevPtr<const RevVariable>                               Mu;                                                                                     //!< The extinction rate(s)
-        RevPtr<const RevVariable>                               Phi;                                                                                    //!< The serial sampling rate(s)
-        RevPtr<const RevVariable>                               r_event;                                                                                    //!< The serial sampling rate(s)
+        RevPtr<const RevVariable>                               r;                                                                                      //!< The treatment/removal probability(s)
+        RevPtr<const RevVariable>                               Lambda;                                                                                 //!< The burst speciation rate(s)
+        RevPtr<const RevVariable>                               Mu;                                                                                     //!< The mass extinction rate(s)
+        RevPtr<const RevVariable>                               Phi;                                                                                    //!< The event sampling rate(s)
+        RevPtr<const RevVariable>                               r_event;                                                                                //!< The event treatment/removal probability(s) - R, uses same timeline as Phi
         RevPtr<const RevVariable>                               timeline;                                                                               //!< The interval change times
         RevPtr<const RevVariable>                               lambda_timeline;                                                                        //!< The speciation rate change times
         RevPtr<const RevVariable>                               mu_timeline;                                                                            //!< The extinction rate change times
         RevPtr<const RevVariable>                               phi_timeline;                                                                           //!< The serial sampling rate change times
-        RevPtr<const RevVariable>                               r_timeline;                                                                           //!< The change times for the death upon sampling probabilities
+        RevPtr<const RevVariable>                               r_timeline;                                                                             //!< The change times for the treatment/removal probabilities
         RevPtr<const RevVariable>                               Lambda_timeline;                                                                        //!< The burst times
         RevPtr<const RevVariable>                               Mu_timeline;                                                                            //!< The mass extinction times
         RevPtr<const RevVariable>                               Phi_timeline;                                                                           //!< The event sampling times
-        std::string                                             start_condition;                                                                     //!< The start condition of the process (rootAge/originAge)
-        RevPtr<const RevVariable>                               initial_tree;
+        std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
+        RevPtr<const RevVariable>                               initial_tree;                                                                           //!< User-specified initial tree (optional)
+        RevPtr<const RevVariable>                               age_check_precision;                                                                    //!< Number of decimal places to use when checking the initial tree against taxon ages
+
 
     };
 

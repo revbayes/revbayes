@@ -73,9 +73,9 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     heterogeneous_beta               = NULL;
 
     heterogeneous_lambda_a = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inlambda_a);
-    homogeneous_lambda_a = dynamic_cast<const TypedDagNode<double >*>(inlambda_a);
-    heterogeneous_beta = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inbeta);
-    homogeneous_beta = dynamic_cast<const TypedDagNode<double >*>(inbeta);
+    homogeneous_lambda_a   = dynamic_cast<const TypedDagNode<double >*>(inlambda_a);
+    heterogeneous_beta     = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inbeta);
+    homogeneous_beta       = dynamic_cast<const TypedDagNode<double >*>(inbeta);
 
     addParameter( homogeneous_lambda_a );
     addParameter( heterogeneous_lambda_a );
@@ -86,13 +86,13 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
 
     RbException inconsistent_rates = RbException("Inconsistent number of rates in fossilized birth death process.");
 
-    if( heterogeneous_lambda_a != NULL )
+    if ( heterogeneous_lambda_a != NULL )
     {
         if ( timeline == NULL ) throw no_timeline_err;
 
         if ( heterogeneous_lambda_a->getValue().size() != num_intervals ) throw inconsistent_rates;
     }
-    if( heterogeneous_beta != NULL )
+    if ( heterogeneous_beta != NULL )
     {
         if ( timeline == NULL ) throw no_timeline_err;
 
@@ -144,7 +144,7 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) 
 {
     double lnProb = 0.0;
 
-    for(size_t i = 0; i < taxa.size(); i++)
+    for (size_t i = 0; i < taxa.size(); i++)
     {
         // include the anagenetic speciation density for descendants of sampled ancestors
         if ( I[i] == true )
@@ -276,7 +276,7 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 /**
  *
  */
-void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
+void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn)
 {
 
     // Get the rng
@@ -377,7 +377,7 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
         else
         {
             // now we simulate new ages
-            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age);
+            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age, alwaysReturn);
 
             if ( next_sim_age < next_node_age )
             {
@@ -490,8 +490,12 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
 
 }
 
-std::vector<double> FossilizedBirthDeathSpeciationProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min) const
+/**
+ * @param alwaysReturn whether the simulation can return times which are not valid draws from the distribution (for initial values)
+*/
+std::vector<double> FossilizedBirthDeathSpeciationProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const
 {
+    if(!alwaysReturn) throw RbException("Impossible to simulate under a true FossilizedBirthDeathSpeciation process");
 
     std::vector<double> t(n, 0.0);
 
@@ -570,7 +574,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
     std::vector<TopologyNode* > children = node.getChildren();
 
-    bool sa = node.isSampledAncestor(true);
+    bool sa = node.isSampledAncestorTipOrParent();
 
     for(int c = 0; c < children.size(); c++)
     {
@@ -598,7 +602,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
         // is child a new species?
         // set start time at this node
-        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestor() ) )
+        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestorTip() ) )
         {
             double age = node.getAge(); // y_{a(i)}
 
@@ -651,7 +655,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
  *
  *
  */
-void FossilizedBirthDeathSpeciationProcess::prepareProbComputation()
+void FossilizedBirthDeathSpeciationProcess::prepareProbComputation( void ) const 
 {
     AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation();
 

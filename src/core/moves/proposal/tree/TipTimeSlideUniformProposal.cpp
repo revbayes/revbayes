@@ -130,11 +130,12 @@ double TipTimeSlideUniformProposal::doProposal( void )
     TopologyNode& parent = node->getParent();
 
     // we need to work with the times
-    double parent_age  = parent.getAge();
-    double my_age      = node->getAge();
-    double sibling_Age = 0;
+    double my_age  = node->getAge();
+    double max_age = parent.getAge();
+    double min_age = 0.0;
 
-    if (node->isSampledAncestor())
+    // adjust min and max age if sampled ancestor
+    if (node->isSampledAncestorTip())
     {
         TopologyNode *sibling = &parent.getChild( 0 );
         if ( sibling == node )
@@ -142,29 +143,39 @@ double TipTimeSlideUniformProposal::doProposal( void )
             sibling = &parent.getChild( 1 );
         }
 
-        sibling_Age = sibling->getAge();
+        min_age = sibling->getAge();
 
         if (parent.isRoot())
         {
             if (origin == NULL)
                 throw(RbException("Attempting to move root sampled ancestor, but no origin time provided."));
 
-            parent_age = origin->getValue();
+            max_age = origin->getValue();
         }
         else
         {
             TopologyNode& grandParent = parent.getParent();
 
-            parent_age = grandParent.getAge();
+            max_age = grandParent.getAge();
         }
     }
-    
-    // now we store all necessary values
-    storedNode = node;
-    storedAge = my_age;
-    
-    // draw new ages and compute the hastings ratio at the same time
-    double my_new_age = sibling_Age + (parent_age - sibling_Age) * rng->uniform01();
+
+    // adjust min and max age given taxon data
+    Taxon& taxon = node->getTaxon();
+    if ( taxon.getMaxAge() < max_age ) {
+    	max_age = taxon.getMaxAge();
+    }
+    if ( taxon.getMinAge() > min_age ) {
+    	min_age = taxon.getMinAge();
+    }
+
+
+	// now we store all necessary values
+	storedNode = node;
+	storedAge = my_age;
+
+	// draw new ages and compute the hastings ratio at the same time
+	double my_new_age = min_age + (max_age - min_age) * rng->uniform01();
     
     // set the age
     node->setAge( my_new_age );

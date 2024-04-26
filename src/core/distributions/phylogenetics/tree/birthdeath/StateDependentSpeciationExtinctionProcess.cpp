@@ -227,11 +227,11 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -245,7 +245,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -271,7 +271,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
         num_initial_lineages = 1;
     }
     // if conditioning on root, root node must be a "true" bifurcation event
-    else if (root.getChild(0).isSampledAncestor() || root.getChild(1).isSampledAncestor())
+    else if (root.getChild(0).isSampledAncestorTip() || root.getChild(1).isSampledAncestorTip())
     {
         return RbConstants::Double::neginf;
     }
@@ -363,7 +363,8 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 extinction = pExtinction(0.0, node.getAge());
             }
             
-            RbBitSet obs_state(num_states, true);
+            RbBitSet obs_state(num_states);
+            obs_state.set();
             bool gap = true;
 
             if ( tree->hasCharacterData() == true )
@@ -424,7 +425,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
             }
             
             bool speciation_node = true;
-            if ( left.isSampledAncestor() || right.isSampledAncestor() )
+            if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
             {
                 speciation_node = (phi == NULL);
             }
@@ -464,7 +465,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         double begin_age = node.getAge();
         double end_age = node.getParent().getAge();
         
-        if ( node.isSampledAncestor() == false )
+        if ( node.isSampledAncestorTip() == false )
         {
             // calculate likelihoods for this branch
             if ( sample_character_history == false )
@@ -540,7 +541,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         }
         
     }
-    
+
 }
 
 
@@ -575,7 +576,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     }
 
     bool speciation_node = true;
-    if ( left.isSampledAncestor() || right.isSampledAncestor() )
+    if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
     {
         speciation_node = (phi == NULL);
     }
@@ -585,7 +586,11 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     {
         node_likelihood[i] = left_likelihoods[i];
 
-        if ( use_cladogenetic_events == true && speciation_node == true )
+        // MRM 03/23/2020: the root is a cladogenetic event, so the
+        // cladogenetic events should be included at the root. right now,
+        // I am just forcing the cladogenetic events at the root, but there
+        // may be a better solution.
+		if ( use_cladogenetic_events == true && speciation_node == true )
         {
 
             double like_sum = 0.0;
@@ -1808,6 +1813,7 @@ double StateDependentSpeciationExtinctionProcess::pSurvival(double start, double
  */
 void StateDependentSpeciationExtinctionProcess::redrawValue( void )
 {
+
     size_t attempts = 0;    
     //while (attempts < 100000)
     while (attempts < 10000)

@@ -1,7 +1,7 @@
 #ifndef Environment_H
 #define Environment_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <string>
 #include <vector>

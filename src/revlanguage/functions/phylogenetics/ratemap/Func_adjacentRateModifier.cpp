@@ -8,7 +8,7 @@
 
 #include "Func_adjacentRateModifier.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "AdjacentRateModifierFunction.h"

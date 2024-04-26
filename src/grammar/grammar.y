@@ -25,6 +25,7 @@
 #include "Probability.h"
 #include "Parser.h"
 #include "RlBoolean.h"
+#include "RbException.h"
 #include "RlString.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -52,6 +53,7 @@
 #include "SyntaxUnaryExpr.h"
 #include "SyntaxVariableDecl.h"
 #include "SyntaxVariable.h"
+#include "SyntaxPipePlaceholder.h"
 #include "SyntaxWorkspaceVariableAssignment.h"
 #include "Workspace.h"
 
@@ -68,6 +70,7 @@ extern Environment *executionEnvironment;
 
 /* The function yyerror handles errors. It is defined below. */
 int yyerror(const char *);
+RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg, RevLanguage::SyntaxElement* fxnCallE);
 
 /* We use the global parser to execute the syntax tree */
 Parser& parser = Parser::getParser();
@@ -130,6 +133,8 @@ Parser& parser = Parser::getParser();
 %token DECREMENT INCREMENT
 %token EQUAL 
 %token AND OR AND2 OR2 GT GE LT LE EQ NE
+%token PIPE
+%token PIPE_PLACEHOLDER
 %token END_OF_INPUT
 
 /* Destructors */
@@ -173,6 +178,7 @@ Parser& parser = Parser::getParser();
 %nonassoc   GT GE LT LE EQ NE
 %left       '+' '-'
 %left       '*' '/'
+%left       PIPE
 %left       ':' '%'
 %right      DECREMENT INCREMENT
 %left       UMINUS UPLUS
@@ -354,6 +360,7 @@ prog    :       END_OF_INPUT
         ;
 
 expression  :   constant                    { $$ = $1; }
+            |   PIPE_PLACEHOLDER            { $$ = new SyntaxPipePlaceholder(); }
 
             |   vector                      { $$ = new SyntaxFunctionCall("v", $1); }
 
@@ -390,6 +397,8 @@ expression  :   constant                    { $$ = $1; }
             |   expression AND2 expression  { $$ = new SyntaxBinaryExpr(SyntaxBinaryExpr::And2, $1, $3); }
             |   expression OR2 expression   { $$ = new SyntaxBinaryExpr(SyntaxBinaryExpr::Or2, $1, $3); }
 
+            |   expression PIPE expression  { $$ = xxpipe($1, $3); }
+
             |   arrowAssign                 { $$ = $1; }
             |   equationAssign              { $$ = $1; }
             |   tildeAssign                 { $$ = $1; }
@@ -404,6 +413,7 @@ expression  :   constant                    { $$ = $1; }
             |   functionCall                { $$ = $1; }
 
             |   variable                    { $$ = $1; }
+
             ;
 
 arrowAssign     :   expression ARROW_ASSIGN expression
@@ -500,42 +510,46 @@ variable    :   identifier optElements
                     delete $1;
                     delete $2;
                 }
-            |   fxnCall '[' expression ']' optElements
+            |   fxnCall elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (FUNCTION_VAR) in syntax tree\n");
 #endif
-                    $$ = new SyntaxIndexOperation($1,$3);
-                    for (std::list<SyntaxElement*>::iterator it=$5->begin(); it!=$5->end(); ++it)
+                    $$ = $1;
+                    for (auto& element: *$2)
                     {
-                        $$ = new SyntaxIndexOperation($$,*it);
+                        $$ = new SyntaxIndexOperation($$, element);
                     }
-                    delete $5;
+                    delete $2;
                 }
-            |   '(' expression ')' '[' expression ']' optElements
+            |   '(' expression ')' elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting variable (EXPRESSION_VAR) in syntax tree\n");
 #endif
-                    $$ = new SyntaxIndexOperation($2,$5);
-                    for (std::list<SyntaxElement*>::iterator it=$7->begin(); it!=$7->end(); ++it)
+                    $$ = $2;
+                    for (auto& element: *$4)
                     {
-                        $$ = new SyntaxIndexOperation($$,*it);
+                        $$ = new SyntaxIndexOperation($$, element);
                     }
-                    delete $7;
+                    delete $4;
                 }
-            |   variable '.' fxnCall '[' expression ']' optElements
+            |   variable '.' fxnCall elementList
                 {
 #ifdef DEBUG_BISON_FLEX
                     printf("Parser inserting member variable (FUNCTION_VAR) in syntax tree\n");
 #endif
                     $3->setBaseVariable($1);
-                    $$ = new SyntaxIndexOperation($3,$5);
-                    for (std::list<SyntaxElement*>::iterator it=$7->begin(); it!=$7->end(); ++it)
+                    $$ = $3;
+                    for (auto& element: *$4)
                     {
-                        $$ = new SyntaxIndexOperation($$,*it);
+                        $$ = new SyntaxIndexOperation($$, element);
                     }
-                    delete $7;
+                    delete $4;
+                }
+            |   PIPE_PLACEHOLDER
+                {
+                    $$ = new SyntaxPipePlaceholder;
                 }
             ;
 
@@ -555,7 +569,6 @@ fxnCall     :   identifier '(' optArguments ')'
                     delete $1;
                 }
             ;
-
 
 functionCall    :   fxnCall
                     {
@@ -932,4 +945,19 @@ int yyerror(const char *msg)
     return 1;
 }
 
+RevLanguage::SyntaxElement* xxpipe(RevLanguage::SyntaxElement* arg,
+                                   RevLanguage::SyntaxElement* fxnCallE)
+{
+    if (auto fxnCall = dynamic_cast<RevLanguage::SyntaxFunctionCall*>(fxnCallE))
+    {
+        fxnCall->pipeAddArg(arg);
+    }
+    else
+    {
+        delete arg;
+        delete fxnCallE;
+        throw RbException("The pipe operator requires a function call as RHS.");
+    }
 
+    return fxnCallE;
+}

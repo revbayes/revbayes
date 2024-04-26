@@ -240,6 +240,12 @@ protected                               {
 "!="                                    {
                                             return NE;
                                         }
+"|>"                                    {
+                                            return PIPE;
+                                        }
+"_"                                     {
+                                            return PIPE_PLACEHOLDER;
+                                        }
 [ \t]+                                  {
                                             /* Ignore white space */
                                         }
