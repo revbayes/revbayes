@@ -2,8 +2,8 @@
 #include <iosfwd>
 #include <vector>
 
-#include "SmoothenTimelineFunction.h"
-#include "Func_SmoothenTimeline.h"
+#include "SmoothTimeLineFunction.h"
+#include "Func_SmoothTimeLine.h"
 #include "Natural.h"
 #include "RlBoolean.h"
 #include "RlDeterministicNode.h"
@@ -36,7 +36,7 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_SmoothenTimeline::Func_SmoothenTimeline( void ) : TypedFunction< ModelVector<RealPos> >( )
+Func_SmoothTimeLine::Func_SmoothTimeLine( void ) : TypedFunction< ModelVector<RealPos> >( )
 {
 
 }
@@ -48,28 +48,28 @@ Func_SmoothenTimeline::Func_SmoothenTimeline( void ) : TypedFunction< ModelVecto
  *
  * \return A new copy of the process.
  */
-Func_SmoothenTimeline* Func_SmoothenTimeline::clone( void ) const
+Func_SmoothTimeLine* Func_SmoothTimeLine::clone( void ) const
 {
 
-    return new Func_SmoothenTimeline( *this );
+    return new Func_SmoothTimeLine( *this );
 }
 
 
-RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_SmoothenTimeline::createFunction( void ) const
+RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_SmoothTimeLine::createFunction( void ) const
 {
 
     RevBayesCore::TypedDagNode<double>* max_t                              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* times = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* values = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::SmoothenTimelineFunction* f = new RevBayesCore::SmoothenTimelineFunction( max_t, times, values );
+    RevBayesCore::SmoothTimeLineFunction* f = new RevBayesCore::SmoothTimeLineFunction( max_t, times, values );
       return f;
 
 }
 
 
 /* Get argument rules */
-const ArgumentRules& Func_SmoothenTimeline::getArgumentRules( void ) const
+const ArgumentRules& Func_SmoothTimeLine::getArgumentRules( void ) const
 {
 
     static ArgumentRules argumentRules = ArgumentRules();
@@ -90,17 +90,17 @@ const ArgumentRules& Func_SmoothenTimeline::getArgumentRules( void ) const
 }
 
 
-const std::string& Func_SmoothenTimeline::getClassType(void)
+const std::string& Func_SmoothTimeLine::getClassType(void)
 {
 
-    static std::string rev_type = "Func_SmoothenTimeline";
+    static std::string rev_type = "Func_SmoothTimeLine";
 
     return rev_type;
 }
 
 
 /* Get class type spec describing type of object */
-const TypeSpec& Func_SmoothenTimeline::getClassTypeSpec(void)
+const TypeSpec& Func_SmoothTimeLine::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -112,16 +112,16 @@ const TypeSpec& Func_SmoothenTimeline::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_SmoothenTimeline::getFunctionName( void ) const
+std::string Func_SmoothTimeLine::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnSmoothenTimeline";
+    std::string f_name = "fnSmoothTimeLine";
 
     return f_name;
 }
 
 
-const TypeSpec& Func_SmoothenTimeline::getTypeSpec( void ) const
+const TypeSpec& Func_SmoothTimeLine::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();

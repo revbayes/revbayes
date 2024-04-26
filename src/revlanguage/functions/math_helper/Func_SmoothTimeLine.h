@@ -1,5 +1,5 @@
-#ifndef Func_SmoothenTimeline_H
-#define Func_SmoothenTimeline_H
+#ifndef Func_SmoothTimeLine_H
+#define Func_SmoothTimeLine_H
 
 #include "ModelVector.h"
 #include "Real.h"
@@ -13,11 +13,11 @@
 namespace RevLanguage {
 
     /**
-     * The RevLanguage wrapper of the SmoothenTimeline function.
+     * The RevLanguage wrapper of the SmoothTimeLine function.
      *
-     * The RevLanguage wrapper of the SmoothenTimeline function connects
+     * The RevLanguage wrapper of the SmoothTimeLine function connects
      * the variables/parameters of the function and creates the internal vector.
-     * Please read the SmoothenTimelineFunction.h for more info.
+     * Please read the SmoothTimeLineFunction.h for more info.
      *
      *
      * @copyright Copyright 2009-
@@ -25,13 +25,13 @@ namespace RevLanguage {
      * @since 2014-08-14, version 1.0
      *
      */
-    class Func_SmoothenTimeline : public TypedFunction<ModelVector<RealPos> > {
+    class Func_SmoothTimeLine : public TypedFunction<ModelVector<RealPos> > {
 
     public:
-        Func_SmoothenTimeline( void );
+        Func_SmoothTimeLine( void );
 
         // Basic utility functions
-        Func_SmoothenTimeline*                                              clone(void) const;                                          //!< Clone the object
+        Func_SmoothTimeLine*                                              clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev

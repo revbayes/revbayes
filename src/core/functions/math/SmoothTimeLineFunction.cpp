@@ -1,4 +1,4 @@
-#include "SmoothenTimelineFunction.h"
+#include "SmoothTimeLineFunction.h"
 
 #include <cmath>
 
@@ -10,7 +10,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-SmoothenTimelineFunction::SmoothenTimelineFunction(const TypedDagNode< double > *max_t, const TypedDagNode< RbVector<double> > *t, const TypedDagNode< RbVector<double> > *v) : TypedFunction< RbVector<double> >( new RbVector<double>(v->getValue().size(),0.0) ),
+SmoothTimeLineFunction::SmoothTimeLineFunction(const TypedDagNode< double > *max_t, const TypedDagNode< RbVector<double> > *t, const TypedDagNode< RbVector<double> > *v) : TypedFunction< RbVector<double> >( new RbVector<double>(v->getValue().size(),0.0) ),
     max_time( max_t ),
     times( t ),
     values( v )
@@ -23,20 +23,20 @@ SmoothenTimelineFunction::SmoothenTimelineFunction(const TypedDagNode< double > 
     update();
 }
 
-SmoothenTimelineFunction::~SmoothenTimelineFunction( void )
+SmoothTimeLineFunction::~SmoothTimeLineFunction( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-SmoothenTimelineFunction* SmoothenTimelineFunction::clone( void ) const
+SmoothTimeLineFunction* SmoothTimeLineFunction::clone( void ) const
 {
-    return new SmoothenTimelineFunction( *this );
+    return new SmoothTimeLineFunction( *this );
 }
 
 
-void SmoothenTimelineFunction::update( void )
+void SmoothTimeLineFunction::update( void )
 {
 
     RbVector<double> &smooth_values = *value;
@@ -72,7 +72,7 @@ void SmoothenTimelineFunction::update( void )
 
 }
 
-void SmoothenTimelineFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void SmoothTimeLineFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == times)

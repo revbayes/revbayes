@@ -1,5 +1,5 @@
-#ifndef SmoothenTimelineFunction_H
-#define SmoothenTimelineFunction_H
+#ifndef SmoothTimeLineFunction_H
+#define SmoothTimeLineFunction_H
 
 #include <cstddef>
 
@@ -22,14 +22,14 @@ template <class valueType> class TypedDagNode;
      * @since Version 1.2, 2023-02-25
      *
      */
-    class SmoothenTimelineFunction : public TypedFunction<RbVector<double> > {
+    class SmoothTimeLineFunction : public TypedFunction<RbVector<double> > {
 
     public:
-        SmoothenTimelineFunction(const TypedDagNode< double > *max_t, const TypedDagNode< RbVector<double> > *times, const TypedDagNode< RbVector<double> > *values);
-        virtual                                            ~SmoothenTimelineFunction(void);                                                    //!< Virtual destructor
+        SmoothTimeLineFunction(const TypedDagNode< double > *max_t, const TypedDagNode< RbVector<double> > *times, const TypedDagNode< RbVector<double> > *values);
+        virtual                                            ~SmoothTimeLineFunction(void);                                                    //!< Virtual destructor
 
         // public member functions
-        SmoothenTimelineFunction*                           clone(void) const;                                                              //!< Create an independent clone
+        SmoothTimeLineFunction*                           clone(void) const;                                                              //!< Create an independent clone
         void                                                update(void);
 
     protected:
