@@ -71,7 +71,7 @@ double ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
     
     // variable declarations and initialization
     double ln_prob = 0;
-    double theta = Ne->getValue();
+    double this_ne = Ne->getValue();
     
     // retrieve the coalescence times
     std::vector<double> ages;
@@ -164,13 +164,13 @@ double ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
         if (combined_event_types[i] == SERIAL_SAMPLE)
         {
             // sampled ancestor
-            ln_prob -= n_pairs * delta_age / theta ;
+            ln_prob -= n_pairs * delta_age / this_ne ;
             ++current_num_lineages;
         }
         else if (combined_event_types[i] == COALESCENT)
         {
             // coalescence probability
-            ln_prob += log( 1.0 / theta ) - n_pairs * delta_age / theta;
+            ln_prob += log( 1.0 / this_ne ) - n_pairs * delta_age / this_ne;
             --current_num_lineages;
         }
         else
@@ -225,7 +225,7 @@ std::vector<double> ConstantPopulationCoalescent::simulateCoalescentAges( size_t
     
     // j is the number of active lineages at the current time
     size_t current_num_lineages = num_taxa_at_present;
-    double theta = Ne->getValue();
+    double this_ne = Ne->getValue();
     
     // the current age of the process
     double sim_age = 0.0;
@@ -237,7 +237,7 @@ std::vector<double> ConstantPopulationCoalescent::simulateCoalescentAges( size_t
         do
         {
             double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
-            double lambda = n_pairs / theta;
+            double lambda = n_pairs / this_ne;
             double u = RbStatistics::Exponential::rv( lambda, *rng);
             sim_age += u;
             is_coalescent_event = (at_serial_age >= serial_ages.size() || sim_age < serial_ages[at_serial_age]) && current_num_lineages > 1;
