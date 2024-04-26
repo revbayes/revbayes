@@ -221,6 +221,18 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     {
 	RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
 	dist->setMixtureModel( mm );
+
+	if ( root_frequencies and root_frequencies->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMC: can't specify 'rootFrequencies' if Q if a SiteMixtureModel";
+
+	if ( site_rates and site_rates->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMC: can't specify 'siteRates' if Q if a SiteMixtureModel";
+
+	if ( p_inv and p_inv->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMC: can't specify 'pInv' if Q if a SiteMixtureModel";
+
+	if ( site_matrices and site_matrices->getRevObject() != RevNullObject::getInstance() )
+	    throw RbException()<<"dnPhyloCTMC: can't specify 'siteMatrices' if Q is a SiteMixtureModel";
     }
     else
     {
@@ -507,16 +519,15 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         branchRateTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "branchRates", branchRateTypes, "The global or branch-specific rate multipliers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
-        ModelVector<RealPos> *defaultSiteRates = new ModelVector<RealPos>();
         //dist_member_rules.push_back( new ArgumentRule( "siteMatrices", RlBoolean::getClassTypeSpec(), "Treat Q as vector of site mixture categories instead of branch-specific matrices?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         std::vector<TypeSpec> matrix_probs_types;
         matrix_probs_types.push_back(Simplex::getClassTypeSpec());
         matrix_probs_types.push_back(RlBoolean::getClassTypeSpec());
 
         dist_member_rules.push_back( new ArgumentRule( "siteMatrices", matrix_probs_types, "Simplex of site matrix mixture probabilities. Treats Q as vector of site mixture categories instead of branch-specific matrices.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "siteRates", ModelVector<RealPos>::getClassTypeSpec(), "The rate categories for the sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultSiteRates ) );
+        dist_member_rules.push_back( new ArgumentRule( "siteRates", ModelVector<RealPos>::getClassTypeSpec(), "The rate categories for the sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "siteRatesProbs", Simplex::getClassTypeSpec(), "The probability weights of rate categories for the sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "pInv", Probability::getClassTypeSpec(), "The probability of a site being invariant.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "pInv", Probability::getClassTypeSpec(), "The probability of a site being invariant.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         dist_member_rules.push_back( new ArgumentRule( "nSites", Natural::getClassTypeSpec(), "The number of sites, used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural() ) );
 
