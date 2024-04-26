@@ -1,4 +1,4 @@
-# RevBayes 1.2.3 (unreleased)
+# RevBayes 1.2.3 (Apr 26, 2024)
 
 ## Changes
   * Setting collapseSampledAncestors=true is now ignored -- use fnCollapseSA(tree).
