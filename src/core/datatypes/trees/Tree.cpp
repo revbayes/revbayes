@@ -2130,13 +2130,15 @@ void Tree::setTaxonName(const std::string& current_name, const std::string& new_
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
     t.setName( new_name );
-    taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
+    
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 }
 
 
 /**
- * Change the name of a taxon
+ * Change the taxon object with specified name
  *
  * \param[in] current_name   self explanatory.
  * \param[in] new_taxon      self explanatory.
@@ -2149,8 +2151,9 @@ void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxo
     TopologyNode& node = getTipNodeWithName( current_name );
     node.setTaxon( new_taxon );
 
-    taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 
 }
 
