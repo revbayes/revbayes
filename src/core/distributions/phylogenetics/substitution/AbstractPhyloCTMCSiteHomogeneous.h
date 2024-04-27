@@ -778,8 +778,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
     }
 
-    bool allow_ambiguous_as_invariant = true;
-
     // now copy back the pattern count vector
     pattern_counts = process_pattern_counts;
 
@@ -810,8 +808,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     val &= ambiguous_char_matrix[taxon_index][i];
                 }
 
-                if (   ( allow_ambiguous_as_invariant == true  &&  val.count() == 0 && gap_matrix[taxon_index][i] == false)
-                    || ( allow_ambiguous_as_invariant == false && (val.count() == 0 || gap_matrix[taxon_index][i] == true ) ) )
+                if ( val.count() == 0 && gap_matrix[taxon_index][i] == false )
                 {
                     inv = false;
                     break;
@@ -842,8 +839,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
             for (; taxon_index<length; ++taxon_index)
             {
-                if (   ( allow_ambiguous_as_invariant == true  &&  c != char_matrix[taxon_index][i] && gap_matrix[taxon_index][i] == false)
-                    || ( allow_ambiguous_as_invariant == false && (c != char_matrix[taxon_index][i] || gap_matrix[taxon_index][i] == true ) ) )
+                if ( c != char_matrix[taxon_index][i] && gap_matrix[taxon_index][i] == false )
                 {
                     inv = false;
                     break;
