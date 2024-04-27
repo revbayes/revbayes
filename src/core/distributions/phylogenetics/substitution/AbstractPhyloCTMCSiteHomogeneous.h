@@ -754,7 +754,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 if ( using_ambiguous_characters == true )
                 {
                     // we use the actual state
-                    ambiguous_char_matrix[node_index][patternIndex] = c.getState();
+                    auto C = c.getState();
+
+		    // This is necessary for Mk models.
+		    // If we are analyze columns with n states, but other columns have n+k states,
+		    //  then c.getState() will have n+k bits, which is too many.
+		    if (not c.isGapState())
+		    {
+			for(int i=this->num_chars;i<C.size();i++)
+			    assert(not C.test(i));
+		    }
+
+		    C.resize(this->num_chars);
+
+		    ambiguous_char_matrix[node_index][patternIndex] = C;
                 }
                 else if ( c.isGapState() == false )
                 {
