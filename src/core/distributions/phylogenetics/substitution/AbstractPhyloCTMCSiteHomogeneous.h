@@ -803,65 +803,47 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     for (size_t i=0; i<pattern_block_size; ++i)
     {
         bool inv = true;
-        size_t taxon_index = 0;
 
-        while ( taxon_index<(length-1) && gap_matrix[taxon_index][i] == true  )
-        {
-            ++taxon_index;
+	// Start out with all chars allowed.
+	RbBitSet chars(this->num_chars);
+	chars.flip();
+	assert(chars.count() == this->num_chars);
+
+	// Restrict to chars allowed by non-gap entries in each column.
+	for(int taxon_index = 0; taxon_index < length; taxon_index++)
+	{
+	    // Skip gap cells
+	    if (gap_matrix[taxon_index][i]) continue;
+
+	    // Restrict to chars that are visible in this cell
+	    RbBitSet C;
+	    if ( using_ambiguous_characters )
+	    {
+		chars &= ambiguous_char_matrix[taxon_index][i];
+	    }
+	    else
+	    {
+		unsigned long c = char_matrix[taxon_index][i];
+		if ( c < 0 || c >= this->num_chars )
+		    throw RbException() << "Possible bug: sites with ambiguous chars at site " << i << ", but ambiguous chars not allowed!";
+
+		RbBitSet C(this->num_chars);
+		C.set(c);
+		chars &= C;
+	    }
         }
 
-        if ( using_ambiguous_characters == true )
-        {
-            RbBitSet val = ambiguous_char_matrix[taxon_index][i];
+	// This site is invariant if any characters are part of the observation at all non-gap cells.
+	site_invariant[i] = chars.any();
 
-            for (; taxon_index<length; ++taxon_index)
-            {
-                if ( gap_matrix[taxon_index][i] == false )
-                {
-                    val &= ambiguous_char_matrix[taxon_index][i];
-                }
-
-                if ( val.count() == 0 && gap_matrix[taxon_index][i] == false )
-                {
-                    inv = false;
-                    break;
-                }
-            }
-
-            for ( size_t c = 0; c < this->num_chars; c++ )
-            {
-                if ( val.test(c) )
-                {
-                    if ( c < 0 || c >= this->num_chars )
-                    {
-                        throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds!";
-                    }
-                    invariant_site_index[i].push_back(c);
-                }
-            }
-        }
-        else
-        {
-            unsigned long c = char_matrix[taxon_index][i];
-            
-            if ( c < 0 || c >= this->num_chars )
-            {
-                throw RbException() << "Possible bug: Invar sites with ambiguous chars at site " << i << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
-            }
-            invariant_site_index[i].push_back(c);
-
-            for (; taxon_index<length; ++taxon_index)
-            {
-                if ( c != char_matrix[taxon_index][i] && gap_matrix[taxon_index][i] == false )
-                {
-                    inv = false;
-                    break;
-                }
-            }
-        }
-
-        site_invariant[i] = inv;
-        
+	if (site_invariant[i])
+	{
+	    for ( int c = 0; c < this->num_chars; c++ )
+	    {
+		if ( chars.test(c) )
+		    invariant_site_index[i].push_back(c);
+	    }
+	}
     }
     
     // finally we resize the partial likelihood vectors to the new pattern counts
