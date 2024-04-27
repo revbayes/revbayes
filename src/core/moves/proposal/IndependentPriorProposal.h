@@ -47,7 +47,6 @@ namespace RevBayesCore {
         
         StochasticNode<valueType>*              variable;
         valueType                               stored_value;
-        bool                                    metropolisHastings;
 
     };
     
@@ -57,8 +56,7 @@ namespace RevBayesCore {
 template <class valueType>
 RevBayesCore::IndependentPriorProposal<valueType>::IndependentPriorProposal( RevBayesCore::StochasticNode<valueType> *v, bool mh) : RevBayesCore::Proposal(),
     variable( v ),
-    stored_value(v->getValue()),
-    metropolisHastings(mh)
+    stored_value(v->getValue())
 {
 
     addNode( variable );
@@ -120,11 +118,6 @@ double RevBayesCore::IndependentPriorProposal<valueType>::doProposal( void )
     variable->touch( true );
     
     double ln_forw_prob = variable->getLnProbability();
-
-    if (metropolisHastings == false)
-    {
-        return RbConstants::Double::inf;
-    }
 
     return ln_back_prob - ln_forw_prob;
 }

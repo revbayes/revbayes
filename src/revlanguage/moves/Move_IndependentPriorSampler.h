@@ -42,7 +42,6 @@ class TypeSpec;
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);               //!< Set member variable
 
         RevPtr<const RevVariable>                   x;                                                                                              //!< The variable holding the real valued vector.
-        RevPtr<const RevVariable>                   metropolisHastings;
     };
     
 }
@@ -92,9 +91,7 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
     RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
     
-    bool mh = static_cast<const RlBoolean &>( metropolisHastings->getRevObject() ).getValue();
-
-    RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn, mh);
+    RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
 }
 
@@ -104,7 +101,6 @@ template <class rlValueType>
 const std::string& RevLanguage::Move_IndependentPriorSampler<rlValueType>::getClassType(void)
 {
     
-//    static std::string rev_type = "Move_IndependentPriorSampler<" + rlValueType::getClassType() + ">";
     static std::string rev_type = "Move_IndependentPriorSampler__" + rlValueType::getClassType();
     
     return rev_type;
@@ -147,7 +143,6 @@ const RevLanguage::MemberRules& RevLanguage::Move_IndependentPriorSampler<rlValu
     if ( !rules_set )
     {
         move_member_rules.push_back( new ArgumentRule( "x", rlValueType::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "MetropolisHastings"   , RlBoolean::getClassTypeSpec(), "If TRUE, use the regular Metropolis-Hastings acceptance ratio. If FALSE, always accept this move and sample every variable uniformly.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -195,10 +190,6 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::setConstParameter(c
     if ( name == "x" )
     {
         x = var;
-    }
-    else if ( name == "MetropolisHastings" )
-    {
-        metropolisHastings = var;
     }
     else
     {
