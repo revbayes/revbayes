@@ -213,7 +213,6 @@
 #include "Move_FNPR.h"
 #include "Move_FossilTipTimeUniform.h"
 #include "Move_FossilTipTimeSlideUniform.h"
-#include "Move_TipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
@@ -463,7 +462,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesNodeTimeSlideUniform()      );
         addType( new Move_SpeciesSubtreeScale()              );
         addType( new Move_SpeciesSubtreeScaleBeta()          );
-        addType( new Move_TipTimeSlideUniform()              );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
         addType( new Move_NarrowExchangeRateMatrix()         );

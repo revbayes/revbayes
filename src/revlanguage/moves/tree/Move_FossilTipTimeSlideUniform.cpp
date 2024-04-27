@@ -123,6 +123,9 @@ std::string Move_FossilTipTimeSlideUniform::getMoveName( void ) const
 std::vector<std::string> Move_FossilTipTimeSlideUniform::getMoveAliases(void) const
 {
     std::vector<std::string> aliases;
+    
+    aliases.push_back("FossilTimeSlideUniform");
+    aliases.push_back("TipTimeSlideUniform");
 
     return aliases;
 }
