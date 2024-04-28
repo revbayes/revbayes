@@ -120,7 +120,7 @@ for(i in 1:fossils.size())
 }
 
 # Add a move to sample the fossil times #
-moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, weight=5.0) )
+#moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, weight=5.0) )
 
 
 ### Create deterministic nodes to monitor various tree statistics ###
@@ -263,9 +263,6 @@ mymcmc = mcmc(mymodel, monitors, moves)
 
 # Run the MCMC #
 mymcmc.run(generations=30)
-
-# Load the tree trace
-treetrace = readTreeTrace("output/BDSTP.trees", treetype="clock")
 
 # Quit RevBayes #
 q()

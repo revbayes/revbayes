@@ -43,6 +43,7 @@ FossilTipTimeUniformProposal::FossilTipTimeUniformProposal( StochasticNode<Tree>
     }
     else
     {
+        use_index = true;
         node_index = tree->getValue().getTipIndex( tip_taxon );
     }
 }
