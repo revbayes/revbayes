@@ -70,7 +70,7 @@ void Move_FossilTipTimeSlideUniform::constructInternalObject( void )
     }
     
     // use NULL as defaults
-    RevBayesCore::TypedDagNode<double> *ma = NULL;static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *ma = NULL;
     RevBayesCore::TypedDagNode<double> *mi = NULL;
     
     if ( max->getRevObject() != RevLanguage::RevNullObject::getInstance() )

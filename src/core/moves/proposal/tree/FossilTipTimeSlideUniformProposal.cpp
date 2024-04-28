@@ -305,7 +305,10 @@ void FossilTipTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode 
     if (oldN == tree)
     {
         tree = static_cast<StochasticNode<Tree>* >(newN) ;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
+        if ( tip_taxon != "" )
+        {
+            node_index = tree->getValue().getTipIndex( tip_taxon );
+        }
     }
     else if (oldN == origin)
     {
