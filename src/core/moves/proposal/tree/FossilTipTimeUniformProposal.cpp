@@ -111,7 +111,7 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    if( use_index == false )
+    if ( use_index == false )
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
