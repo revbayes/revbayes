@@ -117,7 +117,9 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_FBDSP::createDistribution( void ) 
     bool pa = static_cast<const RlBoolean &>( presence_absence->getRevObject() ).getValue();
     bool ex = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, c, r, rt, cond, t, uo, pa, ex, init);
+    long pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
+
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, c, r, rt, cond, t, uo, pa, ex, init, pr);
 
     return d;
 }
@@ -231,7 +233,7 @@ const MemberRules& Dist_FBDSP::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "binary" , RlBoolean::getClassTypeSpec() , "Treat fossil counts as binary presence/absence data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         dist_member_rules.push_back( new ArgumentRule( "extended" , RlBoolean::getClassTypeSpec() , "Treat tip nodes as extinction events?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-
+        dist_member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
         rules_set = true;
     }
     
@@ -305,6 +307,10 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "initialTree" )
     {
         initial_tree = var;
+    }
+    else if ( name == "ageCheckPrecision" )
+    {
+        age_check_precision = var;
     }
     else
     {

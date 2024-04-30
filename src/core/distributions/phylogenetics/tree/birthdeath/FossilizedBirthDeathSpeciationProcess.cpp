@@ -55,7 +55,8 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                                                            bool use_origin,
                                                                                            bool presence_absence,
                                                                                            bool extended,
-                                                                                           Tree* initial_tree) :
+                                                                                           Tree* initial_tree,
+                                                                                           long age_check_precision) :
     AbstractBirthDeathProcess(root_age, incondition, intaxa, use_origin, initial_tree),
     AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, incounts, inrho, intimes, intaxa, presence_absence),
     extended(extended)
@@ -64,7 +65,7 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     {
         try
         {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *initial_tree, taxa );
+            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *initial_tree, taxa, age_check_precision );
             value = my_tree->clone();
         }
         catch (RbException &e)
@@ -80,7 +81,7 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
         RbVector<Clade> constr;
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
         StartingTreeSimulator simulator;
-        RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+        RevBayesCore::Tree *my_tree = simulator.simulateTree( intaxa, constr );
         // store the new value
         value = my_tree;
     }
@@ -89,8 +90,6 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     {
         addParameter(*it);
     }
-
-    redrawValue();
 }
 
 

@@ -53,6 +53,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                               extended;
         std::string                                             start_condition;                                                                        //!< The start condition of the process (rootAge/originAge)
         RevPtr<const RevVariable>                               initial_tree;
+        RevPtr<const RevVariable>                               age_check_precision;                                                                    //!< Number of decimal places to use when checking the initial tree against taxon ages
 
     };
     

@@ -45,7 +45,8 @@ namespace RevBayesCore {
                                                       bool use_origin,
                                                       bool presence_absence,
                                                       bool extended,
-                                                      Tree *initial_tree);  //!< Constructor
+                                                      Tree *initial_tree,
+                                                      long age_check_precision);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
@@ -68,10 +69,6 @@ namespace RevBayesCore {
 
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const;                 //!< Simulate n speciation events.
-
-        void                                            keepSpecialization(DagNode *toucher);
-        void                                            restoreSpecialization(DagNode *toucher);
-        void                                            touchSpecialization(DagNode *toucher, bool touchAll);
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
