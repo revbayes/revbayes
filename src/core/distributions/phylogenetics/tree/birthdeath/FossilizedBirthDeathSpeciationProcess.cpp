@@ -283,7 +283,27 @@ double FossilizedBirthDeathSpeciationProcess::pSurvival(double start, double end
 /**
  *
  */
-void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
+void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
+{
+    AbstractBirthDeathProcess::redrawValue();
+
+    const std::vector<TopologyNode*> nodes = this->getValue().getNodes();
+
+    for( size_t i = 0; i < this->getValue().getNumberOfTips(); i++)
+    {
+        size_t j = find(taxa.begin(), taxa.end(), nodes[i]->getTaxon()) - taxa.begin();
+
+        nodes[i]->setIndex(j);
+    }
+
+    this->getValue().orderNodesByIndex();
+}
+
+
+/**
+ *
+ */
+void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn)
 {
 
     // Get the rng
@@ -392,7 +412,7 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
         else
         {
             // now we simulate new ages
-            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age);
+            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age, alwaysReturn);
 
             if ( next_sim_age < next_node_age )
             {
@@ -504,6 +524,25 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
 
 }
 
+/**
+ * @param alwaysReturn whether the simulation can return times which are not valid draws from the distribution (for initial values)
+*/
+std::vector<double> FossilizedBirthDeathSpeciationProcess::simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const
+{
+    if(!alwaysReturn) throw RbException("Impossible to simulate under a true FossilizedBirthDeathSpeciation process");
+
+    std::vector<double> t(n, 0.0);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        t[i] = simulateDivergenceTime(origin, min);
+    }
+
+    // finally sort the times
+    std::sort(t.begin(), t.end());
+
+    return t;
+}
 
 /**
  * Simulate new speciation times.

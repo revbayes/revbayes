@@ -104,6 +104,7 @@ const MemberRules& Dist_FBDP::getParameterRules(void) const
 
         std::vector<std::string> aliases_event_sampling;
         aliases_event_sampling.push_back("rho");
+        aliases_event_sampling.push_back("Phi");
         dist_member_rules.push_back(new ArgumentRule(aliases_event_sampling, event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
 
         rules_set = true;

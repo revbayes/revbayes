@@ -1,3 +1,41 @@
+# RevBayes 1.2.3 (Apr 26, 2024)
+
+## Changes
+  * Setting collapseSampledAncestors=true is now ignored -- use fnCollapseSA(tree).
+  * Temporarily disable FBD-Range models (#449).
+  * Refactor PhyloOrnsteinUhlenbeckREML (#426)
+
+## Features
+  * Allow mnFile and mnModel to write JSON output if given format="json" (#377)
+  * Refactor dnBDSTP, dnFBDP, and dnPhylodynamicBDP (#386, #440)
+  * Compute average distance matrices more efficiently (#454).
+  * Compute ExponentialError probability densities more efficiently (#432, #434).
+  * Add member procedure to set node age (#380).
+  * Add member procedures to remove invariant and gap sites (#379, #392).
+  * Be less picky about initial tree ages matching ages from taxon files (#455).
+  * Make mvCollapseExpandFossilBranch complain if r=1 (no fossil sampling) (#440).
+  * Make power posterior analyses more flexible (#397).
+
+## Bug fixes
+  * Stop BD simulations from hanging in situations with many constraints (#453).
+  * Stop moving fossil tip nodes in mvRootTimeSlideUniform (#447).
+  * Fix consensusTree (#441).
+  * Fix crash reading trees with bad indices (#403, #395).
+  * Fix ancestral state reconstruction with missing data (#396)
+  * Fix the uniform topology prior (#442).
+  * Fix vectorFlatten (#445, #389).
+  * Fix a memory leak in reversible jump mixtures (#430).
+  * Fix BDSTP segfault (#367)
+  * Fix updating phylogenetic likelihood when site mixture probability changes (#437).
+  * Fix interaction of multiple stopping rules (#458).
+  * Fix crash with tuning on mvScale (#452).
+  * Fix writing delimited character data (#362)
+  * Fix representation of sampled ancestors in tensorphylo functions (#369).
+  * Fix offset for the read tree trace function (#381).
+  * Fix Probability(-1) and Probability(2) (#410).
+  * Don't flatten arrays of stochastic variables in checkpoint files (#448).
+
+
 # RevBayes 1.2.2 (Jun 7, 2023)
 
 ## Features
