@@ -23,11 +23,11 @@ automatically convert a RateMatrix to a SiteMixtureModel.
         M := fnJC(4) |> fnUnitMixture()  # nested functions can be expressed using pipes.
         
         # Explicit conversion to SiteMixtureModel
-        M := fnJC(4) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+        M := fnGTR(er,pi) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
         # Implicit conversion to SiteMixtureModel
-        M := fnJC(4) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+        M := fnGTR(er,pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
         
         # Starting the model at non-equilibrium frequencies.
-        M := fnJC(4) |> fnUnitMixture(rootFrequencies=pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+        M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep1,n_states))
         
 ## references

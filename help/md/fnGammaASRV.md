@@ -3,12 +3,12 @@ fnGammaASRV
 ## title
 fnGammaASRV
 ## description
-Add Gamma-distributed across-site rate variation (ASRV) to a submodel.
+Add Gamma-distributed across-site rate variation (ASRV) to a site model.
 
 ## details
-Each site evolves according to the specified submodel, but at an unknown rate
-that is Gamma distributed. If the submodel has m components, this function will
-return a model with m*n components.
+Each site evolves according to the specified site model, but at an unknown rate
+that is Gamma distributed. If the site model parameter is a mixture model with
+m components, this function will return a mixture with m*n components.
 
 The continuous Gamma distribution is approximated with a mixture distribution
 over n discrete rates, each with probability 1/n.  The Gamma distribution is
@@ -18,7 +18,7 @@ It therefore has only a single parameter alpha -- the shape parameter.
         - If alpha = 1, then the rate is exponentially distributed.  Rate variation is substantial.
         - As alpha approaches zero, many sites have rate 0, and many sites have a high rate.
 
-RateMatrix and RateGenerator submodels will automatically be converted to a
+RateMatrix and RateGenerator site model parameters will automatically be converted to a
 SiteMixtureModel with a single component.
 
 ## authors
@@ -29,20 +29,25 @@ fnInvASRV
 fnMixtureASRV
 fnDiscretizeGamma
 ## example
-        alpha ~ dnExp(1/10) # Don't put too much prior belief on high rate variation.
+        # fnGammaASRV( ) constructs a mixture model that represents both the underlying
+        #   rate matrix and Gamma-distributed rate variation.
+        alpha ~ dnExp(1/10)
+        er ~ dnDirichlet( [1,1,1,1,1,1] )
+        pi ~ dnDirichlet( [1,1,1,1] )
         M := fnGammaASRV( fnGTR(er, pi), alpha, 4)
-        M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)  # Nested functions can be expressed using pipes.
         seq ~ dnPhyloCTMC(psi, M, type="DNA")
 
-        M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
-        M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
+        # As an alternative approach, models can be built up iteratively using pipes.
+        M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)  
 
-        # The submodel can be a mixture model
+        M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
+        M := fnGTR(er,pi) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (2*4) components - slower.
+
+        # The site model parameter can be a mixture model
         weights ~ dnDirichlet([1,1])
-        M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
-
-        # Rate is a product of two Gamma-distributed variables.  For illustration only -- NOT recommended.
-        M := fnJC(4) |> fnGammaASRV(alpha1,4) |> fnGammaASRV(alpha2,4)   # This has 16 components.
+        pi1 ~ dnDirichlet( [1,1,1,1,1,1 ] )
+        pi2 ~ dnDirichlet( [1,1,1,1,1,1 ] )
+        M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 
 ## references
 - citation: Yang, Z. (1994) Maximum likelihood phylogenetic estimation from DNA sequences with variable rates

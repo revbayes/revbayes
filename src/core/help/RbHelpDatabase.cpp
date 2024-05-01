@@ -1361,35 +1361,40 @@ Q := fnGTR(er,pi))");
 	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S. Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences.  Lectures on Mathematics in the Life Sciences (1986). 17: 57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
 	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible rate matrix)");
 	help_arrays[string("fnGammaASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
-	help_strings[string("fnGammaASRV")][string("description")] = string(R"(Add Gamma-distributed across-site rate variation (ASRV) to a submodel.)");
-	help_strings[string("fnGammaASRV")][string("details")] = string(R"(Each site evolves according to the specified submodel, but at an unknown rate
-that is Gamma distributed. If the submodel has m components, this function will
-return a model with m*n components.
+	help_strings[string("fnGammaASRV")][string("description")] = string(R"(Add Gamma-distributed across-site rate variation (ASRV) to a site model.)");
+	help_strings[string("fnGammaASRV")][string("details")] = string(R"(Each site evolves according to the specified site model, but at an unknown rate
+that is Gamma distributed. If the site model parameter is a mixture model with
+m components, this function will return a mixture with m*n components.
 
 The continuous Gamma distribution is approximated with a mixture distribution
-over n discrete rates, each with probability 1/4.  The Gamma distribution is
+over n discrete rates, each with probability 1/n.  The Gamma distribution is
 constrained to have a mean of 1, so as not to change the  branch lengths.
 It therefore has only a single parameter alpha -- the shape parameter.
         - As alpha approaches infinity, rate variation goes to 0.
         - If alpha = 1, then the rate is exponentially distributed.  Rate variation is substantial.
         - As alpha approaches zero, many sites have rate 0, and many sites have a high rate.
 
-RateMatrix and RateGenerator submodels will automatically converted to a
+RateMatrix and RateGenerator site model parameters will automatically be converted to a
 SiteMixtureModel with a single component.)");
-	help_strings[string("fnGammaASRV")][string("example")] = string(R"(alpha ~ dnExp(1/10) # Don't put too much prior belief on high rate variation.
+	help_strings[string("fnGammaASRV")][string("example")] = string(R"(# fnGammaASRV( ) constructs a mixture model that represents both the underlying
+#   rate matrix and Gamma-distributed rate variation.
+alpha ~ dnExp(1/10)
+er ~ dnDirichlet( [1,1,1,1,1,1] )
+pi ~ dnDirichlet( [1,1,1,1] )
 M := fnGammaASRV( fnGTR(er, pi), alpha, 4)
-M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)  # Nested functions can be expressed using pipes.
 seq ~ dnPhyloCTMC(psi, M, type="DNA")
 
-M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
-M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
+# As an alternative approach, models can be built up iteratively using pipes.
+M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)
 
-# The submodel can be a mixture model
+M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
+M := fnGTR(er,pi) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (2*4) components - slower.
+
+# The site model parameter can be a mixture model
 weights ~ dnDirichlet([1,1])
-M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
-
-# Rate is a product of two Gamma-distributed variables.  For illustration only -- NOT recommended.
-M := fnJC(4) |> fnGammaASRV(alpha1,4) |> fnGammaASRV(alpha2,4)   # This has 16 components.)");
+pi1 ~ dnDirichlet( [1,1,1,1,1,1 ] )
+pi2 ~ dnDirichlet( [1,1,1,1,1,1 ] )
+M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
 	help_strings[string("fnGammaASRV")][string("name")] = string(R"(fnGammaASRV)");
 	help_references[string("fnGammaASRV")].push_back(RbHelpReference(R"(Yang, Z. (1994) Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: approximate methods)",R"(https://doi.org/10.1007/BF00160154 )",R"()"));
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
@@ -1410,13 +1415,17 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnInferAncestralPopSize")][string("name")] = string(R"(fnInferAncestralPopSize)");
 	help_strings[string("fnInfiniteSites")][string("name")] = string(R"(fnInfiniteSites)");
 	help_arrays[string("fnInvASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
-	help_strings[string("fnInvASRV")][string("description")] = string(R"(Add an invariable-sites component to a submodel.)");
+	help_strings[string("fnInvASRV")][string("description")] = string(R"(Add an invariable-sites component to a site model.)");
 	help_strings[string("fnInvASRV")][string("details")] = string(R"(This model specifies that some fraction pInv of sites are invariable.
-If the submodel has m components, this function will return a model with
-n+1 components.)");
-	help_strings[string("fnInvASRV")][string("example")] = string(R"(p_inv ~ dnUniform(0,1)
+If the site model parameter is a mixture model with m components, this function will return a model with
+m+1 components.)");
+	help_strings[string("fnInvASRV")][string("example")] = string(R"(# fnInvASRV( ) creates a mixture model by adding invariant sites to an underlying site model.
+p_inv ~ dnUniform(0,1)
 M := fnInv( fnJC(4), p_inv)
-M := fnJC(4) |> fnInv(p_inv)  # Nested functions can be expressed using pipes.
+seq ~ dnPhyloCTMC(psi, M, type="DNA")
+
+# As an alternative approach, models can be built up iteratively using pipes.
+M := fnJC(4) |> fnInv(p_inv)
 
 M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
 M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
@@ -1588,12 +1597,12 @@ automatically convert a RateMatrix to a SiteMixtureModel.)");
 M := fnJC(4) |> fnUnitMixture()  # nested functions can be expressed using pipes.
 
 # Explicit conversion to SiteMixtureModel
-M := fnJC(4) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+M := fnGTR(er,pi) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 # Implicit conversion to SiteMixtureModel
-M := fnJC(4) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+M := fnGTR(er,pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 
 # Starting the model at non-equilibrium frequencies.
-M := fnJC(4) |> fnUnitMixture(rootFrequencies=pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
+M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep1,n_states)))");
 	help_strings[string("fnUnitMixture")][string("name")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUnitMixture")][string("title")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUpperTriangle")][string("name")] = string(R"(fnUpperTriangle)");
