@@ -1444,13 +1444,16 @@ M := fnJC(4) |> fnInv(p2) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
 	help_arrays[string("fnMixtureASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
-	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of submodels.)");
-	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the submodels. The probability that
-each site follows a particular submodel is specified by the fractions parameter.
-If the rates parameter is given, each submodel rate is multipled by the corresponding
-element of the rates vector.
+	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of site models.)");
+	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the input site models, which may also
+be mixture models.  The probability that each site follows a particular site model
+is specified by the fractions parameter.
 
-The number of components is the sum of the components of the individual submodels.)");
+The number of components in the resulting mixture model is the sum of the number
+of components of the input mixture models.
+
+If the rates parameter is given, the rate of each input site model is multipled
+by the corresponding element of the rates vector.)");
 	help_strings[string("fnMixtureASRV")][string("example")] = string(R"(# Two components with different frequencies
 pi1 ~ dnDirichlet([1,1,1,1])
 pi2 ~ dnDirichlet([1,1,1,1])
@@ -1458,14 +1461,14 @@ weights ~ dnDirichlet([1,1])
 M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
 seq ~ dnPhyloCTMC(psi, M, type="DNA")
 
+# Adding rate variation to the frequency-variation model.
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+
 # A free-rates model
 Q := fnJC(4)
 rates ~ dnDirichlet([1,1,1,1])
 weights ~ dnDirichlet([2,2,2,2])
-M := fnMixtureASRV([Q,Q,Q,Q], weights, rates*4)
-
-# Adding rate variation to the frequency-variation model.
-M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
+M := fnMixtureASRV([Q,Q,Q,Q], weights, rates*4))");
 	help_strings[string("fnMixtureASRV")][string("name")] = string(R"(fnMixtureASRV)");
 	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
 	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
@@ -1587,9 +1590,9 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 rate and root frequencies for a RateGenerator.  The rate defaults to 1, leaving
 the underlying model unchanged.
 
-If the submodel is a RateMatrix, the root frequencies default to the equilibrium
-frequencies of the RateMatrix.  However, a RateGenerator may not have equilibrium
-frequencies, so the root frequencies must be specified explicitly.
+If the site model parameter is a RateMatrix, the root frequencies default to the
+equilibrium frequencies of the RateMatrix.  However, a RateGenerator might not have
+equilibrium frequencies, in which case the root frequencies must be specified explicitly.
 
 In many cases it is not necessary to explicitly call fnUnitMixture(), RevBayes can
 automatically convert a RateMatrix to a SiteMixtureModel.)");
@@ -1601,7 +1604,7 @@ M := fnGTR(er,pi) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 # Implicit conversion to SiteMixtureModel
 M := fnGTR(er,pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 
-# Starting the model at non-equilibrium frequencies.
+# Specifying the root frequencies
 M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep1,n_states)))");
 	help_strings[string("fnUnitMixture")][string("name")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUnitMixture")][string("title")] = string(R"(fnUnitMixture)");
