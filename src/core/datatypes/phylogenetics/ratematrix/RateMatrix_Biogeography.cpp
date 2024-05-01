@@ -275,6 +275,30 @@ void RateMatrix_Biogeography::calculateCijk(void)
 
 
 /** Calculate the transition probabilities */
+
+void RateMatrix_Biogeography::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+{
+    double t = scalingFactor * rate * (startAge - endAge);
+    
+    
+    if ( useSquaring || true )
+    {
+        //We use repeated squaring to quickly obtain exponentials, as in Poujol and Lartillot, Bioinformatics 2014.
+        exponentiateMatrixByScalingAndSquaring(t, P);
+    }
+    else if ( theEigenSystem->isComplex() == false )
+    {
+        tiProbsEigens(t, P);
+    }
+    else
+    {
+        tiProbsComplexEigens(t, P);
+    }
+    
+    return;
+}
+
+/*
 void RateMatrix_Biogeography::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     double t = scalingFactor * rate * (startAge - endAge);
@@ -330,6 +354,7 @@ void RateMatrix_Biogeography::calculateTransitionProbabilities(double startAge, 
     
     return;
 }
+*/
 
 RateMatrix_Biogeography* RateMatrix_Biogeography::clone( void ) const
 {
