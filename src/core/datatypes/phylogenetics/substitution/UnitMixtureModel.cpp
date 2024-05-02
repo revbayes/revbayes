@@ -6,7 +6,6 @@
 #include <cstddef>
 
 #include "MatrixReal.h"
-#include "MixtureModel.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
 #include "TopologyNode.h"
@@ -20,59 +19,57 @@ using std::unique_ptr;
 using std::optional;
 using std::tuple;
 
-UnitMixtureModel* UnitMixtureModel::clone() const
+GeneratorToSiteModel* GeneratorToSiteModel::clone() const
 {
-    return new UnitMixtureModel(*this);
+    return new GeneratorToSiteModel(*this);
+}
+
+int GeneratorToSiteModel::getNumberOfStates() const
+{
+    return generator->getNumberOfStates();
 }
 
 TransitionProbabilityMatrix
-UnitMixtureModel::calculateTransitionProbabilities(const Tree& tau,
-                                                   int node_index,
-                                                   int m,
-                                                   double rate) const
+GeneratorToSiteModel::calculateTransitionProbabilities(const Tree& tau, int node_index, double rate) const
 {
-    assert(m == 0);
-
     const TopologyNode* node = tau.getNodes()[node_index];
 
     if ( node->isRoot() == true )
     {
-        throw RbException("UnitMixtureModel called updateTransitionProbabilities for the root node\n");
+        throw RbException("GeneratorToSiteModel called updateTransitionProbabilities for the root node\n");
     }
 
     auto [start_age, end_age] = getStartEndAge(*node);
     
     TransitionProbabilityMatrix P(getNumberOfStates());
-    generator->calculateTransitionProbabilities( start_age, end_age, _scale * rate, P);
+    auto generator2 = std::shared_ptr<RateGenerator>(generator->clone());
+    generator2->calculateTransitionProbabilities( start_age, end_age, _scale * rate, P);
     return P;
 }
 
-bool UnitMixtureModel::simulateStochasticMapping(const Tree& tau, int node_index, int m, int rate, vector<size_t>& states, vector<double>& times)
+bool GeneratorToSiteModel::simulateStochasticMapping(const Tree& tau, int node_index, int rate, vector<size_t>& states, vector<double>& times) const
 {
-    assert(m == 0);
-
     const TopologyNode* node = tau.getNodes()[node_index];
 
     auto [start_age, end_age] = getStartEndAge(*node);
 
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;
-    return generator->simulateStochasticMapping(start_age, end_age, _scale * rate, states, times);
+    auto generator2 = std::shared_ptr<RateGenerator>(generator->clone());
+    return generator2->simulateStochasticMapping(start_age, end_age, _scale * rate, states, times);
 }
 
-vector<double> UnitMixtureModel::getRootFrequencies(int) const
+vector<double> GeneratorToSiteModel::getRootFrequencies() const
 {
     return frequencies;
 }
 
-vector<double> UnitMixtureModel::componentProbs() const { return {1.0};}
-
-void UnitMixtureModel::scale(double factor)
+void GeneratorToSiteModel::scale(double factor)
 {
     _scale *= factor;
 }
 
-optional<double> UnitMixtureModel::rate() const
+optional<double> GeneratorToSiteModel::rate() const
 {
     if (auto matrix = dynamic_cast<const RateMatrix*>(generator.get()))
         return _scale * matrix->averageRate();
@@ -81,65 +78,26 @@ optional<double> UnitMixtureModel::rate() const
 }
         
 
-// assignment operator / copy constructor
-UnitMixtureModel& UnitMixtureModel::operator=(const UnitMixtureModel& m)
-{
-    SiteMixtureModel::operator=(m);
-    generator = unique_ptr<RateGenerator>(m.generator->clone());
-    frequencies = m.frequencies;
-    _scale = m._scale;
-    return *this;
-}
-
-UnitMixtureModel::UnitMixtureModel(const UnitMixtureModel& m)
-    :SiteMixtureModel(m)
-{
-    operator=(m);
-}
-
-
-// move assignment operator / move  constructor
-UnitMixtureModel& UnitMixtureModel::operator=(UnitMixtureModel&& m)
-{
-    SiteMixtureModel::operator=(std::move(m));
-    generator = std::move(m.generator);
-    frequencies = m.frequencies;
-    _scale = m._scale;
-    return *this;
-}
-
-UnitMixtureModel::UnitMixtureModel(UnitMixtureModel&& m)
-    :SiteMixtureModel(m)
-{
-    operator=(std::move(m));
-}
-
-
 // constructors
-UnitMixtureModel::UnitMixtureModel(const RateMatrix& m, double s)
-    :SiteMixtureModel(1, m.getNumberOfStates()),
-     generator( unique_ptr<RateGenerator>(m.clone()) ),
-     frequencies (m.getStationaryFrequencies()),
-     _scale(s)
+GeneratorToSiteModel::GeneratorToSiteModel(const RateMatrix& m, double s)
+    :GeneratorToSiteModel(m, m.getStationaryFrequencies(), s)
 {
-
 }
 
-UnitMixtureModel::UnitMixtureModel(const RateMatrix& m, const vector<double>& freqs, double s)
-    :SiteMixtureModel(1, m.getNumberOfStates()),
-     generator( unique_ptr<RateGenerator>(m.clone()) ),
+GeneratorToSiteModel::GeneratorToSiteModel(const RateGenerator& g, const vector<double>& freqs, double s)
+    :GeneratorToSiteModel(std::shared_ptr<const RateGenerator>(g.clone()), freqs, s)
+{
+}
+
+GeneratorToSiteModel::GeneratorToSiteModel(const std::shared_ptr<const RateMatrix>& m, double s)
+    :GeneratorToSiteModel(m, m->getStationaryFrequencies(), s)
+{
+}
+
+GeneratorToSiteModel::GeneratorToSiteModel(const std::shared_ptr<const RateGenerator>& g, const vector<double>& freqs, double s)
+    :generator( g ),
      frequencies(freqs),
      _scale(s)
 {
-
-}
-
-UnitMixtureModel::UnitMixtureModel(const RateGenerator& g, const vector<double>& freqs, double s)
-    :SiteMixtureModel(1, g.getNumberOfStates()),
-     generator( unique_ptr<RateGenerator>(g.clone()) ),
-     frequencies(freqs),
-     _scale(s)
-{
-
 }
 

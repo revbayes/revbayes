@@ -1,7 +1,7 @@
 #ifndef UNIT_MIXTURE_MODEL_H
 #define UNIT_MIXTURE_MODEL_H
 
-#include "MixtureModel.h"
+#include "SiteModel.h"
 #include "RateGenerator.h"
 #include "RateMatrix.h"
 
@@ -9,34 +9,36 @@ namespace RevBayesCore {
 
     class Tree;
 
-    class UnitMixtureModel: public SiteMixtureModel
+    class GeneratorToSiteModel: public SiteModel
     {
-        std::unique_ptr<RateGenerator> generator;
+        std::shared_ptr<const RateGenerator> generator;
         std::vector<double> frequencies;
         double _scale;
 
     public:
-        UnitMixtureModel* clone() const;
-        TransitionProbabilityMatrix calculateTransitionProbabilities(const Tree& tau, int node_index, int m, double rate) const;
+        GeneratorToSiteModel* clone() const;
 
-        bool simulateStochasticMapping(const Tree&, int node, int mixture_component, int rate, std::vector<size_t>&, std::vector<double>&);
+	int getNumberOfStates() const;
 
-        std::vector<double> getRootFrequencies(int) const;
+        TransitionProbabilityMatrix calculateTransitionProbabilities(const Tree& tau, int node_index, double rate) const;
+        bool simulateStochasticMapping(const Tree&, int node, int rate, std::vector<size_t>&, std::vector<double>&) const;
 
-        std::vector<double> componentProbs() const;
+        std::vector<double> getRootFrequencies() const;
 
         std::optional<double> rate() const;
         void scale(double factor);
+	// factor out rescalable class
         
-        UnitMixtureModel& operator=(const UnitMixtureModel&);
-        UnitMixtureModel(const UnitMixtureModel&);
+        GeneratorToSiteModel& operator=(const GeneratorToSiteModel&) = default;;
+        GeneratorToSiteModel& operator=(GeneratorToSiteModel&&) noexcept = default;
 
-        UnitMixtureModel& operator=(UnitMixtureModel&&);
-        UnitMixtureModel(UnitMixtureModel&&);
+        GeneratorToSiteModel(const GeneratorToSiteModel&) = default;
+        GeneratorToSiteModel(GeneratorToSiteModel&&) noexcept = default;
         
-        UnitMixtureModel(const RateMatrix& m, double s = 1);
-        UnitMixtureModel(const RateMatrix& m, const std::vector<double>& freqs, double s = 1);
-        UnitMixtureModel(const RateGenerator& g, const std::vector<double>& freqs, double s = 1);
+        GeneratorToSiteModel(const RateMatrix& m, double s = 1);
+        GeneratorToSiteModel(const std::shared_ptr<const RateMatrix>& g, double s = 1);
+        GeneratorToSiteModel(const RateGenerator& g, const std::vector<double>& freqs, double s = 1);
+        GeneratorToSiteModel(const std::shared_ptr<const RateGenerator>& g, const std::vector<double>& freqs, double s = 1);
     };
 
 }
