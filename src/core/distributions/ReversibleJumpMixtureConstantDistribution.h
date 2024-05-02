@@ -309,20 +309,24 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::redra
 template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
 {
-    
     // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
     if ( restorer == const_value && index == 0 )
     {
-        const mixtureType &tmp = const_value->getValue();
-        Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
+        if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
+        {
+            delete this->value;
+            this->value = const_value->getValue().clone();
+        }
+        else
+        {
+            *this->value = const_value->getValue();
+        }
 
         if ( this->dag_node != NULL )
         {
             this->dag_node->restoreAffected();
         }
-        
     }
-    
 }
 
 
@@ -410,16 +414,21 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touch
     // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
     if ( toucher == const_value && index == 0 )
     {
-        const mixtureType &tmp = const_value->getValue();
-        Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
+        if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
+        {
+            delete this->value;
+            this->value = const_value->getValue().clone();
+        }
+        else
+        {
+            *this->value = const_value->getValue();
+        }
         
         if ( this->dag_node != NULL )
         {
             this->dag_node->touchAffected();
         }
-        
     }
-    
 }
 
 #endif
