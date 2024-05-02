@@ -34,13 +34,14 @@ Core::SiteMixtureModel* InvModelFunc(const Core::SiteMixtureModel& sub_model, do
     if (p < 0 or p > 1)
         throw RbException()<<"fnInv: pInv should be in [0,1], but pInv = "<<p;
 
+    int n = sub_model.getNumberOfStates();
+
     // 1. Compute average root frequencies of the submodel
     auto f = sub_model.componentProbs();
-    int n = sub_model.getNumberOfStates();
     vector<double> pi(n,0);
     for(int m=0; m<f.size(); m++)
     {
-        auto sub_pi = sub_model.getRootFrequencies(m);
+        auto sub_pi = sub_model.getComponent(m).getRootFrequencies();
         for(int l=0;l<pi.size();l++)
             pi[l] += sub_pi[l] * f[m];
     }

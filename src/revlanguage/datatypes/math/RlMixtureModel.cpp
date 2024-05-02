@@ -115,7 +115,7 @@ RevPtr<RevVariable> SiteMixtureModel::executeMethod(std::string const &name, con
         const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
         int i = index.getValue() - 1;
         
-        auto weights = dag_node->getValue().getRootFrequencies(i);
+        auto weights = dag_node->getValue().getComponent(i).getRootFrequencies();
         return new RevVariable( new Simplex( weights ) );
     }
 

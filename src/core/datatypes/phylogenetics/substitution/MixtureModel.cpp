@@ -43,11 +43,6 @@ int SiteMixtureModel::getNumberOfComponents() const
     return size();
 }
 
-vector<double> SiteMixtureModel::getRootFrequencies(int m) const
-{
-    return getComponent(m).getRootFrequencies();
-}
-
 int SiteMixtureModel::getNumberOfStates() const
 {
     for(auto& component: components)

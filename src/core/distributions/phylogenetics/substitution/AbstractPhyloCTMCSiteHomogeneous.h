@@ -2193,7 +2193,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getRootFrequencie
 
         auto& mm = mixture_model->getValue();
         for(int i=0;i < mm.getNumberOfComponents(); i++)
-            rf.push_back( mm.getRootFrequencies(i) );
+            rf.push_back( mm.getComponent(i).getRootFrequencies() );
     }
     else if (heterogeneous_rate_matrices !=  NULL)
     {
