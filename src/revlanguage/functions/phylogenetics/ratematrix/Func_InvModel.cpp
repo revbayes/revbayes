@@ -21,25 +21,20 @@
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
 #include "ConcreteTimeReversibleRateMatrix.h"
-#include "ConcreteMixtureModel.h"
+#include "MixtureModel.h"
 #include "UnitMixtureModel.h"
 
 using std::vector;
-using std::unique_ptr;
+using std::shared_ptr;
 
-RevBayesCore::ConcreteMixtureModel* InvModelFunc(const RevBayesCore::SiteMixtureModel& sub_model, double p)
+namespace Core = RevBayesCore;
+
+Core::SiteMixtureModel* InvModelFunc(const Core::SiteMixtureModel& sub_model, double p)
 {
-    using namespace RevBayesCore;
-
     if (p < 0 or p > 1)
         throw RbException()<<"fnInv: pInv should be in [0,1], but pInv = "<<p;
 
-    vector<unique_ptr<RevBayesCore::SiteMixtureModel>> sub_models;
-    vector<double> fractions = {1-p, p};
-
-    // The non-invariant part.
-    sub_models.push_back( unique_ptr<RevBayesCore::SiteMixtureModel>(sub_model.clone()) );
-
+    // 1. Compute average root frequencies of the submodel
     auto f = sub_model.componentProbs();
     int n = sub_model.getNumberOfStates();
     vector<double> pi(n,0);
@@ -49,12 +44,16 @@ RevBayesCore::ConcreteMixtureModel* InvModelFunc(const RevBayesCore::SiteMixture
         for(int l=0;l<pi.size();l++)
             pi[l] += sub_pi[l] * f[m];
     }
-    vector<double> er(n*(n-1)/2,0);
-    RevBayesCore::ConcreteTimeReversibleRateMatrix INV(er,pi,{});
 
-    sub_models.push_back( unique_ptr<RevBayesCore::SiteMixtureModel>(new RevBayesCore::UnitMixtureModel(INV)) );
+    // 2. Construct the INV model component
+    vector<double> er(n*(n-1)/2,0);
+    auto INV1 = Core::ConcreteTimeReversibleRateMatrix(er,pi,{});
+    auto INV2 = std::shared_ptr<const Core::SiteModel>(Core::GeneratorToSiteModel(INV1).clone());
+    auto INV = std::shared_ptr<const Core::SiteMixtureModel>(new Core::SiteMixtureModel({INV2},{1.0}));
+
+    auto VAR = shared_ptr<const RevBayesCore::SiteMixtureModel>(sub_model.clone());
     
-    auto inv_model = new RevBayesCore::ConcreteMixtureModel(sub_models, fractions);
+    auto inv_model = Core::mix_mixture( {VAR, INV}, {1-p, p} )->clone();
 
     // Here we scaling the model so that the invariant site category does not change the rate.
     // This fits what RevBayes is currently doing.
