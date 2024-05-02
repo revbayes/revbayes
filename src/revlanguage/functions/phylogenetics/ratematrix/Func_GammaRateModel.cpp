@@ -20,7 +20,7 @@
 
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
-#include "ConcreteMixtureModel.h"
+#include "MixtureModel.h"
 #include "UnitMixtureModel.h"
 
 using std::vector;
@@ -71,7 +71,7 @@ vector<double> gamma_rates(double a, int nCats, bool median)
     return rates;
 }
 
-Core::ConcreteMixtureModel* GammaRateModelFunc(const Core::SiteMixtureModel& submodel, double a, int nCats, Core::Boolean median)
+Core::SiteMixtureModel* GammaRateModelFunc(const Core::SiteMixtureModel& submodel, double a, int nCats, Core::Boolean median)
 {
     using namespace RevBayesCore;
 
@@ -85,7 +85,8 @@ Core::ConcreteMixtureModel* GammaRateModelFunc(const Core::SiteMixtureModel& sub
 
     vector<double> rates = gamma_rates(a, nCats, median);
 
-    return scaled_mixture( submodel, fraction, rates );
+    // It would be nice to be able to pass a smart pointer here.
+    return scaled_mixture( submodel, fraction, rates )->clone();
 }
 
 using namespace RevLanguage;
