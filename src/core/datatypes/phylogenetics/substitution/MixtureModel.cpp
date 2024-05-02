@@ -59,16 +59,6 @@ vector<TransitionProbabilityMatrix> SiteMixtureModel::calculateTransitionProbabi
     return Ps;
 }
 
-TransitionProbabilityMatrix SiteMixtureModel::calculateTransitionProbabilities(const Tree& t, int node, int mixture_component, double rate) const
-{
-    return getComponent(mixture_component).calculateTransitionProbabilities(t, node, rate);
-}
-
-bool SiteMixtureModel::simulateStochasticMapping(const Tree& t, int node, int mixture_component, int rate, std::vector<size_t>& states, std::vector<double>& times)
-{
-    return getComponent(mixture_component).simulateStochasticMapping(t, node, rate, states, times);
-}
-
 std::optional<double> SiteMixtureModel::rate() const
 {
     double r = 0;

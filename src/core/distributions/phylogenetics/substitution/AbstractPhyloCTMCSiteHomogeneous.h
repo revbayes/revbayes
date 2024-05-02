@@ -1550,7 +1550,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     {
         auto& model = mixture_model->getValue();
         int m = sampled_site_rate_component;
-        success = const_cast<SiteMixtureModel&>(model).simulateStochasticMapping(tau->getValue(), node_index, m, clock_rate, transition_states, transition_times);
+        success = const_cast<SiteMixtureModel&>(model).getComponent(m).simulateStochasticMapping(tau->getValue(), node_index, clock_rate, transition_states, transition_times);
     }
     else
     {
@@ -4314,7 +4314,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     {
         auto& model = mixture_model->getValue();
         for(int m=0; m < model.getNumberOfComponents(); m++)
-            pmatrices[pmat_offset + m] = model.calculateTransitionProbabilities(tau->getValue(), node_idx, m, rate);
+            pmatrices[pmat_offset + m] = model.getComponent(m).calculateTransitionProbabilities(tau->getValue(), node_idx, rate);
         return;
     }
 

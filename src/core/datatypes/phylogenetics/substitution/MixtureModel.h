@@ -43,11 +43,8 @@ namespace RevBayesCore {
 
         int                              getNumberOfStates() const;
 
-        TransitionProbabilityMatrix      calculateTransitionProbabilities(const Tree& t, int node, int mixture_component, double rate) const;
         std::vector<TransitionProbabilityMatrix>
                                          calculateTransitionProbabilities(const Tree& t, int node, double rate) const;
-
-        bool                             simulateStochasticMapping(const Tree&, int node, int mixture_component, int rate, std::vector<size_t>&, std::vector<double>&);
 
 	std::optional<double>            rate() const;
         void                             scale(double f);
