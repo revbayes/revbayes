@@ -256,7 +256,7 @@ jobs:
         fi
 
         if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
-           rm -f test_FBD/output_expected/
+           rm -rf test_FBD/output_expected/
            rm -f test_BDSTP/output_expected/BDSTP.*
         fi
 
