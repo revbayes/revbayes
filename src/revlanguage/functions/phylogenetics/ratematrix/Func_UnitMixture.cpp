@@ -27,26 +27,32 @@
 #include "UnitMixtureModel.h"
 
 using std::vector;
-using std::unique_ptr;
+using std::shared_ptr;
 
 namespace Core = RevBayesCore;
 
 
 // FIXME -- Make an argument rule so that we can check if the model is a RateMatrix when we create the function.
-Core::UnitMixtureModel* UnitMixtureFunc(const Core::RateGenerator& model,
+Core::SiteMixtureModel* UnitMixtureFunc(const Core::RateGenerator& model,
                                          const Core::Simplex& root_freqs,
                                          double rate)
 {
     if (root_freqs.size() == model.getNumberOfStates())
-        return new Core::UnitMixtureModel(model, root_freqs, rate);
+    {
+	auto site_model = std::shared_ptr<const Core::SiteModel>(new Core::GeneratorToSiteModel(model, root_freqs, rate));
+	return new Core::SiteMixtureModel({site_model}, {1.0});
+    }
     else
         throw RbException()<<"fnUnitMixture: root frequencies have "<<root_freqs.size()<<" states, but model has "<<model.getNumberOfStates()<<" states.";
 }
 
-Core::UnitMixtureModel* UnitMixtureFuncNoFreqs(const Core::RateGenerator& model, double scale)
+Core::SiteMixtureModel* UnitMixtureFuncNoFreqs(const Core::RateGenerator& model, double rate)
 {
     if (auto matrix = dynamic_cast<const Core::RateMatrix*>(&model))
-        return new Core::UnitMixtureModel(*matrix, matrix->getStationaryFrequencies(), scale);
+    {
+	auto site_model = std::shared_ptr<const Core::SiteModel>(new Core::GeneratorToSiteModel(*matrix, rate));
+	return new Core::SiteMixtureModel({site_model}, {1.0});
+    }
     else
         throw RbException()<<"fnUnitMixture: root frequencies not supplied, but model is not a RateMatrix";
 }
