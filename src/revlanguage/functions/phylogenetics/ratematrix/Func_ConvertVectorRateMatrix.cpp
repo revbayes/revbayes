@@ -40,7 +40,10 @@ Core::RbVector<Core::SiteMixtureModel>* ConvertVectorRateMatrixFunc(const Core::
     {
 	i++;
 	if (auto matrix = dynamic_cast<const Core::RateMatrix*>(&generator))
-	    models->push_back( Core::UnitMixtureModel(*matrix, matrix->getStationaryFrequencies()) );
+	{
+	    auto site_model = std::make_shared<const Core::GeneratorToSiteModel>(*matrix);
+	    models->push_back( Core::SiteMixtureModel({site_model},{1}) );
+	}
 	else
 	    throw RbException()<<"Converting RateGenerator[] to SiteMixtureModel[]: entry "<<i<<" is not a RateMatrix!";
     }
