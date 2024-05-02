@@ -31,10 +31,13 @@ using std::unique_ptr;
 
 namespace Core = RevBayesCore;
 
-Core::UnitMixtureModel* ConvertRateMatrixFunc(const Core::RateGenerator& model)
+Core::SiteMixtureModel* ConvertRateMatrixFunc(const Core::RateGenerator& model)
 {
     if (auto matrix = dynamic_cast<const Core::RateMatrix*>(&model))
-        return new Core::UnitMixtureModel(*matrix, matrix->getStationaryFrequencies());
+    {
+	auto site_model = std::make_shared<const Core::GeneratorToSiteModel>(*matrix);
+        return new Core::SiteMixtureModel({site_model},{1.0});
+    }
     else
         throw RbException()<<"_RateMatrix2MixtureModel: model is not a RateMatrix!";
 }
