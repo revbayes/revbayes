@@ -14,31 +14,88 @@
 using namespace RevBayesCore;
 
 using std::vector;
+using std::shared_ptr;
 
-SiteMixtureModel::SiteMixtureModel(int m, int n)
-    :n_mixture_components(m),
-     n_states(n)
+SiteMixtureModel* SiteMixtureModel::clone() const
 {
-    if (m <= 0)
-        throw RbException()<<"Mixture model: number of components is "<<m<<", but must be at least 1";
+    return new SiteMixtureModel(*this);
+}
+
+const SiteModel& SiteMixtureModel::getComponent(int m) const
+{
+    assert(m >= 0 and m < components.size());
+    return *components[m];
+}
+
+const std::vector<double>& SiteMixtureModel::componentProbs() const
+{
+    return fractions;
+}
+
+int SiteMixtureModel::size() const
+{
+    assert(fractions.size() == components.size());
+    return components.size();
 }
 
 int SiteMixtureModel::getNumberOfComponents() const
 {
-    return n_mixture_components;
+    return size();
+}
+
+vector<double> SiteMixtureModel::getRootFrequencies(int m) const
+{
+    return getComponent(m).getRootFrequencies();
 }
 
 int SiteMixtureModel::getNumberOfStates() const
 {
-    return n_states;
+    for(auto& component: components)
+	assert(component->getNumberOfStates() == components[0]->getNumberOfStates());
+
+    return getComponent(0).getNumberOfStates();
 }
 
 vector<TransitionProbabilityMatrix> SiteMixtureModel::calculateTransitionProbabilities(const Tree& t, int node, double rate) const
 {
     vector<TransitionProbabilityMatrix> Ps;
-    for(int c=0; c < getNumberOfComponents(); c++)
-        Ps.push_back( calculateTransitionProbabilities(t, node, c, rate) );
+    for(auto& component: components)
+        Ps.push_back( component->calculateTransitionProbabilities(t, node, rate) );
     return Ps;
+}
+
+TransitionProbabilityMatrix SiteMixtureModel::calculateTransitionProbabilities(const Tree& t, int node, int mixture_component, double rate) const
+{
+    return getComponent(mixture_component).calculateTransitionProbabilities(t, node, rate);
+}
+
+bool SiteMixtureModel::simulateStochasticMapping(const Tree& t, int node, int mixture_component, int rate, std::vector<size_t>& states, std::vector<double>& times)
+{
+    return getComponent(mixture_component).simulateStochasticMapping(t, node, rate, states, times);
+}
+
+std::optional<double> SiteMixtureModel::rate() const
+{
+    double r = 0;
+    for(int i=0;i<getNumberOfComponents();i++)
+    {
+        if (auto sr = components[i]->rate())
+            r += fractions[i] * (*sr);
+        else
+            return {};
+    }
+
+    return r;
+}
+
+void SiteMixtureModel::scale(double factor)
+{
+    for(auto& component: components)
+    {
+	auto component2 = std::shared_ptr<SiteModel>(component->clone());
+	component2->scale(factor);
+	component = std::move(component2);
+    }
 }
 
 void SiteMixtureModel::setRate(double r)
@@ -88,8 +145,47 @@ void SiteMixtureModel::executeMethod( const std::string &n, const std::vector<co
     }
 }
 
+SiteMixtureModel::SiteMixtureModel(const std::vector<std::shared_ptr<const SiteModel>>& c, const std::vector<double>& f)
+    :components(c),
+     fractions(f)
+{
+}
+
+SiteMixtureModel::SiteMixtureModel(std::vector<std::shared_ptr<const SiteModel>>&& c, std::vector<double>&& f)
+    :components(std::move(c)),
+     fractions(std::move(f))
+{
+}
+
 namespace RevBayesCore
 {
+
+shared_ptr<const SiteMixtureModel> scaled_mixture(const SiteMixtureModel& submodel, const std::vector<double>& fractions, const std::vector<double>& rates)
+{
+    const int n = fractions.size();
+    assert(rates.size() == n);
+
+    auto models = std::vector(n, std::shared_ptr<const SiteMixtureModel>(submodel.clone()));
+    return mix_mixture( scale_models( models, rates), fractions);
+}
+
+shared_ptr<const SiteMixtureModel> mix_mixture(const vector<shared_ptr<const SiteMixtureModel>>& models, const std::vector<double>& fractions)
+{
+    const int n = fractions.size();
+
+    vector<shared_ptr<const SiteModel>> components2;
+    vector<double> fractions2;
+
+    for(int i=0;i<n;i++)
+    {
+	for(int j=0;j<models[i]->size();j++)
+	{
+	    components2.push_back( std::shared_ptr<SiteModel>(models[i]->getComponent(j).clone()) );
+	    fractions2.push_back( fractions[i] * models[i]->componentProbs()[j] );
+	}
+    }
+    return std::make_shared<const SiteMixtureModel>( std::move(components2), std::move(fractions2) );
+}
 
 std::ostream& operator<<(std::ostream& o, const SiteMixtureModel& m)
 {

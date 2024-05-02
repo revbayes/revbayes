@@ -10,13 +10,14 @@
 #include "MemberObject.h"  // For member functions.
 #include "Cloneable.h"
 #include "TransitionProbabilityMatrix.h"
+#include "SiteModel.h"
 
 namespace RevBayesCore {
 
     class Tree;
 
     /**
-     * @brief Abstract mixture model class.
+     * @brief SiteModel mixture class.
      *
      * Derived models that depend on the branch lengths will additionally need to
      * incorporate a reference to the tree.
@@ -28,47 +29,76 @@ namespace RevBayesCore {
 
     class SiteMixtureModel: public Cloneable, public MemberObject< RbVector<RbVector<RbVector<double>>> >
     {
-        int n_mixture_components = 0;
-        int n_states = 0;
+        std::vector<std::shared_ptr<const SiteModel>> components;
+        std::vector<double> fractions;
 
     public:
         virtual                          ~SiteMixtureModel() = default;                                                  //!< Destructor
-        virtual SiteMixtureModel*        clone() const = 0;
+        SiteMixtureModel*                clone() const;
 
+	const SiteModel&                 getComponent(int m) const;
+        const std::vector<double>&       componentProbs() const;
+	int                              size() const;
         int                              getNumberOfComponents() const;
+
+        std::vector<double>              getRootFrequencies(int mixture_component) const;
         int                              getNumberOfStates() const;
 
-        virtual TransitionProbabilityMatrix
-                                         calculateTransitionProbabilities(const Tree& t, int node, int mixture_component, double rate) const = 0;
+        TransitionProbabilityMatrix      calculateTransitionProbabilities(const Tree& t, int node, int mixture_component, double rate) const;
         std::vector<TransitionProbabilityMatrix>
                                          calculateTransitionProbabilities(const Tree& t, int node, double rate) const;
 
-        virtual bool                     simulateStochasticMapping(const Tree&, int node, int mixture_component, int rate, std::vector<size_t>&, std::vector<double>&) = 0;
+        bool                             simulateStochasticMapping(const Tree&, int node, int mixture_component, int rate, std::vector<size_t>&, std::vector<double>&);
 
-        virtual std::optional<double>    rate() const = 0;
-        virtual void                     scale(double f) = 0;
+	std::optional<double>            rate() const;
+        void                             scale(double f);
         void                             setRate(double r);
 
         virtual void                     executeMethod( const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<RbVector<double>>> &retValue) const;       //!< Execute the member-method
-
-        virtual std::vector<double>      getRootFrequencies(int mixture_component) const = 0;
-        virtual std::vector<double>      componentProbs() const = 0;
 
         // This is a hack to satisfy ModelVector<T>, which incorrectly assumes that these exist for all T.
         bool                             operator==(const SiteMixtureModel&) const {return false;}
         bool                             operator!=(const SiteMixtureModel&) const {return true;}
         bool                             operator<=(const SiteMixtureModel&) const {return false;}
+        bool                             operator<(const SiteMixtureModel&) const {return false;}
 
         // virtual std::vector<int>            get_emitted_letters() const;                                          //!<Find out what alphet letter each state emits, for markov modulated models.
 
-    protected:
+	SiteMixtureModel& operator=(const SiteMixtureModel&) = default;
+	SiteMixtureModel& operator=(SiteMixtureModel&&) = default;
 
-        // prevent instantiation
-        SiteMixtureModel(int m, int n);
+	SiteMixtureModel(const SiteMixtureModel&) = default;
+	SiteMixtureModel(SiteMixtureModel&&) noexcept = default;
+
+	SiteMixtureModel() = default; // This is required by RbVectorImpl::initFromString because the class is not abstract.
+	SiteMixtureModel(const std::vector<std::shared_ptr<const SiteModel>>& c, const std::vector<double>& f);
+	SiteMixtureModel(std::vector<std::shared_ptr<const SiteModel>>&& c, std::vector<double>&& f);
     };
 
     // We need this for TypedDagNode<SiteMixtureModel> for some reason...
     std::ostream&                                       operator<<(std::ostream& o, const SiteMixtureModel& x);
+
+    template <typename T>    
+    std::vector<std::shared_ptr<const T>> scale_models(const std::vector<std::shared_ptr<const T>>& models, const std::vector<double>& rates)
+    {
+	assert(models.size() == rates.size());
+
+	std::vector<std::shared_ptr<const T>> scaled_models;
+
+	for(int i=0; i<models.size(); i++)
+	{
+	    auto m = std::shared_ptr<T>(models[i]->clone());
+	    m->scale(rates[i]);
+	    scaled_models.push_back(m);
+	}
+
+	return scaled_models;
+    }
+
+    std::shared_ptr<const SiteMixtureModel> scaled_mixture(const SiteMixtureModel& sub_model, const std::vector<double>& fractions, const std::vector<double>& rates);
+    std::shared_ptr<const SiteMixtureModel> mix_mixture(const std::vector<std::shared_ptr<const SiteMixtureModel>>& submodel, const std::vector<double>& fractions);
 }
+
+
 
 #endif
