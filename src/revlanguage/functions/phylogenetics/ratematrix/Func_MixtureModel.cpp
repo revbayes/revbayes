@@ -24,7 +24,7 @@
 
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
-#include "ConcreteMixtureModel.h"
+#include "MixtureModel.h"
 #include "UnitMixtureModel.h"
 
 using std::vector;
@@ -32,7 +32,7 @@ using std::unique_ptr;
 
 namespace Core = RevBayesCore;
 
-Core::ConcreteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SiteMixtureModel>& models,
+Core::SiteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SiteMixtureModel>& models,
                                              const Core::Simplex& fractions,
                                              const Core::RbVector<double>& scales)
 {
@@ -45,19 +45,18 @@ Core::ConcreteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SiteMixt
     if (scales.size() != models.size())
         throw RbException()<<"Got "<<models.size()<<" models but "<<scales.size()<<" scaling factors.";
 
-    vector<unique_ptr<Core::SiteMixtureModel>> model_ptrs;
-    for(int i=0;i<models.size();i++)
-    {
-        auto model_ptr = std::unique_ptr<Core::SiteMixtureModel>(models[i].clone());
-        model_ptr->scale(scales[i]);
-        model_ptrs.push_back( std::move(model_ptr) );
-    }
-    
-    return new Core::ConcreteMixtureModel(model_ptrs, fractions);
+
+    // convert vector<T> to vector<shared_ptr<const T>>
+    std::vector<std::shared_ptr<const Core::SiteMixtureModel>> models2;
+    for(auto& model: models)
+	models2.push_back(std::shared_ptr<const Core::SiteMixtureModel>(model.clone()));
+
+    // It would be nice to be able to pass a smart pointer here.
+    return Core::mix_mixture(Core::scale_models(models2, scales), fractions)->clone();
 }
 
-RevBayesCore::ConcreteMixtureModel* MixtureModelFunc2(const RevBayesCore::RbVector<RevBayesCore::SiteMixtureModel>& models,
-                                                      const RevBayesCore::Simplex& fractions)
+RevBayesCore::SiteMixtureModel* MixtureModelFunc2(const RevBayesCore::RbVector<RevBayesCore::SiteMixtureModel>& models,
+						  const RevBayesCore::Simplex& fractions)
 {
     vector<double> scales(models.size(), 1.0);
     return MixtureModelFunc(models, fractions, scales);
