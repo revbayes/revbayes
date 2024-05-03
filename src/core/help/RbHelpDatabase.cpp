@@ -1582,7 +1582,7 @@ Qs = fnScale(Q,    [1,2])      # An abbreviation for the above.
 Qs = Q |> fnScale([1,2])       # A shorter abbreviation.
 
 # A JC+LogNormal[4]+INV ASRV model
-site_rates := fnDiscretizeDistribution(4, dnLognormal(0,lsigma))
+site_rates := dnLognormal(0,lsigma) |> fnDiscretizeDistribution(4)
 M := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV() |> fnInvASRV(p_inv)
 
 # A FreeRates[5] ASRV model
