@@ -26,7 +26,6 @@
 #include "MemberFunction.h"
 #include "MethodTable.h"
 #include "ModelObject.h"
-#include "MixtureModel.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RevObject.h"

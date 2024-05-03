@@ -21,7 +21,7 @@
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
 #include "ConcreteTimeReversibleRateMatrix.h"
-#include "MixtureModel.h"
+#include "SiteMixtureModel.h"
 #include "UnitMixtureModel.h"
 
 using std::vector;

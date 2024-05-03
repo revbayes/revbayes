@@ -20,8 +20,7 @@
 
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
-#include "MixtureModel.h"
-#include "UnitMixtureModel.h"
+#include "SiteMixtureModel.h"
 
 using std::vector;
 using std::unique_ptr;

@@ -18,7 +18,7 @@
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDistribution.h"
-#include "MixtureModel.h"
+#include "SiteMixtureModel.h"
 
 #include <memory.h>
 

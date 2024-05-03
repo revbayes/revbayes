@@ -1,5 +1,5 @@
-#ifndef SUBSTITUTION_MIXTURE_MODEL_H
-#define SUBSTITUTION_MIXTURE_MODEL_H
+#ifndef SITE_MIXTURE_MODEL_H
+#define SITE_MIXTURE_MODEL_H
 
 #include <stddef.h>
 #include <vector>

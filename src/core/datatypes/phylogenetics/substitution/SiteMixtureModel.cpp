@@ -1,4 +1,4 @@
-#include "MixtureModel.h"
+#include "SiteMixtureModel.h"
 
 #include <cmath>
 #include <fstream>
@@ -6,7 +6,6 @@
 #include <cstddef>
 
 #include "MatrixReal.h"
-#include "MixtureModel.h"
 #include "RbException.h"
 #include "TypedDagNode.h"
 #include "Tree.h"

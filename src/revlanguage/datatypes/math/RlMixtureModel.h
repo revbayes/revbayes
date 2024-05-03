@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "RlRateGenerator.h"
-#include "MixtureModel.h"
+#include "SiteMixtureModel.h"
 #include "RevPtr.h"
 
 namespace RevBayesCore { class SiteMixtureModel; }
