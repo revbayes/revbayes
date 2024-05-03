@@ -1462,17 +1462,12 @@ M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
 seq ~ dnPhyloCTMC(psi, M, type="DNA")
 
 # Adding rate variation to the frequency-variation model.
-M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
-
-# A free-rates model
-Q := fnJC(4)
-rates ~ dnDirichlet([1,1,1,1])
-weights ~ dnDirichlet([2,2,2,2])
-M := fnMixtureASRV([Q,Q,Q,Q], weights, rates*4))");
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
 	help_strings[string("fnMixtureASRV")][string("name")] = string(R"(fnMixtureASRV)");
 	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
 	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
 	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnMixtureASRV")][string("title")] = string(R"(fnMixtureASRV)");
 	help_strings[string("fnMixtureCladoProbs")][string("name")] = string(R"(fnMixtureCladoProbs)");
 	help_strings[string("fnMtMam")][string("name")] = string(R"(fnMtMam)");
@@ -1560,6 +1555,43 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnReversiblePoMoTwo4N")][string("name")] = string(R"(fnReversiblePoMoTwo4N)");
 	help_strings[string("fnRtRev")][string("name")] = string(R"(fnRtRev)");
 	help_strings[string("fnSampledCladogenesisRootFrequencies")][string("name")] = string(R"(fnSampledCladogenesisRootFrequencies)");
+	help_arrays[string("fnScale")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnScale")][string("description")] = string(R"(Scale a vector of SiteMixtureModels)");
+	help_strings[string("fnScale")][string("details")] = string(R"(This function has two forms.  The first form takes a SiteMixtureModel `model` and scales it by
+a rate `rate`.  This form returns SiteMixtureModel[].
+
+The second form takes SiteMixtureModel[] `models` and RealPos[] `rates`, and scales `models[i]`
+by `rates[i]`.  This form returns SiteMixtureModel[].
+
+As a shortcut, if the second argument `rates` is a vector but the first element `model` is not,
+then the first argument will be automatically replaced with a vector of SiteMixtureModels of the
+same length as `rates`, where each element is identical to `model`.)");
+	help_strings[string("fnScale")][string("example")] = string(R"(Q = fnJC(4)                    # The rate of Q is 1
+
+# Operating on SiteMixtureModel
+Q2 = fnScale(Q,2)              # The rate of Q2 is 2
+
+# Operating on SiteMixtureModel[]
+Qs = fnScale([Q,Q],[1,2])      # The Qs[1] and Qs[2] have rates are 1 and 2
+Qs = fnScale(Q,    [1,2])      # An abbreviation for the above.
+
+# We can build up models iteratively using pipes
+Qs = Q |> fnScale([1,2])       # A shorter abbreviation.
+
+# A JC+LogNormal[4]+INV ASRV model
+site_rates := fnDiscretizeDistribution(4, dnLognormal(0,lsigma))
+M := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV(rep(1/4,4)) |> fnInvASRV(p_inv)
+
+# A FreeRates[5] ASRV model
+rates ~ dnDirichlet( [1,1,1,1,1] )
+weights ~ dnDirichlet( [2,2,2,2,2] )
+M := fnJC(4) |> fnScale(rates*5) |> fnMixtureASRV(weights))");
+	help_strings[string("fnScale")][string("name")] = string(R"(fnScale)");
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
+	help_strings[string("fnScale")][string("title")] = string(R"(fnScale)");
 	help_strings[string("fnSegregatingSites")][string("name")] = string(R"(fnSegregatingSites)");
 	help_strings[string("fnShiftEvents")][string("name")] = string(R"(fnShiftEvents)");
 	help_strings[string("fnShortestDistance")][string("name")] = string(R"(fnShortestDistance)");

@@ -26,6 +26,7 @@ Benjamin Redelings
 ## see_also
 fnUnitMixture
 fnInvASRV
+fnScale
 fnMixtureASRV
 fnDiscretizeGamma
 ## example

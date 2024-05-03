@@ -14,6 +14,7 @@ Benjamin Redelings
 fnUnitMixture
 fnGammaASRV
 fnMixtureASRV
+fnScale
 ## example
         # fnInvASRV( ) creates a mixture model by adding invariant sites to an underlying site model.
         p_inv ~ dnUniform(0,1)

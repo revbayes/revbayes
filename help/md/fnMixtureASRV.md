@@ -21,6 +21,8 @@ Benjamin Redelings
 fnUnitMixture
 fnGammaASRV
 fnInvASRV
+fnScale
+
 ## example
         # Two components with different frequencies
         pi1 ~ dnDirichlet([1,1,1,1])
@@ -31,11 +33,5 @@ fnInvASRV
 
         # Adding rate variation to the frequency-variation model.
         M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
-
-        # A free-rates model
-        Q := fnJC(4)
-        rates ~ dnDirichlet([1,1,1,1])
-        weights ~ dnDirichlet([2,2,2,2])
-        M := fnMixtureASRV([Q,Q,Q,Q], weights, rates*4)
         
 ## references
