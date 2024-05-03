@@ -1561,7 +1561,7 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_arrays[string("fnScale")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnScale")][string("description")] = string(R"(Scale a vector of SiteMixtureModels)");
 	help_strings[string("fnScale")][string("details")] = string(R"(This function has two forms.  The first form takes a SiteMixtureModel `model` and scales it by
-a rate `rate`.  This form returns SiteMixtureModel[].
+a rate `rate`.  This form returns SiteMixtureModel.
 
 The second form takes SiteMixtureModel[] `models` and RealPos[] `rates`, and scales `models[i]`
 by `rates[i]`.  This form returns SiteMixtureModel[].

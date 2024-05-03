@@ -6,7 +6,7 @@ fnScale
 Scale a vector of SiteMixtureModels
 ## details
 This function has two forms.  The first form takes a SiteMixtureModel `model` and scales it by
-a rate `rate`.  This form returns SiteMixtureModel[].
+a rate `rate`.  This form returns SiteMixtureModel.
 
 The second form takes SiteMixtureModel[] `models` and RealPos[] `rates`, and scales `models[i]`
 by `rates[i]`.  This form returns SiteMixtureModel[].
