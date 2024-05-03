@@ -206,7 +206,7 @@ void RateGenerator_Epoch::setEpochRates(const RbVector<double>& r)
     assignEpochDominatingRates();
 }
 
-bool RateGenerator_Epoch::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times)
+bool RateGenerator_Epoch::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times) const
 {
     if ( dynamic_cast<const RateMatrix*>( &epochRateGenerators[0] ) == NULL )
     {
