@@ -262,6 +262,7 @@
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
+#include "Dist_Log.h"
 #include "Dist_markovTimes.h"
 #include "Dist_markovEvents.h"
 #include "Dist_mixture.h"
@@ -593,6 +594,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Natural>       >( new Dist_IID<Natural>()      );
         AddDistribution< ModelVector<Integer>       >( new Dist_IID<Integer>()      );
         AddDistribution< ModelVector<Probability>   >( new Dist_IID<Probability>()  );
+
+        AddDistribution< RealPos                    >( new Dist_Log()         );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );

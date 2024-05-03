@@ -771,6 +771,23 @@ where mu is the mean of the distribution and b the scale.)");
 	help_arrays[string("dnLaplace")][string("see_also")].push_back(string(R"(dnExponential)"));
 	help_arrays[string("dnLaplace")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_strings[string("dnLaplace")][string("title")] = string(R"(Laplace Distribution)");
+	help_strings[string("dnLog")][string("description")] = string(R"(Computes a log-transformed distribution.  If
+        X ~ dist
+then
+        exp(X) ~ dnLog(dist)        
+
+This provides a way to construct distributions like dnLognormal and
+dnLogExponential,)");
+	help_strings[string("dnLog")][string("example")] = string(R"(x ~ dnLog(dnNormal(0,1))          # Draw from the log-Normal distribution
+x ~ dnNormal(0,1) |> dnLog()      # Expressed using pipes.
+x ~ dnLognormal(0,1)              # This is equivalent.
+
+x ~ dnLog(dnGamma(2,3))           # There is no equivalent for this.
+x ~ dnIID(10,dnLog(dnGamma(2,3))) # Draw 10 log-Gamma(2,3) random variables.)");
+	help_strings[string("dnLog")][string("name")] = string(R"(dnLog)");
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLogExponential)"));
+	help_strings[string("dnLog")][string("title")] = string(R"(A log-transformed distribution)");
 	help_arrays[string("dnLogExponential")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnLogExponential")][string("description")] = string(R"(A real number x has a log-Exponential distribution if y = exp(x) has Exponential distribution.)");
 	help_strings[string("dnLogExponential")][string("details")] = string(R"(The log-Exponential distribution is defined over real numbers. Saying that x is log-Exponential is equivalent to saying that y = exp(x) is Exponential. The log-Exponential distribution therefore expresses lack of information about the order of magnitude of a scale parameter:  if x has a log-Exponential distribution, then it has equal chance to be contained by any of the intervals of the form (10^k, 10^(k+1)) within the allowed range.
