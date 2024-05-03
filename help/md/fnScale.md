@@ -35,12 +35,14 @@ fnMixtureASRV
         # We can build up models iteratively using pipes
         Qs = Q |> fnScale([1,2])       # A shorter abbreviation.
 
-        # A JC+LogNormal[4]+INV ASRV model
+        # A JC+LogNormal[4] ASRV model
         site_rates := dnLognormal(0,lsigma) |> fnDiscretizeDistribution(4)
-        M := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV() |> fnInvASRV(p_inv)
+        MM := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV()
+        M := fnScale(MM, 1/MM.rate())
 
         # A FreeRates[5] ASRV model
         rates ~ dnDirichlet( [1,1,1,1,1] )
         weights ~ dnDirichlet( [2,2,2,2,2] )
-        M := fnJC(4) |> fnScale(rates*5) |> fnMixtureASRV(weights)
+        MM := fnJC(4) |> fnScale(rates) |> fnMixtureASRV(weights)
+        M := fnScale(MM, 1/MM.rate())
 ## references
