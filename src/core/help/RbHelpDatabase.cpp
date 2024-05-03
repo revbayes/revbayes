@@ -1575,7 +1575,7 @@ same length as `rates`, where each element is identical to `model`.)");
 Q2 = fnScale(Q,2)              # The rate of Q2 is 2
 
 # Operating on SiteMixtureModel[]
-Qs = fnScale([Q,Q],[1,2])      # The Qs[1] and Qs[2] have rates are 1 and 2
+Qs = fnScale([Q,Q],[1,2])      # Qs[1] and Qs[2] have rates 1 and 2
 Qs = fnScale(Q,    [1,2])      # An abbreviation for the above.
 
 # We can build up models iteratively using pipes
