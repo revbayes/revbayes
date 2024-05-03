@@ -22,7 +22,7 @@
 #include "RbMathFunctions.h"
 #include "ConcreteTimeReversibleRateMatrix.h"
 #include "SiteMixtureModel.h"
-#include "UnitMixtureModel.h"
+#include "GeneratorToSiteModel.h"
 
 using std::vector;
 using std::shared_ptr;

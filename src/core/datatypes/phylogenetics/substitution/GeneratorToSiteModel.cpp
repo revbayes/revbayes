@@ -1,4 +1,4 @@
-#include "UnitMixtureModel.h"
+#include "GeneratorToSiteModel.h"
 
 #include <cmath>
 #include <fstream>

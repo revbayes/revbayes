@@ -1,5 +1,5 @@
-#ifndef UNIT_MIXTURE_MODEL_H
-#define UNIT_MIXTURE_MODEL_H
+#ifndef GENERATOR_TO_SITE_MODEL_H
+#define GENERATOR_TO_SITE_MODEL_H
 
 #include "SiteModel.h"
 #include "RateGenerator.h"

@@ -24,7 +24,7 @@
 
 #include "DistributionChisq.h"
 #include "RbMathFunctions.h"
-#include "UnitMixtureModel.h"
+#include "GeneratorToSiteModel.h"
 
 using std::vector;
 using std::unique_ptr;
