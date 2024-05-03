@@ -129,6 +129,18 @@ void SiteMixtureModel::executeMethod( const std::string &n, const std::vector<co
     }
 }
 
+void SiteMixtureModel::executeMethod( const std::string &n, const std::vector<const DagNode*> &args, double &rv) const
+{
+
+    if (n == "rate")
+    {
+	if (auto r = rate())
+	    rv = *r;
+	else
+            throw RbException()<<"SiteMixtureModel.rate(): this model does not have a well-define rate.";
+    }
+}
+
 SiteMixtureModel::SiteMixtureModel(const std::vector<std::shared_ptr<const SiteModel>>& c, const std::vector<double>& f)
     :components(c),
      fractions(f)

@@ -97,16 +97,6 @@ RevPtr<RevVariable> SiteMixtureModel::executeMethod(std::string const &name, con
         auto weights = dag_node->getValue().componentProbs();
         return new RevVariable( new Simplex( weights ) );
     }
-    else if (name == "rate")
-    {
-        found = true;
-
-        auto rate = dag_node->getValue().rate();
-        if (not rate)
-            throw RbException()<<"Cannot call .rate() on this mixture model: the rate is not defined.";
-
-        return new RevVariable( new RealPos( *rate ) );
-    }
     else if (name == "rootFrequencies")
     {
         found = true;
@@ -119,6 +109,9 @@ RevPtr<RevVariable> SiteMixtureModel::executeMethod(std::string const &name, con
     }
 
     ; // do nothing for now
+
+    // "getTransitionProbabilities"
+    // "rate"
     return ModelObject<RevBayesCore::SiteMixtureModel>::executeMethod( name, args, found );
 }
 
@@ -163,7 +156,7 @@ void SiteMixtureModel::initMethods(void)
 
     // add method for call "weights" as a function
     ArgumentRules* rateArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "rate", RealPos::getClassTypeSpec(), rateArgRules) );
+    methods.addFunction( new MemberFunction<SiteMixtureModel, RealPos>( "rate", this, rateArgRules) );
 
     // add method for call "rootFrequencies" as a function
     ArgumentRules* rootFrequenciesArgRules = new ArgumentRules();
