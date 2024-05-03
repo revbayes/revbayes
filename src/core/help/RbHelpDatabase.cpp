@@ -1593,7 +1593,6 @@ M := fnJC(4) |> fnScale(rates*5) |> fnMixtureASRV(weights))");
 	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
 	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnInvASRV)"));
 	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
-	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
 	help_strings[string("fnScale")][string("title")] = string(R"(fnScale)");
 	help_strings[string("fnSegregatingSites")][string("name")] = string(R"(fnSegregatingSites)");
 	help_strings[string("fnShiftEvents")][string("name")] = string(R"(fnShiftEvents)");
