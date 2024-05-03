@@ -12,8 +12,8 @@ is specified by the fractions parameter.
 The number of components in the resulting mixture model is the sum of the number
 of components of the input mixture models.
 
-If the rates parameter is given, the rate of each input site model is multipled
-by the corresponding element of the rates vector.
+If the fractions parameter is missing, then each of the given models is given equal
+weight.
 
 ## authors
 Benjamin Redelings
@@ -31,7 +31,12 @@ fnScale
         M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
         seq ~ dnPhyloCTMC(psi, M, type="DNA")
 
+        # A weight of 1/2 on each model because the weights are missing.
+        M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)])
+
         # Adding rate variation to the frequency-variation model.
         M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+
+
         
 ## references

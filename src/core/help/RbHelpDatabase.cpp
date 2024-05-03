@@ -1452,14 +1452,17 @@ is specified by the fractions parameter.
 The number of components in the resulting mixture model is the sum of the number
 of components of the input mixture models.
 
-If the rates parameter is given, the rate of each input site model is multipled
-by the corresponding element of the rates vector.)");
+If the fractions parameter is missing, then each of the given models is given equal
+weight.)");
 	help_strings[string("fnMixtureASRV")][string("example")] = string(R"(# Two components with different frequencies
 pi1 ~ dnDirichlet([1,1,1,1])
 pi2 ~ dnDirichlet([1,1,1,1])
 weights ~ dnDirichlet([1,1])
 M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
 seq ~ dnPhyloCTMC(psi, M, type="DNA")
+
+# A weight of 1/2 on each model because the weights are missing.
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)])
 
 # Adding rate variation to the frequency-variation model.
 M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
@@ -1580,7 +1583,7 @@ Qs = Q |> fnScale([1,2])       # A shorter abbreviation.
 
 # A JC+LogNormal[4]+INV ASRV model
 site_rates := fnDiscretizeDistribution(4, dnLognormal(0,lsigma))
-M := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV(rep(1/4,4)) |> fnInvASRV(p_inv)
+M := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV() |> fnInvASRV(p_inv)
 
 # A FreeRates[5] ASRV model
 rates ~ dnDirichlet( [1,1,1,1,1] )

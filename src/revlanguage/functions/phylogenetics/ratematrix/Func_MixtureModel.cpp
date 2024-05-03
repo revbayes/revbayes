@@ -33,8 +33,7 @@ using std::unique_ptr;
 namespace Core = RevBayesCore;
 
 Core::SiteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SiteMixtureModel>& models,
-                                             const Core::Simplex& fractions,
-                                             const Core::RbVector<double>& scales)
+					 const Core::Simplex& fractions)
 {
     if (models.size() == 0)
         throw RbException()<<"Cannot have a mixture of 0 models!";
@@ -42,24 +41,21 @@ Core::SiteMixtureModel* MixtureModelFunc(const Core::RbVector<Core::SiteMixtureM
     if (fractions.size() != models.size())
         throw RbException()<<"Got "<<models.size()<<" models but "<<fractions.size()<<" probabilities.";
 
-    if (scales.size() != models.size())
-        throw RbException()<<"Got "<<models.size()<<" models but "<<scales.size()<<" scaling factors.";
-
-
     // convert vector<T> to vector<shared_ptr<const T>>
     std::vector<std::shared_ptr<const Core::SiteMixtureModel>> models2;
     for(auto& model: models)
 	models2.push_back(std::shared_ptr<const Core::SiteMixtureModel>(model.clone()));
 
     // It would be nice to be able to pass a smart pointer here.
-    return Core::mix_mixture(Core::scale_models(models2, scales), fractions)->clone();
+    return Core::mix_mixture(models2, fractions)->clone();
 }
 
-RevBayesCore::SiteMixtureModel* MixtureModelFunc2(const RevBayesCore::RbVector<RevBayesCore::SiteMixtureModel>& models,
-						  const RevBayesCore::Simplex& fractions)
+Core::SiteMixtureModel* MixtureModelFuncEqualWeights(const Core::RbVector<Core::SiteMixtureModel>& models)
 {
-    vector<double> scales(models.size(), 1.0);
-    return MixtureModelFunc(models, fractions, scales);
+    int n = models.size();
+    std::vector<double> fractions(n, 1.0/n);
+
+    return MixtureModelFunc(models, fractions);
 }
 
 using namespace RevLanguage;
@@ -87,15 +83,13 @@ Core::TypedFunction< Core::SiteMixtureModel >* Func_MixtureModel::createFunction
 {
     Core::TypedDagNode< Core::RbVector<Core::SiteMixtureModel> >* models = static_cast<const ModelVector<SiteMixtureModel> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-    Core::TypedDagNode< Core::Simplex >* fractions = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-
-    if (auto& scales_var = *args[2].getVariable(); scales_var.getRevObject() != RevNullObject::getInstance())
+    if (auto& fractions_var = *args[1].getVariable(); fractions_var.getRevObject() != RevNullObject::getInstance())
     {
-        Core::TypedDagNode< Core::RbVector<double> >* scales = dynamic_cast<const ModelVector<RealPos> &>( scales_var.getRevObject() ).getDagNode();
-        return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFunc, models, fractions, scales );
+	Core::TypedDagNode< Core::Simplex >* fractions = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFunc, models, fractions );
     }
     else
-        return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFunc2, models, fractions );
+        return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFuncEqualWeights, models );
 }
 
 
@@ -108,8 +102,7 @@ const ArgumentRules& Func_MixtureModel::getArgumentRules( void ) const
     if ( !rules_set )
     {
         argumentRules.push_back( new ArgumentRule( "models"    , ModelVector<SiteMixtureModel>::getClassTypeSpec(), "The mixture models to mix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "fractions" , Simplex::getClassTypeSpec(), "The probability of each model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "rates"     , ModelVector<RealPos>::getClassTypeSpec(), "The rate to scale each model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, nullptr) );
+        argumentRules.push_back( new ArgumentRule( "fractions" , Simplex::getClassTypeSpec(), "The probability of each model.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, nullptr) );
 
         rules_set = true;
     }
