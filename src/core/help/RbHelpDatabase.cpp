@@ -1399,6 +1399,7 @@ M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) 
 	help_references[string("fnGammaASRV")].push_back(RbHelpReference(R"(Yang, Z. (1994) Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: approximate methods)",R"(https://doi.org/10.1007/BF00160154 )",R"()"));
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
 	help_strings[string("fnGammaASRV")][string("title")] = string(R"(fnGammaASRV)");
@@ -1436,6 +1437,7 @@ M := fnJC(4) |> fnInv(p2) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
