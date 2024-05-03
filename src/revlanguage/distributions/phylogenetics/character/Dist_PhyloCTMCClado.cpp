@@ -48,7 +48,7 @@
 #include "RlDeterministicNode.h"
 #include "RlDistribution.h"
 #include "RlRateGenerator.h"
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlStochasticNode.h"
 #include "RlTypedDistribution.h"
 #include "RlTypedFunction.h"

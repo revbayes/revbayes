@@ -63,7 +63,7 @@
 #include "RlConstantNode.h"
 #include "RlDeterministicNode.h"
 #include "RlDistribution.h"
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlTypedDistribution.h"
 #include "RlTree.h"
 #include "RlTypedFunction.h"

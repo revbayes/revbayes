@@ -5,7 +5,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlTypedFunction.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"

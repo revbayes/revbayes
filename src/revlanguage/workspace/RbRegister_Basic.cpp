@@ -66,7 +66,7 @@
 #include "RlConstantNode.h"                               // for ConstantNode
 #include "RlDeterministicNode.h"                          // for Determinist...
 #include "RlRateGenerator.h"                              // for RateGenerator
-#include "RlMixtureModel.h"                               // for MixtureModel
+#include "RlSiteMixtureModel.h"                               // for MixtureModel
 #include "RlTimeTree.h"                                   // for TimeTree
 #include "RlTypedFunction.h"                              // for TypedFunction
 #include "ScalarMatrixMultiplication.h"                   // for ScalarMatri...

@@ -13,7 +13,7 @@
 #include "RlBoolean.h"
 #include "RlMatrixReal.h"
 #include "RlRateGenerator.h"
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlString.h"
 #include "RlTree.h"
 #include "StandardState.h"

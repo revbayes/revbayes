@@ -2,7 +2,7 @@
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlRateMatrix.h"
 #include "RlSimplex.h"
 #include "GenericFunction.h"

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "ModelVector.h"
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlTypedFunction.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"

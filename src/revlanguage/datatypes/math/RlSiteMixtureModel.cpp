@@ -1,5 +1,5 @@
 //
-//  RlMixtureModel.cpp
+//  RlSiteMixtureModel.cpp
 //  revbayes-proj
 //
 //  Created by Michael Landis on 3/17/15.
@@ -14,7 +14,7 @@
 #include "ModelVector.h"
 #include "RealPos.h"
 #include "RlMemberFunction.h"
-#include "RlMixtureModel.h"
+#include "RlSiteMixtureModel.h"
 #include "RlSimplex.h"
 #include "RlTree.h"
 #include "ArgumentRules.h"
