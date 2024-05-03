@@ -42,8 +42,7 @@ GeneratorToSiteModel::calculateTransitionProbabilities(const Tree& tau, int node
     auto [start_age, end_age] = getStartEndAge(*node);
     
     TransitionProbabilityMatrix P(getNumberOfStates());
-    auto generator2 = std::shared_ptr<RateGenerator>(generator->clone());
-    generator2->calculateTransitionProbabilities( start_age, end_age, _scale * rate, P);
+    generator->calculateTransitionProbabilities( start_age, end_age, _scale * rate, P);
     return P;
 }
 
@@ -55,8 +54,7 @@ bool GeneratorToSiteModel::simulateStochasticMapping(const Tree& tau, int node_i
 
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;
-    auto generator2 = std::shared_ptr<RateGenerator>(generator->clone());
-    return generator2->simulateStochasticMapping(start_age, end_age, _scale * rate, states, times);
+    return generator->simulateStochasticMapping(start_age, end_age, _scale * rate, states, times);
 }
 
 vector<double> GeneratorToSiteModel::getRootFrequencies() const
