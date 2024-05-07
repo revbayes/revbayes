@@ -14,7 +14,7 @@ The continuous Gamma distribution is approximated with a mixture distribution
 over n discrete rates, each with probability 1/n.  The Gamma distribution is
 constrained to have a mean of 1, so as not to change the  branch lengths.
 It therefore has only a single parameter alpha -- the shape parameter.
-        - As alpha approaches infinity, rate variation goes to 0.
+        - As alpha approaches infinity, all rates across sites become equal (rate variation goes to 0).
         - If alpha = 1, then the rate is exponentially distributed.  Rate variation is substantial.
         - As alpha approaches zero, many sites have rate 0, and many sites have a high rate.
 
@@ -32,11 +32,13 @@ fnDiscretizeGamma
 ## example
         # fnGammaASRV( ) constructs a mixture model that represents both the underlying
         #   rate matrix and Gamma-distributed rate variation.
+        for (i in 1:10) { taxa[i] = taxon("T"+i) }
+        psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
         alpha ~ dnExp(1/10)
         er ~ dnDirichlet( [1,1,1,1,1,1] )
         pi ~ dnDirichlet( [1,1,1,1] )
         M := fnGammaASRV( fnGTR(er, pi), alpha, 4)
-        seq ~ dnPhyloCTMC(psi, M, type="DNA")
+        seq ~ dnPhyloCTMC(psi, M, type="DNA",nSites=10)
 
         # As an alternative approach, models can be built up iteratively using pipes.
         M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)  

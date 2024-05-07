@@ -28,6 +28,6 @@ automatically convert a RateMatrix to a SiteMixtureModel.
         M := fnGTR(er,pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
         
         # Specifying the root frequencies
-        M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep1,n_states))
+        M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep(1,n_states)))
         
 ## references

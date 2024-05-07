@@ -25,11 +25,13 @@ fnScale
 
 ## example
         # Two components with different frequencies
+        for (i in 1:10) { taxa[i] = taxon("T"+i) }
+        psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
         pi1 ~ dnDirichlet([1,1,1,1])
         pi2 ~ dnDirichlet([1,1,1,1])
         weights ~ dnDirichlet([1,1])
         M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
-        seq ~ dnPhyloCTMC(psi, M, type="DNA")
+        seq ~ dnPhyloCTMC(psi, M, type="DNA", nSites=10)
 
         # A weight of 1/2 on each model because the weights are missing.
         M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)])

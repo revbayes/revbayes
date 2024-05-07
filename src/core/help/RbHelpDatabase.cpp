@@ -89,7 +89,23 @@ c = a + b
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("RlRegionalFeatureLayer")][string("name")] = string(R"(RlRegionalFeatureLayer)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_arrays[string("SiteMixtureModel")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("SiteMixtureModel")][string("description")] = string(R"(A weighted collection of discrete character evolution models.)");
+	help_strings[string("SiteMixtureModel")][string("details")] = string(R"(The SiteMixtureModel datatype is a mixture distribution where each
+component is a model of discrete character evolution.  Each character evolves
+according to one of the component models.  However, the specific model for each
+character is not specified in advance.  Instead, each character has some
+probability of choosing each component.  These probabilities are specified by
+the mixture weights.)");
+	help_strings[string("SiteMixtureModel")][string("example")] = string(R"(M := fnInvASRV(fnGammaASRV(fnJC(4),alpha=1),pInv=0.1)
+M.weights()
+M.nComponents()
+M.rootFrequencies(1)
+
+# It possible to express nested models using pipes.
+M := fnJC(4) |> fnGammaASRV(alpha=1) |> fnInvASRV(pInv=0.1))");
 	help_strings[string("SiteMixtureModel")][string("name")] = string(R"(SiteMixtureModel)");
+	help_strings[string("SiteMixtureModel")][string("title")] = string(R"(SiteMixtureModel)");
 	help_strings[string("StochasticMatrix")][string("name")] = string(R"(StochasticMatrix)");
 	help_strings[string("String")][string("name")] = string(R"(String)");
 	help_strings[string("TimeTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
@@ -1370,7 +1386,7 @@ The continuous Gamma distribution is approximated with a mixture distribution
 over n discrete rates, each with probability 1/n.  The Gamma distribution is
 constrained to have a mean of 1, so as not to change the  branch lengths.
 It therefore has only a single parameter alpha -- the shape parameter.
-        - As alpha approaches infinity, rate variation goes to 0.
+        - As alpha approaches infinity, all rates across sites become equal (rate variation goes to 0).
         - If alpha = 1, then the rate is exponentially distributed.  Rate variation is substantial.
         - As alpha approaches zero, many sites have rate 0, and many sites have a high rate.
 
@@ -1378,11 +1394,13 @@ RateMatrix and RateGenerator site model parameters will automatically be convert
 SiteMixtureModel with a single component.)");
 	help_strings[string("fnGammaASRV")][string("example")] = string(R"(# fnGammaASRV( ) constructs a mixture model that represents both the underlying
 #   rate matrix and Gamma-distributed rate variation.
+for (i in 1:10) { taxa[i] = taxon("T"+i) }
+psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
 alpha ~ dnExp(1/10)
 er ~ dnDirichlet( [1,1,1,1,1,1] )
 pi ~ dnDirichlet( [1,1,1,1] )
 M := fnGammaASRV( fnGTR(er, pi), alpha, 4)
-seq ~ dnPhyloCTMC(psi, M, type="DNA")
+seq ~ dnPhyloCTMC(psi, M, type="DNA",nSites=10)
 
 # As an alternative approach, models can be built up iteratively using pipes.
 M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)
@@ -1421,9 +1439,11 @@ Q := fnHKY(kappa,pi))");
 If the site model parameter is a mixture model with m components, this function will return a model with
 m+1 components.)");
 	help_strings[string("fnInvASRV")][string("example")] = string(R"(# fnInvASRV( ) creates a mixture model by adding invariant sites to an underlying site model.
+for (i in 1:10) { taxa[i] = taxon("T"+i) }
+psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
 p_inv ~ dnUniform(0,1)
-M := fnInv( fnJC(4), p_inv)
-seq ~ dnPhyloCTMC(psi, M, type="DNA")
+M := fnInvASRV( fnJC(4), p_inv)
+seq ~ dnPhyloCTMC(psi, M, type="DNA", nSites=10)
 
 # As an alternative approach, models can be built up iteratively using pipes.
 M := fnJC(4) |> fnInv(p_inv)
@@ -1432,7 +1452,7 @@ M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) co
 M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
 
 # Not recommended -- illustration only.  3 components.
-M := fnJC(4) |> fnInv(p2) |> fnInv(p2) # Fraction of invariable sites is p2 + (1-p2)*p2)");
+M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1-p2)*p1)");
 	help_strings[string("fnInvASRV")][string("name")] = string(R"(fnInvASRV)");
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
@@ -1457,11 +1477,13 @@ of components of the input mixture models.
 If the fractions parameter is missing, then each of the given models is given equal
 weight.)");
 	help_strings[string("fnMixtureASRV")][string("example")] = string(R"(# Two components with different frequencies
+for (i in 1:10) { taxa[i] = taxon("T"+i) }
+psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
 pi1 ~ dnDirichlet([1,1,1,1])
 pi2 ~ dnDirichlet([1,1,1,1])
 weights ~ dnDirichlet([1,1])
 M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
-seq ~ dnPhyloCTMC(psi, M, type="DNA")
+seq ~ dnPhyloCTMC(psi, M, type="DNA", nSites=10)
 
 # A weight of 1/2 on each model because the weights are missing.
 M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)])
@@ -1643,7 +1665,7 @@ M := fnGTR(er,pi) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 M := fnGTR(er,pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
 
 # Specifying the root frequencies
-M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep1,n_states)))");
+M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep(1,n_states))))");
 	help_strings[string("fnUnitMixture")][string("name")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUnitMixture")][string("title")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUpperTriangle")][string("name")] = string(R"(fnUpperTriangle)");
