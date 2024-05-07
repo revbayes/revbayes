@@ -219,7 +219,7 @@ void RevBayesCore::TypedDistribution<variableType>::setStochasticNode( Stochasti
 }
 
 template <class variableType>
-void RevBayesCore::TypedDistribution<variableType>::setValue( variableType *v, bool /*force*/ )
+void RevBayesCore::TypedDistribution<variableType>::setValue( variableType *v, bool force )
 {
     
     // free memory
@@ -228,7 +228,16 @@ void RevBayesCore::TypedDistribution<variableType>::setValue( variableType *v, b
         delete value;
     }
     
-    value = v;
+    if ( force == false && owns_value == false )
+    {
+        (*value) = (*v);
+        delete v;
+    }
+    else
+    {
+        value = v;
+    }
+        
 }
 
 

@@ -134,8 +134,16 @@ void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition sim_conditi
         Tree *my_tree = simulator.simulateTreeConditionTime( getOriginAge(), BirthDeathForwardSimulator::SIM_CONDITION::ROOT);
         
         // store the new value
-        delete value;
-        value = my_tree;
+        if ( owns_value == true )
+        {
+            delete value;
+            value = my_tree;
+        }
+        else
+        {
+            (*value) = (*my_tree);
+            delete my_tree;
+        }
         taxa = value->getTaxa();
     }
     else
