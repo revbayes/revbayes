@@ -122,6 +122,8 @@ M := fnJC(4) |> fnGammaASRV(alpha=1) |> fnInvASRV(pInv=0.1))");
 	help_strings[string("VectorMonitors")][string("name")] = string(R"(VectorMonitors)");
 	help_strings[string("VectorMoves")][string("name")] = string(R"(VectorMoves)");
 	help_strings[string("[]")][string("name")] = string(R"([])");
+	help_strings[string("_RateGenerator[]2SiteMixtureModel[]")][string("name")] = string(R"(_RateGenerator[]2SiteMixtureModel[])");
+	help_strings[string("_RateMatrix2SiteMixtureModel")][string("name")] = string(R"(_RateMatrix2SiteMixtureModel)");
 	help_arrays[string("abs")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("abs")][string("description")] = string(R"(The 'abs' function returns the absolute value of a number.)");
 	help_strings[string("abs")][string("example")] = string(R"(# compute the absolute value of a real number
@@ -690,6 +692,24 @@ where mu is the mean of the distribution and b the scale.)");
 	help_arrays[string("dnLaplace")][string("see_also")].push_back(string(R"(dnExponential)"));
 	help_arrays[string("dnLaplace")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_strings[string("dnLaplace")][string("title")] = string(R"(Laplace Distribution)");
+	help_strings[string("dnLog")][string("description")] = string(R"(Computes a log-transformed distribution.  If
+        X ~ dist
+then
+        exp(X) ~ dnLog(dist)
+
+This provides a way to construct distributions like dnLognormal and
+dnLogExponential directly from the underlying distribution in log-space.
+It can therefore express distributions that are not directly implemented.)");
+	help_strings[string("dnLog")][string("example")] = string(R"(x ~ dnLog(dnNormal(0,1))          # Draw from the log-Normal distribution
+x ~ dnNormal(0,1) |> dnLog()      # Expressed using pipes.
+x ~ dnLognormal(0,1)              # This is equivalent.
+
+x ~ dnLog(dnGamma(2,3))           # There is no equivalent for this.
+x ~ dnIID(10,dnLog(dnGamma(2,3))) # Draw 10 log-Gamma(2,3) random variables.)");
+	help_strings[string("dnLog")][string("name")] = string(R"(dnLog)");
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLogExponential)"));
+	help_strings[string("dnLog")][string("title")] = string(R"(A log-transformed distribution)");
 	help_arrays[string("dnLogExponential")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnLogExponential")][string("description")] = string(R"(A real number x has a log-Exponential distribution if y = exp(x) has Exponential distribution.)");
 	help_strings[string("dnLogExponential")][string("details")] = string(R"(The log-Exponential distribution is defined over real numbers. Saying that x is log-Exponential is equivalent to saying that y = exp(x) is Exponential. The log-Exponential distribution therefore expresses lack of information about the order of magnitude of a scale parameter:  if x has a log-Exponential distribution, then it has equal chance to be contained by any of the intervals of the form (10^k, 10^(k+1)) within the allowed range.
@@ -1001,6 +1021,7 @@ x)");
 	help_strings[string("dnPhyloMultivariateBrownianREML")][string("title")] = string(R"(Phylogenetic Multivariate Brownian Motion)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeck)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckMVN")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckMVN)");
+	help_strings[string("dnPhyloOrnsteinUhlenbeckPruning")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckPruning)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckREML")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckREML)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckThreePoint")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckThreePoint)");
 	help_strings[string("dnPhyloWhiteNoise")][string("name")] = string(R"(dnPhyloWhiteNoise)");
@@ -1144,6 +1165,7 @@ exists(x))");
 	help_strings[string("fnBiogeographyCladoEventsBD")][string("name")] = string(R"(fnBiogeographyCladoEventsBD)");
 	help_strings[string("fnBiogeographyRateMatrix")][string("name")] = string(R"(fnBiogeographyRateMatrix)");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
+	help_strings[string("fnBranchRates")][string("name")] = string(R"(fnBranchRates)");
 	help_strings[string("fnChromosomes")][string("name")] = string(R"(fnChromosomes)");
 	help_strings[string("fnChromosomesCladoEventsBD")][string("name")] = string(R"(fnChromosomesCladoEventsBD)");
 	help_strings[string("fnChromosomesCladoProbs")][string("name")] = string(R"(fnChromosomesCladoProbs)");
@@ -2064,7 +2086,6 @@ moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0))");
 	help_strings[string("mvDPPGibbsConcentration")][string("name")] = string(R"(mvDPPGibbsConcentration)");
 	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
-	help_strings[string("mvDPPValueSliding")][string("name")] = string(R"(mvDPPValueSliding)");
 	help_strings[string("mvDirichletSimplex")][string("name")] = string(R"(mvDirichletSimplex)");
 	help_strings[string("mvDiscreteEventCategoryRandomWalk")][string("name")] = string(R"(mvDiscreteEventCategoryRandomWalk)");
 	help_strings[string("mvElementSwapSimplex")][string("name")] = string(R"(mvElementSwapSimplex)");
@@ -2133,7 +2154,6 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGraphFlipEdge")][string("name")] = string(R"(mvGraphFlipEdge)");
 	help_strings[string("mvGraphShiftEdge")][string("name")] = string(R"(mvGraphShiftEdge)");
 	help_strings[string("mvHSRFHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFHyperpriorsGibbs)");
-	help_strings[string("mvHSRFIntervalSwap")][string("name")] = string(R"(mvHSRFIntervalSwap)");
 	help_strings[string("mvHSRFUnevenGridHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFUnevenGridHyperpriorsGibbs)");
 	help_strings[string("mvHomeologPhase")][string("name")] = string(R"(mvHomeologPhase)");
 	help_strings[string("mvIndependentTopology")][string("name")] = string(R"(mvIndependentTopology)");
@@ -2216,16 +2236,6 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvNodeTimeSlidePathTruncatedNormal")][string("name")] = string(R"(mvNodeTimeSlidePathTruncatedNormal)");
 	help_strings[string("mvNodeTimeSlideUniform")][string("name")] = string(R"(mvNodeTimeSlideUniform)");
 	help_strings[string("mvNodeTimeSlideUniformAgeConstrained")][string("name")] = string(R"(mvNodeTimeSlideUniformAgeConstrained)");
-	help_strings[string("mvOrderedEventBirthDeath")][string("name")] = string(R"(mvOrderedEventBirthDeath)");
-	help_strings[string("mvOrderedEventScaleRealPos")][string("name")] = string(R"(mvOrderedEventScaleRealPos)");
-	help_strings[string("mvOrderedEventSlideProbability")][string("name")] = string(R"(mvOrderedEventSlideProbability)");
-	help_strings[string("mvOrderedEventSlideReal")][string("name")] = string(R"(mvOrderedEventSlideReal)");
-	help_strings[string("mvOrderedEventSlideRealPos")][string("name")] = string(R"(mvOrderedEventSlideRealPos)");
-	help_strings[string("mvOrderedEventTimeSlide")][string("name")] = string(R"(mvOrderedEventTimeSlide)");
-	help_strings[string("mvOrderedEventVectorScaleRealPos")][string("name")] = string(R"(mvOrderedEventVectorScaleRealPos)");
-	help_strings[string("mvOrderedEventVectorSlideProbability")][string("name")] = string(R"(mvOrderedEventVectorSlideProbability)");
-	help_strings[string("mvOrderedEventVectorSlideReal")][string("name")] = string(R"(mvOrderedEventVectorSlideReal)");
-	help_strings[string("mvOrderedEventVectorSlideRealPos")][string("name")] = string(R"(mvOrderedEventVectorSlideRealPos)");
 	help_strings[string("mvRJSwitch")][string("name")] = string(R"(mvRJSwitch)");
 	help_strings[string("mvRandomDive")][string("description")] = string(R"(The multiplicative proposal of Dutta 2012, allows for long-distance moves.
 
@@ -2236,8 +2246,6 @@ Variables on [0,infinity) are log-transformed for proposals.)");
 	help_strings[string("mvRandomGeometricWalk")][string("name")] = string(R"(mvRandomGeometricWalk)");
 	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(mvRandomIntegerWalk)");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
-	help_strings[string("mvRateAgeProposal")][string("name")] = string(R"(mvRateAgeProposal)");
-	help_strings[string("mvRateAgeSubtreeProposal")][string("name")] = string(R"(mvRateAgeSubtreeProposal)");
 	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
 	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
@@ -2249,7 +2257,6 @@ moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
 	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
 	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
-	help_strings[string("mvRootTimeSlide")][string("name")] = string(R"(mvRootTimeSlide)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
 	help_strings[string("mvSPR")][string("name")] = string(R"(mvSPR)");
 	help_strings[string("mvScale")][string("name")] = string(R"(mvScale)");
@@ -2592,7 +2599,6 @@ mymcmc.operatorSummary())");
 	help_arrays[string("mvSpeciesTreeScale")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScale)"));
 	help_strings[string("mvSpeciesTreeScale")][string("title")] = string(R"(Tree scale move on species tree and gene trees for multispecies coalescent models.)");
 	help_strings[string("mvSubtreeScale")][string("name")] = string(R"(mvSubtreeScale)");
-	help_strings[string("mvSubtreeSwap")][string("name")] = string(R"(mvSubtreeSwap)");
 	help_strings[string("mvSymmetricMatrixElementSlide")][string("name")] = string(R"(mvSymmetricMatrixElementSlide)");
 	help_strings[string("mvSynchronizedVectorFixedSingleElementSlide")][string("name")] = string(R"(mvSynchronizedVectorFixedSingleElementSlide)");
 	help_strings[string("mvTipTimeSlideUniform")][string("name")] = string(R"(mvTipTimeSlideUniform)");

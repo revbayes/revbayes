@@ -54,6 +54,7 @@ namespace RevBayesCore {
 
         virtual void                     executeMethod( const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<RbVector<double>>> &retValue) const;       //!< Execute the member-method
         virtual void                     executeMethod( const std::string &n, const std::vector<const DagNode*> &args, double &retValue) const;       //!< Execute the member-method
+        virtual void                     executeMethodAbstract( const std::string &n, const std::vector<const DagNode*> &args, SiteModel* &retValue) const;       //!< Execute the member-method
 
         // This is a hack to satisfy ModelVector<T>, which incorrectly assumes that these exist for all T.
         bool                             operator==(const SiteMixtureModel&) const {return false;}

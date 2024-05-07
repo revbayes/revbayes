@@ -159,9 +159,9 @@ RevPtr<RevVariable> MatrixBoolean::executeMethod(std::string const &name, const 
 void MatrixBoolean::initializeMethods( void )
 {
     // Add method for call "x[]" as a function
-    ArgumentRules* squareBracketArgRules = new ArgumentRules();
-    squareBracketArgRules->push_back( new ArgumentRule( "index" , Natural::getClassTypeSpec(), "The index of the row.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberFunction<MatrixBoolean, ModelVector< RlBoolean > >("[]", this, squareBracketArgRules ) );
+//    ArgumentRules* squareBracketArgRules = new ArgumentRules();
+//    squareBracketArgRules->push_back( new ArgumentRule( "index" , Natural::getClassTypeSpec(), "The index of the row.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+//    methods.addFunction( new MemberFunction<MatrixBoolean, ModelVector< RlBoolean > >("[]", this, squareBracketArgRules ) );
     
     // add method for call "column" as a function
     ArgumentRules* columnArgRules = new ArgumentRules();

@@ -15,6 +15,7 @@
 #include "RealPos.h"
 #include "RlMemberFunction.h"
 #include "RlSiteMixtureModel.h"
+#include "RlSiteModel.h"
 #include "RlSimplex.h"
 #include "RlTree.h"
 #include "ArgumentRules.h"
@@ -112,6 +113,7 @@ RevPtr<RevVariable> SiteMixtureModel::executeMethod(std::string const &name, con
 
     // "getTransitionProbabilities"
     // "rate"
+    // "component"
     return ModelObject<RevBayesCore::SiteMixtureModel>::executeMethod( name, args, found );
 }
 
@@ -146,22 +148,22 @@ void SiteMixtureModel::initMethods(void)
     ArgumentRules* nComponentsArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "nComponents", Natural::getClassTypeSpec(), nComponentsArgRules) );
 
+    // add method for call "weights" as a function
+    ArgumentRules* nWeightsArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "weights", Simplex::getClassTypeSpec(), nWeightsArgRules) );
+
+    // add method for call "rootFrequencies" as a function
+    ArgumentRules* componentArgRules = new ArgumentRules();
+    componentArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberFunction<SiteMixtureModel,SiteModel>( "[]", this, componentArgRules) );
+
     // add method for call "nStates" as a function
     ArgumentRules* nStatesArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "nStates", Natural::getClassTypeSpec(), nStatesArgRules) );
 
     // add method for call "weights" as a function
-    ArgumentRules* nWeightsArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "weights", Simplex::getClassTypeSpec(), nWeightsArgRules) );
-
-    // add method for call "weights" as a function
     ArgumentRules* rateArgRules = new ArgumentRules();
     methods.addFunction( new MemberFunction<SiteMixtureModel, RealPos>( "rate", this, rateArgRules) );
-
-    // add method for call "rootFrequencies" as a function
-    ArgumentRules* rootFrequenciesArgRules = new ArgumentRules();
-    rootFrequenciesArgRules->push_back( new ArgumentRule( "index", Natural::getClassTypeSpec(), "The mixture component index.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "rootFrequencies", Simplex::getClassTypeSpec(), rootFrequenciesArgRules) );
 
     // add method for call "getTransitionProbabilities" as a function
     ArgumentRules* getTransitionProbArgRules = new ArgumentRules();

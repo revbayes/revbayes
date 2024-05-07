@@ -52,12 +52,14 @@ namespace RevBayesCore {
 
 
 template <class memberObjectType, class valueType>
-RevBayesCore::MemberFunction<memberObjectType,valueType>::MemberFunction(const std::string &n, const TypedDagNode<memberObjectType> *o, const std::vector<const DagNode* > &a) : TypedFunction<valueType>( new valueType() ),
+RevBayesCore::MemberFunction<memberObjectType,valueType>::MemberFunction(const std::string &n, const TypedDagNode<memberObjectType> *o, const std::vector<const DagNode* > &a) : TypedFunction<valueType>( nullptr ),
     method_name( n ),
     the_member_variable( o ),
     args( a )
 {
-    
+    if constexpr (not IsAbstract<valueType>::Is)
+	this->value = new valueType;
+
     this->addParameter( the_member_variable );
     typename std::vector<const DagNode* >::iterator it;
     for (it = args.begin(); it != args.end(); ++it)
@@ -114,9 +116,22 @@ void RevBayesCore::MemberFunction<memberObjectType,valueType>::swapParameterInte
 template <class memberObjectType, class valueType>
 void RevBayesCore::MemberFunction<memberObjectType,valueType>::update( void )
 {
+    const memberObjectType& the_object = dynamic_cast<const memberObjectType& >( the_member_variable->getValue() );
     
-    const MemberObject<valueType>& the_member_object = dynamic_cast<const MemberObject<valueType>& >( the_member_variable->getValue() );
-    the_member_object.executeMethod(method_name,args,*this->value);
+    if constexpr (IsAbstract<valueType>::Is)
+    {
+	delete this->value;
+	the_object.executeMethodAbstract(method_name,args,this->value);
+    }
+    else
+    {
+	// The memberObjectType might be Core::MatrixBoolean, Core::RbVector,
+	// But Core::MatrixBoolean and Core::RbVector don't have the right update types.
+	the_object.executeMethod(method_name,args,*this->value);
+
+//	const MemberObject<valueType>& the_member_object = dynamic_cast<const MemberObject<valueType>& >( the_member_variable->getValue() );
+//	the_member_object.executeMethod(method_name,args,*this->value);
+    }
     
 }
 

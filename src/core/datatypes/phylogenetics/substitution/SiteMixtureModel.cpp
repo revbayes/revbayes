@@ -129,6 +129,20 @@ void SiteMixtureModel::executeMethod( const std::string &n, const std::vector<co
     }
 }
 
+void SiteMixtureModel::executeMethodAbstract( const std::string &n, const std::vector<const DagNode*> &args, SiteModel* &rv) const
+{
+
+    if (n == "component")
+    {
+        int index = dynamic_cast<const TypedDagNode<long> *>( args[0] )->getValue() - 1; // Natural
+
+        if (index < 0 or index >= getNumberOfComponents() )
+            throw RbException()<<"SiteMixtureModel.component(index): index "<<index<<" is out of range.  Mixture only has "<<getNumberOfComponents()<<" components.";
+
+	rv = components[index]->clone();
+    }
+}
+
 void SiteMixtureModel::executeMethod( const std::string &n, const std::vector<const DagNode*> &args, double &rv) const
 {
 
