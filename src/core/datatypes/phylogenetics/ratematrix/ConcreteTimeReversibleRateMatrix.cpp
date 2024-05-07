@@ -11,7 +11,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "AminoAcidState.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "DiscreteCharacterState.h"
 #include "RbVector.h"
@@ -80,8 +79,8 @@ vector<double> flatten_exchange_rates( const MatrixReal& ER )
 }
 
 /** Construct rate matrix with n states */
-ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector<double>& er, const vector<double>& pi)
-    : TimeReversibleRateMatrix( pi.size() )
+ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector<double>& er, const vector<double>& pi, boost::optional<double> r)
+    : TimeReversibleRateMatrix( pi.size() ), _rate(r)
 {
     int n = pi.size();
     assert( er.size() == n*(n-1)/2 );
@@ -91,22 +90,9 @@ ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector
     update();
 }
 
-ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const MatrixReal& ER, const vector<double>& pi)
-    : ConcreteTimeReversibleRateMatrix( flatten_exchange_rates(ER), pi)
+ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const MatrixReal& ER, const vector<double>& pi, boost::optional<double> r)
+    : ConcreteTimeReversibleRateMatrix( flatten_exchange_rates(ER), pi, r)
 {
-}
-
-ConcreteTimeReversibleRateMatrix& ConcreteTimeReversibleRateMatrix::assign(const Assignable &m)
-{
-    const ConcreteTimeReversibleRateMatrix *rm = dynamic_cast<const ConcreteTimeReversibleRateMatrix*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
 }
 
 ConcreteTimeReversibleRateMatrix* ConcreteTimeReversibleRateMatrix::clone( void ) const
@@ -133,7 +119,8 @@ void ConcreteTimeReversibleRateMatrix::update( void )
         setDiagonal();
 
         // rescale
-        rescaleToAverageRate( 1.0 );
+        if (_rate)
+            rescaleToAverageRate( *_rate );
 
         // clean flags
         needs_update = false;

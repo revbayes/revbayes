@@ -26,13 +26,11 @@ history.txt
 /GPATH
 /GRTAGS
 /GTAGS
-# generated files
+
+#-------- Generated files -----
 validation/output*
 src/meson.build
-src/core/meson.build
-src/libs/meson.build
-src/revlanguage/meson.build
-src/revstudio/meson.build
+src/*/meson.build
 doxygen/html/*
 doxygen/latex/*
 doxygen/DoxygenWarningLog.txt
@@ -41,3 +39,10 @@ doxygen/DoxygenWarningLog.txt
 .settings/
 .vscode
 revbayes.code-workspace
+
+#--------- Backups -----------
+*.orig
+*GitVersion_backup.cpp
+*~
+*#
+.#*
