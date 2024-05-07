@@ -148,6 +148,14 @@ double RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnProbab
 {
     dirty = false;
     
+    mixtureType* val_ptr = this->value;
+    for ( size_t i=0; i<base_distributions.size(); ++i )
+    {
+        if ( val_ptr != (&base_distributions[i]->getValue()) )
+        {
+            throw RbException("Bug in AnalyticalMixture: Distributions work on different values!");
+        }
+    }
     const Simplex &probs = probabilities->getValue();
     for ( size_t i=0; i<base_distributions.size(); ++i )
     {
