@@ -249,7 +249,7 @@ double AbstractRateMatrix::getDominatingRate(void) const
     return dominating_rate;
 }
 
-void AbstractRateMatrix::computeDominatingRate(void)
+void AbstractRateMatrix::computeDominatingRate(void) const
 {
     dominating_rate = 0.0;
     for (size_t i = 0; i < num_states; i++)
@@ -289,7 +289,7 @@ MatrixReal AbstractRateMatrix::getRateMatrix() const
     return *the_rate_matrix;
 }
 
-MatrixReal AbstractRateMatrix::getStochasticMatrix(size_t n)
+MatrixReal AbstractRateMatrix::getStochasticMatrix(size_t n) const
 {
     if (n >= stochastic_matrix.size())
     {
@@ -300,7 +300,7 @@ MatrixReal AbstractRateMatrix::getStochasticMatrix(size_t n)
     return stochastic_matrix[n];
 }
 
-void AbstractRateMatrix::computeStochasticMatrix(size_t n)
+void AbstractRateMatrix::computeStochasticMatrix(size_t n) const
 {
     MatrixReal r;
     if (n == 0) {
@@ -360,7 +360,7 @@ void AbstractRateMatrix::rescaleToAverageRate(double r)
 }
 
 
-bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times)
+bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times) const
 {
     // start and end states
     size_t start_state = transition_states[0];
