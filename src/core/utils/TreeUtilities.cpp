@@ -495,7 +495,7 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
     }
 
     // set the node flags
-    tn.setSampledAncestor( n.isSampledAncestor() );
+    tn.setSampledAncestor( n.isSampledAncestorTip() );
 
     // remember the node
     nodes.push_back( &tn );
@@ -522,13 +522,8 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
         constructTimeTreeRecursively(*new_child, child, nodes, ages, a);
     }
 
-    // Mark knuckles as sampled ancestors
-    if ( tn.getNumberOfChildren() == 1 )
-    {
-        tn.setSampledAncestor( true );
-    }
-    // Mark nodes on a 0-length branch as sampled ancestors, and also their parents.
-    else if ( tn.getNumberOfChildren() == 2)
+    // Mark tip nodes on a 0-length branch as sampled ancestors
+    if ( tn.getNumberOfChildren() == 2)
     {
         // The time-tree doesn't have any branch lengths or ages yet, so we have to look
         // at the branch-length tree that we are copying from.
@@ -695,7 +690,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // gather all taxa across all source matrices into a single vector
     std::vector<RevBayesCore::Taxon> allTaxa;
 
-    for(RbConstIterator<DistanceMatrix> it = matvect.begin(); it != matvect.end(); ++it)
+    for (RbConstIterator<DistanceMatrix> it = matvect.begin(); it != matvect.end(); ++it)
     {
         allTaxa.insert(allTaxa.end(), it->getTaxa().begin(), it->getTaxa().end());
     }
@@ -703,7 +698,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // convert the vector of taxa into a vector of strings for easier sorting
     std::vector<std::string> allNames( allTaxa.size() );
 
-    for(size_t i = 0; i < allTaxa.size(); i++)
+    for (size_t i = 0; i < allTaxa.size(); i++)
     {
         allNames[i] = allTaxa[i].getName();
     }
@@ -711,7 +706,7 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // get rid of duplicates by converting from vector to unordered_set
     boost::unordered_set<std::string> uniqueNames;
 
-    for(size_t j = 0; j < allNames.size(); j++)
+    for (size_t j = 0; j < allNames.size(); j++)
     {
         uniqueNames.insert(allNames[j]);
     }
@@ -726,23 +721,26 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // initialize the corresponding Boolean matrix of the right dimensions, filled with 'false'
     RevBayesCore::MatrixBoolean mask = MatrixBoolean( allNames.size() );
 
-    for(size_t mat = 0; mat != matvect.size(); ++mat)
+    for (size_t mat = 0; mat != matvect.size(); ++mat)
     {
         std::vector<Taxon> taxa = matvect[mat].getTaxa();
+        std::vector<size_t> matInd( taxa.size() );
         
-        for(size_t i = 0; i != taxa.size(); i++)
+        for (size_t i = 0; i != taxa.size(); i++)
         {
-            size_t rowInd = std::distance(allNames.begin(), std::find(allNames.begin(), allNames.end(), taxa[i].getName()));
-            
-            for(size_t j = i + 1; j != taxa.size(); ++j)
+            matInd[i] = std::distance( allNames.begin(), std::find( allNames.begin(), allNames.end(), taxa[i].getName() ) );
+        }
+        
+        for (size_t j = 0; j != taxa.size(); j++)
+        {
+            for (size_t k = j + 1; k != taxa.size(); ++k)
             {
-                size_t colInd = std::distance(allNames.begin(), std::find(allNames.begin(), allNames.end(), taxa[j].getName()));
-                sumMatrix[rowInd][colInd] += matvect[mat].getMatrix()[i][j] * (*weights)[mat];
-                sumMatrix[colInd][rowInd] += matvect[mat].getMatrix()[i][j] * (*weights)[mat]; // by symmetry
-                divisorMatrix[rowInd][colInd] += (*weights)[mat];
-                divisorMatrix[colInd][rowInd] += (*weights)[mat];                              // by symmetry
-                mask[rowInd][colInd] = true;
-                mask[colInd][rowInd] = true;                                                   // by symmetry
+                sumMatrix[ matInd[j] ][ matInd[k] ] += matvect[mat].getMatrix()[j][k] * (*weights)[mat];
+                sumMatrix[ matInd[k] ][ matInd[j] ] += matvect[mat].getMatrix()[j][k] * (*weights)[mat]; // by symmetry
+                divisorMatrix[ matInd[j] ][ matInd[k] ] += (*weights)[mat];
+                divisorMatrix[ matInd[k] ][ matInd[j] ] += (*weights)[mat];                              // by symmetry
+                mask[ matInd[j] ][ matInd[k] ] = true;
+                mask[ matInd[k] ][ matInd[j] ] = true;                                                   // by symmetry
             }
         }
     }
@@ -750,11 +748,11 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
     // divide the sum matrix by the divisor matrix
     RevBayesCore::MatrixReal averageMatrix = MatrixReal( allNames.size() );
 
-    for(size_t i = 0; i != averageMatrix.getNumberOfRows(); i++)
+    for (size_t i = 0; i != averageMatrix.getNumberOfRows(); i++)
     {
-        for(size_t j = 0; j != averageMatrix.getNumberOfColumns(); j++)
+        for (size_t j = 0; j != averageMatrix.getNumberOfColumns(); j++)
         {
-            if(divisorMatrix[i][j] > 0.0)
+            if (divisorMatrix[i][j] > 0.0)
             {
                 averageMatrix[i][j] = sumMatrix[i][j]/divisorMatrix[i][j];
             }
@@ -1651,8 +1649,9 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * Make sure that the starting tree used to initialize serial-sampling birth-death analyses satisfies specified age constraints, and assign min/max ages to its tips
  * @param treeToChange user-supplied starting tree to be modified
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
+ * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, long agePrecision)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();
@@ -1678,14 +1677,16 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
         throw RbException("Tip names of the initial tree do not match the taxon names.");
     }
     
+    double factor = pow(10.0, agePrecision);
+    
     // Check that the ages of the taxa in the user-supplied tree fall within their age uncertainty ranges
     for (size_t i = 0; i < tax_num; ++i)
     {
         // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
-        double min_age = taxaToCopy[i].getMinAge();
-        double max_age = taxaToCopy[i].getMaxAge();
+        double min_age = std::round(taxaToCopy[i].getMinAge() * factor) / factor;
+        double max_age = std::round(taxaToCopy[i].getMaxAge() * factor) / factor;
         // Get the age of the tree tip of the same name
-        double tip_age = treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge();
+        double tip_age = std::round(treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge() * factor) / factor;
 
         if (tip_age < min_age || tip_age > max_age)
         {

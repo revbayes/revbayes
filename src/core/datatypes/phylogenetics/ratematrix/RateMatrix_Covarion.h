@@ -48,7 +48,6 @@ namespace RevBayesCore {
         
         // overloaded operators
         RateMatrix_Covarion&                operator=(const RateMatrix_Covarion& r);
-        virtual RateMatrix_Covarion&        assign(const Assignable &m);
         std::vector<int>                    get_emitted_letters(void) const;
         
         // RateMatrix functions

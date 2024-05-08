@@ -26,7 +26,12 @@ echo "Generating src/generated_include_dirs.cmake"
     echo '
     # TODO Split these up based on sub-package dependency
 INCLUDE_DIRECTORIES('
-    find libs core revlanguage -type d | grep -v "svn" | sed 's|^|    ${PROJECT_SOURCE_DIR}/|g' 
+    find libs core revlanguage -type d |
+        grep -v "svn" |
+        sed "s|libs/\([^/]*\)/.*|libs/\1|" |
+        sort |
+        uniq |
+        sed 's|^|    ${PROJECT_SOURCE_DIR}/|g'
     echo ' ${Boost_INCLUDE_DIR} )
 '
 ) > "$SRC_DIR/generated_include_dirs.cmake"

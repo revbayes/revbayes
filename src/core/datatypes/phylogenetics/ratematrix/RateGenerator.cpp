@@ -10,7 +10,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "TypedDagNode.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "Simplex.h"
@@ -32,19 +31,6 @@ RateGenerator::~RateGenerator(void)
     ; // do nothing
 }
 
-
-RateGenerator& RateGenerator::assign(const Assignable &m)
-{
-    const RateGenerator *rm = dynamic_cast<const RateGenerator*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
 
 void RateGenerator::calculateTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const
 {
@@ -234,7 +220,7 @@ size_t RateGenerator::size( void ) const
 
 }
 
-bool RateGenerator::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times)
+bool RateGenerator::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times) const
 {
     throw RbException("simulateStochasticMapping not defined for abstract RateGenerator objects");
     return false;
