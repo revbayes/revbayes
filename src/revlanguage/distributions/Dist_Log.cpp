@@ -81,7 +81,9 @@ const RevLanguage::MemberRules& RevLanguage::Dist_Log::getParameterRules(void) c
     
     if ( rules_set == false )
     {
-        dist_member_rules.push_back( new ArgumentRule( "logDistribution", TypedDistribution<Real>::getClassTypeSpec(), "The distribution in log-space.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+	std::vector<TypeSpec> distTypes = { TypedDistribution<Real>::getClassTypeSpec(), TypedDistribution<RealPos>::getClassTypeSpec(), TypedDistribution<Probability>::getClassTypeSpec()};
+
+        dist_member_rules.push_back( new ArgumentRule( "logDistribution", distTypes, "The distribution in log-space.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
