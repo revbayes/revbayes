@@ -266,7 +266,20 @@ void CharacterHistory::removeEvent( CharacterEvent *e, size_t branch_index)
 }
 
 
-void CharacterHistory::setHistory(const std::vector<BranchHistory *>& h)
+void CharacterHistory::setHistory(BranchHistory* h, size_t index)
+{
+    if ( index >= histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    delete histories[index];
+    
+    histories[index] = h;
+}
+
+
+void CharacterHistory::setHistories(const std::vector<BranchHistory *>& h)
 {
     histories = h;
 }

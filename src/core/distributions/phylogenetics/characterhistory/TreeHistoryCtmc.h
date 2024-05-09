@@ -580,7 +580,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::initializeHistoriesVector( void )
         TopologyNode* nd = nodes[i];
         new_histories[nd->getIndex()] = new BranchHistoryDiscrete(num_sites,num_states,nd->getIndex());
     }
-    histories.setHistory(new_histories);
+    histories.setHistories(new_histories);
     
     history_likelihoods.resize(2);
     for (size_t i = 0; i < 2; ++i)
@@ -707,11 +707,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setClockRate(const TypedDagNode< R
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::setHistory(const BranchHistoryDiscrete& bh, const TopologyNode& nd)
 {
-    // free memory
-    delete histories[ nd.getIndex() ];
-
-    // create new branch history object
-    histories[ nd.getIndex() ] = new BranchHistoryDiscrete(bh);
+    
+    histories.setHistory( bh.clone(), nd.getIndex() );
 
 }
 

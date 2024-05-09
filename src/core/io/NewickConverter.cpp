@@ -181,7 +181,7 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
     
     CharacterHistoryDiscrete* new_char_hist = new CharacterHistoryDiscrete();
     new_char_hist->setTree( t );
-    new_char_hist->setHistory( sorted_histories );
+    new_char_hist->setHistories( sorted_histories );
 
     // return the tree, the caller is responsible for destruction
     return new_char_hist;
