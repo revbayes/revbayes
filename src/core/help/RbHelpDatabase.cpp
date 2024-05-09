@@ -789,20 +789,6 @@ x ~ dnIID(10,dnLog(dnGamma(2,3))) # Draw 10 log-Gamma(2,3) random variables.)");
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLogExponential)"));
 	help_strings[string("dnLog")][string("title")] = string(R"(A log-transformed distribution)");
-	help_arrays[string("dnLogExponential")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnLogExponential")][string("description")] = string(R"(A real number x has a log-Exponential distribution if y = exp(x) has Exponential distribution.)");
-	help_strings[string("dnLogExponential")][string("details")] = string(R"(The log-Exponential distribution is defined over positive real numbers. Saying that x is log-Exponential is equivalent to saying that log(x) is Exponential.
-
-The density is p(x) = lambda*exp(-lambda*log(x))/x = lambda * x**(lambda-1).)");
-	help_strings[string("dnLogExponential")][string("example")] = string(R"(# a log-Exponential prior over the rate of change of a Brownian trait (or a Brownian relaxed clock)
-trueTree = readTrees("data/primates.tree")[1]
-log_sigma ~ dnLogExponential(lambda=1)
-sigma := exp(log_sigma)
-X ~ dnBrownian(trueTree,sigma)
-# ...)");
-	help_strings[string("dnLogExponential")][string("name")] = string(R"(dnLogExponential)");
-	help_arrays[string("dnLogExponential")][string("see_also")].push_back(string(R"(dnExponential)"));
-	help_strings[string("dnLogExponential")][string("title")] = string(R"(Log-Exponential Distribution)");
 	help_arrays[string("dnLognormal")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnLognormal")][string("description")] = string(R"(Lognormal distribution is the distribution for a log-transformed normally distributed random variable with mean 'mu' and standard deviation 'sigma'.)");
 	help_strings[string("dnLognormal")][string("details")] = string(R"(The lognormal random variable is defined as
