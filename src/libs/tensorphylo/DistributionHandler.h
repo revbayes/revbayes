@@ -81,10 +81,11 @@ public:
 	virtual void setIntegrationScheme(integrationScheme_t aIntScheme) = 0;
 	virtual void setNumberOfThreads(size_t nThreads) = 0;
 	virtual void setMaxNumStochMapTries(size_t aNumTries) = 0;
+
 	virtual void setAbsoluteTolerance(double anAbsoluteTolerance) = 0;
 	virtual void setRelativeTolerance(double aRelativeTolerance) = 0;
-
 	virtual void setInitialDeltaT(double initDeltaT) = 0;
+	virtual void setMaxNumDenseSteps(size_t aMaxNumSteps) = 0;
 
 	virtual void setRootPrior(const stdVectorXd &rootPrior) = 0;
 

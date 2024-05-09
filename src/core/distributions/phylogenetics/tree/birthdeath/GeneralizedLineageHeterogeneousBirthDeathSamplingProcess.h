@@ -42,7 +42,8 @@ namespace RevBayesCore {
 																 bool                          zero_indexed_,
 																 size_t                        n_proc_,
 																 double                        abs_tol_,
-																 double                        rel_tol_);
+																 double                        rel_tol_,
+																 size_t                        n_dense_steps_);
 
         // pure virtual member functions
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
@@ -90,6 +91,7 @@ namespace RevBayesCore {
         bool   tp_can_reset = true;
 
         // tensorphylo interface
+        size_t                                    n_dense_steps;
         size_t                                    n_proc;
         TensorPhylo::DistributionHandlerSharedPtr tp_ptr;
 
