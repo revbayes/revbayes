@@ -31,9 +31,11 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	bool                                                            zero_indexed_,
 	size_t                                                          n_proc_,
 	double                                                          abs_tol_,
-    double                                                          rel_tol_
+    double                                                          rel_tol_,
+	size_t                                                          n_dense_steps_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
 	n_proc(n_proc_),
+	n_dense_steps(n_dense_steps_),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
@@ -61,6 +63,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	tp_ptr->setNumberOfThreads(n_proc);
 	tp_ptr->setAbsoluteTolerance(abs_tol_);
 	tp_ptr->setRelativeTolerance(rel_tol_);
+	tp_ptr->setMaxNumDenseSteps(n_dense_steps);
 	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
 //	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
 //	tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
@@ -825,6 +828,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool use_simmap_default)
 {
+
+	// prepare parameters for the pointer
+	prepareParameters(false);
+
 	// draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistory();
 
@@ -875,6 +882,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events)
 {
+
+	// prepare parameters for the pointer
+	prepareParameters(false);
+
 	// draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);
 
@@ -907,6 +918,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates)
 {
+
+	// prepare parameters for the pointer
+	prepareParameters(false);
+
 	// draw the ancestral states
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawAncestralStates();
 
