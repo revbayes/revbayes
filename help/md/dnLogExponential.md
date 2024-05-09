@@ -5,9 +5,9 @@ Log-Exponential Distribution
 ## description
 A real number x has a log-Exponential distribution if y = exp(x) has Exponential distribution.
 ## details
-The log-Exponential distribution is defined over real numbers. Saying that x is log-Exponential is equivalent to saying that y = exp(x) is Exponential. The log-Exponential distribution therefore expresses lack of information about the order of magnitude of a scale parameter:  if x has a log-Exponential distribution, then it has equal chance to be contained by any of the intervals of the form (10^k, 10^(k+1)) within the allowed range.
+The log-Exponential distribution is defined over positive real numbers. Saying that x is log-Exponential is equivalent to saying that log(x) is Exponential.
 
-The density is p(x) = ???, which can be seen by defining x = ln(y) where y has Exponential distribution and apply the change-of-variable formula.
+The density is p(x) = lambda*exp(-lambda*log(x))/x = lambda * x**(lambda-1).
 
 ## authors
 Sebastian Hoehna

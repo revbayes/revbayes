@@ -27,8 +27,7 @@ LogExponentialDistribution::LogExponentialDistribution(const TypedDagNode<double
     addParameter( lambda );
     
     double u = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG);
-    double ln_u = log( u );
-    *value = ln_u;
+    *value = exp(u);
 }
 
 
@@ -53,10 +52,10 @@ LogExponentialDistribution* LogExponentialDistribution::clone( void ) const
 double LogExponentialDistribution::computeLnProbability( void )
 {
     
-    double v = *value;
+    double x = *value;
     double l = lambda->getValue();
     
-    double ln_prob = log(l) - l*exp(v) + v;
+    double ln_prob = log(l) - (l+1)*log(x);
     
     return ln_prob;
 }
@@ -87,8 +86,7 @@ void LogExponentialDistribution::redrawValue( void )
 {
     
     double u = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG);
-    double ln_u = log(u );
-    *value = ln_u;
+    *value = exp(u);
     
 }
 
