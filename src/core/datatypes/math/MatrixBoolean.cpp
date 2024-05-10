@@ -153,7 +153,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
         RbVector<Boolean> rv( tmp.size() );
         for (size_t i = 0; i < tmp.size(); i++)
         {
-            rv[i] = (Boolean)tmp[i];
+            rv[i] = Boolean( tmp[i] );
         }
         
     }
@@ -164,7 +164,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
         RbVector<Boolean> rv( tmp.size() );
         for (size_t i = 0; i < tmp.size(); i++)
         {
-            rv[i] = (Boolean)tmp[i];
+            rv[i] = Boolean( tmp[i] );
         }
     }
     else
@@ -205,7 +205,7 @@ RbVector<Boolean> MatrixBoolean::getColumn( size_t columnIndex ) const
         throw RbException( o.str() );
     }
     
-    RbVector<Boolean> col( nRows );
+    RbVector<Boolean> col( nRows, false );
 
     for (size_t i = 0; i < nRows; ++i)
     {
