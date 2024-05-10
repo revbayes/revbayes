@@ -150,7 +150,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
         size_t index = (size_t)static_cast<const TypedDagNode<long> *>( args[0] )->getValue() - 1;
         boost::dynamic_bitset<> tmp = elements[index];
         
-        RbVector<Boolean> rv;
+        RbVector<Boolean> rv( tmp.size() );
         for (size_t i = 0; i < tmp.size(); i++)
         {
             rv[i] = (Boolean)tmp[i];
@@ -161,7 +161,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     {
         boost::dynamic_bitset<> tmp = this->getUpperTriangle();
         
-        RbVector<Boolean> rv;
+        RbVector<Boolean> rv( tmp.size() );
         for (size_t i = 0; i < tmp.size(); i++)
         {
             rv[i] = (Boolean)tmp[i];
