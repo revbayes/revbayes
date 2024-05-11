@@ -225,10 +225,10 @@ jobs:
       env:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
-        CXX=x86_64-w64-mingw32-g++-posix
         PREFIX=${HOME}/local
+        /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        CXX=x86_64-w64-mingw32-g++-posix
         WINROOT=/home/runner/win_root
-        /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dstudio=true
         ccache -p
         ccache -s
         /usr/local/bin/ninja -C build install
@@ -237,18 +237,15 @@ jobs:
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
-        cp $WINROOT/mingw64/bin/*.dll                     $PREFIX/bin
-        # Don't put the wrapper in the same dir as rb.exe so we don't ship it
-        mkdir $HOME/wrapper
+        cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
+
+        mkdir ${HOME}/wrapper
         ( echo '#!/bin/bash'
-          echo "cp $PREFIX/bin/* ."
           echo 'if [ "$#" -gt "1" ]; then'
-          echo '  wine64 rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo '  wine64 ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'else'
-          echo '  wine64 rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
-          echo 'fi'
-          echo 'rm -f *.exe'
-          echo 'rm -f *.dll' ) > $HOME/wrapper/rb
+          echo '  wine64 ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'fi' ) > ${HOME}/wrapper/rb
         chmod +x ${HOME}/wrapper/rb
 
     - name: Test

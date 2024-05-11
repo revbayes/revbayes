@@ -226,20 +226,22 @@ jobs:
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
         cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
         cp $WINROOT/mingw64/bin/libopenlibm.dll           $PREFIX/bin
+
+        mkdir ${HOME}/wrapper
         ( echo '#!/bin/bash'
           echo 'if [ "$#" -gt "1" ]; then'
           echo '  wine64 ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'else'
           echo '  wine64 ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
-          echo 'fi' ) > $PREFIX/bin/rb
-        chmod +x $PREFIX/bin/rb
+          echo 'fi' ) > ${HOME}/wrapper/rb
+        chmod +x ${HOME}/wrapper/rb
 
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
         IS_WINDOWS: ${{ matrix.name == 'windows' }}
       run: |
-        export PATH=${HOME}/local/bin:$PATH
+        export PATH=${HOME}/wrapper:${HOME}/local/bin:$PATH
 
         # Temporary hack to make Mac/ARM work: remove the expected JSON output.
         # On Mac/ARM, the JSON output disagrees in the 16th and 17th digit
