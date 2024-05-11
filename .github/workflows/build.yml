@@ -26,28 +26,28 @@ jobs:
         include:
 
           - name: ubuntu-gcc-9
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: gcc
             version: "9"
             mpi: false
             arch: linux64
 
           - name: ubuntu-gcc-9-mpi
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: gcc
             version: "9"
             mpi: true
             arch: linux64
 
           - name: ubuntu-gcc-10
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: gcc
             version: "10"
             mpi: false
             arch: linux64
 
           - name: ubuntu-gcc-11
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: gcc
             version: "11"
             mpi: false
@@ -61,7 +61,7 @@ jobs:
             arch: linux64
 
           - name: ubuntu-clang-13
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: clang
             version: "13"
             mpi: false
@@ -82,7 +82,7 @@ jobs:
             arch: mac-arm64
 
           - name: windows
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: idk
             version: "9000"
             mpi: false
@@ -286,7 +286,7 @@ jobs:
   notify:
     name: Notify Slack
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
     steps:
     - uses: technote-space/workflow-conclusion-action@v3

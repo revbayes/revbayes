@@ -15,7 +15,7 @@ jobs:
 
   create_release:
     name: Create release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -32,7 +32,7 @@ jobs:
 
   build_singularity_and_upload:
     needs: create_release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - uses: eWaterCycle/setup-apptainer@v2
@@ -75,7 +75,7 @@ jobs:
 
         include:
           - name: ubuntu-gcc-9
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: gcc
             version: "9"
             mpi: false
@@ -96,7 +96,7 @@ jobs:
             arch: mac-arm64
 
           - name: windows
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: idk
             version: "9000"
             mpi: false
@@ -327,7 +327,7 @@ jobs:
   notify:
     name: Notify Slack
     needs: [build_singularity_and_upload, build_and_upload]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
     steps:
     - uses: technote-space/workflow-conclusion-action@v3
