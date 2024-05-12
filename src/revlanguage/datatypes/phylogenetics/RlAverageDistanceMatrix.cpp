@@ -190,14 +190,14 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
             ModelVector<RlString> *n = new ModelVector<RlString>();
             
             std::stringstream s;
-            s << "[ " << element.first << ", ";
+            s << element.first << ", ";
             if (element.second)
             {
-                s << "T ]";
+                s << "TRUE";
             }
             else
             {
-                s << "F ]";
+                s << "FALSE";
             }
             n->push_back( s.str() );
 
