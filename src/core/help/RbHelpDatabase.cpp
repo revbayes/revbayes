@@ -777,7 +777,7 @@ then
         exp(X) ~ dnLog(dist)
 
 This provides a way to construct distributions like dnLognormal and
-dnLogExponential directly from the underlying distribution in log-space.
+dnLoguniform directly from the underlying distribution in log-space.
 It can therefore express distributions that are not directly implemented.)");
 	help_strings[string("dnLog")][string("example")] = string(R"(x ~ dnLog(dnNormal(0,1))          # Draw from the log-Normal distribution
 x ~ dnNormal(0,1) |> dnLog()      # Expressed using pipes.
@@ -787,7 +787,7 @@ x ~ dnLog(dnGamma(2,3))           # There is no equivalent for this.
 x ~ dnIID(10,dnLog(dnGamma(2,3))) # Draw 10 log-Gamma(2,3) random variables.)");
 	help_strings[string("dnLog")][string("name")] = string(R"(dnLog)");
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
-	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLogExponential)"));
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLoguniform)"));
 	help_strings[string("dnLog")][string("title")] = string(R"(A log-transformed distribution)");
 	help_arrays[string("dnLognormal")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnLognormal")][string("description")] = string(R"(Lognormal distribution is the distribution for a log-transformed normally distributed random variable with mean 'mu' and standard deviation 'sigma'.)");

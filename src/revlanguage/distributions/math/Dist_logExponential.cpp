@@ -41,7 +41,7 @@ Dist_logExponential* Dist_logExponential::clone( void ) const
 
 RevBayesCore::ContinuousDistribution* Dist_logExponential::createDistribution( void ) const
 {
-    throw RbException()<<"dnLogExponential has been removed from RevBayes.\n  * If you want a distribution that is uniform on orders of magnitude, consider dnLoguniform.\n  * If you want a distribution whose log is exponential, consider dnLog(dnExponential(lambda))";
+    throw RbException()<<"dnLogExponential has been removed from RevBayes.\n  * If you want the log of an exponentially distributed variable, consider `y ~ dnExponential(lambda); x := log(y)`.\n  * If you want a distribution whose log is exponential, consider `x ~ dnLog(dnExponential(lambda))`";
 }
 
 
