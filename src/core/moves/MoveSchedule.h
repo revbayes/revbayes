@@ -21,7 +21,7 @@ template <class valueType> class RbVector;
         void                                                    tune(void);                                                                                     //!< The the moves to achieve better performance.
         
     protected:
-        MoveSchedule(RbVector<Move> *m);                                                                                                                  //!< Default constructor
+        MoveSchedule(RbVector<Move> *m);                                                                                                                        //!< Default constructor
                 
         // Hidden member variables
         RbVector<Move>*                                         moves;

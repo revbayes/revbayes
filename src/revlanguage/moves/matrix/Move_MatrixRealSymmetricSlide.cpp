@@ -1,11 +1,3 @@
-//
-//  Move_MatrixRealSymmetricSlide.cpp
-//  revbayes
-//
-//  Created by Nicolas Lartillot on 2014-03-28.
-//  Copyright (c) 2014 revbayes team. All rights reserved.
-//
-
 #include "Move_MatrixRealSymmetricSlide.h"
 
 #include <cstddef>
@@ -14,6 +6,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
+#include "Natural.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -59,12 +52,13 @@ void Move_MatrixRealSymmetricSlide::constructInternalObject( void )
     // now allocate a new wishart simple move
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* tmp = static_cast<const MatrixRealSymmetric &>( mat->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *matrix = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::MatrixRealSymmetricSingleElementSlidingProposal(matrix,l);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
         
 }
 

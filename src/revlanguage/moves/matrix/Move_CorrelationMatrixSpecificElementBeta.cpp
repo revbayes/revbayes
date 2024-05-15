@@ -62,13 +62,14 @@ void Move_CorrelationMatrixSpecificElementBeta::constructInternalObject( void )
     size_t j = static_cast<const Natural &>( col->getRevObject() ).getValue();
     double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixSpecificElementBetaProposal(n,i,j,a,r);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
 
 }
 

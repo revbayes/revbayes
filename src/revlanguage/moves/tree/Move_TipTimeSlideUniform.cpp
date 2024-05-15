@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_TipTimeSlideUniform.h"
+#include "Natural.h"
 #include "TipTimeSlideUniformProposal.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -57,6 +58,7 @@ void Move_TipTimeSlideUniform::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::StochasticNode<double> *d = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
     {
@@ -83,7 +85,7 @@ void Move_TipTimeSlideUniform::constructInternalObject( void )
         p->useIndex(index);
     }
 
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 }
 
 

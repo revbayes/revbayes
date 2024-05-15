@@ -62,6 +62,7 @@ void Move_NarrowExchange::constructInternalObject( void )
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     // get the tree(s) variable
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = NULL;
@@ -82,7 +83,7 @@ void Move_NarrowExchange::constructInternalObject( void )
     }
     
     RevBayesCore::Proposal *p = new RevBayesCore::NarrowExchangeProposal(t, vec_t);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
     
 }
 

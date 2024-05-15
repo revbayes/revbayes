@@ -6,6 +6,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_EventTimeSlide.h"
+#include "Natural.h"
 #include "EventTimeSlideProposal.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
@@ -66,13 +67,14 @@ void Move_EventTimeSlide::constructInternalObject( void )
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::EventTimeSlideProposal(n,d);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tu);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,tu);
     
 }
 

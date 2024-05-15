@@ -87,11 +87,12 @@ void RevLanguage::Move_ReversibleJumpSwitch<rlValueType>::constructInternalObjec
     
     // now allocate a new vector-scale move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
     
     RevBayesCore::ReversibleJumpMixtureProposal< typename rlValueType::valueType > *p = new RevBayesCore::ReversibleJumpMixtureProposal< typename rlValueType::valueType >(sn);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w, del, false);
 
 }
 

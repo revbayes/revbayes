@@ -8,6 +8,7 @@
 #include "RlMatrixReal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_ResampleFBD.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
 #include "TypeSpec.h"
@@ -83,8 +84,9 @@ void Move_ResampleFBD::constructInternalObject( void )
 
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
     
 }
 
