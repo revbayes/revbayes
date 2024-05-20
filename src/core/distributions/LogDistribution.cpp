@@ -12,11 +12,11 @@ RevBayesCore::LogDistribution::LogDistribution(const TypedDistribution<double>& 
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
-    
+
     // add the parameters of the distribution
     for (auto& parameter: dist->getParameters())
         this->addParameter( parameter );
-    
+
     simulate();
 }
 
@@ -28,7 +28,7 @@ RevBayesCore::LogDistribution::LogDistribution( const LogDistribution &d )
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
-    
+
     // add the parameters of the distribution
     for (auto& parameter: dist->getParameters())
         this->addParameter( parameter );
