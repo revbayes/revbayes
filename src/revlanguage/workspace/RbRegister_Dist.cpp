@@ -203,6 +203,9 @@
 #include "Dist_uniformTopology.h"
 #include "Dist_uniformTopologyBranchLength.h"
 
+/* Branch rate priors (in folder "distributions/popgen") */
+#include "Dist_SFSDiffusionApproximation.h"
+
 /* Distributions on simple variables (in folder "distributions/math") */
 #include "Dist_bernoulli.h"
 #include "Dist_beta.h"
@@ -429,6 +432,12 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
 		// Distance Matrix Gamma distribution
 		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
+        
+        
+        
+        /* Popgen distributions (in folder "distributions/popgen") */
+
+        AddDistribution< ModelVector<RealPos>       >( new Dist_SFSDiffusionApproximation()       );
 
 
         /* Statistical distributions on simple variables (in folder "distributions/math") */
