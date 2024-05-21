@@ -24,7 +24,6 @@ namespace RevLanguage {
         const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
         
-        
         // Distribution functions you have to override
         RevBayesCore::MultivariateLogDistribution*      createDistribution(void) const;
         

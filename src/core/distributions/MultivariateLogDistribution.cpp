@@ -59,26 +59,30 @@ double RevBayesCore::MultivariateLogDistribution::computeLnProbability( void )
 	sum_log_xs += x;
     }
 
-    dist->setValue( new RbVector<double>(xs) );
-
     double ln_pdf = dist->computeLnProbability() - sum_log_xs;
 
-    // 3. Return value
+    // 3. Set the log-transformed value on the child distribution
+    dist->setValue( new RbVector<double>(xs) );
+
+    // 4. Return value
     return ln_pdf;
 }
 
 
 void RevBayesCore::MultivariateLogDistribution::simulate()
 {
+    // 1. Draw a value from the child distribution
     dist->redrawValue();
 
     RbVector<double> xs = dist->getValue();
 
+    // 2. Exponentiate each element
     for(auto& x: xs)
     {
 	x = exp(x);
     }
     
+    // 3. Set the value of the current distribution to the result.
     *this->value = xs;
 }
 
