@@ -11,7 +11,6 @@
 #include "RateMatrix_GTR.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StringUtilities.h"
@@ -69,23 +68,6 @@ RateMatrix_GTR& RateMatrix_GTR::operator=(const RateMatrix_GTR &r)
     
     return *this;
 }
-
-
-RateMatrix_GTR& RateMatrix_GTR::assign(const Assignable &m)
-{
-    
-    const RateMatrix_GTR *rm = dynamic_cast<const RateMatrix_GTR*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */

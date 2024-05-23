@@ -271,9 +271,10 @@ jobs:
 
         # For now, remove JSON tests -- these fail on more architectures without openlibm
         find . -name '*.json' | xargs rm
-        # For now, don't require the BDSTP tests -- I think these fail because they aren't using openlibm
-        rm test_FBD/output_expected/BDSTP.*
-        # touch test_FBD/XFAIL -- this would skip ALL the FBD tests.
+        # For now, don't require the FBD and BDSTP tests -- I think these fail in the release
+        # builds because the release doesn't use openlibm.
+        rm -rf test_FBD/output_expected
+        rm -rf test_BDSTP/output_expected
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
         cd

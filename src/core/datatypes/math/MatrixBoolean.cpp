@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "MatrixBoolean.h"
+#include "RbBoolean.h"
 #include "RbException.h"
 #include "RbVector.h"
 #include "RbConstants.h"
@@ -141,17 +142,28 @@ MatrixBoolean* MatrixBoolean::clone(void) const
 }
 
 
-void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, boost::dynamic_bitset<> &rv) const
+void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<Boolean> &rv) const
 {
     
     if ( n == "[]" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
-        rv = elements[index];
+        size_t index = (size_t)static_cast<const TypedDagNode<long> *>( args[0] )->getValue() - 1;
+        boost::dynamic_bitset<> tmp = elements[index];
+        
+        for (size_t i = 0; i < tmp.size(); i++)
+        {
+            rv.push_back( Boolean( tmp[i] ) );
+        }
+        
     }
     else if ( n == "upperTriangle" )
     {
-        rv = this->getUpperTriangle();
+        boost::dynamic_bitset<> tmp = this->getUpperTriangle();
+        
+        for (size_t i = 0; i < tmp.size(); i++)
+        {
+            rv.push_back( Boolean( tmp[i] ) );
+        }
     }
     else
     {
@@ -181,7 +193,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
  * @throw RbException if columnIndex is out of bounds
  * @return Vector of Booleans corresponding to the given column of the matrix
  */
-boost::dynamic_bitset<> MatrixBoolean::getColumn( size_t columnIndex ) const
+RbVector<Boolean> MatrixBoolean::getColumn( size_t columnIndex ) const
 {
     
     if ( columnIndex >= nCols )
@@ -191,7 +203,7 @@ boost::dynamic_bitset<> MatrixBoolean::getColumn( size_t columnIndex ) const
         throw RbException( o.str() );
     }
     
-    boost::dynamic_bitset<> col( nRows );
+    RbVector<Boolean> col( nRows, false );
 
     for (size_t i = 0; i < nRows; ++i)
     {

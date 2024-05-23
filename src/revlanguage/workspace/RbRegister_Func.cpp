@@ -133,6 +133,15 @@
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
+#include "Func_GammaRateModel.h"
+#include "Func_InvModel.h"
+#include "Func_MixtureModel.h"
+#include "Func_ScaleSiteMixtureModel.h"
+#include "Func_ScaleVectorSiteMixtureModel.h"
+#include "Func_UnitMixture.h"
+#include "Func_ConvertRateMatrix.h"
+#include "Func_ConvertVectorRateMatrix.h"
+
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
 #include "Func_GoldmanYang94RateMatrix.h"
@@ -306,7 +315,6 @@
 /** Initialize global workspace */
 void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 {
-
     try
     {
         ///////////////////////////////////////////
@@ -322,6 +330,16 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_biogeographyRateMatrix()                      );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
+
+        addFunction( new Func_ConvertRateMatrix()                           );
+        addFunction( new Func_ConvertVectorRateMatrix()                     );
+
+        addFunction( new Func_GammaRateModel()                              );
+        addFunction( new Func_InvModel()                                    );
+        addFunction( new Func_MixtureModel()                                );
+        addFunction( new Func_UnitMixture()                                 );
+        addFunction( new Func_ScaleSiteMixtureModel()                       );
+        addFunction( new Func_ScaleVectorSiteMixtureModel()                 );
 
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
