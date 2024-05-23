@@ -1,11 +1,12 @@
 ## name
-mvRandomGeometricWalk
+
+mvRandomNaturalWalk
 
 ## title
-Geometric random walk
+Random walk on natural numbers
 
 ## description
-A move that performs geometric random walk on an integer variable. The displacement of the random walk is drawn from a geometric distribution, mirrored for positive and negative steps.
+A move that performs random walk on a natural number variable. The displacement of the random walk is exactly one step, either positive or negative.
 
 ## details
 
@@ -13,15 +14,15 @@ A move that performs geometric random walk on an integer variable. The displacem
 Sebastian Hoehna
 
 ## see_also
-mvRandomNaturalWalk
 mvRandomIntegerWalk
+mvRandomGeometricWalk
 
 ## example
 
 p <- 0.8
 x ~ dnGeom(p)
 
-moves[1] = mvRandomGeometricWalk(x, weight=1.0)
+moves[1] = mvRandomNaturalWalk(x, weight=1.0)
 monitors[1] = mvScreen(printgen=1000, x)
 
 mymodel = model(p)
