@@ -43,7 +43,8 @@ template <class valueType> class RbVector;
         size_t                                          getSize(void) const;              //!< Get the number of tips of the tree associated with the matrix
         const std::vector<Taxon>&                       getTaxa(void) const;              //!< Get the taxa whose pairwise distances are stored in the matrix
         size_t                                          size(void) const;                 //!< Get the number of elements in a row or column of the matrix
-    
+        void                                            ultrametricImputation(void);      //!< Impute missing entries using the three-point condition satisfied by ultrametric distances
+        
     protected:
         DistanceMatrix                                  distanceMatrix;                   //!< Distance matrix object containing taxa and the real-valued distances among them
         MatrixBoolean                                   mask;                             //!< Boolean mask: a matrix of bools of the same dimensions as distanceMatrix that determines which of the entries in distanceMatrix are defined and which are not
