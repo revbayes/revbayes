@@ -89,6 +89,23 @@ c = a + b
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("RlRegionalFeatureLayer")][string("name")] = string(R"(RlRegionalFeatureLayer)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_arrays[string("SiteMixtureModel")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("SiteMixtureModel")][string("description")] = string(R"(A weighted collection of discrete character evolution models.)");
+	help_strings[string("SiteMixtureModel")][string("details")] = string(R"(The SiteMixtureModel datatype is a mixture distribution where each
+component is a model of discrete character evolution.  Each character evolves
+according to one of the component models.  However, the specific model for each
+character is not specified in advance.  Instead, each character has some
+probability of choosing each component.  These probabilities are specified by
+the mixture weights.)");
+	help_strings[string("SiteMixtureModel")][string("example")] = string(R"(M := fnInvASRV(fnGammaASRV(fnJC(4),alpha=1),pInv=0.1)
+M.weights()
+M.nComponents()
+M.rootFrequencies(1)
+
+# It possible to express nested models using pipes.
+M := fnJC(4) |> fnGammaASRV(alpha=1) |> fnInvASRV(pInv=0.1))");
+	help_strings[string("SiteMixtureModel")][string("name")] = string(R"(SiteMixtureModel)");
+	help_strings[string("SiteMixtureModel")][string("title")] = string(R"(SiteMixtureModel)");
 	help_strings[string("StochasticMatrix")][string("name")] = string(R"(StochasticMatrix)");
 	help_strings[string("String")][string("name")] = string(R"(String)");
 	help_strings[string("TimeTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
@@ -1359,6 +1376,51 @@ Q := fnGTR(er,pi))");
 	help_strings[string("fnGTR")][string("name")] = string(R"(fnGTR)");
 	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S. Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences.  Lectures on Mathematics in the Life Sciences (1986). 17: 57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
 	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible rate matrix)");
+	help_arrays[string("fnGammaASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnGammaASRV")][string("description")] = string(R"(Add Gamma-distributed across-site rate variation (ASRV) to a site model.)");
+	help_strings[string("fnGammaASRV")][string("details")] = string(R"(Each site evolves according to the specified site model, but at an unknown rate
+that is Gamma distributed. If the site model parameter is a mixture model with
+m components, this function will return a mixture with m*n components.
+
+The continuous Gamma distribution is approximated with a mixture distribution
+over n discrete rates, each with probability 1/n.  The Gamma distribution is
+constrained to have a mean of 1, so as not to change the  branch lengths.
+It therefore has only a single parameter alpha -- the shape parameter.
+        - As alpha approaches infinity, all rates across sites become equal (rate variation goes to 0).
+        - If alpha = 1, then the rate is exponentially distributed.  Rate variation is substantial.
+        - As alpha approaches zero, many sites have rate 0, and many sites have a high rate.
+
+RateMatrix and RateGenerator site model parameters will automatically be converted to a
+SiteMixtureModel with a single component.)");
+	help_strings[string("fnGammaASRV")][string("example")] = string(R"(# fnGammaASRV( ) constructs a mixture model that represents both the underlying
+#   rate matrix and Gamma-distributed rate variation.
+for (i in 1:10) { taxa[i] = taxon("T"+i) }
+psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
+alpha ~ dnExp(1/10)
+er ~ dnDirichlet( [1,1,1,1,1,1] )
+pi ~ dnDirichlet( [1,1,1,1] )
+M := fnGammaASRV( fnGTR(er, pi), alpha, 4)
+seq ~ dnPhyloCTMC(psi, M, type="DNA",nSites=10)
+
+# As an alternative approach, models can be built up iteratively using pipes.
+M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4)
+
+M := fnGTR(er,pi) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
+M := fnGTR(er,pi) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (2*4) components - slower.
+
+# The site model parameter can be a mixture model
+weights ~ dnDirichlet([1,1])
+pi1 ~ dnDirichlet( [1,1,1,1,1,1 ] )
+pi2 ~ dnDirichlet( [1,1,1,1,1,1 ] )
+M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
+	help_strings[string("fnGammaASRV")][string("name")] = string(R"(fnGammaASRV)");
+	help_references[string("fnGammaASRV")].push_back(RbHelpReference(R"(Yang, Z. (1994) Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: approximate methods)",R"(https://doi.org/10.1007/BF00160154 )",R"()"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnScale)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
+	help_strings[string("fnGammaASRV")][string("title")] = string(R"(fnGammaASRV)");
 	help_strings[string("fnGeographicalDistance")][string("name")] = string(R"(fnGeographicalDistance)");
 	help_strings[string("fnHKY")][string("description")] = string(R"(The HKY85 model.)");
 	help_strings[string("fnHKY")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
@@ -1371,12 +1433,69 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnHostSwitchRateModifier")][string("name")] = string(R"(fnHostSwitchRateModifier)");
 	help_strings[string("fnInferAncestralPopSize")][string("name")] = string(R"(fnInferAncestralPopSize)");
 	help_strings[string("fnInfiniteSites")][string("name")] = string(R"(fnInfiniteSites)");
+	help_arrays[string("fnInvASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnInvASRV")][string("description")] = string(R"(Add an invariable-sites component to a site model.)");
+	help_strings[string("fnInvASRV")][string("details")] = string(R"(This model specifies that some fraction pInv of sites are invariable.
+If the site model parameter is a mixture model with m components, this function will return a model with
+m+1 components.)");
+	help_strings[string("fnInvASRV")][string("example")] = string(R"(# fnInvASRV( ) creates a mixture model by adding invariant sites to an underlying site model.
+for (i in 1:10) { taxa[i] = taxon("T"+i) }
+psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
+p_inv ~ dnUniform(0,1)
+M := fnInvASRV( fnJC(4), p_inv)
+seq ~ dnPhyloCTMC(psi, M, type="DNA", nSites=10)
+
+# As an alternative approach, models can be built up iteratively using pipes.
+M := fnJC(4) |> fnInv(p_inv)
+
+M := fnJC(4) |> fnGammaASRV(alpha, 4) |> fnInvASRV(p_inv)  # This has 5 (4+1) components - faster.
+M := fnJC(4) |> fnInvASRV(p_inv) |> fnGammaASRV(alpha, 4)  # This has 8 (4*2) components - slower.
+
+# Not recommended -- illustration only.  3 components.
+M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1-p2)*p1)");
+	help_strings[string("fnInvASRV")][string("name")] = string(R"(fnInvASRV)");
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
+	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
 	help_strings[string("fnK81")][string("name")] = string(R"(fnK81)");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
+	help_arrays[string("fnMixtureASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of site models.)");
+	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the input site models, which may also
+be mixture models.  The probability that each site follows a particular site model
+is specified by the fractions parameter.
+
+The number of components in the resulting mixture model is the sum of the number
+of components of the input mixture models.
+
+If the fractions parameter is missing, then each of the given models is given equal
+weight.)");
+	help_strings[string("fnMixtureASRV")][string("example")] = string(R"(# Two components with different frequencies
+for (i in 1:10) { taxa[i] = taxon("T"+i) }
+psi ~ dnBDP(lambda=1, rootAge=1, taxa=taxa)
+pi1 ~ dnDirichlet([1,1,1,1])
+pi2 ~ dnDirichlet([1,1,1,1])
+weights ~ dnDirichlet([1,1])
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights)
+seq ~ dnPhyloCTMC(psi, M, type="DNA", nSites=10)
+
+# A weight of 1/2 on each model because the weights are missing.
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)])
+
+# Adding rate variation to the frequency-variation model.
+M := fnMixtureASRV([fnF81(pi1),fnF81(pi2)],weights) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv))");
+	help_strings[string("fnMixtureASRV")][string("name")] = string(R"(fnMixtureASRV)");
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnGammaASRV)"));
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnMixtureASRV")][string("see_also")].push_back(string(R"(fnScale)"));
+	help_strings[string("fnMixtureASRV")][string("title")] = string(R"(fnMixtureASRV)");
 	help_strings[string("fnMixtureCladoProbs")][string("name")] = string(R"(fnMixtureCladoProbs)");
 	help_strings[string("fnMtMam")][string("name")] = string(R"(fnMtMam)");
 	help_strings[string("fnMtRev")][string("name")] = string(R"(fnMtRev)");
@@ -1463,6 +1582,44 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnReversiblePoMoTwo4N")][string("name")] = string(R"(fnReversiblePoMoTwo4N)");
 	help_strings[string("fnRtRev")][string("name")] = string(R"(fnRtRev)");
 	help_strings[string("fnSampledCladogenesisRootFrequencies")][string("name")] = string(R"(fnSampledCladogenesisRootFrequencies)");
+	help_arrays[string("fnScale")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("fnScale")][string("description")] = string(R"(Scale a vector of SiteMixtureModels)");
+	help_strings[string("fnScale")][string("details")] = string(R"(This function has two forms.  The first form takes a SiteMixtureModel `model` and scales it by
+a rate `rate`.  This form returns SiteMixtureModel.
+
+The second form takes SiteMixtureModel[] `models` and RealPos[] `rates`, and scales `models[i]`
+by `rates[i]`.  This form returns SiteMixtureModel[].
+
+As a shortcut, if the second argument `rates` is a vector but the first element `model` is not,
+then the first argument will be automatically replaced with a vector of SiteMixtureModels of the
+same length as `rates`, where each element is identical to `model`.)");
+	help_strings[string("fnScale")][string("example")] = string(R"(Q = fnJC(4)                    # The rate of Q is 1
+
+# Operating on SiteMixtureModel
+Q2 = fnScale(Q,2)              # The rate of Q2 is 2
+
+# Operating on SiteMixtureModel[]
+Qs = fnScale([Q,Q],[1,2])      # Qs[1] and Qs[2] have rates 1 and 2
+Qs = fnScale(Q,    [1,2])      # An abbreviation for the above.
+
+# We can build up models iteratively using pipes
+Qs = Q |> fnScale([1,2])       # A shorter abbreviation.
+
+# A JC+LogNormal[4] ASRV model
+site_rates := dnLognormal(0,lsigma) |> fnDiscretizeDistribution(4)
+MM := fnJC(4) |> fnScale(site_rates) |> fnMixtureASRV()
+M := fnScale(MM, 1/MM.rate())
+
+# A FreeRates[5] ASRV model
+rates ~ dnDirichlet( [1,1,1,1,1] )
+weights ~ dnDirichlet( [2,2,2,2,2] )
+MM := fnJC(4) |> fnScale(rates) |> fnMixtureASRV(weights)
+M := fnScale(MM, 1/MM.rate()))");
+	help_strings[string("fnScale")][string("name")] = string(R"(fnScale)");
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnUnitMixture)"));
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnInvASRV)"));
+	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
+	help_strings[string("fnScale")][string("title")] = string(R"(fnScale)");
 	help_strings[string("fnSegregatingSites")][string("name")] = string(R"(fnSegregatingSites)");
 	help_strings[string("fnShiftEvents")][string("name")] = string(R"(fnShiftEvents)");
 	help_strings[string("fnShortestDistance")][string("name")] = string(R"(fnShortestDistance)");
@@ -1488,6 +1645,29 @@ Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnTreePairwiseDistances")][string("name")] = string(R"(fnTreePairwiseDistances)");
 	help_strings[string("fnTreePairwiseNodalDistances")][string("name")] = string(R"(fnTreePairwiseNodalDistances)");
 	help_strings[string("fnTreeScale")][string("name")] = string(R"(fnTreeScale)");
+	help_strings[string("fnUnitMixture")][string("description")] = string(R"(Create a SiteMixtureModel from a RateMatrix or RateGenerator)");
+	help_strings[string("fnUnitMixture")][string("details")] = string(R"(This function creates a SiteMixtureModel with one component by specifying the
+rate and root frequencies for a RateGenerator.  The rate defaults to 1, leaving
+the underlying model unchanged.
+
+If the site model parameter is a RateMatrix, the root frequencies default to the
+equilibrium frequencies of the RateMatrix.  However, a RateGenerator might not have
+equilibrium frequencies, in which case the root frequencies must be specified explicitly.
+
+In many cases it is not necessary to explicitly call fnUnitMixture(), RevBayes can
+automatically convert a RateMatrix to a SiteMixtureModel.)");
+	help_strings[string("fnUnitMixture")][string("example")] = string(R"(M := fnUnitMixture( fnJC(4) )
+M := fnJC(4) |> fnUnitMixture()  # nested functions can be expressed using pipes.
+
+# Explicit conversion to SiteMixtureModel
+M := fnGTR(er,pi) |> fnUnitMixture() |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+# Implicit conversion to SiteMixtureModel
+M := fnGTR(er,pi) |> fnGammaASRV(alpha) |> fnInvASRV(p_inv)
+
+# Specifying the root frequencies
+M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(rep(1,n_states))))");
+	help_strings[string("fnUnitMixture")][string("name")] = string(R"(fnUnitMixture)");
+	help_strings[string("fnUnitMixture")][string("title")] = string(R"(fnUnitMixture)");
 	help_strings[string("fnUpperTriangle")][string("name")] = string(R"(fnUpperTriangle)");
 	help_strings[string("fnVT")][string("name")] = string(R"(fnVT)");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");

@@ -29,7 +29,6 @@ class Assignable;
         virtual void                        setDiagonal(void) = 0;                                                                      //!< Set the diagonal such that each row sums to zero
         virtual void                        update(void) = 0;                                                                           //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
 
-        virtual RateMatrix&                 assign(const Assignable &m);
 
     protected:
         // prevent instantiation
