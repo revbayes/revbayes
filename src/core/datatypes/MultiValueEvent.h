@@ -1,7 +1,7 @@
 #ifndef MultiValueEvent_h
 #define MultiValueEvent_h
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <iosfwd>
 
@@ -24,8 +24,7 @@ namespace RevBayesCore {
         
     public:
         
-        MultiValueEvent(void);                                              //!< Default constructor
-//        MultiValueEvent(const MultiValueEvent &e);                          //!< Default constructor
+        MultiValueEvent(void);                                                                                                          //!< Default constructor
         virtual                             ~MultiValueEvent() {}
         
         bool                                operator==(const MultiValueEvent &mve) const;
@@ -34,7 +33,7 @@ namespace RevBayesCore {
         bool                                operator<=(const MultiValueEvent &mve) const { return operator<(mve) || operator==(mve); }
 
         // public methods
-        void                                addValues(const RbVector<double> &v, const std::string &n);                               //!< Set the age.
+        void                                addValues(const RbVector<double> &v, const std::string &n);                                 //!< Set the age.
         void                                clear(void);
         MultiValueEvent*                    clone(void) const;
         const std::string&                  getName(size_t i) const;
@@ -45,7 +44,7 @@ namespace RevBayesCore {
         RbVector<double>&                   getValues(const std::string &n);                                                            //!< Get the values for this element.
         const RbVector<double>&             getValues(const std::string &n) const;                                                      //!< Get the values for this element.
         void                                setNumberOfEvents(long n);
-        void                                setValues(const RbVector<double> &v, const std::string &n);                               //!< Set the age.
+        void                                setValues(const RbVector<double> &v, const std::string &n);                                 //!< Set the age.
 
 
     private:

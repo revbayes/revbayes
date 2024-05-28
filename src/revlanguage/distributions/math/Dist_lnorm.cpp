@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -51,7 +51,7 @@ const std::string& Dist_lnorm::getClassType(void)
     
     static std::string rev_type = "Dist_lnorm";
     
-	return rev_type; 
+    return rev_type;
 }
 
 /* Get class type spec describing type of object */
@@ -60,7 +60,7 @@ const TypeSpec& Dist_lnorm::getClassTypeSpec(void)
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( PositiveContinuousDistribution::getClassTypeSpec() ) );
     
-	return rev_type_spec; 
+    return rev_type_spec;
 }
 
 
@@ -144,15 +144,15 @@ void Dist_lnorm::printValue(std::ostream& o) const {
 /** Set a member variable */
 void Dist_lnorm::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
-    if ( name == "mean" ) 
+    if ( name == "mean" )
     {
         mean = var;
     }
-    else if ( name == "sd" ) 
+    else if ( name == "sd" )
     {
         sd = var;
     }
-    else 
+    else
     {
         PositiveContinuousDistribution::setConstParameter(name, var);
     }

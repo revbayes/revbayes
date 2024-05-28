@@ -22,7 +22,7 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_lnorm :  public PositiveContinuousDistribution {
+    class Dist_lnorm : public PositiveContinuousDistribution {
         
     public:
         Dist_lnorm( void );

@@ -2,7 +2,7 @@
 
 #include "PoMoRootFrequenciesFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbVector.h"
 #include "TypedDagNode.h"

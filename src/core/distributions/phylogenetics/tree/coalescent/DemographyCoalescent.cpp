@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -137,7 +137,7 @@ double DemographyCoalescent::computeLnProbabilityTimes( void ) const
         next_df_change_age = change_ages[index_demographic_function_change_point];
     }
     // create master list of event times and types
-    // events are either a sample (lineage size up), coalescence (lineage size down), or theta changepoint (lineage size constant)
+    // events are either a sample (lineage size up), coalescence (lineage size down), or Ne changepoint (lineage size constant)
     do
     {
         next_age = ages[index_age];
@@ -215,8 +215,8 @@ double DemographyCoalescent::computeLnProbabilityTimes( void ) const
         else
         {
             // coalescence
-            double theta_at_coal_age = current_demographic_function->getDemographic(combined_event_ages[i]);
-            ln_prob -= log( theta_at_coal_age );
+            double ne_at_coal_age = current_demographic_function->getDemographic(combined_event_ages[i]);
+            ln_prob -= log( ne_at_coal_age );
             --current_num_lineages;
         }
         
@@ -349,7 +349,7 @@ std::vector<double> DemographyCoalescent::simulateCoalescentAges( size_t n ) con
             {
                 // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
                 // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
-                // Alternately, when we cross a serial sampling time or theta window, the number of active lineages changes
+                // Alternately, when we cross a serial sampling time or Ne window, the number of active lineages changes
                 // or the pop size changes, and it is necessary to discard any "excess" time,
                 // which is drawn from an incorrect distribution,then we can draw a new time according to
                 // the correct number of active lineages.

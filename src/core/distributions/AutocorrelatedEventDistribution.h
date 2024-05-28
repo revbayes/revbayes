@@ -76,4 +76,3 @@ template <class valueType> class RbVector;
 
 
 #endif
-

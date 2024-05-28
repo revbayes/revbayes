@@ -1,7 +1,7 @@
 #ifndef __revbayes__GilbertGraphDistribution__
 #define __revbayes__GilbertGraphDistribution__
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDistribution.h"
 #include "MatrixReal.h"

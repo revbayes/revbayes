@@ -271,4 +271,3 @@ void RevBayesCore::VectorElementSwapProposal<valueType>::tune( double rate )
 
 
 #endif
-

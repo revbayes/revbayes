@@ -50,7 +50,7 @@ namespace RevLanguage {
         virtual WorkspaceVector<rlType>*            clone(void) const;                                                  //!< Clone object
         static const std::string&                   getClassType(void);                                                 //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                             //!< Get class type spec
-        virtual const TypeSpec&                     getTypeSpec(void) const;                                            //!< Get the object type spec of the instance        
+        virtual const TypeSpec&                     getTypeSpec(void) const;                                            //!< Get the object type spec of the instance
         virtual RevPtr<RevVariable>                 executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found); //!< Map member methods to internal methods
 
         // Type conversion functions
@@ -261,7 +261,7 @@ const std::string& WorkspaceVector<rlType>::getClassType(void)
 {
     static std::string rev_type = rlType::getClassType() + "[]";
     
-	return rev_type;
+    return rev_type;
 }
 
 
@@ -276,7 +276,7 @@ const TypeSpec& WorkspaceVector<rlType>::getClassTypeSpec(void)
 {
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), &WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::getClassTypeSpec(), &rlType::getClassTypeSpec() );
     
-	return rev_type_spec;
+    return rev_type_spec;
 }
 
 
@@ -294,7 +294,7 @@ rlType* WorkspaceVector<rlType>::getElement(size_t idx) const
 /** Get the type spec of this class. */
 template <typename rlType>
 const TypeSpec& WorkspaceVector<rlType>::getTypeSpec(void) const
-{    
+{
     return getClassTypeSpec();  // This should do the trick; there should be a separate version of the function for each template type
 }
 

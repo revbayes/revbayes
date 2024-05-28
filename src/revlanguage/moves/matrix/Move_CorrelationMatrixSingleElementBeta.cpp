@@ -7,7 +7,7 @@
 
 #include "Move_CorrelationMatrixSingleElementBeta.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

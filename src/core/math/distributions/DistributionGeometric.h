@@ -15,12 +15,12 @@ namespace RevBayesCore {
     
         namespace Geometric {
         
-            double                      pdf(int n, double p);                                   /*!< Geometric(p) probability density */
-            double                      pdf(int n, double p, bool asLog);                       /*!< Geometric(p) probability density */
-            double                      lnPdf(int n, double p);                                 /*!< Geometric(p) log_e probability density */
-            double                      cdf(int n, double p);                                   /*!< Geometric(p) cumulative probability */
-            int                         quantile(double q, double p);                           /*!< Geometric(p) quantile */
-            int                         rv(double p, RandomNumberGenerator& rng);               /*!< Geometric(p) random variable */
+            double                      pdf(long n, double p);                                   /*!< Geometric(p) probability density */
+            double                      pdf(long n, double p, bool asLog);                       /*!< Geometric(p) probability density */
+            double                      lnPdf(long n, double p);                                 /*!< Geometric(p) log_e probability density */
+            double                      cdf(long n, double p);                                   /*!< Geometric(p) cumulative probability */
+            long                         quantile(double q, double p);                           /*!< Geometric(p) quantile */
+            long                         rv(double p, RandomNumberGenerator& rng);               /*!< Geometric(p) random variable */
         }
     }
 }

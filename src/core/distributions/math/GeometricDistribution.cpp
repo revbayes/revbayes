@@ -53,7 +53,7 @@ double GeometricDistribution::computeLnProbability( void )
         return RbConstants::Double::neginf;
     }
     
-    return RbStatistics::Geometric::lnPdf(*value, p->getValue());
+    return RbStatistics::Geometric::lnPdf(v, p->getValue());
 }
 
 

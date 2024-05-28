@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -140,7 +140,7 @@ double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
     double next_serial_age              = (at_serial_age < serial_tip_ages.size() ? serial_tip_ages[at_serial_age] : RbConstants::Double::inf);
 
     // create master list of event times and types
-    // events are either a sample (lineage size up), coalescence (lineage size down), or theta changepoint (lineage size constant)
+    // events are either a sample (lineage size up), coalescence (lineage size down), or Ne changepoint (lineage size constant)
     do
     {
         next_coal_age = coalescent_ages[at_coal_age];
@@ -169,7 +169,7 @@ double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
         }
         else
         {
-            // theta change
+            // Ne change
             combined_event_ages.push_back( next_interval_change_point );
             combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE );
             ++at_interval_change_point;
@@ -194,7 +194,6 @@ double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
     for (size_t i = 0; i < combined_event_ages.size(); ++i)
     {
         
-        // double theta = pop_sizes[current_interval];
         double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
         double interval_area = getIntegral(last_event_age, combined_event_ages[i], index_demographic_function);
         
@@ -204,8 +203,8 @@ double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
         if (combined_event_types[i] == COALESCENT)
         {
             // coalescence
-            double theta_at_coal_age = getDemographic(combined_event_ages[i], index_demographic_function);
-            ln_prob -= log( theta_at_coal_age );            
+            double ne_at_coal_age = getDemographic(combined_event_ages[i], index_demographic_function);
+            ln_prob -= log( ne_at_coal_age );
             --current_num_lineages;
         }
         else if (combined_event_types[i] == SERIAL_SAMPLE)
@@ -215,7 +214,7 @@ double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
         }
         else // combined_event_types[i] == DEMOGRAPHIC_MODEL_CHANGE
         {
-            // theta change, i.e., change of the demographic function
+            // Ne change, i.e., change of the demographic function
             ++index_demographic_function;
             if ( index_demographic_function > interval_change_points.size() )
             {
@@ -407,82 +406,6 @@ void PiecewiseCoalescent::restoreSpecialization(const DagNode *affecter)
     
 }
 
-//
-///**
-// * Simulate new coalescent times.
-// *
-// * \param[in]    n      The number of coalescent events to simulate.
-// *
-// * \return    A vector of the simulated coalescent times.
-// */
-//std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) const
-//{
-//    
-//    // first check if we want to set the interval ages here!
-//    if ( interval_method == SPECIFIED )
-//    {
-//        updateIntervals();
-//    }
-//    else
-//    {
-//        interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
-//    }
-//    size_t num_events_per_interval = size_t( floor( double(n)/Nes->getValue().size()) );
-//    size_t current_num_events_in_interval = 0;
-//    
-//    // Get the rng
-//    RandomNumberGenerator* rng = GLOBAL_RNG;
-//    
-//    // allocate the vector for the times
-//    std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
-//    
-//    const RbVector<double> &pop_sizes  = Nes->getValue();
-//    size_t current_interval = 0;
-//    size_t current_num_lineages = num_taxa;
-//    // draw a time for each speciation event condition on the time of the process
-//    for (size_t i = 0; i < n; ++i)
-//    {
-//        double prev_coalescent_age = 0.0;
-//        if ( i > 0 )
-//        {
-//            prev_coalescent_age = coalescent_ages[i-1];
-//        }
-//        
-//        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
-//        
-//        double sim_age = 0.0;
-//        bool was_coalescent_event = false;
-//        do
-//        {
-//            double theta = 1.0 / (pop_sizes[current_interval]);
-//            double lambda = n_pairs * theta;
-//            double u = RbStatistics::Exponential::rv( lambda, *rng);
-//            sim_age = prev_coalescent_age + u;
-//            was_coalescent_event = current_interval >= interval_change_points.size() || sim_age < interval_change_points[current_interval];
-//            if ( was_coalescent_event == false )
-//            {
-//                prev_coalescent_age = interval_change_points[current_interval];
-//                ++current_interval;
-//            }
-//            
-//        } while ( was_coalescent_event == false );
-//        
-//        coalescent_ages[i] = sim_age;
-//        
-//        ++current_num_events_in_interval;
-//        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && current_interval < interval_change_points.size() )
-//        {
-//            interval_change_points[current_interval] = sim_age;
-//            current_num_events_in_interval = 0;
-//        }
-//        
-//        --current_num_lineages;
-//    }
-//    
-//    return coalescent_ages;
-//}
-
-
 
 /**
  * Simulate new coalescent times.
@@ -545,13 +468,13 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
 
     
     // create master list of event times and types
-    // pre-defined events are either a sample (lineage size up) or theta changepoint (lineage size constant)
+    // pre-defined events are either a sample (lineage size up) or Ne changepoint (lineage size constant)
     size_t num_total_events = ( interval_method == SPECIFIED ? interval_change_points.size() + serial_tip_ages.size() : serial_tip_ages.size() );
     for (size_t num_events = 0; num_events < num_total_events; ++num_events)
     {
         if (next_interval_change_point <= next_serial_age)
         {
-            // theta change
+            // Ne change
             combined_event_ages.push_back( next_interval_change_point );
             combined_event_types.push_back( DEMOGRAPHIC_MODEL_CHANGE);
             ++at_interval_change_point;
@@ -599,7 +522,7 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
     std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
     
     size_t current_interval = 0;
-    size_t theta_interval = 0;
+    size_t ne_interval = 0;
     size_t current_num_lineages = num_taxa_at_present;
     
     size_t num_events_per_interval = size_t( ceil( double(n)/Nes->getValue().size()) );
@@ -616,9 +539,9 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
         bool was_coalescent_event = false;
         do
         {
-            double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;            
+            double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
             double lambda = RbStatistics::Exponential::rv( n_pairs, *rng);
-            double waitingTime = getWaitingTime(sim_age, lambda, theta_interval);
+            double waitingTime = getWaitingTime(sim_age, lambda, ne_interval);
             
             if ( RbMath::isFinite(waitingTime) == false )
             {
@@ -632,7 +555,7 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
             {
                 // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
                 // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
-                // Alternately, when we cross a serial sampling time or theta window, the number of active lineages changes
+                // Alternately, when we cross a serial sampling time or Ne window, the number of active lineages changes
                 // or the pop size changes, and it is necessary to discard any "excess" time,
                 // which is drawn from an incorrect distribution,then we can draw a new time according to
                 // the correct number of active lineages.
@@ -640,8 +563,8 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
                 sim_age = combined_event_ages[current_interval];
                 if (combined_event_types[current_interval] == DEMOGRAPHIC_MODEL_CHANGE)
                 {
-                    // theta change
-                    ++theta_interval;
+                    // Ne change
+                    ++ne_interval;
                 }
                 else
                 {
@@ -655,11 +578,11 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
         coalescent_ages[i] = sim_age;
         
         ++current_num_events_in_interval;
-        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && theta_interval < interval_change_points.size() )
+        if ( interval_method == EVENTS && current_num_events_in_interval == num_events_per_interval && ne_interval < interval_change_points.size() )
         {
-            interval_change_points[theta_interval] = sim_age;
+            interval_change_points[ne_interval] = sim_age;
             current_num_events_in_interval = 0;
-            ++theta_interval;
+            ++ne_interval;
         }
         
         --current_num_lineages;
@@ -701,72 +624,6 @@ void PiecewiseCoalescent::touchSpecialization(const DagNode *affecter, bool touc
 //    updateIntervals();
     
 }
-
-
-// @TODO: Sebastian: Might want to remove this if we end up not using it.
-///**
-// * Recompute the current interval change point vector and corresponding population size vector.
-// *
-// */
-//void PiecewiseCoalescent::updateDemographies( void ) const
-//{
-//    pop_sizes = Nes->getValue();
-//
-//    // we need to recompute the demographic functions
-//    const RbVector< DemographicFunction > dem_funs;
-//    DemographicFunction* current_demographic_function;
-//
-//    for (size_t interval_index = 0; interval_index < pop_sizes.size(); ++interval_index)
-//    {
-//        if (demographic_function_var == CONSTANT)
-//        {
-//            double this_pop_size = pop_sizes[interval_index];
-//
-//            const TypedDagNode<double>* theta = &pop_sizes[interval_index];
-//            current_demographic_function = &ConstantDemographicFunction(theta);
-//        }
-//        else if (demographic_function_var == LINEAR)
-//        {
-//            if (interval_index == 0)
-//            {
-//                const TypedDagNode<double>* N0 = pop_sizes[interval_index];
-//                const TypedDagNode<double>* N1 = pop_sizes[interval_index+1];
-//                const TypedDagNode<double>* t0 = 0.0;
-//                const TypedDagNode<double>* t1 = interval_change_points[interval_index];
-//
-//                current_demographic_function = &LinearDemographicFunction(N0, N1, t0, t1);
-//
-//            }
-//            else if (interval_index > 0 && interval_index < (pop_sizes.size()-1)){
-//                const TypedDagNode<double>* N0 = pop_sizes[interval_index];
-//                const TypedDagNode<double>* N1 = pop_sizes[interval_index+1];
-//                const TypedDagNode<double>* t0 = interval_change_points[interval_index-1];
-//                const TypedDagNode<double>* t1 = interval_change_points[interval_index];
-//
-//                current_demographic_function = &LinearDemographicFunction(N0, N1, t0, t1);
-//
-//            }
-//            else if (interval_index == (pop_sizes.size() -1)){
-//                const TypedDagNode<double>* theta = &pop_sizes[interval_index];
-//                current_demographic_function = &ConstantDemographicFunction(theta);
-//            }
-//            else {
-//                throw RbException("Something went wrong with the piecewise linear function.");
-//            }
-//
-//        }
-//        else
-//        {
-//            throw RbException("Please provide as demographic function either 'constant' or 'linear'.");
-//        }
-//
-//        dem_funs.push_back(current_demographic_function);
-//    }
-//
-//    demographies = dem_funs;
-//
-//}
-
 
 
 /**
@@ -842,7 +699,7 @@ void PiecewiseCoalescent::updateIntervals( void ) const
         interval_change_points = RbVector<double>(Nes->getValue().size()-1, RbConstants::Double::inf);
         
         if ( this->value != NULL )
-        {            
+        {
             // retrieve the coalescent ages
             std::vector<double> coalescent_ages;
             for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i)
@@ -861,7 +718,6 @@ void PiecewiseCoalescent::updateIntervals( void ) const
             for (size_t i = 0; i < num_taxa-2; ++i)
             {
                 ++current_num_events_in_interval;
-//                if ( current_num_events_in_interval == num_events_per_interval )
                 if ( current_num_events_in_interval == number_events_per_interval->getValue()[current_interval] )
                 {
                     interval_change_points[current_interval] = coalescent_ages[i];

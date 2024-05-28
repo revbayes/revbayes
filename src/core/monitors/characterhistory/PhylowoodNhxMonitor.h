@@ -1,7 +1,7 @@
 #ifndef PhylowoodNhxMonitor_H
 #define PhylowoodNhxMonitor_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <fstream>
 #include <vector>
 #include <set>

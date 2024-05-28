@@ -1,0 +1,12 @@
+Creating pruned tree number 1
+# of tips in the complete tree: 144
+# of tips to prune: 121
+# of tips in the pruned tree according to .ntips(): 23
+# of taxa in the pruned tree according to .taxa().size(): 23
+# of tips to prune + # of tips in the pruned tree = # of tips in the complete tree? TRUE
+Creating pruned tree number 2
+# of tips in the complete tree: 144
+# of tips to prune: 121
+# of tips in the pruned tree according to .ntips(): 23
+# of taxa in the pruned tree according to .taxa().size(): 23
+# of tips to prune + # of tips in the pruned tree = # of tips in the complete tree? TRUE

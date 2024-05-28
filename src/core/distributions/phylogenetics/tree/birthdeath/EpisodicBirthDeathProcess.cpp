@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -57,7 +57,7 @@ EpisodicBirthDeathProcess::EpisodicBirthDeathProcess(const TypedDagNode<double> 
 
     if ( starting_tree == NULL )
     {
-        simulateTree();
+        simulateTree(true);
     }
 }
 

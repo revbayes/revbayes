@@ -9,7 +9,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include <fstream>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 

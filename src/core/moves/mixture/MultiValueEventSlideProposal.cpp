@@ -226,4 +226,3 @@ void MultiValueEventSlideProposal::tune( double rate )
     lambda = fmin(10000, lambda);
     
 }
-

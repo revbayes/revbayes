@@ -36,7 +36,16 @@ FossilTipTimeUniformProposal::FossilTipTimeUniformProposal( StochasticNode<Tree>
     addNode( max );
     addNode( min );
     
-    node_index = tree->getValue().getTipIndex( tip_taxon );
+    if ( tip_taxon == "" )
+    {
+        use_index = false;
+        node_index = -1;
+    }
+    else
+    {
+        use_index = true;
+        node_index = tree->getValue().getTipIndex( tip_taxon );
+    }
     
 }
 
@@ -104,26 +113,75 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    // this would be the safer but less efficient way because it computes the index first by looping
-    // tau.getTipNodeWithName( tip_taxon.getName() );
-    // we use the stored index instead
-    TopologyNode* node = &tau.getNode(node_index);
+    if ( use_index == false )
+    {
+        std::vector<size_t> tips;
+        for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
+        {
+            TopologyNode* node = &tau.getNode(i);
+            if ( node->isFossil() )
+            {
+                tips.push_back(i);
+            }
 
-    TopologyNode& parent = node->getParent();
+        }
+
+        if ( tips.empty() )
+        {
+            failed = true;
+            return 0;
+        }
+
+        // pick a random fossil node
+        double u = rng->uniform01();
+        node_index = tips[ size_t( std::floor(tips.size() * u) ) ];
+    }
+
+    TopologyNode& node = tau.getNode(node_index);
+    TopologyNode& parent = node.getParent();
 
     // we need to work with the times
     double parent_age   = parent.getAge();
-    double my_age       = node->getAge();
-    double min_age      = min->getValue();
-    double max_age      = max->getValue();
+    double my_age       = node.getAge();
+    double min_age      = 0;
+    double max_age      = parent_age;
     
-    // set the max age either to the boundary or the parent max age
-    max_age = fmin(max_age, parent_age);
+    // adjust min and max age, either given taxon data or given provided ages
+    if ( min == NULL )
+    {
+        // adjust min age given taxon data
+        Taxon& taxon = node.getTaxon();
+        min_age = taxon.getMinAge();
+    }
+    else
+    {
+        // adjust min age given provided age
+        min_age = min->getValue();
+    }
+    if ( max == NULL )
+    {
+        // adjust max age given taxon data
+        Taxon& taxon = node.getTaxon();
+        double taxon_max_age = taxon.getMaxAge();
+        if ( taxon_max_age < max_age )
+        {
+            max_age = taxon_max_age;
+        }
+    }
+    else
+    {
+        // adjust max age given provided variable
+        double provided_max_age = max->getValue();
+        if ( provided_max_age < max_age )
+        {
+            max_age = provided_max_age;
+        }
+    }
 
-    if ( node->isSampledAncestor() == true )
+    if ( node.isSampledAncestorTip() == true )
     {
         TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == node )
+        if ( sibling == &node )
         {
             sibling = &parent.getChild( 1 );
         }
@@ -161,10 +219,9 @@ double FossilTipTimeUniformProposal::doProposal( void )
     double my_new_age = min_age + (max_age - min_age) * rng->uniform01();
     
     // set the age
-    node->setAge( my_new_age );
+    node.setAge( my_new_age );
 
     return 0.0;
-    
 }
 
 
@@ -219,8 +276,11 @@ void FossilTipTimeUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     
     if (oldN == tree)
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN) ;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
+        tree = static_cast<StochasticNode<Tree>* >(newN);
+        if ( tip_taxon != "" )
+        {
+            node_index = tree->getValue().getTipIndex( tip_taxon );
+        }
     }
     else if (oldN == origin)
     {
@@ -255,4 +315,3 @@ void FossilTipTimeUniformProposal::tune( double rate )
 {
     
 }
-

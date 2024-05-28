@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -273,7 +273,7 @@ bool RevVariable::isAssignable( void ) const
 }
 
 
-/** 
+/**
  * Return the internal flag signalling whether the RevVariable is an element of a vector, e.g., x[1] would be.
  */
 bool RevVariable::isElementVariable( void ) const
@@ -358,7 +358,7 @@ void RevVariable::replaceRevObject( RevObject *newValue )
     {
         referenced_variable = NULL;
     }
-//    
+//
 //    // Make sure default assignment is not a workspace (control) RevVariable assignment
 //    is_workspace_var = false;
     
@@ -401,7 +401,7 @@ void RevVariable::replaceRevObject( RevObject *newValue )
 /**
  * Set whether this RevVariable is an element of a vector RevVariable.
  * All element RevVariable are also hidden.
- * Throw an error if the RevVariable is a reference RevVariable. 
+ * Throw an error if the RevVariable is a reference RevVariable.
  * If so, you need to set the Rev object first, and then set the hidden RevVariable flag.
  */
 void RevVariable::setElementVariableState(bool flag)
@@ -529,4 +529,3 @@ void RevVariable::setRequiredTypeSpec(const TypeSpec &ts)
     
     required_type_spec = ts;
 }
-

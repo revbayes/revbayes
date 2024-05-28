@@ -68,9 +68,9 @@ namespace RevLanguage {
                                                                        std::vector<double>*         matchScore,
                                                                        std::vector<bool>&           arg_mapped,
                                                                        bool                         once);                                  //!< Process args, return a match score if pointer is not null
-        virtual bool                                    isInternal(void) const { return false; }                                           //!< Is the function a procedure?
+        virtual bool                                    isInternal(void) const { return false; }                                            //!< Is the function a procedure?
         virtual bool                                    isProcedure(void) const { return false; }                                           //!< Is the function a procedure?
-        virtual void                                    processArguments(const std::vector<Argument>& passed_args, bool once);               //!< Process args, return a match score if pointer is not null
+        virtual void                                    processArguments(const std::vector<Argument>& passed_args, bool once);              //!< Process args, return a match score if pointer is not null
 
 
         // Function functions you should not override

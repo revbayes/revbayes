@@ -28,8 +28,8 @@ class TypeSpec;
     class ProbabilityContinuousDistribution : public TypedDistribution<Probability> {
         
     public:
-        virtual                                         ~ProbabilityContinuousDistribution(void);                                                                  //!< Destructor
-        ProbabilityContinuousDistribution(const ProbabilityContinuousDistribution &x);                                                                //!< Copy constuctor
+        virtual                                         ~ProbabilityContinuousDistribution(void);                                           //!< Destructor
+        ProbabilityContinuousDistribution(const ProbabilityContinuousDistribution &x);                                                      //!< Copy constuctor
         
         virtual Probability*                            createRandomVariable(void) const;                                                   //!< Create a random variable from this distribution
         
@@ -44,11 +44,10 @@ class TypeSpec;
         
         
     protected:
-        ProbabilityContinuousDistribution(void);                                                                                                 //!< Basic constructor
+        ProbabilityContinuousDistribution(void);                                                                                            //!< Basic constructor
         
     };
     
 }
 
 #endif
-

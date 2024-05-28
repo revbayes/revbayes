@@ -1,6 +1,6 @@
 #include "Trace.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"

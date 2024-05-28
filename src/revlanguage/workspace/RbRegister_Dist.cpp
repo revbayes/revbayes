@@ -27,7 +27,7 @@
 #include <vector>
 #include <cstdlib>
 #include <math.h>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 /* Files including helper classes */
@@ -156,7 +156,7 @@
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
-#include "Dist_PhyloOrnsteinUhlenbeckREML.h"
+#include "Dist_PhyloOrnsteinUhlenbeckPruning.h"
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
 #include "Dist_PhyloWhiteNoise.h"
 
@@ -314,7 +314,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianMultiSampleREML()      );
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloOrnsteinUhlenbeck()                        );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                     );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckREML()                    );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()              );
 
         // multivariate brownian motion
@@ -366,6 +366,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
+        
+        // coalescent (population sizes via demography functions)
+        AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
 
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
@@ -378,7 +381,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // multispecies coalescent (per branch constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_constPopMultispCoal() );
-        AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentInverseGammaPrior() );
+        AddDistribution< ModelVector<TimeTree>      >( new Dist_multispeciesCoalescentInverseGammaPrior() );
         AddDistribution< TimeTree                   >( new Dist_multispeciesCoalescentUniformPrior() );
         AddDistribution< TimeTree                   >( new Dist_MultispeciesCoalescentMigration() );
 
@@ -563,7 +566,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Real>          >( new Dist_EmpiricalSample<Real>());
         AddDistribution< ModelVector<RealPos>       >( new Dist_EmpiricalSample<RealPos>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_EmpiricalSample<TimeTree>());
-        AddDistribution< ModelVector<BranchLengthTree>      >( new Dist_EmpiricalSample<BranchLengthTree>());
+        AddDistribution< ModelVector< ModelVector<TimeTree> >       >( new Dist_EmpiricalSample< ModelVector<TimeTree> >());
+        AddDistribution< ModelVector<BranchLengthTree>              >( new Dist_EmpiricalSample<BranchLengthTree>());
         AddDistribution< ModelVector<TimeTree>      >( new Dist_WeightedSample<TimeTree>());
         AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>      >( new Dist_WeightedSample<AbstractHomologousDiscreteCharacterData>());
 

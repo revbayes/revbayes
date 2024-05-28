@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -91,7 +91,7 @@ TimeTree::TimeTree(RevBayesCore::TypedDagNode<RevBayesCore::Tree> *n) : Tree( n 
 TimeTree* TimeTree::clone(void) const
 {
     
-	return new TimeTree(*this);
+    return new TimeTree(*this);
 }
 
 
@@ -144,7 +144,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
         size_t num = 0;
         for (size_t i=0; i<n; i++){
             RevBayesCore::TopologyNode &node = this->dag_node->getValue().getNode(i);
-            num += node.isSampledAncestor();
+            num += node.isSampledAncestorTip();
         }
         return new RevVariable( new Natural( num ) );
     }
@@ -188,7 +188,7 @@ const std::string& TimeTree::getClassType(void)
     
     static std::string rev_type = "TimeTree";
     
-	return rev_type; 
+    return rev_type;
 }
 
 /** Get class type spec describing type of object */
@@ -197,7 +197,7 @@ const TypeSpec& TimeTree::getClassTypeSpec(void)
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Tree::getClassTypeSpec() ) );
     
-	return rev_type_spec; 
+    return rev_type_spec;
 }
 
 

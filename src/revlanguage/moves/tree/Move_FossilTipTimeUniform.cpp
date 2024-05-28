@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -66,8 +66,18 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
         org = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     }
     
-    RevBayesCore::TypedDagNode<double> *ma = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *mi = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
+    // use NULL as defaults
+    RevBayesCore::TypedDagNode<double> *ma = NULL;
+    RevBayesCore::TypedDagNode<double> *mi = NULL;
+    
+    if ( max->getRevObject() != RevLanguage::RevNullObject::getInstance() )
+    {
+        ma = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+    }
+    if ( min->getRevObject() != RevLanguage::RevNullObject::getInstance() )
+    {
+        mi = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
+    }
     
     std::string tip_name = "";
     if ( tip->getRevObject().getType() == RlString::getClassType() )
@@ -137,13 +147,13 @@ const MemberRules& Move_FossilTipTimeUniform::getParameterRules(void) const
         
         move_member_rules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec() , "The variable for the origin of the process giving a maximum age.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
-        move_member_rules.push_back( new ArgumentRule( "max", RealPos::getClassTypeSpec() , "The variable for the maximum age of this fossil tip.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY) );
-        move_member_rules.push_back( new ArgumentRule( "min", RealPos::getClassTypeSpec() , "The variable for the minimun age of this fossil tip.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY) );
+        move_member_rules.push_back( new ArgumentRule( "max", RealPos::getClassTypeSpec() , "The variable for the maximum age of this fossil tip.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
+        move_member_rules.push_back( new ArgumentRule( "min", RealPos::getClassTypeSpec() , "The variable for the minimun age of this fossil tip.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         
         std::vector<TypeSpec> tip_index_arg_types;
         tip_index_arg_types.push_back( RlString::getClassTypeSpec() );
         tip_index_arg_types.push_back( Taxon::getClassTypeSpec() );
-        move_member_rules.push_back( new ArgumentRule( "tip", tip_index_arg_types, "The name of a specific tip/taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        move_member_rules.push_back( new ArgumentRule( "tip", tip_index_arg_types, "The name of a specific tip/taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlString("") ) );
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();

@@ -56,4 +56,3 @@ const TypeSpec& ProbabilityContinuousDistribution::getClassTypeSpec(void)
     
     return rev_type_spec;
 }
-

@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include <cstddef>
 #include <string>
@@ -295,7 +295,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
         for (size_t j=0; j<num_rules; j++)
         {
             
-            if ( filled[j] == false ) 
+            if ( filled[j] == false )
             {
                 
                 Argument &arg = const_cast<Argument&>(passed_args[i]);

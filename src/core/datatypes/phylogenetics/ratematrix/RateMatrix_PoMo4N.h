@@ -21,7 +21,7 @@
 #ifndef RateMatrix_PoMo4N_H
 #define RateMatrix_PoMo4N_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"
@@ -48,7 +48,6 @@ namespace RevBayesCore {
         virtual                                    ~RateMatrix_PoMo4N(void);                     //!< Destructor
 
         // RateMatrix functions
-        virtual RateMatrix_PoMo4N&                  assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         double                                      averageRate(void) const;
         void                                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_PoMo4N*                          clone(void) const;

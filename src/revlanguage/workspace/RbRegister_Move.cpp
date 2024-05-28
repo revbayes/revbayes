@@ -25,7 +25,7 @@
 
 #include <sstream>
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 /* Files including helper classes */
@@ -213,7 +213,6 @@
 #include "Move_FNPR.h"
 #include "Move_FossilTipTimeUniform.h"
 #include "Move_FossilTipTimeSlideUniform.h"
-#include "Move_TipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
@@ -282,7 +281,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_UpDownSlide() );
         addType( new Move_UpDownSlideBactrian() );
 
-		// compound moves on real values
+        // compound moves on real values
         addType( new Move_LevyJumpSum() );
         addType( new Move_LevyJump() );
 
@@ -435,7 +434,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );
         addType( new Move_IndependentTopology()              );
-		addType( new Move_EmpiricalTree()                    );
+        addType( new Move_EmpiricalTree()                    );
         addType( new Move_FNPR()                             );
         addType( new Move_FossilTipTimeUniform()             );
         addType( new Move_FossilTipTimeSlideUniform()        );
@@ -463,7 +462,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesNodeTimeSlideUniform()      );
         addType( new Move_SpeciesSubtreeScale()              );
         addType( new Move_SpeciesSubtreeScaleBeta()          );
-        addType( new Move_TipTimeSlideUniform()              );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
         addType( new Move_NarrowExchangeRateMatrix()         );

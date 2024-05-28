@@ -1,7 +1,7 @@
 #ifndef RateMatrix_InfiniteSites_H
 #define RateMatrix_InfiniteSites_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TimeReversibleRateMatrix.h"
 
@@ -40,7 +40,6 @@ class Assignable;
         virtual                             ~RateMatrix_InfiniteSites(void);                                                                                                   //!< Destructor
         
         // RateMatrix functions
-        virtual RateMatrix_InfiniteSites&   assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                calculateStationaryFrequencies(void);                                                                                   //!< Calculate the stationary frequencies for the rate matrix
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_InfiniteSites*           clone(void) const;

@@ -1,6 +1,6 @@
 #include "StochasticBranchRateMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 
@@ -65,6 +65,7 @@ StochasticBranchRateMonitor* StochasticBranchRateMonitor::clone(void) const
  */
 void StochasticBranchRateMonitor::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
 	std::vector<double> speciation;
 	std::vector<double> extinction;
@@ -130,11 +131,12 @@ void StochasticBranchRateMonitor::monitorVariables(unsigned long gen)
  */
 void StochasticBranchRateMonitor::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
-	std::vector<double> speciation;
-	std::vector<double> extinction;
-	std::vector<double> sampling;
-	std::vector<double> destructive_sampling;
+    std::vector<double> speciation;
+    std::vector<double> extinction;
+    std::vector<double> sampling;
+    std::vector<double> destructive_sampling;
     std::vector<long>   n_shifts;
 
     size_t num_nodes = cdbdp->getValue().getNumberOfNodes();

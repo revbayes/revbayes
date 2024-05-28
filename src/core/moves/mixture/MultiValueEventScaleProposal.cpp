@@ -95,7 +95,7 @@ double MultiValueEventScaleProposal::doProposal( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    MultiValueEvent &mve = event_var->getValue();    
+    MultiValueEvent &mve = event_var->getValue();
     std::vector<double> &values = mve.getValues( value_name );
     
     double hr = RbConstants::Double::neginf;
@@ -223,4 +223,3 @@ void MultiValueEventScaleProposal::tune( double rate )
     }
 
 }
-

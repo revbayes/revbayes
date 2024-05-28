@@ -53,6 +53,7 @@ namespace RevBayesCore {
         TypedDagNode<double>*                   min;
         std::string                             tip_taxon;
 
+        bool                                    use_index;
         size_t                                  node_index;
 
         // stored objects to undo proposal
@@ -64,4 +65,3 @@ namespace RevBayesCore {
 }
 
 #endif
-
