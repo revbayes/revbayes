@@ -17,9 +17,10 @@ This will clone the RevBayes website as a submodule directory. In order to test 
 Updating the test output or adding new tests requires both changes to this repository, as well as a change to the main RevBayes repository to update the version of the tests used by the main repository. Step-by-step instructions:
 
  * Make changes to the tests.
+ * You need to add -DCONTINUOUS_INTEGRATION=TRUE to the arguments when compiling with cmake. This turns on using openlibm instead of the regular math library, and also adds the flag -mfpmath=sse . ./build.sh can also take -travis true which is a hold-over from when we used travis to do the tests.
  * Make sure you are on a branch of the `tests` repository that is separate from `development`. If necessary, checkout a new branch `git checkout -b <branch>`.
  * Add and commit changes to the tests repository using `git add` and `git commit` from within the `tests` folder.
- * Push the changes to the tests repository (using `git push` from within the `tests` folder). Because the submodule commit might have been checked out in a detached HEAD state, you may have to specify the branch you want to push to using `git push origin HEAD:<branch>` where `<branch>` is the name of your branch in the tests repository.
+ * Push the changes to the revbayes repository (using `git push`).
  * Update the tests version used by the main repository (using `git add tests`, `git commit` and `git push` from within the `revbayes` folder).
  * Note that the tests version is specific to each branch, so when merging with the main revbayes `development` branch, you should first merge the tests `development` into your test branch, then follow the above steps to update the tests submodule to point to your new merge commit.
 

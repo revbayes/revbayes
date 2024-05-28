@@ -2,6 +2,7 @@
 #define Dist_unifProbability_H
 
 #include "UniformDistribution.h"
+#include "RlProbabilityContinuousDistribution.h"
 #include "RlTypedDistribution.h"
 #include "Probability.h"
 
@@ -24,7 +25,7 @@ namespace RevLanguage {
      * @since 2014-11-15, version 1.0
      *
      */
-    class Dist_unifProbability : public TypedDistribution<Probability> {
+    class Dist_unifProbability : public ProbabilityContinuousDistribution {
         
     public:
         Dist_unifProbability( void );
