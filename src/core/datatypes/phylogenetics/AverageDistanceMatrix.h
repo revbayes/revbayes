@@ -37,9 +37,11 @@ template <class valueType> class RbVector;
 
         virtual AverageDistanceMatrix*                  clone(void) const;
         double                                          getCompleteness(void) const;      //!< Get the ratio of defined elements to total elements
-        const DistanceMatrix&                           getDistanceMatrix(void) const;    //!< Get the distance matrix (without the mask distinguishing between defined and undefined entries)
+        DistanceMatrix&                                 getDistanceMatrix(void);          //!< Overloaded method for extracting the distance matrix (without the mask distinguishing between defined and undefined entries)
+        const DistanceMatrix&                           getDistanceMatrix(void) const;
         std::pair<double, bool>                         getElement( size_t i, size_t j ); //!< Get the value of the element in the i-th row and the j-th column and check whether it is defined
-        const MatrixBoolean&                            getMask(void) const;              //!< Get the Boolean mask distinguishing between defined (true) and undefined (false) elements
+        MatrixBoolean&                                  getMask(void);                    //!< Overloaded method for extracting the Boolean mask distinguishing between defined (true) and undefined (false) elements
+        const MatrixBoolean&                            getMask(void) const;
         size_t                                          getSize(void) const;              //!< Get the number of tips of the tree associated with the matrix
         const std::vector<Taxon>&                       getTaxa(void) const;              //!< Get the taxa whose pairwise distances are stored in the matrix
         size_t                                          size(void) const;                 //!< Get the number of elements in a row or column of the matrix

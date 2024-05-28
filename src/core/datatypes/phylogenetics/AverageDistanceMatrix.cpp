@@ -85,6 +85,12 @@ double AverageDistanceMatrix::getCompleteness(void) const
 
 
 /** Get the distance matrix (without the mask distinguishing between defined and undefined entries) */
+DistanceMatrix& AverageDistanceMatrix::getDistanceMatrix(void)
+{
+    return distanceMatrix;
+}
+
+
 const DistanceMatrix& AverageDistanceMatrix::getDistanceMatrix(void) const
 {
     return distanceMatrix;
@@ -104,6 +110,12 @@ std::pair<double, bool> AverageDistanceMatrix::getElement( size_t i, size_t j )
 
 
 /** Get the Boolean mask distinguishing between defined (true) and undefined (false) elements */
+MatrixBoolean& AverageDistanceMatrix::getMask(void)
+{
+    return mask;
+}
+
+
 const MatrixBoolean& AverageDistanceMatrix::getMask(void) const
 {
     return mask;
@@ -169,9 +181,17 @@ void AverageDistanceMatrix::ultrametricImputation(void)
             }
         }
         
+        /* In each pass, we want to *independently* apply the imputation algorithm to each missing distance
+         * d(i, j) for which at least one k can be found such that d(i, k) and d(j, k) are both non-missing.
+         * I.e., the imputation of one distance should *not* immediately affect the number of {i, j, k}
+         * triplets available for the imputation of the remaining distances. To do so, we create a temporary
+         * copy of the matrix, and make element-wise changes to it before re-assigning the original matrix.
+         */
+        AverageDistanceMatrix* tmp = new AverageDistanceMatrix(*this);
+        
         for (size_t i = 0; i < missing_entry_row_indices.size(); i++)
         {
-            // For every missing distance d(i, j), find all x such that d(i, k) and d(j, k) are non-missing
+            // For every missing distance d(i, j), find all k such that d(i, k) and d(j, k) are non-missing
             size_t ix0 = missing_entry_row_indices[i];
             size_t ix1 = missing_entry_col_indices[i];
             
@@ -198,12 +218,16 @@ void AverageDistanceMatrix::ultrametricImputation(void)
                 double repl_dist = *std::min_element(maxima.begin(), maxima.end());
                 
                 // Re-assign (while exploiting matrix symmetry)
-                distanceMatrix[ix0][ix1] = repl_dist;
-                distanceMatrix[ix1][ix0] = repl_dist;
-                mask[ix0][ix1] = true;
-                mask[ix1][ix0] = true;
+                tmp->getDistanceMatrix()[ix0][ix1] = repl_dist;
+                tmp->getDistanceMatrix()[ix1][ix0] = repl_dist;
+                tmp->getMask()[ix0][ix1] = true;
+                tmp->getMask()[ix1][ix0] = true;
             }
         }
+        
+        // Re-assign
+        distanceMatrix = tmp->getDistanceMatrix();
+        mask = tmp->getMask();
         
         // Recalculate the number of missing entries
         empty = (int)missing_entry_row_indices.size();
