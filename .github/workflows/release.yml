@@ -96,7 +96,7 @@ jobs:
             arch: mac-arm64
 
           - name: windows
-            os: ubuntu-latest
+            os: ubuntu-24.04
             compiler: idk
             version: "9000"
             mpi: false
