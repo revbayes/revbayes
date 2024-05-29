@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: eWaterCycle/setup-apptainer@v2
+    - uses: actions/setup-python@v5
       with:
-        apptainer-version: 1.2.5
+        python-version: 3.12
 
     - name: Get version
       id: get_version
@@ -106,6 +106,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
 
     - name: Install (Linux)
       if: runner.os == 'Linux' && matrix.name != 'windows'
