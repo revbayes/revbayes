@@ -223,7 +223,7 @@ jobs:
         WINROOT=/home/runner/win_root
         ccache -p
         ccache -s
-        ninja -C build install
+        ninja -C build install -j 4
         ccache -s
         cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
