@@ -218,12 +218,12 @@ jobs:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
         PREFIX=${HOME}/local
-        /usr/local/bin/meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
         CXX=x86_64-w64-mingw32-g++-posix
         WINROOT=/home/runner/win_root
         ccache -p
         ccache -s
-        /usr/local/bin/ninja -C build install
+        ninja -C build install
         ccache -s
         cp $($CXX --print-file-name libgcc_s_seh-1.dll)   $PREFIX/bin
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
