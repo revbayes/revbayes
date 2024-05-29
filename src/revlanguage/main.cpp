@@ -197,10 +197,6 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-//    source_files.push_back( "read_SIMMAP.Rev" );
-//    source_files.push_back( "mcmc_state_dependent_OU_SIMMAP.Rev" );
-//    source_files.push_back( "test_likelihood.Rev" );
-//    source_files.push_back( "1d_mcmc_state_dependent_OU.Rev" );
 
     if ( args.count("args") && args.count("cmd"))
     {
