@@ -249,9 +249,9 @@ jobs:
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'
           echo 'if [ "$#" -gt "1" ]; then'
-          echo '  wine64 ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo '  wine ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'else'
-          echo '  wine64 ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo '  wine ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'fi' ) > $HOME/wrapper/rb
         chmod +x ${HOME}/wrapper/rb
 
