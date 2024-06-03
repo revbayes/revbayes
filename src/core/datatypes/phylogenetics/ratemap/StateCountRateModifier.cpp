@@ -7,7 +7,6 @@
 
 #include "CharacterEventDiscrete.h"
 #include "StateCountRateModifier.h"
-#include "Assignable.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Cloneable.h"
 #include "RbException.h"
@@ -31,20 +30,6 @@ StateCountRateModifier::StateCountRateModifier(const StateCountRateModifier& g) 
     if (&g != this)
     {
         state_factors       = g.state_factors;
-    }
-}
-
-StateCountRateModifier& StateCountRateModifier::assign(const Assignable &m)
-{
-    
-    const StateCountRateModifier *crm = dynamic_cast<const StateCountRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
     }
 }
 

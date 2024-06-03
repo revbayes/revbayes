@@ -25,7 +25,6 @@ namespace RevBayesCore {
         RateMatrix_FlowT2Populations&             operator=(const RateMatrix_FlowT2Populations& r);
         
         // RateMatrix functions
-        virtual RateMatrix_FlowT2Populations&                   assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_FlowT2Populations*                           clone(void) const;
 

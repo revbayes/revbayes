@@ -80,16 +80,23 @@ SyntaxFunctionCall& SyntaxFunctionCall::operator=( const SyntaxFunctionCall& x )
         delete base_variable;
         
         for ( std::list<SyntaxLabeledExpr*>::iterator it = arguments->begin(); it != arguments->end(); ++it )
+        {
             delete *it;
-
+        }
+        
         function_name = x.function_name;
 
         if (x.base_variable != NULL)
+        {
             base_variable = x.base_variable->clone();
+        }
         
         arguments->clear();
         for ( std::list<SyntaxLabeledExpr*>::iterator it = x.arguments->begin(); it != x.arguments->end(); ++it )
+        {
             arguments->push_back( (*it)->clone() );
+        }
+        
     }
 
     return ( *this );
@@ -153,7 +160,8 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
             if ( the_object.isType( Function::getClassTypeSpec() ) )
             {
                 func = static_cast<Function*>( the_object.clone() );
-                found = func->checkArguments(args, NULL, !dynamic);
+                std::vector<bool> arg_mapped(args.size(), false);
+                found = func->checkArguments(args, NULL, arg_mapped, !dynamic);
             }
         }
         
@@ -185,17 +193,21 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
 
         Function* the_function;
-        if (the_const_function)
+        if ( the_const_function != NULL )
+        {
             the_function = the_const_function->clone();
+        }
         else
+        {
             throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
-
+        }
+        
         the_function->processArguments(args, !dynamic);
         
-        MemberMethod* theMemberMethod = dynamic_cast<MemberMethod*>( the_function );
-        if ( theMemberMethod != NULL )
+        MemberMethod* the_member_method = dynamic_cast<MemberMethod*>( the_function );
+        if ( the_member_method != NULL )
         {
-            theMemberMethod->setMemberObject( the_var );
+            the_member_method->setMemberObject( the_var );
             func = the_function;
         }
         else
