@@ -30,7 +30,7 @@ template <class valueType> class TypedDagNode;
         
         enum CODING { ALL, NO_MONOMORPHIC, NO_SINGLETONS };
         
-        SFSDiffusionApproximationDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f=false, CODING cod=ALL);
+        SFSDiffusionApproximationDistribution(const TypedDagNode< RbVector<double> > *th, const TypedDagNode< RbVector<double> > *ls, long n, long n_ind, bool f=false, CODING cod=ALL);
         virtual                                            ~SFSDiffusionApproximationDistribution(void);                                                //!< Virtual destructor
         
         // public member functions
@@ -45,11 +45,19 @@ template <class valueType> class TypedDagNode;
 
     private:
         bool                                                calculateExpectedSFS(void) const;
-        RbVector<double>                                    computeTimeBreakpoints(void) const;
+        RbVector<double>                                    exponential_grid(long pts) const;
+        RbVector<double>                                    extrap_SFS(void) const;
+        RbVector<double>                                    from_phi(RbVector<double> phi, RbVector<double> grid) const;
         void                                                initialize(void);
-        
+        RbVector<double>                                    integration_one_pop(RbVector<double> phi, RbVector<double> grid, double epochlength, double nu, double theta0) const;
+        RbVector<double>                                    n_epoch(long pts) const;
+        RbVector<double>                                    phi_snm(double theta0, RbVector<double> grid) const;
+        RbVector<double>                                    tridiag(RbVector<double> a, RbVector<double> b, RbVector<double> c, RbVector<double> r) const;
+
+    
         // members
         const TypedDagNode< RbVector<double> >*             theta;
+        const TypedDagNode< RbVector<double> >*             lengths;
         long                                                num_sites;
         bool                                                folded;
         long                                                num_individuals;
