@@ -9,9 +9,7 @@
 
 namespace RevBayesCore {
     
-    class TransitionProbabilityMatrix;
-class Assignable;
-    
+    class TransitionProbabilityMatrix;    
     
     /**
      * \brief Abstract class for general rate matrices.

@@ -55,9 +55,6 @@ namespace RevBayesCore {
 }
 
 
-#include "Assign.h"
-#include "Assignable.h"
-
 
 template <class valueType>
 RevBayesCore::BSPIntervalFunction<valueType>::BSPIntervalFunction(const TypedDagNode< RbVector<valueType> > *v, const TypedDagNode< RbVector<long> >* n) : TypedFunction< RbVector<valueType> >( new RbVector<valueType>() ),
