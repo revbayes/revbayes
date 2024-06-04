@@ -181,23 +181,24 @@ bool SFSDiffusionApproximationDistribution::calculateExpectedSFS(void) const
     // here we need to compute a vector (with n+1 elements where n is the number of individuals)
     // of the expected SFS
     
-//     for (size_t i=1; i<num_individuals; ++i)
-//     {
-//         // @Ronja: here goes the model computation
+    for (size_t i=1; i<num_individuals; ++i)
+    {
+        // @Ronja: here goes the model computation
         
-// //        double expected_frequency = 0.0;
-// //        for (size_t k=2; k<=(num_individuals-i+1); ++k)
-// //        {
-// //            double this_theta = th[k-2];
-// //            expected_frequency += this_theta * prob_k[i-1][k-2];
-// //        }
-// //        
-// //        // add the current expected frequency to our sum
-// //        sum_expected_frequency += expected_frequency;
-// //        
-// //        // store the value of the expected frequency
-// //        expected_SFS[i] = expected_frequency;
-//     }
+//        double expected_frequency = 0.0;
+//        for (size_t k=2; k<=(num_individuals-i+1); ++k)
+//        {
+//            double this_theta = th[k-2];
+//            expected_frequency += this_theta * prob_k[i-1][k-2];
+//        }
+//        
+       // add the current expected frequency to our sum
+    //    sum_expected_frequency += expected_frequency;
+       sum_expected_frequency += expected_SFS[i];
+//        
+//        // store the value of the expected frequency
+//        expected_SFS[i] = expected_frequency;
+    }
     
     // return false that the likelihood should be -Inf
     if ( sum_expected_frequency > 1 )
