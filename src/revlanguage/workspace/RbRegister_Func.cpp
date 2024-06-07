@@ -244,6 +244,7 @@
 #include "Func_ceil.h"
 #include "Func_choose.h"
 #include "Func_coala.h"
+#include "Func_cumsumVector.h"
 #include "Func_diagonalMatrix.h"
 #include "Func_empiricalQuantile.h"
 #include "Func_exp.h"
@@ -492,6 +493,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // choose function
         addFunction( new Func_choose() );
+
+        // cumulative sum (cumsum) function
+        addFunction( new Func_cumsumVector() );
 
         // coala function
         addFunction( new Func_coala()        );
