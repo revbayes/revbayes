@@ -143,8 +143,8 @@ const MemberRules& Dist_SFSDiffusionApproximation::getParameterRules(void) const
     
     if ( rules_set == false )
     {
-        dist_member_rules.push_back( new ArgumentRule( "theta", ModelObject<RealPos>::getClassTypeSpec(), "The theta values with theta=4*Ne*mu.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "lengths", ModelObject<RealPos>::getClassTypeSpec(), "The epoch lengths for all but the most ancient epoch. Time is in units of 2*Na generations with Na being the most ancient population size.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "theta", ModelVector<RealPos>::getClassTypeSpec(), "The theta values with theta=4*Ne*mu.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "lengths", ModelVector<RealPos>::getClassTypeSpec(), "The epoch lengths for all but the most ancient epoch. Time is in units of 2*Na generations with Na being the most ancient population size.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
         dist_member_rules.push_back( new ArgumentRule( "numSites", Natural::getClassTypeSpec(), "The number of sites in the SFS.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "numIndividuals", Natural::getClassTypeSpec(), "The number of individuals in the (unfolded) SFS.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "folded", RlBoolean::getClassTypeSpec(), "Is the site frequency spectrum folded?", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean(false) ) );
