@@ -416,9 +416,90 @@ a := qchisq(0.025, df)
 a)");
 	help_strings[string("dnChisq")][string("name")] = string(R"(dnChisq)");
 	help_strings[string("dnChisq")][string("title")] = string(R"(Chi-Square Distribution)");
+	help_arrays[string("dnCoalescent")][string("authors")].push_back(string(R"(Ronja Billenstein)"));
+	help_arrays[string("dnCoalescent")][string("authors")].push_back(string(R"(Andrew Magee)"));
+	help_arrays[string("dnCoalescent")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("dnCoalescent")][string("description")] = string(R"(The constant population size coalescent process specifies a probability density on genealogies, both node ages and the topology.)");
+	help_strings[string("dnCoalescent")][string("details")] = string(R"(The underlying theory of the constant population size Coalescent implemented here is Kingman's Coalescent. The implementation here assumes haploid individuals, so for diploid study systems one needs to multiply the effective population size by 2 and the true effective population size in units of individuals needs to be divided by 2 afterwards.
+The Coalescent process is parameterized with theta, which here stands for the effective population size (not 4 * Ne * mu). For detailed examples see https://revbayes.github.io/tutorials/coalescent/)");
+	help_strings[string("dnCoalescent")][string("example")] = string(R"(
+# specify a prior distribution on the constant population size
+pop_size ~ dnUniform(0,1E6)
+moves.append( mvScale(pop_size, lambda=0.1, tune=true, weight=2.0) )
+
+# specify the coalescent process.
+# note that you need to have a vector of taxa
+psi ~ dnCoalescent(theta=pop_size, taxa=taxa)
+
+# for monitoring purposes, you may want the root age
+root_height := psi.rootAge()
+
+# continue as usual to either clamp the genealogy or infer the genealogy based on sequence data)");
 	help_strings[string("dnCoalescent")][string("name")] = string(R"(dnCoalescent)");
+	help_references[string("dnCoalescent")].push_back(RbHelpReference(R"(Comparison of Bayesian Coalescent Skyline Plot Models for Inferring Demographic Histories. Billenstein, Ronja and Höhna, Sebastian (2024) Molecular Biology and Evolution, 41(5):msae073.)",R"(https://doi.org/10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_arrays[string("dnCoalescent")][string("see_also")].push_back(string(R"(dnCoalescentSkyline)"));
+	help_arrays[string("dnCoalescent")][string("see_also")].push_back(string(R"(dnCoalescentDemography)"));
+	help_strings[string("dnCoalescent")][string("title")] = string(R"(Constant population size Coalescent process)");
 	help_strings[string("dnCoalescentDemography")][string("name")] = string(R"(dnCoalescentDemography)");
+	help_arrays[string("dnCoalescentSkyline")][string("authors")].push_back(string(R"(Ronja Billenstein)"));
+	help_arrays[string("dnCoalescentSkyline")][string("authors")].push_back(string(R"(Andrew Magee)"));
+	help_arrays[string("dnCoalescentSkyline")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("dnCoalescentSkyline")][string("description")] = string(R"(The skyline coalescent process specifies a probability density on genealogies, both node ages and the topology. It is used for both heterochronous samples and homochronous samples.)");
+	help_strings[string("dnCoalescentSkyline")][string("details")] = string(R"(The underlying theory of the skyline Coalescent implemented here is Kingman's Coalescent. The implementation here assumes haploid individuals, so for diploid study systems one needs to multiply the effective population size by 2 and the true effective population size in units of individuals needs to be divided by 2 afterwards.
+The Coalescent process is parameterized with the following parameters:
+theta: a vector of effective population sizes (not 4 * Ne * mu).
+times: A vector of times for the intervals, if applicable.
+events_per_interval: A vector of number of coalescent events for the intervals, if applicable.
+method: The method how intervals are defined, either 'specified' or 'events'
+model: The shape of the demographic function within the intervals (constant or linear)
+taxa: The taxa used when drawing a random tree.
+For detailed examples see https://revbayes.github.io/tutorials/coalescent/)");
+	help_strings[string("dnCoalescentSkyline")][string("example")] = string(R"(
+NUM_INTERVALS = ceil(n_taxa / 5)
+for (i in 1:NUM_INTERVALS) {
+
+    pop_size[i] ~ dnUniform(0,1E6)
+    pop_size[i].setValue(100.0)
+    moves.append( mvScale(pop_size[i], lambda=0.1, tune=true, weight=2.0) )
+
+}
+
+# next we specify a prior on the number of events per interval
+# we use a multinomial prior offset to have at least one event per interval
+# first, specify the offset
+num_events_pi <- rep(1, NUM_INTERVALS)
+
+# next, specify the prior for the multinomial distribution
+num_e_simplex_init <- rep(1, NUM_INTERVALS)
+num_e_simplex <- simplex(num_e_simplex_init)
+
+# calculate the number of coalescent events that we distribute over the intervals
+n_multi <- n_taxa-1-NUM_INTERVALS
+
+# draw the coalescent events into intervals
+number_events_pi ~ dnMultinomial(p=num_e_simplex, size=n_multi)
+
+# compute the actual number of events per interval, so the drawn number plus offset
+final_number_events_pi := num_events_pi + number_events_pi
+
+moves.append( mvIidPrior(x=number_events_pi) )
+
+
+
+### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
+psi ~ dnCoalescentSkyline(theta=pop_size, events_per_interval=final_number_events_pi, method="events", taxa=taxa)
+
+interval_times := psi.getIntervalAges()
+
+root_height := psi.rootAge()
+
+
+# continue as usual to either clamp the genealogy or infer the genealogy based on sequence data)");
 	help_strings[string("dnCoalescentSkyline")][string("name")] = string(R"(dnCoalescentSkyline)");
+	help_references[string("dnCoalescentSkyline")].push_back(RbHelpReference(R"(Comparison of Bayesian Coalescent Skyline Plot Models for Inferring Demographic Histories. Billenstein, Ronja and Höhna, Sebastian (2024) Molecular Biology and Evolution, 41(5):msae073.)",R"(https://doi.org/10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_arrays[string("dnCoalescentSkyline")][string("see_also")].push_back(string(R"(dnCoalescent)"));
+	help_arrays[string("dnCoalescentSkyline")][string("see_also")].push_back(string(R"(dnCoalescentDemography)"));
+	help_strings[string("dnCoalescentSkyline")][string("title")] = string(R"(Heterochonous and homochronous skyline Coalescent process)");
 	help_strings[string("dnCompleteBirthDeath")][string("name")] = string(R"(dnCompleteBirthDeath)");
 	help_strings[string("dnConstrainedNodeAge")][string("name")] = string(R"(dnConstrainedNodeAge)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
@@ -1624,6 +1705,11 @@ M := fnScale(MM, 1/MM.rate()))");
 	help_strings[string("fnShiftEvents")][string("name")] = string(R"(fnShiftEvents)");
 	help_strings[string("fnShortestDistance")][string("name")] = string(R"(fnShortestDistance)");
 	help_strings[string("fnSiteRateModifier")][string("name")] = string(R"(fnSiteRateModifier)");
+	help_arrays[string("fnSmoothTimeLine")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("fnSmoothTimeLine")][string("description")] = string(R"(Function to create a smooth timeline where all values after a maximum time are constant, i.e., equal to the previous interval, to avoid crazy looking plots from the prior.)");
+	help_strings[string("fnSmoothTimeLine")][string("details")] = string(R"(Thus function takes a vector of values and a matching vector of times and a maximum time. Then, it constructs a smooth timeline by using all values before the maximum, and replacing all values after the maximum with the last value before the maximum. Thus, the timeline is smooth after the maximum.)");
+	help_strings[string("fnSmoothTimeLine")][string("name")] = string(R"(fnSmoothTimeLine)");
+	help_strings[string("fnSmoothTimeLine")][string("title")] = string(R"(Create a smooth timeline)");
 	help_strings[string("fnStateCountRateModifier")][string("name")] = string(R"(fnStateCountRateModifier)");
 	help_strings[string("fnStirling")][string("name")] = string(R"(fnStirling)");
 	help_strings[string("fnStitchTree")][string("name")] = string(R"(fnStitchTree)");
@@ -2086,9 +2172,57 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_arrays[string("mvEmpiricalTree")][string("see_also")].push_back(string(R"(mvEmpiricalTree)"));
 	help_arrays[string("mvEmpiricalTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("mvEmpiricalTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
+	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
+	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
+	help_strings[string("mvFossilTipTimeSlideUniform")][string("details")] = string(R"(This sliding move uses the possible minimum and maximum ages as reflection boundaries.
+The maximum ages is computed either by its parents or the maximum age in the uncertainty of the fossil, which can be provided to the move or is taken from the taxon object.
+The minimum ages is computed either by its oldest descendant (for sampled ancestors) or the minimum age in the uncertainty of the fossil, which can be provided to the move or is taken from the taxon object.)");
+	help_strings[string("mvFossilTipTimeSlideUniform")][string("example")] = string(R"(
+# Use a for loop to create a uniform distribution on the occurrence time for each fossil #
+# The boundaries of the uniform distribution are specified in the tsv file #
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+    moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
+    moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
+})");
+	help_strings[string("mvFossilTipTimeSlideUniform")][string("name")] = string(R"(mvFossilTipTimeSlideUniform)");
+	help_arrays[string("mvFossilTipTimeSlideUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeSlideUniform)"));
+	help_strings[string("mvFossilTipTimeSlideUniform")][string("title")] = string(R"(Sliding move to change a fossil tip age)");
+	help_arrays[string("mvFossilTipTimeUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvFossilTipTimeUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then draws the new ages randomly between the maximum and minimum ages.)");
+	help_strings[string("mvFossilTipTimeUniform")][string("details")] = string(R"(The maximum ages is computed either by its parents or the maximum age in the uncertainty of the fossil, which can be provided to the move or is taken from the taxon object.
+The minimum ages is computed either by its oldest descendant (for sampled ancestors) or the minimum age in the uncertainty of the fossil, which can be provided to the move or is taken from the taxon object.)");
+	help_strings[string("mvFossilTipTimeUniform")][string("example")] = string(R"(
+# Use a for loop to create a uniform distribution on the occurrence time for each fossil #
+# The boundaries of the uniform distribution are specified in the tsv file #
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+    moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
+    moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
+})");
+	help_strings[string("mvFossilTipTimeUniform")][string("name")] = string(R"(mvFossilTipTimeUniform)");
+	help_arrays[string("mvFossilTipTimeUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeSlideUniform)"));
+	help_strings[string("mvFossilTipTimeUniform")][string("title")] = string(R"(Move to uniformly draw fossil tip ages)");
 	help_strings[string("mvGMRFHyperpriorGibbs")][string("name")] = string(R"(mvGMRFHyperpriorGibbs)");
 	help_strings[string("mvGMRFUnevenGridHyperpriorGibbs")][string("name")] = string(R"(mvGMRFUnevenGridHyperpriorGibbs)");
 	help_strings[string("mvGPR")][string("name")] = string(R"(mvGPR)");
@@ -2133,9 +2267,19 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGraphFlipEdge")][string("name")] = string(R"(mvGraphFlipEdge)");
 	help_strings[string("mvGraphShiftEdge")][string("name")] = string(R"(mvGraphShiftEdge)");
 	help_strings[string("mvHSRFHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFHyperpriorsGibbs)");
-	help_strings[string("mvHSRFIntervalSwap")][string("name")] = string(R"(mvHSRFIntervalSwap)");
 	help_strings[string("mvHSRFUnevenGridHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFUnevenGridHyperpriorsGibbs)");
 	help_strings[string("mvHomeologPhase")][string("name")] = string(R"(mvHomeologPhase)");
+	help_arrays[string("mvIidPrior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvIidPrior")][string("description")] = string(R"(This move proposes new values drawn from the prior.)");
+	help_strings[string("mvIidPrior")][string("details")] = string(R"(Using this move, one actually gets an independence sampler as the proposal doesn't depend on the current state. The move calls redraw based on the distribution attached to the random variable.)");
+	help_strings[string("mvIidPrior")][string("example")] = string(R"(x ~ dnUnif(0,10000)
+moves[1] = mvIidPrior(x, weight=1.0)
+monitors[1] = screenmonitor(printgen=1000, x)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=200000))");
+	help_strings[string("mvIidPrior")][string("name")] = string(R"(mvIidPrio)");
+	help_strings[string("mvIidPrior")][string("title")] = string(R"(Move to propose from prior)");
 	help_strings[string("mvIndependentTopology")][string("name")] = string(R"(mvIndependentTopology)");
 	help_arrays[string("mvLayeredScaleProposal")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("mvLayeredScaleProposal")][string("description")] = string(R"(Makes a subtree scale move on all subtrees below a given age in the tree. Tree topology is not altered.)");
@@ -2233,8 +2377,60 @@ Useful for fat-tailed distributions, possibly for bimoodal distributions.
 
 Variables on [0,infinity) are log-transformed for proposals.)");
 	help_strings[string("mvRandomDive")][string("name")] = string(R"(mvRandomDive)");
+	help_arrays[string("mvRandomGeometricWalk")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvRandomGeometricWalk")][string("description")] = string(R"(A move that performs geometric random walk on an integer variable. The displacement of the random walk is drawn from a geometric distribution, mirrored for positive and negative steps.)");
+	help_strings[string("mvRandomGeometricWalk")][string("example")] = string(R"(
+p <- 0.8
+x ~ dnGeom(p)
+
+moves[1] = mvRandomGeometricWalk(x, weight=1.0)
+monitors[1] = mvScreen(printgen=1000, x)
+
+mymodel = model(p)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=20000,tuningInterval=100)
+mymcmc.run(generations=200000))");
 	help_strings[string("mvRandomGeometricWalk")][string("name")] = string(R"(mvRandomGeometricWalk)");
 	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(mvRandomIntegerWalk)");
+	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
+	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
+	help_strings[string("mvRandomGeometricWalk")][string("title")] = string(R"(Geometric random walk)");
+	help_arrays[string("mvRandomIntegerWalk")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvRandomIntegerWalk")][string("description")] = string(R"(A move that performs random walk on an integer variable. The displacement of the random walk is exactly one step, either positive or negative.)");
+	help_strings[string("mvRandomIntegerWalk")][string("example")] = string(R"(
+p <- 0.8
+x ~ dnGeom(p)
+
+moves[1] = mvRandomIntegerWalk(x, weight=1.0)
+monitors[1] = mvScreen(printgen=1000, x)
+
+mymodel = model(p)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=20000,tuningInterval=100)
+mymcmc.run(generations=200000))");
+	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(
+mvRandomIntegerWalk)");
+	help_arrays[string("mvRandomIntegerWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
+	help_arrays[string("mvRandomIntegerWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
+	help_strings[string("mvRandomIntegerWalk")][string("title")] = string(R"(Random walk on integers)");
+	help_arrays[string("mvRandomNaturalWalk")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvRandomNaturalWalk")][string("description")] = string(R"(A move that performs random walk on a natural number variable. The displacement of the random walk is exactly one step, either positive or negative.)");
+	help_strings[string("mvRandomNaturalWalk")][string("example")] = string(R"(
+p <- 0.8
+x ~ dnGeom(p)
+
+moves[1] = mvRandomNaturalWalk(x, weight=1.0)
+monitors[1] = mvScreen(printgen=1000, x)
+
+mymodel = model(p)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=20000,tuningInterval=100)
+mymcmc.run(generations=200000))");
+	help_strings[string("mvRandomNaturalWalk")][string("name")] = string(R"(
+mvRandomNaturalWalk)");
+	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
+	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
+	help_strings[string("mvRandomNaturalWalk")][string("title")] = string(R"(Random walk on natural numbers)");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
 	help_strings[string("mvRateAgeProposal")][string("name")] = string(R"(mvRateAgeProposal)");
 	help_strings[string("mvRateAgeSubtreeProposal")][string("name")] = string(R"(mvRateAgeSubtreeProposal)");
@@ -2602,6 +2798,11 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvUpDownSlide")][string("name")] = string(R"(mvUpDownSlide)");
 	help_strings[string("mvUpDownSlideBactrian")][string("name")] = string(R"(mvUpDownSlideBactrian)");
 	help_strings[string("mvVectorBinarySwitch")][string("name")] = string(R"(mvVectorBinarySwitch)");
+	help_arrays[string("mvVectorElementSwap")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvVectorElementSwap")][string("description")] = string(R"(Move that randomly picks a pair of elements in a vector on swaps the two with another.)");
+	help_strings[string("mvVectorElementSwap")][string("name")] = string(R"(mvVectorElementSwap)");
+	help_arrays[string("mvVectorElementSwap")][string("see_also")].push_back(string(R"(mvVectorBinarySwitch)"));
+	help_strings[string("mvVectorElementSwap")][string("title")] = string(R"(Move to swap to elements in a vector)");
 	help_strings[string("mvVectorFixedSingleElementSlide")][string("name")] = string(R"(mvVectorFixedSingleElementSlide)");
 	help_strings[string("mvVectorScale")][string("name")] = string(R"(mvVectorScale)");
 	help_strings[string("mvVectorSingleElementScale")][string("name")] = string(R"(mvVectorSingleElementScale)");
