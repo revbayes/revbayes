@@ -6,6 +6,7 @@
 
 #include "RbException.h"
 #include "RbFileManager.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 
 using namespace RevBayesCore;
@@ -27,7 +28,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
     
         if ( not is_regular_file(fn) )
         {
-            throw RbException()<< "Could not not file " << fn;
+            throw RbException()<< "Could not open file " << fn;
         }
     
     
@@ -44,7 +45,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
         // Initialize
         std::string commandLine;
     
-        //    RBOUT("Processing file \"" + fn + "\"");
+        RBOUT("Processing file \"" + fn.string() + "\"");
     
         int powerColumnIndex = -1;
         int likelihoodColumnIndex = -1;

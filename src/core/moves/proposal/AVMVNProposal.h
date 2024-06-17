@@ -31,7 +31,7 @@ template <class valueType> class StochasticNode;
     class AVMVNProposal : public Proposal {
 
     public:
-        AVMVNProposal( double s, double e, double n0, double c0, double m );                                 //!< Constructor
+        AVMVNProposal( double s, double e, size_t n0, size_t c0, size_t m );                                 //!< Constructor
 
         void                                        addUntransformedScalar(StochasticNode<double> *v);                                    //!< Add an up-scaling variable
         void                                        addLogScalar(StochasticNode<double> *v);                                    //!< Add an up-scaling variable

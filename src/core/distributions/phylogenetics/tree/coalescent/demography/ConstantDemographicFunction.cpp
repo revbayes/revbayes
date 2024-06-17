@@ -89,13 +89,13 @@ double ConstantDemographicFunction::getIntegral(double start, double finish) con
 
 /**
  * @param[in]   time    Current time in coalescent simulation process
- * @param[in]   lambda  
+ * @param[in]   lambda  Waiting time under a standardized coalescent with constant population of theta=1
  *
  * @return Waiting Time until next coalescent event
  */
-double ConstantDemographicFunction::getWaitingTime(double time, double lambda) const
+double ConstantDemographicFunction::getWaitingTime(double time, double lambda, double ploidy_factor) const
 {
-    return theta->getValue() * lambda;
+    return theta->getValue() * lambda * ploidy_factor;
 }
 
 /**
