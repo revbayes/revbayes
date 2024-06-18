@@ -317,7 +317,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
             {
                 double value = static_cast<const RealPos&>( new_value ).getValue();
                 RevBayesCore::Tree &tree = dag_node->getValue();
+                
+                double used_age = tree.getRoot().doesUseAges();
+                tree.getRoot().setUseAges(false, true);
                 tree.getNode(index).setBranchLength(value);
+                tree.getRoot().setUseAges(used_age, true);
             }
         }
         return NULL;

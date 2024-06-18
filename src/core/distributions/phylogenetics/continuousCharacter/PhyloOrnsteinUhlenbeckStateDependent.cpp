@@ -96,27 +96,6 @@ PhyloOrnsteinUhlenbeckStateDependent* PhyloOrnsteinUhlenbeckStateDependent::clon
 }
 
 
-
-double PhyloOrnsteinUhlenbeckStateDependent::computeBranchTime( size_t nide_idx, double brlen )
-{
-    
-    // get the clock rate for the branch
-    double branch_time = 1.0;
-//    if ( this->heterogeneous_clock_rates != NULL )
-//    {
-//        double sigma = this->heterogeneous_clock_rates->getValue()[nide_idx];
-//        branch_time = sigma * sigma * brlen;
-//    }
-//    else
-//    {
-//        double sigma = this->homogeneous_clock_rate->getValue();
-//        branch_time = sigma * sigma * brlen;
-//    }
-    
-    return branch_time;
-}
-
-
 double PhyloOrnsteinUhlenbeckStateDependent::computeStateDependentAlpha(size_t state_idx) const
 {
     
@@ -210,7 +189,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
         this->ln_prob = sumRootLikelihood();
         
     }
-    //std::cout << this->ln_prob << std::endl;
+    
     return this->ln_prob;
 }
 
@@ -251,10 +230,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &p_node       = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &mu_node                   = this->means[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node     = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &mu_node    = this->means[this->active_likelihood[node_index]][node_index];
 
-        
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -294,7 +272,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             // get character history for tree
             const CharacterHistory& current_history = character_histories->getValue();
             
-            //////////// BEGIN LEFT
+            // BEGIN LEFT
             // get branch history for the left branch
             const BranchHistory& bh_left = current_history.getHistory(left_index);
             const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_left = bh_left.getHistory();
@@ -336,8 +314,8 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 PhyloOrnsteinUhlenbeckStateDependent::computeEpisode(mean_left, var_left, log_nf_left, state, delta_t);
             }
             
-            //////////// BEGIN RIGHT
-             // get branch history for the right branch
+            // BEGIN RIGHT
+            // get branch history for the right branch
             const BranchHistory& bh_right = current_history.getHistory(right_index);
             const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_right = bh_right.getHistory();
 
@@ -421,6 +399,10 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                     {
                         root_state = computeRootState( last_state_left );
                         var_root = var_node;
+                    }
+                    else
+                    {
+                        throw RbException("Unkown root treatment chosen for probability computation in state-dependent Ornstein-Uhlenbeck process.");
                     }
                     lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_root), mu_node[i]);
                 }
@@ -781,32 +763,27 @@ void PhyloOrnsteinUhlenbeckStateDependent::setValue(ContinuousCharacterData *v, 
 }
 
 // this function changes mu, variance and log_nf in-place
-void PhyloOrnsteinUhlenbeckStateDependent::computeEpisode(
-        double &mu,
-        double &variance,
-        double &log_nf,
-        size_t state_index, 
-        double time 
-        )
+void PhyloOrnsteinUhlenbeckStateDependent::computeEpisode(double &mu, double &variance, double &log_nf, size_t state_index, double time )
 {
-                double sigma = computeStateDependentSigma(state_index);
-                double alpha = computeStateDependentAlpha(state_index);
-                double theta = computeStateDependentTheta(state_index);
+    
+    double sigma = computeStateDependentSigma(state_index);
+    double alpha = computeStateDependentAlpha(state_index);
+    double theta = computeStateDependentTheta(state_index);
                
-                double v;
-                if ( alpha > 1E-20 )
-                {
-                    v = (sigma*sigma) / (2.0*alpha) * (exp(2.0*alpha*time) - 1.0 );
-                    mu  = exp(1.0 * time  * alpha ) * (mu  - theta)  + theta;
-                }
-                else
-                {
-                    v  = (sigma*sigma) * time;
-                }
-                variance = v + variance * exp(2.0*alpha *time);
+    double v;
+    if ( alpha > 1E-20 )
+    {
+        v = (sigma*sigma) / (2.0*alpha) * (exp(2.0*alpha*time) - 1.0 );
+        mu  = exp(1.0 * time  * alpha ) * (mu  - theta)  + theta;
+    }
+    else
+    {
+        v  = (sigma*sigma) * time;
+    }
+    variance = v + variance * exp(2.0*alpha *time);
                 
-                // update the log normalizing factor
-                log_nf += time * alpha;
+    // update the log normalizing factor
+    log_nf += time * alpha;
 }
 
 double PhyloOrnsteinUhlenbeckStateDependent::simulateEpisode(size_t state_index, double delta_t, double ancestral_value)
@@ -824,11 +801,14 @@ double PhyloOrnsteinUhlenbeckStateDependent::simulateEpisode(size_t state_index,
 
     // calculate the variance
     double sd;
-    if (alpha > 1e-10){
-        double stationary_var = (sigma * sigma) / (2 * alpha); 
+    if (alpha > 1e-10)
+    {
+        double stationary_var = (sigma * sigma) / (2 * alpha);
         double var = stationary_var * (1.0 - e * e); 
         sd = sqrt(var);
-    }else{
+    }
+    else
+    {
         sd = sigma * sqrt(delta_t);
     }
 
@@ -858,15 +838,11 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
         double branch_length = child.getBranchLength();
         
         // get the branch specific rate
-        double branch_time = computeBranchTime( child.getIndex(), branch_length );
         const CharacterHistory& current_history = character_histories->getValue();
         size_t child_index = child.getIndex();
         const BranchHistory& bh = current_history.getHistory(child_index);
 
         const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh.getHistory();
-
-        // compute the first episode
-        //double begin_time = child.getAge();
 
 
         ContinuousTaxonData &taxon = taxa[ child.getIndex() ];
@@ -913,10 +889,11 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
             double y = parent.getCharacter( i );
 
             // simulate the episodes
-            for (size_t j = 0; j < times.size(); ++j){
+            for (size_t j = 0; j < times.size(); ++j)
+            {
                 size_t state = states[j];
                 double delta_t = times[j];
-                y = PhyloOrnsteinUhlenbeckStateDependent::simulateEpisode(state, delta_t, y);
+                y = simulateEpisode(state, delta_t, y);
             }
 
             taxon.addCharacter(y);
@@ -943,8 +920,11 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
     
     std::vector<double> chars = std::vector<double>(num_sites, 0);
 
-    double theta, sigma, alpha, stationary_variance;
-    if (root_treatment == OPTIMUM || root_treatment == EQUILIBRIUM){
+    double theta = 0;
+    double stationary_variance = 0;
+    
+    if (root_treatment == OPTIMUM || root_treatment == EQUILIBRIUM)
+    {
 
         const Tree& tau = character_histories->getValue().getTree();
         const TopologyNode &root = tau.getRoot();
@@ -954,8 +934,8 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         const BranchHistory& bh_left = left_history.getHistory(left_index);
         size_t root_state_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
         theta = computeStateDependentTheta(root_state_index);
-        sigma = computeStateDependentSigma(root_state_index);
-        alpha = computeStateDependentAlpha(root_state_index);
+        double sigma = computeStateDependentSigma(root_state_index);
+        double alpha = computeStateDependentAlpha(root_state_index);
         stationary_variance = sigma * sigma / (2 * alpha);
     }
 
@@ -976,7 +956,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         }
         else
         {
-        throw RbException( "the rootTreatment has not been set properly" );
+            throw RbException( "Cannot simulate under a state-dependent Ornstein-Uhlenbeck process because the root treatment is not set correctly." );
         }
     }
     

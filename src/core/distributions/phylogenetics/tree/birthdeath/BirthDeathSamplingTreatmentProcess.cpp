@@ -64,7 +64,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::string &cdt,
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
-                                                                        Tree *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        Tree *t,
+                                                                        long age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -165,25 +166,10 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     prepareTimeline();
     prepareProbComputation();
 
-    delete value;
-    
-    if (t != nullptr)
+    if ( starting_tree == NULL )
     {
-        try
-        {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa );
-            value = my_tree->clone();
-        }
-        catch (RbException &e)
-        {
-            value = nullptr;
-            // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
-            // a nonexistent starting_tree
-            throw RbException( e.getMessage() );
-        }
-    }
-    else
-    {
+        delete value;
+        
         RbVector<Clade> constr;
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
         StartingTreeSimulator simulator;
@@ -318,7 +304,7 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
     // if conditioning on root, root node must be a "true" bifurcation event
     else
     {
-        if ( root->isSampledAncestor(true) )
+        if ( root->isSampledAncestorTipOrParent() )
         {
             return RbConstants::Double::neginf;
         }
@@ -576,7 +562,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 
       double t = n.getAge();
 
-      if ( n.isTip() && n.isFossil() && n.isSampledAncestor() )
+      if ( n.isTip() && n.isFossil() && n.isSampledAncestorTip() )
       {
         // node is sampled ancestor
           int at_event = whichIntervalTime(t);
@@ -591,7 +577,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               event_sampled_ancestor_ages[at_event].push_back(t);
           }
       }
-      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestor() )
+      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestorTip() )
       {
           // node is serial leaf
           int at_event = whichIntervalTime(t);
@@ -620,7 +606,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               serial_tip_ages.push_back(0.0);
           }
       }
-      else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
       {
           if ( n.isRoot() == false || use_origin == true )
           {
@@ -638,7 +624,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               }
           }
       }
-      else if ( n.isInternal() && n.getChild(0).isSampledAncestor() && n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && n.getChild(0).isSampledAncestorTip() && n.getChild(1).isSampledAncestorTip() )
       {
           return true;
       }
@@ -1955,4 +1941,18 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
         // delegate the super-class
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
+}
+
+/**
+ * Checks if removal probabilities set for this distribution are compatible with sampled ancestors
+ * (i.e. removal < 1)
+ */
+bool BirthDeathSamplingTreatmentProcess::allowsSA() {
+    for(auto removal : r) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    for(auto removal : r_event) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    return false;
 }

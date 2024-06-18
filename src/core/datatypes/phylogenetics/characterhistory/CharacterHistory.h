@@ -42,7 +42,8 @@ namespace RevBayesCore {
         bool                                    hasRootBranch(void) const;
         virtual CharacterEvent*                 pickRandomEvent(size_t &bi);
         void                                    removeEvent(CharacterEvent *e, size_t bi);
-        void                                    setHistory(const std::vector<BranchHistory*>& h);
+        void                                    setHistory(BranchHistory* h, size_t i);
+        void                                    setHistories(const std::vector<BranchHistory*>& h);
 
         
     protected:

@@ -166,6 +166,13 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
         double cmpl = this->dag_node->getValue().getCompleteness();
         return new RevVariable( new Real( cmpl ) );
     }
+    else if ( name == "ultrametricImputation" )
+    {
+        found = true;
+            
+        this->dag_node->getValue().ultrametricImputation();
+        return NULL;
+    }
     else if ( name == "getElement" )
     {
         
@@ -184,16 +191,22 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
             {
                 throw RbException("Index j out of bounds in getElement");
             }
-            
-            // This is a crude solution, but we will coerce the boolean in the second value of the std::pair
-            // to a double so that we can output a Rev vector of two values of the same type. '1.0' stands for
-            // 'true', 0.0 for 'false'.
 
             std::pair<double, bool> element = static_cast< RevBayesCore::AverageDistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
             
-            ModelVector< Real > *n = new ModelVector< Real >();
-            n->push_back( element.first );
-            n->push_back( (double)element.second );
+            ModelVector<RlString> *n = new ModelVector<RlString>();
+            
+            std::stringstream s;
+            s << element.first << ", ";
+            if (element.second)
+            {
+                s << "TRUE";
+            }
+            else
+            {
+                s << "FALSE";
+            }
+            n->push_back( s.str() );
 
             return new RevVariable( n );
 
@@ -226,6 +239,10 @@ void AverageDistanceMatrix::initializeMethods( void )
     // add method for call "completeness" as a function
     ArgumentRules* complArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "completeness", Real::getClassTypeSpec(), complArgRules) );
+    
+    // add method for call "ultrametricImputation" as a function
+    ArgumentRules* ultraImputeArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "ultrametricImputation", RlUtils::Void, ultraImputeArgRules) );
     
     // add method for call "getElement" as a function
     ArgumentRules* getElementArgRules = new ArgumentRules();

@@ -47,7 +47,6 @@ namespace RevBayesCore {
     protected:
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        double                                                              computeBranchTime(size_t nide_idx, double brlen);
         virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);

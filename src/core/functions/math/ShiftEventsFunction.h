@@ -34,8 +34,6 @@ namespace RevBayesCore {
 }
 
 
-#include "Assign.h"
-#include "Assignable.h"
 
 
 template <class valueType>

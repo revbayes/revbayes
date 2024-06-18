@@ -64,7 +64,34 @@ namespace RevBayesCore {
         void                                        rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor
         void                                        setAges(TopologyNode& n, const std::vector<double>& ages);                                              //!< set ages of a node and children from a vector
         void                                        setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children
-        Tree*                                       startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy);                            //!< make sure starting tree satisfies age constraints, and assign min/max ages to its tips
+        Tree*                                       startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, long agePrecision);         //!< make sure starting tree satisfies age constraints, and assign min/max ages to its tips
+
+//        void                    climbUpTheTree(const TopologyNode& node, boost::unordered_set< const TopologyNode* >& node_root_path) ; //!< find path from given node to root
+//        double                  computeRobinsonFouldDistance(const std::vector<RbBitSet>& a, const std::vector<RbBitSet>& b, bool symmetric);//!< Robinson-Foulds distance
+//        double                  computeRobinsonFouldDistance(const Tree& a, const Tree& b, bool symmetric);                             //!< Robinson-Foulds distance
+//        Tree*                   convertTree(const Tree& t, bool resetIndex=true);                                                       //!< convert tree to time tree
+//        double                  getAgeOfMRCA(const Tree& t, const std::string& first, const std::string& second);                       //!< calculate age of MRCA based on tip names
+//        void                    getAges(const TopologyNode& n, std::vector<double>& ages, bool internals_only=true);                    //!< fill vector with node ages
+//        AverageDistanceMatrix   getAverageDistanceMatrix(const RbVector<DistanceMatrix>& matvect, const RbVector<double>* weights);     //!< calculate the (possibly weighted) average of multiple distance matrices
+//        int                     getCollessMetric(const TopologyNode&, int& size);                                                       //!< calculate the Colless metric
+//        DistanceMatrix*         getDistanceMatrix(const Tree& tree);                                                                    //!< get matrix of all distances
+//        int                     getFitchScore(const Tree& t, const AbstractHomologousDiscreteCharacterData &c);                         //!< calculate the parsimony score
+//        double                  getGammaStatistic(const Tree& t);                                                                       //!< calculate the Gamma statistic
+//        std::vector<double>     getInverseES(const Tree& t);                                                                            //!< calculate the inverse Equal Splits measure
+//        double                  getMeanInverseES(const Tree &t, const AbstractHomologousDiscreteCharacterData &c, size_t state_index);  //!< calculate the mean inverse Equal Splits measure
+//        size_t                  getMrcaIndex(const TopologyNode& l, const TopologyNode& r);                                             //!< get index of MRCA
+//        int                     getNodalDistance(const TopologyNode& l, const TopologyNode& r);                                         //!< get nodal distance between two nodes
+//        DistanceMatrix*         getNodalDistanceMatrix(const Tree& tree);                                                               //!< get matrix of nodal distances between all tips
+//        double                  getOldestTipAge(const TopologyNode& n);                                                                 //!< get the age of the oldest tip below specified node
+//        std::vector<double>     getPSSP(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t state_index);           //!< calculate the Parsimoniously Same State Paths
+//        void                    getTaxaInSubtree(TopologyNode& n, std::vector<TopologyNode*>& taxa );                                   //!< get taxa below specified node
+//        bool                    isConnectedNNI(const Tree& a, const Tree& b);                                                           //!< Check if the two trees are connected by a single NNI move
+//        void                    makeUltrametric(Tree& t);                                                                               //!< make the tree ultrametric by extending terminal branches
+//        void                    offsetTree(TopologyNode& n, double factor);                                                             //!< offset node and its children by a factor
+//        void                    rescaleSubtree(TopologyNode& n, double factor, bool v=false);                                           //!< rescale tree ages below a node by a factor, except tips
+//        void                    rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor
+//        void                    setAges(TopologyNode& n, const std::vector<double>& ages);                                              //!< set ages of a node and children from a vector
+//        void                    setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children
         
         // internal helper functions
         void                                        constructTimeTreeRecursively(TopologyNode& tn, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth); //!< helper function for time tree conversion

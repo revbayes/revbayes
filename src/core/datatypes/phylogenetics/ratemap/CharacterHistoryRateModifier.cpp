@@ -13,7 +13,6 @@
 
 #include "CharacterHistoryRateModifier.h"
 #include "RbException.h"
-#include "Assignable.h"
 
 namespace RevBayesCore { class CharacterEvent; }
 namespace RevBayesCore { class CharacterEventDiscrete; }
@@ -40,20 +39,6 @@ CharacterHistoryRateModifier::CharacterHistoryRateModifier(const CharacterHistor
         num_characters = g.num_characters;
     }
 }
-
-CharacterHistoryRateModifier& CharacterHistoryRateModifier::assign(const Assignable &m)
-{
-    const CharacterHistoryRateModifier *crm = dynamic_cast<const CharacterHistoryRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
-    }
-}
-
 
 double CharacterHistoryRateModifier::computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, std::vector<size_t> counts, double age)
 {

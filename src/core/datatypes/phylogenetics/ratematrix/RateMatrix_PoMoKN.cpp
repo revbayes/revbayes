@@ -4,7 +4,6 @@
 #include <cstddef>
 
 #include "RbException.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "TransitionProbabilityMatrix.h"
@@ -72,21 +71,6 @@ RateMatrix_PoMoKN::~RateMatrix_PoMoKN(void)
 
 }
 
-
-
-RateMatrix_PoMoKN& RateMatrix_PoMoKN::assign(const Assignable &m)
-{
-
-    const RateMatrix_PoMoKN *rm = dynamic_cast<const RateMatrix_PoMoKN*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
 
 
 double RateMatrix_PoMoKN::averageRate(void) const

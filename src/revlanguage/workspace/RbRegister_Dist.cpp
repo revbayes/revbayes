@@ -157,7 +157,7 @@
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
-#include "Dist_PhyloOrnsteinUhlenbeckREML.h"
+#include "Dist_PhyloOrnsteinUhlenbeckPruning.h"
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
 #include "Dist_PhyloOrnsteinUhlenbeckStateDependent.h"
 #include "Dist_PhyloWhiteNoise.h"
@@ -171,6 +171,7 @@
 #include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
+#include "Dist_CoalescentDemography.h"
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
@@ -186,9 +187,6 @@
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
 #include "Dist_episodicBirthDeath.h"
-#include "Dist_HeterochronousCoalescent.h"
-#include "Dist_HeterochronousConstantCoalescent.h"
-#include "Dist_HeterochronousSkylineCoalescent.h"
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
@@ -262,6 +260,7 @@
 #include "Process_OrnsteinUhlenbeck.h"
 
 /* Mixture distributions (in folder "distributions/mixture") */
+#include "Dist_AutocorrelatedEvent.h"
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
@@ -292,6 +291,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         ///////////////////////////////////////////////////
         /* Add distributions (in folder "distributions") */
         ///////////////////////////////////////////////////
+        addType( new WorkspaceVector<Distribution>( ) );
 
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
@@ -317,7 +317,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianMultiSampleREML()      );
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloOrnsteinUhlenbeck()                        );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                     );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckREML()                    );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()              );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckStateDependent()          );
 
@@ -370,18 +370,12 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
+        
+        // coalescent (population sizes via demography functions)
+        AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
 
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
-
-        // heterochronously sampled coalescent (constant population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousCoalescent() );
-
-        // heterochronously sampled coalescent (constant population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousConstantCoalescent() );
-
-        // heterochronously sampled coalescent (skyline population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousSkylineCoalescent() );
 
         // duplication loss process
         AddDistribution< TimeTree                   >( new Dist_DuplicationLoss() );
@@ -589,6 +583,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Simplex>       >( new Dist_dpp<Simplex>()      );
 
         // event distribution
+        AddDistribution< MultiValueEvent            >( new Dist_AutocorrelatedEvent() );
         AddDistribution< ModelVector<Real>          >( new Dist_event<Real>()         );
         AddDistribution< ModelVector<RealPos>       >( new Dist_event<RealPos>()      );
         AddDistribution< ModelVector<Natural>       >( new Dist_event<Natural>()      );
