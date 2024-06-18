@@ -86,22 +86,6 @@ RateMatrix_revPoMoBalanceKN& RateMatrix_revPoMoBalanceKN::operator=(const RateMa
 }
 
 
-RateMatrix_revPoMoBalanceKN& RateMatrix_revPoMoBalanceKN::assign(const Assignable &m)
-{
-    
-    const RateMatrix_revPoMoBalanceKN *rm = dynamic_cast<const RateMatrix_revPoMoBalanceKN*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
 
 /** Do precalculations on eigenvectors */
 void RateMatrix_revPoMoBalanceKN::calculateCijk(void)

@@ -25,7 +25,7 @@ ConstantRateBirthDeathProcess::ConstantRateBirthDeathProcess(const TypedDagNode<
     addParameter( speciation );
     addParameter( extinction );
 
-    simulateTree();
+    simulateTree(true);
 
 }
 
@@ -87,12 +87,12 @@ void ConstantRateBirthDeathProcess::redrawValue( SimulationCondition sim_conditi
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            simulateTree(true);
         }
     }
     else if ( sim_condition == SimulationCondition::VALIDATION && condition == "nTaxa" )
     {
-        simulateTree();
+        simulateTree(false);
     }
     else if ( sim_condition == SimulationCondition::VALIDATION )
     {

@@ -1,7 +1,7 @@
 #ifndef PoMoState_H
 #define PoMoState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

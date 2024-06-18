@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <ostream>
@@ -186,7 +186,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
         {
             if( the_node.isTip() )
             {
-                if ( the_node.isSampledAncestor() == true )
+                if ( the_node.isSampledAncestorTip() == true )
                 {
                     if ( the_node.getAge() - the_node.getParent().getAge() != 0 )
                     {
@@ -375,7 +375,7 @@ std::vector<double> AbstractRootedTreeDistribution::getAgesOfTipsFromMostRecentS
     {
         
         const TopologyNode& n = *(nodes[i]);
-        if ( n.isTip() == true && n.isSampledAncestor() == false )
+        if ( n.isTip() == true && n.isSampledAncestorTip() == false )
         {
             double t = n.getAge() - minTipAge;
             ages.push_back(t);
@@ -483,12 +483,24 @@ void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
 }
 
 
+void AbstractRootedTreeDistribution::redrawValue( SimulationCondition c )
+{
+    
+    if ( starting_tree == NULL )
+    {
+        // if we are initializing an MCMC run, we don't care that the starting value comes from the "true" distribution
+        bool alwaysReturn = (c == SimulationCondition::MCMC); 
+        simulateTree(alwaysReturn);
+    }
+}
+
 void AbstractRootedTreeDistribution::redrawValue( void )
 {
     
     if ( starting_tree == NULL )
     {
-        simulateTree();
+        // if no condition is specified, assume the most restrictive
+        redrawValue(SimulationCondition::VALIDATION);
     }
 }
 
@@ -511,7 +523,7 @@ void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affect
 }
 
 
-void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
+void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn)
 {
 
     // Get the rng
@@ -567,7 +579,7 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
         {
 
             // now we simulate new ages
-            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age);
+            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age, alwaysReturn);
 
             if ( next_sim_age < next_node_age )
             {
@@ -644,25 +656,26 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
 }
 
 
-double AbstractRootedTreeDistribution::simulateCladeAge(size_t n, double origin, double present, double min) const
+double AbstractRootedTreeDistribution::simulateCladeAge(size_t n, double origin, double present, double min, bool alwaysReturn) const
 {
     
-    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min);
+    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min, alwaysReturn);
     
     return times.back();
 }
 
 
-double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, double present, double min) const
+double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, double present, double min, bool alwaysReturn) const
 {
 
-    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min);
+    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min, alwaysReturn);
 
     return times.front();
 }
-
-
-void AbstractRootedTreeDistribution::simulateTree( void )
+/**
+ * @param alwaysReturn whether the simulation can return times which are not valid draws from the distribution (for initial values)
+ **/
+void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
 {
     
     // the time tree object (topology & times)
@@ -721,7 +734,7 @@ void AbstractRootedTreeDistribution::simulateTree( void )
         }
     }
 
-    simulateClade(nodes, ra, min_node_age);
+    simulateClade(nodes, ra, min_node_age, alwaysReturn);
 
     TopologyNode *root = nodes[0];
 

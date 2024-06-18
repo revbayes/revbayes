@@ -1,7 +1,7 @@
 #ifndef PhylogeneticIndependentContrastsFunction_H
 #define PhylogeneticIndependentContrastsFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVector.h"

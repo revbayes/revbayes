@@ -1,6 +1,6 @@
 #include "CovarionFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RateMatrix_FreeK.h"
@@ -134,7 +134,7 @@ void CovarionFunction::update( void )
     // finally set the rates in the actual matrix
     static_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
 
-    // set the emitted letters for each covartion state in the actual matrix
+    // set the emitted letters for each covarion state in the actual matrix
     std::vector<int> emit(num_states);
     for (int i=0; i<num_states; ++i)
     {

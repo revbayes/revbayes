@@ -1,7 +1,7 @@
 #ifndef AbstractCoalescent_H
 #define AbstractCoalescent_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Taxon.h"
@@ -46,6 +46,7 @@ namespace RevBayesCore {
         bool                                                matchesConstraints(void);
         void                                                simulateTree(void);
         void                                                simulateHeterochronousTree(void);                                                                   //!< Simulates a heterochronus coalescent tree.
+        void                                                simulateHomochronousTree(void);
         
         // members
         std::vector<Clade>                                  constraints;                                                                                        //!< Topological constrains.
@@ -53,6 +54,7 @@ namespace RevBayesCore {
         std::vector<Taxon>                                  taxa;                                                                                               //!< Taxon names that will be attached to new simulated trees.
         double                                              logTreeTopologyProb;                                                                                //!< Log-transformed tree topology probability (combinatorial constant).
         
+        enum EVENT_TYPE { COALESCENT, SERIAL_SAMPLE, DEMOGRAPHIC_MODEL_CHANGE };
     };
     
 }

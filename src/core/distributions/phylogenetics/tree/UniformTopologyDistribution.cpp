@@ -32,7 +32,7 @@ UniformTopologyDistribution::UniformTopologyDistribution(const std::vector<Taxon
     
 	double branchLnFact = 0.0;
 	double nodeLnFact = 0.0;
-	for (size_t i = 2; i < 2*num_taxa - 3 - 2*(!rooted); i++)
+	for (size_t i = 2; i <= 2*num_taxa - 3 - 2*(!rooted); i++)
     {
 		branchLnFact += std::log(i);
 		if (i <= num_taxa - 2 - !rooted)

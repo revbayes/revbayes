@@ -1,6 +1,6 @@
 #include "RlBurninEstimationConvergenceAssessment.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cstddef>
 #include <ostream>
 #include <set>

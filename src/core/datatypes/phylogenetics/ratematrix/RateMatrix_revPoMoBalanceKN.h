@@ -43,12 +43,11 @@ namespace RevBayesCore {
         virtual                             ~RateMatrix_revPoMoBalanceKN(void);                                                              //!< Destructor
 
         // overloaded operators
-        RateMatrix_revPoMoBalanceKN&                                 operator=(const RateMatrix_revPoMoBalanceKN& r);
+        RateMatrix_revPoMoBalanceKN&                            operator=(const RateMatrix_revPoMoBalanceKN& r);
 
         // RateMatrix functions
-        virtual RateMatrix_revPoMoBalanceKN&                         assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
-        RateMatrix_revPoMoBalanceKN*                                 clone(void) const;
+        RateMatrix_revPoMoBalanceKN*                            clone(void) const;
 
         void                                                    setK( long &na );
         void                                                    setN( long &ni );
@@ -73,7 +72,7 @@ namespace RevBayesCore {
         std::vector<std::complex<double> >                      cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
 
         long                                                    K;
-        long                                                     N;
+        long                                                    N;
         std::vector<double>                                     pi;
         std::vector<double>                                     rho;
         std::vector<double>                                     phi;

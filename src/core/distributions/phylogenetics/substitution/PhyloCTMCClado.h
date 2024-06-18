@@ -280,7 +280,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
                                                               heterogeneousCladogenesisMatrices->getValue()[root].getEventMap(node.getAge()) :
                                                               homogeneousCladogenesisMatrix->getValue().getEventMap(node.getAge()) );
     // bypass cladogenetic probs if it's a sampled ancestor
-    bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestor() || node.getChild(1).isSampledAncestor();
+    bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestorTip() || node.getChild(1).isSampledAncestorTip();
     
     // get the pointers to the partial likelihoods of the left and right subtree
     double* p_node         = likelihoods + this->active_likelihood[root]  * likelihood_offset + root  * node_offset;
@@ -384,7 +384,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
 
 
     // bypass cladogenetic probs if it's a sampled ancestor
-    bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestor() || node.getChild(1).isSampledAncestor();
+    bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestorTip() || node.getChild(1).isSampledAncestorTip();
     
     // compute the transition probability matrix
     this->updateTransitionProbabilities( node_index );

@@ -210,6 +210,18 @@ double Taxon::getMinAge( void ) const
     return age_range.getMin();
 }
 
+void Taxon::setMinAge( double a )
+{
+    age_range.setMin( a );
+}
+
+
+void Taxon::setMaxAge( double a )
+{
+    age_range.setMax( a );
+}
+
+
 
 /**
 * Get a JSON-formatted string description of this object.

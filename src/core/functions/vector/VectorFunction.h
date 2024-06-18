@@ -57,8 +57,6 @@ namespace RevBayesCore {
 }
 
 
-#include "Assign.h"
-#include "Assignable.h"
 
 
 template <class valueType>
@@ -131,7 +129,7 @@ void RevBayesCore::VectorFunction<valueType>::update( void )
             updateAll = false;
             for (std::set<size_t>::const_iterator it = indices.begin(); it != indices.end(); ++it)
             {
-                Assign<valueType, IsDerivedFrom<valueType, Assignable>::Is >::doAssign( (*this->value)[*it], vectorParams[*it]->getValue() );
+                (*this->value).setElement( *it, vectorParams[*it]->getValue() );
             }
             
         }

@@ -3,14 +3,13 @@
 
 #include <set>
 #include <vector>
-#include "Assignable.h"
 #include "Cloneable.h"
 
 namespace RevBayesCore
 {
     class CharacterEvent;
     class CharacterEventDiscrete;
-    class CharacterHistoryRateModifier : public Cloneable, public Assignable
+    class CharacterHistoryRateModifier : public Cloneable
     {
     public:
         CharacterHistoryRateModifier(size_t ns, size_t nc);
@@ -21,7 +20,6 @@ namespace RevBayesCore
         bool                                operator<(const CharacterHistoryRateModifier &rm) const { return this < &rm; }
         bool                                operator<=(const CharacterHistoryRateModifier &rm) const { return operator<(rm) || operator==(rm); }
         
-        virtual CharacterHistoryRateModifier& assign(const Assignable &m);
         virtual double                      computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, double age=0.0) = 0;
         virtual double                      computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, std::vector<size_t> counts, double age=0.0);
         virtual double                      computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, std::vector<std::set<size_t> > sites_with_states, double age=0.0);

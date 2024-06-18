@@ -79,22 +79,6 @@ RateMatrix_revPoMoM2N& RateMatrix_revPoMoM2N::operator=(const RateMatrix_revPoMo
 }
 
 
-RateMatrix_revPoMoM2N& RateMatrix_revPoMoM2N::assign(const Assignable &m)
-{
-    
-    const RateMatrix_revPoMoM2N *rm = dynamic_cast<const RateMatrix_revPoMoM2N*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
 double RateMatrix_revPoMoM2N::averageRate(void) const
 {
     throw RbException("Missing implementation of average rate in PoMo2N.");

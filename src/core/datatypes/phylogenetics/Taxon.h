@@ -51,6 +51,8 @@ namespace RevBayesCore {
         void                                    setAge(double a);                           //!< Set the age.
         void                                    setAgeRange(const TimeInterval &d);         //!< Set the date info.
         void                                    setExtinct(bool extinct);                   //!< Set the extinct status flag.
+        void                                    setMinAge(double a);                        //!< Set the min age.
+        void                                    setMaxAge(double a);                        //!< Set the max age.
         void                                    setName(const std::string &n);              //!< Set the name.
         void                                    setPloidy(const std::string &n);            //!< Set the ploidy information.
         void                                    setSpeciesName(const std::string &n);       //!< Set the name of the species.

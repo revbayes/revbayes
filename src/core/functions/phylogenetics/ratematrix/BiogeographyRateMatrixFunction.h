@@ -1,7 +1,7 @@
 #ifndef BiogeographyRateMatrixFunction_H
 #define BiogeographyRateMatrixFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedFunction.h"
 #include "RateGenerator.h"

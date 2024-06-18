@@ -4,6 +4,7 @@
 #include "BetaDistribution.h"
 #include "Probability.h"
 #include "RlTypedDistribution.h"
+#include "RlProbabilityContinuousDistribution.h"
 
 namespace RevLanguage {
     
@@ -23,7 +24,7 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_beta :  public TypedDistribution<Probability> {
+    class Dist_beta : public ProbabilityContinuousDistribution {
         
     public:
         Dist_beta( void );
@@ -39,8 +40,8 @@ namespace RevLanguage {
         void                                            printValue(std::ostream& o) const;                                                      //!< Print the general information on the function ('usage')
         
         
-        // Distribution functions you have to override                  
-        virtual Probability*                            createRandomVariable(void) const;  
+        // Distribution functions you have to override
+        virtual Probability*                            createRandomVariable(void) const;
         RevBayesCore::BetaDistribution*                 createDistribution(void) const;
         
     protected:

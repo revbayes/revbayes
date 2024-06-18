@@ -159,11 +159,11 @@ double DirichletTimeTreeDistribution::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - the_node.getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - the_node.getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - the_node.getParent().getAge()) > 1E-6 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - the_node.getParent().getAge()) > 1E-6 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -171,7 +171,7 @@ double DirichletTimeTreeDistribution::computeLnProbability( void )
         }
         
         // check that the sampled ancestor nodes have a zero branch length
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )

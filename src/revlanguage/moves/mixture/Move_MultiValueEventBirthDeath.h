@@ -45,8 +45,9 @@ namespace RevLanguage {
         
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);           //!< Set member variable
         
-        RevPtr<const RevVariable>                       x;                                                                                          //!< If autotuning should be used.
-        
+        RevPtr<const RevVariable>                       x;                                                                                             //!< If autotuning should be used.
+        RevPtr<const RevVariable>                       ac;                                                                                             //!< If autotuning should be used.
+
     };
     
 }
