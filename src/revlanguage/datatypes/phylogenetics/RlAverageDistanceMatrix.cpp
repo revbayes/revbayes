@@ -166,6 +166,13 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
         double cmpl = this->dag_node->getValue().getCompleteness();
         return new RevVariable( new Real( cmpl ) );
     }
+    else if ( name == "ultrametricImputation" )
+    {
+        found = true;
+            
+        this->dag_node->getValue().ultrametricImputation();
+        return NULL;
+    }
     else if ( name == "getElement" )
     {
         
@@ -232,6 +239,10 @@ void AverageDistanceMatrix::initializeMethods( void )
     // add method for call "completeness" as a function
     ArgumentRules* complArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "completeness", Real::getClassTypeSpec(), complArgRules) );
+    
+    // add method for call "ultrametricImputation" as a function
+    ArgumentRules* ultraImputeArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "ultrametricImputation", RlUtils::Void, ultraImputeArgRules) );
     
     // add method for call "getElement" as a function
     ArgumentRules* getElementArgRules = new ArgumentRules();
