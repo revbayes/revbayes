@@ -1120,6 +1120,203 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
 
 
 
+RbVector< RbVector<long> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip_first )
+{
+    // create the SFS object
+    size_t NUM_SAMPLES = taxa_list.size();
+    RbVector< RbVector<long> > mutations_list = RbVector< RbVector<long> >();
+    
+    // we need to get a map of species names to all samples belonging to that species
+    std::vector<size_t> indices_of_taxa;
+    
+    // open file
+    std::ifstream readStream( filename.string() );
+    if ( not readStream )
+    {
+        throw RbException()<<"Could not open file "<<filename.make_preferred();
+    }
+    
+    // read file
+    // bool firstLine = true;
+    std::string read_line = "";
+    std::vector<std::string> tmpChars;
+    bool has_names_been_read = false;
+    size_t samples_start_column = 0;
+    size_t NUM_SAMPLES_TOTAL = 0;
+    
+    size_t lines_skipped = 0;
+    size_t lines_to_skip = 0;
+    long   lines_read    = 0;
+    bool   skipped_first = false;
+    
+    size_t ref_index = 0;
+    size_t alt_index = 0;
+    size_t chr_index = 0;
+    size_t pos_index = 0;
+    
+    size_t genome_index = 1;
+    
+    std::string curr_chrom = "";
+    
+    RbVector<RbVector<long> > curr_mut_list = RbVector<RbVector<long> >(NUM_SAMPLES, RbVector<long>());
+    
+    while (safeGetline(readStream,read_line))
+    {
+        
+        tmpChars.clear();
+        ++lines_skipped;
+        if ( lines_skipped <= lines_to_skip)
+        {
+            continue;
+        }
+        
+        // skip blank lines
+        std::string::iterator first_nonspace = std::find_if(read_line.begin(), read_line.end(), [](int c) {return not isspace(c);});
+        if (first_nonspace == read_line.end())
+        {
+            continue;
+        }
+
+        StringUtilities::stringSplit(read_line, delimiter, tmpChars, true);
+        
+        // Skip comments.
+        if ( tmpChars[0][0] == '#' && tmpChars[0][1] == '#')
+        {
+            continue;
+        }
+        
+        if ( has_names_been_read == false )
+        {
+            std::vector<std::string> sample_names;
+            const std::vector<std::string> &format_line = tmpChars;
+            while ( format_line[samples_start_column] != "FORMAT" )
+            {
+                ++samples_start_column;
+            };
+            ++samples_start_column;
+            for (size_t j = samples_start_column; j < format_line.size(); ++j)
+            {
+                sample_names.push_back( format_line[j] );
+            }
+            
+            NUM_SAMPLES_TOTAL = sample_names.size();
+            
+            // create the lookup vector with the species to taxon columns positions
+            for (size_t i=0; i<NUM_SAMPLES_TOTAL; ++i)
+            {
+                const std::string& sample_name = sample_names[i];
+                
+                // now check if that sample is in the taxon list
+                for (size_t j=0; j<taxa_list.size(); ++j)
+                {
+                    const std::string& this_sample_name = taxa_list[j].getName();
+                    if ( sample_name == this_sample_name )
+                    {
+                        indices_of_taxa.push_back( i + samples_start_column );
+                        break;
+                    }
+                }
+                
+            }
+            
+            for (size_t j = 0; j < format_line.size(); ++j)
+            {
+                if ( format_line[j] == "REF" )
+                {
+                    ref_index = j;
+                }
+                if ( format_line[j] == "ALT" )
+                {
+                    alt_index = j;
+                }
+                if ( format_line[j] == "CHROM" || format_line[j] == "#CHROM" )
+                {
+                    chr_index = j;
+                }
+                if ( format_line[j] == "POS" )
+                {
+                    pos_index = j;
+                }
+            }
+            
+            has_names_been_read = true;
+            
+            // skip now
+            continue;
+            
+        } // finished reading the header and species information
+        
+        
+        ++lines_read;
+        if ( skipped_first == false && lines_read > skip_first )
+        {
+            skipped_first = true;
+            lines_read = 0;
+            curr_chrom = tmpChars[chr_index];
+        }
+        
+        if ( skipped_first == true && thinning == lines_read )
+        {
+            long current_pos = StringUtilities::asIntegerNumber(tmpChars[pos_index]);
+            
+            const std::string& current_chrom = tmpChars[chr_index];
+            if ( chr != "" && chr != current_chrom )
+            {
+                // skip this side
+                continue;
+            }
+            
+            // clear the list each time we arrive at a new chromosome
+            if ( curr_chrom != current_chrom )
+            {
+                for (size_t ind_index=0; ind_index<NUM_SAMPLES; ++ind_index)
+                {
+                    mutations_list.push_back( curr_mut_list[ind_index] );
+                    curr_mut_list[ind_index].clear();
+                }
+            }
+            
+            // reset the lines read so that we can check the thinning again
+            lines_read = 0;
+            
+            // allocate the counts vector for the states
+            std::vector<size_t> counts (4+1, 0.0); // 0 1 2 3 ?
+            for (size_t k = 0; k < indices_of_taxa.size(); ++k)
+            {
+                
+                size_t sample_index = indices_of_taxa[k];
+                
+                const std::string &this_char_read = tmpChars[sample_index];
+                std::vector<std::string> format_tokens;
+                StringUtilities::stringSplit(this_char_read, ":", format_tokens);
+                
+                std::string this_alleles = format_tokens[0];
+                bool same = isSNP(this_alleles);
+                
+                if ( same == false )
+                {
+                    curr_mut_list[k].push_back( current_pos );
+                }
+            }
+            
+        } // end-if we don't skip the entry
+        
+    
+    };
+    
+    for (size_t ind_index=0; ind_index<NUM_SAMPLES; ++ind_index)
+    {
+        mutations_list.push_back( curr_mut_list[ind_index] );
+        curr_mut_list[ind_index].clear();
+    }
+    
+    readStream.close(  );
+
+    return mutations_list;
+}
+
+
+
 RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip_first )
 {
     // create the SFS object
@@ -1321,6 +1518,7 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const s
 }
 
 
+
 std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, PLOIDY this_ploidy)
 {
     
@@ -1459,6 +1657,21 @@ std::vector<size_t> VCFReader::extractStateIndices(std::string alleles, PLOIDY t
     
     return states;
 }
+
+bool VCFReader::isSNP(std::string alleles)
+{
+    
+    std::vector<size_t> states;
+    
+    StringUtilities::replaceAllOccurrences(alleles, '/', '|');
+    std::vector<std::string> allele_tokens;
+    StringUtilities::stringSplit(alleles, "|", allele_tokens);
+    
+    bool same = (allele_tokens[0] == ".") || (allele_tokens[1] == ".") || (allele_tokens[0] == allele_tokens[1]);
+    
+    return same;
+}
+
 
 
 HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, const RbVector<Taxon>& input_taxa  )

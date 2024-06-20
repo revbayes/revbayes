@@ -86,6 +86,16 @@ VCFReader::VCFReader() : WorkspaceToCoreWrapperObject<RevBayesCore::VCFReader>()
     methods.addFunction(new MemberProcedure( "convertToCountsFile", RevNullObject::getClassTypeSpec(), convert_to_CF_arg_rules) );
 
     
+    ArgumentRules* convert_to_PSMC_arg_rules = new ArgumentRules();
+    
+    convert_to_PSMC_arg_rules->push_back( new ArgumentRule( "taxa"     , ModelVector<Taxon>::getClassTypeSpec(), "The taxa to match the individuals to species/populations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    convert_to_PSMC_arg_rules->push_back( new ArgumentRule( "chrom"    , RlString::getClassTypeSpec(),           "Name of the chromosome we want to extract. If empty, then all chromosomes are used.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "" ) ) );
+    convert_to_PSMC_arg_rules->push_back( new ArgumentRule( "thinning" , Natural::getClassTypeSpec(),            "If thinning is larger than 1, then we only take the i-th entry of the VCF.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+    convert_to_PSMC_arg_rules->push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(),            "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+
+    methods.addFunction(new MemberProcedure( "convertToPSMC", RevNullObject::getClassTypeSpec(), convert_to_PSMC_arg_rules) );
+
+    
 }
 
 
@@ -211,6 +221,22 @@ RevPtr<RevVariable> VCFReader::executeMethod(std::string const &name, const std:
         value->convertToNexusFile( fn, "DNA", chrom, ref_genome, taxa, thinning, skip_first );
         
         return NULL;
+    }
+    else if (name == "convertToPSMC")
+    {
+        found = true;
+        size_t arg_index = 0;
+        
+        const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa  = static_cast< const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        const std::string& chrom = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        
+        long thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+        long skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+
+        RevBayesCore::RbVector<RevBayesCore::RbVector<long> > mut_list = value->convertToPSMC( taxa, chrom, thinning, skip_first );
+                
+        return new RevVariable( new ModelVector< ModelVector<Natural> >( mut_list ) );
     }
     else if (name == "convertToSFS")
     {

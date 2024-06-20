@@ -692,7 +692,7 @@ void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const path& fil
 #endif
     
     size_t num_sites_per_process = taxa.size();
-        
+            
     
 #ifdef RB_MPI
     for (size_t writing_pid=active_PID; writing_pid<active_PID+num_processes; ++writing_pid)
