@@ -1,7 +1,7 @@
 #ifndef AbstractDiscreteTaxonData_H
 #define AbstractDiscreteTaxonData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "AbstractTaxonData.h"

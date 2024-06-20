@@ -2197,3 +2197,6 @@ void VCFReader::printSequencesToNexusFile(std::ofstream &out_stream, std::vector
     
 }
 
+
+
+

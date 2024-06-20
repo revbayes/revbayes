@@ -1,6 +1,6 @@
 #include "Move_EmpiricalTree.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

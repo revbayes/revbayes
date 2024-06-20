@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -132,7 +132,7 @@ const std::string& Dist_MultiValueEvent::getClassType(void)
 const TypeSpec& Dist_MultiValueEvent::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Natural>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<MultiValueEvent>::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }

@@ -1,7 +1,7 @@
 #include "TraceNumeric.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "GewekeTest.h"

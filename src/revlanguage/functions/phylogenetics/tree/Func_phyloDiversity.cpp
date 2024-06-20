@@ -1,6 +1,6 @@
 #include "Func_phyloDiversity.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ModelVector.h"
 #include "PhyloDiversityFunction.h"

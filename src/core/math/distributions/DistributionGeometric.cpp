@@ -23,7 +23,7 @@ using namespace RevBayesCore;
  * \return Returns a double for the cumulative probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::cdf(int n, double p)
+double RbStatistics::Geometric::cdf(long n, double p)
 {
     
     if (p <= 0 || p > 1) 
@@ -58,7 +58,7 @@ double RbStatistics::Geometric::cdf(int n, double p)
  * \return Returns a double of the log probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::lnPdf(int n, double p)
+double RbStatistics::Geometric::lnPdf(long n, double p)
 {
 
     return pdf(n, p, true);
@@ -74,7 +74,7 @@ double RbStatistics::Geometric::lnPdf(int n, double p)
  * \return Returns a double with the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::pdf(int n, double p)
+double RbStatistics::Geometric::pdf(long n, double p)
 {
 
     return pdf(n, p, false);
@@ -100,7 +100,7 @@ double RbStatistics::Geometric::pdf(int n, double p)
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::pdf(int n, double p, bool asLog)
+double RbStatistics::Geometric::pdf(long n, double p, bool asLog)
 {
     
     double prob;
@@ -130,7 +130,7 @@ double RbStatistics::Geometric::pdf(int n, double p, bool asLog)
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
-int RbStatistics::Geometric::quantile(double q, double p)
+long RbStatistics::Geometric::quantile(double q, double p)
 {
 
     if (p <= 0 || p > 1) 
@@ -144,7 +144,7 @@ int RbStatistics::Geometric::quantile(double q, double p)
         return 0;
     
     /* add a fuzz to ensure left continuity */
-    return int(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
+    return long(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
 }
 
 /*!
@@ -165,9 +165,10 @@ int RbStatistics::Geometric::quantile(double q, double p)
  *    New York: Springer-Verlag.
  *    Page 480.
  */
-int RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng)
+long RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng)
 {
-    if (!RbMath::isFinite(p) || p <= 0 || p > 1) throw RbException("NaN produced in rgeom");
+    if (!RbMath::isFinite(p) || p <= 0 || p > 1) 
+        throw RbException("NaN produced in rgeom");
     
     return RbStatistics::Poisson::rv(rng.exponential() * ((1 - p) / p),rng);
 }

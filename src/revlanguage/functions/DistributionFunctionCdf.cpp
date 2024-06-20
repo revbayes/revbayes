@@ -1,6 +1,6 @@
 #include "DistributionFunctionCdf.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "CumulativeDistributionFunction.h"

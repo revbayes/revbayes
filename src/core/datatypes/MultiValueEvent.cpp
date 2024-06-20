@@ -98,7 +98,7 @@ bool MultiValueEvent::operator!=(const MultiValueEvent &mve) const
 
 
 
-void MultiValueEvent::addValues(const std::vector<double> &v, const std::string &n)
+void MultiValueEvent::addValues(const RbVector<double> &v, const std::string &n)
 {
     names.push_back(n);
     values.push_back( v );
@@ -142,21 +142,21 @@ size_t MultiValueEvent::getNumberOfValues(void) const
 
 
 
-std::vector<double>& MultiValueEvent::getValues(size_t i)
+RbVector<double>& MultiValueEvent::getValues(size_t i)
 {
     return values[i];
 }
 
 
 
-const std::vector<double>& MultiValueEvent::getValues(size_t i) const
+const RbVector<double>& MultiValueEvent::getValues(size_t i) const
 {
     return values[i];
 }
 
 
 
-std::vector<double>& MultiValueEvent::getValues(const std::string &n)
+RbVector<double>& MultiValueEvent::getValues(const std::string &n)
 {
     size_t index = names.size();
     for (size_t i=0; i<names.size(); ++i)
@@ -178,7 +178,7 @@ std::vector<double>& MultiValueEvent::getValues(const std::string &n)
 
 
 
-const std::vector<double>& MultiValueEvent::getValues(const std::string &n) const
+const RbVector<double>& MultiValueEvent::getValues(const std::string &n) const
 {
     size_t index = names.size();
     for (size_t i=0; i<names.size(); ++i)
@@ -206,7 +206,7 @@ void MultiValueEvent::setNumberOfEvents(long n)
 
 
 
-void MultiValueEvent::setValues(const std::vector<double> &v, const std::string &n)
+void MultiValueEvent::setValues(const RbVector<double> &v, const std::string &n)
 {
     
     size_t index = names.size();
@@ -235,7 +235,7 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const RevBayesCore::Mult
     for ( size_t j=0; j<x.getNumberOfValues(); ++j )
     {
         const std::string &n = x.getName(j);
-        const std::vector<double> &v = x.getValues(j);
+        const RbVector<double> &v = x.getValues(j);
         o << n << ":\t[";
         for (size_t i=0; i<v.size(); ++i)
         {

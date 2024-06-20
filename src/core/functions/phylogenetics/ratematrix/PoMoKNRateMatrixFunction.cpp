@@ -4,19 +4,20 @@
 using namespace RevBayesCore;
 
 
-PoMoKNRateMatrixFunction::PoMoKNRateMatrixFunction(   const TypedDagNode< long > *na, 
-                                                      const TypedDagNode< long > *ni, 
-                                                      const TypedDagNode< RbVector<double> > *m, 
-                                                      const TypedDagNode< RbVector<double> > *f ) : 
-TypedFunction<RateGenerator>( new RateMatrix_PoMoKN( computeNumStates(na->getValue(), ni->getValue() ), na->getValue(), ni->getValue() , computeNumMutRates( na->getValue() ) ) ),
-K( na ),
-N( ni),
-mu( m ),
-phi( f )
+PoMoKNRateMatrixFunction::PoMoKNRateMatrixFunction(   long num_all,
+                                                      long virt,
+                                                      const TypedDagNode< double > *eff,
+                                                      const TypedDagNode< RbVector<double> > *mut,
+                                                      const TypedDagNode< RbVector<double> > *sel ) :
+TypedFunction<RateGenerator>( new RateMatrix_PoMoKN( computeNumStates(num_all, virt), num_all, virt, virt, computeNumMutRates( num_all ) ) ),
+num_alleles( num_all ),
+virt_pop_size( virt ),
+eff_pop_size( eff ),
+mu( mut ),
+phi( sel )
 {
     // add the lambda parameter as a parent
-    addParameter( K );
-    addParameter( N );
+    addParameter( eff_pop_size );
     addParameter( mu );
     addParameter( phi );
 
@@ -60,18 +61,20 @@ PoMoKNRateMatrixFunction* PoMoKNRateMatrixFunction::clone( void ) const
 
 void PoMoKNRateMatrixFunction::update( void )
 {
-    // get the information from the arguments for reading the file
-    long na = K->getValue();
-    long ni = N->getValue();
-    const std::vector<double>& m = mu->getValue();
-    const std::vector<double>& f = phi->getValue();
 
-    // set the base frequencies
-    static_cast< RateMatrix_PoMoKN* >(value)->setK( na );
-    static_cast< RateMatrix_PoMoKN* >(value)->setN( ni );
-    static_cast< RateMatrix_PoMoKN* >(value)->setMu( m );
-    static_cast< RateMatrix_PoMoKN* >(value)->setPhi( f );
-
+    if ( eff_pop_size != NULL )
+    {
+        static_cast< RateMatrix_PoMoKN* >(value)->setEffectivePopulationSize( eff_pop_size->getValue() );
+    }
+    if ( mu != NULL )
+    {
+        static_cast< RateMatrix_PoMoKN* >(value)->setMu( mu->getValue() );
+    }
+    if ( phi != NULL )
+    {
+        static_cast< RateMatrix_PoMoKN* >(value)->setPhi( phi->getValue() );
+    }
+    
     value->update();
 }
 
@@ -80,14 +83,9 @@ void PoMoKNRateMatrixFunction::update( void )
 void PoMoKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
-    if (oldP == K)
+    if (oldP == eff_pop_size)
     {
-        K = static_cast<const TypedDagNode< long >* >( newP );
-    }
-    
-    if (oldP == N)
-    {
-        N =  static_cast<const TypedDagNode< long >* >( newP );
+        eff_pop_size =  static_cast<const TypedDagNode< double >* >( newP );
     }
 
     if (oldP == mu)

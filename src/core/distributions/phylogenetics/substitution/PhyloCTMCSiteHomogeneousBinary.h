@@ -1,7 +1,7 @@
 #ifndef PhyloCTMCSiteHomogeneousBinary_H
 #define PhyloCTMCSiteHomogeneousBinary_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 

@@ -33,21 +33,6 @@ CladogeneticSpeciationRateMatrix::~CladogeneticSpeciationRateMatrix(void)
     ; // do nothing
 }
 
-CladogeneticSpeciationRateMatrix& CladogeneticSpeciationRateMatrix::assign(const Assignable &m)
-{
-    
-    const CladogeneticSpeciationRateMatrix *cp = dynamic_cast<const CladogeneticSpeciationRateMatrix*>(&m);
-    if ( cp != NULL )
-    {
-        return operator=(*cp);
-    }
-    else
-    {
-        throw RbException("Could not assign cladogenetic speciation rate matrix.");
-    }
-}
-
-
 CladogeneticSpeciationRateMatrix* CladogeneticSpeciationRateMatrix::clone( void ) const
 {
     
@@ -176,6 +161,22 @@ size_t CladogeneticSpeciationRateMatrix::size( void ) const
     return num_states;
 }
 
+
+json CladogeneticSpeciationRateMatrix::toJSON() const
+{
+    json matrix;
+    for (auto& [v,w]: event_map)
+    {
+	json row;
+	row.push_back(v[0]);
+	row.push_back(v[1]);
+	row.push_back(v[2]);
+	row.push_back(w);
+
+	matrix.push_back(row);
+    }
+    return matrix;
+}
 
 void CladogeneticSpeciationRateMatrix::printForUser(std::ostream &o, const std::string &sep, int l, bool left) const
 {

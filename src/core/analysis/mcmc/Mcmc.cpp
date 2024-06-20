@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -202,7 +202,7 @@ void Mcmc::checkpoint( void ) const
 {
     // initialize variables
     std::string separator = "\t";
-    bool flatten = true;
+    bool flatten = false;
     
     createDirectoryForFile( checkpoint_file_name );
     
@@ -779,7 +779,13 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
             }
         }
     }
-    
+
+    // We need to touch these so that their probabilities get recomputed.
+    for(auto& node: nodes)
+    {
+        node->touch();
+    }
+
     // assemble the new filename
     path mcmc_checkpoint_file_name = appendToStem( checkpoint_file_name, "_mcmc");
 

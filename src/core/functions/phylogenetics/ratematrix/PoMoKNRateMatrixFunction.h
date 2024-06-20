@@ -12,7 +12,7 @@
 namespace RevBayesCore {
     
     /**
-     * @brief HKY rate matrix function.
+     * @brief PoMo rate matrix function.
      *
      * This function creates the HKY rates matrix object by setting the transition-transversion parameter kappa
      * and the base frequencies. The rate matrix takes care of the setting of the actual rates and transition probabilities.
@@ -27,12 +27,12 @@ namespace RevBayesCore {
         
     public:
 
-        PoMoKNRateMatrixFunction( const TypedDagNode< long > *na, const TypedDagNode< long > *ni, const TypedDagNode< RbVector<double> > *m, const TypedDagNode< RbVector<double> > *f ) ;
+        PoMoKNRateMatrixFunction( long num_all, long virt, const TypedDagNode< double >* eff , const TypedDagNode< RbVector<double> > *mut, const TypedDagNode< RbVector<double> > *sel ) ;
 
-        virtual                                            ~PoMoKNRateMatrixFunction(void);                                                    //!< Virtual destructor
+        virtual                                                ~PoMoKNRateMatrixFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
-        PoMoKNRateMatrixFunction*      clone(void) const;                                                              //!< Create an independent clone
+        PoMoKNRateMatrixFunction*      clone(void) const;                                                                                               //!< Create an independent clone
 
         void                                                    update(void);
         
@@ -45,8 +45,9 @@ namespace RevBayesCore {
         long                                                    computeNumMutRates( long na );
 
         // members
-        const TypedDagNode< long >*                             N;
-        const TypedDagNode< long >*                             K;
+        long                                                    num_alleles;
+        long                                                    virt_pop_size;
+        const TypedDagNode< double >*                           eff_pop_size;
         const TypedDagNode< RbVector<double> >*                 mu;
         const TypedDagNode< RbVector<double> >*                 phi;
         

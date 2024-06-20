@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <iosfwd>
 #include <map>
@@ -73,7 +73,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     value = &base_distribution->getValue();
     
     initializeBitSets();
-    redrawValue();
+    redrawValue( SimulationCondition::MCMC );
 }
 
 
@@ -499,7 +499,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
             dirty_nodes[node.getIndex()] = false;
         }
         
-        return RbBitSet( value->getNumberOfTips(), true );
+        return RbBitSet( value->getNumberOfTips() ).set();
     }
     else
     {
@@ -532,10 +532,11 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyUpdateClades( const Top
 /**
  * Redraw the current value. We delegate this to the simulate method.
  */
-void TopologyConstrainedTreeDistribution::redrawValue( void )
+void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
 {
     
     Tree* new_value = NULL;
+    bool alwaysReturn = (c == SimulationCondition::MCMC);
     
     if ( starting_tree == NULL )
     {
@@ -550,7 +551,7 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
             
         if ( is_rooted == true )
         {
-            new_value = simulateRootedTree();
+            new_value = simulateRootedTree(alwaysReturn);
         }
         else
         {
@@ -584,7 +585,11 @@ void TopologyConstrainedTreeDistribution::redrawValue( void )
     stored_backbone_clades = active_backbone_clades;
 }
 
-
+void TopologyConstrainedTreeDistribution::redrawValue( void )
+{
+    // if no condition is specified, assume the most restrictive
+    redrawValue(SimulationCondition::VALIDATION);
+}
 
 
 void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *backbone_one, const TypedDagNode<RbVector<Tree> > *backbone_many)
@@ -697,7 +702,7 @@ void checkCladesConsistent(const std::vector<Clade>& clades)
 /**
  *
  */
-Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
+Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn )
 {
         
     // the time tree object (topology & times)
@@ -902,10 +907,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( void )
 //            RandomNumberGenerator* rng = GLOBAL_RNG;
 
 //            clade_age = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
-            clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age);
+            clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age, alwaysReturn);
         }
 
-        tree_base_distribution->simulateClade(nodes_in_clade, clade_age, 0.0);
+        tree_base_distribution->simulateClade(nodes_in_clade, clade_age, 0.0, alwaysReturn);
         nodes.push_back( nodes_in_clade[0] );
 
         std::vector<Taxon> v_taxa;

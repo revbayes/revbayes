@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <iostream>
 #include <map>
@@ -130,6 +130,16 @@ Aborted (core dumped)
                 PoMoState pState (4, virtual_population_size, chars[i][j], chromosome, position );
                 std::cout << "§2: " << names[j-2] << "\n\n"; 
                 name_to_taxon_data.at(names[j-2]).addCharacter( pState);
+//                pState.setWeighted(true);
+                pState.setWeighting(PoMoState::BINOMIAL);
+//                std::cout << pState.getWeighting() << "\n\n";
+                pState.setState(chars[i][j]);
+                std::vector<double> vec = pState.getWeights();
+                std::cout << "§3: " << "Weights " << pState.isWeighted() << " Size " << vec.size() << " String Value "<< pState.getStringValue() << "\n\n";
+                for (int i=0; i < vec.size(); i++)
+                {
+                    std::cout << vec[i] << ' ';
+                }
                 std::cout << "Reached here!\n\n";
 
             }
