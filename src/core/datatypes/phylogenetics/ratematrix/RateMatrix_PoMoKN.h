@@ -43,10 +43,8 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
 
         //RateMatrix_PoMoKN(size_t num_states) ;
-        RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr)  ;
-        RateMatrix_PoMoKN(const RateMatrix_PoMoKN& m) ;
+        RateMatrix_PoMoKN(long num_states, long num_all, double virt, double eff, size_t num_mut_rates)  ;
 
-        RateMatrix_PoMoKN&                         operator=(const RateMatrix_PoMoKN &r) ;
         virtual                                    ~RateMatrix_PoMoKN(void);                     //!< Destructor
 
         // RateMatrix functions
@@ -56,19 +54,21 @@ namespace RevBayesCore {
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setK( long &na );
-        void                                        setN( long &ni );
-        void                                        setMu(  const std::vector<double> &m );
-        void                                        setPhi( const std::vector<double> &f );
+        void                                        setEffectivePopulationSize( double ni );
+        void                                        setNumberOfAlleles( long na );
+        void                                        setVirtualPopulationSize( long ni );
+        void                                        setMu(  const std::vector<double>& m );
+        void                                        setPhi( const std::vector<double>& f );
 
 
     private:
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
         
-        long                                        K;
-        long                                        N;
-        std::vector<double>                         mu;   
+        long                                        num_alleles;
+        long                                        virtual_pop_size;
+        double                                      effective_pop_size;
+        std::vector<double>                         mu;
         std::vector<double>                         phi;    
 //        std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
 

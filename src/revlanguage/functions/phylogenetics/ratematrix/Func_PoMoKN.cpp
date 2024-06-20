@@ -34,21 +34,23 @@ Func_PoMoKN* Func_PoMoKN::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_PoMoKN::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< long                          >* na = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< long                          >* ni = static_cast<const Natural              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m  = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fc = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    long num_alleles    = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    long virt_pop_size  = static_cast<const Natural              &>( this->args[1].getVariable()->getRevObject() ).getValue();
 
-    if ( m->getValue().size() != ((na->getValue())*(na->getValue())-na->getValue() ) )
+    RevBayesCore::TypedDagNode< double                        >* eff    = static_cast<const RealPos              &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mu     = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sel    = static_cast<const ModelVector<RealPos> &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+
+    if ( mu->getValue().size() != (num_alleles*num_alleles-num_alleles ) )
     {
         throw RbException("The number of alleles does not match the number of mutation rates given: n_mut_rates = n_alleles*n_alleles-n_alleles");
     }
-    if ( fc->getValue().size() != na->getValue() )
+    if ( sel->getValue().size() != num_alleles )
     {
         throw RbException("The number of alleles does not match the number of fitness coefficients given: n_fit_coeff = n_alleles");
     }
 
-    RevBayesCore::PoMoKNRateMatrixFunction* f = new RevBayesCore::PoMoKNRateMatrixFunction( na, ni, m, fc );
+    RevBayesCore::PoMoKNRateMatrixFunction* f = new RevBayesCore::PoMoKNRateMatrixFunction( num_alleles, virt_pop_size, eff, mu, sel );
     
     return f;
 }
@@ -63,8 +65,9 @@ const ArgumentRules& Func_PoMoKN::getArgumentRules( void ) const
     
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "K"       , Natural::getClassTypeSpec(), "Number of alleles", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "N"       , Natural::getClassTypeSpec(), "Number of individuals", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "K"       , Natural::getClassTypeSpec(), "Number of alleles", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "V"       , Natural::getClassTypeSpec(), "Number of virtual individuals", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "N"       , RealPos::getClassTypeSpec(), "Number of effective individuals", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         argumentRules.push_back( new ArgumentRule( "mu"      , ModelVector<RealPos>::getClassTypeSpec(), "Vector of mutation rates: mu=(mu_a0a1,mu_a1a0,mu_a0a2,mu_a2a0,...)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "phi"     , ModelVector<RealPos>::getClassTypeSpec(), "Vector of fitness coefficients: phi=(phi_0,phi_1,...,phi_ak)", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );  
 

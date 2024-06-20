@@ -211,8 +211,8 @@ void EpochPoMoDemography::initialize( void )
     
     // get the number of epochs
     size_t num_epoch = ne->getValue().size();
-    rate_matrices = std::vector<RateMatrix_PoMoKN>( num_epoch, RateMatrix_PoMoKN(num_states, virtual_pop_size, false, true) );
-    
+//    rate_matrices = std::vector<RateMatrix_PoMoKN>( num_epoch, RateMatrix_PoMoKN(num_states, virtual_pop_size, false, true) );
+    throw RbException("Missing implementation of epoch demography.");
     
 }
 
