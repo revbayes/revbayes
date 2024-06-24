@@ -354,26 +354,26 @@ std::string Move_AVMVN::getMoveName( void ) const
 const MemberRules& Move_AVMVN::getParameterRules(void) const
 {
 
-    static MemberRules memberRules;
+    static MemberRules member_rules;
     static bool rules_set = false;
 
-    if ( !rules_set )
+    if ( rules_set == false )
     {
-        memberRules.push_back( new ArgumentRule( "sigmaSquared"        , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
-        memberRules.push_back( new ArgumentRule( "epsilon"             , RealPos::getClassTypeSpec()  , "The mixture weight of the post-learning move on a simple identity matrix.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(0.05) ) );
-        memberRules.push_back( new ArgumentRule( "waitBeforeLearning"  , Natural::getClassTypeSpec()  , "The number of move attempts to wait before tracking the covariance of the variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(2500) ) );
-        memberRules.push_back( new ArgumentRule( "waitBeforeUsing"     , Natural::getClassTypeSpec()  , "The number of move attempts to wait before using the learned covariance matrix.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(5000) ) );
-        memberRules.push_back( new ArgumentRule( "maxUpdates"          , Natural::getClassTypeSpec()  , "The maximum number of updates to the empirical covariance matrix (matrix is only updated when MCMC tunes).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
-        memberRules.push_back( new ArgumentRule( "tune"                , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        member_rules.push_back( new ArgumentRule( "sigmaSquared"        , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
+        member_rules.push_back( new ArgumentRule( "epsilon"             , RealPos::getClassTypeSpec()  , "The mixture weight of the post-learning move on a simple identity matrix.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(0.05) ) );
+        member_rules.push_back( new ArgumentRule( "waitBeforeLearning"  , Natural::getClassTypeSpec()  , "The number of move attempts to wait before tracking the covariance of the variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(2500) ) );
+        member_rules.push_back( new ArgumentRule( "waitBeforeUsing"     , Natural::getClassTypeSpec()  , "The number of move attempts to wait before using the learned covariance matrix.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(5000) ) );
+        member_rules.push_back( new ArgumentRule( "maxUpdates"          , Natural::getClassTypeSpec()  , "The maximum number of updates to the empirical covariance matrix (matrix is only updated when MCMC tunes).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
+        member_rules.push_back( new ArgumentRule( "tune"                , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         /* Inherit weight from Move, put it after variable */
-        const MemberRules& inheritedRules = Move::getParameterRules();
-        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        const MemberRules& inherited_rules = Move::getParameterRules();
+        member_rules.insert( member_rules.end(), inherited_rules.begin(), inherited_rules.end() );
 
         rules_set = true;
     }
 
-    return memberRules;
+    return member_rules;
 }
 
 
