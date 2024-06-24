@@ -88,8 +88,6 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
         
         bool no_fossil = std::none_of(fossils.begin(), fossils.end(), [](bool v) { return v; });
         
-        std::cout << "No fossils found in the starting tree: " << no_fossil << std::endl;
-        
         if (!no_fossil)
         {
             delete value;
