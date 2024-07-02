@@ -559,9 +559,8 @@ double FossilizedBirthDeathSpeciationProcess::simulateDivergenceTime(double orig
     double age = origin - present;
     double b = birth[i];
     double d = death[i];
-    //double f = fossil[i];
-    double r = homogeneous_rho->getValue();
-
+    double rho = homogeneous_rho->getValue();
+    double div = b - d;
 
     // get a random draw
     double u = rng->uniform01();
@@ -571,11 +570,13 @@ double FossilizedBirthDeathSpeciationProcess::simulateDivergenceTime(double orig
     double t = 0.0;
     if ( b > d )
     {
-        t = ( log( ( (b-d) / (1 - (u)*(1-((b-d)*exp((d-b)*age))/(r*b+(b*(1-r)-d)*exp((d-b)*age) ) ) ) - (b*(1-r)-d) ) / (r * b) ) )  /  (b-d);
+        if(rho > 0) t = log( ( div / (1 - u*(1 - (div*exp(div*age))/(rho*b + (b*(1-rho) - d)*exp(-div*age) ) ) ) - (b*(1-rho)-d) ) / (rho * b) )  /  div;
+        else t = log( (1 - u) * exp(-div * age) + u) / div + age;
     }
     else
     {
-        t = ( log( ( (b-d) / (1 - (u)*(1-(b-d)/(r*b*exp((b-d)*age)+(b*(1-r)-d) ) ) ) - (b*(1-r)-d) ) / (r * b) ) )  /  (b-d);
+        if(rho > 0) t = log( ( div / (1 - u*(1 - div/(rho*b*exp(div*age)+(b*(1-rho) - d) ) ) ) - (b*(1-rho)-d) ) / (rho * b) ) /  div;
+        else t = log( 1 - u * (1 - exp(age*div))  ) / div;
     }
 
     return present + t;
