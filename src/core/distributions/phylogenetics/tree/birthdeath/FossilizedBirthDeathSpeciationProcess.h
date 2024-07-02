@@ -53,6 +53,7 @@ namespace RevBayesCore {
 
         void                                            redrawValue(void);
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn);
+        bool                                            allowsSA();                                                             //!< Checks if distribution is compatible with sampled ancestors
 
     protected:
         void                                            updateStartEndTimes() const;

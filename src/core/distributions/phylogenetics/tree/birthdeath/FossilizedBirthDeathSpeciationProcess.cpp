@@ -523,6 +523,10 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
 
 }
 
+bool RevBayesCore::FossilizedBirthDeathSpeciationProcess::allowsSA() {
+    return true;
+}
+
 /**
  * @param alwaysReturn whether the simulation can return times which are not valid draws from the distribution (for initial values)
 */
