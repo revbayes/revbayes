@@ -74,7 +74,9 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     interval_times_event_speciation(event_sampling_timeline),
     interval_times_event_extinction(event_extinction_timeline),
     interval_times_event_sampling(event_sampling_timeline),
-    offset( 0.0 )
+    offset( 0.0 ),
+    taxa(tn),
+    age_check_precision(age_check_precision)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda   = NULL;
@@ -1970,4 +1972,10 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
         if(removal < 1.0 - DBL_EPSILON) return true;
     }
     return false;
+}
+
+void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
+{
+    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
+    AbstractRootedTreeDistribution::setValue(newv, f);
 }
