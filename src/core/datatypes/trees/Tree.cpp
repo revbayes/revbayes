@@ -640,6 +640,7 @@ std::vector<Taxon> Tree::getFossilTaxa() const
         }
 
     }
+    std::sort(taxa.begin(), taxa.end());
 
     return taxa;
 }
