@@ -19,6 +19,9 @@ When passed as an element of the `StoppingRules[]` argument to `mcmc.run()` or `
 Incorporates text by Martyn Plummer
 
 ## see_also
+
+- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/)
+
 ## example
 ```
 # Specify a model
