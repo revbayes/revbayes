@@ -49,3 +49,6 @@ mymcmc.run(rules = stopping_rules, checkpointFile = "checkpoint.ckp", checkpoint
 - citation: Gelman, A; Rubin, D.B. (1992). Inference from Iterative Simulation Using Multiple Sequences. Statistical Science. 7 (4): 457–472
   doi: 10.1214/ss/1177011136
   url: null
+- citation: Vats, D.; Knudson, C. Revisiting the Gelman–Rubin Diagnostic. Statist. Sci. 36 (4) 518 - 529, 2021.
+  doi: 10.1214/20-STS812
+  
