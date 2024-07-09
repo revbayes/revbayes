@@ -27,28 +27,10 @@ x ~ dnPhyloCTMC(tree = tree, Q = q_matrix)
 # Clamp observed characters to the node
 chars <- readDiscreteCharacterData("myData.nex")
 x.clamp(chars)
-```
 
-Simpler distributions contain methods to compute the probability of a particular value
-```rb
-x ~ dnNormal(0.0, 1.0)
-x.clamp(0.42)
+# Calculate the probability of the observed characters under the given distribution
 x.lnProbability()
 ```
-
-The likelihood of observed characters given fixed parameter values (tree with branch lengths, site rates, etc.)
-can be computed by running a dummy single-iteration MCMC analysis:
-
-```rb
-mymodel = model(tree) # will incoroporate all phyloCTMC objects with `tree` as a parameter
-monitors = VectorMonitors()
-monitors.append( mnScreen(printgen=1) )
-mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.run(generations=1)
-```
-
-The value is given in the Likelihood column of the first (i.e. 0th-iteration) row.
-
 
 ## Methods
 
