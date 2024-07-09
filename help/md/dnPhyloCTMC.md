@@ -192,7 +192,7 @@ varGcContentByCodonPosition = varGcContentByCodonPosition (Natural<...
   doi = 10.1093/sysbio/22.3.240
 - citation: Felsenstein, J. (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution. 17 (6): 368–376.
   doi : 10.1007/BF01734359
-- citation: Hohna, S., Landis, M.J. and Heath, T.A. 2017. Phylogenetic inference using `RevBayes`. Curr. Protoc. Bioinform.
+- citation: Höhna, S., Landis, M.J. and Heath, T.A. 2017. Phylogenetic inference using `RevBayes`. Curr. Protoc. Bioinform.
 57:6.16.1-6.16.34.
   doi: 10.1002/cpbi.22
   url: null
