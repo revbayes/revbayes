@@ -20,12 +20,20 @@ The likelihood of observed tip labels (specified via a clamped `AbstractHomologo
 ## example
 
 ```rb
-# Create stochastic node with the tip distribution given by the topology `tree` with the 
-# rate matrix parameter q_matrix
+# Read character data from a file
+chars <- readDiscreteCharacterData("myData.nex")
+taxa = chars.taxa()
+
+# Draw a tree with branch lengths
+tree ~ dnUniformTopologyBranchLength( taxa, branchLengthDistribution=dnExp(10.0) )
+
+# Define a rate matrix
+q_matrix <- fnJC(4)
+
+# Create stochastic node with the tip distribution given by `tree` and `q_matrix`
 x ~ dnPhyloCTMC(tree = tree, Q = q_matrix)
 
 # Clamp observed characters to the node
-chars <- readDiscreteCharacterData("myData.nex")
 x.clamp(chars)
 
 # Calculate the probability of the observed characters under the given distribution
