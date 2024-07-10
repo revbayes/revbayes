@@ -206,12 +206,12 @@ void RateMatrix_revPoMo2Nrecurrent::computeOffDiagonal( void )
   //fixations
   double fixation_rate = (N-1.0)/N; 
 
-  m[2][0]  = fixation_rate;  //{(N-1)ai,1aj} -> {Nai}
-  m[N][1]  = fixation_rate;  //{1ai,(N-1)aj} -> {Naj}
+  m[2][0]  = fixation_rate + mu_10;  //{(N-1)ai,1aj} -> {Nai}
+  m[N][1]  = fixation_rate + mu_01;  //{1ai,(N-1)aj} -> {Naj}
   
   // diagonal elements 
-  m[2][2] = -2.0*fixation_rate;
-  m[N][N] = -2.0*fixation_rate;
+  m[2][2] = -2.0*fixation_rate -         mu_10 - (N-1.0)*mu_01;
+  m[N][N] = -2.0*fixation_rate - (N-1.0)*mu_10 -         mu_01;
 
   // the pomo rate matrix is entirely defined by fixations and mutations if N=2
   
@@ -221,7 +221,7 @@ void RateMatrix_revPoMo2Nrecurrent::computeOffDiagonal( void )
   {
       
       //polymorphic states are populated
-      for (int n=1; n<(N-2); n++)
+      for (int n=1; n<(N-1); n++)
       {
 
           drift_rate = 1.0*n*(N-n)/N;
