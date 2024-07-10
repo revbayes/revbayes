@@ -159,7 +159,7 @@ filesystem
 date_time
 serialization REQUIRED)
 MESSAGE("Boost configuration results:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
+MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
