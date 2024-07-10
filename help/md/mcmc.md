@@ -6,6 +6,11 @@ MCMC analysis object
 The MCMC analysis object keeps a model and the associated moves and monitors. The object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 ## details
 The MCMC analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The MCMC analysis object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
+
+An MCMC analysis is initiated using the `mcmc.run()` method.  
+The `StoppingRule[]` argument provides a mechanism to automatically terminate an MCMC run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
+The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.
+
 ## authors
 Sebastian Hoehna
 ## see_also
@@ -33,9 +38,9 @@ mcmcmc
 - citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953).
     Equation of state calculations by fast computing machines. Journal of Chemical
     Physics, 21:1087-1092.
-  doi: null
+  doi: 10.1063/1.1699114
   url: null
 - citation: Hastings WK (1970) Monte Carlo sampling methods using Markov chains and
     their applications. Biometrika, 57:97-109.
-  doi: null
+  doi: 10.2307/2334940
   url: null
