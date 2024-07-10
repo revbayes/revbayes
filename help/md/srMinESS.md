@@ -14,6 +14,11 @@ The ESS takes into account the correlation between samples within a chain.
 Low ESS values represent high autocorrelation in the chain.
 If the autocorrelation is higher, then the uncertainty in our estimates is also higher.
 
+The MCMC run will terminate once all parameters in every log file meet the ESS
+threshold.  As such, performing additional runs will not decrease the number
+of generations required to meet the ESS threshold – even though it will increase
+the number of indepedent samples in the final, pooled posterior sample.
+
 ## authors
 ESS explanation adapted from Luiza Fabreti and Sebastian Höhna's [tutorial](https://revbayes.github.io/tutorials/convergence/)
 
