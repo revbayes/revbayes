@@ -228,11 +228,11 @@ void RateMatrix_revPoMo2Nrecurrent::computeOffDiagonal( void )
                       
           //populates the first half of the polymorphic edge aiaj
           m[n+1][n+2]   = drift_rate + (N-n)*mu_01; //{(N-n)ai,naj} -> {(N-n-1)ai,(n+1)aj}
-          m[N-n+1][N-n] = drift_rate +     n*mu_10; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
+          m[N-n+1][N-n] = drift_rate + (N-n)*mu_10; //{(N-n)ai,naj} -> {(N-n+1)ai,(n-1)aj}
 
           // diagonal elements
           m[n+1]  [n+1]   = -2.0*drift_rate - (N-n)*mu_01 -     n*mu_10;
-          m[N-n+1][N-n+1] = -2.0*drift_rate -     n*mu_10 - (N-n)*mu_01;
+          //m[N-n+1][N-n+1] = -2.0*drift_rate -     n*mu_10 - (N-n)*mu_01;
                                       
       }
                                 
