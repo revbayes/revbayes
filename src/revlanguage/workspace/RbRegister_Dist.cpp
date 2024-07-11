@@ -53,6 +53,7 @@
 #include "EmpiricalSampleDistribution.h"
 #include "EventDistribution.h"
 #include "IndirectReferenceFunction.h"
+#include "InverseDistribution.h"
 #include "MatrixBoolean.h"
 #include "MatrixReal.h"
 #include "MixtureDistribution.h"
@@ -623,6 +624,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Logit() );
         AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
+
+        // Inverse distribution
+        AddDistribution < Probability               >( new Dist_Inverse<Probability>() );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );

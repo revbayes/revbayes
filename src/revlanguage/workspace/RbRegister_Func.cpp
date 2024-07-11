@@ -96,7 +96,6 @@
 #include "Func_extantTree.h"
 #include "Func_formatDiscreteCharacterData.h"
 #include "Func_inferAncestralPopSize.h"
-#include "Func_inverse.h"
 #include "Func_maximumTree.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
@@ -519,9 +518,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // geometric mean function
         addFunction( new Func_geometricMean() );
-
-        // inverse function
-        addFunction( new Func_inverse() );
         
         // logistic function
         addFunction( new Func_logistic() );
