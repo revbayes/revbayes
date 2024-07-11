@@ -10,15 +10,24 @@ set(CMAKE_CXX_STANDARD 17)
 # Policies relevant to the configuration of Boost libraries
 if(POLICY CMP0111)
   # Provides clear error if imported library not found
-  cmake_policy(SET CMP0111 NEW)
+  # cmake_policy(SET CMP0111 NEW)
 endif()
 if(POLICY CMP0144)
   # Recognize BOOST_ROOT as well as Boost_ROOT
-  cmake_policy(SET CMP0144 NEW)
+  # cmake_policy(SET CMP0144 NEW)
 endif()
 if(POLICY CMP0167)
   # FindBoost module not available in cmake 3.30
   cmake_policy(SET CMP0167 NEW)
+endif()
+
+if(WIN32)
+  # Congifure compiler to support big objects
+  if(MSVC)
+    add_compile_options(/W4 /EHsc /bigobj)
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj")
+  endif()
 endif()
 
 find_program(CCACHE_PROGRAM ccache)
