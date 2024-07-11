@@ -1,5 +1,5 @@
 ## name
-fnInverse
+dnInverse
 
 ## title
 Inverse distribution 
