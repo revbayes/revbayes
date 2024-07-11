@@ -75,23 +75,6 @@ RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::operator=(const RateMatrix_rev
 }
 
 
-RateMatrix_revPoMoTwo4N& RateMatrix_revPoMoTwo4N::assign(const Assignable &m)
-{
-    
-    const RateMatrix_revPoMoTwo4N *rm = dynamic_cast<const RateMatrix_revPoMoTwo4N*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
-
 /** Do precalculations on eigenvectors */
 void RateMatrix_revPoMoTwo4N::calculateCijk(void)
 {
