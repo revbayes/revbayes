@@ -11,7 +11,6 @@
 
 #include "CladogeneticProbabilityMatrix_Epoch.h"
 #include "EpochCladogeneticStateFunction.h"
-#include "Assignable.h"
 #include "CladogeneticProbabilityMatrix.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"

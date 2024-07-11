@@ -133,6 +133,15 @@
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
+#include "Func_GammaRateModel.h"
+#include "Func_InvModel.h"
+#include "Func_MixtureModel.h"
+#include "Func_ScaleSiteMixtureModel.h"
+#include "Func_ScaleVectorSiteMixtureModel.h"
+#include "Func_UnitMixture.h"
+#include "Func_ConvertRateMatrix.h"
+#include "Func_ConvertVectorRateMatrix.h"
+
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
 #include "Func_GoldmanYang94RateMatrix.h"
@@ -264,6 +273,7 @@
 #include "Func_shortestDistance.h"
 #include "Func_sigmoid.h"
 #include "Func_sigmoidVector.h"
+#include "Func_SmoothTimeLine.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -289,6 +299,7 @@
 #include "Func_discretizeLognormalQuadrature.h"
 #include "Func_discretizeDistribution.h"
 #include "Func_discretizePositiveDistribution.h"
+#include "Func_discretizeProbabilityDistribution.h"
 #include "Func_dppConcFromMean.h"
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
@@ -306,7 +317,6 @@
 /** Initialize global workspace */
 void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 {
-
     try
     {
         ///////////////////////////////////////////
@@ -322,6 +332,16 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_biogeographyRateMatrix()                      );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
+
+        addFunction( new Func_ConvertRateMatrix()                           );
+        addFunction( new Func_ConvertVectorRateMatrix()                     );
+
+        addFunction( new Func_GammaRateModel()                              );
+        addFunction( new Func_InvModel()                                    );
+        addFunction( new Func_MixtureModel()                                );
+        addFunction( new Func_UnitMixture()                                 );
+        addFunction( new Func_ScaleSiteMixtureModel()                       );
+        addFunction( new Func_ScaleVectorSiteMixtureModel()                 );
 
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
@@ -586,8 +606,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
  		/* Statistics functions (in folder "functions/statistics") */
 
-    // helpers for Markov Random Field models
+        // helpers for Markov Random Field models
         addFunction( new Func_assembleContinuousMRF( )     );
+        addFunction( new Func_SmoothTimeLine( )     );
 
 		// some helper statistics for the DPP distribution
         addFunction( new Func_dppConcFromMean( )     );
@@ -605,9 +626,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // return a distcretized (by quantile) and normalized vector from a continuous distribution
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
         addFunction( new Func_fnNormalizedQuantile<RealPos>()    );
-
-        addFunction( new Func_discretizeDistribution( )         );
-        addFunction( new Func_discretizePositiveDistribution( ) );
+        
+        addFunction( new Func_discretizeDistribution( )            );
+        addFunction( new Func_discretizePositiveDistribution( )    );
+        addFunction( new Func_discretizeProbabilityDistribution( ) );
 
         // return a discretized gamma distribution (for gamma-dist rates)
         addFunction( new Func_discretizeBeta( )    );

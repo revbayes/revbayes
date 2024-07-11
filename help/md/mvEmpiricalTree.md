@@ -1,6 +1,7 @@
 ## name
 mvEmpiricalTree
 ## title
+Move on an empirical tree distribution
 ## description
 An MCMC move that operates on empirical tree distributions.
 ## details
@@ -19,8 +20,8 @@ readTreeTrace
 	
 	# Create a distribution of trees
 	tree ~ dnEmpiricalTree(tree_trace)
-	
+
 	# Add an MCMC move
 	moves[1] = mvEmpiricalTree(tree)
-	
+
 ## references

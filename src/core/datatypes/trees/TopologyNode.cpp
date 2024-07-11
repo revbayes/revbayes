@@ -2030,3 +2030,27 @@ void TopologyNode::setTree(Tree *t)
 
 }
 
+std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
+{
+    double end_age = node.getAge();
+
+    if (not RbMath::isFinite( end_age ))
+    {
+        // we assume by default that the end is at time 0
+        end_age = 0;
+    }
+
+    double branch_length = node.getBranchLength();
+
+    // From recursivelyDrawStochasticCharacterMap
+    if (branch_length < 0.0)
+    {
+        branch_length = 1.0;
+    }
+
+    // This works for the root node.
+    double start_age = end_age + branch_length;
+
+    return {start_age, end_age};
+}
+

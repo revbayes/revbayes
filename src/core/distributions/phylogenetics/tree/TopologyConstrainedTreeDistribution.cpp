@@ -27,6 +27,7 @@
 #include "Tree.h"
 #include "TreeChangeEventHandler.h"
 #include "TreeChangeEventMessage.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
@@ -44,7 +45,10 @@ using namespace RevBayesCore;
  *
  * \param[in]    c         Clade constraints.
  */
-TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t) : TypedDistribution<Tree>( NULL ),
+TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist,
+                                                                          const std::vector<Clade> &c,
+                                                                          Tree *t,
+                                                                          long age_check_precision) : TypedDistribution<Tree>( NULL ),
 //    active_backbone_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     active_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     backbone_topology(NULL),
@@ -71,6 +75,40 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     }
     
     value = &base_distribution->getValue();
+    
+    // Are there any fossils in the starting tree?
+    if (starting_tree != NULL)
+    {
+        std::vector<bool> fossils;
+        for (size_t i = 0; i < t->getNumberOfTips(); ++i)
+        {
+            TopologyNode* node = &t->getNode(i);
+            fossils.push_back( node->isFossil() );
+        }
+        
+        bool no_fossil = std::none_of(fossils.begin(), fossils.end(), [](bool v) { return v; });
+        
+        if (!no_fossil)
+        {
+            delete value;
+            
+            AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
+            std::vector<Taxon> taxa = tree_base_distribution->getTaxa();
+            
+            try
+            {
+                RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
+                value = my_tree->clone();
+            }
+            catch (RbException &e)
+            {
+                value = nullptr;
+                // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
+                // a nonexistent starting_tree
+                throw RbException( e.getMessage() );
+            }
+        }
+    }
     
     initializeBitSets();
     redrawValue( SimulationCondition::MCMC );

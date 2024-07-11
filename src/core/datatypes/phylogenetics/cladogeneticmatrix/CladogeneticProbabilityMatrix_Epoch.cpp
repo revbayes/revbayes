@@ -11,7 +11,6 @@
 using namespace RevBayesCore;
 
 #include "RbException.h"
-#include "Assignable.h"
 
 using namespace RevBayesCore;
 
@@ -32,21 +31,6 @@ CladogeneticProbabilityMatrix_Epoch::~CladogeneticProbabilityMatrix_Epoch(void)
 {
     ; // do nothing
 }
-
-CladogeneticProbabilityMatrix_Epoch& CladogeneticProbabilityMatrix_Epoch::assign(const Assignable &m)
-{
-    
-    const CladogeneticProbabilityMatrix_Epoch *cp = dynamic_cast<const CladogeneticProbabilityMatrix_Epoch*>(&m);
-    if ( cp != NULL )
-    {
-        return operator=(*cp);
-    }
-    else
-    {
-        throw RbException("Could not assign cladogenetic probability matrix.");
-    }
-}
-
 
 CladogeneticProbabilityMatrix_Epoch* CladogeneticProbabilityMatrix_Epoch::clone( void ) const
 {
