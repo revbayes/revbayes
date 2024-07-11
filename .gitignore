@@ -1,11 +1,9 @@
 # ---------- Generated files -------------------
 src/generated_include_dirs.cmake
 src/*/CMakeLists.txt
-**/cmake_install.cmake
 
 # ----------------------------------------------
-build
-
+build/
 projects/cmake/*
 !projects/cmake/README.txt
 !projects/cmake/*.sh
@@ -53,8 +51,8 @@ revbayes.code-workspace
 
 #--------- Backups -----------
 *.orig
+*.bak
 *GitVersion_backup.cpp
 *~
 *#
 .#*
-*.bak
