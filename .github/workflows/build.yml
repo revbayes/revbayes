@@ -302,6 +302,7 @@ jobs:
     - name: Set up Cygwin
       uses: egor-tensin/setup-cygwin@v4
       with:
+        platform: x86_64
         packages: cmake cmake-debuginfo cmake-doc cmake-gui mingw64-x86_64-gcc-core mingw64-x86_64-gcc-g++ git make python3
         
     - name: Set up MinGW
