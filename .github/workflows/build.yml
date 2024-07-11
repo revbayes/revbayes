@@ -294,14 +294,11 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: 3.12
         
     - name: Set up Cygwin
       uses: egor-tensin/setup-cygwin@v4
       with:
-        packages: cmake cmake-debuginfo cmake-doc cmake-gui mingw64-x86_64-gcc-core mingw64-x86_64-gcc-g++ git make
+        packages: cmake cmake-debuginfo cmake-doc cmake-gui mingw64-x86_64-gcc-core mingw64-x86_64-gcc-g++ git make python3
         
     - name: Set up MinGW
       uses: egor-tensin/setup-mingw@v2
