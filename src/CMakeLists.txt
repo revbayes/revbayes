@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Policies relevant to the configuration of Boost libraries
 if(POLICY CMP0111)
   # Provides clear error if imported library not found
-  # cmake_policy(SET CMP0111 NEW)
+  cmake_policy(SET CMP0111 NEW)
 endif()
 if(POLICY CMP0144)
   # Recognize BOOST_ROOT as well as Boost_ROOT
