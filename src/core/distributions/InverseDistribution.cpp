@@ -1,87 +1,69 @@
-#include "Func_inverse.h"
-#include "Probability.h"
-#include "Real.h"
-#include "RlDeterministicNode.h"
+#include "InverseDistribution.h"
 #include "TypedDagNode.h"
-#include "GenericFunction.h"
-
 using namespace RevLanguage;
 
-double* hyperbolicCosine(double x)
+RevBayesCore::InverseDistribution::InverseDistribution(const TypedDistribution<double>& d)
+    : TypedDistribution<double>( new double ),
+      dist( d.clone() )
 {
-    double result = (exp(x) + exp(-x))/2;
-    return new double(result);
+    // add the parameters to our set (in the base class)
+    // in that way other class can easily access the set of our parameters
+    // this will also ensure that the parameters are not getting deleted before we do
+
+    // add the parameters of the distribution
+    for (auto& parameter: dist->getParameters())
+        this->addParameter( parameter );
+
+    simulate();
 }
 
 
-/**
- * The clone function is a convenience function to create proper copies of inherited objected.
- * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'b'.
- *
- * \return A new copy of the function.
- */
-Func_inverse* Func_inverse::clone( void ) const
+RevBayesCore::InverseDistribution::InverseDistribution( const InverseDistribution &d )
+    : TypedDistribution<double>(*this),
+      dist (d.dist->clone())
 {
-    return new Func_inverse( *this );
+    // add the parameters to our set (in the base class)
+    // in that way other class can easily access the set of our parameters
+    // this will also ensure that the parameters are not getting deleted before we do
+
+    // add the parameters of the distribution
+    for (auto& parameter: dist->getParameters())
+        this->addParameter( parameter );
 }
 
 
-RevBayesCore::TypedFunction<double>* Func_inverse::createFunction( void ) const
+
+RevBayesCore::InverseDistribution* RevBayesCore::InverseDistribution::clone( void ) const
 {
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    
-    return RevBayesCore::generic_function_ptr< double >( hyperbolicCosine, x );
+    return new InverseDistribution( *this );
 }
 
 
-/* Get argument rules */
-const ArgumentRules& Func_inverse::getArgumentRules( void ) const
-{
-    static ArgumentRules argumentRules = ArgumentRules();
-    static bool          rules_set = false;
-    
-    if ( !rules_set )
-    {
-        
-        argumentRules.push_back( new ArgumentRule( "x", Real::getClassTypeSpec(), "The value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
-        rules_set = true;
-    }
 
-    return argumentRules;
+double RevBayesCore::InverseDistribution::computeLnProbability( void )
+{    
+    return -(dist->computeLnProbability());
 }
 
 
-const std::string& Func_inverse::getClassType(void)
+void RevBayesCore::InverseDistribution::simulate()
 {
-    static std::string rev_type = "Func_inverse";
-    
-    return rev_type;
-}
+    dist->redrawValue();
 
-/* Get class type spec describing type of object */
-const TypeSpec& Func_inverse::getClassTypeSpec(void)
-{
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
-    
-    return rev_type_spec;
+    double log_x = dist->getValue();
+
+    *this->value = exp(log_x);
 }
 
 
-/**
- * Get the primary Rev name for this function.
- */
-std::string Func_inverse::getFunctionName( void ) const
+void RevBayesCore::InverseDistribution::redrawValue( void )
 {
-    // create a name variable that is the same for all instance of this class
-    std::string f_name = "cosh";
-    
-    return f_name;
+    simulate();
 }
 
-const TypeSpec& Func_inverse::getTypeSpec( void ) const
+
+/** Swap a parameter of the distribution */
+void RevBayesCore::InverseDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
-    static TypeSpec type_spec = getClassTypeSpec();
-    
-    return type_spec;
+    dist->swapParameter(oldP,newP);
 }
