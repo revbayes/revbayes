@@ -293,6 +293,10 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
+    - name: Use safe line endings
+      run: git config --global core.autocrlf input
+      shell: cmd
+      
     - uses: actions/checkout@v4
         
     - name: Set up Cygwin
