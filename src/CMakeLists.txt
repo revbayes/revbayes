@@ -232,10 +232,18 @@ else()
   add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 endif()
 
-  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
-target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
 # Link the target to other libraries.  Some variables can be empty.
-target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
+target_link_libraries(${RB_EXEC_NAME}
+  ${RB_CMD_LIB}
+  rb-parser
+  rb-core
+  rb-libs
+  ${Boost_LIBRARIES}
+  ${OPENLIBM}
+  ${CMAKE_DL_LIBS}
+  ${GTK_LIBRARIES}
+  ${MPI_LIBRARIES}
+)
 
 set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
 
