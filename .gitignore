@@ -53,6 +53,7 @@ revbayes.code-workspace
 
 #--------- Backups -----------
 *.orig
+*.bak
 *GitVersion_backup.cpp
 *~
 *#
