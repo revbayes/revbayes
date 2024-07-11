@@ -1,6 +1,6 @@
 #include "InverseDistribution.h"
 #include "TypedDagNode.h"
-using namespace RevLanguage;
+using namespace RevBayesCore;
 
 RevBayesCore::InverseDistribution::InverseDistribution(const TypedDistribution<double>& d)
     : TypedDistribution<double>( new double ),

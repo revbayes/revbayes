@@ -3,7 +3,7 @@
 
 #include "TypedDistribution.h"
 
-namespace RevLanguage {
+namespace RevBayesCore {
     
     /**
      * Provides the inverse of the probability of a distribution.
@@ -13,7 +13,7 @@ namespace RevLanguage {
      * @since 2024-07-11, version 1.2.5
      *
      */
-    class InverseDistribution :  public TypedDistribution<Real> {
+    class InverseDistribution :  public TypedDistribution< double > {
      
     public:
         // constructor(s)
