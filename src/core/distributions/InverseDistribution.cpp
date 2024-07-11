@@ -46,24 +46,8 @@ double RevBayesCore::InverseDistribution::computeLnProbability( void )
 }
 
 
-void RevBayesCore::InverseDistribution::simulate()
-{
-    dist->redrawValue();
-
-    double log_x = dist->getValue();
-
-    *this->value = exp(log_x);
-}
-
-
-void RevBayesCore::InverseDistribution::redrawValue( void )
-{
-    simulate();
-}
-
-
 /** Swap a parameter of the distribution */
 void RevBayesCore::InverseDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
-    dist->swapParameter(oldP,newP);
+    dist->swapParameter( oldP, newP );
 }
