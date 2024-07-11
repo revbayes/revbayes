@@ -340,8 +340,8 @@ jobs:
     - name: Use Bash to build project
       run: |
         cd projects/cmake
-         bash build.sh -DCMAKE_TOOLCHAIN_FILE=../mingw64_toolchain.cmake
-      shell: bash
+        sh build.sh -DCMAKE_TOOLCHAIN_FILE=../mingw64_toolchain.cmake
+      shell: cmd
 
     - name: Configure and Build Project
       uses: threeal/cmake-action@main
