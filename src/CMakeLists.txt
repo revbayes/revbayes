@@ -157,7 +157,7 @@ if ("${STATIC_BOOST}" STREQUAL "ON")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-MESSAGE("Searching for BOOST:")
+message("Searching for BOOST:")
 find_package(Boost
 1.71.0
 COMPONENTS regex
@@ -167,11 +167,11 @@ system
 filesystem
 date_time
 serialization REQUIRED)
-MESSAGE("Boost configuration results:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
-MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+message("Boost configuration results:")
+message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
+link_directories(${Boost_LIBRARY_DIRS})
 
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")
@@ -246,7 +246,5 @@ target_link_libraries(${RB_EXEC_NAME}
   ${GTK_LIBRARIES}
   ${MPI_LIBRARIES}
 )
-
-set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)
