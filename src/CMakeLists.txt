@@ -7,29 +7,6 @@ project(RevBayes)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Policies relevant to the configuration of Boost libraries
-if(POLICY CMP0111)
-  # Provides clear error if imported library not found
-  cmake_policy(SET CMP0111 NEW)
-endif()
-if(POLICY CMP0144)
-  # Recognize BOOST_ROOT as well as Boost_ROOT
-  cmake_policy(SET CMP0144 NEW)
-endif()
-if(POLICY CMP0167)
-  # FindBoost module not available in cmake 3.30
-  cmake_policy(SET CMP0167 NEW)
-endif()
-
-if(WIN32)
-  # Congifure compiler to support big objects
-  if(MSVC)
-    add_compile_options(/W4 /EHsc /bigobj)
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj")
-  endif()
-endif()
-
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
@@ -171,7 +148,7 @@ if ("${STATIC_BOOST}" STREQUAL "ON")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-message("Searching for BOOST:")
+MESSAGE("Searching for BOOST:")
 find_package(Boost
 1.71.0
 COMPONENTS regex
@@ -181,11 +158,11 @@ system
 filesystem
 date_time
 serialization REQUIRED)
-message("Boost configuration results:")
-message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
-message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
-link_directories(${Boost_LIBRARY_DIRS})
+MESSAGE("Boost configuration results:")
+MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
+LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")
@@ -260,5 +237,7 @@ target_link_libraries(${RB_EXEC_NAME}
   ${GTK_LIBRARIES}
   ${MPI_LIBRARIES}
 )
+
+set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

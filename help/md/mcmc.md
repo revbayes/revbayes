@@ -7,7 +7,7 @@ The MCMC analysis object keeps a model and the associated moves and monitors. Th
 ## details
 The MCMC analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The MCMC analysis object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
-The `mcmc.run()` method begins or continues an MCMC analysis. 
+The `mcmc.run()` method begins or continues an MCMC analysis.
 
 During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Höhna et al. (2017) for details.
 
@@ -25,18 +25,18 @@ mcmcmc
     # Create a simple model (unclamped)
     a ~ dnExponential(1)
     mymodel = model(a)
-    
+
     # Create a move vector and a monitor vector
     moves[1] = mvScale( a, lambda = 1.0, weight = 1.0 )
     monitors[1] = mnFile( a, filename = "output/out.log" )
-    
+
     # Create an mcmc object
     mymcmcObject = mcmc( mymodel, monitors, moves )
-    
+
     # Run a short analysis
     mymcmcObject.burnin( generations = 400, tuningInterval = 100 )
     mymcmcObject.run( generations = 400, checkpointFile = "output/out.ckp", checkpointInterval = 100 )
-    
+
     # print the summary of the operators (now tuned)
     mymcmcObject.operatorSummary()
 
@@ -49,7 +49,7 @@ mcmcmc
     # Stopping rules are defined on the total number of generations
     # This command will have no effect, as 400 generations have already been performed.
     mymcmcObject.run( rules = [ srMaxIteration(400) ] )
-	
+
 ## references
 - citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953).
     Equation of state calculations by fast computing machines. Journal of Chemical
@@ -60,7 +60,7 @@ mcmcmc
     their applications. Biometrika, 57:97-109.
   doi: 10.2307/2334940
   url: null
-- citation: Höhna S, Landis MJ, Heath TA (2017). 
+- citation: Höhna S, Landis MJ, Heath TA (2017).
   Phylogenetic inference using `RevBayes`.
   Current Protocols in Bioinformatics.
   doi: 10.1002/cpbi.22

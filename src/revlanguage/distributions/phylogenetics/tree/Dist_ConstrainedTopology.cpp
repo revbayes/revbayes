@@ -94,7 +94,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
     }
     
     // number of decimal places to use when checking the initial tree against taxon ages
-    long pr = 0; // unset
+    long pr = NULL;
     if ( age_check_precision != NULL )
     {
         pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
