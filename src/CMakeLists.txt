@@ -14,11 +14,11 @@ if(POLICY CMP0111)
 endif()
 if(POLICY CMP0144)
   # Recognize BOOST_ROOT as well as Boost_ROOT
-  # cmake_policy(SET CMP0144 NEW)
+  cmake_policy(SET CMP0144 NEW)
 endif()
 if(POLICY CMP0167)
   # FindBoost module not available in cmake 3.30
-  cmake_policy(SET CMP0167 NEW)
+  # cmake_policy(SET CMP0167 NEW)
 endif()
 
 if(WIN32)
