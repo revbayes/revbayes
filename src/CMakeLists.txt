@@ -7,6 +7,15 @@ project(RevBayes)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(WIN32)
+  # Congifure compiler to support big objects
+  if(MSVC)
+    add_compile_options(/W4 /EHsc /bigobj)
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj")
+  endif()
+endif()
+
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
