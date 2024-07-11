@@ -1,6 +1,7 @@
 # ---------- Generated files -------------------
 src/generated_include_dirs.cmake
 src/*/CMakeLists.txt
+**/cmake_install.cmake
 
 # ----------------------------------------------
 build/
@@ -56,3 +57,4 @@ revbayes.code-workspace
 *~
 *#
 .#*
+*.bak
