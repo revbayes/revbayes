@@ -2,10 +2,10 @@
 #include "TypedDagNode.h"
 using namespace RevBayesCore;
 
-// Template declaration for TypedDistribution<variableType>
-template<typename variableType>
-RevBayesCore::InverseDistribution::InverseDistribution(const TypedDistribution<variableType>& d)
-    : TypedDistribution<variableType>( new double ),
+// Template declaration for TypedDistribution<valType>
+template<typename valType>
+RevBayesCore::InverseDistribution::InverseDistribution(const TypedDistribution<valType>& d)
+    : TypedDistribution<valType>( new double ),
       dist( d.clone() )
 {
     // add the parameters to our set (in the base class)
@@ -21,7 +21,7 @@ RevBayesCore::InverseDistribution::InverseDistribution(const TypedDistribution<v
 
 
 RevBayesCore::InverseDistribution::InverseDistribution( const InverseDistribution &d )
-    : TypedDistribution<variableType>(*this),
+    : TypedDistribution<valType>(*this),
       dist (d.dist->clone())
 {
     // add the parameters to our set (in the base class)

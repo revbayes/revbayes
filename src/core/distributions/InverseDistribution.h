@@ -13,12 +13,12 @@ namespace RevBayesCore {
      * @since 2024-07-11, version 1.2.5
      *
      */
-    template<typename variableType>
-    class InverseDistribution :  public TypedDistribution< variableType > {
+    template<typename valType>
+    class InverseDistribution :  public TypedDistribution< valType > {
      
     public:
         // constructor(s)
-        InverseDistribution(const TypedDistribution<variableType>& vp);
+        InverseDistribution(const TypedDistribution<valType>& vp);
         InverseDistribution(const InverseDistribution &d);
 
         // public member functions
@@ -37,7 +37,7 @@ namespace RevBayesCore {
         void                                                simulate();
         
         // private members
-        std::unique_ptr<TypedDistribution<variableType>>          dist;
+        std::unique_ptr<TypedDistribution<valType>>    dist;
     };
 }
 

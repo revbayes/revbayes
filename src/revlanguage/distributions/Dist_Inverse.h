@@ -9,8 +9,8 @@
 
 namespace RevLanguage {
 
-    template<typename variableType>
-    class Dist_Inverse : public TypedDistribution< variableType > {
+    template<typename valType>
+    class Dist_Inverse : public TypedDistribution< valType > {
         
     public:
         Dist_Inverse( void );
@@ -26,7 +26,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::InverseDistribution*              createDistribution(void) const;
+        RevBayesCore::InverseDistribution<typename valType::valueType>*            createDistribution(void) const;
         
     protected:
         
