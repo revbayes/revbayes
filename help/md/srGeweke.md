@@ -13,8 +13,6 @@ The test statistic is a standard Z-score: the difference between the two sample 
 The Z-score is calculated under the assumption that the two parts of the chain are asymptotically independent, which requires that the sum of `frac1` and `frac2` be strictly less than 1.
 
 ## details
-When passed as an element of the `StoppingRules[]` argument to `mcmc.run()` or `mcmcmc.run()`, the run will terminate once *all* specified convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
-
 ## authors
 Incorporates text by Martyn Plummer
 

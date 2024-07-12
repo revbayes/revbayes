@@ -6,8 +6,6 @@ srStationarity
 Allow an MCMC run to terminate once the specified criterion has been met.
 
 ## details
-When passed as an element of the `StoppingRules[]` argument to `mcmc.run()` or `mcmcmc.run()`, the run will terminate once *all* specified convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
-
 ## authors
 ## see_also
 - Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/)
