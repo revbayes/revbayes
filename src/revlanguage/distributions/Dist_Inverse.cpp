@@ -8,8 +8,8 @@
 #include "TypedDistribution.h"
 using namespace RevLanguage;
 
-template<typename variableType>
-Dist_Inverse<variableType>::Dist_Inverse<variableType>() : TypedDistribution< variableType >(),
+template<typename valType>
+Dist_Inverse<valType>::Dist_Inverse<valType>() : TypedDistribution< valType >(),
     inverse_distribution( NULL )
 {
     
@@ -30,8 +30,8 @@ RevBayesCore::InverseDistribution* RevLanguage::Dist_Inverse::createDistribution
 {
     
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( inverse_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<variableType>* vp         = static_cast<RevBayesCore::TypedDistribution<variableType>* >( rl_vp.createDistribution() );
+    const Distribution& rl_vp                          = static_cast<const Distribution &>( inverse_distribution->getRevObject() );
+    RevBayesCore::TypedDistribution<valType>* vp  = static_cast<RevBayesCore::TypedDistribution<valType>* >( rl_vp.createDistribution() );
 
     RevBayesCore::InverseDistribution* d = new RevBayesCore::InverseDistribution(*vp);
 
@@ -101,6 +101,6 @@ void RevLanguage::Dist_Inverse::setConstParameter(const std::string& name, const
     }
     else
     {
-        TypedDistribution< variableType >::setConstParameter(name, var);
+        TypedDistribution< valType >::setConstParameter(name, var);
     }
 }

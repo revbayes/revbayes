@@ -626,7 +626,21 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
 
         // Inverse distribution
-        AddDistribution < RealPos                   >( new Dist_Inverse() );
+		AddDistribution< Integer                    >( new Dist_Inverse<Integer>() );
+		AddDistribution< Natural                    >( new Dist_Inverse<Natural>() );
+        AddDistribution< Probability                >( new Dist_Inverse<Probability>() );
+        AddDistribution< Real                       >( new Dist_Inverse<Real>() );
+		AddDistribution< RealPos                    >( new Dist_Inverse<RealPos>() );
+        AddDistribution< Simplex                    >( new Dist_Inverse<Simplex>() );
+        AddDistribution< ModelVector<Integer>       >( new Dist_Inverse<ModelVector<Integer>>());
+        AddDistribution< ModelVector<Natural>       >( new Dist_Inverse<ModelVector<Natural>>());
+        AddDistribution< ModelVector<Probability>   >( new Dist_Inverse<ModelVector<Probability>>() );
+        AddDistribution< ModelVector<Real>          >( new Dist_Inverse<ModelVector<Real>>());
+        AddDistribution< ModelVector<RealPos>       >( new Dist_Inverse<ModelVector<RealPos>>());
+        AddDistribution< ModelVector<TimeTree>      >( new Dist_Inverse<ModelVector<TimeTree>>());
+        AddDistribution< ModelVector< ModelVector<TimeTree> >       >( new Dist_Inverse< ModelVector<ModelVector<TimeTree> > >());
+        AddDistribution< ModelVector<BranchLengthTree>              >( new Dist_Inverse < ModelVector<BranchLengthTree> >());
+        AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>      >( new Dist_Inverse<ModelVector<AbstractHomologousDiscreteCharacterData>>());
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
