@@ -2,6 +2,8 @@
 #define InverseDistribution_h
 
 #include "TypedDistribution.h"
+#include "TypedDagNode.h"
+#include <memory>
 
 namespace RevBayesCore {
     
@@ -10,7 +12,7 @@ namespace RevBayesCore {
      *
      * @copyright Copyright 2024-
      * @author Martin R. Smith
-     * @since 2024-07-11, version 1.2.5
+     * @since 2024-07-14, version 1.2.5
      *
      */
     template<typename valType>
@@ -18,28 +20,61 @@ namespace RevBayesCore {
      
     public:
         // constructor(s)
-        InverseDistribution(const TypedDistribution<valType>& vp);
-        InverseDistribution(const InverseDistribution &d);
+        InverseDistribution(const TypedDistribution<valType>& d)
+            : TypedDistribution<valType>( new valType() ),
+              dist( d.clone() )
+        {
+            // add the parameters to our set (in the base class)
+            // in that way other class can easily access the set of our parameters
+            // this will also ensure that the parameters are not getting deleted before we do
+            
+            // add the parameters of the distribution
+            for (const auto& parameter : dist->getParameters())
+                this->addParameter( parameter );
+            
+            dist->redrawValue();
+        }
+
+        InverseDistribution(const InverseDistribution &d)
+            : TypedDistribution<valType>( d ),
+              dist( d.dist->clone() )
+        {
+            // add the parameters to our set (in the base class)
+            // in that way other class can easily access the set of our parameters
+            // this will also ensure that the parameters are not getting deleted before we do
+            
+            // add the parameters of the distribution
+            for (const auto& parameter : dist->getParameters())
+                this->addParameter( parameter );
+        }
 
         // public member functions
-        InverseDistribution*                                clone(void) const;                                                       //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                redrawValue(void);
+        InverseDistribution* clone(void) const override // Create an independent clone
+        {
+            return new InverseDistribution( *this );
+        }
+
+        double computeLnProbability(void) override
+        {
+            return -(dist->computeLnProbability());
+        }
+
+        void redrawValue(void) override
+        {
+            dist->redrawValue();
+        }
         
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);        //!< Swap a parameter
+        void swapParameterInternal(const DagNode *oldP, const DagNode *newP) override
+        {
+            dist->swapParameter( oldP, newP );
+        }
         
-        
-    private:
-        
-        // helper methods
-        void                                                simulate();
-        
+    private:        
         // private members
-        std::unique_ptr<TypedDistribution<valType>>         dist;
+        std::unique_ptr<TypedDistribution<valType>> dist;
     };
 }
 
-
-#endif /* Func_inverse_h */
+#endif /* InverseDistribution_h */
