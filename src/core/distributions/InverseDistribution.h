@@ -48,6 +48,11 @@ namespace RevBayesCore {
                 this->addParameter( parameter );
         }
 
+        // Set the current value, e.g. attach an observation (clamp)
+        void setValue(valType *v, bool f=false) override {
+            dist->setValue(v, f);
+        }
+
         // public member functions
         InverseDistribution* clone(void) const override // Create an independent clone
         {
