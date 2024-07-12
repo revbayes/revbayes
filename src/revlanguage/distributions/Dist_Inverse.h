@@ -9,6 +9,14 @@
 #include "RealPos.h"
 #include "Simplex.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
+
+#include "Dist_CTMC.h"
+#include "Dist_phyloCTMC.h"
+#include "Dist_phyloCTMCDASequence.h"
+#include "Dist_phyloCTMCDASiteIID.h"
+#include "Dist_phyloCTMCClado.h"
+#include "Dist_phyloCTMCDollo.h"
+
 #include "IidDistribution.h"
 #include "ModelVector.h"
 #include "TypedDistribution.h"
@@ -43,6 +51,17 @@ namespace RevLanguage {
             return rev_type_spec;
         }
         
+
+        // Get the alternative Rev names (aliases) for the constructor function.
+        std::vector<std::string> getDistributionFunctionAliases( void ) const
+        {
+            // create alternative constructor function names variable that is the same for all instance of this class
+            std::vector<std::string> a_names;
+            a_names.push_back( "inv" );
+            
+            return a_names;
+        }
+
         // Get the Rev-name for this distribution
         std::string getDistributionFunctionName(void) const {
             return "inverse";
@@ -103,6 +122,40 @@ namespace RevLanguage {
         RevPtr<const RevVariable> dist;
     };
     
+    template<>
+    class Dist_Inverse<AbstractHomologousDiscreteCharacterData> {
+
+     public TypedDistribution<AbstractHomologousDiscreteCharacterData> {
+        
+        RevBayesCore::InverseDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* createDistribution(void) const override {
+            // get the parameters
+            const Distribution& orig_dist = static_cast<const Distribution &>(dist->getRevObject());
+            
+            // Check for specific phylogenetic CTMC distributions
+            if (dynamic_cast<const Dist_phyloCTMC*>(&orig_dist) ||
+                dynamic_cast<const Dist_phyloCTMCDASequence*>(&orig_dist) ||
+                dynamic_cast<const Dist_phyloCTMCDASiteIID*>(&orig_dist) ||
+                dynamic_cast<const Dist_phyloCTMCClado*>(&orig_dist) ||
+                dynamic_cast<const Dist_phyloCTMCDollo*>(&orig_dist)) {
+                
+                // Cast the distribution to the specific type expected by InverseDistribution
+                RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* typedDistPtr = 
+                    static_cast<RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>*>(orig_dist.createDistribution());
+
+                // Create an instance of InverseDistribution using the phylogenetic CTMC distribution
+                RevBayesCore::InverseDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* d = 
+                    new RevBayesCore::InverseDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>(*typedDistPtr);
+
+                delete typedDistPtr;
+                
+                return d;
+            }
+            
+            // Handle other cases or throw an error if not supported
+            throw RbException("Unsupported distribution type for Inverse distribution of AbstractHomologousDiscreteCharacterData");
+        }
+    };
+
 }
 
 #endif // Dist_Inverse_H
