@@ -20,9 +20,17 @@ Martin R. Smith
 
 ## see_also
 ## example
-x ~ dnNormal(mean = 0, sd = 1)
-invX := fnInverse(x)
-x.probability()
-invX.probability()
+```
+# Draw X from an exponential distribution
+x ~ dnExp(lambda = 1)
+x.clamp(42)
+x.lnProbability()
+
+# Now calculate the inverse
+invX ~ dnInverse(dnExp(lambda = 1))
+# Clamp the value of the draw from the exponential distribution
+invX.clamp(42)
+invX.lnProbability()
+```
 
 ## references
