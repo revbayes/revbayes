@@ -1,9 +1,11 @@
 ## name
 srStationarity
 ## title
+Stationarity stopping rule
 
 ## description
 Allow an MCMC run to terminate once the specified criterion has been met.
+An MCMC sample can be considered stationary once its mean, variance and autocorrelation structure do not change over time.
 
 ## details
 ## authors
@@ -39,3 +41,6 @@ mymcmc.run(rules = stopping_rules)
 ```
 
 ## references
+- citation: Hill, S.D. and Spall, J.C. 2011. Stationarity and Convergence of the Metropolis-Hastings Algorithm: Insights into Theoretical Aspects. IEEE Control Systems Magazine 39.
+  doi: 10.1109/MCS.2018.2876959
+  url: null
