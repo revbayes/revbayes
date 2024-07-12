@@ -131,6 +131,7 @@
 /* Distribution types (in folder "distributions") */
 
 #include "Dist_EmpiricalSample.h"
+#include "Dist_Inverse.h"
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
@@ -262,7 +263,6 @@
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
-#include "Dist_Inverse.h"
 #include "Dist_markovTimes.h"
 #include "Dist_markovEvents.h"
 #include "Dist_mixture.h"

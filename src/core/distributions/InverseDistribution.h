@@ -37,7 +37,7 @@ namespace RevBayesCore {
         void                                                simulate();
         
         // private members
-        std::unique_ptr<TypedDistribution<valType>>    dist;
+        std::unique_ptr<TypedDistribution<valType>>         dist;
     };
 }
 
