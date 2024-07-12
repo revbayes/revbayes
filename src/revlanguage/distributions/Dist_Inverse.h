@@ -1,13 +1,14 @@
 #ifndef Dist_Inverse_H
 #define Dist_Inverse_H
 
-// Need to include headers for all possible values of valType?
+// Need to include headers for all possible values of valType
 #include "Integer.h"
 #include "Natural.h"
 #include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "Simplex.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
 #include "IidDistribution.h"
 #include "ModelVector.h"
 #include "TypedDistribution.h"
