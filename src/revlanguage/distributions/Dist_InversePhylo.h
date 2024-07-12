@@ -1,13 +1,13 @@
-#ifndef Dist_Inverse_H
-#define Dist_Inverse_H
+#ifndef Dist_InversePhylo_H
+#define Dist_InversePhylo_H
 
 // Need to include headers for all possible values of valType
-#include "Integer.h"
-#include "Natural.h"
-#include "Probability.h"
-#include "Real.h"
-#include "RealPos.h"
-#include "Simplex.h"
+#include "Dist_CTMC.h"
+#include "Dist_phyloCTMC.h"
+#include "Dist_phyloCTMCDASequence.h"
+#include "Dist_phyloCTMCDASiteIID.h"
+#include "Dist_phyloCTMCClado.h"
+#include "Dist_phyloCTMCDollo.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "IidDistribution.h"
 #include "ModelVector.h"
@@ -18,22 +18,22 @@
 namespace RevLanguage {
 
     template<typename valType>
-    class Dist_Inverse : public TypedDistribution< valType > {
+    class Dist_InversePhylo : public TypedDistribution< valType > {
         
     public:
-        Dist_Inverse( void ) : TypedDistribution< valType >(), dist( NULL ) {}
+        Dist_InversePhylo( void ) : TypedDistribution< valType >(), dist( NULL ) {}
         
-        virtual ~Dist_Inverse() {}
+        virtual ~Dist_InversePhylo() {}
         
         // Basic utility functions
         // Clone the object
-        Dist_Inverse* clone(void) const {
-            return new Dist_Inverse(*this);
+        Dist_InversePhylo* clone(void) const {
+            return new Dist_InversePhylo(*this);
         }
         
         // Get Rev type
         static const std::string& getClassType(void) {
-            static std::string rev_type = "Dist_Inverse";
+            static std::string rev_type = "Dist_InversePhylo";
             return rev_type;
         }
         
@@ -56,7 +56,7 @@ namespace RevLanguage {
 
         // Get the Rev-name for this distribution
         std::string getDistributionFunctionName(void) const {
-            return "inverse";
+            return "InversePhylo";
         }
         
         // Get the type spec of the instance

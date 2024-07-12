@@ -6,6 +6,7 @@ project(RevBayes)
 # -D_GLIBCXX_DEBUG
 
 set(CMAKE_CXX_STANDARD 17)
+endif()
 
 if(WIN32)
   # Congifure compiler to support big objects
