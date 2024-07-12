@@ -1,11 +1,11 @@
 ## name
 srGelmanRubin
 ## title
-Gelman–Rubin stopping rule
+Gelman–Rubin (PSRF) stopping rule
 
 ## description
 Allow an MCMC run to terminate once the specified criterion has been met.
-The Gelman–Rubin rule compares the variance between chains with the variance within chains; its value tends to unity (1) as runs converge.
+The Gelman–Rubin rule compares the variance between chains with the variance within chains; its value tends to unity (1) as runs converge.  It is widely referred to as the "potential scale reduction factor" (PSRF).
 
 ## details
 When passed as an element of the `StoppingRules[]` argument to `mcmc.run()` or `mcmcmc.run()`, the run will terminate once *all* specified convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
