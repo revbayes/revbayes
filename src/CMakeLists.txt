@@ -6,6 +6,7 @@ project(RevBayes)
 # -D_GLIBCXX_DEBUG
 
 set(CMAKE_CXX_STANDARD 17)
+endif()
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
