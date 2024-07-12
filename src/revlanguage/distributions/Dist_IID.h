@@ -129,21 +129,6 @@ std::string RevLanguage::Dist_IID<valType>::getDistributionFunctionName( void ) 
 }
 
 
-template <typename valType>
-RevLanguage::MethodTable RevLanguage::Dist_mixtureVector<valType>::getDistributionMethods( void ) const
-{
-    
-    MethodTable methods = TypedDistribution< ModelVector<valType> >::getDistributionMethods();
-    
-    // member functions
-    ArgumentRules* get_mixture_prob_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_mixtureVector, Simplex >( "getMixtureProbabilities", this->variable, get_mixture_prob_arg_rules, true ) );
-    
-    return methods;
-}
-
-
-
 /** Return member rules (no members) */
 template <typename valType>
 const RevLanguage::MemberRules& RevLanguage::Dist_IID<valType>::getParameterRules(void) const
