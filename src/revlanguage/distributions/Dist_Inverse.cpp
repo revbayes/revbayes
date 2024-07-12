@@ -8,7 +8,8 @@
 #include "TypedDistribution.h"
 using namespace RevLanguage;
 
-Dist_Inverse::Dist_Inverse() : TypedDistribution< RealPos >(),
+template<typename variableType>
+Dist_Inverse<variableType>::Dist_Inverse<variableType>() : TypedDistribution< variableType >(),
     inverse_distribution( NULL )
 {
     
@@ -30,7 +31,7 @@ RevBayesCore::InverseDistribution* RevLanguage::Dist_Inverse::createDistribution
     
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( inverse_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<variableType>* vp         = static_cast<RevBayesCore::TypedDistribution<variableType>* >( rl_vp.createDistribution() );
 
     RevBayesCore::InverseDistribution* d = new RevBayesCore::InverseDistribution(*vp);
 
@@ -77,18 +78,7 @@ std::string RevLanguage::Dist_Inverse::getDistributionFunctionName( void ) const
 /** Return member rules (no members) */
 const RevLanguage::MemberRules& RevLanguage::Dist_Inverse::getParameterRules(void) const
 {
-    static MemberRules dist_member_rules;
-    static bool rules_set = false;
-    
-    if ( rules_set == false )
-    {
-	std::vector<TypeSpec> distTypes = { TypedDistribution<Real>::getClassTypeSpec(), TypedDistribution<RealPos>::getClassTypeSpec(), TypedDistribution<Probability>::getClassTypeSpec()};
-
-        dist_member_rules.push_back( new ArgumentRule( "InverseDistribution", distTypes, "TODO The distribution in log-space.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
-        rules_set = true;
-    }
-    
+    static MemberRules dist_member_rules;    
     return dist_member_rules;
 }
 
@@ -111,6 +101,6 @@ void RevLanguage::Dist_Inverse::setConstParameter(const std::string& name, const
     }
     else
     {
-        TypedDistribution< RealPos >::setConstParameter(name, var);
+        TypedDistribution< variableType >::setConstParameter(name, var);
     }
 }

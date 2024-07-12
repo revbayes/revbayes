@@ -3,14 +3,14 @@
 
 #include "IidDistribution.h"
 #include "ModelVector.h"
-#include "RealPos.h"
-#include "RlTypedDistribution.h"
+#include "TypedDistribution.h"
 #include "InverseDistribution.h"
 #include "TypeSpec.h"
 
 namespace RevLanguage {
-    
-    class Dist_Inverse : public TypedDistribution<RealPos> {
+
+    template<typename variableType>
+    class Dist_Inverse : public TypedDistribution< variableType > {
         
     public:
         Dist_Inverse( void );
