@@ -131,6 +131,7 @@
 /* Distribution types (in folder "distributions") */
 
 #include "Dist_EmpiricalSample.h"
+#include "Dist_Inverse.h"
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
@@ -382,7 +383,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
-        
+
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
 
