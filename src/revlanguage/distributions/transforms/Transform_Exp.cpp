@@ -38,6 +38,10 @@ std::optional<double> exp_inverse(double x)
 
 std::optional<double> log_exp_prime(double x)
 {
+    // y = exp(x)
+    // dy/dx = exp(x)
+    // log(dy/dx) = x;
+
     return x;
 }
 
