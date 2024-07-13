@@ -132,6 +132,7 @@
 
 #include "Dist_EmpiricalSample.h"
 #include "Dist_Inverse.h"
+#include "Dist_InversePhylo.h"
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */

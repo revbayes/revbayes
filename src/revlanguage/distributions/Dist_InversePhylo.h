@@ -1,14 +1,13 @@
 #ifndef Dist_InversePhylo_H
 #define Dist_InversePhylo_H
 
-// Need to include headers for all possible values of valType
+#include "AbstractHomologousDiscreteCharacterData.h"
 #include "Dist_CTMC.h"
 #include "Dist_phyloCTMC.h"
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
 #include "Dist_phyloCTMCClado.h"
 #include "Dist_phyloCTMCDollo.h"
-#include "AbstractHomologousDiscreteCharacterData.h"
 #include "IidDistribution.h"
 #include "ModelVector.h"
 #include "TypedDistribution.h"
@@ -17,11 +16,10 @@
 
 namespace RevLanguage {
 
-    template<typename valType>
-    class Dist_InversePhylo : public TypedDistribution< valType > {
+    class Dist_InversePhylo : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
         
     public:
-        Dist_InversePhylo( void ) : TypedDistribution< valType >(), dist( NULL ) {}
+        Dist_InversePhylo( void ) : TypedDistribution< AbstractHomologousDiscreteCharacterData >(), dist( NULL ) {}
         
         virtual ~Dist_InversePhylo() {}
         
@@ -39,11 +37,14 @@ namespace RevLanguage {
         
         // Get class type spec
         static const TypeSpec& getClassTypeSpec(void) {
-            static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< valType >::getClassTypeSpec() ) );
+            static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< AbstractHomologousDiscreteCharacterData >::getClassTypeSpec() ) );
             return rev_type_spec;
         }
         
-
+        MethodTable getDistributionMethods( void ) const override {
+            return dist->getDistributionMethods();
+        }
+        
         // Get the alternative Rev names (aliases) for the constructor function.
         std::vector<std::string> getDistributionFunctionAliases( void ) const
         {
@@ -72,7 +73,7 @@ namespace RevLanguage {
             
             if ( !rules_set ) {
                 dist_member_rules.push_back( new ArgumentRule( "distribution", 
-                    TypedDistribution<valType>::getClassTypeSpec(), 
+                    TypedDistribution<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), 
                     "The distribution to invert.", 
                     ArgumentRule::BY_CONSTANT_REFERENCE, 
                     ArgumentRule::ANY ) );
@@ -81,32 +82,14 @@ namespace RevLanguage {
             
             return dist_member_rules;
         }
-        
-        // Distribution functions you have to override
-        RevBayesCore::InverseDistribution<typename valType::valueType>* createDistribution(void) const {
-            // get the parameters
-            const Distribution& orig_dist = static_cast<const Distribution &>( dist->getRevObject() );
-            
-            // Cast the single distribution to the specific type expected by InverseDistribution
-            RevBayesCore::TypedDistribution<typename valType::valueType>* typedDistPtr = 
-                static_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( orig_dist.createDistribution() );
-
-            // Create an instance of InverseDistribution using the single distribution
-            RevBayesCore::InverseDistribution<typename valType::valueType>* d = 
-                new RevBayesCore::InverseDistribution<typename valType::valueType>(*typedDistPtr);
-
-            delete typedDistPtr;
-            
-            return d;
-        }
-        
+             
     protected:
         void setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
             if ( name == "distribution" ) {
                 dist = var;
             }
             else {
-                TypedDistribution< valType >::setConstParameter(name, var);
+                TypedDistribution< AbstractHomologousDiscreteCharacterData >::setConstParameter(name, var);
             }
         }
         
@@ -115,4 +98,4 @@ namespace RevLanguage {
     };
 }
 
-#endif // Dist_Inverse_H
+#endif // Dist_InversePhylo_H
