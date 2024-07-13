@@ -8,6 +8,8 @@ Allow an MCMC run to terminate once the specified criterion has been met.
 An MCMC sample can be considered stationary once its mean, variance and autocorrelation structure do not change over time.
 
 ## details
+Because the statistic is defined by comparing different runs, it can only be calculated when multiple independent runs are performed, by setting the `nruns` argument to `mcmc` or `mcmcmc` to a value greater than one.
+
 ## authors
 ## see_also
 - Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/)
@@ -34,7 +36,7 @@ monitors.append( mnModel(filename=paramFile, printgen=100, p) )
 stopping_rules[1] = srStationarity(prob = 0.05, file = paramFile, freq = 1000)
 
 # Create the MCMC object
-mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc = mcmc(mymodel, monitors, moves, nruns = 2)
 
 # Begin the MCMC run
 mymcmc.run(rules = stopping_rules)
