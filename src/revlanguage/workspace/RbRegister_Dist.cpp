@@ -271,6 +271,8 @@
 #include "Dist_reversibleJumpMixtureConstant.h"
 #include "Dist_upp.h"
 
+#include "Transform_Exp.h"
+
 /// Functions ///
 
 /* Helper functions for creating functions (in folder "functions") */
@@ -594,6 +596,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         AddDistribution< RealPos                    >( new Dist_Log()               );
         AddDistribution< ModelVector<RealPos>       >( new Dist_MultivariateLog()   );
+        AddDistribution< RealPos                    >( new Transform_Exp()          );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
