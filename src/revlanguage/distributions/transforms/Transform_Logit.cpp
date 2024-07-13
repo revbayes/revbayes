@@ -39,13 +39,14 @@ std::optional<double> logit_transform(double x)
 
 std::optional<double> logit_inverse(double x)
 {
+    // Two forms of the same expression to avoid overflow with exp(larg number)
     if (x < 0)
 	return exp(x)/(1+exp(x));
     else
 	return 1/(exp(-x)+1);
 }
 
-std::optional<double> logit_logit_prime(double x)
+std::optional<double> log_logit_prime(double x)
 {
     // y = log(x/(1-x))
     // dy/dx = 1/(x/(1-x)) * ((1-x)(1) - x(-1))/((1-x)**2)
@@ -67,7 +68,7 @@ RevBayesCore::TransformedDistribution* Transform_Logit::createDistribution( void
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
-    RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, logit_transform, logit_inverse, logit_logit_prime);
+    RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, logit_transform, logit_inverse, log_logit_prime);
 
     delete vp;
 
