@@ -771,20 +771,32 @@ where mu is the mean of the distribution and b the scale.)");
 	help_arrays[string("dnLaplace")][string("see_also")].push_back(string(R"(dnExponential)"));
 	help_arrays[string("dnLaplace")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_strings[string("dnLaplace")][string("title")] = string(R"(Laplace Distribution)");
-	help_arrays[string("dnLogExponential")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnLogExponential")][string("description")] = string(R"(A real number x has a log-Exponential distribution if y = exp(x) has Exponential distribution.)");
-	help_strings[string("dnLogExponential")][string("details")] = string(R"(The log-Exponential distribution is defined over real numbers. Saying that x is log-Exponential is equivalent to saying that y = exp(x) is Exponential. The log-Exponential distribution therefore expresses lack of information about the order of magnitude of a scale parameter:  if x has a log-Exponential distribution, then it has equal chance to be contained by any of the intervals of the form (10^k, 10^(k+1)) within the allowed range.
+	help_arrays[string("dnLog")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("dnLog")][string("description")] = string(R"(Log-transforms a given distribution.)");
+	help_strings[string("dnLog")][string("details")] = string(R"(If X ~ dist then exp(X) ~ dnLog(dist)
 
-The density is p(x) = ???, which can be seen by defining x = ln(y) where y has Exponential distribution and apply the change-of-variable formula.)");
-	help_strings[string("dnLogExponential")][string("example")] = string(R"(# a log-Exponential prior over the rate of change of a Brownian trait (or a Brownian relaxed clock)
-trueTree = readTrees("data/primates.tree")[1]
-log_sigma ~ dnLogExponential(lambda=1)
-sigma := exp(log_sigma)
-X ~ dnBrownian(trueTree,sigma)
-# ...)");
-	help_strings[string("dnLogExponential")][string("name")] = string(R"(dnLogExponential)");
-	help_arrays[string("dnLogExponential")][string("see_also")].push_back(string(R"(dnExponential)"));
-	help_strings[string("dnLogExponential")][string("title")] = string(R"(Log-Exponential Distribution)");
+This provides a way to construct distributions like dnLognormal and
+dnLoguniform directly from the underlying distribution in log-space.
+It can therefore express distributions that are not directly implemented.
+
+The distribution `dist` can be either univariate (dnNormal) or
+multivariate (dnMultivariateNormal).)");
+	help_strings[string("dnLog")][string("example")] = string(R"(x ~ dnLog(dnNormal(0,1))          # Draw from the log-Normal distribution
+x ~ dnNormal(0,1) |> dnLog()      # Expressed using pipes.
+x ~ dnLognormal(0,1)              # This is equivalent.
+y ~ dnNormal(0,1)
+x := exp(y)                       # This is also equivalent.
+
+x ~ dnLog(dnGamma(2,3))           # There is no equivalent for this.
+x ~ dnIID(10,dnLog(dnGamma(2,3))) # Draw 10 log-Gamma(2,3) random variables.
+
+mu = [1.0, 2.0, 3.0, 4.0]
+Sigma ~ dnWishart(df=4, kappa=2, dim=4)
+x ~ dnLog(dnMultivariateNormal(mu,Sigma)))");
+	help_strings[string("dnLog")][string("name")] = string(R"(dnLog)");
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
+	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLoguniform)"));
+	help_strings[string("dnLog")][string("title")] = string(R"(Log-transformed distribution)");
 	help_arrays[string("dnLognormal")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnLognormal")][string("description")] = string(R"(Lognormal distribution is the distribution for a log-transformed normally distributed random variable with mean 'mu' and standard deviation 'sigma'.)");
 	help_strings[string("dnLognormal")][string("details")] = string(R"(The lognormal random variable is defined as
