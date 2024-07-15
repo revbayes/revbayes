@@ -278,6 +278,8 @@
 #include "Transform_Shift.h"
 #include "Transform_Scale.h"
 
+#include "Transform_Vector_Exp.h"
+
 /// Functions ///
 
 /* Helper functions for creating functions (in folder "functions") */
@@ -607,6 +609,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Probability                >( new Transform_InvLogit()     );
         AddDistribution< Real                       >( new Transform_Shift()        );
         AddDistribution< Real                       >( new Transform_Scale()        );
+
+        AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
