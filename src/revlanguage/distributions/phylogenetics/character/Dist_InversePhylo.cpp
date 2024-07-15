@@ -1,5 +1,6 @@
 #include "Dist_InversePhylo.h"
-#include "InversePhyloCTMCDistribution.h"
+#include "Dist_phyloCTMC.h"
+#include "InversePhyloCTMC.h"
 
 using namespace RevLanguage;
 
@@ -25,6 +26,7 @@ const TypeSpec& Dist_InversePhylo::getClassTypeSpec(void) {
     static TypeSpec rev_type_spec = TypeSpec(getClassType(), new TypeSpec(TypedDistribution<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec()));
     return rev_type_spec;
 }
+
 
 const TypeSpec& Dist_InversePhylo::getTypeSpec(void) const {
     static TypeSpec type_spec = getClassTypeSpec();
