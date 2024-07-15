@@ -279,6 +279,7 @@
 #include "Transform_Scale.h"
 
 #include "Transform_Vector_Exp.h"
+#include "Transform_Vector_Log.h"
 
 /// Functions ///
 
@@ -611,6 +612,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Transform_Scale()        );
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
