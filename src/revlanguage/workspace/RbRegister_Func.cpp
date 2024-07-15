@@ -121,6 +121,7 @@
 #include "Func_treeScale.h"
 #include "Func_UPGMA.h"
 #include "Func_PoMoStationaryFrequencies.h"
+#include "Func_PoMoReversibleMutationRates.h"
 #include "Func_FlowT2Populations.h"
 
 /* Frequency functions (in folder "functions/phylogenetics/frequencies") */
@@ -420,6 +421,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_MixtureCladoProbs() );
         addFunction( new Func_SampledCladogenesisRootFrequencies() );
         addFunction( new Func_PoMoStationaryFrequencies() );
+        addFunction( new Func_PoMoReversibleMutationRates() );
 
 
 		/* Functions related to phylogenetic trees (in folder "functions/phylogenetics/tree") */
