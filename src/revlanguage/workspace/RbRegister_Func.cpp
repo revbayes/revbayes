@@ -120,7 +120,7 @@
 #include "Func_treePairwiseNodalDistances.h"
 #include "Func_treeScale.h"
 #include "Func_UPGMA.h"
-
+#include "Func_PoMoStationaryFrequencies.h"
 #include "Func_FlowT2Populations.h"
 
 /* Frequency functions (in folder "functions/phylogenetics/frequencies") */
@@ -419,6 +419,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_cladogeneticProbabilityMatrix() );
         addFunction( new Func_MixtureCladoProbs() );
         addFunction( new Func_SampledCladogenesisRootFrequencies() );
+        addFunction( new Func_PoMoStationaryFrequencies() );
+
 
 		/* Functions related to phylogenetic trees (in folder "functions/phylogenetics/tree") */
         addFunction( new Func_AlleleFrequencySimulator()                        );
