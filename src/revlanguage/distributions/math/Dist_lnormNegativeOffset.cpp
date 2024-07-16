@@ -5,7 +5,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Dist_lnormOffset.h"
+#include "Dist_lnormNegativeOffset.h"
 #include "LognormalDistribution.h"
 #include "Real.h"
 #include "RealPos.h"
