@@ -216,8 +216,7 @@
 #include "Dist_dirichlet.h"
 #include "Dist_exponential.h"
 #include "Dist_exponentialError.h"
-#include "Dist_exponentialOffset.h"
-#include "Dist_exponentialOffsetPositive.h"
+#include "Dist_exponentialNegativeOffset.h"
 #include "Dist_gamma.h"
 #include "Dist_geom.h"
 #include "Dist_GilbertGraph.h"
@@ -497,8 +496,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // exponential distribution
         AddContinuousDistribution< RealPos          >( new Dist_exponential() );
-        AddContinuousDistribution< Real             >( new Dist_exponentialOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_exponentialOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_exponentialNegativeOffset() );
 
         // Laplace distribution
         AddContinuousDistribution< Real             >( new Dist_Laplace() );
