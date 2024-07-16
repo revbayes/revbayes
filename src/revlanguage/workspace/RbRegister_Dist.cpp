@@ -278,6 +278,7 @@
 #include "Transform_Shift.h"
 #include "Transform_Shift_Pos.h"
 #include "Transform_Scale.h"
+#include "Transform_Scale_Pos.h"
 
 #include "Transform_Vector_Exp.h"
 #include "Transform_Vector_Log.h"
@@ -611,6 +612,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Probability                >( new Transform_InvLogit()     );
         AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
         AddDistribution< Real                       >( new Transform_Shift()        );
+        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
         AddDistribution< Real                       >( new Transform_Scale()        );
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
