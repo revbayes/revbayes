@@ -231,8 +231,7 @@
 #include "Dist_LKJ.h"
 #include "Dist_LKJPartial.h"
 #include "Dist_lnorm.h"
-#include "Dist_lnormOffset.h"
-#include "Dist_lnormOffsetPositive.h"
+#include "Dist_lnormNegativeOffset.h"
 #include "Dist_logExponential.h"
 #include "Dist_logUniform.h"
 #include "Dist_multinomial.h"
@@ -513,8 +512,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // lognormal distribution
         AddContinuousDistribution< RealPos          >( new Dist_lnorm() );
-        AddContinuousDistribution< Real             >( new Dist_lnormOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_lnormOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_lnormNegativeOffset() );
 
         // LogExponential distribution
         AddContinuousDistribution< Real             >( new Dist_logExponential() );
