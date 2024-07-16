@@ -185,7 +185,6 @@
 #include "Func_PoMoKNrecurrentMutations.h"
 #include "Func_PoMoBalanceKN.h"
 #include "Func_revPoMoKN.h"
-#include "Func_revPoMo2Nrecurrent.h"
 #include "Func_revPoMoBalanceKN.h"
 #include "Func_revPoMoM2N.h"
 #include "Func_rtRev.h"
@@ -381,7 +380,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_PoMoKNrecurrentMutations()                    );
         addFunction( new Func_PoMoBalanceKN()                               );
         addFunction( new Func_revPoMoKN()                                   );
-        addFunction( new Func_revPoMo2Nrecurrent()                          );
         addFunction( new Func_revPoMoBalanceKN()                            );
         addFunction( new Func_revPoMoM2N()                                  );
         addFunction( new Func_rtRev()                                       );
