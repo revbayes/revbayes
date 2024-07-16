@@ -24,7 +24,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         double                                              cdf(void) const;                                                  //!< Cummulative density function
-        ExponentialWithOffsetDistribution*                  clone(void) const;                                                //!< Create an independent clone
+        ExponentialDistribution*                            clone(void) const;                                                //!< Create an independent clone
         double                                              computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
