@@ -107,7 +107,7 @@ const MemberRules& Dist_exponentialNegativeOffset::getParameterRules(void) const
     if ( !rules_set )
     {
         distExpMemberRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "The rate parameter ( rate = 1/mean ) of the distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        distExpMemberRules.push_back( new ArgumentRule( "offset", Real::getClassTypeSpec()   , "The offset parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
+        distExpMemberRules.push_back( new ArgumentRule( "offset", Real::getClassTypeSpec()   , "The offset parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
