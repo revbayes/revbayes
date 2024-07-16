@@ -133,7 +133,7 @@ const MemberRules& Dist_exponential::getParameterRules(void) const
     {
     
         distExpMemberRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "The rate parameter ( rate = 1/mean ).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
-        distExpMemberRules.push_back( new ArgumentRule( "offset", Real::getClassTypeSpec(), "The offset of the distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
+        distExpMemberRules.push_back( new ArgumentRule( "offset", RealPos::getClassTypeSpec(), "The offset of the distribution.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }

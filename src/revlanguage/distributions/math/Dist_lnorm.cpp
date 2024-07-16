@@ -106,7 +106,7 @@ const MemberRules& Dist_lnorm::getParameterRules(void) const
     {
         memberRules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m)).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "offset", Real::getClassTypeSpec(), "The offset in real-space."                        , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
+        memberRules.push_back( new ArgumentRule( "offset", RealPos::getClassTypeSpec(), "The offset in real-space."                        , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
