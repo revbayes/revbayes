@@ -276,6 +276,7 @@
 #include "Transform_Logit.h"
 #include "Transform_InvLogit.h"
 #include "Transform_Shift.h"
+#include "Transform_Shift_Pos.h"
 #include "Transform_Scale.h"
 
 #include "Transform_Vector_Exp.h"
@@ -608,6 +609,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Transform_Log()          );
         AddDistribution< Real                       >( new Transform_Logit()        );
         AddDistribution< Probability                >( new Transform_InvLogit()     );
+        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
         AddDistribution< Real                       >( new Transform_Shift()        );
         AddDistribution< Real                       >( new Transform_Scale()        );
 
