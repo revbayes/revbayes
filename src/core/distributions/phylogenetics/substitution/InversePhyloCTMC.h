@@ -1,21 +1,40 @@
 #ifndef InversePhyloCTMC_H
 #define InversePhyloCTMC_H
 
-#include "Dist_PhyloCTMC.h"
+#include "AbstractHomologousDiscreteCharacterData.h"
+#include "DnaState.h"
+#include "RateMatrix.h"
+#include "RbVector.h"
+#include "TopologyNode.h"
+#include "TransitionProbabilityMatrix.h"
+#include "TypedDistribution.h"
 
-class InversePhyloCTMC {
-public:
-    static std::shared_ptr<Dist_phyloCTMC> create(const std::shared_ptr<Dist_phyloCTMC>& base_dist) {
-        // Create a new phyloCTMC instance
-        auto new_dist = std::make_shared<>(*base_dist); // Assuming copy constructor
+namespace RevBayesCore {
 
-        // Override calcLnProbability
-        new_dist->calcLnProbability = [base_dist](void) {
-            return -base_dist->calcLnProbability();
-        };
+    template<typename valType>
+    class InversePhyloCTMC : public TypedDistribution< valType > {
 
-        return new_dist;
-    }
-};
+    public:
+        InversePhyloCTMC(TypedDistribution< valType > base_dist);
+        virtual                                            ~InversePhyloCTMC(void);                                                                   //!< Virtual destructor
+
+        // public member functions
+        InversePhyloCTMC*                                   clone(void) const;                                                                          //!< Create an independent clone
+
+
+    protected:
+
+        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r);
+        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
+        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
+        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
+        virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx);
+
+
+    private:
+        RevPtr< const RevVariable > base_distribution;
+    };
+
+}
 
 #endif

@@ -8,7 +8,6 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "Simplex.h"
-#include "AbstractHomologousDiscreteCharacterData.h"
 #include "IidDistribution.h"
 #include "ModelVector.h"
 #include "TypedDistribution.h"
@@ -44,7 +43,7 @@ namespace RevLanguage {
         }
         
 
-        // Get the alternative Rev names (aliases) for the constructor function.
+        // Get the alternative Rev names (aliases) for the constructor function
         std::vector<std::string> getDistributionFunctionAliases( void ) const
         {
             // create alternative constructor function names variable that is the same for all instance of this class
