@@ -12,7 +12,7 @@ namespace RevLanguage {
     public:
         Dist_InversePhylo( void ) : TypedDistribution< valType >(), base_distribution( NULL ) {}
         
-        virtual ~Dist_InversePhylo();
+        virtual ~Dist_InversePhylo() {}
 
         // Basic utility functions
         // Clone the object
@@ -33,8 +33,7 @@ namespace RevLanguage {
         }
 
         // Get the alternative Rev names (aliases) for the constructor function
-        std::vector<std::string> getDistributionFunctionAliases( void ) const
-        {
+        std::vector<std::string> getDistributionFunctionAliases( void ) const {
             // create alternative constructor function names variable that is the same for all instance of this class
             std::vector<std::string> a_names;
             a_names.push_back( "inv" );
@@ -71,7 +70,7 @@ namespace RevLanguage {
         }
 
         // Distribution functions
-        RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* createDistribution(void) const;
+        RevBayesCore::TypedDistribution<typename valType::valueType>* createDistribution(void) const;
 
         // Basic utility functions
         // MethodTable                                             getDistributionMethods(void) const;
