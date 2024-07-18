@@ -643,7 +643,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector< ModelVector<TimeTree> >                  >( new Dist_Inverse< ModelVector<ModelVector<TimeTree> > >());
         AddDistribution< ModelVector<BranchLengthTree>                         >( new Dist_Inverse< ModelVector<BranchLengthTree> >());
         // AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>  >( new Dist_Inverse< ModelVector<AbstractHomologousDiscreteCharacterData> >());
-        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_InversePhylo<AbstractHomologousDiscreteCharacterData> );
+        addDistribution( new Dist_InversePhylo() );
 
 
         // uniform partitions prior
