@@ -10,6 +10,15 @@
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
+    
+    /**
+     * Provides the inverse of the probability of a phylogenetic character distribution.
+     *
+     * @copyright Copyright 2024-
+     * @author Martin R. Smith
+     * @since 2024-07-14, version 1.2.5
+     *
+     */
 
     template<typename valType>
     class InversePhyloCTMC : public TypedDistribution< valType > {
