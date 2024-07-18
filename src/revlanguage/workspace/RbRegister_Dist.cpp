@@ -597,13 +597,13 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Probability>   >( new Dist_IID<Probability>()  );
 
         // Inverse distribution
-		AddDistribution< Integer                    >( new Dist_Inverse<Integer>() );
-		AddDistribution< Natural                    >( new Dist_Inverse<Natural>() );
+        AddDistribution< Integer                    >( new Dist_Inverse<Integer>() );
+        AddDistribution< Natural                    >( new Dist_Inverse<Natural>() );
         AddDistribution< Probability                >( new Dist_Inverse<Probability>() );
         AddDistribution< Real                       >( new Dist_Inverse<Real>() );
-		AddDistribution< RealPos                    >( new Dist_Inverse<RealPos>() );
+        AddDistribution< RealPos                    >( new Dist_Inverse<RealPos>() );
         AddDistribution< Simplex                    >( new Dist_Inverse<Simplex>() );
-        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_InversePhylo() );
+        AddDistribution< AbstractHomologousDiscreteCharacterData  >( new Dist_Inverse< AbstractHomologousDiscreteCharacterData >());
         AddDistribution< ModelVector<Integer>       >( new Dist_Inverse< ModelVector<Integer> >());
         AddDistribution< ModelVector<Natural>       >( new Dist_Inverse< ModelVector<Natural> >());
         AddDistribution< ModelVector<Probability>   >( new Dist_Inverse< ModelVector<Probability> >() );
@@ -612,11 +612,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<TimeTree>      >( new Dist_Inverse< ModelVector<TimeTree> >());
         AddDistribution< ModelVector< ModelVector<TimeTree> >                  >( new Dist_Inverse< ModelVector<ModelVector<TimeTree> > >());
         AddDistribution< ModelVector<BranchLengthTree>                         >( new Dist_Inverse< ModelVector<BranchLengthTree> >());
-        // AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>  >( new Dist_Inverse< ModelVector<AbstractHomologousDiscreteCharacterData> >());
-        
+        AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>  >( new Dist_Inverse< ModelVector<AbstractHomologousDiscreteCharacterData> >());
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
-        // addDistribution( new Dist_CTMC() );
-//        addDistribution( new Dist_InversePhylo() );
 
 
         // uniform partitions prior
