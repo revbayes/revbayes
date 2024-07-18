@@ -28,13 +28,28 @@ namespace RevBayesCore {
         // Notice that we don't need a version of
         // InverseDistribution(const TypedDistribution<valType>& d) : TypedDistribution<valType>( new valType() ),
         // as we can't call new AbstractHomologousDiscreteCharacterData() - it's an abstract function
-        InversePhyloDistribution(TypedDistribution< AbstractHomologousDiscreteCharacterData >& d)
+        InversePhyloDistribution(const TypedDistribution< AbstractHomologousDiscreteCharacterData >& d)
             : TypedDistribution< AbstractHomologousDiscreteCharacterData >( d ), base_distribution( d.clone() ) {
                 
             // add the parameters of the distribution
             for (const auto& parameter : base_distribution->getParameters())
                 this->addParameter( parameter );
         }
+
+        
+        InversePhyloDistribution(const InversePhyloDistribution &d)
+            : TypedDistribution<AbstractHomologousDiscreteCharacterData>( d ),
+              base_distribution( d.base_distribution->clone() )
+        {
+            // add the parameters to our set (in the base class)
+            // in that way other class can easily access the set of our parameters
+            // this will also ensure that the parameters are not getting deleted before we do
+            
+            // add the parameters of the distribution
+            for (const auto& parameter : base_distribution->getParameters())
+                this->addParameter( parameter );
+        }
+
 
         // Virtual destructor
         virtual ~InversePhyloDistribution(void) = default;
