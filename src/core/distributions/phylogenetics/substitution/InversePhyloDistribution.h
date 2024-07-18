@@ -23,8 +23,8 @@ namespace RevBayesCore {
     class InversePhyloDistribution : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
 
     public:
-        InversePhyloDistribution(TypedDistribution<AbstractHomologousDiscreteCharacterData>& d)
-            : TypedDistribution<AbstractHomologousDiscreteCharacterData>(d), base_distribution(d) {}
+        InversePhyloDistribution(TypedDistribution< AbstractHomologousDiscreteCharacterData >& d)
+            : TypedDistribution< AbstractHomologousDiscreteCharacterData >(d), base_distribution(d) {}
 
         // Virtual destructor
         virtual ~InversePhyloDistribution(void) = default;
@@ -52,9 +52,7 @@ namespace RevBayesCore {
 
 
     private:
-        // or?
-        // const TypedDistribution<AbstractHomologousDiscreteCharacterData>& base_distribution;
-        TypedDistribution<AbstractHomologousDiscreteCharacterData>& base_distribution;
+        TypedDistribution< AbstractHomologousDiscreteCharacterData >& base_distribution;
     };
 
 
