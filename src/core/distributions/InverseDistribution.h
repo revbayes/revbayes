@@ -61,7 +61,7 @@ namespace RevBayesCore {
 
         double computeLnProbability(void) override
         {
-            return -(dist->computeLnProbability());
+            return -( dist->computeLnProbability() );
         }
 
         void redrawValue(void) override
@@ -78,7 +78,7 @@ namespace RevBayesCore {
         
     private:        
         // private members
-        std::unique_ptr<TypedDistribution<valType>> dist;
+        std::unique_ptr< TypedDistribution<valType> > dist;
     };
 }
 
