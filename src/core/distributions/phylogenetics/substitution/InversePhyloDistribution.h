@@ -40,7 +40,7 @@ namespace RevBayesCore {
         virtual ~InversePhyloDistribution(void) = default;
         
         // Set the current value, e.g. attach an observation (clamp)
-        void setValue(valType *v, bool f = false) override {
+        void setValue(AbstractHomologousDiscreteCharacterData *v, bool f = false) override {
             base_distribution->setValue(v, f);
         }
 
@@ -56,7 +56,7 @@ namespace RevBayesCore {
         }
 
         void redrawValue(void) override {
-            redrawValue();
+            base_distribution->redrawValue();
         }
         
     protected:
@@ -68,7 +68,7 @@ namespace RevBayesCore {
 
 
     private:
-        std::unique_ptr<TypedDistribution< AbstractHomologousDiscreteCharacterData >> base_distribution;
+        std::unique_ptr<TypedDistribution< AbstractHomologousDiscreteCharacterData > > base_distribution;
     };
 
 
