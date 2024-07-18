@@ -20,6 +20,7 @@ namespace RevBayesCore {
      *
      */
 
+    template<typename charType>
     class InversePhyloDistribution : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
 
     public:
