@@ -24,20 +24,30 @@ namespace RevBayesCore {
     class InversePhyloDistribution : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
 
     public:
+        // constructor(s)
+        // Notice that we don't need a version of
+        // InverseDistribution(const TypedDistribution<valType>& d) : TypedDistribution<valType>( new valType() ),
+        // as we can't call new AbstractHomologousDiscreteCharacterData() - it's an abstract function
         InversePhyloDistribution(TypedDistribution< AbstractHomologousDiscreteCharacterData >& d)
-            : TypedDistribution< AbstractHomologousDiscreteCharacterData >(d), base_distribution(d) {}
+            : TypedDistribution< AbstractHomologousDiscreteCharacterData >( d ), base_distribution( d.clone() ) {
+                
+            // add the parameters of the distribution
+            for (const auto& parameter : base_distribution->getParameters())
+                this->addParameter( parameter );
+        }
 
         // Virtual destructor
         virtual ~InversePhyloDistribution(void) = default;
 
         // public member functions
         
-        InversePhyloDistribution* clone(void) const override {
-            return new InversePhyloDistribution(*this);
+        InversePhyloDistribution* clone(void) const override // Create an independent clone
+        {
+            return new InversePhyloDistribution( *base_distribution );
         }
         
         double computeLnProbability(void) override {
-            return -base_distribution.computeLnProbability();
+            return -( base_distribution->computeLnProbability() );
         }
 
         void redrawValue(void) override {
@@ -48,12 +58,12 @@ namespace RevBayesCore {
         // Parameter management functions
         void swapParameterInternal(const DagNode *oldP, const DagNode *newP) override
         {
-            base_distribution.swapParameter( oldP, newP );
+            base_distribution->swapParameter( oldP, newP );
         }
 
 
     private:
-        TypedDistribution< AbstractHomologousDiscreteCharacterData >& base_distribution;
+        std::unique_ptr<TypedDistribution< AbstractHomologousDiscreteCharacterData >> base_distribution;
     };
 
 
