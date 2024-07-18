@@ -21,7 +21,7 @@ namespace RevBayesCore {
     public:
         // constructor(s)
         InverseDistribution(const TypedDistribution<valType>& d)
-            : TypedDistribution<valType>( new valType() ),
+            : TypedDistribution<valType>( nullptr ),
               dist( d.clone() )
         {
             // add the parameters to our set (in the base class)
@@ -32,7 +32,7 @@ namespace RevBayesCore {
             for (const auto& parameter : dist->getParameters())
                 this->addParameter( parameter );
             
-            dist->redrawValue();
+	    redrawValue();
         }
 
         InverseDistribution(const InverseDistribution &d)
@@ -66,7 +66,12 @@ namespace RevBayesCore {
 
         void redrawValue(void) override
         {
-            dist->redrawValue();
+	    delete this->value;
+
+	    if constexpr(std::is_base_of_v<Cloneable, valType>)
+		this->value = dist->getValue().clone();
+	    else
+		this->value = new valType(dist->getValue());
         }
         
     protected:
