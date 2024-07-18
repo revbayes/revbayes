@@ -2,15 +2,15 @@
 #define Dist_InversePhylo_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "InversePhyloDistribution.h"
 #include "TypedDistribution.h"
 
 namespace RevLanguage {
 
-    template<typename valType> // Expecting AbstractHomologousDiscreteCharacterData, // could extend to other character classes
-    class Dist_InversePhylo : public TypedDistribution< valType > {
+    class Dist_InversePhylo : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
 
     public:
-        Dist_InversePhylo( void ) : TypedDistribution< valType >(), base_distribution( NULL ) {}
+        Dist_InversePhylo( void ) : TypedDistribution< AbstractHomologousDiscreteCharacterData >(), base_distribution( NULL ) {}
         
         virtual ~Dist_InversePhylo() {}
 
@@ -28,7 +28,7 @@ namespace RevLanguage {
         
         // Get class type spec
         static const TypeSpec& getClassTypeSpec(void) {
-            static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< valType >::getClassTypeSpec() ) );
+            static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< AbstractHomologousDiscreteCharacterData >::getClassTypeSpec() ) );
             return rev_type_spec;
         }
 
@@ -59,7 +59,7 @@ namespace RevLanguage {
             
             if ( !rules_set ) {
                 dist_member_rules.push_back( new ArgumentRule( "distribution", 
-                    TypedDistribution<valType>::getClassTypeSpec(), 
+                    TypedDistribution<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), 
                     "The distribution to invert.", 
                     ArgumentRule::BY_CONSTANT_REFERENCE, 
                     ArgumentRule::ANY ) );
@@ -68,9 +68,22 @@ namespace RevLanguage {
             
             return dist_member_rules;
         }
+        // Distribution functions you have to override      
+        RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* createDistribution(void) const {
+            const Distribution& orig_dist = static_cast<const Distribution &>( base_distribution->getRevObject() );
+            
+            RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* typedDistPtr = 
+                static_cast<RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >( orig_dist.createDistribution() );
 
-        // Distribution functions
-        RevBayesCore::TypedDistribution<typename valType::valueType>* createDistribution(void) const;
+            RevBayesCore::InversePhyloDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* d = 
+                new RevBayesCore::InversePhyloDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>(*typedDistPtr);
+
+            delete typedDistPtr;
+            
+            // Here we return an InversePhyloDistribution, but 'disguised' as a TypedDistribution
+            // in order to match the base class's function signature.
+            return d;
+        }
 
         // Basic utility functions
         // MethodTable                                             getDistributionMethods(void) const;
@@ -78,13 +91,13 @@ namespace RevLanguage {
         // void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);
 
     protected:
-        double                                                  calcLnProbability(void) const;
+        // double                                                  calcLnProbability(void) const;
         void setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
             if ( name == "distribution" ) {
                 base_distribution = var;
             }
             else {
-                TypedDistribution< valType >::setConstParameter(name, var);
+                TypedDistribution< AbstractHomologousDiscreteCharacterData >::setConstParameter(name, var);
             }
         }
 
