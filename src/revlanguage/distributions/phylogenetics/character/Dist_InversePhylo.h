@@ -75,7 +75,7 @@ namespace RevLanguage {
             RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* typedDistPtr = 
                 static_cast<RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >( orig_dist.createDistribution() );
 
-            RevBayesCore::InversePhyloDistribution* d = new RevBayesCore::InversePhyloDistribution(*typedDistPtr);
+            RevBayesCore::InversePhyloDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>* d = new RevBayesCore::InversePhyloDistribution<RevBayesCore::AbstractHomologousDiscreteCharacterData>(*typedDistPtr);
 
             delete typedDistPtr;
             

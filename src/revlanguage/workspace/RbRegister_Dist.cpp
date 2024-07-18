@@ -634,6 +634,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Dist_Inverse<Real>() );
 		AddDistribution< RealPos                    >( new Dist_Inverse<RealPos>() );
         AddDistribution< Simplex                    >( new Dist_Inverse<Simplex>() );
+        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_InversePhylo() );
         AddDistribution< ModelVector<Integer>       >( new Dist_Inverse< ModelVector<Integer> >());
         AddDistribution< ModelVector<Natural>       >( new Dist_Inverse< ModelVector<Natural> >());
         AddDistribution< ModelVector<Probability>   >( new Dist_Inverse< ModelVector<Probability> >() );
@@ -643,7 +644,10 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector< ModelVector<TimeTree> >                  >( new Dist_Inverse< ModelVector<ModelVector<TimeTree> > >());
         AddDistribution< ModelVector<BranchLengthTree>                         >( new Dist_Inverse< ModelVector<BranchLengthTree> >());
         // AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>  >( new Dist_Inverse< ModelVector<AbstractHomologousDiscreteCharacterData> >());
-        addDistribution( new Dist_InversePhylo() );
+        
+//        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
+        // addDistribution( new Dist_CTMC() );
+//        addDistribution( new Dist_InversePhylo() );
 
 
         // uniform partitions prior
