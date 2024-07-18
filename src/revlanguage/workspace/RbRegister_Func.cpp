@@ -257,6 +257,7 @@
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
 #include "Func_log.h"
+#include "Func_logit.h"
 #include "Func_logistic.h"
 #include "Func_matrix.h"
 #include "Func_max.h"
@@ -526,6 +527,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // log function
         addFunction( new Func_log()  );
+
+        // logit function
+        addFunction( new Func_logit()  );
 
         // matrix function (converts into MatrixReal)
         addFunction( new Func_matrix() );
