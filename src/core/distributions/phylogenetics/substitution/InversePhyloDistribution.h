@@ -23,22 +23,38 @@ namespace RevBayesCore {
     class InversePhyloDistribution : public TypedDistribution< AbstractHomologousDiscreteCharacterData > {
 
     public:
-        InversePhyloDistribution(const TypedDistribution<AbstractHomologousDiscreteCharacterData>& d) 
-            : TypedDistribution<AbstractHomologousDiscreteCharacterData>(), base_distribution(d) {}
-        
-        virtual                                            ~InversePhyloDistribution(void);                                                                   //!< Virtual destructor
+        InversePhyloDistribution(TypedDistribution<AbstractHomologousDiscreteCharacterData>& d)
+            : TypedDistribution<AbstractHomologousDiscreteCharacterData>(d), base_distribution(d) {}
+
+        // Virtual destructor
+        virtual ~InversePhyloDistribution(void) = default;
 
         // public member functions
-        InversePhyloDistribution*                           clone(void) const;                                                                          //!< Create an independent clone
         
-        double computeLnProbability(void) {
-            return -base_dist.computeLnProbability();
+        InversePhyloDistribution* clone(void) const override {
+            return new InversePhyloDistribution(*this);
+        }
+        
+        double computeLnProbability(void) override {
+            return -base_distribution.computeLnProbability();
         }
 
+        void redrawValue(void) override {
+            redrawValue();
+        }
+        
+    protected:
+        // Parameter management functions
+        void swapParameterInternal(const DagNode *oldP, const DagNode *newP) override
+        {
+            base_distribution.swapParameter( oldP, newP );
+        }
+
+
     private:
-        RevPtr< const RevVariable > base_distribution;
         // or?
         // const TypedDistribution<AbstractHomologousDiscreteCharacterData>& base_distribution;
+        TypedDistribution<AbstractHomologousDiscreteCharacterData>& base_distribution;
     };
 
 
