@@ -38,6 +38,11 @@ namespace RevBayesCore {
 
         // Virtual destructor
         virtual ~InversePhyloDistribution(void) = default;
+        
+        // Set the current value, e.g. attach an observation (clamp)
+        void setValue(valType *v, bool f = false) override {
+            base_distribution->setValue(v, f);
+        }
 
         // public member functions
         
