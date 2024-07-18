@@ -60,8 +60,8 @@ namespace RevLanguage {
         
         // Get the type spec of the instance
         const TypeSpec& getTypeSpec(void) const {
-            static TypeSpec ts = getClassTypeSpec();
-            return ts;
+            static TypeSpec type_spec = getClassTypeSpec();
+            return type_spec;
         }
         
         // Get member rules (const)
