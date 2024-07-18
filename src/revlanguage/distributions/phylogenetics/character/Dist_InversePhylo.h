@@ -68,6 +68,7 @@ namespace RevLanguage {
             
             return dist_member_rules;
         }
+
         // Distribution functions you have to override      
         RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* createDistribution(void) const {
             const Distribution& orig_dist = static_cast<const Distribution &>( base_distribution->getRevObject() );
@@ -84,13 +85,7 @@ namespace RevLanguage {
             return d;
         }
 
-        // Basic utility functions
-        // MethodTable                                             getDistributionMethods(void) const;
-        // void                                                    printValue(std::ostream& o) const;
-        // void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);
-
     protected:
-        // double                                                  calcLnProbability(void) const;
         void setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
             if ( name == "distribution" ) {
                 base_distribution = var;
