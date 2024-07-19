@@ -596,7 +596,7 @@ void Mcmc::initializeSampler( bool prior_only, bool suppress_char_data )
         
     }
     
-    if (chardata_nodes == 0)
+    if (suppress_char_data && chardata_nodes == 0)
     {
         std::stringstream msg;
         msg << "NOTE: No character data detected; the 'suppressCharacterData' option is ignored.";
