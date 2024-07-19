@@ -55,10 +55,12 @@ namespace RevBayesCore {
             return dist->getParameterValues();
         }
         
+        template<class variableType>
         variableType& getValue( void ) {
             return dist->getValue();
         }
 
+        template<class variableType>
         const variableType& getValue( void ) const {
             return dist->getValue();
         }        
