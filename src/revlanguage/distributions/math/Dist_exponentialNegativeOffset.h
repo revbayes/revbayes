@@ -1,20 +1,20 @@
-#ifndef Dist_lnorm_H
-#define Dist_lnorm_H
+#ifndef Dist_exponentialNegativeOffset_H
+#define Dist_exponentialNegativeOffset_H
 
-#include "LognormalDistribution.h"
-#include "RlPositiveContinuousDistribution.h"
+#include "ExponentialDistribution.h"
+#include "RlContinuousDistribution.h"
 
 namespace RevLanguage {
     
-    
     /**
-     * The RevLanguage wrapper of the lognormal distribution.
+     * An alternative RevLanguage wrapper of the exponential distribution, to be
+     * used when the offset is negative.
      *
-     * The RevLanguage wrapper of the lognormal distribution simply
+     * The RevLanguage wrapper of the exponential distribution simply
      * manages the interactions through the Rev with our core.
      * That is, the internal distribution object can be constructed and hooked up
      * in a model graph.
-     * See the LognormalDistribution for more details.
+     * See the ExponentialDistribution for more details.
      *
      *
      * @copyright Copyright 2009-
@@ -22,13 +22,14 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_lnorm :  public PositiveContinuousDistribution {
+    class Dist_exponentialNegativeOffset : public ContinuousDistribution {
         
     public:
-        Dist_lnorm( void );
+                                                  Dist_exponentialNegativeOffset( void );                                                 //!< Default constructor
+        virtual                                  ~Dist_exponentialNegativeOffset();
         
         // Basic utility functions
-        Dist_lnorm*                               clone(void) const;                                                                      //!< Clone the object
+        Dist_exponentialNegativeOffset*           clone(void) const;                                                                      //!< Clone the object
         static const std::string&                 getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                    getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                  getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
@@ -39,7 +40,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::LognormalDistribution*      createDistribution(void) const;
+        RevBayesCore::ExponentialDistribution*    createDistribution(void) const;
         
     protected:
         
@@ -47,10 +48,8 @@ namespace RevLanguage {
         
         
     private:
-        
-        RevPtr<const RevVariable>                           mean;
-        RevPtr<const RevVariable>                           sd;
-        RevPtr<const RevVariable>                           offset;
+        RevPtr<const RevVariable>                 lambda;                                                                                 //!< Rate parameter
+        RevPtr<const RevVariable>                 offset;                                                                                 //!< Offset parameter
         
     };
     

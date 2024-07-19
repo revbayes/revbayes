@@ -5,8 +5,8 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Dist_lnormOffset.h"
-#include "LognormalWithOffsetDistribution.h"
+#include "Dist_lnormNegativeOffset.h"
+#include "LognormalDistribution.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -19,26 +19,26 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Dist_lnormOffset::Dist_lnormOffset() : ContinuousDistribution()
+Dist_lnormNegativeOffset::Dist_lnormNegativeOffset() : ContinuousDistribution()
 {
     
 }
 
 
 
-Dist_lnormOffset* Dist_lnormOffset::clone( void ) const
+Dist_lnormNegativeOffset* Dist_lnormNegativeOffset::clone( void ) const
 {
-    return new Dist_lnormOffset(*this);
+    return new Dist_lnormNegativeOffset(*this);
 }
 
 
-RevBayesCore::LognormalWithOffsetDistribution* Dist_lnormOffset::createDistribution( void ) const
+RevBayesCore::LognormalDistribution* Dist_lnormNegativeOffset::createDistribution( void ) const
 {
     // get the parameters
     RevBayesCore::TypedDagNode<double>* m   = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* s   = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* o   = static_cast<const Real &>( offset->getRevObject() ).getDagNode();
-    RevBayesCore::LognormalWithOffsetDistribution* d  = new RevBayesCore::LognormalWithOffsetDistribution(m, s, o);
+    RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s, o);
     
     return d;
 }
@@ -46,15 +46,15 @@ RevBayesCore::LognormalWithOffsetDistribution* Dist_lnormOffset::createDistribut
 
 
 /* Get Rev type of object */
-const std::string& Dist_lnormOffset::getClassType(void) {
+const std::string& Dist_lnormNegativeOffset::getClassType(void) {
     
-    static std::string rev_type = "Dist_lnormOffset";
+    static std::string rev_type = "Dist_lnormNegativeOffset";
     
 	return rev_type; 
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& Dist_lnormOffset::getClassTypeSpec(void) {
+const TypeSpec& Dist_lnormNegativeOffset::getClassTypeSpec(void) {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( ContinuousDistribution::getClassTypeSpec() ) );
     
@@ -67,7 +67,7 @@ const TypeSpec& Dist_lnormOffset::getClassTypeSpec(void) {
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_lnormOffset::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_lnormNegativeOffset::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
@@ -84,7 +84,7 @@ std::vector<std::string> Dist_lnormOffset::getDistributionFunctionAliases( void 
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_lnormOffset::getDistributionFunctionName( void ) const
+std::string Dist_lnormNegativeOffset::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
     std::string d_name = "lognormal";
@@ -94,7 +94,7 @@ std::string Dist_lnormOffset::getDistributionFunctionName( void ) const
 
 
 /** Return member rules (no members) */
-const MemberRules& Dist_lnormOffset::getParameterRules(void) const
+const MemberRules& Dist_lnormNegativeOffset::getParameterRules(void) const
 {
     
     static MemberRules memberRules;
@@ -114,7 +114,7 @@ const MemberRules& Dist_lnormOffset::getParameterRules(void) const
 }
 
 
-const TypeSpec& Dist_lnormOffset::getTypeSpec( void ) const {
+const TypeSpec& Dist_lnormNegativeOffset::getTypeSpec( void ) const {
     
     static TypeSpec ts = getClassTypeSpec();
     
@@ -123,7 +123,7 @@ const TypeSpec& Dist_lnormOffset::getTypeSpec( void ) const {
 
 
 /** Print value for user */
-void Dist_lnormOffset::printValue(std::ostream& o) const {
+void Dist_lnormNegativeOffset::printValue(std::ostream& o) const {
     
     o << "lognormal(mean=";
     if ( mean != NULL ) {
@@ -148,7 +148,7 @@ void Dist_lnormOffset::printValue(std::ostream& o) const {
 
 
 /** Set a member variable */
-void Dist_lnormOffset::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
+void Dist_lnormNegativeOffset::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
     if ( name == "mean" ) 
     {
