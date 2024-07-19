@@ -1,6 +1,6 @@
 /**
  * @file
- * This file contains the declaration of the interface for all distribution.
+ * This file contains the declaration of the interface for all distributions.
  *
  * Distributions are either values inside DAG nodes, i.e. a constant node used as input for the DPP,
  * or be associated with a stochastic node.
