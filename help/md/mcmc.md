@@ -13,7 +13,6 @@ The parameters `checkpointFile` and `checkpointInterval` generate snapshots of t
 
 The `mcmc.initializeFromCheckpoint()` method allows an analysis to be continued from a checkpoint file.
 New generations will be appended to existing monitor files.
-Note that the iteration numbers printed to the console will resume from zero.
 
 ## authors
 Sebastian Hoehna
@@ -40,7 +39,13 @@ mcmcmc
 
         # Resume analysis from the checkpoint file
         mymcmcObject.initializeFromCheckpoint( "output/out.ckp" )
-	mymcmcObject.run( generations = 500 )
+
+        # Conduct an additional 400 generations
+	mymcmcObject.run( generations = 400 )
+
+        # Stopping rules are defined on the total number of generations
+	# This command will have no effect, as 400 generations have already been performed.
+	mymcmcObject.run( generations = 400, rules = [ srMaxIteration(400) ] )
 	
 ## references
 - citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953).
