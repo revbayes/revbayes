@@ -280,12 +280,14 @@ void MonteCarloAnalysis::initializeMethods()
     run_arg_rules->push_back( new ArgumentRule( "checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a files for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "Should we run this analysis under the prior only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+    run_arg_rules->push_back( new ArgumentRule( "suppressCharacterData" , RlBoolean::getClassTypeSpec(), "Should we run this analysis without character data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
     
     ArgumentRules* burninArgRules = new ArgumentRules();
     burninArgRules->push_back( new ArgumentRule( "generations"   , Natural::getClassTypeSpec(), "The number of generation to run this burnin simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "Should we run this analysis under the prior only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+    burninArgRules->push_back( new ArgumentRule( "suppressCharacterData" , RlBoolean::getClassTypeSpec(), "Should we run this analysis without character data?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burninArgRules) );
     
