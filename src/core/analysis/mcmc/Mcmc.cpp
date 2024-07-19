@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "DagNode.h"
+#include "Distribution.h"
 #include "Mcmc.h"
 #include "MoveSchedule.h"
 #include "RandomMoveSchedule.h"
@@ -30,6 +31,7 @@
 #include "RbIteratorImpl.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "StochasticNode.h"
 #include "StringUtilities.h"
 
 #ifdef RB_MPI
@@ -533,8 +535,18 @@ std::string Mcmc::getStrategyDescription( void ) const
 }
 
 
-void Mcmc::initializeSampler( bool prior_only )
+void Mcmc::initializeSampler( bool prior_only, bool suppress_char_data )
 {
+    
+    if (prior_only && suppress_char_data)
+    {
+        suppress_char_data = false;
+        std::stringstream msg;
+        msg << "NOTE: The 'underPrior' option overrides the 'suppressCharacterData' option.";
+        RBOUT( msg.str() );
+    }
+    
+    size_t chardata_nodes = 0;
     
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
@@ -554,9 +566,41 @@ void Mcmc::initializeSampler( bool prior_only )
         
         DagNode *the_node = *i;
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( prior_only );
+        
+        if (suppress_char_data)
+        {
+            std::string node_value = the_node->getValueAsString();
+                
+            /* Whenever character data are printed to the screen, the string "character matrix"
+             * is always included: this is true of both discrete data (e.g., DNA, discrete
+             * morphology) and of continuous data.
+             */
+            bool chardata_found = node_value.find("character matrix") != std::string::npos;
+            if (chardata_found)
+            {
+                std::cout << "Hooray! Found character data!" << std::endl;
+                the_node->setPriorOnly( true );
+                chardata_nodes++;
+            }
+            else
+            {
+                the_node->setPriorOnly( false );
+            }
+        }
+        else
+        {
+            the_node->setPriorOnly( prior_only );
+        }
+        
         the_node->touch();
         
+    }
+    
+    if (chardata_nodes == 0)
+    {
+        std::stringstream msg;
+        msg << "NOTE: No character data detected; the 'suppressCharacterData' option is ignored.";
+        RBOUT( msg.str() );
     }
     
     

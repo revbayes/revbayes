@@ -48,9 +48,9 @@ namespace RevBayesCore {
         void                                                addMonitor(const Monitor &m);
         MonteCarloAnalysis*                                 clone(void) const;                                              //!< Clone function. This is similar to the copy constructor but useful in inheritance.
 #ifdef RB_MPI
-        void                                                burnin(size_t g, const MPI_Comm &c, size_t ti, bool underPrior=false, bool verbose=true);
+        void                                                burnin(size_t g, const MPI_Comm &c, size_t ti, bool underPrior=false, bool suppressCharacterData=false, bool verbose=true);
 #else
-        void                                                burnin(size_t g, size_t ti, bool underPrior=false, bool verbose=true);
+        void                                                burnin(size_t g, size_t ti, bool underPrior=false, bool suppressCharacterData=false, bool verbose=true);
 #endif
         void                                                disableScreenMonitors(bool all);
         size_t                                              getCurrentGeneration(void) const;                               //!< Get the current generations number

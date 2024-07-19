@@ -162,9 +162,9 @@ void MonteCarloAnalysis::addMonitor(const Monitor &m)
 
 /** Run burnin and auto-tune */
 #ifdef RB_MPI
-void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool underPrior, bool suppressCharacterData, bool verbose)
 #else
-void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool underPrior, bool suppressCharacterData, bool verbose)
 #endif
 {
     
@@ -174,7 +174,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
         
         if ( runs[i] != NULL )
         {
-            runs[i]->initializeSampler(underPrior);
+            runs[i]->initializeSampler(underPrior, suppressCharacterData);
         }
         
     }
