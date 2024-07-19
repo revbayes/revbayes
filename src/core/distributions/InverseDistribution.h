@@ -16,7 +16,7 @@ namespace RevBayesCore {
      *
      */
     template<typename valType>
-    class InverseDistribution :  public TypedDistribution< valType > {
+    class InverseDistribution : public TypedDistribution< valType > {
      
     public:
         // constructor(s)
@@ -87,12 +87,13 @@ namespace RevBayesCore {
 
         void redrawValue(void) override
         {
-	    delete this->value;
+	        delete this->value;
 
-	    if constexpr(std::is_base_of_v<Cloneable, valType>)
-		this->value = dist->getValue().clone();
-	    else
-		this->value = new valType(dist->getValue());
+            if constexpr(std::is_base_of_v<Cloneable, valType>) {
+                this->value = dist->getValue().clone();
+            } else {
+                this->value = new valType(dist->getValue());
+            }
         }
         
     protected:
