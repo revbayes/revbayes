@@ -5,7 +5,7 @@
 #include "Func_logit.h"
 #include "GenericFunction.h"
 #include "Real.h"
-#include "RealPos.h"
+#include "Probability.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "Argument.h"
@@ -49,7 +49,7 @@ double* logit(double x)
 RevBayesCore::TypedFunction<double>* Func_logit::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = static_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     return RevBayesCore::generic_function_ptr< double >( logit, x );
 }
 
@@ -63,7 +63,7 @@ const ArgumentRules& Func_logit::getArgumentRules( void ) const
     if ( !rules_set )
     {
 
-        argumentRules.push_back( new ArgumentRule( "x"   , RealPos::getClassTypeSpec(), "A positive number.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "x"   , Probability::getClassTypeSpec(), "A positive number.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }

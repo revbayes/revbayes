@@ -13,6 +13,9 @@ x ~ dnBeta(1,2) |> tnLogit()
 x ~ dnExponential(1) |> tnShift(1) |> tnLog()
 x ~ dnExponential(1) |> tnScale(2) |> tnLog()
 
+# A probability multiplied by a probability remains a probability.
+x ~ dnBeta(1,2) |> tnScale(0.5) |> tnLogit()
+
 # But shifting or scaling by negative things is still allowed
 x ~ dnExponential(1) |> tnShift(-1)
 x ~ dnExponential(1) |> tnScale(-2)
@@ -31,3 +34,5 @@ x ~ dnDirichlet([1,1,1,1]) |> tnLogit() |> tnInvlogit()
 
 x ~ dnIID(4,dnNormal(0,1)) |> tnInvlogit()
 x ~ dnIID(4,dnNormal(0,1)) |> tnInvlogit() |> tnLogit()
+
+q()
