@@ -263,6 +263,8 @@
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
+#include "Dist_Log.h"
+#include "Dist_MultivariateLog.h"
 #include "Dist_markovTimes.h"
 #include "Dist_markovEvents.h"
 #include "Dist_mixture.h"
@@ -614,6 +616,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>  >( new Dist_Inverse< ModelVector<AbstractHomologousDiscreteCharacterData> >());
 //        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
 
+        AddDistribution< RealPos                    >( new Dist_Log()               );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_MultivariateLog()   );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
