@@ -21,18 +21,18 @@ Sebastian Hoehna
 mcmcmc
 ## example
 	# Create a simple model (unclamped)
-	a ~ exponential(1)
+	a ~ dnExponential(1)
 	mymodel = model(a)
 	
 	# Create a move vector and a monitor vector
-	moves[1] = mvScale(a, lambda=1.0, weight=1.0)
-	monitors[1] = mnFile(a,"output/out.log")
+	moves[1] = mvScale( a, lambda = 1.0, weight = 1.0 )
+	monitors[1] = mnFile( a, filename = "output/out.log" )
 	
 	# Create an mcmc object
-	mymcmcObject = mcmc( mymodel, monitors, moves)
+	mymcmcObject = mcmc( mymodel, monitors, moves )
 	
 	# Run a short analysis
-	mymcmcObject.burnin( generations = 400, tuningInterval = 100)
+	mymcmcObject.burnin( generations = 400, tuningInterval = 100 )
 	mymcmcObject.run( generations = 400, checkpointFile = "output/out.ckp", checkpointInterval = 100 )
 	
 	# print the summary of the operators (now tuned)
