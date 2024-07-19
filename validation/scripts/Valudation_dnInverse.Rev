@@ -1,0 +1,39 @@
+################################################################################
+#
+# RevBayes Validation Test: dnInverse
+#
+# Model: Various: these tests validate the behaviour of dnInverse()
+#
+#
+# authors: Martin R. Smith, following Valication_Exponential.Rev
+#
+################################################################################
+
+seed(42)
+write("Values on each row should be identical:")
+
+# Test Inverse Exponential distribution
+exp ~ dnExp(1)
+exp.clamp(42)
+invExp ~ dnInv(dnExp(1))
+invExp.clamp(42)
+print("TestExp: ", -exp.lnProbability(), "42", invExp.lnProbability())
+
+
+# Test Inverse Phylogenetic distribution
+chars <- readDiscreteCharacterData("../validation/data/primates_cytb.nex")
+
+taxa <- chars.names()
+nTaxa <- chars.size()
+nEdge <- 2 * nTaxa - 3
+
+topology ~ dnUniformTopology(taxa)
+br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+phylogeny := treeAssembly(topology, br_lengths)
+
+Q4 = fnJC(4)
+phy ~ dnPhyloCTMC(tree = phylogeny, Q = Q4, type = "DNA")
+phy.clamp(chars)
+invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = Q4, type = "DNA"))
+invPhy.clamp(chars)
+print("TestPhylo:", -phy.lnProbability(), invPhy.lnProbability())
