@@ -11,6 +11,10 @@ An MCMC analysis is initiated using the `mcmc.run()` method.
 The `StoppingRule[]` argument provides a mechanism to automatically terminate an MCMC run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
 The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.
 
+The `mcmc.initializeFromCheckpoint()` method allows an analysis to be continued from a checkpoint file.
+New generations will be appended to existing monitor files.
+Note that the iteration numbers printed to the console will resume from zero.
+
 ## authors
 Sebastian Hoehna
 ## see_also
@@ -29,10 +33,14 @@ mcmcmc
 	
 	# Run a short analysis
 	mymcmcObject.burnin( generations = 400, tuningInterval = 100)
-	mymcmcObject.run( generations = 400)
+	mymcmcObject.run( generations = 400, checkpointFile = "output/out.ckp", checkpointInterval = 100 )
 	
 	# print the summary of the operators (now tuned)
 	mymcmcObject.operatorSummary()
+
+        # Resume analysis from the checkpoint file
+        mymcmcObject.initializeFromCheckpoint( "output/out.ckp" )
+	mymcmcObject.run( generations = 500 )
 	
 ## references
 - citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953).
