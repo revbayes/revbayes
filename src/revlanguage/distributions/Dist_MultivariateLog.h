@@ -5,7 +5,7 @@
 #include "ModelVector.h"
 #include "RealPos.h"
 #include "RlTypedDistribution.h"
-#include "MultivariateLogDistribution.h"
+#include "TransformedVectorDistribution.h"
 #include "TypeSpec.h"
 
 namespace RevLanguage {
@@ -25,7 +25,7 @@ namespace RevLanguage {
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
         
         // Distribution functions you have to override
-        RevBayesCore::MultivariateLogDistribution*      createDistribution(void) const;
+        RevBayesCore::TransformedVectorDistribution*    createDistribution(void) const;
         
     protected:
         

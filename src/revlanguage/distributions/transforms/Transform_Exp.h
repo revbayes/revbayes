@@ -1,23 +1,22 @@
-#ifndef Dist_Log_H
-#define Dist_Log_H
+#ifndef Transform_Exp_H
+#define Transform_Exp_H
 
-#include "IidDistribution.h"
 #include "ModelVector.h"
 #include "RealPos.h"
 #include "RlTypedDistribution.h"
-#include "TransformedDistribution.h"
 #include "TypeSpec.h"
+#include "TransformedDistribution.h"
 
 namespace RevLanguage {
     
-    class Dist_Log : public TypedDistribution<RealPos> {
+    class Transform_Exp : public TypedDistribution<RealPos> {
         
     public:
-        Dist_Log( void );
-        virtual ~Dist_Log();
+        Transform_Exp( void );
+        virtual ~Transform_Exp();
         
         // Basic utility functions
-        Dist_Log*                                       clone(void) const;                                                                      //!< Clone the object
+        Transform_Exp*                                  clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
@@ -31,13 +30,13 @@ namespace RevLanguage {
     protected:
         
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        
-        
+
+
     private:
-        RevPtr<const RevVariable>                       log_distribution;
+        RevPtr<const RevVariable>                       base_distribution;
         
     };
     
 }
 
-#endif // Dist_Log_H
+#endif // Transform_Exp_H

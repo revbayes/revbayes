@@ -2,10 +2,10 @@
 #include <string>
 #include <vector>
 
-#include "LogisticFunction.h"
-#include "Func_logistic.h"
-#include "Probability.h"
+#include "Func_logit.h"
+#include "GenericFunction.h"
 #include "Real.h"
+#include "Probability.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "Argument.h"
@@ -24,9 +24,8 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_logistic::Func_logistic( void ) : TypedFunction<Probability>( )
-{
-    
+Func_logit::Func_logit( void ) : TypedFunction<Real>( ) {
+
 }
 
 
@@ -36,57 +35,57 @@ Func_logistic::Func_logistic( void ) : TypedFunction<Probability>( )
  *
  * \return A new copy of the process.
  */
-Func_logistic* Func_logistic::clone( void ) const
+Func_logit* Func_logit::clone( void ) const {
+
+    return new Func_logit( *this );
+}
+
+double* logit(double x)
 {
-    
-    return new Func_logistic( *this );
+    return new double(log(x) - log1p(-x));
 }
 
 
-RevBayesCore::TypedFunction<double>* Func_logistic::createFunction( void ) const
+RevBayesCore::TypedFunction<double>* Func_logit::createFunction( void ) const
 {
-    
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::LogisticFunction* f = new RevBayesCore::LogisticFunction( x );
-    
-    return f;
-}
 
+    RevBayesCore::TypedDagNode<double>* x = static_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    return RevBayesCore::generic_function_ptr< double >( logit, x );
+}
 
 /* Get argument rules */
-const ArgumentRules& Func_logistic::getArgumentRules( void ) const
+const ArgumentRules& Func_logit::getArgumentRules( void ) const
 {
-    
+
     static ArgumentRules argumentRules = ArgumentRules();
     static bool          rules_set = false;
-    
+
     if ( !rules_set )
     {
-        
-        argumentRules.push_back( new ArgumentRule( "x", Real::getClassTypeSpec(), "The value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        
+
+        argumentRules.push_back( new ArgumentRule( "x"   , Probability::getClassTypeSpec(), "A positive number.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
         rules_set = true;
     }
-    
+
     return argumentRules;
 }
 
 
-const std::string& Func_logistic::getClassType(void)
+const std::string& Func_logit::getClassType(void)
 {
-    
-    static std::string rev_type = "Func_logistic";
-    
+
+    static std::string rev_type = "Func_logit";
+
     return rev_type;
 }
 
 
 /* Get class type spec describing type of object */
-const TypeSpec& Func_logistic::getClassTypeSpec(void)
+const TypeSpec& Func_logit::getClassTypeSpec(void)
 {
-    
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
-    
+
     return rev_type_spec;
 }
 
@@ -94,24 +93,18 @@ const TypeSpec& Func_logistic::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_logistic::getFunctionName( void ) const
+std::string Func_logit::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "logistic";
-    
+    std::string f_name = "logit";
+
     return f_name;
 }
 
-std::vector<std::string> Func_logistic::getFunctionNameAliases( void ) const
-{
-    // This is the name from R
-    return { "invlogit" };
-}
 
-const TypeSpec& Func_logistic::getTypeSpec( void ) const
+const TypeSpec& Func_logit::getTypeSpec( void ) const
 {
-    
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
 }
