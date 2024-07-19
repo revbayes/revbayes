@@ -282,6 +282,8 @@
 
 #include "Transform_Vector_Exp.h"
 #include "Transform_Vector_Log.h"
+#include "Transform_Vector_Logit.h"
+#include "Transform_Vector_Invlogit.h"
 
 /// Functions ///
 
@@ -617,6 +619,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Logit() );
+        AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );

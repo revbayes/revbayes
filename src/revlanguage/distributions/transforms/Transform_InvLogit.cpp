@@ -33,7 +33,7 @@ std::optional<double> invlogit_transform(double x)
 	return 1/(exp(-x)+1);
 }
 
-std::optional<double> inv_invlogit_inverse(double x)
+std::optional<double> invlogit_inverse(double x)
 {
     if (x > 0 and x < 1)
     {
@@ -73,7 +73,7 @@ RevBayesCore::TransformedDistribution* Transform_InvLogit::createDistribution( v
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
-    RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, invlogit_transform, inv_invlogit_inverse, log_invlogit_prime);
+    RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, invlogit_transform, invlogit_inverse, log_invlogit_prime);
 
     delete vp;
 
@@ -109,7 +109,7 @@ const TypeSpec& Transform_InvLogit::getClassTypeSpec(void)
 std::string Transform_InvLogit::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "invLogit";
+    std::string d_name = "invlogit";
 
     return d_name;
 }

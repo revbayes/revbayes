@@ -16,7 +16,7 @@ that has distribution `dist` on the log-scale.
 ## authors
 Ben Redelings
 ## see_also
-tnLog, tnLogit, tnInvLogit
+tnLog, tnLogit, tnInvlogit
 ## example
     x ~ tnExp(dnNormal(0,1))          # Draw from the log-Normal distribution
     x ~ dnNormal(0,1) |> tnExp()      # Expressed using pipes.
@@ -29,5 +29,5 @@ tnLog, tnLogit, tnInvLogit
 
     mu = [1.0, 2.0, 3.0, 4.0]
     Sigma ~ dnWishart(df=4, kappa=2, dim=4)
-    x ~ tnExp(dnMultivariateNormal(mu,Sigma))
+    x ~ dnMultivariateNormal(mu,Sigma) |> tnExp()
 ## references

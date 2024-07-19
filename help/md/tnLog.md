@@ -16,7 +16,7 @@ that has distribution `dist` on the log-scale.
 ## authors
 Ben Redelings
 ## see_also
-tnExp, tnLogit, tnInvLogit
+tnExp, tnLogit, tnInvlogit
 ## example
     x ~ tnLog(dnExponential(1))       # The log of an Exponential random variable.
     x ~ dnExponential(1) |> tnLog()   # Expressed using pipes.

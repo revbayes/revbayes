@@ -3360,7 +3360,7 @@ This turns out to be the same as dnLog(dist), which provides a distribution
 that has distribution `dist` on the log-scale.)");
 	help_strings[string("tnExp")][string("example")] = string(R"(x ~ tnExp(dnNormal(0,1))          # Draw from the log-Normal distribution
 x ~ dnNormal(0,1) |> tnExp()      # Expressed using pipes.
-x ~ tnExpnormal(0,1)              # This is equivalent.
+x ~ dnLognormal(0,1)              # This is equivalent.
 y ~ dnNormal(0,1)
 x := exp(y)                       # This is also equivalent.
 
@@ -3369,27 +3369,37 @@ x ~ dnIID(10,tnExp(dnGamma(2,3))) # Draw 10 log-Gamma(2,3) random variables.
 
 mu = [1.0, 2.0, 3.0, 4.0]
 Sigma ~ dnWishart(df=4, kappa=2, dim=4)
-x ~ tnExp(dnMultivariateNormal(mu,Sigma)))");
+x ~ dnMultivariateNormal(mu,Sigma) |> tnExp())");
 	help_strings[string("tnExp")][string("name")] = string(R"(tnExp)");
-	help_arrays[string("tnExp")][string("see_also")].push_back(string(R"(tnLog, tnLogit, tnInvLogit)"));
+	help_arrays[string("tnExp")][string("see_also")].push_back(string(R"(tnLog, tnLogit, tnInvlogit)"));
 	help_strings[string("tnExp")][string("title")] = string(R"(Exp-transformed distribution)");
-	help_arrays[string("tnInvLogit")][string("authors")].push_back(string(R"(Ben Redelings)"));
-	help_strings[string("tnInvLogit")][string("description")] = string(R"(InvLogit-transforms a given distribution.)");
-	help_strings[string("tnInvLogit")][string("details")] = string(R"(If X ~ dist then tnInvLogit(dist) is the distribution of exp(X)/(1+exp(X)).)");
-	help_strings[string("tnInvLogit")][string("example")] = string(R"(x ~ tnInvLogit(dnNormal(0,1))      # The inverse-logit of a Normal random variable.
-x ~ dnNormal(0,1) |> tnInvLogit()  # Expressed using pipes.
+	help_arrays[string("tnInvlogit")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("tnInvlogit")][string("description")] = string(R"(Invlogit-transforms a given distribution.)");
+	help_strings[string("tnInvlogit")][string("details")] = string(R"(If X ~ dist then tnInvlogit(dist) is the distribution of exp(X)/(1+exp(X)).
+The inverse logit function is also called the logistic function.
 
-y ~ dnNormal(0,1)
-x := exp(y)/(1+exp(y))             # This is also equivalent.)");
-	help_strings[string("tnInvLogit")][string("name")] = string(R"(tnInvLogit)");
-	help_arrays[string("tnInvLogit")][string("see_also")].push_back(string(R"(tnExp, tnLog, tnLogit)"));
-	help_strings[string("tnInvLogit")][string("title")] = string(R"(InvLogit-transformed distribution)");
+The distribution `dist` can be either univariate (dnNormal) or
+multivariate (MultivariateNormal).)");
+	help_strings[string("tnInvlogit")][string("example")] = string(R"(p ~ tnInvlogit(dnNormal(0,1))      # The inverse-logit of a Normal random variable.
+p ~ dnNormal(0,1) |> tnInvlogit()  # Expressed using pipes.
+
+x ~ dnNormal(0,1)
+p := invlogit(x)                   # Expressed as a deterministic function of the log-odds.
+
+ps ~ dnIID(4,dnNormal(0,1)) |> tnInvlogit()
+
+mu = [1.0, 2.0, 3.0, 4.0]
+Sigma ~ dnWishart(df=4, kappa=2, dim=4)
+x ~ dnMultivariateNormal(mu,Sigma) |> tnInvlogit())");
+	help_strings[string("tnInvlogit")][string("name")] = string(R"(tnInvlogit)");
+	help_arrays[string("tnInvlogit")][string("see_also")].push_back(string(R"(logistic, tnExp, tnLog, tnLogit)"));
+	help_strings[string("tnInvlogit")][string("title")] = string(R"(Invlogit-transformed distribution)");
 	help_arrays[string("tnLog")][string("authors")].push_back(string(R"(Ben Redelings)"));
 	help_strings[string("tnLog")][string("description")] = string(R"(Log-transforms a given distribution.)");
 	help_strings[string("tnLog")][string("details")] = string(R"(If X ~ dist then tnLog(dist) is the distribution of log(X).
 
-The distribution `dist` can be either univariate (dnNormal) or
-multivariate (dnMultivariateNormal).
+The distribution `dist` can be either univariate (dnExponential) or
+multivariate (dnDirichlet).
 
 This is NOT the same as dnLog(dist), which provides a distribution
 that has distribution `dist` on the log-scale.)");
@@ -3397,21 +3407,44 @@ that has distribution `dist` on the log-scale.)");
 x ~ dnExponential(1) |> tnLog()   # Expressed using pipes.
 
 y ~ dnExponential(1)
-x := log(y)                       # This is also equivalent.)");
+x := log(y)                       # This is also equivalent.
+
+x ~ dnDirichlet([1,1,1,1]) |> tnLog())");
 	help_strings[string("tnLog")][string("name")] = string(R"(tnLog)");
-	help_arrays[string("tnLog")][string("see_also")].push_back(string(R"(tnExp, tnLogit, tnInvLogit)"));
+	help_arrays[string("tnLog")][string("see_also")].push_back(string(R"(tnExp, tnLogit, tnInvlogit)"));
 	help_strings[string("tnLog")][string("title")] = string(R"(Log-transformed distribution)");
 	help_arrays[string("tnLogit")][string("authors")].push_back(string(R"(Ben Redelings)"));
 	help_strings[string("tnLogit")][string("description")] = string(R"(Logit-transforms a given distribution.)");
-	help_strings[string("tnLogit")][string("details")] = string(R"(If X ~ dist then tnLogit(dist) is the distribution of log(X/(1-X)).)");
+	help_strings[string("tnLogit")][string("details")] = string(R"(If P ~ dist then tnLogit(dist) is the distribution of log(P/(1-P)).
+
+The distribution `dist` can be either univariate (dnBeta) or
+multivariate (dnDirichlet).)");
 	help_strings[string("tnLogit")][string("example")] = string(R"(x ~ tnLogit(dnBeta(1,2))         # The log-odds of an Beta random variable.
 x ~ dnBeta(1,2)|> tnLogit()      # Expressed using pipes.
 
-y ~ dnBeta(1,2)
-x := log(y/(1-y))                # This is also equivalent.)");
+p ~ dnBeta(1,2)
+x := logit(p)                    # Expressed as a deterministic function of the probability.
+
+xs ~ dnDirichlet([1,1,1,1]) |> tnLogit())");
 	help_strings[string("tnLogit")][string("name")] = string(R"(tnLogit)");
-	help_arrays[string("tnLogit")][string("see_also")].push_back(string(R"(tnExp, tnLog, tnInvLogitit)"));
+	help_arrays[string("tnLogit")][string("see_also")].push_back(string(R"(logit, tnExp, tnLog, tnInvlogitit)"));
 	help_strings[string("tnLogit")][string("title")] = string(R"(Logit-transformed distribution)");
+	help_arrays[string("tnScale")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("tnScale")][string("description")] = string(R"(Rescales a given distribution.)");
+	help_strings[string("tnScale")][string("details")] = string(R"(If X ~ dist then tnScale(dist, lambda) is the distribution of X * lambda)");
+	help_strings[string("tnScale")][string("example")] = string(R"(x ~ tnScale(dExponential(1),2)       # An Exponential(rate=0.5) random variable.
+x ~ dnExponential(1) |> tnScale(2)   # Expressed using pipes.)");
+	help_strings[string("tnScale")][string("name")] = string(R"(tnScale)");
+	help_arrays[string("tnScale")][string("see_also")].push_back(string(R"(tnScale)"));
+	help_strings[string("tnScale")][string("title")] = string(R"(A scaled distribution)");
+	help_arrays[string("tnShift")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("tnShift")][string("description")] = string(R"(Shifts a given distribution.)");
+	help_strings[string("tnShift")][string("details")] = string(R"(If X ~ dist then tnShift(dist, d) is the distribution of X + d)");
+	help_strings[string("tnShift")][string("example")] = string(R"(x ~ tnShift(dExponential(1),2)       # An exponential variable starting at 2.
+x ~ dnExponential(1) |> tnShift(2)   # Expressed using pipes.)");
+	help_strings[string("tnShift")][string("name")] = string(R"(tnShift)");
+	help_arrays[string("tnShift")][string("see_also")].push_back(string(R"(tnScale)"));
+	help_strings[string("tnShift")][string("title")] = string(R"(A shifted distribution)");
 	help_arrays[string("treeTrace")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_strings[string("treeTrace")][string("description")] = string(R"(Creates a tree trace object from a vector of trees.)");
 	help_strings[string("treeTrace")][string("example")] = string(R"(# Read in a vector of trees
