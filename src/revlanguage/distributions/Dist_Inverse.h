@@ -42,14 +42,6 @@ namespace RevLanguage {
             return rev_type_spec;
         }
    
-        void printValue(std::ostream& o) const {
-            dist->printValue(o);
-        }
-
-        MethodTable getDistributionMethods( void ) const {
-            return dist->getDistributionMethods();
-        }
-
         // Get the alternative Rev names (aliases) for the constructor function
         std::vector<std::string> getDistributionFunctionAliases( void ) const
         {

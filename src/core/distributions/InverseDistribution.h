@@ -48,11 +48,30 @@ namespace RevBayesCore {
                 this->addParameter( parameter );
         }
 
+        // functions from 'public methods' section of TypedDistribution.h
+        
+        template<class variableType>
+        const RevBayesCore::RbVector<variableType>& getParameterValues(void) const {
+            return dist->getParameterValues();
+        }
+        
+        variableType& getValue( void ) {
+            return dist->getValue();
+        }
+
+        const variableType& getValue( void ) const {
+            return dist->getValue();
+        }        
+        
+
+        // functions from 'virtual methods' section of TypedDistribution.h
+
         // Set the current value, e.g. attach an observation (clamp)
         void setValue(valType *v, bool f=false) override {
             dist->setValue(v, f);
         }
 
+        // functions from 'pure virtual methods' section of TypedDistribution.h
         // public member functions
         InverseDistribution* clone(void) const override // Create an independent clone
         {
