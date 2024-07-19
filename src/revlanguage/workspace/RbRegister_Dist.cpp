@@ -216,8 +216,7 @@
 #include "Dist_dirichlet.h"
 #include "Dist_exponential.h"
 #include "Dist_exponentialError.h"
-#include "Dist_exponentialOffset.h"
-#include "Dist_exponentialOffsetPositive.h"
+#include "Dist_exponentialNegativeOffset.h"
 #include "Dist_gamma.h"
 #include "Dist_geom.h"
 #include "Dist_GilbertGraph.h"
@@ -231,8 +230,7 @@
 #include "Dist_LKJ.h"
 #include "Dist_LKJPartial.h"
 #include "Dist_lnorm.h"
-#include "Dist_lnormOffset.h"
-#include "Dist_lnormOffsetPositive.h"
+#include "Dist_lnormNegativeOffset.h"
 #include "Dist_logExponential.h"
 #include "Dist_logUniform.h"
 #include "Dist_multinomial.h"
@@ -498,8 +496,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // exponential distribution
         AddContinuousDistribution< RealPos          >( new Dist_exponential() );
-        AddContinuousDistribution< Real             >( new Dist_exponentialOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_exponentialOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_exponentialNegativeOffset() );
 
         // Laplace distribution
         AddContinuousDistribution< Real             >( new Dist_Laplace() );
@@ -513,8 +510,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // lognormal distribution
         AddContinuousDistribution< RealPos          >( new Dist_lnorm() );
-        AddContinuousDistribution< Real             >( new Dist_lnormOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_lnormOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_lnormNegativeOffset() );
 
         // LogExponential distribution
         AddContinuousDistribution< Real             >( new Dist_logExponential() );
