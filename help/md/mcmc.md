@@ -19,33 +19,33 @@ Sebastian Hoehna
 ## see_also
 mcmcmc
 ## example
-	# Create a simple model (unclamped)
-	a ~ dnExponential(1)
-	mymodel = model(a)
-	
-	# Create a move vector and a monitor vector
-	moves[1] = mvScale( a, lambda = 1.0, weight = 1.0 )
-	monitors[1] = mnFile( a, filename = "output/out.log" )
-	
-	# Create an mcmc object
-	mymcmcObject = mcmc( mymodel, monitors, moves )
-	
-	# Run a short analysis
-	mymcmcObject.burnin( generations = 400, tuningInterval = 100 )
-	mymcmcObject.run( generations = 400, checkpointFile = "output/out.ckp", checkpointInterval = 100 )
-	
-	# print the summary of the operators (now tuned)
-	mymcmcObject.operatorSummary()
+    # Create a simple model (unclamped)
+    a ~ dnExponential(1)
+    mymodel = model(a)
+    
+    # Create a move vector and a monitor vector
+    moves[1] = mvScale( a, lambda = 1.0, weight = 1.0 )
+    monitors[1] = mnFile( a, filename = "output/out.log" )
+    
+    # Create an mcmc object
+    mymcmcObject = mcmc( mymodel, monitors, moves )
+    
+    # Run a short analysis
+    mymcmcObject.burnin( generations = 400, tuningInterval = 100 )
+    mymcmcObject.run( generations = 400, checkpointFile = "output/out.ckp", checkpointInterval = 100 )
+    
+    # print the summary of the operators (now tuned)
+    mymcmcObject.operatorSummary()
 
-        # Resume analysis from the checkpoint file
-        mymcmcObject.initializeFromCheckpoint( "output/out.ckp" )
+    # Resume analysis from the checkpoint file
+    mymcmcObject.initializeFromCheckpoint( "output/out.ckp" )
 
-        # Conduct an additional 400 generations
-	mymcmcObject.run( generations = 400 )
+    # Conduct an additional 400 generations
+    mymcmcObject.run( generations = 400 )
 
-        # Stopping rules are defined on the total number of generations
-	# This command will have no effect, as 400 generations have already been performed.
-	mymcmcObject.run( generations = 400, rules = [ srMaxIteration(400) ] )
+    # Stopping rules are defined on the total number of generations
+    # This command will have no effect, as 400 generations have already been performed.
+    mymcmcObject.run( generations = 400, rules = [ srMaxIteration(400) ] )
 	
 ## references
 - citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953).
