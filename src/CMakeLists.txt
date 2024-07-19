@@ -18,7 +18,7 @@ if(POLICY CMP0144)
 endif()
 if(POLICY CMP0167)
   # FindBoost module not available in cmake 3.30
-  cmake_policy(SET CMP0167 OLD) # Fails on Mac XCode 14 ARM when set to NEW
+  cmake_policy(SET CMP0167 NEW)
 endif()
 
 if(WIN32)
