@@ -7,9 +7,13 @@ The MCMC analysis object keeps a model and the associated moves and monitors. Th
 ## details
 The MCMC analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The MCMC analysis object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
-An MCMC analysis is initiated using the `mcmc.run()` method.  
+An MCMC analysis is initiated using the `mcmc.run()` method.
+ 
 The `StoppingRule[]` argument provides a mechanism to automatically terminate an MCMC run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
+
 The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.
+
+In node-dating analyses that employ calibration distributions, it is often of interest to run the analysis without character data to investigate how such distributions interact with one another and with the tree prior. Often, this is referred to as "running the analysis under the prior". In RevBayes, however, calibration distributions are treated as part of the data rather than of the prior. Accordingly, when setting `underPrior=TRUE` in `mcmc.burnin()` or `mcmc.run()`, both character data and calibration distributions are disregarded. To disregard the character data but not the calibrations, use `suppressCharacterData=TRUE` instead.
 
 ## authors
 Sebastian Hoehna
