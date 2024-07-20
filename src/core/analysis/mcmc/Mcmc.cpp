@@ -583,7 +583,6 @@ void Mcmc::initializeSampler( bool prior_only, bool suppress_char_data )
             bool chardata_found = node_value.find("character matrix") != std::string::npos;
             if (chardata_found)
             {
-                std::cout << "Hooray! Found character data!" << std::endl;
                 the_node->setPriorOnly( true );
                 chardata_nodes++;
             }
