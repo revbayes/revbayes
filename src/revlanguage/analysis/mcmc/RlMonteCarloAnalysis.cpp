@@ -129,7 +129,12 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         bool prior = static_cast<const RlBoolean &>( args[args_index++].getVariable()->getRevObject() ).getValue();
         if ( prior == true )
         {
-            value->runPriorSampler( gen, rules, tuning_interval );
+            value->runModifiedSampler( true, false, gen, rules, tuning_interval );
+        }
+        bool suppress_chardata = static_cast<const RlBoolean &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        if ( suppress_chardata == true )
+        {
+            value->runModifiedSampler( false, true, gen, rules, tuning_interval );
         }
         else
         {
@@ -150,11 +155,12 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         bool prior = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool suppress_chardata = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
 
 #ifdef RB_MPI
-        value->burnin( gen, MPI_COMM_WORLD, tuningInterval, prior );
+        value->burnin( gen, MPI_COMM_WORLD, tuningInterval, prior, suppress_chardata );
 #else
-        value->burnin( gen, tuningInterval, prior );
+        value->burnin( gen, tuningInterval, prior, suppress_chardata );
 #endif
         
         return NULL;

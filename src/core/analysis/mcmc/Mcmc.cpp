@@ -540,10 +540,15 @@ void Mcmc::initializeSampler( bool prior_only, bool suppress_char_data )
     
     if (prior_only && suppress_char_data)
     {
+        /* This should never happen: we already check for it at a higher level, namely
+         * within MonteCarloAnalysis::runModifiedSampler(), which is the only function
+         * that runs Mcmc::initializeSampler() with non-default arguments. That function
+         * explicitly tells the user that the "priorOnly" option (which enables
+         * setPriorOnly for *all* stochastic nodes) overrides the "suppressCharacterData"
+         * option (which enables it only for those stochastic nodes that contain character
+         * data). However, just in case, we implement this check one more time here, too.
+         */
         suppress_char_data = false;
-        std::stringstream msg;
-        msg << "NOTE: The 'underPrior' option overrides the 'suppressCharacterData' option.";
-        RBOUT( msg.str() );
     }
     
     size_t chardata_nodes = 0;

@@ -819,7 +819,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 
 
 
-void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval )
+void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata, size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval )
 {
     
     // get the current generation
@@ -834,6 +834,14 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
         
     }
     
+    if (prior && suppress_chardata)
+    {
+        suppress_chardata = false;
+        std::stringstream msg;
+        msg << "NOTE: The 'underPrior' option overrides the 'suppressCharacterData' option.\n";
+        RBOUT( msg.str() );
+    }
+    
     // Let user know what we are doing
     if ( process_active == true && runs[0] != NULL )
     {
@@ -841,7 +849,14 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
         if ( runs[0]->getCurrentGeneration() == 0 )
         {
             ss << "\n";
-            ss << "Running prior MCMC simulation\n";
+            if (prior)
+            {
+                ss << "Running prior MCMC simulation\n";
+            }
+            if (suppress_chardata)
+            {
+                ss << "Running MCMC simulation without character data\n";
+            }
         }
         else
         {
@@ -858,7 +873,14 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
         
         if ( runs[i] != NULL )
         {
-            runs[i]->initializeSampler(true);
+            if (prior)
+            {
+                runs[i]->initializeSampler( true, false );
+            }
+            if (suppress_chardata)
+            {
+                runs[i]->initializeSampler( false, true );
+            }
         }
         
     }
