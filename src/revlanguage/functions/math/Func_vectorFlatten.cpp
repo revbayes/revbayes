@@ -10,7 +10,7 @@
 #include "ArgumentRule.h"
 #include "Func_vectorFlatten.h"
 #include "Real.h"
-#include "VectorFlattenFunction.h"
+#include "GenericFunction.h"
 #include "ModelVector.h"
 #include "RbVector.h"
 #include "RevPtr.h"
@@ -19,6 +19,18 @@
 
 
 using namespace RevLanguage;
+
+namespace Core = RevBayesCore;
+
+template <typename T>
+Core::RbVector<T>* flatten(const Core::RbVector< Core::RbVector<T>>& vs)
+{
+    auto f = new Core::RbVector<T>;
+    for(auto& v: vs)
+	for(auto& x: v)
+	    f->push_back(x);
+    return f;
+}
 
 
 /** Default constructor */
@@ -47,9 +59,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_vectorFlatte
     const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* vec;
     vec = static_cast< const ModelVector<ModelVector<Real> >& >( args[0].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::VectorFlattenFunction* func = new RevBayesCore::VectorFlattenFunction( vec );
-    
-    return func;
+    return RevBayesCore::generic_function_ptr<Core::RbVector<double>>(flatten<double>, vec);
 }
 
 
