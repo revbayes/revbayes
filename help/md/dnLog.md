@@ -1,9 +1,9 @@
 ## name
 dnLog
 ## title
-Log-transformed distribution
+Log-scaled distribution
 ## description
-Log-transforms a given distribution.
+Log-scales a given distribution.
 ## details
 If X ~ dist then exp(X) ~ dnLog(dist)
 

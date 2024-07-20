@@ -1,4 +1,4 @@
-#include "Dist_Log.h"
+#include "Transform_Exp.h"
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
@@ -7,32 +7,50 @@
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
 
-Dist_Log::Dist_Log() : TypedDistribution< RealPos >(),
-    log_distribution( NULL )
+Transform_Exp::Transform_Exp() : TypedDistribution< RealPos >(),
+				 base_distribution( NULL )
+{
+    markAsTransform();
+}
+
+Transform_Exp::~Transform_Exp()
 {
     
 }
 
-Dist_Log::~Dist_Log()
+Transform_Exp* RevLanguage::Transform_Exp::clone( void ) const
 {
-    
+    return new Transform_Exp(*this);
 }
 
-Dist_Log* RevLanguage::Dist_Log::clone( void ) const
+std::optional<double> exp_transform(double x)
 {
-    return new Dist_Log(*this);
+    return exp(x);
 }
 
-// Declare transformation defined in Transform_Exp.cpp
-std::optional<double> exp_transform(double x);
-std::optional<double> exp_inverse(double x);
-std::optional<double> log_exp_prime(double x);
+std::optional<double> exp_inverse(double x)
+{
+    if (x > 0)
+	return log(x);
+    else
+	return {}; // out of range
+}
 
-RevBayesCore::TransformedDistribution* RevLanguage::Dist_Log::createDistribution( void ) const
+std::optional<double> log_exp_prime(double x)
+{
+    // y = exp(x)
+    // dy/dx = exp(x)
+    // log(dy/dx) = x;
+
+    return x;
+}
+
+
+RevBayesCore::TransformedDistribution* RevLanguage::Transform_Exp::createDistribution( void ) const
 {
     
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
+    const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, exp_transform, exp_inverse, log_exp_prime);
@@ -44,16 +62,16 @@ RevBayesCore::TransformedDistribution* RevLanguage::Dist_Log::createDistribution
 
 
 /* Get Rev type of object */
-const std::string& RevLanguage::Dist_Log::getClassType(void)
+const std::string& RevLanguage::Transform_Exp::getClassType(void)
 {
     
-    static std::string rev_type = "Dist_Log";
+    static std::string rev_type = "Transform_Exp";
     
     return rev_type;
 }
 
 /* Get class type spec describing type of object */
-const RevLanguage::TypeSpec& RevLanguage::Dist_Log::getClassTypeSpec(void)
+const RevLanguage::TypeSpec& RevLanguage::Transform_Exp::getClassTypeSpec(void)
 {
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< RealPos >::getClassTypeSpec() ) );
     
@@ -68,17 +86,17 @@ const RevLanguage::TypeSpec& RevLanguage::Dist_Log::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string RevLanguage::Dist_Log::getDistributionFunctionName( void ) const
+std::string RevLanguage::Transform_Exp::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "Log";
+    std::string d_name = "exp";
     
     return d_name;
 }
 
 
 /** Return member rules (no members) */
-const RevLanguage::MemberRules& RevLanguage::Dist_Log::getParameterRules(void) const
+const RevLanguage::MemberRules& RevLanguage::Transform_Exp::getParameterRules(void) const
 {
     static MemberRules dist_member_rules;
     static bool rules_set = false;
@@ -87,7 +105,7 @@ const RevLanguage::MemberRules& RevLanguage::Dist_Log::getParameterRules(void) c
     {
 	std::vector<TypeSpec> distTypes = { TypedDistribution<Real>::getClassTypeSpec(), TypedDistribution<RealPos>::getClassTypeSpec(), TypedDistribution<Probability>::getClassTypeSpec()};
 
-        dist_member_rules.push_back( new ArgumentRule( "logDistribution", distTypes, "The distribution in log-space.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "baseDistribution", distTypes, "The distribution to be transformed.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
@@ -96,7 +114,7 @@ const RevLanguage::MemberRules& RevLanguage::Dist_Log::getParameterRules(void) c
 }
 
 
-const RevLanguage::TypeSpec& RevLanguage::Dist_Log::getTypeSpec( void ) const
+const RevLanguage::TypeSpec& RevLanguage::Transform_Exp::getTypeSpec( void ) const
 {
     static TypeSpec ts = getClassTypeSpec();
     
@@ -106,11 +124,11 @@ const RevLanguage::TypeSpec& RevLanguage::Dist_Log::getTypeSpec( void ) const
 
 
 /** Set a member variable */
-void RevLanguage::Dist_Log::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void RevLanguage::Transform_Exp::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-    if ( name == "logDistribution" )
+    if ( name == "baseDistribution" )
     {
-        log_distribution = var;
+        base_distribution = var;
     }
     else
     {
