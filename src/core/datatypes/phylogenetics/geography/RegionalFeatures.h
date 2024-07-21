@@ -38,8 +38,8 @@ namespace RevBayesCore {
         const RegionalFeatureLayer&                             getLayers(std::string feature_relationship, std::string feature_type, size_t time_index, size_t feature_index);
         
         
-        void            normalizeWithinQuantitative();
-        void            normalizeBetweenQuantitative();
+        void            standardizeWithinQuantitative();
+        void            standardizeBetweenQuantitative();
         std::map<std::string, std::map<std::string, size_t> >  getNumLayers(void) const;
         size_t          getNumTimeslices(void) const;
         
@@ -68,6 +68,7 @@ namespace RevBayesCore {
         
         size_t                                                  numTimeslices;
         std::map<std::string, std::map<std::string, size_t> >   numLayers;
+        double                                                  zeroTolerance;
         
     };
     
