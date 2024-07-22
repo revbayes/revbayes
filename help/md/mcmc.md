@@ -61,3 +61,8 @@ mcmcmc
     their applications. Biometrika, 57:97-109.
   doi: 10.2307/2334940
   url: null
+- citation: Höhna S, Landis MJ, Heath TA (2017). 
+  Phylogenetic inference using `RevBayes`.
+  Current Protocols in Bioinformatics.
+  doi: 10.1002/cpbi.22
+  url: null
