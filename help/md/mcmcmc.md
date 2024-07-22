@@ -7,11 +7,9 @@ The Mcmcmc analysis object keeps a model and the associated moves and monitors. 
 ## details
 The Mcmcmc analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The Mcmcmc analysis object is used to run Markov chain Monte Carlo (Mcmcmc) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
-An MCMCMC analysis is initiated using the `mcmcmc.run()` method.  
+The `mcmcmc.run()` method begins or continues an MCMCMC analysis. The run will continue for `generations`, or until a stopping rule is triggered: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
 
-The `StoppingRule[]` argument provides a mechanism to automatically terminate a run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
-
-The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.
+The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method. An example is given on the documentation page for [`mcmc()`].
 
 In node-dating analyses that employ calibration distributions, it is often of interest to run the analysis without character data to investigate how such distributions interact with one another and with the tree prior. Often, this is referred to as "running the analysis under the prior". In RevBayes, however, calibration distributions are treated as part of the data rather than of the prior. Accordingly, when setting `underPrior=TRUE` in `mcmcmc.burnin()` or `mcmcmc.run()`, both character data and calibration distributions are disregarded. To disregard the character data but not the calibrations, use `suppressCharacterData=TRUE` instead.
 
