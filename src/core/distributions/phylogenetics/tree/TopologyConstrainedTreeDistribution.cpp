@@ -750,6 +750,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
     psi->setRooted( true );
 
     AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
+    if ( tree_base_distribution == NULL )
+    {
+        throw RbException("dnConstrainedTopology cannot simulate from the base distribution. Use the 'initialTree' argument to provide a custom starting tree.");
+    }
     size_t num_taxa = tree_base_distribution->getNumberOfTaxa();
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
 
@@ -980,9 +984,9 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     psi->setRooted( false );
     
     UniformTopologyBranchLengthDistribution* tree_base_distribution = dynamic_cast<UniformTopologyBranchLengthDistribution*>( base_distribution );
-    if (tree_base_distribution == NULL )
+    if ( tree_base_distribution == NULL )
     {
-        throw RbException("Wrong type of base distribution for constrained tree topology distribution.");
+        throw RbException("dnConstrainedTopology cannot simulate from the base distribution. Use the 'initialTree' argument to provide a custom starting tree.");
     }
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
     size_t num_taxa = taxa.size();
