@@ -89,8 +89,8 @@ const std::string& FossilTipTimeSlideUniformProposal::getProposalName( void ) co
 
 double FossilTipTimeSlideUniformProposal::getProposalTuningParameter( void ) const
 {
-    // this proposal has no tuning parameter
-    return RbConstants::Double::nan;
+    // get the scaling parameter for the proposal
+    return lambda;
 }
 
 
