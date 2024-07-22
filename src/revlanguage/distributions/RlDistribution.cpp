@@ -86,7 +86,7 @@ std::vector<std::string> Distribution::getConstructorFunctionAliases( void ) con
     for (size_t i=0; i < dist_aliases.size(); ++i)
     {
         std::string tmp = dist_aliases[i];
-        std::string c_name = "dn" + StringUtilities::firstCharToUpper( tmp );
+        std::string c_name = (is_transform?"tn":"dn") + StringUtilities::firstCharToUpper( tmp );
         
         aliases.push_back( c_name );
     }
@@ -104,7 +104,7 @@ std::string Distribution::getConstructorFunctionName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
     std::string tmp = getDistributionFunctionName();
-    std::string c_name = "dn" + StringUtilities::firstCharToUpper( tmp );
+    std::string c_name = (is_transform?"tn":"dn") + StringUtilities::firstCharToUpper( tmp );
     
     return c_name;
 }
@@ -129,7 +129,7 @@ std::string Distribution::getRevDeclaration(void) const
     else
     {
         std::string tmp = getDistributionFunctionName();
-        std::string dn_name = "dn" + StringUtilities::firstCharToUpper( tmp );
+        std::string dn_name = (is_transform?"tn":"dn") + StringUtilities::firstCharToUpper( tmp );
         o << "" << dn_name << "(";
     }
     
@@ -154,6 +154,11 @@ RevBayesCore::RbHelpDistribution* Distribution::constructTypeSpecificHelp( void 
     return new RevBayesCore::RbHelpDistribution();
 }
 
+
+void Distribution::markAsTransform()
+{
+    is_transform = true;
+}
 
 /** 
  * Get the help entry for this class 

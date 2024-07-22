@@ -23,15 +23,19 @@ Dist_Log* RevLanguage::Dist_Log::clone( void ) const
     return new Dist_Log(*this);
 }
 
+// Declare transformation defined in Transform_Exp.cpp
+std::optional<double> exp_transform(double x);
+std::optional<double> exp_inverse(double x);
+std::optional<double> log_exp_prime(double x);
 
-RevBayesCore::LogDistribution* RevLanguage::Dist_Log::createDistribution( void ) const
+RevBayesCore::TransformedDistribution* RevLanguage::Dist_Log::createDistribution( void ) const
 {
     
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
-    RevBayesCore::LogDistribution* d = new RevBayesCore::LogDistribution(*vp);
+    RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, exp_transform, exp_inverse, log_exp_prime);
 
     delete vp;
     
