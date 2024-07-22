@@ -40,9 +40,20 @@ Func_type* Func_type::clone( void ) const
 RevPtr<RevVariable> Func_type::execute( void )
 {
     
-    RlString* type = new RlString( args[0].getVariable()->getRevObject().getType() );
-    
-    return new RevVariable( type );
+    bool verbose = static_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+
+    if (verbose)
+    {
+	std::ostringstream o;
+	o << args[0].getVariable()->getRevObject().getTypeSpec();
+	RlString* type = new RlString( o.str() );
+	return new RevVariable( type );
+    }
+    else
+    {
+	RlString* type = new RlString( args[0].getVariable()->getRevObject().getType() );
+	return new RevVariable( type );
+    }
 }
 
 
@@ -56,7 +67,8 @@ const ArgumentRules& Func_type::getArgumentRules( void ) const
     if ( rules_set == false )
     {
         
-        argument_rules.push_back( new ArgumentRule( "x", RevObject::getClassTypeSpec(), "A variable.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "x",    RevObject::getClassTypeSpec(), "A variable.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "verbose", RlBoolean::getClassTypeSpec(), "Show parent classes.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         rules_set = true;
         
     }
