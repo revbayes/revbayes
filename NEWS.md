@@ -2,17 +2,22 @@
 
 ## Features
   * Allow constructing log-scaled distributions from non-log distribution (e.g. log-Cauchy)
+  * Add exp/log/logit/invlogit/shift/scale-transformed distributions (e.g. dnExp(1) |> tnShift(2))
   * Allow checking args.size() when there are no arguments.
 
 ## Bug fixes
   * Fix initial tree for ???. (David fill out here?)
   * Fix TreeAssembly sometimes failing to initialize branch lengths.
   * Don't crash if a file changes while we are source( )-ing it.
-  * Fixes for building on Windows.
+  * Multiple fixes for building on Windows.
+  * Fix dnMixture of rate matrices and other Cloneable objects.
 
 ## Documentation improvements
   * stopping rules (srGeweke, srGelmanRubin/PSRF)
   * dnPhyloCTMC
+
+## Backwards-incompatible changes
+  * Remove dnLogexponential.  You can use dnExponential(l) |> tnLog() instead.
 
 # RevBayes 1.2.4 (May 29, 2024)
 
