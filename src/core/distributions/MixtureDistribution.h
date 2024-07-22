@@ -83,7 +83,7 @@ RevBayesCore::MixtureDistribution<mixtureType>::MixtureDistribution(const TypedD
     this->addParameter( parameter_values );
     this->addParameter( probabilities );
     
-    *this->value = simulate();
+    redrawValue();
 }
 
 

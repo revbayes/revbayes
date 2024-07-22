@@ -36,10 +36,11 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode<Tree>*                           tau;
-        const TypedDagNode< RbVector<double> >*             brlen;
+        const TypedDagNode<Tree>*                           tau = nullptr;
+        const TypedDagNode< RbVector<double> >*             brlen = nullptr;
         std::set<size_t>                                    touchedNodeIndices;
-        bool                                                touchedTopology;
+        // Initialize this to false to ensure that we set branch lengths on the first update()
+        bool                                                touchedTopology = false;
     };
     
 }
