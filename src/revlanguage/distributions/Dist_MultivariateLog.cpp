@@ -25,19 +25,22 @@ Dist_MultivariateLog* RevLanguage::Dist_MultivariateLog::clone( void ) const
     return new Dist_MultivariateLog(*this);
 }
 
+std::optional<double> exp_transform(double x);
+std::optional<double> exp_inverse(double x);
+std::optional<double> log_exp_prime(double x);
 
-RevBayesCore::MultivariateLogDistribution* RevLanguage::Dist_MultivariateLog::createDistribution( void ) const
+Core::TransformedVectorDistribution* RevLanguage::Dist_MultivariateLog::createDistribution( void ) const
 {
-    
+    using Core::RbVector;
+
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
-    Core::TypedDistribution<Core::RbVector<double>>* vp    = static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() );
+    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );;
 
-    Core::MultivariateLogDistribution* d = new RevBayesCore::MultivariateLogDistribution(*vp);
-
-    delete vp;
-    
-    return d;
+    return new Core::TransformedVectorDistribution( vp,
+						    exp_transform,
+						    exp_inverse,
+						    log_exp_prime);
 }
 
 

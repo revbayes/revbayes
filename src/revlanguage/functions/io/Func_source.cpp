@@ -21,8 +21,11 @@
 #include "RevVariable.h"
 #include "RlBoolean.h"
 #include "RlFunction.h"
+#include <boost/filesystem/path.hpp>
 
 using namespace RevLanguage;
+
+namespace fs = boost::filesystem;
 
 /** Default constructor */
 Func_source::Func_source( void ) : Procedure()
@@ -43,28 +46,22 @@ Func_source* Func_source::clone( void ) const
     return new Func_source( *this );
 }
 
-
 /** Execute function */
 RevPtr<RevVariable> Func_source::execute( void )
 {
     
     /* Open file */
-    std::string fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    fs::path fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
 
-    std::ifstream inFile(fname);
+    std::stringstream inFile = RevBayesCore::readFileAsStringStream(fname);
 
     bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-    
-    if ( !inFile )
-    {
-        throw RbException( "Could not open file \"" + fname + "\"" );
-    }
     
     // Initialize
     std::string commandLine;
     int lineNumber = 0;
     int result = 0;     // result from processing of last command
-    RBOUT("Processing file \"" + fname + "\"");
+    RBOUT("Processing file \"" + fname.string() + "\"");
     
     // Command-processing loop
     while ( inFile.good() )
@@ -111,7 +108,7 @@ RevPtr<RevVariable> Func_source::execute( void )
     }
     
     // Return control 
-    RBOUT("Processing of file \"" + fname + "\" completed");
+    RBOUT("Processing of file \"" + fname.string() + "\" completed");
     
     return NULL;
 }
