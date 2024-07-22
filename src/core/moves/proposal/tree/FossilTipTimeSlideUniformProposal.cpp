@@ -138,13 +138,13 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
         node_index = tips[ size_t( std::floor(tips.size() * u) ) ];
     }
     
-    TopologyNode* node = &tau.getNode(node_index);
+    TopologyNode& node = tau.getNode(node_index);
 
-    TopologyNode& parent = node->getParent();
+    TopologyNode& parent = node.getParent();
 
     // we need to work with the times
     double parent_age   = parent.getAge();
-    double my_age       = node->getAge();    
+    double my_age       = node.getAge();    
     double min_age      = 0;
     double max_age      = parent_age;
     
@@ -152,7 +152,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     if ( min == NULL )
     {
         // adjust min age given taxon data
-        Taxon& taxon = node->getTaxon();
+        Taxon& taxon = node.getTaxon();
         min_age = taxon.getMinAge();
     }
     else
@@ -163,7 +163,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     if ( max == NULL )
     {
         // adjust max age given taxon data
-        Taxon& taxon = node->getTaxon();
+        Taxon& taxon = node.getTaxon();
         double taxon_max_age = taxon.getMaxAge();
         if ( taxon_max_age < max_age )
         {
@@ -180,10 +180,10 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
         }
     }
 
-    if ( node->isSampledAncestorTip() == true )
+    if ( node.isSampledAncestorTip() == true )
     {
         TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == node )
+        if ( sibling == &node )
         {
             sibling = &parent.getChild( 1 );
         }
@@ -241,7 +241,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     } while ( new_age < min_age || new_age > max_age );
     
     // set the age
-    node->setAge( new_age );
+    node.setAge( new_age );
     
     
     // this is a symmetric proposal so the hasting ratio is 0.0
