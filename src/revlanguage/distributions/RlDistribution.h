@@ -63,12 +63,15 @@ namespace RevLanguage {
     protected:
         Distribution(void);
         
+	void                                                markAsTransform();
         // virtual method that may be overwritten
         virtual void                                        addSpecificHelpFields(RevBayesCore::RbHelpEntry* e) const;
         virtual RevBayesCore::RbHelpDistribution*           constructTypeSpecificHelp(void) const;
                 
     private:
         
+	bool                                                is_transform = false;
+	
         std::string                                         guiDistributionName;
         std::string                                         guiDistributionToolTip;
 

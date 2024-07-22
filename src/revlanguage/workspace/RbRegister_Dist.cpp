@@ -271,6 +271,21 @@
 #include "Dist_reversibleJumpMixtureConstant.h"
 #include "Dist_upp.h"
 
+#include "Transform_Exp.h"
+#include "Transform_Log.h"
+#include "Transform_Logit.h"
+#include "Transform_InvLogit.h"
+#include "Transform_Shift.h"
+#include "Transform_Shift_Pos.h"
+#include "Transform_Scale.h"
+#include "Transform_Scale_Pos.h"
+#include "Transform_Scale_Prob.h"
+
+#include "Transform_Vector_Exp.h"
+#include "Transform_Vector_Log.h"
+#include "Transform_Vector_Logit.h"
+#include "Transform_Vector_Invlogit.h"
+
 /// Functions ///
 
 /* Helper functions for creating functions (in folder "functions") */
@@ -594,6 +609,20 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         AddDistribution< RealPos                    >( new Dist_Log()               );
         AddDistribution< ModelVector<RealPos>       >( new Dist_MultivariateLog()   );
+        AddDistribution< RealPos                    >( new Transform_Exp()          );
+        AddDistribution< Real                       >( new Transform_Log()          );
+        AddDistribution< Real                       >( new Transform_Logit()        );
+        AddDistribution< Probability                >( new Transform_InvLogit()     );
+        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
+        AddDistribution< Real                       >( new Transform_Shift()        );
+        AddDistribution< Probability                >( new Transform_Scale_Prob()   );
+        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
+        AddDistribution< Real                       >( new Transform_Scale()        );
+
+        AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Logit() );
+        AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
