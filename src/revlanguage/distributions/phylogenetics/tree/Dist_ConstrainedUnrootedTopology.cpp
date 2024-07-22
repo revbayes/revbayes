@@ -86,7 +86,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
     
     // tree for initialization
-    RevBayesCore::Tree* init = NULL;
+    RevBayesCore::Tree* init = nullptr;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
         init = static_cast<const BranchLengthTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
@@ -94,9 +94,9 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
     
     /* Since an unrooted topology is not a time tree, its tips are not associated with times that would require checking.
      * Therefore, this distribution has no user-facing (= Rev-level) "age check precision" argument, but because
-     * TopologyConstrainedTreeDistribution expects one, here we set it to NULL and pass it to the constructor.
+     * TopologyConstrainedTreeDistribution expects one, here we set it to 0 and pass it to the constructor.
      */
-    long pr = NULL;
+    long pr = 0;
     
     // create the internal distribution object
     RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init, pr); // , bb);

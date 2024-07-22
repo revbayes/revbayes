@@ -255,16 +255,12 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 	help_strings[string("convertCountFileToNaturalNumbers")][string("name")] = string(R"(convertCountFileToNaturalNumbers)");
 	help_strings[string("convertFastaFileToNaturalNumbers")][string("name")] = string(R"(convertFastaFileToNaturalNumbers)");
 	help_strings[string("convertToPhylowood")][string("name")] = string(R"(convertToPhylowood)");
-	help_strings[string("dexponential")][string("name")] = string(R"(dexponential)");
 	help_strings[string("dfConstant")][string("name")] = string(R"(dfConstant)");
 	help_strings[string("dfExponential")][string("name")] = string(R"(dfExponential)");
 	help_strings[string("dfLinear")][string("name")] = string(R"(dfLinear)");
 	help_arrays[string("diagonalMatrix")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("diagonalMatrix")][string("description")] = string(R"(Building a identity/diagonal matrix with 'n' columns and rows.)");
 	help_strings[string("diagonalMatrix")][string("name")] = string(R"(diagonalMatrix)");
-	help_strings[string("dinvlogit")][string("name")] = string(R"(dinvlogit)");
-	help_strings[string("dlogit")][string("name")] = string(R"(dlogit)");
-	help_strings[string("dnAutocorrelatedEvent")][string("name")] = string(R"(dnAutocorrelatedEvent)");
 	help_arrays[string("dnBernoulli")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
 	help_strings[string("dnBernoulli")][string("description")] = string(R"(A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.)");
 	help_strings[string("dnBernoulli")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
@@ -345,21 +341,21 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Alexander Zarebski)"));
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBivariatePoisson")][string("description")] = string(R"(A Bivariate Poisson distribution defines probabilities for pairs of natural numbers.)");
-	help_strings[string("dnBivariatePoisson")][string("example")] = string(R"(th0 ~ dnUniform(0.0, 10.0)
-th1 ~ dnUniform(0.0, 10.0)
-th2 ~ dnUniform(0.0, 10.0)
-x ~ dnBivariatePoisson(th0, th1, th2)
+	help_strings[string("dnBivariatePoisson")][string("example")] = string(R"(th1 ~ dnUniform(0.0,10.0)
+th2 ~ dnUniform(0.0,10.0)
+th0 ~ dnUniform(0.0,10.0)
+ ~ dnBivariatePoisson(th1, th2, th0)
 x.clamp([3, 3, 3])
-moves[1] = mvSlide(th0, delta=0.01, weight=1.0)
-moves[2] = mvSlide(th1, delta=0.01, weight=1.0)
-moves[3] = mvSlide(th2, delta=0.01, weight=1.0)
-monitors[1] = mnScreen(printgen=20000, th0)
-mymodel = model(th1)
+oves[1] = mvSlide(th1, delta=0.01, weight=1.0)
+moves[2] = mvSlide(th2, delta=0.01, weight=1.0)
+oves[3] = mvSlide(th0, delta=0.01, weight=1.0)
+monitors[1] = mnScreen(printgen=1000,  th0)
+ymodel = model(th1)
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20000, tuningInterval=100)
+ymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnBivariatePoisson")][string("name")] = string(R"(dnBivariatePoisson)");
-	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
+	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
 	help_strings[string("dnBranchRateTree")][string("name")] = string(R"(dnBranchRateTree)");
@@ -801,7 +797,6 @@ x ~ dnLog(dnMultivariateNormal(mu,Sigma)))");
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLoguniform)"));
 	help_strings[string("dnLog")][string("title")] = string(R"(Log-scaled distribution)");
-	help_strings[string("dnLogExponential")][string("name")] = string(R"(dnLogExponential)");
 	help_arrays[string("dnLognormal")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnLognormal")][string("description")] = string(R"(Lognormal distribution is the distribution for a log-transformed normally distributed random variable with mean 'mu' and standard deviation 'sigma'.)");
 	help_strings[string("dnLognormal")][string("details")] = string(R"(The lognormal random variable is defined as
@@ -1130,7 +1125,6 @@ x)");
 	help_strings[string("dnPhyloMultivariateBrownianREML")][string("title")] = string(R"(Phylogenetic Multivariate Brownian Motion)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeck)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckMVN")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckMVN)");
-	help_strings[string("dnPhyloOrnsteinUhlenbeckPruning")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckPruning)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckREML")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckREML)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckThreePoint")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckThreePoint)");
 	help_strings[string("dnPhyloWhiteNoise")][string("name")] = string(R"(dnPhyloWhiteNoise)");
@@ -1251,8 +1245,6 @@ x)");
 	help_arrays[string("dnWhiteNoise")][string("see_also")].push_back(string(R"(dnGamma)"));
 	help_strings[string("dnWhiteNoise")][string("title")] = string(R"(White-Noise Process)");
 	help_strings[string("dnWishart")][string("name")] = string(R"(dnWishart)");
-	help_strings[string("dscale")][string("name")] = string(R"(dscale)");
-	help_strings[string("dshift")][string("name")] = string(R"(dshift)");
 	help_arrays[string("exists")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("exists")][string("description")] = string(R"(Determines whether the RevBayes workspace contains a variable named 'name')");
 	help_strings[string("exists")][string("details")] = string(R"('exists' returns 'true' if the workspace contains a variable whose name matches the String 'name' and 'false' otherwise. One use of 'exists' is to add Move and Monitor objects conditional on the variable 'x' existing. The function 'ls' provides a summary for all variable names that 'exists' would evaluate as 'true'.)");
@@ -1276,7 +1268,6 @@ exists(x))");
 	help_strings[string("fnBiogeographyCladoEventsBD")][string("name")] = string(R"(fnBiogeographyCladoEventsBD)");
 	help_strings[string("fnBiogeographyRateMatrix")][string("name")] = string(R"(fnBiogeographyRateMatrix)");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
-	help_strings[string("fnBranchRates")][string("name")] = string(R"(fnBranchRates)");
 	help_strings[string("fnChromosomes")][string("name")] = string(R"(fnChromosomes)");
 	help_strings[string("fnChromosomesCladoEventsBD")][string("name")] = string(R"(fnChromosomesCladoEventsBD)");
 	help_strings[string("fnChromosomesCladoProbs")][string("name")] = string(R"(fnChromosomesCladoProbs)");
@@ -2078,46 +2069,29 @@ map_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_strings[string("mcmc")][string("description")] = string(R"(The MCMC analysis object keeps a model and the associated moves and monitors. The object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.)");
 	help_strings[string("mcmc")][string("details")] = string(R"(The MCMC analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The MCMC analysis object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
-The `mcmc.run()` method begins or continues an MCMC analysis. 
-
-During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Höhna et al. (2017) for details.
-
-The run will continue for `generations` iterations, or until a stopping rule is triggered: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) in its `StoppingRule[]` argument have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
-
-The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.
-
-The `mcmc.initializeFromCheckpoint()` method allows an analysis to be continued from a checkpoint file. New generations will be appended to existing monitor files.)");
+An MCMC analysis is initiated using the `mcmc.run()` method.  
+The `StoppingRule[]` argument provides a mechanism to automatically terminate an MCMC run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
+The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.)");
 	help_strings[string("mcmc")][string("example")] = string(R"(# Create a simple model (unclamped)
-a ~ dnExponential(1)
+a ~ exponential(1)
 mymodel = model(a)
 
 # Create a move vector and a monitor vector
-moves[1] = mvScale( a, lambda = 1.0, weight = 1.0 )
-monitors[1] = mnFile( a, filename = "output/out.log" )
+moves[1] = mvScale(a, lambda=1.0, weight=1.0)
+monitors[1] = mnFile(a,"output/out.log")
 
 # Create an mcmc object
-mymcmcObject = mcmc( mymodel, monitors, moves )
+mymcmcObject = mcmc( mymodel, monitors, moves)
 
 # Run a short analysis
-mymcmcObject.burnin( generations = 400, tuningInterval = 100 )
-mymcmcObject.run( generations = 400, checkpointFile = "output/out.ckp", checkpointInterval = 100 )
+mymcmcObject.burnin( generations = 400, tuningInterval = 100)
+mymcmcObject.run( generations = 400)
 
 # print the summary of the operators (now tuned)
-mymcmcObject.operatorSummary()
-
-# Resume analysis from the checkpoint file
-mymcmcObject.initializeFromCheckpoint( "output/out.ckp" )
-
-# Conduct an additional 400 generations
-mymcmcObject.run( generations = 400 )
-
-# Stopping rules are defined on the total number of generations
-# This command will have no effect, as 400 generations have already been performed.
-mymcmcObject.run( rules = [ srMaxIteration(400) ] ))");
+mymcmcObject.operatorSummary())");
 	help_strings[string("mcmc")][string("name")] = string(R"(mcmc)");
 	help_references[string("mcmc")].push_back(RbHelpReference(R"(Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953). Equation of state calculations by fast computing machines. Journal of Chemical Physics, 21:1087-1092.)",R"(10.1063/1.1699114)",R"()"));
 	help_references[string("mcmc")].push_back(RbHelpReference(R"(Hastings WK (1970) Monte Carlo sampling methods using Markov chains and their applications. Biometrika, 57:97-109.)",R"(10.2307/2334940)",R"()"));
-	help_references[string("mcmc")].push_back(RbHelpReference(R"(Höhna S, Landis MJ, Heath TA (2017).  Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics.)",R"(10.1002/cpbi.22)",R"()"));
 	help_arrays[string("mcmc")][string("see_also")].push_back(string(R"(mcmcmc)"));
 	help_strings[string("mcmc")][string("title")] = string(R"(MCMC analysis object)");
 	help_arrays[string("mcmcmc")][string("authors")].push_back(string(R"(Michael Landis)"));
@@ -2127,7 +2101,7 @@ mymcmcObject.run( rules = [ srMaxIteration(400) ] ))");
 
 An MCMCMC analysis is initiated using the `mcmcmc.run()` method.  
 The `StoppingRule[]` argument provides a mechanism to automatically terminate a run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
-The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method. An example is given on the documentation page for [`mcmc()`].)");
+The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method.)");
 	help_strings[string("mcmcmc")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ exponential(1)
 mymodel = model(a)
@@ -2195,37 +2169,7 @@ min(a)
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
 	help_strings[string("mnStochasticVariable")][string("name")] = string(R"(mnStochasticVariable)");
-	help_strings[string("model")][string("description")] = string(R"(Creates a model object that can be graphed or subjected to Bayesian inference.)");
-	help_strings[string("model")][string("details")] = string(R"(`model(x)` creates a model object by creating a copy of all elements and 
-parameters that influence or are influenced by the likelihood of `x`.
-
-Because `model` works with copies of objects, conducting an mcmc(mc) analysis
-on a model object will not change the values of the objects in the RevBayes
-workspace.)");
-	help_strings[string("model")][string("example")] = string(R"(# Create a simple model (unclamped)
-a ~ dnExponential(1)
-b ~ dnExponential(a)
-mymodel = model(b) # equivalent to model(a) or model(a, b)
-
-# Save a DOT visualization of the model to file
-mymodel.graph("mymodel.dot")
-
-# Create a move vector and a monitor vector
-moves = [ mvScale( a, lambda = 1.0, weight = 1.0 ) ]
-monitors = [ mnScreen(printgen = 10, a) ]
-
-# Create an mcmc object
-mymcmcObject = mcmc( mymodel, monitors, moves )
-
-# Print value of a
-print(a)
-
-# Run a short analysis
-mymcmcObject.run( generations = 100 )
-
-print(a) # Value is unchanged in the workspace - only the copy is modified)");
 	help_strings[string("model")][string("name")] = string(R"(model)");
-	help_strings[string("model")][string("title")] = string(R"(Create a model object)");
 	help_strings[string("module")][string("name")] = string(R"(module)");
 	help_strings[string("mrcaIndex")][string("name")] = string(R"(mrcaIndex)");
 	help_strings[string("mvAVMVN")][string("description")] = string(R"(The adaptive variance multivariate-normal proposal of Baele et al. 2017, uses MCMC samples to fit covariance matrix to parameters.
@@ -2399,7 +2343,6 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGraphFlipEdge")][string("name")] = string(R"(mvGraphFlipEdge)");
 	help_strings[string("mvGraphShiftEdge")][string("name")] = string(R"(mvGraphShiftEdge)");
 	help_strings[string("mvHSRFHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFHyperpriorsGibbs)");
-	help_strings[string("mvHSRFIntervalSwap")][string("name")] = string(R"(mvHSRFIntervalSwap)");
 	help_strings[string("mvHSRFUnevenGridHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFUnevenGridHyperpriorsGibbs)");
 	help_strings[string("mvHomeologPhase")][string("name")] = string(R"(mvHomeologPhase)");
 	help_arrays[string("mvIidPrior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -2524,6 +2467,7 @@ mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("mvRandomGeometricWalk")][string("name")] = string(R"(mvRandomGeometricWalk)");
+	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(mvRandomIntegerWalk)");
 	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
 	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
 	help_strings[string("mvRandomGeometricWalk")][string("title")] = string(R"(Geometric random walk)");
@@ -2923,6 +2867,7 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvSubtreeSwap")][string("name")] = string(R"(mvSubtreeSwap)");
 	help_strings[string("mvSymmetricMatrixElementSlide")][string("name")] = string(R"(mvSymmetricMatrixElementSlide)");
 	help_strings[string("mvSynchronizedVectorFixedSingleElementSlide")][string("name")] = string(R"(mvSynchronizedVectorFixedSingleElementSlide)");
+	help_strings[string("mvTipTimeSlideUniform")][string("name")] = string(R"(mvTipTimeSlideUniform)");
 	help_strings[string("mvTreeScale")][string("name")] = string(R"(mvTreeScale)");
 	help_strings[string("mvUPPAllocation")][string("name")] = string(R"(mvUPPAllocation)");
 	help_strings[string("mvUpDownScale")][string("name")] = string(R"(mvUpDownScale)");
@@ -3028,13 +2973,8 @@ print(trees))");
 	help_arrays[string("rep")][string("see_also")].push_back(string(R"(v)"));
 	help_strings[string("rep")][string("title")] = string(R"(Replicate a value)");
 	help_strings[string("reverse")][string("name")] = string(R"(reverse)");
-	help_strings[string("rexponential")][string("name")] = string(R"(rexponential)");
-	help_strings[string("rinvlogit")][string("name")] = string(R"(rinvlogit)");
-	help_strings[string("rlogit")][string("name")] = string(R"(rlogit)");
 	help_strings[string("rootedTripletDist")][string("name")] = string(R"(rootedTripletDist)");
 	help_strings[string("round")][string("name")] = string(R"(round)");
-	help_strings[string("rscale")][string("name")] = string(R"(rscale)");
-	help_strings[string("rshift")][string("name")] = string(R"(rshift)");
 	help_strings[string("seed")][string("description")] = string(R"(Sets the random number generator seed given a natural number.)");
 	help_strings[string("seed")][string("example")] = string(R"(# pick some definitely random number
 seed(80797980)

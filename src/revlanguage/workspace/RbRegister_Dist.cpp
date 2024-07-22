@@ -644,6 +644,23 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector< ModelVector<TimeTree> >                  >( new Dist_Inverse< ModelVector<ModelVector<TimeTree> > >());
         AddDistribution< ModelVector<BranchLengthTree>                         >( new Dist_Inverse< ModelVector<BranchLengthTree> >());
 
+        AddDistribution< RealPos                    >( new Dist_Log()               );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_MultivariateLog()   );
+        AddDistribution< RealPos                    >( new Transform_Exp()          );
+        AddDistribution< Real                       >( new Transform_Log()          );
+        AddDistribution< Real                       >( new Transform_Logit()        );
+        AddDistribution< Probability                >( new Transform_InvLogit()     );
+        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
+        AddDistribution< Real                       >( new Transform_Shift()        );
+        AddDistribution< Probability                >( new Transform_Scale_Prob()   );
+        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
+        AddDistribution< Real                       >( new Transform_Scale()        );
+
+        AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Logit() );
+        AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
+
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
 
