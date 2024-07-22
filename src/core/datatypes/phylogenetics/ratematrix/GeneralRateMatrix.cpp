@@ -9,7 +9,7 @@
 using namespace RevBayesCore;
 
 
-GeneralRateMatrix::GeneralRateMatrix(size_t n, bool rto) : AbstractRateMatrix(n),
+GeneralRateMatrix::GeneralRateMatrix(size_t n, bool rto) : AbstractRateMatrix(n, rto, AbstractRateMatrix::EIGEN),
 //    stationary_freqs( std::vector<double>(num_states,1.0/n) ),
     transition_rates( std::vector<double>(num_states*num_states-num_states, 1.0/n) ),
     rescale_to_one(rto)

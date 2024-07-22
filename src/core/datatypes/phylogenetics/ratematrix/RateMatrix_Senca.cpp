@@ -20,7 +20,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_Senca::RateMatrix_Senca(size_t n) : TimeReversibleRateMatrix( n )
+RateMatrix_Senca::RateMatrix_Senca(size_t n) : TimeReversibleRateMatrix( n, true, AbstractRateMatrix::EIGEN )
 {
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);

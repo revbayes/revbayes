@@ -15,7 +15,7 @@ using namespace RevBayesCore;
 /**  Default Constructor for a Kimura80 Rate Matrix
  * This constructor has no parameters as it assumes the transition:transvertion ratio, Kappa, to be 1
  *  */
-RateMatrix_Kimura80::RateMatrix_Kimura80(void) : TimeReversibleRateMatrix( 4 )
+RateMatrix_Kimura80::RateMatrix_Kimura80(void) : TimeReversibleRateMatrix( 4, true, AbstractRateMatrix::OTHER )
 {
     
     kappa = 1.0;

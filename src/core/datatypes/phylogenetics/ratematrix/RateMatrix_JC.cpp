@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  *
  * @param n the size of the matrix
  *  */
-RateMatrix_JC::RateMatrix_JC(size_t n) : TimeReversibleRateMatrix( n )
+RateMatrix_JC::RateMatrix_JC(size_t n) : TimeReversibleRateMatrix( n, true, AbstractRateMatrix::OTHER )
 {
     
     

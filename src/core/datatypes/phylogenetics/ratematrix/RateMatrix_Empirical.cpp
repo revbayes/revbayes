@@ -16,7 +16,8 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_Empirical::RateMatrix_Empirical(size_t n) : TimeReversibleRateMatrix( n ){
+RateMatrix_Empirical::RateMatrix_Empirical(size_t n) : TimeReversibleRateMatrix( n, true, AbstractRateMatrix::EIGEN )
+{
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);
     c_ijk.resize(num_states * num_states * num_states);
@@ -168,7 +169,8 @@ void RateMatrix_Empirical::tiProbsComplexEigens(double t, TransitionProbabilityM
 
 
 /** Update the eigen system */
-void RateMatrix_Empirical::updateEigenSystem(void) {
+void RateMatrix_Empirical::updateEigenSystem(void) 
+{
     
     theEigenSystem->update();
     calculateCijk();
@@ -176,7 +178,8 @@ void RateMatrix_Empirical::updateEigenSystem(void) {
 }
 
 
-void RateMatrix_Empirical::update( void ) {
+void RateMatrix_Empirical::update( void ) 
+{
     
 }
 

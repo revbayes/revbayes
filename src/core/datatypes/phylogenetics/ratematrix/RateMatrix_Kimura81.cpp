@@ -20,7 +20,7 @@ using namespace RevBayesCore;
  * @param n The size of the matrix
  *
  *  */
-RateMatrix_Kimura81::RateMatrix_Kimura81(size_t n) : TimeReversibleRateMatrix( n )
+RateMatrix_Kimura81::RateMatrix_Kimura81(size_t n) : TimeReversibleRateMatrix( n, true, AbstractRateMatrix::EIGEN )
 {
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);

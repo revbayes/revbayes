@@ -17,7 +17,7 @@ using namespace RevBayesCore;
 
 
 /** Construct rate matrix with n states */
-RateMatrix_revPoMoKN::RateMatrix_revPoMoKN(long num_states, long in_k, long in_n, long in_nex) : TimeReversibleRateMatrix( num_states ),
+RateMatrix_revPoMoKN::RateMatrix_revPoMoKN(long num_states, long in_k, long in_n, long in_nex) : TimeReversibleRateMatrix( num_states, false, AbstractRateMatrix::EIGEN ),
     K( in_k ),
     N( in_n ),
     pi( in_k, 1.0/in_k ),

@@ -30,40 +30,38 @@ namespace RevBayesCore {
     class AbstractRateMatrix : public RateMatrix {
         
     public:
+
+        enum METHOD { SCALING_AND_SQUARING, SCALING_AND_SQUARING_PADE, SCALING_AND_SQUARING_TAYLOR, UNIFORMIZATION, EIGEN, OTHER };
+
         virtual                            ~AbstractRateMatrix(void);                                                                   //!< Destructor
-        
-        // overloaded operators
-//        std::vector<double>&                operator[](size_t i);                                                                       //!< Subscript operator
-//        const std::vector<double>&          operator[](size_t i) const;                                                                 //!< Subscript operator (const)
-        
-//        std::vector<std::vector<double> >::const_iterator       begin(void) const;
-//        std::vector<std::vector<double> >::iterator             begin(void);
-//        std::vector<std::vector<double> >::const_iterator       end(void) const;
-//        std::vector<std::vector<double> >::iterator             end(void);
-        
+                
         // public methods
+        void                                fillRateMatrix(void);
         double                              getRate(size_t from, size_t to, double rate=1.0) const;
-        double                              getRate(size_t from, size_t to, double age, double rate) const;         //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
+        double                              getRate(size_t from, size_t to, double age, double rate) const;                             //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
+        MatrixReal                          getRateMatrix(void) const;
         void                                rescaleToAverageRate(double r);                                                             //!< Rescale the rate matrix such that the average rate is "r"
         void                                setDiagonal(void);                                                                          //!< Set the diagonal such that each row sums to zero
-        virtual std::vector<int>            get_emitted_letters() const;                                                                //!<Find out what alphet letter each state emits        
+        void                                update(void);                                                                               //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
 
-        // pure virtual methods you have to overwrite
-        virtual double                      averageRate(void) const = 0;                                                                //!< Calculate the average rate
-        virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const = 0;   //!< Calculate the transition matrix
+        // virtual metho that you may want to overwrite
+        virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         virtual void                        calculateTransitionProbabilitiesForStochasticMapping(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
-        virtual AbstractRateMatrix*         clone(void) const = 0;
-        virtual std::vector<double>         getStationaryFrequencies(void) const = 0;                                                   //!< Return the stationary frequencies
-        MatrixReal                          getRateMatrix(void) const;
-        virtual void                        update(void) = 0;                                                                           //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
+        virtual std::vector<int>            get_emitted_letters() const;                                                                //!<Find out what alphet letter each state emits
         virtual MatrixReal                  getStochasticMatrix(size_t n) const;
         virtual double                      getDominatingRate(void) const;
         virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times) const;
+        virtual void                        updateInternalRateMatrix(void);                                                             //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
+
+        // pure virtual methods you have to overwrite
+        virtual double                      averageRate(void) const = 0;                                                                //!< Calculate the average rate
+        virtual AbstractRateMatrix*         clone(void) const = 0;
+        virtual std::vector<double>         getStationaryFrequencies(void) const = 0;                                                   //!< Return the stationary frequencies
         
 
     protected:
         // prevent instantiation
-        AbstractRateMatrix(size_t n);                                                                                                   //!< Construct rate matrix with n states
+        AbstractRateMatrix(size_t n, bool r, METHOD m);                                                                                                   //!< Construct rate matrix with n states
         AbstractRateMatrix(const AbstractRateMatrix& m);                                                                                //!< Copy constructor
         AbstractRateMatrix&                 operator=(const AbstractRateMatrix& r);                                                     //!< Assignment operator
         
@@ -72,12 +70,38 @@ namespace RevBayesCore {
         bool                                checkTimeReversibity(double tolerance);
         virtual void                        computeStochasticMatrix(size_t n) const;
         virtual void                        computeDominatingRate(void) const;
+        
+        void                                calculateCijk(void);                                                                        //!< Do precalculations on eigenvectors and their inverse
+        void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                              //!< Calculate transition probabilities for real case
+        void                                tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const;                       //!< Calculate transition probabilities for complex case
+        void                                tiProbsUniformization(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities with uniformization
+        void                                tiProbsScalingAndSquaring(double t, TransitionProbabilityMatrix& P) const;                  //!< Calculate transition probabilities with scaling and squaring
+        void                                updateEigenSystem(void);                                                                    //!< Update the system of eigenvalues and eigenvectors
+        void                                updateUniformization(void);                                                                 //!< Update the system for uniformization
+        void                                expandUniformization(int truncation, double tolerance) const;
         void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
+        void                                exponentiateMatrixTaylor(MatrixReal& A, MatrixReal& F, double tolerance) const;
+        void                                checkMatrixIrreducible(double tolerance, TransitionProbabilityMatrix& P) const;
+        void                                checkMatrixDiff(MatrixReal x, double tolerance, bool& diff) const;
+
         
         // protected members available for derived classes
         MatrixReal*                         the_rate_matrix;                                                                            //!< Holds the rate matrix
         bool                                needs_update;
+        bool                                rescale;
+
+        // the eigensystem
+        EigenSystem*                        the_eigen_system;                                                                           //!< Holds the eigen system
+        std::vector<double>                 c_ijk;                                                                                      //!< Vector of precalculated product of eigenvectors and their inverse
+        std::vector<std::complex<double> >  cc_ijk;                                                                                     //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
         
+        // members for uniformization
+        MatrixReal                          singleStepMatrix;
+        std::vector<MatrixReal>*            matrixProducts;
+        double                              maxRate;
+        
+        METHOD                              my_method;
+       
         // stochastic matrix
         mutable double                      dominating_rate;
         mutable std::vector<MatrixReal>     stochastic_matrix;                                                                          //!< Stochastic matrix raised to the power of n

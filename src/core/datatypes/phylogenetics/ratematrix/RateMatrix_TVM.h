@@ -18,11 +18,11 @@ namespace RevBayesCore {
      * and five exchangeability parameters. The resulting rate matrix is computed by:
      *
      *      |     -       pi_C*r_1  pi_G*r_2   pi_T*r_3  |
-     *      |                                                              |
+     *      |                                            |
      *      |   pi_A*r_1      -     pi_G*r_4   pi_T*r_2  |
-     * Q =     |                                                              |
+     *  Q = |                                            |
      *      |  pi_A*r_2   pi_C*r_4      -      pi_T*r_5  |
-     *      |                                                              |
+     *      |                                            |
      *      |   pi_A*r_3  pi_C*r_2   pi_G*r_5       -    |
      *
      */

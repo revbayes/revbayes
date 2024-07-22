@@ -16,7 +16,7 @@ using namespace RevBayesCore;
 /** Default Constructor for a HKY rate matrix
  * Kappa is initialized to 1
  *  */
-RateMatrix_HKY::RateMatrix_HKY(void) : TimeReversibleRateMatrix( 4 )
+RateMatrix_HKY::RateMatrix_HKY(void) : TimeReversibleRateMatrix( 4, true, AbstractRateMatrix::OTHER )
 {
     
     kappa = 1.0;

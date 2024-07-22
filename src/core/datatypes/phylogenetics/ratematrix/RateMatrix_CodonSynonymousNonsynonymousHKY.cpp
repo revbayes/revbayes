@@ -21,7 +21,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_CodonSynonymousNonsynonymousHKY::RateMatrix_CodonSynonymousNonsynonymousHKY( void ) : TimeReversibleRateMatrix( 61 ),
+RateMatrix_CodonSynonymousNonsynonymousHKY::RateMatrix_CodonSynonymousNonsynonymousHKY( void ) : TimeReversibleRateMatrix( 61, false, AbstractRateMatrix::EIGEN ),
     kappa( 1.0 ),
     omega( 1.0 ),
     nucleotide_freqs(4,0.25)

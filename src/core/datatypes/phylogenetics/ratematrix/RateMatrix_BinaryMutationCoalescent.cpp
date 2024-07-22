@@ -10,7 +10,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states, virtual population size, mutation rates, selection coefficients */
-RateMatrix_BinaryMutationCoalescent::RateMatrix_BinaryMutationCoalescent(size_t n) : AbstractRateMatrix( n * (n+3) / 2.0 ),
+RateMatrix_BinaryMutationCoalescent::RateMatrix_BinaryMutationCoalescent(size_t n) : AbstractRateMatrix( n * (n+3) / 2.0, false, AbstractRateMatrix::EIGEN ),
     N( n ),
     matrix_size( (n*(n+3)/2.0) ),
     mu( 1.0 ),

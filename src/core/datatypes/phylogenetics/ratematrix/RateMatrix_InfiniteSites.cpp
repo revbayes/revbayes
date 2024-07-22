@@ -12,7 +12,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_InfiniteSites::RateMatrix_InfiniteSites(size_t n) : TimeReversibleRateMatrix( n )
+RateMatrix_InfiniteSites::RateMatrix_InfiniteSites(size_t n) : TimeReversibleRateMatrix( n, true, AbstractRateMatrix::EIGEN )
 {
     
     MatrixReal &m = *the_rate_matrix;

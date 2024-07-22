@@ -1,10 +1,3 @@
-//
-//  RateMatrix_ReversiblePoMo.cpp
-//
-//  Created by Bastien Boussau on 4/4/14.
-//  Copyright (c) 2014 Bastien Boussau. all rights reserved.
-//
-
 #include "RateMatrix_ReversiblePoMo.h"
 
 #include <cassert>
@@ -19,7 +12,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_ReversiblePoMo::RateMatrix_ReversiblePoMo(size_t n) : AbstractRateMatrix( n ), rho( 6, 1.0 ), pi(4, 0.25), N( 10 ), matrixSize( n )
+RateMatrix_ReversiblePoMo::RateMatrix_ReversiblePoMo(size_t n) : AbstractRateMatrix( n, false, AbstractRateMatrix::EIGEN ), rho( 6, 1.0 ), pi(4, 0.25), N( 10 ), matrixSize( n )
 {
     // theEigenSystem       = new EigenSystem(the_rate_matrix);
     // c_ijk.resize(num_states * num_states * num_states);
@@ -44,7 +37,7 @@ RateMatrix_ReversiblePoMo::RateMatrix_ReversiblePoMo(size_t n) : AbstractRateMat
 
 
 /** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual population size */
-RateMatrix_ReversiblePoMo::RateMatrix_ReversiblePoMo(const size_t n,  const std::vector<double> &rh, const Simplex p, const size_t vps  )  : AbstractRateMatrix( n ), rho(rh), pi(p), N( vps ), matrixSize( n )
+RateMatrix_ReversiblePoMo::RateMatrix_ReversiblePoMo(const size_t n,  const std::vector<double> &rh, const Simplex p, const size_t vps  )  : AbstractRateMatrix( n, false, AbstractRateMatrix::EIGEN ), rho(rh), pi(p), N( vps ), matrixSize( n )
 {
 
   // theEigenSystem       = new EigenSystem(the_rate_matrix);

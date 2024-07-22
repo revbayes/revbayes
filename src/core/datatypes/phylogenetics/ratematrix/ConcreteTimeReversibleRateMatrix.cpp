@@ -79,8 +79,7 @@ vector<double> flatten_exchange_rates( const MatrixReal& ER )
 }
 
 /** Construct rate matrix with n states */
-ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector<double>& er, const vector<double>& pi, boost::optional<double> r)
-    : TimeReversibleRateMatrix( pi.size() ), _rate(r)
+ConcreteTimeReversibleRateMatrix::ConcreteTimeReversibleRateMatrix( const vector<double>& er, const vector<double>& pi, boost::optional<double> r) : TimeReversibleRateMatrix( pi.size(), false, AbstractRateMatrix::EIGEN ), _rate(r)
 {
     int n = pi.size();
     assert( er.size() == n*(n-1)/2 );

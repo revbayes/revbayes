@@ -16,7 +16,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with 4 states */
-RateMatrix_TamuraNei::RateMatrix_TamuraNei(void) : TimeReversibleRateMatrix( 4 )
+RateMatrix_TamuraNei::RateMatrix_TamuraNei(void) : TimeReversibleRateMatrix( 4, true, AbstractRateMatrix::EIGEN )
 {
     
     theEigenSystem       = new EigenSystem(the_rate_matrix);

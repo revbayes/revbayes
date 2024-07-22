@@ -25,8 +25,7 @@ phi( in_k, 1.0 )
 */
 
 /** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual population size */
-RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr)  : 
-AbstractRateMatrix( num_states ), 
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr) : AbstractRateMatrix( num_states, false, AbstractRateMatrix::EIGEN ), 
 K( in_k ),
 N( in_n ),
 mu( in_nmr, 0.01 ),

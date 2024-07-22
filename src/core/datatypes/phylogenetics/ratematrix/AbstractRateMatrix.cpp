@@ -5,12 +5,15 @@
 #include <algorithm>
 #include <cstddef>
 
+#include "EigenSystem.h"
 #include "MatrixReal.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathMatrix.h"
+#include "RbMathLogic.h"
+#include "RbSettings.h"
 #include "DistributionPoisson.h"
 #include "TransitionProbabilityMatrix.h"
 #include "Cloneable.h"
@@ -21,10 +24,23 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-AbstractRateMatrix::AbstractRateMatrix(size_t n) : RateMatrix(n),
+AbstractRateMatrix::AbstractRateMatrix(size_t n, bool r, METHOD m) : RateMatrix(n),
     the_rate_matrix( new MatrixReal(num_states, num_states, 1.0) ),
-    needs_update( true )
+    the_eigen_system( NULL ),
+    needs_update( true ),
+    rescale( r ),
+    my_method( m )
 {
+    
+    if ( my_method == EIGEN )
+    {
+        // create the eigen system so the destructor has something to delete
+        the_eigen_system       = new EigenSystem(the_rate_matrix);
+        c_ijk.resize(num_states * num_states * num_states);
+        cc_ijk.resize(num_states * num_states * num_states);
+    }
+    
+    matrixProducts = new std::vector<MatrixReal>();
 
     // I cannot call a pure virtual function from the constructor (Sebastian)
     //    update();
@@ -35,8 +51,21 @@ AbstractRateMatrix::AbstractRateMatrix(size_t n) : RateMatrix(n),
 /** Copy constructor */
 AbstractRateMatrix::AbstractRateMatrix(const AbstractRateMatrix& m) : RateMatrix(m),
     the_rate_matrix( new MatrixReal(*m.the_rate_matrix) ),
-    needs_update( true )
+    the_eigen_system( NULL ),
+    needs_update( true ),
+    rescale( m.rescale )
 {
+    my_method               = m.my_method;
+    
+    if ( my_method == EIGEN )
+    {
+        the_eigen_system        = new EigenSystem( *m.the_eigen_system );
+        c_ijk                   = m.c_ijk;
+        cc_ijk                  = m.cc_ijk;
+        
+        the_eigen_system->setRateMatrixPtr(the_rate_matrix);
+    }
+    
 
 }
 
@@ -46,6 +75,7 @@ AbstractRateMatrix::~AbstractRateMatrix(void)
 {
 
     delete the_rate_matrix;
+    delete the_eigen_system;
 }
 
 
@@ -59,60 +89,78 @@ AbstractRateMatrix& AbstractRateMatrix::operator=(const AbstractRateMatrix &r)
 
         delete the_rate_matrix;
 
-        the_rate_matrix       = new MatrixReal( *r.the_rate_matrix );
-        needs_update         = true;
+        the_rate_matrix         = new MatrixReal( *r.the_rate_matrix );
+        needs_update            = true;
+        rescale                 = r.rescale;
+        
+        my_method               = r.my_method;
+        
+        if ( my_method == EIGEN )
+        {
+            the_eigen_system        = new EigenSystem( *r.the_eigen_system );
+            c_ijk                   = r.c_ijk;
+            cc_ijk                  = r.cc_ijk;
+            
+            the_eigen_system->setRateMatrixPtr(the_rate_matrix);
+        }
+        
 
     }
 
     return *this;
 }
 
-///** Index operator (const) */
-//const std::vector<double>& AbstractRateMatrix::operator[]( const size_t i ) const {
-//
-//    if ( i >= num_states )
-//    {
-//        throw RbException( "Index to RateMatrix[][] out of bounds" );
-//    }
-//
-//    return (*the_rate_matrix)[i];
-//}
-//
-//
-///** Index operator */
-//std::vector<double>& AbstractRateMatrix::operator[]( const size_t i ) {
-//
-//    if ( i >= num_states )
-//    {
-//        throw RbException( "Index to RateMatrix[][] out of bounds" );
-//    }
-//
-//    return (*the_rate_matrix)[i];
-//}
 
-
-//std::vector<std::vector<double> >::const_iterator AbstractRateMatrix::begin( void ) const
-//{
-//    return the_rate_matrix->begin();
-//}
-//
-//
-//std::vector<std::vector<double> >::iterator AbstractRateMatrix::begin( void )
-//{
-//    return the_rate_matrix->begin();
-//}
-//
-//
-//std::vector<std::vector<double> >::const_iterator AbstractRateMatrix::end( void ) const
-//{
-//    return the_rate_matrix->end();
-//}
-//
-//
-//std::vector<std::vector<double> >::iterator AbstractRateMatrix::end( void )
-//{
-//    return the_rate_matrix->end();
-//}
+/** Do precalculations on eigenvectors */
+void AbstractRateMatrix::calculateCijk(void)
+{
+    
+    if ( the_eigen_system->isComplex() == false )
+    {
+        // real case
+        const MatrixReal& ev  = the_eigen_system->getEigenvectors();
+        const MatrixReal& iev = the_eigen_system->getInverseEigenvectors();
+        double* pc = &c_ijk[0];
+        for (size_t i=0; i<num_states; i++)
+        {
+            
+            for (size_t j=0; j<num_states; j++)
+            {
+                
+                for (size_t k=0; k<num_states; k++)
+                {
+                    *(pc++) = ev[i][k] * iev[k][j];
+                }
+                
+            }
+            
+        }
+        
+    }
+    else
+    {
+        // complex case
+        const MatrixComplex& cev  = the_eigen_system->getComplexEigenvectors();
+        const MatrixComplex& ciev = the_eigen_system->getComplexInverseEigenvectors();
+        std::complex<double>* pc = &cc_ijk[0];
+        for (size_t i=0; i<num_states; i++)
+        {
+            
+            for (size_t j=0; j<num_states; j++)
+            {
+                
+                for (size_t k=0; k<num_states; k++)
+                {
+                    *(pc++) = cev[i][k] * ciev[k][j];
+                }
+                
+            }
+            
+        }
+        
+    }
+    
+}
 
 
 /** This function calculates the stationary frequencies of the rate matrix. The
@@ -200,6 +248,62 @@ std::vector<double> AbstractRateMatrix::calculateStationaryFrequencies(void) con
     return pi;
 }
 
+
+/** Calculate the transition probabilities */
+void AbstractRateMatrix::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
+{
+    assert(num_states == P.num_states);
+
+    // The eigensystem code was returning NaN likelihood values when transition rates
+    // were close to 0.0, so now we use the scaling and squaring method.
+    double t = rate * (startAge - endAge);
+    if (my_method == SCALING_AND_SQUARING)
+    {
+        exponentiateMatrixByScalingAndSquaring(t, P);
+    }
+    else if (my_method == SCALING_AND_SQUARING_PADE || my_method == SCALING_AND_SQUARING_TAYLOR)
+    {
+        tiProbsScalingAndSquaring(t, P);
+    }
+    else if (my_method == UNIFORMIZATION)
+    {
+        tiProbsUniformization(t, P);
+    }
+    else if (my_method == EIGEN)
+    {
+        if ( the_eigen_system->isComplex() == false )
+        {
+            tiProbsEigens(t, P);
+        }
+        else
+        {
+            tiProbsComplexEigens(t, P);
+        }
+    }
+
+    for(int i=0; i < num_states; i++)
+    {
+        double total = 0;
+        for(int j=0; j < num_states; j++)
+        {
+#ifdef DEBUG_MATRIX_EXPONENTIAL
+            if (P[i][j] < -1.0e-6)
+                std::cerr<<my_method<<" exp(M)["<<i<<","<<j<<"] = "<<P[i][j]<<"\n";
+#endif
+            P[i][j] = std::max(0.0, P[i][j]);
+            total += P[i][j];
+        }
+#ifdef DEBUG_MATRIX_EXPONENTIAL
+        if (std::abs(total - 1.0) > num_states * 1.0e-6)
+            std::cerr<<my_method<<" exp(M)["<<i<<"]: row sum = "<<total<<"\n";
+#endif
+        double scale = 1.0/total;
+        for(int j=0; j < num_states; j++)
+            P[i][j] *= scale;
+    }
+}
+
+
 /** This function computes the transition probability matrix that is used for
  stochastic mapping. In general, we use the matrix uniformization method
  for stochastic mapping, which requires P(t) = exp(Qt). This function may be
@@ -209,6 +313,76 @@ std::vector<double> AbstractRateMatrix::calculateStationaryFrequencies(void) con
 void AbstractRateMatrix::calculateTransitionProbabilitiesForStochasticMapping(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
     calculateTransitionProbabilities(startAge, endAge, rate, P);
+}
+
+
+void AbstractRateMatrix::computeDominatingRate(void) const
+{
+    dominating_rate = 0.0;
+    for (size_t i = 0; i < num_states; i++)
+    {
+        double r = -(*the_rate_matrix)[i][i];
+        if ( r > dominating_rate)
+        {
+            dominating_rate = r;
+        }
+    }
+}
+
+
+void AbstractRateMatrix::checkMatrixDiff(MatrixReal x, double tolerance, bool& diff) const
+{
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        for (size_t j = 0; j < num_states; ++j)
+        {
+            diff = (std::abs(x[i][j]) < tolerance) ? true : false;
+            if (diff == false)
+            {
+                return;
+            }
+        }
+    }
+}
+
+
+void AbstractRateMatrix::checkMatrixIrreducible(double tolerance, TransitionProbabilityMatrix &P) const
+{
+    // check if the Q matrix is irreducible by checking if there is any element in the P matrix
+    // that is smaller than some specified tolerance
+    // and if that's the case, fill in the P matrix with all zeros
+    // so that the current proposal will certainly get rejected
+    // here we assume that all the states in the Q matrix exist in the observed data
+    bool irreducible = true;
+    
+    for (size_t i = 0; i < num_states - 1; ++i)
+    {
+        for (size_t j = i + 1; j < num_states; ++j)
+        {
+            if (P[i][j] < tolerance && P[j][i] < tolerance)
+            {
+                irreducible = false;
+                break;
+            }
+        }
+        if (irreducible == false)
+        {
+            break;
+        }
+    }
+    
+    if (irreducible == false)
+    {
+        for (size_t i = 0; i < num_states; ++i)
+        {
+            P[i][i] = 1.0;
+            for (size_t j = i + 1; j < num_states; ++j)
+            {
+                P[i][j] = 0.0;
+                P[j][i] = 0.0;
+            }
+        }
+    }
 }
 
 
@@ -244,23 +418,261 @@ bool AbstractRateMatrix::checkTimeReversibity(double tolerance)
 }
 
 
+void AbstractRateMatrix::expandUniformization(int truncation, double tolerance) const
+{
+
+    int n = (int)matrixProducts->size();
+    int d = truncation - n;
+    int i = 0;
+    
+    for (; i < d; ++i)
+    {
+        // add terms of the power series to matrix products until the difference between the last two terms is smaller than the tolerance
+        MatrixReal diffMatrix = matrixProducts->at(n - 1 + i) - matrixProducts->at(n - 2 + i);
+        
+        bool diff = true;
+        checkMatrixDiff(diffMatrix, tolerance, diff);
+        if (diff == true)
+        {
+            break;
+        }
+
+        MatrixReal m = singleStepMatrix * matrixProducts->at(n - 1 + i);
+        matrixProducts->push_back(m);
+    }
+    
+    // if the current size of the matrix products is still smaller than the truncation, fill all the remaining terms with the same converged matrix
+    MatrixReal m = matrixProducts->at(n - 1 + i);
+    for (int j = i; j < d; ++j)
+    {
+        matrixProducts->push_back(m);
+    }
+    
+}
+
+void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t, TransitionProbabilityMatrix& p) const
+{
+    
+    MatrixReal m = *the_rate_matrix;
+    m *= t;
+    
+    MatrixReal result(num_states);
+    double tol = RbSettings::userSettings().getTolerance();
+    
+    
+    exponentiateMatrixTaylor(m, result, tol);
+    
+//    assert(std::isnan(t) or t >= 0);
+//    assert(p.num_states == p.getNumberOfStates());
+//
+//    // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
+//    //
+//    // Moler, C., & Van Loan, C. 2003. Nineteen dubious ways to compute the exponential of a
+//    // matrix, twenty-five years later. SIAM review, 45(1), 3-49.
+//    //
+//    // I tested this implementation against the Eigen C++ package and a scaling parameter s = 6 had similar time
+//    // efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
+//    // increased for better accuracy.
+//    // -- Will Freyman 11/27/16
+//
+//    // Note that Will had previously chosen a fixed value of 8 scalings/squarings, but this
+//    // didn't work for large branch lengths.
+//
+//    // We need the norm to be small enough for the 4-th order Taylor series to be a good approximation.
+//    // This code gives the number of scalings needed to bring the norm down below 2^-10 = 0.000977
+//    // This is a heuristic choice, but note that that ((2^-10)^4)/24 = 3.79e-14
+//    // The fifth order term would be ((2^-10)^5)/120 = 7.4e-18
+//    // Compare 10 with the number 12 in RateMatrix_FreeK::expMatrixTaylor( ) in RateMatrix_FreeK.cpp
+//    // -- Ben Redelings 10/23/22
+//    double norm = L1norm(*the_rate_matrix) * std::abs(t);
+//    int s = 0;
+//    std::frexp(norm, &s);
+//    s = std::max(10 + s, 0);
+//
+//    // first scale the matrix
+//    double scale = t / pow(2, s);
+//    for ( size_t i = 0; i < num_states; i++ )
+//    {
+//        for ( size_t j = 0; j < num_states; j++ )
+//        {
+//            p[i][j] = (*the_rate_matrix)[i][j] * scale;
+//        }
+//    }
+//
+//    // compute the 4th order Taylor approximant
+//
+//    // BDR: Note more recent work uses Pade approximants, which I think are better.
+//    // Eigen implements that approach, which goes up to a (13,13) Pade approximant, depending
+//    //   on whether the extra work is needed.
+//    // Its kind of complicated, so we should probably use Eigen if we switch to that.
+//
+//    // calculate the scaled matrix raised to powers 2, 3 and 4
+//    TransitionProbabilityMatrix p_2 = p * p;
+//
+//    TransitionProbabilityMatrix p_3 = p * p_2;
+//
+//    TransitionProbabilityMatrix p_4 = p_2 * p_2;
+//
+//    // add k=0 (the identity matrix) and k=1 terms
+//    for ( size_t i = 0; i < num_states; i++ )
+//    {
+//        p[i][i] += 1;
+//    }
+//
+//    // add the k=2, k=3, k=4 terms of the Taylor series
+//    for ( size_t i = 0; i < num_states; i++ )
+//    {
+//        for ( size_t j = 0; j < num_states; j++ )
+//        {
+//            p[i][j] += ( ( p_2[i][j] / 2 ) + ( p_3[i][j] / 6 ) + ( p_4[i][j] / 24 ) );
+//        }
+//    }
+//
+//    // Make sure that our Taylor approximation is now a stochastic matrix
+//    // BEFORE we start squaring it.
+//    ensure_nonnegative(p);
+//    normalize_rows(p);
+//
+//    // now perform the repeated squaring
+//    TransitionProbabilityMatrix r(num_states);
+//    for (size_t i = 0; i < s; i++)
+//    {
+//        // We could do p = p * p, but that allocates memory.
+//        p.multiplyTo(p, r);
+//        p = std::move(r);
+//
+//        // Handle roundoff-error.
+//        normalize_rows(p);
+//    }
+}
+
+
+void AbstractRateMatrix::exponentiateMatrixTaylor(MatrixReal &A, MatrixReal &F, double tolerance) const
+{
+    // here use the global tolerance to determine the truncation order for Taylor series
+    // alternatively, it can be determined according to Table 1 in Moler and Van Loan, 2003
+    
+    // here we dynamically determine the scaling parameter according to the norm of Q*t
+    // first compute the norm of Q*t
+    double normA = 0.0;
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        double x = std::abs(A[i][i]);
+        if (x > normA)
+            normA = x;
+    }
+    normA *= 2.0;
+    
+    // check if the Q matrix is irreducible
+    // if that is not the case, directly exit the current function
+    // as otherwise the following taylor series or repeated squaring loops may not be finite
+    // here we assume that all the states in the Q matrix exist in the observed data
+    if (RbMath::isNan(normA) || normA == 0.0)
+    {
+        return;
+    }
+    
+    // then use the norm to determine the appropriate scaling parameter s
+    // here plus 4 is a decision made under the guidance of Table 1 in Moler and Van Loan, 2003 and my experiments
+    // the original implementation in R expm package for Pade approximation was s = max(0, [log2(norm)]+1), which seems not enough for Taylor series
+    // and it turns out the intermediate norm values are those that tends to be the most problematic ones under the formula
+    // but they actually would be the most common ones for the usage in phylogenetics (branch length around 0.1)
+    // so I decide to jack it up by 11 here, which results in a transition probability matrix
+    // whose sum differ from the ones computed under the eigen method by about 1e-9 under 0.1 branch length
+    // if that turns out to be still insufficient, a larger number should be considered
+    // Jiansi Gao 09/07/2017
+    int e = ceil(log2(normA)) + 12;
+    int s = (e < 0) ? 0 : e;
+    
+    // scale the matrix by 2^s
+    double scale = pow(2, s);
+    A *= 1.0/scale;
+    
+    // the first term of the taylor series is the identity matrix
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        F[i][i] = 1.0;
+    }
+    
+    // add remaining terms of taylor series until a given term is smaller than the tolerance
+    int it = 1;
+    int fact = 1;
+    while (true)
+    {
+        MatrixReal m = A * (1.0/fact);
+        F += m;
+        
+        bool diff = true;
+        checkMatrixDiff(m, tolerance, diff);
+        if (diff == true)
+        {
+            break;
+        }
+        
+        ++it;
+        fact *= it;
+        A *= A;
+    }
+    
+    // now repeated squaring result s times
+    for (size_t i = 0; i < s; i++)
+    {
+        F *= F;
+    }
+    
+}
+
+
+void AbstractRateMatrix::fillRateMatrix( void )
+{
+    
+    MatrixReal& m = *the_rate_matrix;
+    
+//    // fill the rate matrix
+//    for (size_t i=0, k=0; i<num_states; i++)
+//    {
+//        double sum = 0.0;
+//        
+//        // off-diagonal
+//        for (size_t j=0; j<num_states; j++)
+//        {
+//            if (i==j)
+//            {
+//                continue;
+//            }
+//            double r = transition_rates[k];
+//            sum += r;
+//            m[i][j] = r;
+//            k++;
+//        }
+//        
+//        // diagonal
+//        m[i][i] = -sum;
+//    }
+    
+    // set flags
+    needs_update = true;
+}
+
+
+
 double AbstractRateMatrix::getDominatingRate(void) const
 {
     return dominating_rate;
 }
 
-void AbstractRateMatrix::computeDominatingRate(void) const
+
+std::vector<int> AbstractRateMatrix::get_emitted_letters( void ) const
 {
-    dominating_rate = 0.0;
-    for (size_t i = 0; i < num_states; i++)
+    std::vector<int> emit(num_states);
+    for (int i=0;i<num_states;i++)
     {
-        double r = -(*the_rate_matrix)[i][i];
-        if ( r > dominating_rate)
-        {
-            dominating_rate = r;
-        }
+        emit[i] = i;
     }
+    
+    return emit;
 }
+
 
 double AbstractRateMatrix::getRate(size_t from, size_t to, double rate) const
 {
@@ -357,6 +769,30 @@ void AbstractRateMatrix::rescaleToAverageRate(double r)
     // set flags
     needs_update = true;
 
+}
+
+
+/** Set the diagonal of the rate matrix such that each row sums to zero */
+void AbstractRateMatrix::setDiagonal(void)
+{
+
+    for (size_t i=0; i<num_states; ++i)
+    {
+        double sum = 0.0;
+        for (size_t j=0; j<num_states; ++j)
+        {
+
+            if (i != j)
+            {
+                sum += (*the_rate_matrix)[i][j];
+            }
+
+        }
+        (*the_rate_matrix)[i][i] = -sum;
+    }
+
+    // set flags
+    needs_update = true;
 }
 
 
@@ -531,6 +967,278 @@ bool AbstractRateMatrix::simulateStochasticMapping(double startAge, double endAg
     return true;
 }
 
+
+/** Calculate the transition probabilities for the real case */
+void AbstractRateMatrix::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const
+{
+    
+    // get a reference to the eigenvalues
+    const std::vector<double>& eigenValue = the_eigen_system->getRealEigenvalues();
+    
+    // precalculate the product of the eigenvalue and the branch length
+    std::vector<double> eigValExp(num_states);
+    for (size_t s=0; s<num_states; s++)
+    {
+        eigValExp[s] = exp(eigenValue[s] * t);
+    }
+    
+    // calculate the transition probabilities
+    const double* ptr = &c_ijk[0];
+    double*         p = P.theMatrix;
+    for (int i=0; i<num_states; i++)
+    {
+        for (int j=0; j<num_states; j++)
+        {
+            double sum = 0.0;
+            for (int s=0; s<num_states; s++)
+                sum += (*ptr++) * eigValExp[s];
+            
+            p[j] = (sum < 0.0) ? 0.0 : sum;
+        }
+
+        p += num_states;
+    }
+    
+//    double tol = RbSettings::userSettings().getTolerance();
+//    checkMatrixIrreducible(tol, P);
+
+}
+
+
+/** Calculate the transition probabilities for the complex case */
+void AbstractRateMatrix::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const
+{
+    
+    // get a reference to the eigenvalues
+    const std::vector<double>& eigenValueReal = the_eigen_system->getRealEigenvalues();
+    const std::vector<double>& eigenValueComp = the_eigen_system->getImagEigenvalues();
+    
+    // precalculate the product of the eigenvalue and the branch length
+    std::vector<std::complex<double> > ceigValExp(num_states);
+    for (size_t s=0; s<num_states; s++)
+    {
+        std::complex<double> ev = std::complex<double>(eigenValueReal[s], eigenValueComp[s]);
+        ceigValExp[s] = exp(ev * t);
+    }
+    
+    // calculate the transition probabilities
+    const std::complex<double>* ptr = &cc_ijk[0];
+    for (size_t i=0; i<num_states; i++)
+    {
+        for (size_t j=0; j<num_states; j++)
+        {
+            std::complex<double> sum = std::complex<double>(0.0, 0.0);
+            for (size_t s=0; s<num_states; s++)
+            {
+                sum += (*ptr++) * ceigValExp[s];
+            }
+
+            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
+        }
+    }
+    
+//    double tol = RbSettings::userSettings().getTolerance();
+//    checkMatrixIrreducible(tol, P);
+    
+}
+
+
+/** Calculate the transition probabilities with scaling and squaring */
+void AbstractRateMatrix::tiProbsScalingAndSquaring(double t, TransitionProbabilityMatrix& P) const
+{
+    // Moler, C., & Van Loan, C. 2003. Nineteen dubious ways to compute the exponential of a
+    // matrix, twenty-five years later. SIAM review, 45(1), 3-49.
+    // Higham, N. 2009. The Scaling and Squaring Method for the Matrix Exponential Revisited.
+    // SIAM review, 51(4), 747-764.
+
+    MatrixReal m = *the_rate_matrix;
+    m *= t;
+    MatrixReal result(num_states);
+    double tol = RbSettings::userSettings().getTolerance();
+    
+    if (my_method == SCALING_AND_SQUARING_PADE)
+    {
+        // the value of truncation computed by findPadeQValue is 5 under RevBayes default tolerance (1e-9)
+        // which seems a bit too generous comparing with the value given in Table 1 of Moler and Van Loan, 2003
+        // here we use max(4, findPadeQValue(tol)) as the truncation
+        // since findPadeQValue will return 4 if the tolerance is 1e-8 and 4 is also recommended in Table 1
+        // if that turns out to be insufficient or if a higher accuracy is desired, a larger number should be considered
+        // Jiansi Gao 09/07/2017
+        int truncation = RbMath::findPadeQValue(tol);
+        if (truncation > 4)
+        {
+            truncation = 4;
+        }
+        RbMath::expMatrixPade(m, result, truncation);
+    }
+    else if (my_method == SCALING_AND_SQUARING_TAYLOR)
+    {
+        exponentiateMatrixTaylor(m, result, tol);
+    }
+    
+    // fill in P from result
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        for (size_t j = 0; j < num_states; ++j)
+        {
+            P[i][j] = (result[i][j] < 0.0) ? 0.0 : result[i][j];
+        }
+    }
+
+// Probably we should not make the assumption that the Q matrix should be irreducible as the probability could still be positive
+// under reducible Q matrix if not all the states of the Q matrix appear at the tip, so it probably makes more sense just let
+// the likelihood take care of the reducibility, despite of the somewhat tiny possibility of numerical instability.
+// Jiansi Gao 06/22/2018
+//    checkMatrixIrreducible(tol, P);
+
+}
+
+
+/** Calculate the transition probabilities with uniformization */
+void AbstractRateMatrix::tiProbsUniformization(double t, TransitionProbabilityMatrix& P) const
+{
+    
+    // compute the appropriate truncation given t
+    // the formula is taken from Tataru and Hobolth, 2011, BMC Bioinformatics
+    // which seems to be pretty generous in most cases, so it should be sufficient for now
+    // if not, a larger number should be considered
+    // Jiansi Gao 09/07/2017
+    MatrixReal result(num_states);
+    double tol = RbSettings::userSettings().getTolerance();
+    
+    // check if the Q matrix is irreducible
+    // if that is not the case, directly fill in the P matrix with all zeros
+    // as otherwise the following loop which expands the power series of the uniformized matrix may not be finite
+    // here we assume that all the states in the Q matrix exist in the observed data
+    if ((RbMath::isNan(maxRate) || maxRate >= 0.0) == false)
+    {
+        double lambda = -maxRate * t;
+        int truncation = std::ceil(4 + 6 * sqrt(lambda) + lambda);
+        
+        // update the matrix poisson products sum vector if necessary
+        expandUniformization(truncation, tol);
+        
+        // compute the transition probability by weighted average
+        for (size_t i = 0; i < truncation; ++i)
+        {
+            
+            // compute the poisson probability
+            double p = RbStatistics::Poisson::pdf(lambda, (int)i);
+            
+            // add the weighted terms of taylor series until a given term is smaller than the tolerance
+            result += matrixProducts->at(i) * p;
+            
+        }
+    }
+    
+    // fill in P from result
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        for (size_t j = 0; j < num_states; ++j)
+        {
+            P[i][j] = (result[i][j] < 0.0) ? 0.0 : result[i][j];
+        }
+    }
+    
+}
+
+
+void AbstractRateMatrix::update( void )
+{
+    
+    if ( needs_update )
+    {
+        // assign all rate matrix elements
+//        fillRateMatrix();
+        updateInternalRateMatrix();
+        
+        // rescale
+        if ( rescale == true )
+        {
+            rescaleToAverageRate( 1.0 );
+        }
+
+        // update the uniformization system if necessary
+        if (my_method == UNIFORMIZATION)
+        {
+            updateUniformization();
+        }
+        // update the eigensystem if necessary
+        if (my_method == EIGEN)
+        {
+            updateEigenSystem();
+        }
+        
+        // clean flags
+        needs_update = false;
+    }
+    
+}
+
+void AbstractRateMatrix::updateInternalRateMatrix( void )
+{
+    // empty
+    // for derived classes to overwrite if wanted.
+}
+
+
+/** Update the eigen system */
+void AbstractRateMatrix::updateEigenSystem(void)
+{
+    
+    the_eigen_system->update();
+    calculateCijk();
+    
+}
+
+
+void AbstractRateMatrix::updateUniformization(void)
+{
+    
+    // we need to fill in the single-step transition probability matrix
+    
+    // find the diagonial element of the matrix with the maximal value
+    MatrixReal m = *the_rate_matrix;
+    maxRate = m[0][0];
+    for (size_t i = 1; i < num_states; ++i)
+    {
+        if (m[i][i] < maxRate )
+        {
+            maxRate = m[i][i];
+        }
+    }
+    
+    // for the given max rate, fill in the single-step transition probability matrix
+    singleStepMatrix = MatrixReal(num_states);
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        singleStepMatrix[i][i] = 1 - m[i][i] / maxRate;
+        for (size_t j = i + 1; j < num_states; ++j)
+        {
+            singleStepMatrix[i][j] = -m[i][j] / maxRate;
+            singleStepMatrix[j][i] = -m[j][i] / maxRate;
+        }
+    }
+    
+    // finally, clear the vector of matrix products
+    matrixProducts->clear();
+    
+    // add the identity matrix (the first one) and the singleStepMatrix (the second one)
+    MatrixReal identity_matrix(num_states);
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        identity_matrix[i][i] = 1.0;
+    }
+    matrixProducts->push_back(identity_matrix);
+    matrixProducts->push_back(singleStepMatrix);
+
+}
+
+
+
+
+
+
 double L1norm(const MatrixReal& M)
 {
     // ||A||_1 = sup x ||A x||_1 / ||x||_1
@@ -563,122 +1271,4 @@ double L1norm(const TransitionProbabilityMatrix& M)
     }
     assert(norm >= 0);
     return norm;
-}
-
-void AbstractRateMatrix::exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const
-{
-    assert(std::isnan(t) or t >= 0);
-    assert(p.num_states == p.getNumberOfStates());
-
-    // Here we use the scaling and squaring method with a 4th order Taylor approximant as described in:
-    //
-    // Moler, C., & Van Loan, C. 2003. Nineteen dubious ways to compute the exponential of a
-    // matrix, twenty-five years later. SIAM review, 45(1), 3-49.
-    //
-    // I tested this implementation against the Eigen C++ package and a scaling parameter s = 6 had similar time
-    // efficiency and returned the same results with about 10^-9 accuracy. The scaling parameter could be
-    // increased for better accuracy.
-    // -- Will Freyman 11/27/16
-
-    // Note that Will had previously chosen a fixed value of 8 scalings/squarings, but this
-    // didn't work for large branch lengths.
-
-    // We need the norm to be small enough for the 4-th order Taylor series to be a good approximation.
-    // This code gives the number of scalings needed to bring the norm down below 2^-10 = 0.000977
-    // This is a heuristic choice, but note that that ((2^-10)^4)/24 = 3.79e-14
-    // The fifth order term would be ((2^-10)^5)/120 = 7.4e-18
-    // Compare 10 with the number 12 in RateMatrix_FreeK::expMatrixTaylor( ) in RateMatrix_FreeK.cpp
-    // -- Ben Redelings 10/23/22
-    double norm = L1norm(*the_rate_matrix) * std::abs(t);
-    int s = 0;
-    std::frexp(norm, &s);
-    s = std::max(10 + s, 0);
-
-    // first scale the matrix
-    double scale = t / pow(2, s);
-    for ( size_t i = 0; i < num_states; i++ )
-    {
-        for ( size_t j = 0; j < num_states; j++ )
-        {
-            p[i][j] = (*the_rate_matrix)[i][j] * scale;
-        }
-    }
-
-    // compute the 4th order Taylor approximant
-
-    // BDR: Note more recent work uses Pade approximants, which I think are better.
-    // Eigen implements that approach, which goes up to a (13,13) Pade approximant, depending
-    //   on whether the extra work is needed.
-    // Its kind of complicated, so we should probably use Eigen if we switch to that.
-
-    // calculate the scaled matrix raised to powers 2, 3 and 4
-    TransitionProbabilityMatrix p_2 = p * p;
-
-    TransitionProbabilityMatrix p_3 = p * p_2;
-
-    TransitionProbabilityMatrix p_4 = p_2 * p_2;
-
-    // add k=0 (the identity matrix) and k=1 terms
-    for ( size_t i = 0; i < num_states; i++ )
-    {
-        p[i][i] += 1;
-    }
-
-    // add the k=2, k=3, k=4 terms of the Taylor series
-    for ( size_t i = 0; i < num_states; i++ )
-    {
-        for ( size_t j = 0; j < num_states; j++ )
-        {
-            p[i][j] += ( ( p_2[i][j] / 2 ) + ( p_3[i][j] / 6 ) + ( p_4[i][j] / 24 ) );
-        }
-    }
-
-    // Make sure that our Taylor approximation is now a stochastic matrix
-    // BEFORE we start squaring it.
-    ensure_nonnegative(p);
-    normalize_rows(p);
-
-    // now perform the repeated squaring
-    TransitionProbabilityMatrix r(num_states);
-    for (size_t i = 0; i < s; i++)
-    {
-        // We could do p = p * p, but that allocates memory.
-        p.multiplyTo(p, r);
-        p = std::move(r);
-
-        // Handle roundoff-error.
-        normalize_rows(p);
-    }
-}
-
-/** Set the diagonal of the rate matrix such that each row sums to zero */
-void AbstractRateMatrix::setDiagonal(void)
-{
-
-    for (size_t i=0; i<num_states; ++i)
-    {
-        double sum = 0.0;
-        for (size_t j=0; j<num_states; ++j)
-        {
-
-            if (i != j)
-            {
-                sum += (*the_rate_matrix)[i][j];
-            }
-
-        }
-        (*the_rate_matrix)[i][i] = -sum;
-    }
-
-    // set flags
-    needs_update = true;
-}
-
-std::vector<int> AbstractRateMatrix::get_emitted_letters() const
-{
-    std::vector<int> emit(num_states);
-    for(int i=0;i<num_states;i++)
-        emit[i] = i;
-
-    return emit;
 }

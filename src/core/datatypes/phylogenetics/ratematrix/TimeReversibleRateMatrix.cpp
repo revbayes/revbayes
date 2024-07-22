@@ -11,7 +11,7 @@
 
 using namespace RevBayesCore;
 
-TimeReversibleRateMatrix::TimeReversibleRateMatrix(size_t n) : AbstractRateMatrix(n),
+TimeReversibleRateMatrix::TimeReversibleRateMatrix(size_t n, bool r, METHOD m) : AbstractRateMatrix(n, r, m),
     exchangeability_rates( std::vector<double>(num_states*(num_states-1)/2,1.0) ),
     stationary_freqs( std::vector<double>(num_states,1.0/n) )
 {

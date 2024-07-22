@@ -20,7 +20,7 @@ namespace RevBayesCore {
      *      |     -       pi_C    k_1*pi_G   k_2*pi_T |
      *      |                                         |
      *      |   pi_A        -     k_2*pi_G   k_1*pi_T |
-     * Q =  |                                         |
+     *  Q = |                                         |
      *      | k_1*pi_A   k_2*pi_C     -        pi_T   |
      *      |                                         |
      *      | k_2*pi_A   k_1*pi_C    pi_G        -    |

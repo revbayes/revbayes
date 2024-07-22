@@ -17,7 +17,7 @@ using namespace RevBayesCore;
 
 
 /** Construct rate matrix with n states */
-RateMatrix_FlowT2Populations::RateMatrix_FlowT2Populations( size_t ss, const std::vector<double>& in_nu ) : TimeReversibleRateMatrix( ss ),
+RateMatrix_FlowT2Populations::RateMatrix_FlowT2Populations( size_t ss, const std::vector<double>& in_nu ) : TimeReversibleRateMatrix( ss, false, AbstractRateMatrix::EIGEN ),
     nu( in_nu ),
     mu( 2, 0.001),
     lambda( 2, 0.0 ),

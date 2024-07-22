@@ -12,7 +12,7 @@ using namespace RevBayesCore;
 /** Default Constructor for Felsenstein81 rate matrix
  * @param n the size of the matrix
  *  */
-RateMatrix_F81::RateMatrix_F81(size_t n) : TimeReversibleRateMatrix( n )
+RateMatrix_F81::RateMatrix_F81(size_t n) : TimeReversibleRateMatrix( n, true, AbstractRateMatrix::OTHER )
 {
     
     update();

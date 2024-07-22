@@ -12,8 +12,8 @@
  */
 
 
-#ifndef __RateMatrix_Chromosomes__
-#define __RateMatrix_Chromosomes__
+#ifndef RateMatrix_Chromosomes_H
+#define RateMatrix_Chromosomes_H
 
 #include <cstddef>
 #include <vector>
@@ -28,22 +28,21 @@ namespace RevBayesCore {
     class RateMatrix_Chromosomes : public AbstractRateMatrix {
         
     public:
-        RateMatrix_Chromosomes(size_t n);                                                  //!< Construct rate matrix with n states
+        RateMatrix_Chromosomes(size_t n, AbstractRateMatrix::METHOD m);                                                  //!< Construct rate matrix with n states
         virtual                         ~RateMatrix_Chromosomes(void);                     //!< Destructor
         
         // RateMatrix functions
         double                          averageRate(void) const;
-        void                            calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
+//        void                            calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_Chromosomes*         clone(void) const;
         std::vector<double>             getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, although in this model I don't know them
-        void                            update(void);
+        void                            updateInternalRateMatrix(void);
         void                            setGamma(double g);
         void                            setDelta(double d);
         void                            setRho(double r);
         void                            setEta(double e);
         void                            setGamma_l(double l);
         void                            setDelta_l(double d);
-        
         
     private:
         double                          gamma;
@@ -60,4 +59,4 @@ namespace RevBayesCore {
     
 }
 
-#endif /* defined(__RateMatrix_Chromosomes__) */
+#endif /* defined(RateMatrix_Chromosomes_H) */

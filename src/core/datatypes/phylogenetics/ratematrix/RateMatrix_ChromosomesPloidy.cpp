@@ -1,16 +1,3 @@
-/**
- * @file
- * This file contains the implementation of RateMatrix_ChromosomesPloidy, which is a
- * class that holds a rate matrix for the chromosome number evolution model. 
- *
- * @brief Implementation of RateMatrix_ChromosomesPloidy
- *
- * (c) copyright 2014-
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- *
- */
-
 #include "RateMatrix_ChromosomesPloidy.h"
 
 #include <cmath>
@@ -24,7 +11,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix where n = max_chromo */
-RateMatrix_ChromosomesPloidy::RateMatrix_ChromosomesPloidy(size_t n) : AbstractRateMatrix( 2 * (n + 1) ),
+RateMatrix_ChromosomesPloidy::RateMatrix_ChromosomesPloidy(size_t n) : AbstractRateMatrix( 2 * (n + 1), false, AbstractRateMatrix::EIGEN ),
     matrix_size( 2 * (n + 1) ),
     max_chromo( n )
 {
@@ -47,11 +34,13 @@ RateMatrix_ChromosomesPloidy::RateMatrix_ChromosomesPloidy(size_t n) : AbstractR
 
 
 /** Destructor */
-RateMatrix_ChromosomesPloidy::~RateMatrix_ChromosomesPloidy(void) {
+RateMatrix_ChromosomesPloidy::~RateMatrix_ChromosomesPloidy(void) 
+{
     
 }
 
-double RateMatrix_ChromosomesPloidy::averageRate(void) const {
+double RateMatrix_ChromosomesPloidy::averageRate(void) const 
+{
     return 1.0;
 }
 

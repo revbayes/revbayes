@@ -15,7 +15,7 @@ using namespace RevBayesCore;
 /** Default Constructor for the Tamura92 Rate Matrix
  * Kappa is initially assumed to be 1
  * */
-RateMatrix_Tamura92::RateMatrix_Tamura92(void) : TimeReversibleRateMatrix( 4 )
+RateMatrix_Tamura92::RateMatrix_Tamura92(void) : TimeReversibleRateMatrix( 4, true, AbstractRateMatrix::OTHER )
 {
 
     kappa = 1.0;

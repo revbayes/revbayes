@@ -101,61 +101,41 @@ double RateGenerator::getSumOfRatesDifferential(std::vector<CharacterEvent*> fro
 void RateGenerator::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<double> >& rv) const
 {
 
-    // clear old values
-    rv.clear();
-
-    TransitionProbabilityMatrix P(num_states);
-
-    double rate = static_cast<const TypedDagNode<double> *>( args[0] )->getValue();
-    double start_age = static_cast<const TypedDagNode<double> *>( args[1] )->getValue();
-    double end_age = static_cast<const TypedDagNode<double> *>( args[2] )->getValue();
-
-    if (start_age < end_age)
+    if ( n == "getTransitionProbabilities" )
     {
-        double temp = start_age;
-        start_age = end_age;
-        end_age = temp;
-    }
-
-    calculateTransitionProbabilities( start_age, end_age, rate, P);
-
-    for (size_t i = 0; i < num_states; i++)
-    {
-        RbVector<double> v;
-        for (size_t j =0; j < num_states; j++)
+        // clear old values
+        rv.clear();
+        
+        TransitionProbabilityMatrix P(num_states);
+        
+        double rate = static_cast<const TypedDagNode<double> *>( args[0] )->getValue();
+        double start_age = static_cast<const TypedDagNode<double> *>( args[1] )->getValue();
+        double end_age = static_cast<const TypedDagNode<double> *>( args[2] )->getValue();
+        
+        if (start_age < end_age)
         {
-            v.push_back(P[i][j]);
+            double temp = start_age;
+            start_age = end_age;
+            end_age = temp;
         }
-        rv.push_back(v);
+        
+        calculateTransitionProbabilities( start_age, end_age, rate, P);
+        
+        for (size_t i = 0; i < num_states; i++)
+        {
+            RbVector<double> v;
+            for (size_t j =0; j < num_states; j++)
+            {
+                v.push_back(P[i][j]);
+            }
+            rv.push_back(v);
+        }
     }
-
+    else
+    {
+        throw RbException("No member method with name '" + n + "' found in rate generator/rate matrix.");
+    }
 }
-
-//void RateGenerator::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<double> >& rv) const
-//{
-//
-//    // clear old values
-//    rv.clear();
-//    
-//    TransitionProbabilityMatrix P(num_states);
-//    
-//    double rate = static_cast<const TypedDagNode<double> *>( args[0] )->getValue();
-//    double start_age = static_cast<const TypedDagNode<double> *>( args[1] )->getValue();
-//    double end_age = static_cast<const TypedDagNode<double> *>( args[2] )->getValue();
-//    
-//    calculateTransitionProbabilities( start_age, end_age, rate, P);
-//    
-//    for (size_t i = 0; i < num_states; i++)
-//    {
-//        RbVector<double> v;
-//        for (size_t j =0; j < num_states; j++)
-//        {
-//            v.push_back(P[i][j]);
-//        }
-//        rv.push_back(v);
-//    }
-//    
-//}
 
 
 void RateGenerator::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const

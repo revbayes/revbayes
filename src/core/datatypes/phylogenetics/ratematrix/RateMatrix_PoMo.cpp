@@ -11,7 +11,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states, virtual population size, mutation rates, selection coefficients */
-RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const std::vector<double> &mr, const std::vector<double> &sc) : AbstractRateMatrix( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
+RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const std::vector<double> &mr, const std::vector<double> &sc) : AbstractRateMatrix( n + size_t(RbMath::kchoose2(n))*(vps-1), false, AbstractRateMatrix::EIGEN ),
     N( vps ),
     matrix_size( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
     num_raw_states( n )
@@ -36,7 +36,7 @@ RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const std::vector<double>
 }
 
 /** Construct rate matrix with n states, a matrix of mutation rates, and a vector of selection coefficients */
-RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const RateGenerator &mm, const std::vector<double> sc) : AbstractRateMatrix( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
+RateMatrix_PoMo::RateMatrix_PoMo(size_t n, size_t vps, const RateGenerator &mm, const std::vector<double> sc) : AbstractRateMatrix( n + size_t(RbMath::kchoose2(n))*(vps-1), false, AbstractRateMatrix::EIGEN ),
     N( vps ),
     matrix_size( n + size_t(RbMath::kchoose2(n))*(vps-1) ),
     num_raw_states( n )

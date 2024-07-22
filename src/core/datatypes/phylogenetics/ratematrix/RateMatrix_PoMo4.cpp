@@ -10,7 +10,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n) : AbstractRateMatrix( n ), N( 10 ), matrixSize( n )
+RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n) : AbstractRateMatrix( n, false, AbstractRateMatrix::EIGEN ), N( 10 ), matrixSize( n )
 {
     std::vector<double> temp (4, 0.0);
     for (size_t i = 0; i<4 ; ++i)
@@ -22,7 +22,7 @@ RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n) : AbstractRateMatrix( n ), N( 10 ),
 }
 
 /** Construct rate matrix with n states, virtual population size, mutation rates, selection coefficients */
-RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n, const size_t vps, const std::vector<double> &mr, const std::vector<double> &sc) : AbstractRateMatrix( n ), N( vps ), matrixSize( n )
+RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n, const size_t vps, const std::vector<double> &mr, const std::vector<double> &sc) : AbstractRateMatrix( n, false, AbstractRateMatrix::EIGEN ), N( vps ), matrixSize( n )
 {
     std::vector<double> temp (4, 0.0);
     for (size_t i = 0; i<4 ; ++i)
@@ -36,7 +36,7 @@ RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n, const size_t vps, const std::vector
 }
 
 /** Construct rate matrix with n states, a matrix of mutation rates, and a vector of selection coefficients */
-RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n,  const size_t vps, const RateGenerator &mm, const std::vector<double> sc)  : AbstractRateMatrix( n ), N( vps ), matrixSize( n )
+RateMatrix_PoMo4::RateMatrix_PoMo4(size_t n,  const size_t vps, const RateGenerator &mm, const std::vector<double> sc)  : AbstractRateMatrix( n, false, AbstractRateMatrix::EIGEN ), N( vps ), matrixSize( n )
 {
     std::vector<double> temp (4, 0.0);
     for (size_t i = 0; i<4 ; ++i)
