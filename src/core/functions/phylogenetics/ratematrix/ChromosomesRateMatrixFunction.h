@@ -16,6 +16,7 @@
 #ifndef ChromosomesRateMatrixFunction_H
 #define ChromosomesRateMatrixFunction_H
 
+#include "AbstractRateMatrix.h"
 #include "TypedFunction.h"
 #include "RateGenerator.h"
 
@@ -26,10 +27,8 @@ template <class valueType> class TypedDagNode;
     class ChromosomesRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        ChromosomesRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *g, const TypedDagNode<double> *d, const TypedDagNode<double> *r, const TypedDagNode<double> *e, const TypedDagNode<double> *g_l, const TypedDagNode<double> *d_l);
-        
-        virtual                                     ~ChromosomesRateMatrixFunction(void);                                                    //!< Virtual destructor
-        
+        ChromosomesRateMatrixFunction(size_t n, const TypedDagNode<double> *g, const TypedDagNode<double> *d, const TypedDagNode<double> *r, const TypedDagNode<double> *e, const TypedDagNode<double> *g_l, const TypedDagNode<double> *d_l, AbstractRateMatrix::METHOD m);
+                
         // public member functions
         ChromosomesRateMatrixFunction*              clone(void) const;                                                              //!< Create an independent clone
         void                                        update(void);
@@ -41,7 +40,6 @@ template <class valueType> class TypedDagNode;
         
         // members
 
-        const TypedDagNode<long>*                    n;
         const TypedDagNode<double>*                 gamma;
         const TypedDagNode<double>*                 delta;
         const TypedDagNode<double>*                 rho;

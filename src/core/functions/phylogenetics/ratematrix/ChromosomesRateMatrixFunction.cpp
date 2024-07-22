@@ -22,7 +22,14 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ChromosomesRateMatrixFunction::ChromosomesRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *g, const TypedDagNode<double> *d, const TypedDagNode<double> *r, const TypedDagNode<double> *e, const TypedDagNode<double> *g_l, const TypedDagNode<double> *d_l) : TypedFunction<RateGenerator>( new RateMatrix_Chromosomes(n->getValue()) ), gamma( g ), delta( d ), rho( r ), eta( e ), gamma_l( g_l ), delta_l( d_l ) {
+ChromosomesRateMatrixFunction::ChromosomesRateMatrixFunction(size_t n, const TypedDagNode<double> *g, const TypedDagNode<double> *d, const TypedDagNode<double> *r, const TypedDagNode<double> *e, const TypedDagNode<double> *g_l, const TypedDagNode<double> *d_l, AbstractRateMatrix::METHOD m) : TypedFunction<RateGenerator>( new RateMatrix_Chromosomes(n, m) ),
+    gamma( g ),
+    delta( d ),
+    rho( r ),
+    eta( e ),
+    gamma_l( g_l ),
+    delta_l( d_l ) 
+{
 
     addParameter( gamma );
     addParameter( delta );
@@ -36,18 +43,14 @@ ChromosomesRateMatrixFunction::ChromosomesRateMatrixFunction(const TypedDagNode<
 
 
 
-ChromosomesRateMatrixFunction::~ChromosomesRateMatrixFunction( void ) {
-    // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
-}
-
-
-
-ChromosomesRateMatrixFunction* ChromosomesRateMatrixFunction::clone( void ) const {
+ChromosomesRateMatrixFunction* ChromosomesRateMatrixFunction::clone( void ) const 
+{
     return new ChromosomesRateMatrixFunction( *this );
 }
 
 
-void ChromosomesRateMatrixFunction::update( void ) {
+void ChromosomesRateMatrixFunction::update( void ) 
+{
     double ga = gamma->getValue();
     double de = delta->getValue();
     double rh = rho->getValue();
@@ -68,7 +71,8 @@ void ChromosomesRateMatrixFunction::update( void ) {
 
 
 
-void ChromosomesRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void ChromosomesRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) 
+{
     
     if (oldP == gamma) {
         gamma = static_cast<const TypedDagNode<double>* >( newP );

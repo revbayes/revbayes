@@ -130,6 +130,7 @@
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
 #include "Func_blosum62.h"
 #include "Func_biogeographyRateMatrix.h"
+#include "Func_CAFE.h"
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
 
@@ -331,6 +332,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
         addFunction( new Func_biogeographyRateMatrix()                      );
+        addFunction( new Func_CAFE()                                        );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
 

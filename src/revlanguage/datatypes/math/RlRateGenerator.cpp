@@ -75,13 +75,13 @@ RateGenerator* RateGenerator::clone() const
 /* Map calls to member methods */
 RevPtr<RevVariable> RateGenerator::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
-    ; // do nothing for now
     return ModelObject<RevBayesCore::RateGenerator>::executeMethod( name, args, found );
 }
 
 
 /* Get Rev type of object */
-const std::string& RateGenerator::getClassType(void) {
+const std::string& RateGenerator::getClassType(void) 
+{
 
     static std::string rev_type = "RateGenerator";
 
@@ -89,7 +89,8 @@ const std::string& RateGenerator::getClassType(void) {
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& RateGenerator::getClassTypeSpec(void) {
+const TypeSpec& RateGenerator::getClassTypeSpec(void) 
+{
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( RevObject::getClassTypeSpec() ) );
 
@@ -98,13 +99,15 @@ const TypeSpec& RateGenerator::getClassTypeSpec(void) {
 
 
 /** Get the type spec of this class. We return a member variable because instances might have different element types. */
-const TypeSpec& RateGenerator::getTypeSpec(void) const {
+const TypeSpec& RateGenerator::getTypeSpec(void) const 
+{
 
     static TypeSpec type_spec = getClassTypeSpec();
     return type_spec;
 }
 
-void RateGenerator::initMethods(void) {
+void RateGenerator::initMethods(void) 
+{
     
     
     // member functions

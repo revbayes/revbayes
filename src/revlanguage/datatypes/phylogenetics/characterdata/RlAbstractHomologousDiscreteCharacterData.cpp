@@ -318,6 +318,12 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         int max = 0;
         for (size_t i = 0; i < nChars; i++)
         {
+            // jump over excluded characters
+            if ( v.isCharacterExcluded(i) == true )
+            {
+                continue;
+            }
+            
             for (size_t j = 0; j < nTaxa; j++)
             {
                 const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
