@@ -74,6 +74,10 @@ void RlRegionalFeatures::initMethods(void) {
     ArgumentRules* numLayersArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "numLayers", ModelVector<Natural>::getClassTypeSpec(), numLayersArgRules ) );
     
+    ArgumentRules* normalizeArgRules = new ArgumentRules();
+    normalizeArgRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
+    methods.addFunction( new MemberProcedure( "normalize", RlUtils::Void, normalizeArgRules ) );
+    
     ArgumentRules* standardizeArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "standardize", RlUtils::Void, standardizeArgRules ) );
     
@@ -111,6 +115,17 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
         found = true;
         int val = (int)this->dag_node->getValue().getNumTimeslices();
         return new RevVariable( new Natural(val) );
+    }
+    if (name == "normalize") {
+        found = true;
+        std::cout << "Warning: RegionalFeatures .normalize() will soon be removed. Use .standardize() instead.\n";
+        std::string relationship = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        if (relationship == "within") {
+            this->dag_node->getValue().standardizeWithinQuantitative();
+        } else if (relationship == "between") {
+            this->dag_node->getValue().standardizeBetweenQuantitative();
+        }
+        return NULL;
     }
     if (name == "standardize") {
         found = true;
