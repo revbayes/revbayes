@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include "AbstractRateMatrix.h"
 #include "ChromosomesRateMatrixFunction.h"
 #include "Func_chromosomes.h"
 #include "Natural.h"
@@ -15,10 +16,12 @@
 #include "ArgumentRules.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
+#include "OptionRule.h"
 #include "RateGenerator.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlFunction.h"
+#include "RlString.h"
 #include "RlTypedFunction.h"
 #include "StringUtilities.h"
 #include "TypeSpec.h"
@@ -27,7 +30,8 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_chromosomes::Func_chromosomes( void ) : TypedFunction<RateMatrix>( ) {
+Func_chromosomes::Func_chromosomes( void ) : TypedFunction<RateMatrix>( ) 
+{
     
 }
 
@@ -45,7 +49,8 @@ Func_chromosomes* Func_chromosomes::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_chromosomes::createFunction( void ) const {
+RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_chromosomes::createFunction( void ) const 
+{
     
     
     RevBayesCore::TypedDagNode< long >* n           = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
@@ -55,8 +60,31 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_chromosomes::cr
     RevBayesCore::TypedDagNode< double >* eta      = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* gamma_l  = static_cast<const Real &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >* delta_l  = static_cast<const Real &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+    std::string m                                  = static_cast<const RlString &>( this->args[7].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::ChromosomesRateMatrixFunction* f = new RevBayesCore::ChromosomesRateMatrixFunction( n, gamma, delta, rho, eta, gamma_l, delta_l );
+    RevBayesCore::AbstractRateMatrix::METHOD meth;
+    if ( m == "scalingAndSquaring" )
+    {
+        meth = RevBayesCore::AbstractRateMatrix::SCALING_AND_SQUARING;
+    }
+    if ( m == "scalingAndSquaringPade" )
+    {
+        meth = RevBayesCore::AbstractRateMatrix::SCALING_AND_SQUARING_PADE;
+    }
+    if ( m == "scalingAndSquaringTaylor" )
+    {
+        meth = RevBayesCore::AbstractRateMatrix::SCALING_AND_SQUARING_TAYLOR;
+    }
+    if ( m == "uniformization" )
+    {
+        meth = RevBayesCore::AbstractRateMatrix::UNIFORMIZATION;
+    }
+    if ( m == "eigen" )
+    {
+        meth = RevBayesCore::AbstractRateMatrix::EIGEN;
+    }
+        
+    RevBayesCore::ChromosomesRateMatrixFunction* f = new RevBayesCore::ChromosomesRateMatrixFunction( n->getValue(), gamma, delta, rho, eta, gamma_l, delta_l, meth );
     
 	return f;
 }
@@ -80,6 +108,14 @@ const ArgumentRules& Func_chromosomes::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "gamma_l"       , Real::getClassTypeSpec(), "Rate modifier for chromosome gains.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
         argumentRules.push_back( new ArgumentRule( "delta_l"       , Real::getClassTypeSpec(), "Rate modifier for chromosome losses.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Real(0.0) ) );
         
+        std::vector<std::string> optionsMethod;
+        optionsMethod.push_back( "scalingAndSquaring" );
+        optionsMethod.push_back( "scalingAndSquaringPade" );
+        optionsMethod.push_back( "scalingAndSquaringTaylor" );
+        optionsMethod.push_back( "uniformization" );
+        optionsMethod.push_back( "eigen" );
+        argumentRules.push_back( new OptionRule( "method", new RlString("eigen"), optionsMethod, "The method used to compute the matrix exponential." ) );
+
         rules_set = true;
     }
     
