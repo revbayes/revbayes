@@ -67,7 +67,7 @@ void CAFERateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == birth)
     {
-        death = static_cast<const TypedDagNode<double>* >( newP );
+        birth = static_cast<const TypedDagNode<double>* >( newP );
     }
     
     if (oldP == death)

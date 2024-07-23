@@ -74,21 +74,33 @@ void ChromosomesRateMatrixFunction::update( void )
 void ChromosomesRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) 
 {
     
-    if (oldP == gamma) {
+    if (oldP == gamma) 
+    {
         gamma = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == delta) {
+    
+    if (oldP == delta)
+    {
         delta = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == rho) {
+    
+    if (oldP == rho)
+    {
         rho = static_cast<const TypedDagNode<double>* >( newP );
-    } else if (oldP == eta) {
+    } 
+    
+    if (oldP == eta)
+    {
         eta = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == delta_l) {
+    
+    if (oldP == delta_l)
+    {
         delta_l = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == gamma_l) {
+    
+    if (oldP == gamma_l)
+    {
         gamma_l = static_cast<const TypedDagNode<double>* >( newP );
     }
     

@@ -69,7 +69,7 @@ const ArgumentRules& Func_CAFE::getArgumentRules( void ) const
     if ( !rules_set )
     {
       
-        argumentRules.push_back( new ArgumentRule( "max"            , Natural::getClassTypeSpec(), "Maximum number of CAFE.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "max"            , Natural::getClassTypeSpec(), "Maximum number of CAFE.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "birth"          , RealPos::getClassTypeSpec(), "Rate of gain of a single gene.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         argumentRules.push_back( new ArgumentRule( "death"          , RealPos::getClassTypeSpec(), "Rate of loss of a single gene.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         
