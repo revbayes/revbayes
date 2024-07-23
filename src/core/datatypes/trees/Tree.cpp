@@ -932,11 +932,37 @@ std::vector<Taxon> Tree::getTaxa() const
 
 
 /**
+ * Check that all tip ages are within their specified taxon age ranges
+ * If forceAdjust is true (default), will adjust misspecified ages, otherwise throws an exception
+ */
+void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
+{
+    for (auto& node : nodes)
+    {
+        if(!node->isTip()) continue;
+        Taxon taxon = node->getTaxon();
+        if(node->getAge() < taxon.getMinAge()) {
+            if(forceAdjust) {
+                node->setAge(taxon.getMinAge());
+                RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
+            } else throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+        }
+        if(node->getAge() > taxon.getMaxAge()) {
+            if(forceAdjust) {
+                node->setAge(taxon.getMaxAge());
+                RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
+            } else throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+        }
+    }
+}
+
+
+/**
  * Returns a map of the taxa to their BitSet indices.
  * The taxa are ordered alphabetically in the BitSet.
  * Eventually this should be refactored with the TaxonMap class.
  */
-const std::map<std::string, size_t>& Tree::getTaxonBitSetMap( void ) const
+const std::map<std::string, size_t> &Tree::getTaxonBitSetMap(void) const
 {
     if (taxon_bitset_map.size() == 0)
     {

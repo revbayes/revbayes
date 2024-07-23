@@ -106,6 +106,7 @@ namespace RevBayesCore {
         std::vector<std::string>                            getSpeciesNames() const;                                                                            //!< Get all the species represented in the tree
         std::vector<Taxon>                                  getTaxa() const;                                                                                    //!< Get all the taxa in the tree
 
+        void                                                checkTaxonAges(bool forceAdjust = true);
         const std::map<std::string, size_t>&                getTaxonBitSetMap(void) const;                                                                      //!< Returns a map that holds the BitSet index for each taxon
         size_t                                              getTipIndex(const std::string &name) const;
         std::vector<std::string>                            getTipNames() const;
