@@ -631,7 +631,7 @@ void Mcmcmc::nextCycle(bool advanceCycle)
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const
+void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const
 {
     
     std::streamsize previousPrecision = o.precision();
@@ -673,30 +673,47 @@ void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Mo
     
     // print the number of tries
     int t_length = 9;
-    const size_t num_tried_current_period       = chain_moves_tuningInfo[chainId][moveId].num_tried_current_period;
-    if (num_tried_current_period > 0) t_length -= (int)log10(num_tried_current_period);
+    size_t num_tried = chain_moves_tuningInfo[chainId][moveId].num_tried_total;
+    if (current_period == true)
+    {
+        num_tried = chain_moves_tuningInfo[chainId][moveId].num_tried_current_period;
+    }
+    
+    if (num_tried > 0) t_length -= (int)log10(num_tried);
     for (int i = 0; i < t_length; ++i)
     {
         o << " ";
     }
-    o << num_tried_current_period;
+    o << num_tried;
     o << " ";
     
     // print the number of accepted
     int a_length = 9;
-    const size_t num_accepted_current_period        = chain_moves_tuningInfo[chainId][moveId].num_accepted_current_period;
-    if (num_accepted_current_period > 0) a_length -= (int)log10(num_accepted_current_period);
+    size_t num_accepted = chain_moves_tuningInfo[chainId][moveId].num_accepted_total;
+    if (current_period == true)
+    {
+        num_accepted = chain_moves_tuningInfo[chainId][moveId].num_accepted_current_period;
+    }
+    
+    if (num_accepted > 0) a_length -= (int)log10(num_accepted);
     
     for (int i = 0; i < a_length; ++i)
     {
         o << " ";
     }
-    o << num_accepted_current_period;
+    o << num_accepted;
     o << " ";
     
     // print the acceptance ratio
-    double ratio = num_accepted_current_period / (double)num_tried_current_period;
-    if (num_tried_current_period == 0) ratio = 0;
+    double ratio;
+    if (num_tried == 0)
+    {
+        ratio = 0;
+    }
+    else
+    {
+        ratio = num_accepted / (double)num_tried;
+    }
     int r_length = 5;
     
     for (int i = 0; i < r_length; ++i)
@@ -762,7 +779,7 @@ void Mcmcmc::printOperatorSummary(bool current_period)
             
             for (size_t j = 0; j < chain_moves_tuningInfo[0].size(); ++j)
             {
-                printMoveSummary(std::cout, chainIdx, j, base_moves[j]);
+                printMoveSummary(std::cout, chainIdx, j, base_moves[j], current_period);
             }
             
             std::cout << std::endl;
