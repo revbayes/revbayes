@@ -27,7 +27,8 @@ RateMatrix_CAFE::RateMatrix_CAFE(size_t n) : TimeReversibleRateMatrix( n+1, fals
     {
         for (size_t j=0; j<n; ++j)
         {
-            binom_coefficients[i][j] = RbMath::choose(i,j);
+//            binom_coefficients[i][j] = RbMath::choose(i,j);
+            binom_coefficients[i][j] = RbMath::lnchoose(i,j);
         }
     }
     
@@ -58,24 +59,41 @@ void RateMatrix_CAFE::calculateTransitionProbabilities(double startAge, double e
     {
         alpha = birth*t / (1+birth*t);
     }
+    double log_alpha = log(alpha);
+    double log_beta  = log(beta);
+    double coeff = 1-alpha-beta;
+    if ( critical_process == true )
+    {
+        coeff = 1-2*alpha;
+    }
     P[0][0] = 1.0;
-    for (size_t s=1; s<num_states; ++s)
+    for (int s=1; s<num_states; ++s)
     {
         double total = 0.0;
-        for (size_t c=0; c<num_states; ++c)
+        for (int c=0; c<num_states; ++c)
         {
             double sum = 0.0;
+            double last_term = 1.0;
+            int s_add_c = s + c;
+            int s_addc_sub_one = s_add_c - 1;
+            int s_sub_one = s - 1;
             
             size_t min = ( s < c ? s : c );
             for (size_t j=0; j <= min; ++j)
             {
                 if ( critical_process == true )
                 {
-                    sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s+c-2*j) * pow(1-2*alpha,j);
+//                    sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s+c-2*j) * pow(1-2*alpha,j);
+                    double t = binom_coefficients[s][j] + binom_coefficients[s_addc_sub_one-j][s_sub_one] + (s_add_c-2*j) * log_alpha;
+                    sum += exp( t ) * last_term;
+                    last_term *= coeff;
                 }
                 else
                 {
-                    sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s-j) * pow(beta, c-j) * pow(1-alpha-beta,j);
+//                    sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s-j) * pow(beta, c-j) * pow(1-alpha-beta,j);
+                    double t = binom_coefficients[s][j] + binom_coefficients[s_addc_sub_one-j][s_sub_one] + (s-j) * log_alpha + (c-j)*log_beta;
+                    sum += exp( t ) * last_term;
+                    last_term *= coeff;
                 }
             }
             
