@@ -58,6 +58,7 @@ void RateMatrix_CAFE::calculateTransitionProbabilities(double startAge, double e
     {
         alpha = birth*t / (1+birth*t);
     }
+    P[0][0] = 1.0;
     for (size_t s=1; s<num_states; ++s)
     {
         double total = 0.0;
