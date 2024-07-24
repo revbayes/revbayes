@@ -28,7 +28,7 @@ RateMatrix_CAFE::RateMatrix_CAFE(size_t n) : TimeReversibleRateMatrix( n+1, fals
         for (size_t j=0; j<n; ++j)
         {
 //            binom_coefficients[i][j] = RbMath::choose(i,j);
-            binom_coefficients[i][j] = RbMath::lnchoose(i,j);
+            binom_coefficients[i][j] = RbMath::lnChoose(i,j);
         }
     }
     
