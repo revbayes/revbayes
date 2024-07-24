@@ -701,6 +701,12 @@ MatrixReal AbstractRateMatrix::getRateMatrix() const
     return *the_rate_matrix;
 }
 
+
+std::vector<double> AbstractRateMatrix::getStationaryFrequencies( void ) const
+{
+    return calculateStationaryFrequencies();
+}
+
 MatrixReal AbstractRateMatrix::getStochasticMatrix(size_t n) const
 {
     if (n >= stochastic_matrix.size())

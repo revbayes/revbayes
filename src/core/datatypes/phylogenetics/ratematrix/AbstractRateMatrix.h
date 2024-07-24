@@ -48,6 +48,7 @@ namespace RevBayesCore {
         virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         virtual void                        calculateTransitionProbabilitiesForStochasticMapping(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         virtual std::vector<int>            get_emitted_letters() const;                                                                //!<Find out what alphet letter each state emits
+        virtual std::vector<double>         getStationaryFrequencies(void) const;                                                   //!< Return the stationary frequencies
         virtual MatrixReal                  getStochasticMatrix(size_t n) const;
         virtual double                      getDominatingRate(void) const;
         virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times) const;
@@ -56,7 +57,6 @@ namespace RevBayesCore {
         // pure virtual methods you have to overwrite
         virtual double                      averageRate(void) const = 0;                                                                //!< Calculate the average rate
         virtual AbstractRateMatrix*         clone(void) const = 0;
-        virtual std::vector<double>         getStationaryFrequencies(void) const = 0;                                                   //!< Return the stationary frequencies
         
 
     protected:

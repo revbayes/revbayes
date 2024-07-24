@@ -52,6 +52,12 @@ void RateMatrix_CAFE::calculateTransitionProbabilities(double startAge, double e
     double e = exp((birth-death)*t);
     double alpha = death * (e-1) / (birth * e - death);
     double beta  = birth * (e-1) / (birth * e - death);
+    
+    bool critical_process = ( birth == death );
+    if ( critical_process )
+    {
+        alpha = birth*t / (1+birth*t);
+    }
     for (size_t s=1; s<num_states; ++s)
     {
         double total = 0.0;
@@ -62,7 +68,14 @@ void RateMatrix_CAFE::calculateTransitionProbabilities(double startAge, double e
             size_t min = ( s < c ? s : c );
             for (size_t j=0; j <= min; ++j)
             {
-                sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s-j) * pow(beta, c-j) * pow(1-alpha-beta,j);
+                if ( critical_process == true )
+                {
+                    sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s+c-2*j) * pow(1-2*alpha,j);
+                }
+                else
+                {
+                    sum += binom_coefficients[s][j] * binom_coefficients[s+c-j-1][s-1] * pow(alpha, s-j) * pow(beta, c-j) * pow(1-alpha-beta,j);
+                }
             }
             
             // sanity check

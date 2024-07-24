@@ -133,6 +133,7 @@
 #include "Func_CAFE.h"
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
+#include "Func_GeneGainLoss.h"
 
 #include "Func_GammaRateModel.h"
 #include "Func_InvModel.h"
@@ -335,6 +336,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_CAFE()                                        );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
+        addFunction( new Func_GeneGainLoss()                                );
 
         addFunction( new Func_ConvertRateMatrix()                           );
         addFunction( new Func_ConvertVectorRateMatrix()                     );
