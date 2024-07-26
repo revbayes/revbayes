@@ -53,7 +53,7 @@ namespace RevBayesCore {
         void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(unsigned long g);
         void                                    nextCycle(bool advanceCycle);
-        void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const;
+        void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;
         void                                    printOperatorSummary(bool current_period);
         void                                    printSwapSummary(std::ostream &o) const;
         void                                    printTripSummary(std::ostream &o) const;
