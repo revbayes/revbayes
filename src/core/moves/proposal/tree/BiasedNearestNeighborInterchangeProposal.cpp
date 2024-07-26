@@ -261,6 +261,9 @@ double BiasedNearestNeighborInterchangeProposal::doProposal( void )
         std::map<RbBitSet, TopologyNode*> current_clades = tau.getBitsetToNodeMap();
         size_t num_clades = current_clades.size();
         
+        throw RbException("Need to finish this implements (Sebastian).");
+        
+        std::vector<double>        this_clade_frequencies = std::vector<double>(num_clades,0);
         double total_probability = 0.0;
         double chosen_probability = 0.0;
         size_t xxx = 0;
@@ -268,7 +271,7 @@ double BiasedNearestNeighborInterchangeProposal::doProposal( void )
         {
             double this_freq = clade_frequencies[it->first];
             this_clade_frequencies[xxx] = 1.0 - double(this_freq) / attempts;
-            if ( it->second == store);
+            if ( it->second == stored_node_A );
             
             total_probability += 1.0 - double(this_freq) / attempts;
             
