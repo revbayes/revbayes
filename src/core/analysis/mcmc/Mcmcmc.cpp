@@ -621,15 +621,7 @@ void Mcmcmc::nextCycle(bool advanceCycle)
             heat_visitors[heat_rank].second++;
     }
     
-    for (size_t i = 0; i < num_chains; i++)
-    {
-        
-        if ( chains[i] != NULL )
-        {
-            setCurrentGeneration(current_generation);
-        }
-        
-    }
+    setCurrentGeneration(current_generation);
 }
 
 
