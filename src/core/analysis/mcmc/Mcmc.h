@@ -58,7 +58,7 @@ namespace RevBayesCore {
         const std::string&                                  getScheduleType(void) const;
         std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
         void                                                initializeSampler(bool priorOnly=false, bool suppressCharacterData=false);              //!< Initialize objects for mcmc sampling
-        void                                                initializeSamplerFromCheckpoint( void );                                                //!< Initialize the MCMC sampler form the checkpoint file.
+        void                                                initializeSamplerFromCheckpoint(bool priorOnly=false, bool suppressCharacterData=false);              //!< Initialize the MCMC sampler form the checkpoint file.
         void                                                monitor(unsigned long g);
         void                                                nextCycle(bool advanceCycle);
         bool                                                isChainActive(void);

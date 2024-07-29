@@ -50,7 +50,7 @@ namespace RevBayesCore {
         RbVector<Monitor>&                      getMonitors( void );
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
         void                                    initializeSampler(bool priorOnly=false, bool suppressCharacterData=false);      //!< Initialize objects for mcmc sampling
-        void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
+        void                                    initializeSamplerFromCheckpoint(bool priorOnly=false, bool suppressCharacterData=false);                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(unsigned long g);
         void                                    nextCycle(bool advanceCycle);
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;

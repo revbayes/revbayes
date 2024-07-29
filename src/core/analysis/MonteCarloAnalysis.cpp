@@ -312,7 +312,7 @@ const Model& MonteCarloAnalysis::getModel( void ) const
 }
 
 
-void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
+void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file, bool prior, bool suppress_chardata)
 {
     
     for (size_t i = 0; i < replicates; ++i)
@@ -338,7 +338,7 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
         }
         
         // then, initialize the sample for that replicate
-        runs[i]->initializeSamplerFromCheckpoint();
+        runs[i]->initializeSamplerFromCheckpoint( prior, suppress_chardata );
     }
 }
 
@@ -851,6 +851,7 @@ void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata,
                 runs[i]->setCheckpointFile( checkpoint_file );
                 
             }
+            
         }
         
     }
@@ -892,7 +893,7 @@ void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata,
     for (size_t i=0; i<replicates; ++i)
     {
         
-        if ( runs[i] != NULL )
+        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
         {
             if (prior)
             {
@@ -901,6 +902,17 @@ void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata,
             if (suppress_chardata)
             {
                 runs[i]->initializeSampler( false, true );
+            }
+        }
+        else if ( runs[i] != NULL )
+        {
+            if (prior)
+            {
+                runs[i]->initializeSamplerFromCheckpoint( true, false );
+            }
+            if (suppress_chardata)
+            {
+                runs[i]->initializeSamplerFromCheckpoint( false, true );
             }
         }
         

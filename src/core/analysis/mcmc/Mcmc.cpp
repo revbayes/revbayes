@@ -735,8 +735,23 @@ void Mcmc::initializeSampler( bool prior_only, bool suppress_char_data )
 }
 
 
-void Mcmc::initializeSamplerFromCheckpoint( void )
+void Mcmc::initializeSamplerFromCheckpoint( bool prior_only, bool suppress_char_data )
 {
+    
+    if (prior_only && suppress_char_data)
+    {
+        /* This should never happen: we already check for it at a higher level, namely
+         * within MonteCarloAnalysis::runModifiedSampler(), which is the only function
+         * that runs Mcmc::initializeSamplerFromCheckpoint() with non-default arguments.
+         * That function explicitly tells the user that the "priorOnly" option (which enables
+         * setPriorOnly for *all* stochastic nodes) overrides the "suppressCharacterData"
+         * option (which enables it only for those stochastic nodes that contain character
+         * data). However, just in case, we implement this check one more time here, too.
+         */
+        suppress_char_data = false;
+    }
+    
+    size_t chardata_nodes = 0;
     
     //    size_t n_samples = traces[0].size();
     size_t last_generation = 0;
@@ -831,7 +846,39 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     // We need to touch these so that their probabilities get recomputed.
     for(auto& node: nodes)
     {
+        if (suppress_char_data)
+        {
+            std::string node_value = node->getValueAsString();
+                
+            /* Whenever character data are printed to the screen, the string "character matrix"
+             * is always included: this is true of both discrete data (e.g., DNA, discrete
+             * morphology) and of continuous data.
+             */
+            bool chardata_found = node_value.find("character matrix") != std::string::npos;
+            if (chardata_found)
+            {
+                node->setPriorOnly( true );
+                chardata_nodes++;
+            }
+            else
+            {
+                node->setPriorOnly( false );
+            }
+        }
+        
+        if (prior_only)
+        {
+            node->setPriorOnly( prior_only );
+        }
+        
         node->touch();
+    }
+    
+    if (suppress_char_data && chardata_nodes == 0)
+    {
+        std::stringstream msg;
+        msg << "NOTE: No character data detected; the 'suppressCharacterData' option is ignored.";
+        RBOUT( msg.str() );
     }
 
     // assemble the new filename

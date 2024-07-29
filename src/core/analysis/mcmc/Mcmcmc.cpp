@@ -468,7 +468,7 @@ void Mcmcmc::initializeSampler( bool priorOnly, bool suppressCharacterData )
 
 
 
-void Mcmcmc::initializeSamplerFromCheckpoint( void )
+void Mcmcmc::initializeSamplerFromCheckpoint( bool priorOnly, bool suppressCharacterData )
 {
     
     for (size_t i = 0; i < num_chains; ++i)
@@ -476,7 +476,7 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             
         if ( chains[i] != NULL )
         {
-            chains[i]->checkpoint();
+            chains[i]->initializeSamplerFromCheckpoint( priorOnly, suppressCharacterData );
         }
         
     }
