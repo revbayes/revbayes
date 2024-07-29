@@ -819,7 +819,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 
 
 
-void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata, size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval )
+void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata, size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval )
 {
     
     // get the current generation
@@ -830,6 +830,27 @@ void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata,
         if ( runs[i] != NULL )
         {
             gen = runs[i]->getCurrentGeneration();
+            
+            // also set the filename for checkpointing
+            if ( replicates > 1 && checkpoint_file != "" )
+            {
+                
+                // create the run specific appendix
+                std::stringstream ss;
+                ss << "_run_" << (i+1);
+                
+                // assemble the new filename
+                auto run_checkpoint_file = appendToStem(checkpoint_file, ss.str());
+
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( run_checkpoint_file );
+            }
+            else if ( checkpoint_file != "" )
+            {
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( checkpoint_file );
+                
+            }
         }
         
     }

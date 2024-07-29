@@ -64,7 +64,7 @@ namespace RevBayesCore {
 #else
         void                                                run(size_t k, RbVector<StoppingRule> r, size_t ti, const path &cp_file, size_t ci=0, bool verbose=true);
 #endif
-        void                                                runModifiedSampler(bool prior, bool suppress_chardata, size_t k, RbVector<StoppingRule> r, size_t ti);
+        void                                                runModifiedSampler(bool prior, bool suppress_chardata, size_t k, RbVector<StoppingRule> r, size_t ti, const path &cp_file, size_t ci=0);
 #ifdef RB_MPI
         void                                                setModel(Model *m, bool redraw, const MPI_Comm &c);
 #else
