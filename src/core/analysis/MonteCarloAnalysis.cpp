@@ -757,7 +757,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     runs[i]->tune();                   
                 }
                 
-                // check for autotuning
+                // check for checkpointing
                 if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
                 {                    
                     runs[i]->checkpoint();                    
@@ -984,9 +984,13 @@ void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata,
                 // check for autotuning
                 if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
                 {
-                    
                     runs[i]->tune();
-                    
+                }
+                
+                // check for checkpointing
+                if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
+                {
+                    runs[i]->checkpoint();
                 }
             }
 
