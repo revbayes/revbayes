@@ -214,7 +214,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     stored_age = my_age;
     
     double size = max_age - min_age;
-    assert(size > 0); //otherwise the while will hang forever
+    assert(size >= 0); //otherwise the while will hang forever
     
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );
