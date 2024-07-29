@@ -1,0 +1,182 @@
+################################################################################
+#
+# RevBayes Test-Script: Joint Bayesian inference of tree topology and divergence
+#                       times using node calibrations ("node-dating")
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+#######################
+# Reading in the data #
+#######################
+
+# Import the molecular sequences
+cytb <- readDiscreteCharacterData("data/bears_cytb.nex")
+
+# Helper variables
+n_taxa <- cytb.size()
+taxa <- cytb.taxa()
+
+# Create vectors for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+##################################################################
+# Birth-death process prior on the topology and speciation times #
+##################################################################
+
+# Define exponential priors on the birth rate and death rate
+speciation_rate ~ dnExponential(10)
+extinction_rate ~ dnExponential(10)
+
+# Specify scale moves on both rate parameters
+moves.append( mvScale(speciation_rate, lambda=0.5, tune=true, weight=3.0) )
+moves.append( mvScale(extinction_rate, lambda=0.5, tune=true, weight=3.0) )
+
+# Create deterministic nodes for the net diversification rate and extinction
+# fraction to monitor these parameters
+
+diversification := speciation_rate - extinction_rate
+ext_fraction := extinction_rate/speciation_rate
+
+# Fix the probability of extant sampling (rho) to 1, because all living bear
+# taxa are represented in our data
+
+rho <- 1.0
+
+# Define minimum and maximum age constraints for the root
+extant_mrca_min <- 1.84
+extant_mrca_max <- 49.0
+
+# Specify the root age as a stochastic variable drawn from a uniform distribution
+extant_mrca ~ dnUniform(extant_mrca_min, extant_mrca_max)
+
+moves.append( mvScale(extant_mrca, lambda=1, tune=true, weight=5.0) )
+
+# Define the tree-prior distribution as the birth-death process
+tree_dist = dnBDP(lambda=speciation_rate, mu=extinction_rate, rho=rho, rootAge=extant_mrca,
+                  samplingStrategy="uniform", condition="nTaxa", taxa=taxa)
+
+####################
+# Node calibration #
+####################
+
+# Define a clade constraint enforcing the monophyly of the subfamily Ursine
+clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus", 
+                      "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus")                      
+constraints = v(clade_ursinae)
+
+# Draw a topologically constrained tree
+timetree ~ dnConstrainedTopology(tree_dist, constraints=constraints)
+
+# Get the age of Ursinae in the tree
+age_ursinae := tmrca(timetree, clade_ursinae)
+
+# Calibrate the age of this node using an offset exponential distribution.
+# The offset of this distribution corresponds to a "hard minimum", i.e., the youngest
+# possible age of this node (here, 1.84 Ma). The distribution has a rate of 1.0, which
+# corresponds to a mean of 1/1.0 + 1.84 = 2.84 Ma.
+
+obs_age_ursinae ~ dnExponential(1.0, offset = -age_ursinae)
+
+# In RevBayes, calibration distributions are treated as (pseudo)data rather than part
+# of the prior, so we clamp the stochastic variable corresponding to the age of Ursinae
+# to our hard minimum.
+
+obs_age_ursinae.clamp(-1.84)
+
+# Specify moves on the topology of the tree and its divergence times
+moves.append( mvNarrow(timetree, weight=n_taxa/2.0) )
+moves.append( mvFNPR(timetree, weight=n_taxa/10.0) )
+moves.append( mvNodeTimeSlideUniform(timetree, weight=n_taxa) )
+
+################################
+# Global molecular clock model #
+################################
+
+# we assume a strict molecular clock with a rate drawn from an exponential prior
+branch_rates ~ dnExponential(10.0)
+
+moves.append( mvScale(branch_rates,lambda=0.5,tune=true,weight=3.0) )
+
+#######################################
+# GTR+G nucleotide substitution model #
+#######################################
+
+# Both the stationary frequencies and exchangeability rates are drawn from flat
+# Dirichlet distributions
+
+# First the stationary frequencies
+sf_hp <- v(1, 1, 1, 1)
+sf ~ dnDirichlet(sf_hp)
+
+# Then the exchangeability rates
+er_hp <- v(1, 1, 1, 1, 1, 1)
+er ~ dnDirichlet(er_hp)
+
+moves.append( mvBetaSimplex(er, alpha=10.0, weight=2.0) )
+moves.append( mvBetaSimplex(sf, alpha=10.0, weight=3.0) )
+
+# Create the instantaneous rate matrix
+Q_cytb := fnGTR(er,sf)
+
+# Create a discretized gamma distribution of rate categories, with the shape
+# parameter of the gamma distribution drawn from a uniform prior
+
+alpha_cytb ~ dnUniform( 0.0, 1E6 )
+alpha_cytb.setValue( 1.0 )
+rates_cytb := fnDiscretizeGamma( alpha_cytb, alpha_cytb, 4 )
+
+moves.append( mvScale(alpha_cytb, lambda=0.5,tune=true, weight=2.0) )
+
+###################
+# PhyloCTMC model #
+###################
+
+phySeq ~ dnPhyloCTMC(tree=timetree, Q=Q_cytb, siteRates=rates_cytb,
+                     branchRates=branch_rates, type="DNA")
+
+# Clamp to our observed DNA data
+phySeq.clamp(cytb)
+
+############
+# Analysis #
+############
+
+mymodel = model(timetree)	
+
+monitors.append( mnModel(filename="output/node_calibration.log",
+                         printgen=20) )
+monitors.append( mnFile(filename="output/node_calibration.trees",
+                        printgen=20, timetree) )
+monitors.append( mnScreen(printgen=20, extant_mrca, diversification) )
+
+# Initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+
+# Run the MCMC
+mymcmc.run(generations=500, tuningInterval=100, checkpointInterval=100,
+           checkpointFile="output/node_calibration.state")
+
+# Initialize from a checkpoint file
+mymcmc.initializeFromCheckpoint("output/node_calibration.state")
+
+# Run the MCMC again
+mymcmc.run(generations=500, tuningInterval=100)
+
+##########################
+# Summarizing the output #
+##########################
+
+# Read the trace file
+trace = readTreeTrace("output/node_calibration.trees", nruns=2)
+
+# Generate the maximum clade credibility tree
+mccTree(trace, file="output/node_calibration.mcc.tre")
+
+clear()
+q()
