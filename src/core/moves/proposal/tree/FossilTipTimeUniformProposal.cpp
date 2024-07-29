@@ -207,6 +207,8 @@ double FossilTipTimeUniformProposal::doProposal( void )
         max_age = fmin(max_age, parent_age);
     }
     
+    assert(max_age >= min_age); //sanity check
+
     // now we store all necessary values
     stored_age = my_age;
     
