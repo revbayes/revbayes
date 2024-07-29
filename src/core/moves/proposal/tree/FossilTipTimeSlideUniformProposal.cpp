@@ -138,21 +138,21 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
         node_index = tips[ size_t( std::floor(tips.size() * u) ) ];
     }
     
-    TopologyNode* node = &tau.getNode(node_index);
+    TopologyNode& node = tau.getNode(node_index);
 
-    TopologyNode& parent = node->getParent();
+    TopologyNode& parent = node.getParent();
 
     // we need to work with the times
     double parent_age   = parent.getAge();
-    double my_age       = node->getAge();    
+    double my_age       = node.getAge();    
     double min_age      = 0;
-    double max_age      = parent_age;
+    double max_age;
     
     // adjust min and max age, either given taxon data or given provided ages
     if ( min == NULL )
     {
         // adjust min age given taxon data
-        Taxon& taxon = node->getTaxon();
+        Taxon& taxon = node.getTaxon();
         min_age = taxon.getMinAge();
     }
     else
@@ -163,27 +163,21 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     if ( max == NULL )
     {
         // adjust max age given taxon data
-        Taxon& taxon = node->getTaxon();
+        Taxon& taxon = node.getTaxon();
         double taxon_max_age = taxon.getMaxAge();
-        if ( taxon_max_age < max_age )
-        {
-            max_age = taxon_max_age;
-        }
+        max_age = taxon_max_age;
     }
     else
     {
         // adjust max age given provided variable
         double provided_max_age = max->getValue();
-        if ( provided_max_age < max_age )
-        {
-            max_age = provided_max_age;
-        }
+        max_age = provided_max_age;
     }
 
-    if ( node->isSampledAncestorTip() == true )
+    if ( node.isSampledAncestorTip() == true )
     {
         TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == node )
+        if ( sibling == &node )
         {
             sibling = &parent.getChild( 1 );
         }
@@ -212,12 +206,15 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
             // set the max age either to the boundary or the parent max age
             max_age = fmin(max_age, grandparent_age);
         }
+    } else {
+        max_age = fmin(max_age, parent_age);
     }
     
     // now we store all necessary values
     stored_age = my_age;
     
     double size = max_age - min_age;
+    assert(size >= 0); //otherwise the while will hang forever
     
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );
@@ -241,7 +238,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     } while ( new_age < min_age || new_age > max_age );
     
     // set the age
-    node->setAge( new_age );
+    node.setAge( new_age );
     
     
     // this is a symmetric proposal so the hasting ratio is 0.0

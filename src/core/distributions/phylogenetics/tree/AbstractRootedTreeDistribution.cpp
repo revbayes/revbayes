@@ -790,6 +790,8 @@ void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
         }
         
     }
+
+    value->checkTaxonAges(true);
     
 }
 
