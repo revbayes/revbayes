@@ -163,14 +163,6 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
 # and the calibration distributions (to which we clamped 'obs_age_ursinae'). The topology
 # and divergence times of the tree will be determined solely by the birth-death prior.
 
-mymcmc.run(generations=500, tuningInterval=100, checkpointInterval=100,
-           checkpointFile="output/node_calibration_no_data.state",
-           underPrior=true)
-
-# Initialize from a checkpoint file
-mymcmc.initializeFromCheckpoint("output/node_calibration_no_data.state")
-
-# Run the MCMC again
 mymcmc.run(generations=500, tuningInterval=100, underPrior=true)
 
 ##########################

@@ -163,14 +163,6 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
 # which is clamped to a calibration distribution. The divergence times of the tree will
 # therefore be informed both by the birth-death prior and by the specified calibration.
 
-mymcmc.run(generations=500, tuningInterval=100, checkpointInterval=100,
-           checkpointFile="output/node_calibration_no_character_data.state",
-           suppressCharacterData=true)
-
-# Initialize from a checkpoint file
-mymcmc.initializeFromCheckpoint("output/node_calibration_no_character_data.state")
-
-# Run the MCMC again
 mymcmc.run(generations=500, tuningInterval=100, suppressCharacterData=true)
 
 ##########################

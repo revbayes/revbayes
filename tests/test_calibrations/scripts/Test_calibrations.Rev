@@ -159,13 +159,6 @@ monitors.append( mnScreen(printgen=20, extant_mrca, diversification) )
 mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
 
 # Run the MCMC
-mymcmc.run(generations=500, tuningInterval=100, checkpointInterval=100,
-           checkpointFile="output/node_calibration.state")
-
-# Initialize from a checkpoint file
-mymcmc.initializeFromCheckpoint("output/node_calibration.state")
-
-# Run the MCMC again
 mymcmc.run(generations=500, tuningInterval=100)
 
 ##########################
