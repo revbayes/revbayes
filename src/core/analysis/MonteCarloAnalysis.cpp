@@ -946,6 +946,10 @@ void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata,
             runs[i]->monitor(0);
             
         }
+        else if ( runs[i] != NULL )
+        {
+            runs[i]->writeMonitorHeaders( runs[i]->getCurrentGeneration() > 0 );
+        }
         
     }
     
