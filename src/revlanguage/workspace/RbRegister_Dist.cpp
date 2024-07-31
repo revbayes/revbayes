@@ -282,6 +282,8 @@
 #include "Transform_Scale_Pos.h"
 #include "Transform_Scale_Prob.h"
 
+#include "Transform_Add.h"
+
 #include "Transform_Vector_Exp.h"
 #include "Transform_Vector_Log.h"
 #include "Transform_Vector_Logit.h"
@@ -638,6 +640,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Probability                >( new Transform_Scale_Prob()   );
         AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
         AddDistribution< Real                       >( new Transform_Scale()        );
+
+        AddDistribution< Real                       >( new Transform_Add()         );
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
