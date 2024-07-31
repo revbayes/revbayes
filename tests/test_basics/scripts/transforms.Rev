@@ -3,6 +3,9 @@ x ~ dnNormal(0,1) |> tnScale(1)
 p ~ dnNormal(0,1) |> tnInvlogit()
 x ~ dnNormal(0,1) |> tnExp()
 
+x ~ 1 + dnNormal(0,1)
+x ~ dnNormal(0,1) + 1
+
 x ~ dnBeta(1,2) |> tnShift(1)
 x ~ dnBeta(1,2) |> tnScale(1)
 x ~ dnBeta(1,2) |> tnLog()
