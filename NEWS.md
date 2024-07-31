@@ -11,6 +11,8 @@
   * Don't crash if a file changes while we are source( )-ing it.
   * Multiple fixes for building on Windows.
   * Fix dnMixture of rate matrices and other Cloneable objects.
+  * Fix operator summary for MC^3.
+  * Fix some checkpointing bugs with FBD.
 
 ## Documentation improvements
   * stopping rules (srGeweke, srGelmanRubin/PSRF)
