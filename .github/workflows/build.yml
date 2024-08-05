@@ -290,9 +290,118 @@ jobs:
         name: testiphy-results-${{ matrix.name }}
         path: '~/testiphy'
 
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Use safe line endings
+      run: git config --global core.autocrlf input
+      shell: cmd
+      
+    - uses: actions/checkout@v4
+        
+    - name: Set up Cygwin
+      uses: cygwin/cygwin-install-action@v4
+      with:
+        platform: x86_64
+        packages: cmake cmake-debuginfo cmake-doc cmake-gui mingw64-x86_64-gcc-core mingw64-x86_64-gcc-g++ git make python3
+        
+    - name: Set up MinGW
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+        cygwin: 1
+    
+    - name: Cache Boost
+      uses: actions/cache@v2
+      with:
+        path: '${{ runner.workspace }}/boost_*.tar.gz'
+        key: 'boost-1.71.0'
+
+    - name: Build Boost
+      id: boost
+      uses: egor-tensin/build-boost@v1
+      with:
+        version: 1.71.0
+        toolset: gcc
+        libraries: regex program_options thread system filesystem date_time serialization
+        platform: x64
+        configuration: Release
+
+    - name: Show paths
+      run: |
+        printf 'Boost has been unpacked to: %s\n' '${{ steps.boost.outputs.root }}'
+        printf 'Libraries can be found here: %s\n' '${{ steps.boost.outputs.librarydir }}'
+      shell: bash
+        
+    - name: Update submodules
+      run: |
+        git submodule update --init --recursive
+        
+    - name: Use Bash to build project
+      run: |
+        cd projects/cmake
+        sh build.sh -DCMAKE_TOOLCHAIN_FILE=../mingw64_toolchain.cmake
+      shell: cmd
+
+    - name: Configure and Build Project
+      uses: threeal/cmake-action@main
+      with:
+        source-dir: src
+
+    - name: Test
+      env:
+        USE_MPI: ${{ matrix.mpi }}
+        IS_WINDOWS: ${{ matrix.name == 'windows' }}
+      run: |
+        export PATH=${HOME}/wrapper:${HOME}/local/bin:$PATH
+
+        # Temporary hack to make Mac/ARM work: remove the expected JSON output.
+        # On Mac/ARM, the JSON output disagrees in the 16th and 17th digit
+        #  with the JSON output on Linux/Intel and Mac/Intel.
+        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
+          find tests -name '*.json' | xargs rm
+        fi
+
+        echo "\"Hello World\"" | rb
+        echo ::group::Test suite
+        cd tests
+        if [ ${{ matrix.arch }} == "win64" ] ; then
+           rm -f test_FBD/output_expected/test1.*
+        fi
+
+        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+           rm -rf test_FBD/output_expected/
+           rm -rf test_BDSTP/output_expected/
+        fi
+
+        ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
+        cd
+        echo ::endgroup::
+        echo ::group::testiphy
+        git clone https://gitlab.com/testiphy/testiphy.git
+        cd testiphy
+        ./testiphy rb
+        echo ::endgroup::
+
+    - name: Upload test files if they failed
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: test-results-${{ matrix.name }}
+        path: tests/test_*
+
+    - name: Upload testiphy files if they failed
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: testiphy-results-${{ matrix.name }}
+        path: '~/testiphy'
+
   notify:
     name: Notify Slack
-    needs: build
+    needs: 
+      - build
+      - build-windows
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -311,3 +420,4 @@ jobs:
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
