@@ -5,7 +5,7 @@
 # Model: Various: these tests validate the behaviour of dnInverse()
 #
 #
-# authors: Martin R. Smith, following Valication_Exponential.Rev
+# authors: Martin R. Smith, following Validation_Exponential.Rev
 #
 ################################################################################
 
@@ -24,16 +24,16 @@ print("TestExp: ", -exp.lnProbability(), "42", invExp.lnProbability())
 chars <- readDiscreteCharacterData("../validation/data/primates_cytb.nex")
 
 taxa <- chars.names()
-nTaxa <- chars.size()
-nEdge <- 2 * nTaxa - 3
+n_taxa <- chars.size()
+n_edge <- 2 * nTaxa - 3
 
 topology ~ dnUniformTopology(taxa)
-br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+br_lengths ~ dnDirichlet(rep(1.0, nEdge))
 phylogeny := treeAssembly(topology, br_lengths)
 
-Q4 = fnJC(4)
-phy ~ dnPhyloCTMC(tree = phylogeny, Q = Q4, type = "DNA")
+q4 = fnJC(4)
+phy ~ dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA")
 phy.clamp(chars)
-invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = Q4, type = "DNA"))
+invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA"))
 invPhy.clamp(chars)
 print("TestPhylo:", -phy.lnProbability(), invPhy.lnProbability())
