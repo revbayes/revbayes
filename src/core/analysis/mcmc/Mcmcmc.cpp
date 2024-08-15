@@ -620,6 +620,8 @@ void Mcmcmc::nextCycle(bool advanceCycle)
         if (chain_prev_boundary[i] == boundary::hottest)
             heat_visitors[heat_rank].second++;
     }
+    
+    setCurrentGeneration(current_generation);
 }
 
 
