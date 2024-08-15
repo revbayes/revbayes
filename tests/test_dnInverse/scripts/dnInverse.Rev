@@ -1,0 +1,40 @@
+################################################################################
+#
+# RevBayes Validation Test: dnInverse
+#
+# These tests validate the behaviour of dnInverse()
+#
+#
+# Authors: Martin R. Smith
+#
+################################################################################
+
+seed(42)
+
+exp ~ dnExp(1)
+exp.clamp(42)
+
+inv_exp ~ dnInv(dnExp(1))
+inv_exp.clamp(42)
+print("Expect: 42", -exp.lnProbability(), inv_exp.lnProbability())
+
+chars <- readDiscreteCharacterData("../validation/data/primates_cytb.nex")
+
+taxa <- chars.names()
+n_taxa <- chars.size()
+n_edge <- 2 * n_taxa - 3
+
+topology ~ dnUniformTopology(taxa)
+br_lengths ~ dnDirichlet( rep(1.0, n_edge) )
+phylogeny := treeAssembly(topology, br_lengths)
+
+q4 = fnJC(4)
+phy ~ dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA")
+phy.clamp(chars)
+
+invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA"))
+invPhy.clamp(chars)
+invPhy
+
+print("Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+q()
