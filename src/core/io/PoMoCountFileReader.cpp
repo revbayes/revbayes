@@ -20,9 +20,15 @@
 using namespace RevBayesCore;
 
 
-PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMAT f) : DelimitedDataReader(fn, ""),
+PoMoCountFileReader::PoMoCountFileReader(   const path &fn, 
+                                            const size_t vps, 
+                                            FORMAT f,
+                                            const string &wm,
+                                            const long eps ) : DelimitedDataReader(fn, ""),
     virtual_population_size ( vps ),
-    data_format( f )
+    data_format( f ),
+    weighting_method( wm ),
+    effective_population_size( eps )
 {
     if ( data_format == FORMAT::PoMo )
     {
@@ -33,43 +39,56 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
         matrix = new HomologousDiscreteCharacterData<NaturalNumbersState>();
     }
 
+    RevBayesCore::PoMoState::WEIGHTING weighting = RevBayesCore::PoMoState::FIXED;
+    if ( weighting_method == "Binomial" )
+    {
+        weighting  = RevBayesCore::PoMoState::BINOMIAL;
+    } else if ( weighting_method == "Sampled" )
+    {
+        weighting  = RevBayesCore::PoMoState::SAMPLED;
+    } else if ( weighting_method == "Hypergeometric" )
+    {
+        weighting  = RevBayesCore::PoMoState::HYPERGEOMETRIC;
+    }
+    
 	// chars is a matrix containing all the lines of the file fn.
-	// First line, with the names of the columns:
-	// First line should be like: COUNTSFILE  NPOP 5   NSITES N
 
 	int start = -1;
-	// Skip comments.
+	// ignoring comments
 	do {
 			start = start + 1;
 	}
 	while (chars[start][0] == "#");
 
-	if (chars[start][0] != "COUNTSFILE" || chars[0].size() != 5)
+    // checking whether the 1st header line of the count file is properly formatted
+    // first header should be like: COUNTSFILE  NPOP 5   NSITES N
+	if (chars[start][0] != "COUNTSFILE" || chars[start].size() != 5)
     {
-        throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: first line is not correct, it should be similar to \nCOUNTSFILE NPOP 5 NSITES N\n.";
+        throw RbException()<<"File "<<fn<<" is not a proper PoMo counts file. First line is not properly formatted: it should be similar to \nCOUNTSFILE NPOP X NSITES Y\n.";
 	}
 	else
     {
-        number_of_populations = StringUtilities::asIntegerNumber( chars[0][2] );
-        number_of_sites = StringUtilities::asIntegerNumber( chars[0][4] );
+        n_taxa  = StringUtilities::asIntegerNumber( chars[start][2] );
+        n_sites = StringUtilities::asIntegerNumber( chars[start][4] );
 	}
-	size_t numberOfFields = 2 + number_of_populations;
+	size_t numberOfFields = 2 + n_taxa;
 
+    // checking whether the 1st header line of the count file is properly formated
 	// The second line should look like this:
-	//CHROM  POS  Sheep    BlackSheep  RedSheep  Wolf     RedWolf
-	if (chars[start+1][0] != "CHROM" || chars[1][1] != "POS" || chars[1].size() != numberOfFields)
-        {
-            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: second line is not correct, it should be similar to \nCHROM POS Sheep BlackSheep RedSheep Wolf RedWolf\n.";
+	// CHROM  POS  Sheep    BlackSheep  RedSheep  Wolf     RedWolf
+	if (chars[start+1][0] != "CHROM" || chars[start+1][1] != "POS" || chars[start+1].size() != numberOfFields)
+    {
+        throw RbException()<<"File "<<fn<<" is not a proper PoMo counts file. Second line is not properly formatted: it should be similar to \nCHROM POS Species 1 Species 2 ... SpeciesX\n.";
 	}
 	else
     {
-		for (size_t i = start+2; i < 2 + number_of_populations; ++i )
+		for (size_t i = 2; i < 2 + n_taxa; ++i )
         {
-			names.push_back(chars[1][i]);
+			names.push_back(chars[start+1][i]);
 		}
 	}
 
-	// Setting the taxon names in the data matrix
+	// setting the taxon names in the data matrix
 	std::map<std::string, DiscreteTaxonData<PoMoState> > name_to_taxon_data;
 	for (size_t i = 0; i < names.size(); ++i )
     {
@@ -79,8 +98,9 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
 
 
     // estimate the number of states
-    size_t row=2;
-    size_t col=2;
+    size_t row=start+2;
+    size_t col=start+2;
+
     // move ahead until we found a non-missing state
     while ( chars[row][col] == "?" || chars[row][col] == "-" )
     {
@@ -93,61 +113,43 @@ PoMoCountFileReader::PoMoCountFileReader(const path &fn, const size_t vps, FORMA
         }
         if ( row == chars.size() )
         {
-            throw RbException("Couldn't guess the number of states in PoMo counts file because all states missing.");
+            throw RbException("Could not compute the number of alleles in PoMo counts file because all states are missing.");
         }
     }
+    
+    // calculating the number of alleles
     std::vector<std::string> tmp_res;
     StringUtilities::stringSplit(chars[row][col], ",", tmp_res);
-    size_t num_states = tmp_res.size();
+    size_t n_alleles = tmp_res.size();
 
-	for (size_t i = 2; i < chars.size(); ++i)
+    // we have officially reached the counts part of the count file
+	for (size_t i = start + 2; i < chars.size(); ++i)
 	{
             
         if (chars[i].size() != numberOfFields)
         {
-            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file: line "<<i<<" is not correct, it does not have "<<numberOfFields<<" space-separated fields.";
+            throw RbException()<<"File "<<fn<<" is not a proper PoMo Counts file. Line "<<i<<" does not have "<<numberOfFields<<" space-separated fields.";
         }
 
+        // getting chromosome and position
 		const std::string& chromosome = chars[i][0];
-		size_t position = StringUtilities::asIntegerNumber( chars[i][1] );
+		size_t position               = StringUtilities::asIntegerNumber( chars[i][1] );
 
-		for (size_t j = 2; j < 2 + number_of_populations; ++j)
+        // reading the counts of a genomic position for each species 
+		for (size_t j = 2; j < 2 + n_taxa; ++j)
 		{
-
-            if ( num_states == 4 )
-            /* got an error here when num_sates=4
-            stringvalue: 6,0,0,0
-1 1e-08 1e-08 1e-08 0.015625 0.015625 0.015625 1e-08 1e-08 1e-08 
-
- 
-terminate called after throwing an instance of 'std::bad_alloc'
-  what():  std::bad_alloc
-Aborted (core dumped)
-
-            */
+            // creating PoMo state
+            PoMoState pState (n_alleles, virtual_population_size, chars[i][j], chromosome, position, weighting );
+            name_to_taxon_data.at(names[j-2]).addCharacter( pState);
+            std::vector<double> vec = pState.getWeights();
+            
+            // checks the weight
+            std::cout << " Count: " << pState.getStringValue() << "\n";
+            for (int i=0; i < vec.size(); i++)
             {
-                std::cout << "§1: " << chars[i][j] << " - " << chromosome << " - " << position << " - " << virtual_population_size  << "\n\n"; 
-                PoMoState pState (4, virtual_population_size, chars[i][j], chromosome, position );
-                std::cout << "§2: " << names[j-2] << "\n\n"; 
-                name_to_taxon_data.at(names[j-2]).addCharacter( pState);
-//                pState.setWeighted(true);
-                pState.setWeighting(PoMoState::BINOMIAL);
-//                std::cout << pState.getWeighting() << "\n\n";
-                pState.setState(chars[i][j]);
-                std::vector<double> vec = pState.getWeights();
-                std::cout << "§3: " << "Weights " << pState.isWeighted() << " Size " << vec.size() << " String Value "<< pState.getStringValue() << "\n\n";
-                for (int i=0; i < vec.size(); i++)
-                {
-                    std::cout << vec[i] << ' ';
-                }
-                std::cout << "Reached here!\n\n";
-
+                std::cout << vec[i] << ' ';
             }
-            else
-            {
-                PoMoState pState (num_states, virtual_population_size, chars[i][j], chromosome, position );
-                name_to_taxon_data.at(names[j-2]).addCharacter( pState);
-            }
+            std::cout << "\n\n";
 		}
 	}
 
@@ -158,14 +160,11 @@ Aborted (core dumped)
     }
 
 
-
-
-
 }
 
 PoMoCountFileReader::PoMoCountFileReader(const PoMoCountFileReader& r) : DelimitedDataReader(r),
-number_of_populations(r.number_of_populations),
-number_of_sites(r.number_of_sites),
+n_taxa(r.n_taxa),
+n_sites(r.n_sites),
 virtual_population_size(r.virtual_population_size),
 names(r.names),
 data_format(r.data_format)
@@ -183,8 +182,8 @@ PoMoCountFileReader& PoMoCountFileReader::PoMoCountFileReader::operator=(const P
 {
     if (this != &r)
     {
-        number_of_populations   = r.number_of_populations;
-        number_of_sites         = r.number_of_sites;
+        n_taxa                  = r.n_taxa;
+        n_sites                 = r.n_sites;
         virtual_population_size = r.virtual_population_size;
         names                   = r.names;
         data_format             = r.data_format;
@@ -197,12 +196,12 @@ PoMoCountFileReader& PoMoCountFileReader::PoMoCountFileReader::operator=(const P
 
 const size_t PoMoCountFileReader::getNumberOfPopulations( void )
 {
-	return number_of_populations;
+	return n_taxa;
 }
 
 const size_t PoMoCountFileReader::getNumberOfSites( void )
 {
-	return number_of_sites;
+	return n_sites;
 }
 
 const AbstractHomologousDiscreteCharacterData& PoMoCountFileReader::getMatrix( void )

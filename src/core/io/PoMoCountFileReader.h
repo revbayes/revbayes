@@ -34,7 +34,7 @@ namespace RevBayesCore {
         
         enum FORMAT { PoMo, NaturalNumbers };
 
-        PoMoCountFileReader(const path& fn, const size_t vps = 10, FORMAT f=FORMAT::PoMo);
+        PoMoCountFileReader(const path& fn, const size_t vps = 10, FORMAT f=FORMAT::PoMo, const string &wm = "Fixed", const long eps = 10000);
         PoMoCountFileReader(const PoMoCountFileReader& r);
         virtual                                                 ~PoMoCountFileReader();
         
@@ -48,12 +48,16 @@ namespace RevBayesCore {
 
     protected:
 
-        size_t                                                  number_of_populations;
-        size_t                                                  number_of_sites;
+        size_t                                                  n_taxa;
+        size_t                                                  n_sites;
         size_t                                                  virtual_population_size;
+        size_t                                                  n_alleles;
         std::vector<string>                                     names;
         AbstractHomologousDiscreteCharacterData*                matrix;
         FORMAT                                                  data_format;
+        string                                                  weighting_method;
+        long                                                    effective_population_size;
+
     };
 
 }

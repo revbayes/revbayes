@@ -13,10 +13,10 @@ namespace RevBayesCore {
     class PoMoState : public DiscreteCharacterState {
         
     public:
-        enum WEIGHTING { FIXED, BINOMIAL, SAMPLED };
+        enum WEIGHTING { FIXED, BINOMIAL, SAMPLED, HYPERGEOMETRIC };
 
         PoMoState(size_t n=4, size_t vps = 10, const std::string &s = "", const std::string &chromosome = "",
-                  size_t position = 0);                                                   //!< Constructor that sets all fields
+                  size_t position = 0, WEIGHTING w = WEIGHTING::FIXED);                                                   //!< Constructor that sets all fields
         
         PoMoState*                      clone(void) const;                                 //!< Get a copy of this object
         
@@ -49,19 +49,24 @@ namespace RevBayesCore {
         void                            setMissingState(bool tf);                           //!< set whether this is a missing character
 
     private:
-        size_t                          computeIndexBiallelic(size_t f, size_t s) const;    //!< Compute the basic index when this biallelic frequency starts
+        size_t                          computeEdgeFirstState(size_t f, size_t s) const;    //!< Compute the basic index when this biallelic frequency starts
         void                            populateWeightedStatesForMonoallelicState(size_t id1, int sum); //!< Sets the weights of all the states compatible with a monoallelic state
         void                            setStateFixed(size_t t, size_t c, size_t b);        //!< Compute the internal state value for this frequency as the fixed average.
-        void                            setStateBinomial(size_t t, size_t c, size_t b);     //!< Compute the internal state value as weights from a binomial distribution.
+        void                            setStateBinomialForPolymorphic(size_t t, size_t c, size_t b);     //!< Compute the internal state value as weights from a binomial distribution.
         void                            setStateBinomialForMonomorphic(size_t t, size_t f); //!< Compute the internal state value as weights from a binomial distribution.
         void                            setStateSampled(size_t t, size_t c, size_t b);      //!< Compute the internal state value by sampling from a binomial distribution.
+
+        void                            setStateHypergeometricForMonomorphic(size_t t, size_t f); //!< Compute the internal state value as weights from a binomial distribution.
+        void                            setStateHypergeometricForPolymorphic(size_t t, size_t c, size_t b); //!< Compute the internal state value as weights from a binomial distribution.
+        double                          hypergeometric_pdf(int c, int C, int n, int N);     // hypergeometric probability function
+
 
         bool                            is_gap;
         bool                            is_missing;
         size_t                          index_single_state;
         size_t                          virtual_population_size;                            //!< The virtual population size of the PoMo model (by default, 10)
-        size_t                          num_raw_states;                                     //!< The number of raw states (4 for A,C,G and T)
-        size_t                          num_pomo_states;                                    //!< The number of PoMo states
+        size_t                          n_alleles;                                          //!< The number of raw states (4 for A,C,G and T)
+        size_t                          n_pomo_states;                                      //!< The number of PoMo states
         size_t                          num_observed_states;
         RbBitSet                        state;
         

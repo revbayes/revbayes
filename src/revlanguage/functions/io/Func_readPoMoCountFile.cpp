@@ -46,15 +46,18 @@ RevPtr<RevVariable> Func_readPoMoCountFile::execute( void )
 	// get the information from the arguments for reading the file
     const std::string& file_in      = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     long  virtual_population_size   = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    const std::string& format       = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
 
+    const std::string& format       = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
     RevBayesCore::PoMoCountFileReader::FORMAT reader_format = RevBayesCore::PoMoCountFileReader::PoMo;
     if ( format == "NaturalNumbers" )
     {
         reader_format = RevBayesCore::PoMoCountFileReader::NaturalNumbers;
     }
     
-	RevBayesCore::PoMoCountFileReader* pcfr = new RevBayesCore::PoMoCountFileReader( file_in, virtual_population_size, reader_format);
+    const std::string& weighting_method = static_cast<const RlString&>(       args[3].getVariable()->getRevObject() ).getValue();
+    long  effective_population_size     = static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+
+	RevBayesCore::PoMoCountFileReader* pcfr = new RevBayesCore::PoMoCountFileReader( file_in, virtual_population_size, reader_format, weighting_method, effective_population_size );
 
 	AbstractHomologousDiscreteCharacterData *rlPoMoAln = new AbstractHomologousDiscreteCharacterData( pcfr->getMatrix() );
 
@@ -72,13 +75,22 @@ const ArgumentRules& Func_readPoMoCountFile::getArgumentRules( void ) const
     if ( rules_set == false )
     {
         argument_rules.push_back( new ArgumentRule( "countFile", RlString::getClassTypeSpec(), "A count file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "virtualPopulationSize", Natural::getClassTypeSpec(), "The number of (virtual or effective) individuals.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "Virtual population size", Natural::getClassTypeSpec(), "The number of virtual individuals in the population.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
             
         std::vector<std::string> format_options;
         format_options.push_back( "PoMo" );
         format_options.push_back( "NaturalNumbers" );
         argument_rules.push_back( new OptionRule( "format", new RlString("PoMo"), format_options, "The output data type format." ) );
         
+        std::vector<std::string> weighting_options;
+        weighting_options.push_back( "Fixed" );
+        weighting_options.push_back( "Binomial" );
+        weighting_options.push_back( "Sampled" );
+        weighting_options.push_back( "Hypergeometric" );
+        argument_rules.push_back( new OptionRule( "format", new RlString("Fixed"), weighting_options, "The weighting methods to correct the observed counts." ) );
+        
+        argument_rules.push_back( new ArgumentRule( "Effective population size", Natural::getClassTypeSpec(), "A tentative population size used by the hypergeometric method to correct the counts.", ArgumentRule::BY_VALUE, ArgumentRule::ANY,  new Natural(10000) ) );
+
         rules_set = true;
 
     }
