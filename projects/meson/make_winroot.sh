@@ -111,7 +111,7 @@ if [ "${gtk}" = "true" ] ; then
     fontconfig-2.14.2-1
     freetype-2.13.2-1
     fribidi-1.0.13-1
-    gdk-pixbuf2-2.42.9-1
+    gdk-pixbuf2-2.42.12-1
     gettext-0.22.4-3
     glib2-2.78.2-1
     graphite2-1.3.14-2

@@ -18,6 +18,7 @@
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDistribution.h"
+#include "SiteMixtureModel.h"
 
 #include <memory.h>
 
@@ -113,6 +114,7 @@ namespace RevBayesCore {
         void                                                                setClockRate(const TypedDagNode< double > *r);
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
         void                                                                setPInv(const TypedDagNode< double > *);
+        void                                                                setMixtureModel(const TypedDagNode< SiteMixtureModel > *mm);
         void                                                                setRateMatrix(const TypedDagNode< RateGenerator > *rm);
         void                                                                setRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *rm);
         void                                                                setRootFrequencies(const TypedDagNode< Simplex > *f);
@@ -232,6 +234,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode< double >*                                       homogeneous_clock_rate = nullptr;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates = nullptr;
+        const TypedDagNode< SiteMixtureModel >*                     mixture_model = nullptr;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix = nullptr;
         const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices = nullptr;
         const TypedDagNode< Simplex >*                                      root_frequencies = nullptr;
@@ -347,6 +350,7 @@ gap_match_clamped( gapmatch )
     this->addParameter( tau );
     this->addParameter( homogeneous_clock_rate );
     this->addParameter( heterogeneous_clock_rates );
+    this->addParameter( mixture_model );
     this->addParameter( homogeneous_rate_matrix );
     this->addParameter( heterogeneous_rate_matrices );
     this->addParameter( root_frequencies );
@@ -413,6 +417,7 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     // initialize with default parameters
     homogeneous_clock_rate       = n.homogeneous_clock_rate;
     heterogeneous_clock_rates    = n.heterogeneous_clock_rates;
+    mixture_model                = n.mixture_model;
     homogeneous_rate_matrix      = n.homogeneous_rate_matrix;
     heterogeneous_rate_matrices  = n.heterogeneous_rate_matrices;
     root_frequencies             = n.root_frequencies;
@@ -1477,7 +1482,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getSampledMixture
 
 }
 
-
 template<class charType>
 bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, std::vector<std::string>& character_histories, std::vector<std::vector<charType> >& start_states, std::vector<std::vector<charType> >& end_states, size_t site, bool use_simmap_default)
 {
@@ -1498,7 +1502,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     transition_states.push_back(start_state);
 
     // get the rate matrix for this branch (or site if using a mixture of matrices over sites)
-    RateMatrix_JC jc(this->num_chars);
+    RateMatrix_JC jc(this->num_chars); // BAD!!
     const RateGenerator *rate_matrix = &jc;
     if ( this->branch_heterogeneous_substitution_matrices == true )
     {
@@ -1540,19 +1544,27 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
         }
     }
 
-    // multiply by the clock-rate for the site
-    if (this->site_rates != NULL)
-    {
-    	// there is a mixture over site rates
-    	clock_rate *= this->site_rates->getValue()[this->sampled_site_rate_component];
-    }
-
-    // now sample a character history for the branch leading to this node
-    auto [start_age, end_age] = getStartEndAge(node);
-
     // simulate stochastic map
     transition_states.push_back(end_state);
-    success = const_cast<RateGenerator*>(rate_matrix)->simulateStochasticMapping(start_age, end_age, clock_rate, transition_states, transition_times);
+    if (mixture_model)
+    {
+        auto& model = mixture_model->getValue();
+        int m = sampled_site_rate_component;
+        success = const_cast<SiteMixtureModel&>(model).getComponent(m).simulateStochasticMapping(tau->getValue(), node_index, clock_rate, transition_states, transition_times);
+    }
+    else
+    {
+        auto [start_age, end_age] = getStartEndAge(node);
+
+        // multiply by the clock-rate for the site
+        if (this->site_rates != NULL)
+        {
+            // there is a mixture over site rates
+            clock_rate *= this->site_rates->getValue()[this->sampled_site_rate_component];
+        }
+
+        success = const_cast<RateGenerator*>(rate_matrix)->simulateStochasticMapping(start_age, end_age, clock_rate, transition_states, transition_times);
+    }
 
     // make SIMMAP string
     std::string simmap_string = "{";
@@ -2170,8 +2182,18 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getRootFrequencie
 {
     if ( root_frequencies != NULL )
     {
+        assert(not mixture_model);
+
         std::vector<double> f = root_frequencies->getValue();
         rf.push_back( f );
+    }
+    else if (mixture_model)
+    {
+        rf.clear();
+
+        auto& mm = mixture_model->getValue();
+        for(int i=0;i < mm.getNumberOfComponents(); i++)
+            rf.push_back( mm.getComponent(i).getRootFrequencies() );
     }
     else if (heterogeneous_rate_matrices !=  NULL)
     {
@@ -2237,6 +2259,9 @@ std::vector<double> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::ge
 template<class charType>
 std::vector<double> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMixtureProbs( void ) const
 {
+    if (mixture_model)
+        return mixture_model->getValue().componentProbs();
+
     std::vector<double> probs(num_site_mixtures, 1.0/num_site_mixtures);
     std::vector<double> rates_probs(num_site_rates, 1.0/num_site_rates);
     size_t num_site_matrices = num_site_mixtures/num_site_rates;
@@ -2554,7 +2579,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::reInitialized( vo
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodVectors( void )
 {
-    if (this->branch_heterogeneous_substitution_matrices == false)
+    if (mixture_model)
+    {
+        num_site_mixtures = mixture_model->getValue().getNumberOfComponents();
+        // FIXME - not sure if this is right for covarion models.
+        assert(num_chars == mixture_model->getValue().getNumberOfStates());
+    }
+    else if (this->branch_heterogeneous_substitution_matrices == false)
     {
         this->num_site_mixtures = this->num_site_rates * this->num_matrices;
     }
@@ -3154,6 +3185,46 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
     {
         this->redrawValue();
+    }
+
+}
+
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMixtureModel(const TypedDagNode< SiteMixtureModel> *mm)
+{
+
+    // remove the old parameter first
+    if ( homogeneous_rate_matrix != NULL)
+    {
+        removeParameter( homogeneous_rate_matrix );
+        homogeneous_rate_matrix = NULL;
+    }
+
+    if ( heterogeneous_rate_matrices != NULL)
+    {
+        removeParameter( heterogeneous_rate_matrices );
+        heterogeneous_rate_matrices = NULL;
+    }
+
+    // set the value
+    mixture_model = mm;
+    num_matrices = 1;
+
+    resizeLikelihoodVectors();
+
+    if (mm && mm->getValue().getNumberOfStates() != this->num_chars)
+    {
+        throw RbException()<<"Mixture model (" << mm->getValue().getNumberOfStates() << " do not match the number of character states (" << num_chars << ")";
+    }
+
+    // add the new parameter
+    addParameter( mixture_model );
+
+    // redraw the current value
+    if ( not dag_node or not dag_node->isClamped())
+    {
+        redrawValue();
     }
 
 }
@@ -3931,6 +4002,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
     {
         heterogeneous_clock_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
     }
+    else if (oldP == mixture_model)
+    {
+        mixture_model = static_cast<const TypedDagNode< SiteMixtureModel >* >( newP );
+    }
     else if (oldP == homogeneous_rate_matrix)
     {
         homogeneous_rate_matrix = static_cast<const TypedDagNode< RateGenerator >* >( newP );
@@ -4112,9 +4187,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
     }
 
-    auto [start_age, end_age] = getStartEndAge(*node);
-
-    // second, get the clock rate for the branch
+    // 1. Get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
     {
@@ -4124,6 +4197,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     {
         rate = this->homogeneous_clock_rate->getValue();
     }
+
+    // 2. Handle the mixture model object case.
+    if (mixture_model)
+    {
+        transition_prob_matrices = mixture_model->getValue().calculateTransitionProbabilities(tau->getValue(), node_idx, rate);
+        return;
+    }
+
+    auto [start_age, end_age] = getStartEndAge(*node);
 
     // we rescale the rate by the inverse of the proportion of invariant sites
     rate /= ( 1.0 - getPInv() );
@@ -4183,7 +4265,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         }
         else
         {
-            rm = &jc;
+            rm = &jc; // BAD!!
         }
 
 	// The rm can change behind our back if the user redefines it.
@@ -4214,7 +4296,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     
     if (node->isRoot()) throw RbException("dnPhyloCTMC called updateTransitionProbabilityMatrix for the root node\n");
     
-    // second, get the clock rate for the branch
+    size_t pmat_offset = this->active_pmatrices[node_idx] * this->activePmatrixOffset + node_idx * this->pmatNodeOffset;
+
+    // 1. Get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
     {
@@ -4224,18 +4308,26 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     {
         rate = this->homogeneous_clock_rate->getValue();
     }
-    
+
+    // 2. Handle the mixture model object case.
+    if (mixture_model)
+    {
+        auto& model = mixture_model->getValue();
+        for(int m=0; m < model.getNumberOfComponents(); m++)
+            pmatrices[pmat_offset + m] = model.getComponent(m).calculateTransitionProbabilities(tau->getValue(), node_idx, rate);
+        return;
+    }
+
+    // 3. Handle non-mixture-models.
+    auto [start_age, end_age] = getStartEndAge(*node);
+
+    // first, get the rate matrix for this branch
+    RateMatrix_JC jc(this->num_chars); // BAD!!!
+    const RateGenerator *rm = &jc;
+
     // we rescale the rate by the inverse of the proportion of invariant sites
     rate /= ( 1.0 - getPInv() );
-    
-    auto [start_age, end_age] = getStartEndAge(*node);
-    
-    // first, get the rate matrix for this branch
-    RateMatrix_JC jc(this->num_chars);
-    const RateGenerator *rm = &jc;
-    
-    size_t pmat_offset = this->active_pmatrices[node_idx] * this->activePmatrixOffset + node_idx * this->pmatNodeOffset;
-    
+
     if (this->branch_heterogeneous_substitution_matrices == false )
     {
         for (size_t matrix = 0; matrix < this->num_matrices; ++matrix)

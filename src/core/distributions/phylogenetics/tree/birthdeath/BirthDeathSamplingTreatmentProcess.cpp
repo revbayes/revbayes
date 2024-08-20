@@ -74,7 +74,9 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     interval_times_event_speciation(event_sampling_timeline),
     interval_times_event_extinction(event_extinction_timeline),
     interval_times_event_sampling(event_sampling_timeline),
-    offset( 0.0 )
+    offset( 0.0 ),
+    taxa(tn),
+    age_check_precision(age_check_precision)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda   = NULL;
@@ -165,10 +167,19 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     // updateVectorParameters();
     prepareTimeline();
     prepareProbComputation();
-
-    delete value;
     
-    if (t != nullptr)
+    delete value;
+
+    if ( starting_tree == NULL )
+    {
+        RbVector<Clade> constr;
+        // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+        StartingTreeSimulator simulator;
+        RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+        // store the new value
+        value = my_tree;
+    }
+    else
     {
         try
         {
@@ -182,15 +193,6 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
             // a nonexistent starting_tree
             throw RbException( e.getMessage() );
         }
-    }
-    else
-    {
-        RbVector<Clade> constr;
-        // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
-        StartingTreeSimulator simulator;
-        RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
-        // store the new value
-        value = my_tree;
     }
 
     countAllNodes();
@@ -1970,4 +1972,10 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
         if(removal < 1.0 - DBL_EPSILON) return true;
     }
     return false;
+}
+
+void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
+{
+    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
+    AbstractRootedTreeDistribution::setValue(newv, f);
 }

@@ -640,6 +640,7 @@ std::vector<Taxon> Tree::getFossilTaxa() const
         }
 
     }
+    std::sort(taxa.begin(), taxa.end());
 
     return taxa;
 }
@@ -931,11 +932,37 @@ std::vector<Taxon> Tree::getTaxa() const
 
 
 /**
+ * Check that all tip ages are within their specified taxon age ranges
+ * If forceAdjust is true (default), will adjust misspecified ages, otherwise throws an exception
+ */
+void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
+{
+    for (auto& node : nodes)
+    {
+        if(!node->isTip()) continue;
+        Taxon taxon = node->getTaxon();
+        if(node->getAge() < taxon.getMinAge()) {
+            if(forceAdjust) {
+                node->setAge(taxon.getMinAge());
+                RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
+            } else throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+        }
+        if(node->getAge() > taxon.getMaxAge()) {
+            if(forceAdjust) {
+                node->setAge(taxon.getMaxAge());
+                RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
+            } else throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+        }
+    }
+}
+
+
+/**
  * Returns a map of the taxa to their BitSet indices.
  * The taxa are ordered alphabetically in the BitSet.
  * Eventually this should be refactored with the TaxonMap class.
  */
-const std::map<std::string, size_t>& Tree::getTaxonBitSetMap( void ) const
+const std::map<std::string, size_t> &Tree::getTaxonBitSetMap(void) const
 {
     if (taxon_bitset_map.size() == 0)
     {
@@ -2130,13 +2157,15 @@ void Tree::setTaxonName(const std::string& current_name, const std::string& new_
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
     t.setName( new_name );
-    taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
+    
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 }
 
 
 /**
- * Change the name of a taxon
+ * Change the taxon object with specified name
  *
  * \param[in] current_name   self explanatory.
  * \param[in] new_taxon      self explanatory.
@@ -2149,8 +2178,9 @@ void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxo
     TopologyNode& node = getTipNodeWithName( current_name );
     node.setTaxon( new_taxon );
 
-    taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 
 }
 

@@ -201,8 +201,64 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             if (by_value)
             {
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
-                return Argument( valueVar, arg.getLabel(), false );
+                return Argument( valueVar, arg.getLabel(), true );
             }
+//<<<<<<< HEAD
+//            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
+//            {
+//                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
+//                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
+//
+//                RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,the_var->getName() ) );
+//                return Argument( valueVar, arg.getLabel(), true );
+//                
+//            }
+//        } // if (by-value)
+//        else
+//        {
+//            if ( the_var->getRevObject().isType( *it ) )
+//            {
+//                // For now, change the required type of the incoming variable wrapper
+//                the_var->setRequiredTypeSpec( *it );
+//            
+//                if ( isEllipsis() == false )
+//                {
+//                    return Argument( the_var, arg.getLabel(), evalType == BY_CONSTANT_REFERENCE );
+//                }
+//                else
+//                {
+//                    return Argument( the_var, arg.getLabel(), true );
+//                }
+//            
+//            }
+//            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+//            {
+//                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
+//                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
+//                
+//                RevPtr<RevVariable> the_new_var = NULL;
+//                if ( the_var->getRevObject().isConstant() == true )
+//                {
+//                    the_new_var = the_var;
+//                    the_new_var->replaceRevObject( converted_object );
+//                    the_new_var->setRequiredTypeSpec( *it );
+//                }
+//                else
+//                {
+//                    the_new_var = RevPtr<RevVariable>( new RevVariable(converted_object, the_var->getName() ) );
+//                }
+//                
+//                if ( !isEllipsis() )
+//                {
+//                    return Argument( the_new_var, arg.getLabel(), false );
+//                }
+//                else
+//                {
+//                    return Argument( the_new_var, arg.getLabel(), false );
+//                }
+//            }
+//=======
+//>>>>>>> bec51c4a9f3581046b7c8af121197e7ef0dae9d4
             else
             {
                 // For now, change the required type of the incoming variable wrapper
@@ -358,6 +414,10 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         once = true;
     }
+    if ( nodeType == STOCHASTIC || nodeType == DETERMINISTIC )
+    {
+        once = false;
+    }
     
     if ( nodeType == STOCHASTIC && the_var->getRevObject().getDagNode()->getDagNodeType() != RevBayesCore::DagNode::STOCHASTIC )
     {
@@ -367,28 +427,31 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         return -1;
     }
-
-    for ( auto& argTypeSpec: argTypeSpecs )
+   
+    // we need to store and check all arg types
+    std::vector<double> penalties;
+    for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
     {
-        if ( the_var->getRevObject().isType( argTypeSpec ) )
+        const TypeSpec& req_arg_type_spec = *it;
+        if ( the_var->getRevObject().isType( req_arg_type_spec ) )
         {
             return 0.0;
         }
-        
+            
         double penalty = -1;
         // make sure that we only perform type casting when the variable will not be part of a model graph
         if ( once == true || the_var->getRevObject().isConstant() == true )
         {
-            penalty = the_var->getRevObject().isConvertibleTo( argTypeSpec, once );
+            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
         }
-        
-        if ( penalty != -1 && (argTypeSpec).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+            
+        if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
-            return penalty;
+            penalties.push_back( penalty );
         }
         else if ( penalty != -1 && evalType == BY_VALUE )
         {
-            return penalty;
+            penalties.push_back( penalty );
         }
 
 //        else if ( once == true &&
@@ -403,16 +466,16 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         {
             
             const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
-            const TypeSpec& typeTo   = argTypeSpec;
+            const TypeSpec& typeTo   = req_arg_type_spec;
             
             // create the function name
             std::string function_name = "_" + typeFrom.getType() + "2" + typeTo.getType();
-            
+                
             // Package arguments
             std::vector<Argument> args;
             Argument theArg = Argument( the_var, "arg" );
             args.push_back( the_var );
-            
+                
             Environment& env = Workspace::globalWorkspace();
             try
             {
@@ -426,10 +489,23 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             }
 
         }
+            
+    }
         
+    // check which one was the best penalty
+    double best_penalty = -1;
+    for (size_t i=0; i<penalties.size(); ++i)
+    {
+        if ( penalties[i] != -1 )
+        {
+            if (best_penalty == -1 || best_penalty > penalties[i])
+            {
+                best_penalty = penalties[i];
+            }
+        }
     }
     
-    return -1;
+    return best_penalty;
 }
 
 

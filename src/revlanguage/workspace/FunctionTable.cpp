@@ -55,7 +55,7 @@ FunctionTable::~FunctionTable(void)
 FunctionTable& FunctionTable::operator=(const FunctionTable& x)
 {
 
-    if (this != &x) 
+    if (this != &x)
     {
 
         clear();
@@ -205,11 +205,11 @@ bool FunctionTable::existsFunction(std::string const &name) const
     // if this table doesn't contain the function, then we ask the parent table
     if ( it == end() )
     {
-        if ( parentTable != NULL ) 
+        if ( parentTable != NULL )
         {
             return parentTable->existsFunction( name );
         }
-        else 
+        else
         {
             return false;
         }
@@ -297,7 +297,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
     if (hits == 0)
     {
         
-        if (parentTable != NULL) 
+        if (parentTable != NULL)
         {
             // \TODO: We shouldn't allow const casts!!!
             FunctionTable* pt = const_cast<FunctionTable*>(parentTable);
@@ -314,7 +314,8 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
     ret_val = equal_range(name);
     if (hits == 1)
     {
-        if (ret_val.first->second->checkArguments(args,NULL,once) == false)
+        std::vector<bool> arg_mapped(args.size(), false);
+        if (ret_val.first->second->checkArguments(args,NULL,arg_mapped,once) == false)
         {
             std::ostringstream msg;
 
@@ -322,14 +323,23 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
             std::string whitespace(name.size() + 2, ' ');
             
             msg << "Argument or label mismatch for function call.\n";
+            msg << "Arguments which could not be matched (we stopped after the first mismatch):\n";
+            for (size_t i=0; i<arg_mapped.size(); ++i)
+            {
+                if ( arg_mapped[i] == false )
+                {
+                    msg << "\t" << args[i].getLabel() << "\n";
+                    break;
+                }
+            }
             msg << "Provided call:\n";
             msg << name << " (";
 
             // print the passed arguments
-            for (std::vector<Argument>::const_iterator it = args.begin(); it != args.end(); it++) 
+            for (std::vector<Argument>::const_iterator it = args.begin(); it != args.end(); it++)
             {
                 // add a comma and whitespace before the every argument except the first
-                if (it != args.begin()) 
+                if (it != args.begin())
                 {
                     msg << ",\n" << whitespace;
                 }
@@ -380,7 +390,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         }
         return ret_val.first->second;
     }
-    else 
+    else
     {
         std::vector<double>* match_score = new std::vector<double>();
         std::vector<double> best_score;
@@ -391,7 +401,8 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         for (it=ret_val.first; it!=ret_val.second; it++)
         {
             match_score->clear();
-            if ( (*it).second->checkArguments(args, match_score, once) == true )
+            std::vector<bool> arg_mapped(args.size(), false);
+            if ( (*it).second->checkArguments(args, match_score, arg_mapped, once) == true )
             {
                 std::sort(match_score->begin(), match_score->end(), std::greater<double>());
                 if ( best_match == NULL )
@@ -400,7 +411,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
                     best_match = it->second;
                     ambiguous = false;
                 }
-                else 
+                else
                 {
                     size_t j;
                     for (j=0; j<match_score->size() && j<best_score.size(); ++j)
@@ -454,9 +465,9 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
                 msg << "Ambiguous call to function '" << name << "' with arguments (";
             }
             // print the passed arguments
-            for (std::vector<Argument>::const_iterator j = args.begin(); j != args.end(); j++) 
+            for (std::vector<Argument>::const_iterator j = args.begin(); j != args.end(); j++)
             {
-                if (j != args.begin()) 
+                if (j != args.begin())
                 {
                     msg << ",";
                 }
@@ -474,7 +485,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
             }
             throw RbException( msg.str() );
         }
-        else 
+        else
         {
             return best_match;
         }
@@ -551,9 +562,11 @@ const Function& FunctionTable::getFunction(const std::string& name, const std::v
     // find the template function
     const Function* the_function = findFunction(name, args, once);
 
-    if (not the_function)
+    if ( the_function == NULL )
+    {
         throw RbException("No function named '"+ name + "'");
-
+    }
+    
     return *the_function;
 }
 
@@ -577,9 +590,9 @@ bool FunctionTable::isDistinctFormal(const ArgumentRules& x, const ArgumentRules
 {
 
     /* Check that all labels are unique in both sets of argument rules */
-    for (size_t i=0; i<x.size(); i++) 
+    for (size_t i=0; i<x.size(); i++)
     {
-        for (size_t j=i+1; j < x.size(); j++) 
+        for (size_t j=i+1; j < x.size(); j++)
         {
             if (x[i].getArgumentLabel().size() != 0 && x[j].getArgumentLabel().size() != 0)
             {
@@ -614,7 +627,7 @@ bool FunctionTable::isDistinctFormal(const ArgumentRules& x, const ArgumentRules
 
     /* Check that types are different for at least one argument without default values */
     size_t i;
-    for (i=0; i<x.size() && i<y.size(); i++) 
+    for (i=0; i<x.size() && i<y.size(); i++)
     {
         if ( !(x[i].hasDefault() == true && y[i].hasDefault() == true) &&
             !x[i].isEllipsis() && !y[i].isEllipsis() &&
@@ -624,7 +637,7 @@ bool FunctionTable::isDistinctFormal(const ArgumentRules& x, const ArgumentRules
         }
         
     }
-    for (size_t j=i; j<x.size(); j++) 
+    for (size_t j=i; j<x.size(); j++)
     {
         if (x[j].hasDefault() == false && !x[j].isEllipsis())
         {
@@ -632,7 +645,7 @@ bool FunctionTable::isDistinctFormal(const ArgumentRules& x, const ArgumentRules
         }
         
     }
-    for (size_t j=i; j<y.size(); j++) 
+    for (size_t j=i; j<y.size(); j++)
     {
         if (y[j].hasDefault() == false && !y[j].isEllipsis())
         {
