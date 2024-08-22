@@ -19,7 +19,7 @@ dnPoisson
 	moves[1] = mvSlide(th0, delta=0.01, weight=1.0)
 	moves[2] = mvSlide(th1, delta=0.01, weight=1.0)
 	moves[3] = mvSlide(th2, delta=0.01, weight=1.0)
-	monitors[1] = mnScreen(printgen=1000, th0)
+	monitors[1] = mnScreen(printgen=20000, th0)
 	mymodel = model(th1)
 	mymcmc = mcmc(mymodel, monitors, moves)
 	mymcmc.burnin(generations=20000, tuningInterval=100)
