@@ -70,16 +70,7 @@ void  RevBayesCore::TypeConversionFunction<rbTypeFrom, rbTypeTo>::swapParameterI
 template <typename rbTypeFrom, typename rbTypeTo>
 void RevBayesCore::TypeConversionFunction<rbTypeFrom, rbTypeTo>::update(void)
 {
-    if constexpr (std::is_same_v<rbTypeTo, std::string>)
-    {
-        std::ostringstream o;
-        argumentNode -> printValue( o, "", -1, true, true, true );
-        *(this->value) = (o.str());
-    }
-    else
-    {
-        *(this->value) = rbTypeTo(argumentNode->getValue());
-    }
+    *(this->value) = rbTypeTo(argumentNode->getValue());
 }
 
 #endif
