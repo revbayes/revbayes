@@ -116,47 +116,19 @@ Integer* RevLanguage::Integer::clone(void) const
  * Convert to type. The caller manages the returned object. 
  */
 RevObject* Integer::convertTo( const TypeSpec& type ) const
-{
+{   
+    if ( type == RlBoolean::getClassTypeSpec() ) return convertTo<RlBoolean>();
+    if ( type == Real::getClassTypeSpec() ) return convertTo<Real>();
+    if ( type == RlString::getClassTypeSpec() ) return convertTo<RlString>();
 
-    if ( type == RlBoolean::getClassTypeSpec() )
-    {
-        return new RlBoolean( dag_node->getValue() == 0 );
-    }
+    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 ) return convertTo<RealPos>();
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return convertTo<IntegerPos>();
+    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0) return convertTo<Natural>();
     
-    if ( type == Real::getClassTypeSpec() )
-    {
-        return new Real( dag_node->getValue() );
-    }
-    
-    if ( type == RlString::getClassTypeSpec() ) 
-    {
-        std::ostringstream o;
-        printValue( o, true );
-        return new RlString( o.str() );
-    }
-
-    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 )
-    {
-        return new RealPos( double(dag_node->getValue()) );
-    }
-    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0)
-    {
-        return new IntegerPos( dag_node->getValue() );
-    }
-
-    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0)
-    {
-        return new Natural( dag_node->getValue() );
-    }
-    
-    if ( type == Probability::getClassTypeSpec() )
-    {
-        return new Probability( dag_node->getValue() );
-    }
+    if ( type == Probability::getClassTypeSpec() ) return convertTo<Probability>();
     
     return RevObject::convertTo( type );
 }
-
 
 /**
   * Specialized decrement operation.

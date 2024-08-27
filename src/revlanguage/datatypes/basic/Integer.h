@@ -42,11 +42,23 @@ namespace RevLanguage {
         static const TypeSpec&          getClassTypeSpec(void);                                                 //!< Get class type spec
         virtual const TypeSpec&         getTypeSpec(void) const;                                                //!< Get language type of the object
         virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
+
+        template<class rbTypeTo> RevObject* convertTo() const;
         
         std::string                     getGuiName(void) { return "Integer"; }
         std::string                     getGuiUnicodeSymbol(void) { return "Z"; }
         std::string                     getGuiInfo(void) { return ""; }
     };
+
+    template<class rbTypeTo>
+    RevObject* Integer::convertTo() const
+    {   
+        typedef typename rbTypeTo::valueType valueType;
+        Func__conversion<Integer,rbTypeTo>* rlFunc = new Func__conversion<Integer,rbTypeTo>();
+        RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>* func = new RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>(dag_node);
+        DeterministicNode<valueType>* newnode = new DeterministicNode<valueType>(dag_node->getName() + "2" + rbTypeTo::getClassType(), func, rlFunc);
+        return new rbTypeTo(newnode);
+    }
     
 }
 
