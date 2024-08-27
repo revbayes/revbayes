@@ -119,7 +119,12 @@ RevObject* Integer::convertTo( const TypeSpec& type ) const
 {   
     if ( type == RlBoolean::getClassTypeSpec() ) return convertTo<RlBoolean>();
     if ( type == Real::getClassTypeSpec() ) return convertTo<Real>();
-    if ( type == RlString::getClassTypeSpec() ) return convertTo<RlString>();
+
+    if ( type == RlString::getClassTypeSpec() ) {
+        std::ostringstream o;
+        printValue( o, true );
+        return new RlString( o.str() );
+    }
 
     if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 ) return convertTo<RealPos>();
     if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return convertTo<IntegerPos>();
