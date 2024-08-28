@@ -18,7 +18,7 @@ inv_exp ~ dnInv(dnExp(1))
 inv_exp.clamp(42)
 print("Expect: 42", -exp.lnProbability(), inv_exp.lnProbability())
 
-chars <- readDiscreteCharacterData("../validation/data/primates_cytb.nex")
+chars <- readDiscreteCharacterData("../validation/data/bears.nex")
 
 taxa <- chars.names()
 n_taxa <- chars.size()
@@ -28,13 +28,22 @@ topology ~ dnUniformTopology(taxa)
 br_lengths ~ dnDirichlet( rep(1.0, n_edge) )
 phylogeny := treeAssembly(topology, br_lengths)
 
-q4 = fnJC(4)
-phy ~ dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA")
+k ~ dnUniform(1, 10)
+kRates := [ [ 0, k],
+            [ 1, 0] ]
+qK := fnFreeK(kRates)
+phy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard")
 phy.clamp(chars)
 
-invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA"))
+invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
 invPhy.clamp(chars)
 invPhy
 
-print("Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
-q()
+k.clamp(1)
+print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+k.clamp(5)
+print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+k.clamp(6)
+print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+k.clamp(16)
+print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
