@@ -32,7 +32,7 @@ namespace RevBayesCore {
             for (const auto& parameter : dist->getParameters())
                 this->addParameter( parameter );
             
-	    redrawValue();
+	        redrawValue();
         }
 
         InverseDistribution(const InverseDistribution &d)
