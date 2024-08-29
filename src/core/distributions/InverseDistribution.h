@@ -71,6 +71,7 @@ namespace RevBayesCore {
         // Set the current value, e.g. attach an observation (clamp)
         void setValue(valType *v, bool f=false) override {
             dist->setValue(v, f);
+            this->value = v;
         }
 
         // functions from 'pure virtual methods' section of TypedDistribution.h
@@ -87,6 +88,7 @@ namespace RevBayesCore {
 
         void redrawValue(void) override
         {
+            dist->redrawValue();
 	        delete this->value;
 
             if constexpr(std::is_base_of_v<Cloneable, valType>) {

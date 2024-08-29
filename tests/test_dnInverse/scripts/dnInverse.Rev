@@ -44,10 +44,14 @@ invPhy.clamp(chars)
 invPhy
 
 k.clamp(1)
+qK
 print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
 k.clamp(5)
+qK
 print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
 k.clamp(6)
+qK
 print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
 k.clamp(16)
+qK
 print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
