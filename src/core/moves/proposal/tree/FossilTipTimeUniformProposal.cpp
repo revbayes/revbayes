@@ -143,7 +143,7 @@ double FossilTipTimeUniformProposal::doProposal( void )
     double parent_age   = parent.getAge();
     double my_age       = node.getAge();
     double min_age      = 0;
-    double max_age      = parent_age;
+    double max_age;
     
     // adjust min and max age, either given taxon data or given provided ages
     if ( min == NULL )
@@ -162,19 +162,13 @@ double FossilTipTimeUniformProposal::doProposal( void )
         // adjust max age given taxon data
         Taxon& taxon = node.getTaxon();
         double taxon_max_age = taxon.getMaxAge();
-        if ( taxon_max_age < max_age )
-        {
-            max_age = taxon_max_age;
-        }
+        max_age = taxon_max_age;
     }
     else
     {
         // adjust max age given provided variable
         double provided_max_age = max->getValue();
-        if ( provided_max_age < max_age )
-        {
-            max_age = provided_max_age;
-        }
+        max_age = provided_max_age;
     }
 
     if ( node.isSampledAncestorTip() == true )
@@ -209,8 +203,12 @@ double FossilTipTimeUniformProposal::doProposal( void )
             // set the max age either to the boundary or the parent max age
             max_age = fmin(max_age, grandparent_age);
         }
+    } else {
+        max_age = fmin(max_age, parent_age);
     }
     
+    assert(max_age >= min_age); //sanity check
+
     // now we store all necessary values
     stored_age = my_age;
     
