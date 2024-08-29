@@ -18,6 +18,10 @@ inv_exp ~ dnInv(dnExp(1))
 inv_exp.clamp(42)
 print("Expect: 42", -exp.lnProbability(), inv_exp.lnProbability())
 
+exp.clamp(21)
+inv_exp.clamp(21)
+print("Expect: 21", -exp.lnProbability(), inv_exp.lnProbability())
+
 chars <- readDiscreteCharacterData("../validation/data/bears.nex")
 
 taxa <- chars.names()
