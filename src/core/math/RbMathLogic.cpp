@@ -120,8 +120,7 @@ bool RbMath::isAComputableNumber(double x)
 /** Tests whether a double is finite */
 bool RbMath::isFinite(double x)
 {
-    
-    return x > RbConstants::Double::neginf && x < RbConstants::Double::inf;
+    return std::isfinite(x);
 }
 
 
@@ -137,8 +136,7 @@ bool RbMath::isInt(double x)
 /** Tests whether a double is NAN (not a number) */
 bool RbMath::isNan(double x)
 {
-
-    return x != x;
+    return std::isnan(x);
 }
 
 

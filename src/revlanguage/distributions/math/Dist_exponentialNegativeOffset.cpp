@@ -5,8 +5,8 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "Dist_exponentialOffset.h"
-#include "ExponentialWithOffsetDistribution.h"
+#include "Dist_exponentialNegativeOffset.h"
+#include "ExponentialDistribution.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -20,27 +20,27 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Dist_exponentialOffset::Dist_exponentialOffset() : ContinuousDistribution() {
+Dist_exponentialNegativeOffset::Dist_exponentialNegativeOffset() : ContinuousDistribution() {
     
 }
 
 
-Dist_exponentialOffset::~Dist_exponentialOffset() {
+Dist_exponentialNegativeOffset::~Dist_exponentialNegativeOffset() {
     
 }
 
 
 
-Dist_exponentialOffset* Dist_exponentialOffset::clone( void ) const {
-    return new Dist_exponentialOffset(*this);
+Dist_exponentialNegativeOffset* Dist_exponentialNegativeOffset::clone( void ) const {
+    return new Dist_exponentialNegativeOffset(*this);
 }
 
 
-RevBayesCore::ExponentialWithOffsetDistribution* Dist_exponentialOffset::createDistribution( void ) const {
+RevBayesCore::ExponentialDistribution* Dist_exponentialNegativeOffset::createDistribution( void ) const {
     // get the parameters
     RevBayesCore::TypedDagNode<double>* l     = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* o     = static_cast<const Real    &>( offset->getRevObject() ).getDagNode();
-    RevBayesCore::ExponentialWithOffsetDistribution* d  = new RevBayesCore::ExponentialWithOffsetDistribution( l, o );
+    RevBayesCore::ExponentialDistribution* d  = new RevBayesCore::ExponentialDistribution( l, o );
     
     return d;
 }
@@ -48,16 +48,16 @@ RevBayesCore::ExponentialWithOffsetDistribution* Dist_exponentialOffset::createD
 
 
 /* Get Rev type of object */
-const std::string& Dist_exponentialOffset::getClassType(void)
+const std::string& Dist_exponentialNegativeOffset::getClassType(void)
 {
     
-    static std::string rev_type = "Dist_exponentialOffset";
+    static std::string rev_type = "Dist_exponentialNegativeOffset";
     
 	return rev_type; 
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& Dist_exponentialOffset::getClassTypeSpec(void)
+const TypeSpec& Dist_exponentialNegativeOffset::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( ContinuousDistribution::getClassTypeSpec() ) );
@@ -71,7 +71,7 @@ const TypeSpec& Dist_exponentialOffset::getClassTypeSpec(void)
  *
  * \return Rev aliases of constructor function.
  */
-std::vector<std::string> Dist_exponentialOffset::getDistributionFunctionAliases( void ) const
+std::vector<std::string> Dist_exponentialNegativeOffset::getDistributionFunctionAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
@@ -88,7 +88,7 @@ std::vector<std::string> Dist_exponentialOffset::getDistributionFunctionAliases(
  *
  * \return Rev name of constructor function.
  */
-std::string Dist_exponentialOffset::getDistributionFunctionName( void ) const
+std::string Dist_exponentialNegativeOffset::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
     std::string d_name = "exponential";
@@ -98,7 +98,7 @@ std::string Dist_exponentialOffset::getDistributionFunctionName( void ) const
 
 
 /** Return member rules (no members) */
-const MemberRules& Dist_exponentialOffset::getParameterRules(void) const
+const MemberRules& Dist_exponentialNegativeOffset::getParameterRules(void) const
 {
     
     static MemberRules distExpMemberRules;
@@ -116,7 +116,7 @@ const MemberRules& Dist_exponentialOffset::getParameterRules(void) const
 }
 
 
-const TypeSpec& Dist_exponentialOffset::getTypeSpec( void ) const
+const TypeSpec& Dist_exponentialNegativeOffset::getTypeSpec( void ) const
 {
     
     static TypeSpec ts = getClassTypeSpec();
@@ -126,7 +126,7 @@ const TypeSpec& Dist_exponentialOffset::getTypeSpec( void ) const
 
 
 /** Print value for user */
-void Dist_exponentialOffset::printValue(std::ostream& o) const
+void Dist_exponentialNegativeOffset::printValue(std::ostream& o) const
 {
     
     o << " exponential(lambda=";
@@ -146,7 +146,7 @@ void Dist_exponentialOffset::printValue(std::ostream& o) const
 
 
 /** Set a member variable */
-void Dist_exponentialOffset::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
+void Dist_exponentialNegativeOffset::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
     if ( name == "lambda" ) 
     {

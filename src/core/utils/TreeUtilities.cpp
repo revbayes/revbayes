@@ -1599,11 +1599,17 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
     }
     
     // Check that the tip labels of the user-supplied tree match those of the vector of taxa
-    std::vector<std::string> tip_names = treeToChange.getSpeciesNames();
+    std::vector<std::string> tip_names;
+    for (size_t i = 0; i < tip_num; ++i)
+    {
+        const TopologyNode& n = treeToChange.getTipNode( i );
+        tip_names.push_back( n.getTaxon().getName() );
+    }
+
     std::vector<std::string> taxon_names;
     for (size_t i = 0; i < tax_num; ++i)
     {
-        taxon_names.push_back( taxaToCopy[i].getSpeciesName() );
+        taxon_names.push_back( taxaToCopy[i].getName() );
     }
     
     std::sort(tip_names.begin(), tip_names.end());
