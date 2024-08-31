@@ -166,25 +166,10 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     prepareTimeline();
     prepareProbComputation();
 
-    delete value;
-    
-    if (t != nullptr)
+    if ( starting_tree == NULL )
     {
-        try
-        {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
-            value = my_tree->clone();
-        }
-        catch (RbException &e)
-        {
-            value = nullptr;
-            // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
-            // a nonexistent starting_tree
-            throw RbException( e.getMessage() );
-        }
-    }
-    else
-    {
+        delete value;
+        
         RbVector<Clade> constr;
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
         StartingTreeSimulator simulator;
