@@ -118,8 +118,8 @@ Integer* RevLanguage::Integer::clone(void) const
  */
 RevObject* Integer::convertTo( const TypeSpec& type ) const
 {   
-    if ( type == RlBoolean::getClassTypeSpec() ) return convertTo<RlBoolean>();
-    if ( type == Real::getClassTypeSpec() ) return convertTo<Real>();
+    if ( type == RlBoolean::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,RlBoolean>(this);
+    if ( type == Real::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,Real>(this);
 
     if ( type == RlString::getClassTypeSpec() ) {
         std::ostringstream o;
@@ -127,11 +127,11 @@ RevObject* Integer::convertTo( const TypeSpec& type ) const
         return new RlString( o.str() );
     }
 
-    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 ) return convertTo<RealPos>();
-    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return convertTo<IntegerPos>();
-    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0) return convertTo<Natural>();
+    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 ) return RlUtils::RlTypeConverter::convertTo<Integer,RealPos>(this);
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return RlUtils::RlTypeConverter::convertTo<Integer,IntegerPos>(this);
+    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0) return RlUtils::RlTypeConverter::convertTo<Integer,Natural>(this);
     
-    if ( type == Probability::getClassTypeSpec() ) return convertTo<Probability>();
+    if ( type == Probability::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,Probability>(this);
     
     return RevObject::convertTo( type );
 }

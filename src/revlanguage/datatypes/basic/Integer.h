@@ -42,35 +42,11 @@ namespace RevLanguage {
         static const TypeSpec&          getClassTypeSpec(void);                                                 //!< Get class type spec
         virtual const TypeSpec&         getTypeSpec(void) const;                                                //!< Get language type of the object
         virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
-
-        template<class rbTypeTo> RevObject* convertTo() const;
         
         std::string                     getGuiName(void) { return "Integer"; }
         std::string                     getGuiUnicodeSymbol(void) { return "Z"; }
         std::string                     getGuiInfo(void) { return ""; }
     };
-
-
-    /**
-     * Auxiliary function (templated) to convert to another type
-     * If the current node is constant, we just create another constant node with the correct type to replace this one
-     * Otherwise, the node value may change, so we create a deterministic node tied to this one by a type conversion function, which will handle the updates
-     * 
-     * \return the type-converted object
-     */
-    template<class rbTypeTo>
-    RevObject* Integer::convertTo() const
-    {   
-        if(!isConstant()) {
-            typedef typename rbTypeTo::valueType valueType;
-            Func__conversion<Integer,rbTypeTo>* rlFunc = new Func__conversion<Integer,rbTypeTo>();
-            RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>* func = new RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>(dag_node);
-            DeterministicNode<valueType>* newnode = new DeterministicNode<valueType>(dag_node->getName() + "2" + rbTypeTo::getClassType(), func, rlFunc);
-            return new rbTypeTo(newnode);
-        } else {
-            return new rbTypeTo(dag_node->getValue());
-        }
-    }
     
 }
 

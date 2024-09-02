@@ -1,17 +1,5 @@
 /*!
- * @file
- * This file contains global constants of the RevLanguage.
- *
- * @brief Names of variable types
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-02-25 10:17:07 +0100 (Sat, 25 Feb 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @since 2010-09-09, version 1.0
- *
- * $Id: RbUtil.h 1247 2012-02-25 09:17:07Z hoehna $
+ * @file This file contains utilities for the RevLanguage, including type conversion functions.
  */
 
 #ifndef RlUtil_H
@@ -19,6 +7,7 @@
 
 #include "RevNullObject.h"
 #include "RevObject.h"
+#include "ModelObject.h"
 
 #include <string>
 
@@ -29,15 +18,35 @@ namespace RevLanguage {
         // Empty return type spec
         static const TypeSpec& Void    = TypeSpec( "void", NULL );
 
-//        const std::string Void                                   = "void";
-
         class RlTypeConverter {
             public:
             static RevObject*                toReal(double x);
             static RevObject*                toString(const std::string &x);
+            template<class rbTypeFrom, class rbTypeTo> static RevObject* convertTo(const ModelObject<typename rbTypeFrom::valueType>* input);
         };
-    }
 
+        /**
+         * Auxiliary function (templated) to convert to another type
+         * If the current node is constant, we just create another constant node with the correct type to replace this one
+         * Otherwise, the node value may change, so we create a deterministic node tied to this one by a type conversion function, which will handle the updates
+         * 
+         * \return the type-converted object
+         */
+        template<class rbTypeFrom, class rbTypeTo>
+        RevObject* RlTypeConverter::convertTo(const ModelObject<typename rbTypeFrom::valueType>* input) 
+        {   
+            if(!input->isConstant()) {
+                typedef typename rbTypeFrom::valueType fromValueType;
+                typedef typename rbTypeTo::valueType toValueType;
+                Func__conversion<rbTypeFrom,rbTypeTo>* rlFunc = new Func__conversion<rbTypeFrom,rbTypeTo>();
+                RevBayesCore::TypeConversionFunction<fromValueType,toValueType>* func = new RevBayesCore::TypeConversionFunction<fromValueType,toValueType>(input->getDagNode());
+                DeterministicNode<toValueType>* newnode = new DeterministicNode<toValueType>(input->getDagNode()->getName() + "2" + rbTypeTo::getClassType(), func, rlFunc);
+                return new rbTypeTo(newnode);
+            } else {
+                return new rbTypeTo(input->getDagNode()->getValue());
+            }
+        }
+    }
 }
 
 #endif
