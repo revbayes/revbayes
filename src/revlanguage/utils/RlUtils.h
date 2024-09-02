@@ -27,7 +27,8 @@ namespace RevLanguage {
 
         /**
          * Auxiliary function (templated) to convert to another type
-         * If the current node is constant, we just create another constant node with the correct type to replace this one
+         * If the current node is constant, we just create another constant node with the correct type to replace this one, as this is faster
+         * NB: changing this behaviour for constant nodes also requires changing the corresponding code in ArgumentRule::fitArgument, otherwise infinite loops are created
          * Otherwise, the node value may change, so we create a deterministic node tied to this one by a type conversion function, which will handle the updates
          * 
          * \return the type-converted object
