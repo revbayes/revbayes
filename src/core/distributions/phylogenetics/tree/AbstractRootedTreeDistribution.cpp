@@ -520,7 +520,7 @@ void AbstractRootedTreeDistribution::redrawValue( void )
     if ( starting_tree == NULL )
     {
         // if no condition is specified, assume the most restrictive
-        redrawValue(SimulationCondition::VALIDATION);
+        redrawValue(SimulationCondition::MCMC);
     }
 }
 
