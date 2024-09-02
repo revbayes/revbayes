@@ -1,13 +1,47 @@
-//
-//  PhyloBranchRatesDifferenceFunction.hpp
-//  RevBayes-Clock-Rate-Mix
-//
-//  Created by Sebastian Hoehna on 19.04.24.
-//
+#ifndef PhyloBranchRatesDifferenceFunction_H
+#define PhyloBranchRatesDifferenceFunction_H
 
-#ifndef PhyloBranchRatesDifferenceFunction_hpp
-#define PhyloBranchRatesDifferenceFunction_hpp
+#include <cstddef>
+#include <vector>
 
-#include <stdio.h>
+#include "RbVector.h"
+#include "TypedFunction.h"
+#include "TopologyNode.h"
 
-#endif /* PhyloBranchRatesDifferenceFunction_hpp */
+namespace RevBayesCore {
+class DagNode;
+class Tree;
+template <class valueType> class TypedDagNode;
+    
+    class PhyloBranchRatesDifferenceFunction : public TypedFunction< RbVector<double> > {
+        
+    public:
+        PhyloBranchRatesDifferenceFunction(const TypedDagNode<Tree> *t, const TypedDagNode< RbVector<double> > *d);
+        virtual                                                ~PhyloBranchRatesDifferenceFunction(void);                                                     //!< Virtual destructor
+        
+        // public member functions
+        PhyloBranchRatesDifferenceFunction*                     clone(void) const;                                                                  //!< Create an independent clone
+        void                                                    keep(const DagNode* affecter);
+        void                                                    restore(const DagNode *restorer);
+        void                                                    reInitialized(void);                                                                //!< The arguments have been re-initialized
+        void                                                    touch(const DagNode *toucher );
+        void                                                    update(void);
+        
+    protected:
+        void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                    //!< Implementation of swaping parameters
+        
+    private:
+        void                                                    recursiveUpdate(const TopologyNode& n);
+
+        // members
+        const TypedDagNode<Tree>*                               tau;
+        const TypedDagNode< RbVector<double> >*                 branch_rates;
+        
+        std::set<size_t>                                        touched_node_indices;
+
+    };
+    
+}
+
+#endif
+
