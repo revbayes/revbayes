@@ -27,6 +27,7 @@ TreeAssemblyFunction::TreeAssemblyFunction(const TypedDagNode<Tree> *t, const Ty
     
     value = const_cast<Tree*>( &tau->getValue() );
     
+    brlenFlagDirty = true;
     update();
 }
 
@@ -42,6 +43,7 @@ TreeAssemblyFunction::TreeAssemblyFunction(const TreeAssemblyFunction &f) : Type
     
     value = const_cast<Tree*>( &tau->getValue() );
     
+    brlenFlagDirty = true;
     update();
 }
 
@@ -69,6 +71,7 @@ void TreeAssemblyFunction::keep( const DagNode *affecter )
     
     // SH (20200221): This needs to stay, otherwise the MCMC does not update properly.
     touchedNodeIndices.clear();
+    brlenFlagDirty = false;
     
     // SH (20200221): We must not call update because it breaks the MCMC!
     // SH (20190913): There seems to be an issue if we use two replicates
@@ -89,7 +92,8 @@ void TreeAssemblyFunction::restore( const DagNode *restorer )
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
     
-//    touchedNodeIndices.clear();
+    touchedNodeIndices.clear();
+    brlenFlagDirty = false;
 }
 
 
@@ -100,16 +104,20 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
     TypedFunction< Tree >::touch( toucher );
     
     //reset flag
-    touchedTopology = false;
+    brlenFlagDirty = true;
     
     if ( toucher == brlen )
     {
         const std::set<size_t> &touchedIndices = toucher->getTouchedElementIndices();
         touchedNodeIndices.insert(touchedIndices.begin(), touchedIndices.end());
     }
-    else if (toucher == tau)
+    
+    if ( toucher != tau && touchedNodeIndices.size() == 0 )
     {
-        touchedTopology = true;
+        for (size_t i = 0; i < brlen->getValue().size(); ++i)
+        {
+            touchedNodeIndices.insert(i);
+        }
     }
 }
 
@@ -117,22 +125,23 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
 void TreeAssemblyFunction::update( void )
 {
 
-    if ( touchedNodeIndices.size() > 0 )
+    const std::vector<double> &v = brlen->getValue();
+    if ( touchedNodeIndices.size() < v.size() )
     {
-        const std::vector<double> &v = brlen->getValue();
-        for (std::set<size_t>::iterator it = touchedNodeIndices.begin(); it != touchedNodeIndices.end(); ++it)
-        {
-            value->getNode(*it).setBranchLength(v[*it]);
-        }
-        touchedNodeIndices.clear();
-    }
-    else if (touchedTopology == false)
-    {
-        const std::vector<double> &v = brlen->getValue();
         for (size_t i = 0; i < v.size(); ++i)
         {
-            value->getNode(i).setBranchLength( v[i] );
+            value->getNode(i).setBranchLength( v[i], false );
         }
+    }
+
+    if ( touchedNodeIndices.size() > 0 )
+    {
+        for (std::set<size_t>::iterator it = touchedNodeIndices.begin(); it != touchedNodeIndices.end(); ++it)
+        {
+            value->getNode(*it).setBranchLength( v[*it], brlenFlagDirty );
+        }
+        touchedNodeIndices.clear();
+        brlenFlagDirty = false;
     }
 
 }
