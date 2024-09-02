@@ -165,7 +165,7 @@ namespace RevBayesCore {
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
         void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
-        void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
+        void                                        setParent(TopologyNode* p, bool recompute_branch_length = true);                    //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
         void                                        setSpeciesName(std::string const &n);                                               //!< Set the species name of this node
         void                                        setTaxon(Taxon const &t);                                                           //!< Set the taxon of this node
