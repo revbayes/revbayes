@@ -35,6 +35,7 @@ namespace RevBayesCore {
         double                                                  computeLnProbability(void);
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
         void                                                    redrawValue(void);
+        void                                                    redrawValue(SimulationCondition c);
         void                                                    setValue(mixtureType *v, bool f=false, bool o=true);
         
         // special handling of state changes
@@ -298,6 +299,33 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void
         base_distributions[i]->setValue( this->value, true );
     }
 
+}
+
+
+template <class mixtureType>
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( SimulationCondition c )
+{
+    
+    const Simplex &probs = probabilities->getValue();
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    double u = rng->uniform01();
+    size_t index = 0;
+    while ( u > probs[index] )
+    {
+        u -= probs[index];
+        ++index;
+    }
+    
+    TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
+    selected_base_dist->redrawValue( c );
+
+    (*this->value) = selected_base_dist->getValue();
+    
+    for (int i = 0; i< base_distributions.size(); ++i)
+    {
+        base_distributions[i]->setValue( this->value, true );
+    }
 }
 
 
