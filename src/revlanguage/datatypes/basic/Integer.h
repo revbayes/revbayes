@@ -53,11 +53,15 @@ namespace RevLanguage {
     template<class rbTypeTo>
     RevObject* Integer::convertTo() const
     {   
-        typedef typename rbTypeTo::valueType valueType;
-        Func__conversion<Integer,rbTypeTo>* rlFunc = new Func__conversion<Integer,rbTypeTo>();
-        RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>* func = new RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>(dag_node);
-        DeterministicNode<valueType>* newnode = new DeterministicNode<valueType>(dag_node->getName() + "2" + rbTypeTo::getClassType(), func, rlFunc);
-        return new rbTypeTo(newnode);
+        if(!isConstant()) {
+            typedef typename rbTypeTo::valueType valueType;
+            Func__conversion<Integer,rbTypeTo>* rlFunc = new Func__conversion<Integer,rbTypeTo>();
+            RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>* func = new RevBayesCore::TypeConversionFunction<Integer::valueType,valueType>(dag_node);
+            DeterministicNode<valueType>* newnode = new DeterministicNode<valueType>(dag_node->getName() + "2" + rbTypeTo::getClassType(), func, rlFunc);
+            return new rbTypeTo(newnode);
+        } else {
+            return new rbTypeTo(dag_node->getValue());
+        }
     }
     
 }
