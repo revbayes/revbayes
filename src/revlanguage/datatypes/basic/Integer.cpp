@@ -113,7 +113,8 @@ Integer* RevLanguage::Integer::clone(void) const
 
 
 /** 
- * Convert to type. The caller manages the returned object. 
+ * Convert to type. The caller manages the returned object.
+ * Calls the templated convertTo<> function based on the type to return.
  */
 RevObject* Integer::convertTo( const TypeSpec& type ) const
 {   

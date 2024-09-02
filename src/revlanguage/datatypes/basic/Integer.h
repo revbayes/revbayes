@@ -50,6 +50,14 @@ namespace RevLanguage {
         std::string                     getGuiInfo(void) { return ""; }
     };
 
+
+    /**
+     * Auxiliary function (templated) to convert to another type
+     * If the current node is constant, we just create another constant node with the correct type to replace this one
+     * Otherwise, the node value may change, so we create a deterministic node tied to this one by a type conversion function, which will handle the updates
+     * 
+     * \return the type-converted object
+     */
     template<class rbTypeTo>
     RevObject* Integer::convertTo() const
     {   
