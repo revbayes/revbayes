@@ -1936,7 +1936,7 @@ void TopologyNode::setNumberOfShiftEvents(size_t n)
     num_shift_events = n;
 }
 
-void TopologyNode::setParent(TopologyNode* p)
+void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
 {
 
     // we only do something if this isn't already our parent
@@ -1944,14 +1944,25 @@ void TopologyNode::setParent(TopologyNode* p)
     {
         // we do not own the parent so we do not have to delete it
         parent = p;
-
-        // we need to recompute our branch length
-        recomputeBranchLength();
-
-        // fire tree change event
-        if ( tree != NULL )
+        
+        if (recompute_branch_length == true)
         {
-            tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::DEFAULT );
+            // we need to recompute our branch length
+            recomputeBranchLength();
+            
+            // fire tree change event
+            if ( tree != NULL )
+            {
+                tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::DEFAULT );
+            }
+        }
+        else
+        {
+            // fire tree change event
+            if ( tree != NULL && parent != NULL )
+            {
+                tree->getTreeChangeEventHandler().fire( *parent, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+            }
         }
 
     }
