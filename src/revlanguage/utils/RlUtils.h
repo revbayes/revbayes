@@ -30,6 +30,8 @@ namespace RevLanguage {
          * If the current node is constant, we just create another constant node with the correct type to replace this one, as this is faster
          * NB: changing this behaviour for constant nodes also requires changing the corresponding code in ArgumentRule::fitArgument, otherwise infinite loops are created
          * Otherwise, the node value may change, so we create a deterministic node tied to this one by a type conversion function, which will handle the updates
+         * NB: we do *not* check whether a similar conversion node already exists, as the perfomance cost of checking seems likely to be higher than the cost of duplicating in most circumstances
+         * COSTS HAVE NOT BEEN CHECKED and in theory this could end up with many duplicated conversion nodes, so this may need fixing in the future
          * 
          * \return the type-converted object
          */
