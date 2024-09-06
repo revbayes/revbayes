@@ -80,11 +80,7 @@ void Probability::constructInternalObject( void )
 
 RevObject* Probability::convertTo( const TypeSpec& type ) const
 {
-    
-    if ( type == RealPos::getClassTypeSpec() )
-    {
-        return new RealPos(dag_node->getValue());
-    }
+    if ( type == RealPos::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Probability,RealPos>(this);
     
     return RealPos::convertTo( type );
 }
