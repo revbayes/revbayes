@@ -127,7 +127,7 @@ RevObject* Integer::convertTo( const TypeSpec& type ) const
         return new RlString( o.str() );
     }
 
-    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 ) return RlUtils::RlTypeConverter::convertTo<Integer,RealPos>(this);
+    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 ) return RlUtils::RlTypeConverter::convertTo<Integer,RealPos>(this);
     if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return RlUtils::RlTypeConverter::convertTo<Integer,IntegerPos>(this);
     if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0) return RlUtils::RlTypeConverter::convertTo<Integer,Natural>(this);
     
