@@ -1491,12 +1491,20 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
         if ( starting_tree == NULL )
         {
             // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
-//            simulateTree();
+            // simulateTree();
             
             RbVector<Clade> constr;
             // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
             StartingTreeSimulator simulator;
             RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            
+            // When conditioning on the root age, increase the root age of the simulated tree to make it equal to the process age
+            if ( use_origin == false )
+            {
+                double new_root_age = getOriginAge();
+                my_tree->getRoot().setAge( new_root_age );
+            }
+            
             // store the new value
             value = my_tree;
         }

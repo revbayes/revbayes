@@ -2,7 +2,6 @@
 #define AbstractMultispeciesCoalescentGenewise_H
 
 #include "RbVector.h"
-#include "ModelVector.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"

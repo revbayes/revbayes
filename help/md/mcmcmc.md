@@ -20,7 +20,7 @@ Sebastian Hoehna
 mcmc
 ## example
 	# Create a simple model (unclamped)
-	a ~ exponential(1)
+	a ~ dnExponential(1)
 	mymodel = model(a)
 	
 	# Create a move vector and a monitor vector
