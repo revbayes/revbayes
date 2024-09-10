@@ -162,9 +162,9 @@ void MonteCarloAnalysis::addMonitor(const Monitor &m)
 
 /** Run burnin and auto-tune */
 #ifdef RB_MPI
-void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool underPrior, bool suppressCharacterData, bool verbose)
 #else
-void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool underPrior, bool suppressCharacterData, bool verbose)
 #endif
 {
     
@@ -174,7 +174,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
         
         if ( runs[i] != NULL )
         {
-            runs[i]->initializeSampler(underPrior);
+            runs[i]->initializeSampler(underPrior, suppressCharacterData);
         }
         
     }
@@ -312,7 +312,7 @@ const Model& MonteCarloAnalysis::getModel( void ) const
 }
 
 
-void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
+void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file, bool prior, bool suppress_chardata)
 {
     
     for (size_t i = 0; i < replicates; ++i)
@@ -338,7 +338,7 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
         }
         
         // then, initialize the sample for that replicate
-        runs[i]->initializeSamplerFromCheckpoint();
+        runs[i]->initializeSamplerFromCheckpoint( prior, suppress_chardata );
     }
 }
 
@@ -757,7 +757,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     runs[i]->tune();                   
                 }
                 
-                // check for autotuning
+                // check for checkpointing
                 if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
                 {                    
                     runs[i]->checkpoint();                    
@@ -819,7 +819,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 
 
 
-void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval )
+void MonteCarloAnalysis::runModifiedSampler( bool prior, bool suppress_chardata, size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval )
 {
     
     // get the current generation
@@ -830,8 +830,38 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
         if ( runs[i] != NULL )
         {
             gen = runs[i]->getCurrentGeneration();
+            
+            // also set the filename for checkpointing
+            if ( replicates > 1 && checkpoint_file != "" )
+            {
+                
+                // create the run specific appendix
+                std::stringstream ss;
+                ss << "_run_" << (i+1);
+                
+                // assemble the new filename
+                auto run_checkpoint_file = appendToStem(checkpoint_file, ss.str());
+
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( run_checkpoint_file );
+            }
+            else if ( checkpoint_file != "" )
+            {
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( checkpoint_file );
+                
+            }
+            
         }
         
+    }
+    
+    if (prior && suppress_chardata)
+    {
+        suppress_chardata = false;
+        std::stringstream msg;
+        msg << "NOTE: The 'underPrior' option overrides the 'suppressCharacterData' option.\n";
+        RBOUT( msg.str() );
     }
     
     // Let user know what we are doing
@@ -841,7 +871,14 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
         if ( runs[0]->getCurrentGeneration() == 0 )
         {
             ss << "\n";
-            ss << "Running prior MCMC simulation\n";
+            if (prior)
+            {
+                ss << "Running prior MCMC simulation\n";
+            }
+            if (suppress_chardata)
+            {
+                ss << "Running MCMC simulation without character data\n";
+            }
         }
         else
         {
@@ -856,9 +893,27 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
     for (size_t i=0; i<replicates; ++i)
     {
         
-        if ( runs[i] != NULL )
+        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
         {
-            runs[i]->initializeSampler(true);
+            if (prior)
+            {
+                runs[i]->initializeSampler( true, false );
+            }
+            if (suppress_chardata)
+            {
+                runs[i]->initializeSampler( false, true );
+            }
+        }
+        else if ( runs[i] != NULL )
+        {
+            if (prior)
+            {
+                runs[i]->initializeSamplerFromCheckpoint( true, false );
+            }
+            if (suppress_chardata)
+            {
+                runs[i]->initializeSamplerFromCheckpoint( false, true );
+            }
         }
         
     }
@@ -903,6 +958,10 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
             runs[i]->monitor(0);
             
         }
+        else if ( runs[i] != NULL )
+        {
+            runs[i]->writeMonitorHeaders( runs[i]->getCurrentGeneration() > 0 );
+        }
         
     }
     
@@ -941,9 +1000,13 @@ void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingR
                 // check for autotuning
                 if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
                 {
-                    
                     runs[i]->tune();
-                    
+                }
+                
+                // check for checkpointing
+                if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
+                {
+                    runs[i]->checkpoint();
                 }
             }
 

@@ -17,6 +17,8 @@ The parameters `checkpointFile` and `checkpointInterval` generate snapshots of t
 
 The `mcmc.initializeFromCheckpoint()` method allows an analysis to be continued from a checkpoint file. New generations will be appended to existing monitor files.
 
+The `mcmc.burnin()` and `mcmc.run()` methods can be used to carry out sensitivity analyses by setting `suppressCharacterData=TRUE` or `underPrior=TRUE`. The former option causes character data (e.g., morphology or DNA sequences) to be disregarded but allows the inference to be influenced by data of other types (e.g., fossil ages), while the latter option suppresses all data (of any type). The distinction mostly applies to dating analyses, where it may be of interest to disentangle the impact of calibrations (information about time) from that of character data (information about the product of rate and time). While this is often referred to as "running the analysis under the prior", in RevBayes, setting `underPrior=TRUE` removes the calibrations as well. Note that other sensitivity analyses may be necessary to fully evaluate the influence of different sources of data. 
+
 ## authors
 Sebastian Hoehna
 ## see_also
