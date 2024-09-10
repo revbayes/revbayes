@@ -477,6 +477,7 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
         if ( chains[i] != NULL )
         {
             chains[i]->initializeSamplerFromCheckpoint();
+            setCurrentGeneration(chains[i]->getCurrentGeneration());
         }
         
     }
