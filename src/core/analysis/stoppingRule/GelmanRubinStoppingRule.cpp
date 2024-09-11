@@ -69,8 +69,6 @@ void GelmanRubinStoppingRule::setNumberOfRuns(size_t n)
 bool GelmanRubinStoppingRule::stop( size_t g )
 {
     GelmanRubinTest grTest = GelmanRubinTest( R );
-
-    bool passed = true;
     
     std::vector< std::vector<TraceNumeric> > data;
     data.reserve( numReplicates );
@@ -125,8 +123,8 @@ bool GelmanRubinStoppingRule::stop( size_t g )
         }
         
         // conduct the test
-        passed &= grTest.assessConvergence(data_exp[i]);
+        if ( !grTest.assessConvergence(data_exp[i]) ) return false;
     }
 
-    return passed;
+    return true;
 }
