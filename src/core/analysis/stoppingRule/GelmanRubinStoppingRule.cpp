@@ -63,7 +63,7 @@ void GelmanRubinStoppingRule::setNumberOfRuns(size_t n)
 
 /**
  * Should we stop now?
- * Yes, if the ratio of the variance of samples between chains over the variance of samples withing chains
+ * Yes, if the ratio of the variance of samples between chains over the variance of samples within chains
  * is smaller than the provided threshold.
  */
 bool GelmanRubinStoppingRule::stop( size_t g )

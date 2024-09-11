@@ -63,8 +63,8 @@ void StationarityStoppingRule::setNumberOfRuns(size_t n)
 
 /**
  * Should we stop now?
- * Yes, if the ratio of the variance of samples between chains over the variance of samples withing chains
- * is smaller than the provided threshold.
+ * Yes, if the block means of all trace blocks are within their respective confidence intervals (with confidence
+ * level equal to 1 - prob).
  */
 bool StationarityStoppingRule::stop( size_t g )
 {
@@ -72,25 +72,24 @@ bool StationarityStoppingRule::stop( size_t g )
 
     bool passed = true;
     
-    std::vector<std::vector<std::vector<double> > > values;
-    std::vector<std::vector<size_t> > burnins;
-    for ( size_t i = 1; i <= numReplicates; ++i)
+    std::vector< std::vector<TraceNumeric> > data;
+    data.reserve( numReplicates );
+    size_t num_variables_in_rep = 1; // prevent complaints about lack of initialization in the 2nd loop below
+    
+    for ( size_t i = 0; i < numReplicates; ++i)
     {
-        path fn = filename;
-        if ( numReplicates > 1 )
-            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
-        
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
         TraceContinuousReader reader = TraceContinuousReader( fn );
         
-        // get the vector of traces from the reader
-        std::vector<TraceNumeric> &data = reader.getTraces();
+        // get the vector of variable-specific traces from the reader
+        data[i] = reader.getTraces();
         
         size_t maxBurnin = 0;
         
         // find the max burnin
-        for ( size_t j = 0; j < data.size(); ++j)
+        for ( size_t j = 0; j < data[i].size(); ++j)
         {
-            size_t b = burninEst->estimateBurnin( data[j] );
+            size_t b = burninEst->estimateBurnin( data[i][j] );
 
             if ( maxBurnin < b )
             {
@@ -99,13 +98,34 @@ bool StationarityStoppingRule::stop( size_t g )
         }
         
         // set the burnins
-        for ( size_t j = 0; j < data.size(); ++j)
+        for ( size_t j = 0; j < data[i].size(); ++j)
         {
-            data[j].setBurnin( maxBurnin );
+            data[i][j].setBurnin(maxBurnin);
+        }
+        
+        // get the number of variables in the current replicate
+        num_variables_in_rep = data[i].size();
+        
+        // if we have different numbers of variables in different replicates, something has gone terribly wrong
+        if (i > 1 && data[i].size() != num_variables_in_rep)
+        {
+            throw RbException("The replicates contain different sets of parameters.");
+        }
+    }
+    
+    // invert the hierarchy
+    std::vector< std::vector<TraceNumeric> > data_exp;
+    data_exp.reserve( num_variables_in_rep );
+    
+    for (size_t i = 0; i < num_variables_in_rep; i++)
+    {
+        for ( size_t j = 0; j < numReplicates; j++)
+        {
+            data_exp[i].push_back( data[j][i] );
         }
 
         // conduct the test
-        passed &= sTest.assessConvergence(data);
+        passed &= sTest.assessConvergence(data_exp[i]);
     }
     
     return passed;
