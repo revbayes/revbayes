@@ -50,14 +50,9 @@ MinEssStoppingRule* MinEssStoppingRule::clone( void ) const
  */
 bool MinEssStoppingRule::stop( size_t g )
 {
-    
-    bool passed = true;
-    
-    for ( size_t i = 1; i <= numReplicates; ++i)
+    for ( size_t i = 0; i < numReplicates; ++i)
     {
-        path fn = filename;
-        if ( numReplicates > 1 )
-            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
         
         TraceContinuousReader reader = TraceContinuousReader( fn );
     
@@ -84,11 +79,10 @@ bool MinEssStoppingRule::stop( size_t g )
         {
             data[j].setBurnin( maxBurnin );
         
-            passed &= essTest.assessConvergence( data[j] );
+            if ( !essTest.assessConvergence( data[j] ) ) return false;
         }
         
     }
     
-    
-    return passed;
+    return true;
 }

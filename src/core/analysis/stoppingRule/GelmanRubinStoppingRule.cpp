@@ -123,7 +123,7 @@ bool GelmanRubinStoppingRule::stop( size_t g )
         }
         
         // conduct the test
-        if ( !grTest.assessConvergence(data_exp[i]) ) return false;
+        if ( !grTest.assessConvergence( data_exp[i] ) ) return false;
     }
 
     return true;

@@ -70,8 +70,6 @@ bool StationarityStoppingRule::stop( size_t g )
 {
     StationarityTest sTest = StationarityTest( numReplicates, prob );
 
-    bool passed = true;
-    
     std::vector< std::vector<TraceNumeric> > data;
     data.reserve( numReplicates );
     size_t num_variables_in_rep = 1; // prevent complaints about lack of initialization in the 2nd loop below
@@ -125,8 +123,8 @@ bool StationarityStoppingRule::stop( size_t g )
         }
 
         // conduct the test
-        passed &= sTest.assessConvergence(data_exp[i]);
+        if ( !sTest.assessConvergence( data_exp[i] ) ) return false;
     }
     
-    return passed;
+    return true;
 }
