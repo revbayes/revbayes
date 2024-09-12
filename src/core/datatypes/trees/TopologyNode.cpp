@@ -1842,7 +1842,7 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    if(getTaxon().getName() != "") {
+    if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
         if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
             throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
         }
