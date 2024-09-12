@@ -7,7 +7,7 @@
 using namespace RevBayesCore;
 
 
-TimeInterval::TimeInterval() : min(RbConstants::Double::nan), max(RbConstants::Double::nan)
+TimeInterval::TimeInterval() : min(RbConstants::Double::neginf), max(RbConstants::Double::inf)
 {
 }
 
