@@ -155,7 +155,7 @@
 #include "Func_MutSelAARateMatrix.h"
 
 #include "Func_X2RateMatrix.h"
-
+#include "Func_compositeRateMatrix.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -357,7 +357,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_MutSelAARateMatrix()                          );
 
         addFunction( new Func_X2RateMatrix()                                );
-
+        addFunction( new Func_compositeRateMatrix()                          );
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );
