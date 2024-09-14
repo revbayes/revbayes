@@ -78,7 +78,6 @@ bool MinEssStoppingRule::stop( size_t g )
         for ( size_t j = 0; j < data.size(); ++j)
         {
             data[j].setBurnin( maxBurnin );
-        
             if ( !essTest.assessConvergence( data[j] ) ) return false;
         }
         

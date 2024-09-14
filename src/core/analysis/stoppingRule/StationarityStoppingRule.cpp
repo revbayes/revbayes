@@ -70,8 +70,7 @@ bool StationarityStoppingRule::stop( size_t g )
 {
     StationarityTest sTest = StationarityTest( numReplicates, prob );
 
-    std::vector< std::vector<TraceNumeric> > data;
-    data.reserve( numReplicates );
+    std::vector< std::vector<TraceNumeric> > data( numReplicates );
     size_t num_variables_in_rep = 1; // prevent complaints about lack of initialization in the 2nd loop below
     
     for ( size_t i = 0; i < numReplicates; ++i)
@@ -112,9 +111,7 @@ bool StationarityStoppingRule::stop( size_t g )
     }
     
     // invert the hierarchy
-    std::vector< std::vector<TraceNumeric> > data_exp;
-    data_exp.reserve( num_variables_in_rep );
-    
+    std::vector< std::vector<TraceNumeric> > data_exp( num_variables_in_rep );
     for (size_t i = 0; i < num_variables_in_rep; i++)
     {
         for ( size_t j = 0; j < numReplicates; j++)
