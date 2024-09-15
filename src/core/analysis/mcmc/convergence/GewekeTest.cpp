@@ -29,7 +29,7 @@ bool GewekeTest::assessConvergence(const TraceNumeric& trace)
     {
         std::stringstream ss;
         ss << "Insufficient sample size to calculate the Geweke convergence diagnostic.\n";
-        ss << "             Make sure the frequency at which the Geweke diagnostic is calculated exceeds the frequency\n";
+        ss << "             Make sure the interval at which the Geweke diagnostic is calculated exceeds the interval\n";
         ss << "             at which iterations are logged at least by a factor of " << 1 / std::min(frac1, frac2) - 1 << ".\n";
         throw RbException( ss.str() );
     }
