@@ -104,7 +104,7 @@ bool StationarityStoppingRule::stop( size_t g )
         num_variables_in_rep = data[i].size();
         
         // if we have different numbers of variables in different replicates, something has gone terribly wrong
-        if (i > 1 && data[i].size() != num_variables_in_rep)
+        if (i > 0 && data[i].size() != num_variables_in_rep)
         {
             throw RbException("The replicates contain different sets of parameters.");
         }
