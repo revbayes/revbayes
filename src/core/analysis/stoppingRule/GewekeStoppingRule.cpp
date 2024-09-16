@@ -48,7 +48,7 @@ GewekeStoppingRule* GewekeStoppingRule::clone( void ) const
 
 /**
  * Should we stop now?
- * Yes, if the minimum ESS is larger than the provided threshold.
+ * Yes, if the Geweke test statistic is significant at the provided alpha level.
  */
 bool GewekeStoppingRule::stop( size_t g )
 {
