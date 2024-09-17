@@ -478,6 +478,8 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
         {
             chains[i]->initializeSamplerFromCheckpoint();
             setCurrentGeneration(chains[i]->getCurrentGeneration());
+        } else {
+            throw RbException()<<"Chain "<<i<<" is NULL in Mcmcmc::initializeSamplerFromCheckpoint";
         }
         
     }
@@ -1277,6 +1279,8 @@ void Mcmcmc::setCheckpointFile(const path &f)
         {
             path chain_file_name = appendToStem(f, "_chain_" + std::to_string(j) );
             chains[j]->setCheckpointFile( chain_file_name );
+        } else {
+             throw RbException()<<"Could not set checkpoint file for "<<f<<", chain "<<std::to_string(j);
         }
         
     }

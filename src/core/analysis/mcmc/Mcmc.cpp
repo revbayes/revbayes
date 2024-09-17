@@ -762,6 +762,9 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     
     size_t n_parameters = parameter_names.size();
     std::vector<DagNode*> nodes = getModel().getDagNodes();
+    // TODO verify that getModel() is getting the correct nodes
+    // Does the issue that forgets to add nodes to the model graph
+    // rear its head here?
     
     for ( size_t i = 0; i < n_parameters; ++i )
     {
@@ -776,6 +779,10 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
                 nodes[j]->setValueFromString( parameter_values[i] );
                 nodes[j]->keep();
                 break;
+            }
+            if (j == nodes.size() - 1)
+            {
+                throw RbException()<<"The parameter '"<<parameter_name<<"' was not found in the model.";
             }
         }
     }
