@@ -3,7 +3,8 @@ src/generated_include_dirs.cmake
 src/*/CMakeLists.txt
 
 # ----------------------------------------------
-build/
+/build/*
+!/build/.gitkeep
 projects/cmake/*
 !projects/cmake/README.txt
 !projects/cmake/*.sh
