@@ -143,7 +143,7 @@ RevObject* Real::convertTo( const TypeSpec& type ) const
 
     if ( type == RlBoolean::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Real,RlBoolean>(this);
 
-    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0.0) return RlUtils::RlTypeConverter::convertTo<Real,RealPos>(this);
+    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0.0) return RlUtils::RlTypeConverter::convertTo<Real,RealPos>(this);
     if ( type == Probability::getClassTypeSpec() && dag_node->getValue() >= 0.0 && dag_node->getValue() <= 1.0) 
         return RlUtils::RlTypeConverter::convertTo<Real,Probability>(this);
     
