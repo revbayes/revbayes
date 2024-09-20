@@ -74,7 +74,8 @@ else()
    set(OPT_FLAGS "-msse -msse2 -msse3")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if (BUILD_TYPE_UPPER STREQUAL "DEBUG")
    set(OPT_FLAGS "${OPT_FLAGS} -g -O0 -Wall")
 
    # These just add noise:
