@@ -30,8 +30,9 @@ namespace RevBayesCore {
      * This file contains the distribution class for a character state evolving along a tree.
      * This abstract base class can be derived for any character evolution model with homogeneous mixture sites. A
      * homogeneous mixture model over sites is a model where all sites are drawn from the same distribution and the
-     * specific instance of the per site parameter is integrated over. The per site parameter could be a rate scaler (e.g. the + gamma models)
-     * or different rate matrices or anything else.
+     * specific instance of the per site parameter is integrated over.
+     * The per site parameter could be a rate scaler (e.g. the + gamma models) or different rate matrices
+     * or anything else.
      *
      * The pruning algorithm is implemented in this base class and calls some few pure virtual methods.
      * The important functions you have to override are:
@@ -42,12 +43,12 @@ namespace RevBayesCore {
      * - updateTransitionProbabilities()
      *
      *
-     * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) and can
-     * be compressed.
+     * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) 
+     * and can be compressed.
      *
      * The partial likelihoods are stored in a c-style array called partialLikelihoods. The dimension are
-     * partialLikelihoods[active][node_index][siteRateIndex][siteIndex][charIndex], however, since this is a one-dimensional c-style array,
-     * you have to access the partialLikelihoods via
+     * partialLikelihoods[active][node_index][siteRateIndex][siteIndex][charIndex], however, since this is
+     * a one-dimensional c-style array, you have to access the partialLikelihoods via
      * partialLikelihoods[active*num_nodes*num_site_mixtures*pattern_block_size*num_chars +
      *                    node_index*num_site_mixtures*pattern_block_size*num_chars +
      *                    siteRateIndex*pattern_block_size*num_chars +
@@ -61,13 +62,15 @@ namespace RevBayesCore {
      * This gives the more convenient access via
      * partialLikelihoods[active*activeLikelihoodOffset + node_index*nodeOffset + siteRateIndex*mixtureOffset + siteIndex*siteOffset + charIndex]
      *
-     * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node, but not for site rates.
-     * We also use twice as much memory because we store the partial likelihood along each branch and not only for each internal node.
+     * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node,
+     * but not for site rates.
+     * We also use twice as much memory because we store the partial likelihood along each branch and not only 
+     * for each internal node.
      * This gives us a speed improvement during MCMC proposal in the order of a factor 2.
      *
-     * The transition probability matrices are stored in a c-style array called partialLikelihoods. The dimension are
+     * The transition probability matrices are stored in a c-style array called pmatrices. The dimensions are
      * pmatrices[active][node_index][siteMixtureIndex], however, since this is a one-dimensional c-style array,
-     * you have to access the partialLikelihoods via
+     * you have to access the pmatrices via
      * pmatrices[active * num_nodes * num_site_mixtures +
      *                    node_index * num_site_mixtures +
      *                    site_mixture_index]
