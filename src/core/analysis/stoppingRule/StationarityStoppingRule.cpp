@@ -100,14 +100,14 @@ bool StationarityStoppingRule::stop( size_t g )
             data[i][j].setBurnin(maxBurnin);
         }
         
-        // get the number of variables in the current replicate
-        num_variables_in_rep = data[i].size();
-        
         // if we have different numbers of variables in different replicates, something has gone terribly wrong
         if (i > 0 && data[i].size() != num_variables_in_rep)
         {
             throw RbException("The replicates contain different sets of parameters.");
         }
+        
+        // get the number of variables in the current replicate
+        num_variables_in_rep = data[i].size();
     }
     
     // invert the hierarchy
