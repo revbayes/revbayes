@@ -2,6 +2,7 @@
 #define InverseDistribution_h
 
 #include "TypedDistribution.h"
+#include "AbstractPhyloCTMCSiteHomogeneous.h"
 #include "TypedDagNode.h"
 #include <memory>
 
@@ -12,7 +13,7 @@ namespace RevBayesCore {
      *
      * @copyright Copyright 2024-
      * @author Martin R. Smith
-     * @since 2024-07-14, version 1.2.5
+     * @since 2024-09-17, version 1.2.5
      *
      */
     template<typename valType>
@@ -29,8 +30,11 @@ namespace RevBayesCore {
             // this will also ensure that the parameters are not getting deleted before we do
             
             // add the parameters of the distribution
-            for (const auto& parameter : dist->getParameters())
+            for (const auto& parameter : dist->getParameters()) {
+                // Doesn't just add the parameter, but also links it so that updates cause
+                // the distribution to update
                 this->addParameter( parameter );
+            }
             
 	        redrawValue();
         }
@@ -44,8 +48,35 @@ namespace RevBayesCore {
             // this will also ensure that the parameters are not getting deleted before we do
             
             // add the parameters of the distribution
-            for (const auto& parameter : dist->getParameters())
+            for (const auto& parameter : dist->getParameters()) {
                 this->addParameter( parameter );
+            }
+        }
+
+        // Functions from Distribution.cpp
+        void touch(const DagNode *affecter, bool touchAll) override
+        {            
+            dist->touch(affecter, touchAll);
+        }
+
+        void restore( const DagNode *restorer )
+        {
+            dist->restore(restorer);
+        }
+
+        void keep( const DagNode* affecter )
+        {
+            dist->keep(affecter);
+        }
+
+        void getAffected(std::set<DagNode *> &affected, DagNode* affecter)
+        {
+            dist->getAffected(affected, affecter);
+        }
+                
+        void removeParameter(const DagNode *p)
+        {
+            throw RbException("Call to InverseDistribution::removeParameter() is not anticipated.");
         }
 
         // functions from 'public methods' section of TypedDistribution.h
@@ -97,6 +128,7 @@ namespace RevBayesCore {
                 this->value = new valType(dist->getValue());
             }
         }
+          
         
     protected:
         // Parameter management functions
@@ -104,6 +136,7 @@ namespace RevBayesCore {
         {
             dist->swapParameter( oldP, newP );
         }
+         
         
     private:        
         // private members
