@@ -17,6 +17,7 @@ The parameters `checkpointFile` and `checkpointInterval` generate snapshots of t
 
 The `mcmc.initializeFromCheckpoint()` method allows an analysis to be continued from a checkpoint file. New generations will be appended to existing monitor files.
 
+
 ## authors
 Sebastian Hoehna
 ## see_also
