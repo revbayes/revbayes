@@ -1,14 +1,15 @@
 Expect: 42      42      42
-   Successfully read one character matrix from file '../validation/data/primates_cytb.nex'
+   Successfully read one character matrix from file '../validation/data/bears.nex'
 
-    character matrix with 23 taxa and 0 characters
-   ===============================================
-   Origination:                   ""
-   Number of taxa:                23
-   Number of included taxa:       23
-   Number of characters:          0
-   Number of included characters: 0
-   Datatype:
+   Standard character matrix with 18 taxa and 62 characters
+   ========================================================
+   Origination:                   "bears.nex"
+   Number of taxa:                18
+   Number of included taxa:       18
+   Number of characters:          62
+   Number of included characters: 62
+   Datatype:                      Standard
 
 
-Expect equal:   23674.3 23674.3
+Expect equal:   842.8669        842.8669
+Expect equal:   830.57  830.57

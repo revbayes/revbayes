@@ -31,9 +31,20 @@ topology ~ dnUniformTopology(taxa)
 br_lengths ~ dnDirichlet(rep(1.0, nEdge))
 phylogeny := treeAssembly(topology, br_lengths)
 
-q4 = fnJC(4)
-phy ~ dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA")
+k ~ dnUniform(1, 10)
+kRates := [ [ 0, k],
+            [ 1, 0] ]
+qK := fnFreeK(kRates)
+phy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard")
 phy.clamp(chars)
-invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = q4, type = "DNA"))
+
+invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
 invPhy.clamp(chars)
-print("TestPhylo:", -phy.lnProbability(), invPhy.lnProbability())
+invPhy
+
+k.clamp(1)
+print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+
+# Check distribution is touched when parameters are modified
+k.clamp(5)
+print(k, "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
