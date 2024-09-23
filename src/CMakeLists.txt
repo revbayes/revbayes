@@ -6,32 +6,8 @@ project(RevBayes)
 # -D_GLIBCXX_DEBUG
 
 set(CMAKE_CXX_STANDARD 17)
-if(POLICY CMP0111)
-  # Provides clear error if imported library not found
-  cmake_policy(SET CMP0111 NEW)
-endif()
-if(POLICY CMP0144)
-  # Recognize BOOST_ROOT as well as Boost_ROOT
-  cmake_policy(SET CMP0144 NEW)
-endif()
-if(POLICY CMP0167)
-  # FindBoost module not available in cmake 3.30
-  cmake_policy(SET CMP0167 NEW)
-endif()
 
-# Policies relevant to the configuration of Boost libraries
-if(POLICY CMP0111)
-  # Provides clear error if imported library not found
-  cmake_policy(SET CMP0111 NEW)
-endif()
-if(POLICY CMP0144)
-  # Recognize BOOST_ROOT as well as Boost_ROOT
-  cmake_policy(SET CMP0144 NEW)
-endif()
-if(POLICY CMP0167)
-  # FindBoost module not available in cmake 3.30
-  cmake_policy(SET CMP0167 NEW)
-endif()
+
 
 # Policies relevant to the configuration of Boost libraries
 if(POLICY CMP0111)
