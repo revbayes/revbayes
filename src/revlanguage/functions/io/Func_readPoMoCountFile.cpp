@@ -75,7 +75,7 @@ const ArgumentRules& Func_readPoMoCountFile::getArgumentRules( void ) const
     if ( rules_set == false )
     {
         argument_rules.push_back( new ArgumentRule( "countFile", RlString::getClassTypeSpec(), "A count file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "Virtual population size", Natural::getClassTypeSpec(), "The number of virtual individuals in the population.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "virtualPopulationSize", Natural::getClassTypeSpec(), "The number of virtual individuals in the population.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
             
         std::vector<std::string> format_options;
         format_options.push_back( "PoMo" );
@@ -89,7 +89,7 @@ const ArgumentRules& Func_readPoMoCountFile::getArgumentRules( void ) const
         weighting_options.push_back( "Hypergeometric" );
         argument_rules.push_back( new OptionRule( "format", new RlString("Fixed"), weighting_options, "The weighting methods to correct the observed counts." ) );
         
-        argument_rules.push_back( new ArgumentRule( "Effective population size", Natural::getClassTypeSpec(), "A tentative population size used by the hypergeometric method to correct the counts.", ArgumentRule::BY_VALUE, ArgumentRule::ANY,  new Natural(10000) ) );
+        argument_rules.push_back( new ArgumentRule( "effectivePopulationSize", Natural::getClassTypeSpec(), "A tentative population size used by the hypergeometric method to correct the counts.", ArgumentRule::BY_VALUE, ArgumentRule::ANY,  new Natural(10000) ) );
 
         rules_set = true;
 
