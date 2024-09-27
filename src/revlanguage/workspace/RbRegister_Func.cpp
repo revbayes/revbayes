@@ -74,6 +74,7 @@
 /* Argument rules (in folder "functions/argumentrules") */
 
 /* Basic functions (in folder "functions/basic"). */
+#include "Func_BSPInterval.h"
 
 /* These are core functions for the Rev environment, providing user help
    and other essential services. */
@@ -652,6 +653,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_varianceCovarianceMatrix( )           );
         addFunction( new Func_decomposedVarianceCovarianceMatrix( ) );
         addFunction( new Func_partialToCorrelationMatrix( )         );
+        
+        addFunction( new Func_BSPInterval<RealPos>()          );
 
 
         // Type conversion
