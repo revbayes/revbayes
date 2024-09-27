@@ -220,6 +220,7 @@
 
 /* Cladogeneic state prob function */
 #include "Func_biogeographyCladoEventsBD.h"
+#include "Func_traitBiogeographyCladoEventsBD.h"
 #include "Func_DECCladoProbs.h"
 #include "Func_DECRates.h"
 #include "Func_DECRoot.h"
@@ -423,6 +424,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_DECRoot() );
         addFunction( new Func_EpochCladoProbs() );
         addFunction( new Func_biogeographyCladoEventsBD() );
+        addFunction( new Func_traitBiogeographyCladoEventsBD() );
         addFunction( new Func_chromosomesCladoProbs() );
         addFunction( new Func_chromosomesCladoEventsBD() );
         addFunction( new Func_chromosomesPloidyCladoEventsBD() );

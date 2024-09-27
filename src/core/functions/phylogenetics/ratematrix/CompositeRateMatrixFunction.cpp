@@ -99,28 +99,61 @@ void CompositeRateMatrixFunction::update( void )
     // populate rate matrix elements for rm1
     // diagonal blocks of arbitrary rate matrices
     for (size_t i = 0; i < num_states_2; i++) {
-        size_t offset = i * num_states_1;
+        size_t i_mtx = i * num_states_1;
         for (size_t j = 0; j < num_states_1; j++) {
             for (size_t k = 0; k < num_states_1; k++) {
-                rate_matrix[offset+i][offset+j] = rate_matrices2->getValue()[i].getRate(i, j, 0.0, 1.0);
+                if (j != k) {
+                    rate_matrix[i_mtx+j][i_mtx+k] = rate_matrices1->getValue()[i].getRate(j, k, 0.0, 1.0);
+                }
+            }
+        }
+    }
+
+    
+    // populate rate matrix elements for rm2
+    // off-diagonal blocks of diagonal matrices)
+    for (size_t j = 0; j < num_states_2; j++) {
+        size_t j_mtx = j * num_states_1;
+        for (size_t k = 0; k < num_states_2; k++) {
+            size_t k_mtx = k * num_states_1;
+            for (size_t i = 0; i < num_states_1; i++) {
+                rate_matrix[j_mtx+i][k_mtx+i] = rate_matrices2->getValue()[i].getRate(j, k, 0.0, 1.0);
             }
         }
     }
     
-//    // populate rate matrix elements for rm2
-//    // off-diagonal blocks of diagonal matrices)
-//    for (size_t i = 0; i < num_states_1; i++) {
-//        size_t offset = i * num_states_2;
+//    // print output (sanity check)
+//    for (size_t i = 0; i < num_states_2; i++) {
+//        std::cout << "Biogeographic matrices[" << i << "]\n";
 //        for (size_t j = 0; j < num_states_1; j++) {
 //            for (size_t k = 0; k < num_states_1; k++) {
-//                rate_matrix[offset+i][offset+j] = rate_matrices2->getValue()[i].getRate(i, j, 0.0, 1.0);
+//                std::cout << rate_matrices1->getValue()[i].getRate(j, k, 0.0, 1.0) << "\t";
 //            }
+//            std::cout << "\n";
 //        }
+//        std::cout << "\n";
 //    }
-    
-    // populate rate matrix elements for rm2
-
-    
+//    
+//    
+//    for (size_t i = 0; i < num_states_1; i++) {
+//        std::cout << "Trait matrices[" << i << "]\n";
+//        for (size_t j = 0; j < num_states_2; j++) {
+//            for (size_t k = 0; k < num_states_2; k++) {
+//                std::cout << rate_matrices2->getValue()[i].getRate(j, k, 0.0, 1.0) << "\t";
+//            }
+//            std::cout << "\n";
+//        }
+//        std::cout << "\n";
+//    }
+//    
+//    std::cout << "Composite matrix (rate_matrix)\n";
+//    for (size_t i = 0; i < num_states; i++) {
+//        for (size_t j = 0; j < num_states; j++) {
+//            std::cout << rate_matrix[i][j] << "\t";
+//        }
+//        std::cout << "\n";
+//    }
+//    
     // flatten the 2-d rate matrix into a vector
     std::vector<double> all_rates_flat = std::vector<double>( num_states * (num_states - 1), 0.0 );
     size_t k = 0;
@@ -135,16 +168,18 @@ void CompositeRateMatrixFunction::update( void )
         }
     }
     
+
+    
     // finally set the rates in the actual matrix
     static_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
     
-    // set the emitted letters for each covartion state in the actual matrix
-    std::vector<int> emit(num_states);
-    for (int i=0; i<num_states; ++i)
-    {
-        emit[i] = i % num_states_1;
-    }
-    static_cast< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
+    // set the emitted letters for each composite state in the actual matrix
+//    std::vector<int> emit(num_states);
+//    for (int i=0; i<num_states; ++i)
+//    {
+//        emit[i] = i % num_states_1;
+//    }
+//    static_cast< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
     
     value->update();
 }
