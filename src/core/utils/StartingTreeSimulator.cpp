@@ -298,7 +298,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, doubl
         }
     }
 
-    if(max_tip_age > max_clade_age) throw RbException() << "Specified clade age " << max_clade_age << " lower than max tip age";
+    if(max_tip_age >= max_clade_age) throw RbException() << "Specified clade age " << max_clade_age << " lower than max tip age";
     
     size_t index_serial_time = 0;
     if (num_taxa_at_present == num_taxa)
