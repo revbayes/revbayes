@@ -1844,7 +1844,9 @@ void TopologyNode::setAge(double a, bool propagate)
 {
     if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
         if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
-            throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
+            std::cerr << "Attempting to set new age of taxa " << getTaxon().getName() << " incompatible with age range" << std::endl;
+            return;
+            //throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
         }
     }
     if ( sampled_ancestor_tip == true && propagate == true )
