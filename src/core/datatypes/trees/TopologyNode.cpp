@@ -1842,6 +1842,13 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
+    if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
+        if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
+            std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
+            return;
+            //throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
+        }
+    }
     if ( sampled_ancestor_tip == true && propagate == true )
     {
         parent->setAge(a);
@@ -1849,12 +1856,6 @@ void TopologyNode::setAge(double a, bool propagate)
     }
 
     age = a;
-    
-//    // we should also update the taxon age if this is a tip node
-//    if ( isTip() == true )
-//    {
-//        getTaxon().setAge( a );
-//    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();

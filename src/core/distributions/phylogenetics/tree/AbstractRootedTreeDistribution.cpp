@@ -202,8 +202,14 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                     }
 
                 }
+                if(the_node.getTaxon().getName() != "" && the_node.getTaxon().getMinAge() != the_node.getTaxon().getMaxAge()) {
+                    if(the_node.getAge() < the_node.getTaxon().getMinAge() || the_node.getAge() > the_node.getTaxon().getMaxAge()) {
+                        std::cerr << "Age of taxa " << the_node.getTaxon().getName() << " incompatible with age range";
+                        return RbConstants::Double::neginf;
+                    }
+                }
             }
-            else if( the_node.getAge() - the_node.getParent().getAge() > 0 )
+            if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {
                 return RbConstants::Double::neginf;
             }
