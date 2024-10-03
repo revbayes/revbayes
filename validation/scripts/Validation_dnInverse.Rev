@@ -21,7 +21,7 @@ print("TestExp: ", -exp.lnProbability(), "42", invExp.lnProbability())
 
 
 # Test Inverse Phylogenetic distribution
-chars <- readDiscreteCharacterData("../validation/data/primates_cytb.nex")
+chars <- readDiscreteCharacterData("data/primates_cytb.nex")
 
 taxa <- chars.names()
 n_taxa <- chars.size()
