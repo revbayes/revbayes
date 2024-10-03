@@ -1471,8 +1471,8 @@ std::set<size_t> TreeUtilities::recursivelyGetPSSP(const TopologyNode& node, con
 */
 void TreeUtilities::rescaleSubtree(TopologyNode& node, double factor, bool verbose)
 {
-    // we only rescale internal nodes
-    if ( node.isTip() == false )
+    // we only rescale internal nodes which have no SA as children
+    if ( !node.isTip() && !node.isSampledAncestorParent())
     {
         // rescale the age of the node
         double new_age = node.getAge() * factor;
