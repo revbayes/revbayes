@@ -5,10 +5,10 @@ dnInverse
 Inverse distribution 
 
 ## description
-`fnInverse()` inverts a probability distribution.
+`dnInverse()` inverts a probability distribution.
 
-`fnInverse(x).probability()` returns `1 / x.probability()`; 
-`fnInverse(x).lnProbability()` returns `-x.lnProbability()`.
+`dnInverse(x).probability()` returns `1 / x.probability()`; 
+`dnInverse(x).lnProbability()` returns `-x.lnProbability()`.
 
 This provides a way to perform inference using conditional probabilities,
 for example where 
