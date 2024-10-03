@@ -40,6 +40,8 @@ phy.clamp(chars)
 
 invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
 invPhy.clamp(chars)
+
+# Check that print function can access parameters
 invPhy
 
 k.clamp(1)
