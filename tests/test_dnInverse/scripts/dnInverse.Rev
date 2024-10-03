@@ -22,7 +22,7 @@ exp.clamp(21)
 inv_exp.clamp(21)
 print("Expect: 21", -exp.lnProbability(), inv_exp.lnProbability())
 
-chars <- readDiscreteCharacterData("../validation/data/bears.nex")
+chars <- readDiscreteCharacterData("data/bears.nex")
 
 taxa <- chars.names()
 n_taxa <- chars.size()
