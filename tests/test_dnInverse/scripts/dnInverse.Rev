@@ -22,7 +22,7 @@ exp.clamp(21)
 inv_exp.clamp(21)
 print("Expect: 21", -exp.lnProbability(), inv_exp.lnProbability())
 
-chars <- readDiscreteCharacterData("data/bears.nex")
+chars <- readDiscreteCharacterData("data/bears_morphology.nex")
 
 taxa <- chars.names()
 n_taxa <- chars.size()
@@ -41,10 +41,13 @@ phy.clamp(chars)
 
 invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
 invPhy.clamp(chars)
+
+# Validate printing of dataset information
 invPhy
 
 k.clamp(1)
 print("Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
 
+# Validate that distribution is touched and likelihoods udpated
 k.clamp(5)
 print("Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
