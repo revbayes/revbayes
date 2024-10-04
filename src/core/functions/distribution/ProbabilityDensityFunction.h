@@ -120,7 +120,9 @@ template <class valueType>
 void RevBayesCore::ProbabilityDensityFunction<valueType>::update( void )
 {
      if constexpr (std::is_same_v<valueType, AbstractHomologousDiscreteCharacterData>) {
-        // For AbstractHomologousDiscreteCharacterData, we pass a pointer to the existing value
+        // For abstract classes that cannot be instantiated directly
+        // (here, AbstractHomologousDiscreteCharacterData), we pass a pointer
+        // to the existing value
         dist->setValue(const_cast<AbstractHomologousDiscreteCharacterData*>(&x->getValue()));
     } else {
         // For other types, we create a new instance as before
