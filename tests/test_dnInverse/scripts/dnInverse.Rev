@@ -18,12 +18,12 @@ exp.clamp(42)
 inv_exp ~ dnInv(dnExp(1))
 inv_exp.clamp(42)
 print(filename = outFile, append = FALSE,
-      "Expect: 42", -exp.lnProbability(), inv_exp.lnProbability())
+      "Expect 42:", -exp.lnProbability(), inv_exp.lnProbability(), "\n")
 
 exp.clamp(21)
 inv_exp.clamp(21)
 print(filename = outFile, append = TRUE,
-      "Expect: 21", -exp.lnProbability(), inv_exp.lnProbability())
+      "Expect 21:", -exp.lnProbability(), inv_exp.lnProbability(), "\n")
 
 chars <- readDiscreteCharacterData("data/bears_morphology.nex")
 
@@ -46,16 +46,18 @@ invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
 invPhy.clamp(chars)
 
 # Validate printing of dataset information
-print(filename = outFile, append = TRUE, invPhy)
+print(filename = outFile, append = TRUE, invPhy, "\n")
 
 k.clamp(1)
 print(filename = outFile, append = TRUE,
-      "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+      "Expect equal:", -phy.lnProbability(), invPhy.lnProbability(), "\n")
 
 # Validate that distribution is touched and likelihoods udpated
 k.clamp(5)
 print(filename = outFile, append = TRUE,
-      "Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+      "Expect equal:", -phy.lnProbability(), invPhy.lnProbability(), "\n")
 
 # Validate that the function can be destroyed / reset without error
 inv_exp ~ dnInv(dnExp(1))
+
+q()
