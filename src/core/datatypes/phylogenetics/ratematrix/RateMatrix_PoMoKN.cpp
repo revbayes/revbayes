@@ -31,6 +31,7 @@ RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long num_all, double virt,
 AbstractRateMatrix( num_states ),
 num_alleles( num_all ),
 virtual_pop_size( virt ),
+effective_pop_size( eff ),
 mu( num_mut_rates, 0.01 ),
 phi( num_all, 1.0 )
 {

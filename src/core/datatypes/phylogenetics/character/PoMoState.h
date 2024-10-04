@@ -16,7 +16,7 @@ namespace RevBayesCore {
         enum WEIGHTING { FIXED, BINOMIAL, SAMPLED, HYPERGEOMETRIC };
 
         PoMoState(size_t n=4, size_t vps = 10, const std::string &s = "", const std::string &chromosome = "",
-                  size_t position = 0, WEIGHTING w = WEIGHTING::FIXED);                                                   //!< Constructor that sets all fields
+                  size_t position = 0, WEIGHTING w = WEIGHTING::FIXED, const long eps = 10000);                                                   //!< Constructor that sets all fields
         
         PoMoState*                      clone(void) const;                                 //!< Get a copy of this object
         

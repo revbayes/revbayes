@@ -26,7 +26,8 @@ PoMoState::PoMoState(   size_t n,
                         const std::string &s, 
                         const std::string &chr, 
                         size_t pos,
-                        WEIGHTING w ) : DiscreteCharacterState( n + size_t(RbMath::kchoose2(int(n)))*(vps-1) ),
+                        WEIGHTING w , 
+                        const long eps ) : DiscreteCharacterState( n + size_t(RbMath::kchoose2(int(n)))*(vps-1) ),
     is_gap( false ),
     is_missing( false ),
     index_single_state( 0 ),
@@ -78,7 +79,7 @@ PoMoState* PoMoState::clone( void ) const
 size_t PoMoState::computeEdgeFirstState(size_t index_first_allele, size_t index_second_allele) const
 {
     /*
-    SEBASTIAN CHECK:
+    RUI
     The following code is an overcomplicated way of compute the edge first state
     I am commenting it out and add my code below.
 
@@ -403,7 +404,7 @@ void PoMoState::setState(const std::vector<size_t> &counts)
         }
     }
 
-    SEBASTIAN CHECK
+    RUI
     This code can be dangerous because admits triallelic sites by masking the allele with the lowest frequency
     while this seems a reasonable thing to do (e.g., sequencing errors are usually the lowest counts), 
     the user should decide what to do with these counts
@@ -446,11 +447,16 @@ void PoMoState::setState(const std::vector<size_t> &counts)
     // The observed count is monomorphic
     if ( n_observed_alleles == 1 ) 
     {
-        state.clear();
+        //state.clear();
         
         if ( weighting == FIXED )
-        {
+        {   
+            state.reset();
             state_index = index_first_allele;
+            state.set(state_index);
+            std::cout << "  Index: " << state_index << "\n";
+
+
         }
         else if ( weighting == BINOMIAL )
         {
@@ -472,9 +478,13 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             SEBASTIAN CHECK:
             This is not the original sampled method. Monomorphic observed counts should still be able to produce polymorphic counts.
             This is how we recue variation that is not observed due to the sampling process.
-            This should be simply sampling a state from the binomial weights directlys.
+            This should be simply sampling a state from the binomial weights directly.
             */
+            state.reset();
             state_index = index_first_allele;
+            state.set(state_index);
+            std::cout << "  Index: " << state_index << "\n";
+
         }
         else if ( weighting == HYPERGEOMETRIC )
         {
@@ -485,7 +495,6 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             */
             setWeighted(true);
             weights.assign( n_pomo_states , 0.0);
-
             setStateHypergeometricForMonomorphic(total_count, index_first_allele);
         }
         else
@@ -505,11 +514,15 @@ void PoMoState::setState(const std::vector<size_t> &counts)
         
         size_t edge_first_state = computeEdgeFirstState(index_first_allele, index_second_allele);
         
-        state.clear();
-        
-        
         if ( weighting == FIXED )
         {
+             /*
+            SEBASTIAN CHECK:
+            Rev was claiming 0 states were observed by the time we clamp
+            Adding state.reset() solved the problem, please make sure this makes sense
+            borrow it from PoMoState4
+            */
+            state.reset();
             setStateFixed(total_count, count_first_allele, edge_first_state);
         }
         else if ( weighting == BINOMIAL )
@@ -568,11 +581,10 @@ void PoMoState::setStateBinomialForPolymorphic(size_t total_count, size_t count_
     for (size_t j=1; j < virtual_population_size; ++j)
     {
         /*
-        SEBASTIAN CHECK: 
-        I think this is incorrect. The allele that increases in frequency in the edge is the second allele. 
+        Note: The allele that increases in frequency in the edge is the second allele. 
         See description of PoMoKN. 
         */
-        double prob = RbStatistics::Binomial::pdf(n, double(j)/double(virtual_population_size), count_first_allele);
+        double prob = RbStatistics::Binomial::pdf(n, double(j)/double(virtual_population_size), total_count - count_first_allele);
         if (prob < 1e-8)
         {
             prob = 0.0;
@@ -632,11 +644,11 @@ void PoMoState::setStateBinomialForMonomorphic(size_t total_samples, size_t inde
             double freq = 0.0;
             if ( index_first_allele < index_second_allele )
             {
-                freq = double(j) / virtual_population_size;
+                freq = 1.0 - double(j) / virtual_population_size;
             }
             else
             {
-                freq = 1.0 - double(j) / virtual_population_size;
+                freq = double(j) / virtual_population_size;
             }
             
             // compute the probability of binomially sampling the monomorphic state
@@ -677,21 +689,18 @@ void PoMoState::setStateFixed(size_t total_count, size_t count_first_allele, siz
     // We have to get the closest numbers to the observed counts.
     
     /*
-    SEBASTIAN CHECK:
-    We again need to be carefull with the indexing: 
-    The first allele descreases in freqency with the edge state indexing. See PoMoKN.
-    
-    We should thus calculate
-    
-    double obs_proportion_first_allele = std::fmax(1.0, double(total_count-count_first_allele) / double(total_count) );
-    
-    Or input directly the count of the second allele, which we already have
-    
+    RUI 
+    I corrected the indexing here
+    The first allele descreases in frequency with the edge state indexing. See PoMoKN.
+
+    We could as well have inputed directly the count of the second allele, which we already have
     double obs_proportion_first_allele = std::fmax(1.0, double(count_second_allele) / double(total_count) );
     */
 
-    double obs_proportion_first_allele = std::fmax(1.0, double(count_first_allele) / double(total_count) );
-    size_t virtual_pop_sample_count    = (size_t)round(obs_proportion_first_allele*virtual_population_size);
+    //double obs_proportion_first_allele = std::fmax(1.0, double(count_first_allele) / double(total_count) );
+    double obs_proportion_second_allele = double(total_count-count_first_allele) / double(total_count);
+    size_t virtual_pop_sample_count    = (size_t)round(obs_proportion_second_allele*virtual_population_size);
+
     // we want to make sure that we don't assume a monomorphic state due to mapping
     // because a monomorphic PoMo frequency can never produce a biallelic observed state
     if ( virtual_pop_sample_count == virtual_population_size )
@@ -702,15 +711,14 @@ void PoMoState::setStateFixed(size_t total_count, size_t count_first_allele, siz
     {
         ++virtual_pop_sample_count;
     }
-    else
-    {
-        state_index = edge_first_state + virtual_population_size - virtual_pop_sample_count - 1;
-    }
-       
+    
+    state_index = edge_first_state + virtual_pop_sample_count - 1;
+    
     // set the internal values
     index_single_state = state_index;
     num_observed_states = 1;
     state.set(state_index);
+    std::cout << "  Index: " << state_index << "\n";
 
 }
 
@@ -757,10 +765,13 @@ void PoMoState::setStateSampled(size_t total_count, size_t count_first_allele, s
     }
     size_t state_index = edge_first_state + virtual_population_size - sample_index - 1;
 
-    
+
+    state.reset();
     index_single_state = state_index;
     num_observed_states = 1;
     state.set(state_index);
+
+    std::cout << "  Index: " << state_index << "\n";
 
 }
 

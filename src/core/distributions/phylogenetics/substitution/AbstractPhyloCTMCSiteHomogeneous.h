@@ -975,10 +975,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
     
-    std::cerr << "#Sites(data):\t\t\t" << data_num_sites << std::endl;
-    std::cerr << "#Patterns(data):\t\t" << data_num_patterns << std::endl;
-    std::cerr << "#Sites(bias):\t\t\t" << bias_num_sites << std::endl;
-    std::cerr << "#Patterns(bias):\t\t" << bias_num_patterns << std::endl;
+    //std::cerr << "#Sites(data):\t\t\t" << data_num_sites << std::endl;
+    //std::cerr << "#Patterns(data):\t\t" << data_num_patterns << std::endl;
+    //std::cerr << "#Sites(bias):\t\t\t" << bias_num_sites << std::endl;
+    //std::cerr << "#Patterns(bias):\t\t" << bias_num_patterns << std::endl;
     
 
 }

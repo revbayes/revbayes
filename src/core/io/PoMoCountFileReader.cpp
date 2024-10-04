@@ -139,8 +139,9 @@ PoMoCountFileReader::PoMoCountFileReader(   const path &fn,
 		for (size_t j = 2; j < 2 + n_taxa; ++j)
 		{
             // creating PoMo state
-            PoMoState pState (n_alleles, virtual_population_size, chars[i][j], chromosome, position, weighting );
+            PoMoState pState (n_alleles, virtual_population_size, chars[i][j], chromosome, position, weighting, effective_population_size );
             name_to_taxon_data.at(names[j-2]).addCharacter( pState);
+
             std::vector<double> vec = pState.getWeights();
             
             // checks the weight
