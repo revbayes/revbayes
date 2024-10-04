@@ -2,7 +2,6 @@
 #define InverseDistribution_h
 
 #include "TypedDistribution.h"
-#include "AbstractPhyloCTMCSiteHomogeneous.h"
 #include "TypedDagNode.h"
 #include <memory>
 
