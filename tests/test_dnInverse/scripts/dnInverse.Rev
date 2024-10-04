@@ -51,3 +51,6 @@ print("Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
 # Validate that distribution is touched and likelihoods udpated
 k.clamp(5)
 print("Expect equal:", -phy.lnProbability(), invPhy.lnProbability())
+
+# Validate that the function can be destroyed / reset without error
+inv_exp ~ dnInv(dnExp(1))
