@@ -5,6 +5,8 @@
 //  Created by Michael Landis on 9/27/24.
 //
 
+#define DEBUG_TRAITFIG 1
+
 #include "TraitBiogeographyCladogeneticBirthDeathFunction.h"
 
 #include <cmath>
@@ -44,11 +46,10 @@ m_w( mw ),
 m_b( mb ),
 numTraits( (unsigned)m_w->getValue().size() ),
 numRegions( (unsigned)m_w->getValue()[0].size() ),
-numIntStates( pow(2,m_w->getValue().size())-1 ),
+numIntStates( 0 ),
 maxRangeSize(mrs),
 maxSubrangeSplitSize(msss),
 numEventTypes( 2 ),     // 2 types: within-region, between-region
-//use_hidden_rate(false),
 use_cutset_mean(true),
 normalize_split_scores(nss),
 connectivityType( ct )
@@ -58,22 +59,25 @@ connectivityType( ct )
     addParameter( m_w );
     addParameter( m_b );
     
-    const RbVector<double>& rw1 = rho_w->getValue();
-    const RbVector<double>& rb1 = rho_b->getValue();
-    const RbVector<RbVector<double> >& mw1 = m_w->getValue();
-    const RbVector<RbVector<RbVector<double> > >& mb1 = m_b->getValue();
+//    if (numRegions > 8) {
+//        std::cout << "Warning: analyses may be prohibitively slow for >8 regions.\n";
+//    }
     
-    if (numRegions > 8) {
-        std::cout << "Warning: analyses may be prohibitively slow for >8 regions.\n";
+    // total possible number of integer-valued states
+    numTraitSets = pow(2,numTraits);
+    numIntStates = (pow(2,numRegions)-1) * numTraitSets;
+    
+    if (numTraits + numRegions >= 15) {
+        std::cout << "Warning: TraitBiogeographyCladogeneticBirthDeathFunction not designed for models with numTraits + numRegions >= 15\n";
     }
     
-    buildBits();
-    buildRanges(ranges, m_b->getValue()[0], true);
+    buildStateSpace();
     
-    numRanges = (unsigned)ranges.size();
-    numCompositeStates = numRanges * numTraits;
+    numCompositeStates = compositeBitsToStatesByNumOn.size();
+    numRanges = numCompositeStates / numTraitSets;
     
     buildEventMap();
+    
     if (connectivityType == "none")
     {
         ; // do nothing
@@ -95,16 +99,16 @@ TraitBiogeographyCladogeneticBirthDeathFunction::~TraitBiogeographyCladogeneticB
 }
 
 /*
- * This function returns the value of mask, but complementing the 1-valued bits in base
+ * This function returns the value of mask, but complementing the 1-valued rangeBits in base
  * e.g.
  *      mask=001110100
  *      base=001100000
  *      ret =000010100
  */
 
-std::vector<unsigned> TraitBiogeographyCladogeneticBirthDeathFunction::bitAllopatryComplement( const std::vector<unsigned>& mask, const std::vector<unsigned>& base )
+std::vector<unsigned> TraitBiogeographyCladogeneticBirthDeathFunction::rangeBitComplement( const RangeBits& mask, const RangeBits& base )
 {
-    std::vector<unsigned> ret = mask;
+    RangeBits ret = mask;
     for (size_t i = 0; i < base.size(); i++)
     {
         if (base[i] == 1)
@@ -118,13 +122,13 @@ std::vector<unsigned> TraitBiogeographyCladogeneticBirthDeathFunction::bitAllopa
  *  This recursive function builds all possible 0/1 bit combinations for array
  */
 
-void TraitBiogeographyCladogeneticBirthDeathFunction::bitCombinations(std::vector<std::vector<unsigned> >& comb, std::vector<unsigned> array, int i, std::vector<unsigned> accum)
+void TraitBiogeographyCladogeneticBirthDeathFunction::rangeBitCombinations(std::vector<RangeBits>& comb, RangeBits array, int i, RangeBits accum)
 {
     if (i == array.size()) // end recursion
     {
-        unsigned n = sumBits(accum);
+        unsigned n = sumRangeBits(accum);
         
-        if ( n == 0 || n == sumBits(array) )
+        if ( n == 0 || n == sumRangeBits(array) )
             ;  // ignore all-0, all-1 vectors
         else
             comb.push_back(accum);
@@ -132,14 +136,14 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::bitCombinations(std::vecto
     else
     {
         unsigned b = array[i];
-        std::vector<unsigned> tmp0(accum);
-        std::vector<unsigned> tmp1(accum);
+        RangeBits tmp0(accum);
+        RangeBits tmp1(accum);
         tmp0.push_back(0);
-        bitCombinations(comb,array,i+1,tmp0);
+        rangeBitCombinations(comb,array,i+1,tmp0);
         if (b == 1)
         {
             tmp1.push_back(1);
-            bitCombinations(comb,array,i+1,tmp1);
+            rangeBitCombinations(comb,array,i+1,tmp1);
         }
     }
 }
@@ -148,34 +152,54 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::bitCombinations(std::vecto
  * This function returns the state associated with a bit vector
  */
 
-unsigned TraitBiogeographyCladogeneticBirthDeathFunction::bitsToState( const std::vector<unsigned>& b )
+unsigned TraitBiogeographyCladogeneticBirthDeathFunction::compositeBitsToState( const CompositeBits& b )
 {
-    return bitsToStatesByNumOn[b];
+    return compositeBitsToStatesByNumOn[b];
 }
 
 /*
  *  This function converts a bit vector into a string (mostly for printing)
  */
 
-std::string TraitBiogeographyCladogeneticBirthDeathFunction::bitsToString( const std::vector<unsigned>& b )
+std::string TraitBiogeographyCladogeneticBirthDeathFunction::compositeBitsToString( const CompositeBits& b )
 {
     std::stringstream ss;
-    for (size_t i = 0; i < b.size(); i++)
-    {
-        ss << b[i];
+    for (size_t i = 0; i < b.first.size(); i++) {
+        ss << b.first[i];
+    }
+    ss << ":";
+    for (size_t j = 0; j < b.second.size(); j++) {
+        ss << b.second[j];
     }
     return ss.str();
 }
 
 
 /*
- * This function generates the interchangeable state <-> bits <-> area-set
+ * This function generates the interchangeable state <-> rangeBits <-> region-trait
  * containers that define the state space.
+ *
+ * Example with 2 regions (AB), 2 binary traits (XY)
+ *
+ *      integers    regions     trait       state-vector
+ *      0           A                       10,00
+ *      1           A           X           10,10
+ *      2           A            Y          10,01
+ *      3           A           XY          10,11
+ *      4            B                      01,00
+ *      5            B          X           01,10
+ *      6            B           Y          01,01
+ *      7            B          XY          01,11
+ *      8           AB                      11,00
+ *      9           AB          X           11,10
+ *      10          AB           Y          11,01
+ *      11          AB          XY          11,11
  */
 
-void TraitBiogeographyCladogeneticBirthDeathFunction::buildBits( void )
+void TraitBiogeographyCladogeneticBirthDeathFunction::buildStateSpace( void )
 {
     
+    // determine event types
     eventTypes.push_back("s");
     eventTypes.push_back("a");
     for (size_t i = 0; i < eventTypes.size(); i++) {
@@ -187,59 +211,109 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildBits( void )
             eventStringToStateMap[ eventTypes[i] ] = JUMP_DISPERSAL;
     }
     
-    bitsByNumOn.resize(numRegions+1);
-    statesToBitsByNumOn.resize(numIntStates);
-    statesToBitsetsByNumOn.resize(numIntStates);
-    bits = std::vector<std::vector<unsigned> >(numIntStates, std::vector<unsigned>(numRegions, 0));
-//    bitsByNumOn[0].push_back(bits[0]); // commented out to ignore null range
-    for (size_t i = 0; i < numIntStates; i++)
+    // find all region-sets (ranges)
+    // e.g. rangeBitsByNumOn[2] contains all ranges w/ 2 regions occupied
+    rangeBitsByNumOn.resize(numRegions+1);
+    
+    // integer state as key
+    statesToRangeBitsByNumOn.resize(numIntStates);
+    statesToRangeBitsetsByNumOn.resize(numIntStates);
+    statesToTraitBitsByNumOn.resize(numIntStates);
+    statesToTraitBitsetsByNumOn.resize(numIntStates);
+    statesToCompositeBitsByNumOn.resize(numIntStates);
+    statesToCompositeBitsetsByNumOn.resize(numIntStates);
+    
+    // generate all trait-bit patterns
+    size_t numAllTraits = pow(2, numTraits);
+    traitBits = std::vector<TraitBits>(numAllTraits, TraitBits(numTraits, 0));
+    for (size_t i = 0; i < numAllTraits; i++)
     {
-        size_t m = i+1; // offset by one (no null range)
-        for (size_t j = 0; j < numRegions; j++)
+        size_t m = i; // do not offset by one (absence of all traits)
+        for (size_t j = 0; j < numTraits; j++)
         {
-            bits[i][j] = m % 2;
+            traitBits[i][j] = m % 2;
             m /= 2;
             if (m == 0)
                 break;
         }
-        size_t j = sumBits(bits[i]);
-        bitsByNumOn[j].push_back(bits[i]);
-        
-    }
-    for (size_t i = 0; i < numIntStates; i++)
-    {
-        inverseBits[ bits[i] ] = (unsigned)i;
     }
     
-    // assign state to each bit vector, sorted by numOn
-    size_t k = 0;
-    for (size_t i = 0; i < bitsByNumOn.size(); i++)
+    // generate all range-bit patterns
+    size_t numAllRanges = pow(2, numRegions) - 1;
+    rangeBits = std::vector<RangeBits>(numAllRanges, RangeBits(numRegions, 0));
+
+    for (size_t i = 0; i < numAllRanges; i++)
     {
-        for (size_t j = 0; j < bitsByNumOn[i].size(); j++)
+        size_t m = i+1; // offset by one (no null range)
+        for (size_t j = 0; j < numRegions; j++)
         {
-            // assign to presence-absence vector
-            statesToBitsByNumOn[k] = bitsByNumOn[i][j];
-            
-            // assign to set of present areas
-            std::set<unsigned> s;
-            for (size_t m = 0; m < statesToBitsByNumOn[k].size(); m++)
-            {
-                if (statesToBitsByNumOn[k][m] == 1) {
-                    s.insert( (unsigned)m );
+            rangeBits[i][j] = m % 2;
+            m /= 2;
+            if (m == 0)
+                break;
+        }
+        size_t j = sumRangeBits(rangeBits[i]);
+        
+        if (j <= maxRangeSize) {
+            rangeBitsByNumOn[j].push_back(rangeBits[i]);
+        }
+    }
+
+    
+    // assign state to each bit vector, sorted by numOn
+    size_t idx = 0;
+    // each set of ranges with i regions occupied
+    for (size_t i = 0; i < rangeBitsByNumOn.size(); i++)
+    {
+        // each range with i regions occupied
+        for (size_t j = 0; j < rangeBitsByNumOn[i].size(); j++)
+        {
+            // each trait combination for range with i regions occupied
+            for (size_t k = 0; k < traitBits.size(); k++) {
+                // assign to presence-absence vector
+                statesToRangeBitsByNumOn[idx] = rangeBitsByNumOn[i][j];
+                statesToTraitBitsByNumOn[idx] = traitBits[k];
+                
+                // assign to set of present regions
+                RangeBitset s_range;
+                for (size_t m = 0; m < statesToRangeBitsByNumOn[idx].size(); m++)
+                {
+                    if (statesToRangeBitsByNumOn[idx][m] == 1) {
+                        s_range.insert( (unsigned)m );
+                    }
                 }
+                statesToRangeBitsetsByNumOn[idx] = s_range;
+                
+                // assign to set of present traits
+                TraitBitset s_trait;
+                for (size_t m = 0; m < statesToTraitBitsByNumOn[idx].size(); m++)
+                {
+                    if (statesToTraitBitsByNumOn[idx][m] == 1) {
+                        s_trait.insert( (unsigned)m );
+                    }
+                }
+                statesToTraitBitsetsByNumOn[idx] = s_trait;
+                
+                // increment counter for integer state index
+                idx++;
             }
-            statesToBitsetsByNumOn[k] = s;
-            k++;
         }
     }
     
-    for (size_t i = 0; i < statesToBitsByNumOn.size(); i++)
+    // create inverse look-up table
+    for (size_t i = 0; i < statesToRangeBitsByNumOn.size(); i++)
     {
-        bitsToStatesByNumOn[ statesToBitsByNumOn[i] ] = (unsigned)i;
+        CompositeBits p1( statesToRangeBitsByNumOn[i], statesToTraitBitsByNumOn[i] );
+        compositeBitsToStatesByNumOn[p1] = (unsigned)i;
+        statesToCompositeBitsByNumOn[i] = p1;
+//        CompositeBitset p2( statesToRangeBitsetByNumOn[i], statesToTraitBitsetsByNumOn[i] );
+        
     }
     
+    
+    return;
+    
 }
-
 
 /*
  * This function builds the allopatric cutset, which is defined
@@ -247,28 +321,27 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildBits( void )
  */
 void TraitBiogeographyCladogeneticBirthDeathFunction::buildBuddingRegions( void ) {
     
-    std::map< std::vector<unsigned>, unsigned>::iterator it;
+    std::map<StateTriplet, unsigned>::iterator it;
     
     for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
     {
         // get event
-        std::vector<unsigned> idx = it->first;
+        StateTriplet idx = it->first;
         unsigned event_type = it->second;
         
         // for allopatry events
         if (event_type == SYMPATRY)
         {
             
-            // get right and left bitsets
-            const std::set<unsigned>& s1 = statesToBitsetsByNumOn[ idx[1] ];
-            const std::set<unsigned>& s2 = statesToBitsetsByNumOn[ idx[2] ];
+            // get right and left rangeBitsets
+            const RangeBitset& s1 = statesToRangeBitsetsByNumOn[ idx[1] ];
+            const RangeBitset& s2 = statesToRangeBitsetsByNumOn[ idx[2] ];
             
             // get bud area where new species emerges
             unsigned bud_area = ( s1.size() > 1 ? *s2.begin() : *s1.begin() );
             
             eventMapBuddingRegions[ idx ] = bud_area;
         }
-//        eventMapCutsets[ idx ] = cutset;
     }
     
     return;
@@ -280,17 +353,17 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildBuddingRegions( void 
  */
 void TraitBiogeographyCladogeneticBirthDeathFunction::buildCutsets( void ) {
     
-    std::map< std::vector<unsigned>, unsigned>::iterator it;
+    std::map<StateTriplet, unsigned>::iterator it;
     
     for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
     {
         // get event
-        std::vector<unsigned> idx = it->first;
+        StateTriplet idx = it->first;
         unsigned event_type = it->second;
         
-        // get right and left bitsets
-        const std::set<unsigned>& s1 = statesToBitsetsByNumOn[ idx[1] ];
-        const std::set<unsigned>& s2 = statesToBitsetsByNumOn[ idx[2] ];
+        // get right and left rangeBitsets
+        const RangeBitset& s1 = statesToRangeBitsetsByNumOn[ idx[1] ];
+        const RangeBitset& s2 = statesToRangeBitsetsByNumOn[ idx[2] ];
      
         // fill vector with edges to cut
         std::vector< std::vector<unsigned> > cutset;
@@ -299,7 +372,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildCutsets( void ) {
         if (event_type == ALLOPATRY)
         {
             // find the edges between regions in daughter ranges
-            std::set<unsigned>::iterator jt, kt;
+            RangeBitset::iterator jt, kt;
             for (jt = s1.begin(); jt != s1.end(); jt++)
             {
                 for (kt = s2.begin(); kt != s2.end(); kt++)
@@ -327,275 +400,210 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildCutsets( void ) {
  */
 
 void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
-    
+   
     // clear events
     eventMapCounts.clear();
     
     // get L,R states per A state
-    std::vector<unsigned> idx(3);
+    StateTriplet idx(3);
 
-    // loop over possible ranges
-    for (std::set<unsigned>::iterator its = ranges.begin(); its != ranges.end(); its++)
+    // loop over possible comp
+    for (unsigned i = 0; i < compositeBitsToStatesByNumOn.size(); i++)
     {
-        unsigned i = *its;
         idx[0] = i;
         eventMapCounts[i] = std::vector<unsigned>(NUM_CLADO_EVENT_TYPES, 0);
         
-#ifdef DEBUG_DEC
+#ifdef DEBUG_TRAITFIG
         std::cout << "State " << i << "\n";
-        std::cout << "Bits  " << bitsToString(statesToBitsByNumOn[i]) << "\n";
+        std::cout << "Bits  " << compositeBitsToString(statesToCompositeBitsByNumOn[i]) << "\n";
 #endif
         
-        // get on bits for A
-        const std::vector<unsigned>& ba = statesToBitsByNumOn[i];
-        std::vector<unsigned> on;
-        std::vector<unsigned> off;
+        // get on rangeBits for A
+        const RangeBits& ba = statesToCompositeBitsByNumOn[i].first;
+        const TraitBits& ta = statesToCompositeBitsByNumOn[i].second;
+        
+        
+        // find regions that are on and off
+        std::vector<unsigned> on_region;
+        std::vector<unsigned> off_region;
         for (unsigned j = 0; j < ba.size(); j++)
         {
             if (ba[j] == 1)
-                on.push_back(j);
+                on_region.push_back(j);
             else
-                off.push_back(j);
+                off_region.push_back(j);
         }
         
-        std::vector<unsigned> bl(numRegions, 0);
-        std::vector<unsigned> br(numRegions, 0);
+        // find traits that are on and off
+        std::vector<unsigned> on_trait;
+        std::vector<unsigned> off_trait;
+        for (unsigned j = 0; j < ta.size(); j++)
+        {
+            if (ta[j] == 1)
+                on_trait.push_back(j);
+            else
+                off_trait.push_back(j);
+        }
+        
+        RangeBits bl(numRegions, 0);
+        RangeBits br(numRegions, 0);
         
         // narrow sympatry
-        if (sumBits(ba) == 1)
+        if (sumRangeBits(ba) == 1)
         {
             idx[1] = i;
             idx[2] = i;
-            if (ranges.find(i) == ranges.end())
-            {
-                continue;
-            }
             
             eventMapTypes[ idx ] = SYMPATRY;
             eventMapCounts[ i ][  SYMPATRY ] += 1;
             eventMap[ idx ] = 0.0;
             
-#ifdef DEBUG_DEC
-            std::cout << "Narrow sympatry\n";
-            std::cout << "A " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n";
-            std::cout << "L " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n";
-            std::cout << "R " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n\n";
-#endif
+//#ifdef DEBUG_TRAITFIG
+//            std::cout << "Narrow sympatry\n";
+//            std::cout << "A " << rangeBitsToState(statesToCompositeBitsByNumOn[i]) << " " << compositeBitsToString(statesToCompositeBitsByNumOn[i]) << "\n";
+//            std::cout << "L " << rangeBitsToState(statesToCompositeBitsByNumOn[i]) << " " << compositeBitsToString(statesToCompositeBitsByNumOn[i]) << "\n";
+//            std::cout << "R " << rangeBitsToState(statesToCompositeBitsByNumOn[i]) << " " << compositeBitsToString(statesToCompositeBitsByNumOn[i]) << "\n\n";
+//#endif
             
         }
         
+        
         // subset/widespread sympatry
-        else if (sumBits(ba) > 1)
+        else if (sumRangeBits(ba) > 1)
         {
             idx[1] = i;
             idx[2] = i;
-            if (ranges.find(i) == ranges.end())
+            //            if (ranges.find(i) == ranges.end())
+            //            {
+            //                continue;
+            //            }
+            
+            
+#ifdef DEBUG_TRAITFIG
+            std::cout << "Subset sympatry (L-trunk, R-bud)\n";
+#endif
+            
+            // get set of possible sympatric events for L-trunk, R-bud
+            for (size_t j = 0; j < on_region.size(); j++)
             {
-                continue;
+                br = RangeBits(numRegions, 0);
+                br[ on_region[j] ] = 1;
+                CompositeBits p(br, ta);
+                unsigned sr = compositeBitsToStatesByNumOn[p];
+                idx[1] = (unsigned)i;
+                idx[2] = sr;
+                
+                //                if (ranges.find(sr) == ranges.end())
+                //                {
+                //                    br[ on_region[j] ] = 0;
+                //                    continue;
+                //                }
+                
+                eventMapTypes[ idx ] = SYMPATRY;
+                eventMapCounts[ i ][  SYMPATRY ] += 1;
+                eventMap[ idx ] = 0.0;
+                
+                //#ifdef DEBUG_TRAITFIG
+                //                std::cout << "A " << rangeBitsToState(statesToRangeBitsByNumOn[i]) << " " << compositeBitsToString(statesToRangeBitsByNumOn[i]) << "\n";
+                //                std::cout << "L " << rangeBitsToState(statesToRangeBitsByNumOn[i]) << " " << compositeBitsToString(statesToRangeBitsByNumOn[i]) << "\n";
+                //                std::cout << "R " << rangeBitsToState(br) << " " << compositeBitsToString(br) << "\n\n";
+                //#endif
+                
+                br[ on_region[j] ] = 0;
             }
             
-            if (eventStringToStateMap.find("s") != eventStringToStateMap.end()) {
-                
-#ifdef DEBUG_DEC
-                std::cout << "Subset sympatry (L-trunk, R-bud)\n";
+            
+#ifdef DEBUG_TRAITFIG
+            std::cout << "Subset sympatry (L-bud, R-trunk)\n";
 #endif
+            
+            // get set of possible sympatric events for R-trunk, L-bud
+            for (size_t j = 0; j < on_region.size(); j++)
+            {
+                bl = RangeBits(numRegions, 0);
+                bl[ on_region[j] ] = 1;
+                CompositeBits p(bl, ta);
+                unsigned sl = compositeBitsToStatesByNumOn[p];
+                idx[1] = sl;
+                idx[2] = i;
                 
-                // get set of possible sympatric events for L-trunk, R-bud
-                for (size_t j = 0; j < on.size(); j++)
+                //                if (ranges.find(sl) == ranges.end())
+                //                {
+                //                    bl[ on_region[j] ] = 0;
+                //                    continue;
+                //                }
+                
+                eventMapTypes[ idx ] =  SYMPATRY;
+                eventMapCounts[ i ][  SYMPATRY ] += 1;
+                eventMap[ idx ] = 0.0;
+                
+                //#ifdef DEBUG_TRAITFIG
+                //                std::cout << "A " << rangeBitsToState(statesToRangeBitsByNumOn[i]) << " "<< compositeBitsToString(statesToRangeBitsByNumOn[i]) << "\n";
+                //                std::cout << "L " << rangeBitsToState(bl) << " "<< compositeBitsToString(bl) << "\n";
+                //                std::cout << "R " << rangeBitsToState(statesToRangeBitsByNumOn[i]) << " " << compositeBitsToString(statesToRangeBitsByNumOn[i]) << "\n\n";
+                //#endif
+                
+                bl[ on_region[j] ] = 0;
+            }
+            
+            
+            // get set of possible allopatry events
+            bl = ba;
+            std::vector<RangeBits> bc;
+            rangeBitCombinations(bc, ba, 0, RangeBits());
+            
+            //#ifdef DEBUG_TRAITFIG
+            //            std::cout << "Allopatry combinations\n";
+            //            std::cout << "A " << rangeBitsToState(ba) << " " << compositeBitsToString(ba) << "\n";
+            //#endif
+            
+            for (size_t j = 0; j < bc.size(); j++)
+            {
+                
+                bl = bc[j];
+                br = rangeBitComplement(ba, bl);
+                
+                // limit max allopatric split size
+                if ( sumRangeBits(bl) <= maxSubrangeSplitSize || sumRangeBits(br) <= maxSubrangeSplitSize )
                 {
-                    br = std::vector<unsigned>(numRegions, 0);
-                    br[ on[j] ] = 1;
-                    //                unsigned sr = bitsToState(br);
-                    unsigned sr = bitsToStatesByNumOn[br];
-                    idx[1] = i;
+                    // unsigned sa = compositeBitsToStatesByNumOn[ba];
+                    CompositeBits pl(bl, ta);
+                    CompositeBits pr(br, ta);
+                    unsigned sl = compositeBitsToStatesByNumOn[pl];
+                    unsigned sr = compositeBitsToStatesByNumOn[pr];
+                    idx[1] = sl;
                     idx[2] = sr;
                     
-                    if (ranges.find(sr) == ranges.end())
-                    {
-                        br[ on[j] ] = 0;
-                        continue;
-                    }
+                    //#ifdef DEBUG_TRAITFIG
+                    //                    std::cout << "L " << rangeBitsToState(bl) << " " << compositeBitsToString(bl) << "\n";
+                    //                    std::cout << "R " << rangeBitsToState(br) << " " << compositeBitsToString(br) << "\n";
+                    //#endif
                     
-                    eventMapTypes[ idx ] = SYMPATRY;
-                    eventMapCounts[ i ][  SYMPATRY ] += 1;
+                    
+                    eventMapTypes[ idx ] = ALLOPATRY;
+                    eventMapCounts[ i ][  ALLOPATRY ] += 1;
                     eventMap[ idx ] = 0.0;
                     
-#ifdef DEBUG_DEC
-                    std::cout << "A " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n";
-                    std::cout << "L " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n";
-                    std::cout << "R " << bitsToState(br) << " " << bitsToString(br) << "\n\n";
-#endif
-                    
-                    br[ on[j] ] = 0;
-                }
-                
-                
-#ifdef DEBUG_DEC
-                std::cout << "Subset sympatry (L-bud, R-trunk)\n";
-#endif
-                
-                // get set of possible sympatric events for R-trunk, L-bud
-                for (size_t j = 0; j < on.size(); j++)
-                {
-                    bl = std::vector<unsigned>(numRegions, 0);
-                    
-                    bl[ on[j] ] = 1;
-                    //                unsigned sl = bitsToState(bl);
-                    unsigned sl = bitsToStatesByNumOn[bl];
-                    idx[1] = sl;
-                    idx[2] = i;
-                    
-                    if (ranges.find(sl) == ranges.end())
-                    {
-                        bl[ on[j] ] = 0;
-                        continue;
-                    }
-                    
-                    eventMapTypes[ idx ] =  SYMPATRY;
-                    eventMapCounts[ i ][  SYMPATRY ] += 1;
-                    eventMap[ idx ] = 0.0;
-                    
-#ifdef DEBUG_DEC
-                    std::cout << "A " << bitsToState(statesToBitsByNumOn[i]) << " "<< bitsToString(statesToBitsByNumOn[i]) << "\n";
-                    std::cout << "L " << bitsToState(bl) << " "<< bitsToString(bl) << "\n";
-                    std::cout << "R " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n\n";
-#endif
-                    
-                    bl[ on[j] ] = 0;
-                }
-            }
-            
-            
-            if (eventStringToStateMap.find("a") != eventStringToStateMap.end()) {
-                
-                // get set of possible allopatry events
-                bl = ba;
-                std::vector<std::vector<unsigned> > bc;
-                bitCombinations(bc, ba, 0, std::vector<unsigned>());
-                
-#ifdef DEBUG_DEC
-                std::cout << "Allopatry combinations\n";
-                std::cout << "A " << bitsToState(ba) << " " << bitsToString(ba) << "\n";
-#endif
-                
-                for (size_t j = 0; j < bc.size(); j++)
-                {
-                    
-                    bl = bc[j];
-                    br = bitAllopatryComplement(ba, bl);
-                    
-                    // limit max allopatric split size
-                    //if (sumBits(bl)==1 || sumBits(br)==1)
-                    if ( sumBits(bl) <= maxSubrangeSplitSize || sumBits(br) <= maxSubrangeSplitSize )
-                    {
-                        
-//                        unsigned sa = bitsToStatesByNumOn[ba];
-                        unsigned sl = bitsToStatesByNumOn[bl];
-                        unsigned sr = bitsToStatesByNumOn[br];
-                        idx[1] = sl;
-                        idx[2] = sr;
-                        
-#ifdef DEBUG_DEC
-                        std::cout << "L " << bitsToState(bl) << " " << bitsToString(bl) << "\n";
-                        std::cout << "R " << bitsToState(br) << " " << bitsToString(br) << "\n";
-#endif
-                        
-                        
-                        eventMapTypes[ idx ] = ALLOPATRY;
-                        eventMapCounts[ i ][  ALLOPATRY ] += 1;
-                        eventMap[ idx ] = 0.0;
-                        
-#ifdef DEBUG_DEC
-                        std::cout << "\n";
-#endif
-                    }
+//#ifdef DEBUG_TRAITFIG
+//                    std::cout << "\n";
+//#endif
                 }
             }
         }
         
-        // jump dispersal
-        if (eventStringToStateMap.find("j") != eventStringToStateMap.end()) {
-            
-#ifdef DEBUG_DEC
-            std::cout << "Jump dispersal (L-trunk, R-bud)\n";
-#endif
-            
-            // get set of possible jump dispersal events for L-trunk, R-bud
-            for (size_t j = 0; j < off.size(); j++)
-            {
-                br = std::vector<unsigned>(numRegions, 0);
-                br[ off[j] ] = 1;
-                //                unsigned sr = bitsToState(br);
-                unsigned sr = bitsToStatesByNumOn[br];
-                idx[1] = i;
-                idx[2] = sr;
-                
-                if (ranges.find(sr) == ranges.end())
-                {
-                    br[ off[j] ] = 0;
-                    continue;
-                }
-                
-                
-                eventMapTypes[ idx ] = JUMP_DISPERSAL;
-                eventMapCounts[ i ][  JUMP_DISPERSAL ] += 1;
-                eventMap[ idx ] = 0.0;
-                
-#ifdef DEBUG_DEC
-                std::cout << "A " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n";
-                std::cout << "L " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n";
-                std::cout << "R " << bitsToState(br) << " " << bitsToString(br) << "\n\n";
-#endif
-                
-                br[ off[j] ] = 0;
-            }
-            
-            
-#ifdef DEBUG_DEC
-            std::cout << "Jump dispersal (L-bud, R-trunk)\n";
-#endif
-            
-            // get set of possible jump dispersal events for R-trunk, L-bud
-            for (size_t j = 0; j < off.size(); j++)
-            {
-                bl = std::vector<unsigned>(numRegions, 0);
-                
-                bl[ off[j] ] = 1;
-                //                unsigned sl = bitsToState(bl);
-                unsigned sl = bitsToStatesByNumOn[bl];
-                idx[1] = sl;
-                idx[2] = i;
-                
-                if (ranges.find(sl) == ranges.end())
-                {
-                    bl[ off[j] ] = 0;
-                    continue;
-                }
-                
-                eventMapTypes[ idx ] =  JUMP_DISPERSAL;
-                eventMapCounts[ i ][  JUMP_DISPERSAL ] += 1;
-                eventMap[ idx ] = 0.0;
-                
-#ifdef DEBUG_DEC
-                std::cout << "A " << bitsToState(statesToBitsByNumOn[i]) << " "<< bitsToString(statesToBitsByNumOn[i]) << "\n";
-                std::cout << "L " << bitsToState(bl) << " "<< bitsToString(bl) << "\n";
-                std::cout << "R " << bitsToState(statesToBitsByNumOn[i]) << " " << bitsToString(statesToBitsByNumOn[i]) << "\n\n";
-#endif
-                
-                bl[ off[j] ] = 0;
-            }
-        }
-#ifdef DEBUG_DEC
-        std::cout << "\n\n";
-#endif
+//#ifdef DEBUG_TRAITFIG
+//        std::cout << "\n\n";
+//#endif
     }
-#ifdef DEBUG_DEC
-    //    for (size_t i = 0; i < eventMapCounts.size(); i++) {
-    //        std::cout << bitsToState(statesToBitsByNumOn[i]) << " " << eventMapCounts[ i ] << "\n";
-    //    }
-    //
-    std::cout << "------\n";
-#endif
+//#ifdef DEBUG_TRAITFIG
+//    //    for (size_t i = 0; i < eventMapCounts.size(); i++) {
+//    //        std::cout << rangeBitsToState(statesToRangeBitsByNumOn[i]) << " " << eventMapCounts[ i ] << "\n";
+//    //    }
+//    //
+//    std::cout << "------\n";
+//#endif
+    
+    return;
     
 }
 
@@ -617,11 +625,11 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
     std::vector<unsigned> n_value( NUM_CLADO_EVENT_TYPES, 0 );
     
     // loop over all events and their types
-    std::map< std::vector<unsigned>, unsigned >::iterator it;
+    std::map<StateTriplet, unsigned >::iterator it;
     for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
     {
         // get event info
-        std::vector<unsigned> idx = it->first;
+        StateTriplet idx = it->first;
         unsigned event_type = it->second;
         
         // get event score
@@ -677,88 +685,6 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
     return;
 }
 
-/*
- * This function builds all defined ranges in the model
- */
-
-void TraitBiogeographyCladogeneticBirthDeathFunction::buildRanges(
-    std::set<unsigned>& range_set,
-    const RbVector<RbVector<double> >& g,
-    bool all)
-{
-    
-    std::set<std::set<unsigned> > r;
-    for (size_t i = 0; i < numRegions; i++)
-    {
-        std::set<unsigned> s;
-        s.insert((unsigned)i);
-        r.insert(s);
-        buildRangesRecursively(s, r, maxRangeSize, g, all);
-    }
-    
-    for (std::set<std::set<unsigned> >::iterator it = r.begin(); it != r.end(); it++)
-    {
-        std::vector<unsigned> v(numRegions, 0);
-        for (std::set<unsigned>::iterator jt = it->begin(); jt != it->end(); jt++)
-        {
-            v[*jt] = 1;
-        }
-        range_set.insert( bitsToStatesByNumOn[v] );
-    }
-    
-#ifdef DEBUG_DEC
-    for (std::set<std::set<unsigned> >::iterator it = r.begin(); it != r.end(); it++)
-    {
-        for (std::set<unsigned>::iterator jt = it->begin(); jt != it->end(); jt++)
-        {
-            std::cout << *jt << " ";
-        }
-        std::cout << "\n";
-    }
-    std::cout << "\n";
-#endif
-}
-
-
-/*
- * This recursive function accumulates areas to build a range
- */
-
-void TraitBiogeographyCladogeneticBirthDeathFunction::buildRangesRecursively(
-    std::set<unsigned> s,
-    std::set<std::set<unsigned> >& r,
-    size_t k,
-    const RbVector<RbVector<double> >& g,
-    bool all)
-{
-    
-    // add candidate range to list of ranges
-    if (s.size() <= k)
-        r.insert(s);
-    
-    // stop recursing if range equals max size, k
-    if (s.size() == k)
-        return;
-    
-    
-    // otherwise, recurse along
-    for (std::set<unsigned>::iterator it = s.begin(); it != s.end(); it++)
-    {
-        for (size_t i = 0; i < numRegions; i++)
-        {
-            if (g[*it][i] > 0 || all) {
-                std::set<unsigned> t = s;
-                t.insert((unsigned)i);
-                if (r.find(t) == r.end())
-                {
-                    buildRangesRecursively(t, r, k, g, all);
-                }
-            }
-        }
-    }
-}
-
-
 
 TraitBiogeographyCladogeneticBirthDeathFunction* TraitBiogeographyCladogeneticBirthDeathFunction::clone( void ) const
 {
@@ -781,41 +707,41 @@ double TraitBiogeographyCladogeneticBirthDeathFunction::computeDataAugmentedClad
  * This function computes the cutset score for a cladogenetic outcome (optionally, divided by number of cut edges)
  */
 
-double TraitBiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vector<unsigned> idx, unsigned event_type)
+double TraitBiogeographyCladogeneticBirthDeathFunction::computeCutsetScore(StateTriplet idx, unsigned event_type)
 {
     double cost = 0.0;
     
-    // get value for connectivity mtx
-    // TODO: adjust for multiple traits
-//    const RbVector<RbVector<double> >& mw = m_w->getValue();
-//    const RbVector<RbVector<RbVector<double> > >& mb = m_b->getValue();
-    const RbVector<double>& m_w_values = m_w->getValue()[0];
-    const RbVector<RbVector<double> >& m_b_values = m_b->getValue()[0];
+    CompositeBits cb = statesToCompositeBitsByNumOn[ idx[0] ];
+    RangeBits rb = cb.first;
+    TraitBits tb = cb.second;
     
-    // compute modularity score depending on event type
+    // compute score depending on event type
     if (event_type == SYMPATRY)
     {
-        // sympatry depends on matrix diagonal value
-        unsigned i = eventMapBuddingRegions[idx];
-        cost = m_w_values[i];
+        const RbVector<RbVector<double> >& m_w_values = m_w->getValue();
+        unsigned region_idx = eventMapBuddingRegions[idx];
+        cost = 1.0;
+        for (size_t trait_idx = 0; trait_idx < tb.size(); trait_idx++) {
+            if (tb[trait_idx] == 1) {
+                cost *= m_w_values[trait_idx][region_idx];
+            }
+        }
+        
     }
     else if (event_type == ALLOPATRY)
     {
+        const RbVector<RbVector<RbVector<double> > >& m_b_values = m_b->getValue();
         
-        std::string s0 = bitsToString( statesToBitsByNumOn[ idx[0] ] );
-        std::string s1 = bitsToString( statesToBitsByNumOn[ idx[1] ] );
-        std::string s2 = bitsToString( statesToBitsByNumOn[ idx[2] ] );
-        
-        
-//        std::cout << "COST " << s0 << " -> " << s1 << " | " << s2 << "\n";
         // allopatry depends on inverse sum of cutset cost of edge weights
         const std::vector<std::vector<unsigned> >& cutset = eventMapCutsets[idx];
         for (size_t i = 0; i < cutset.size(); i++) {
-            size_t v1 = cutset[i][0];
-            size_t v2 = cutset[i][1];
-            double mean_m_b_values = (m_b_values[v1][v2] + m_b_values[v2][v1]) / 2.0;
-            cost += (1.0 / mean_m_b_values);
-//            std::cout << "\t" << v1 << " -- " << v2 << " : " << bf[v1][v2] << "\n";
+            for (size_t trait_idx = 0; trait_idx < tb.size(); trait_idx++) {
+                size_t v1 = cutset[i][0];
+                size_t v2 = cutset[i][1];
+                double mean_m_b_values = (m_b_values[trait_idx][v1][v2] + m_b_values[trait_idx][v2][v1]) / 2.0;
+                cost += (1.0 / mean_m_b_values);
+    //            std::cout << "\t" << v1 << " -- " << v2 << " : " << bf[v1][v2] << "\n";
+            }
         }
         
         // take the inverse sum of costs
@@ -849,7 +775,7 @@ const std::map< std::vector<unsigned>, double >&  TraitBiogeographyCladogeneticB
  * Prints the event map -- for debugging mostly
  */
 
-void TraitBiogeographyCladogeneticBirthDeathFunction::printEventMap(std::map< std::vector< unsigned >, double > x)
+void TraitBiogeographyCladogeneticBirthDeathFunction::printEventMap(std::map<StateTriplet, double> x)
 {
     std::map< std::vector< unsigned >, double >::iterator it;
     
@@ -868,14 +794,13 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::printEventMap(std::map< st
             unsigned event_type = eventMapTypes[ idx ];
             
             if (i == event_type) {
-            
-                std::vector<unsigned> b0= statesToBitsByNumOn[ idx[0] ];
-                std::vector<unsigned> b1= statesToBitsByNumOn[ idx[1] ];
-                std::vector<unsigned> b2= statesToBitsByNumOn[ idx[2] ];
-                
-                std::string s0 = bitsToString( b0 );
-                std::string s1 = bitsToString( b1 );
-                std::string s2 = bitsToString( b2 );
+                CompositeBits b0 = statesToCompositeBitsByNumOn[ idx[0] ];
+                CompositeBits b1 = statesToCompositeBitsByNumOn[ idx[1] ];
+                CompositeBits b2 = statesToCompositeBitsByNumOn[ idx[2] ];
+
+                std::string s0 = compositeBitsToString( b0 );
+                std::string s1 = compositeBitsToString( b1 );
+                std::string s2 = compositeBitsToString( b2 );
                 
                 std::cout << s0 << " -> " << s1 << " | " << s2 << " = " << rate << "\n";
             }
@@ -889,10 +814,10 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::printEventMap(std::map< st
 
 
 /*
- *  Computes the sum of bits (how many bits are set to 1)
+ *  Computes the sum of rangeBits (how many rangeBits are set to 1)
  */
 
-unsigned TraitBiogeographyCladogeneticBirthDeathFunction::sumBits(const std::vector<unsigned>& b)
+unsigned TraitBiogeographyCladogeneticBirthDeathFunction::sumRangeBits(const std::vector<unsigned>& b)
 {
     unsigned n = 0;
     for (int i = 0; i < b.size(); i++)
@@ -1017,5 +942,8 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
     value->setEventMap(eventMap);
     value->setCladogeneticProbabilityMatrix( cladogenetic_probability_matrix );
     value->setSpeciationRateSumPerState( speciation_rate_sum_per_state );
+    
+    // print
+    printEventMap( this->eventMap );
 }
 
