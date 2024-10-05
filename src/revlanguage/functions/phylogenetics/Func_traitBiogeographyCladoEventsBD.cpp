@@ -61,16 +61,16 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
 {
     
     // base rate for within-region speciation
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rho_w = static_cast<const ModelVector<RealPos>& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* rho_w = static_cast<const ModelVector<ModelVector<RealPos> >& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     // base rate for between-region speciation
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rho_b = static_cast<const ModelVector<RealPos>& >( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* rho_b = static_cast<const ModelVector<ModelVector<RealPos> >& >( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     // parameterized geography for within-region features (shape == (N))
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* m_w = static_cast<const ModelVector<ModelVector<RealPos> >&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* m_w = static_cast<const ModelVector<ModelVector<ModelVector<RealPos> > >& >( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     // parameterized geography for between-region features (shape == (N,N))
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* m_b = static_cast<const ModelVector<ModelVector<ModelVector<RealPos> > >& >( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > > >* m_b = static_cast<const ModelVector<ModelVector<ModelVector<ModelVector<RealPos> > > >& >( this->args[3].getVariable()->getRevObject() ).getDagNode();
     
     // get dimension information
     
@@ -114,10 +114,10 @@ const ArgumentRules& Func_traitBiogeographyCladoEventsBD::getArgumentRules( void
     
     if ( !rules_set )
     {
-        argumentRules.push_back( new ArgumentRule( "rho_w", ModelVector<RealPos>::getClassTypeSpec() , "Base speciation rates for within-region speciation events (one per trait).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "rho_b", ModelVector<RealPos>::getClassTypeSpec() , "Base speciation rates for between-region speciation events (one per trait).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "m_w", ModelVector<ModelVector<RealPos> >::getClassTypeSpec(), "The within-region feature vector (traits x regions).", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
-        argumentRules.push_back( new ArgumentRule( "m_b", ModelVector<ModelVector<ModelVector<RealPos> > >::getClassTypeSpec(), "The between-region feature matrix (traits x regions x regions).", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "rho_w", ModelVector<ModelVector<RealPos> >::getClassTypeSpec() , "Base speciation rates for within-region speciation events (one per trait).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "rho_b", ModelVector<ModelVector<RealPos> >::getClassTypeSpec() , "Base speciation rates for between-region speciation events (one per trait).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "m_w", ModelVector<ModelVector<ModelVector<RealPos> > >::getClassTypeSpec(), "The within-region feature vector (traits x regions).", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
+        argumentRules.push_back( new ArgumentRule( "m_b", ModelVector<ModelVector<ModelVector<ModelVector<RealPos> > > >::getClassTypeSpec(), "The between-region feature matrix (traits x regions x regions).", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
         argumentRules.push_back( new ArgumentRule( "max_range_size",          Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
         argumentRules.push_back( new ArgumentRule( "max_subrange_split_size", Natural::getClassTypeSpec(), "The maximum size of a daughter subrange following a between-region speciation event.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
         argumentRules.push_back( new ArgumentRule( "normalize_split_score", RlBoolean::getClassTypeSpec(), "Normalize the split scores to have geometric mean of 1?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
