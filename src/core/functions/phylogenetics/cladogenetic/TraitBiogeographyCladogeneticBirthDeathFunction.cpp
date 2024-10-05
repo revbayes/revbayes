@@ -34,10 +34,10 @@ using namespace RevBayesCore;
 //    bool nss,
 //    std::string ct) :
 TraitBiogeographyCladogeneticBirthDeathFunction::TraitBiogeographyCladogeneticBirthDeathFunction(
-    const TypedDagNode<RbVector<double> >* rw,
-    const TypedDagNode<RbVector<double> >* rb,
-    const TypedDagNode<RbVector<RbVector<double> > >* mw,
-    const TypedDagNode<RbVector<RbVector<RbVector<double> > > >* mb,
+    const TypedDagNode<RbVector<RbVector<double> > >* rw,
+    const TypedDagNode<RbVector<RbVector<double> > >* rb,
+    const TypedDagNode<RbVector<RbVector<RbVector<double> > > >* mw,
+    const TypedDagNode<RbVector<RbVector<RbVector<RbVector<double> > > > >* mb,
     unsigned mrs, unsigned msss, bool nss, std::string ct) :
 TypedFunction<CladogeneticSpeciationRateMatrix>( new CladogeneticSpeciationRateMatrix(  pow(2,mrs)-1) ),
 rho_w( rw ),
@@ -204,11 +204,11 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildStateSpace( void )
     eventTypes.push_back("a");
     for (size_t i = 0; i < eventTypes.size(); i++) {
         if (eventTypes[i]=="s")
-            eventStringToStateMap[ eventTypes[i] ] = SYMPATRY;
+            eventStringToStateMap[ eventTypes[i] ] = WITHIN_SPECIATION;
         else if (eventTypes[i]=="a")
-            eventStringToStateMap[ eventTypes[i] ] = ALLOPATRY;
+            eventStringToStateMap[ eventTypes[i] ] = BETWEEN_SPECIATION;
         else if (eventTypes[i]=="j")
-            eventStringToStateMap[ eventTypes[i] ] = JUMP_DISPERSAL;
+            eventStringToStateMap[ eventTypes[i] ] = FOUNDER_SPECIATION;
     }
     
     // find all region-sets (ranges)
@@ -330,7 +330,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildBuddingRegions( void 
         unsigned event_type = it->second;
         
         // for allopatry events
-        if (event_type == SYMPATRY)
+        if (event_type == WITHIN_SPECIATION)
         {
             
             // get right and left rangeBitsets
@@ -369,7 +369,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildCutsets( void ) {
         std::vector< std::vector<unsigned> > cutset;
 
         // for allopatry events
-        if (event_type == ALLOPATRY)
+        if (event_type == BETWEEN_SPECIATION)
         {
             // find the edges between regions in daughter ranges
             RangeBitset::iterator jt, kt;
@@ -454,8 +454,8 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
             idx[1] = i;
             idx[2] = i;
             
-            eventMapTypes[ idx ] = SYMPATRY;
-            eventMapCounts[ i ][  SYMPATRY ] += 1;
+            eventMapTypes[ idx ] = WITHIN_SPECIATION;
+            eventMapCounts[ i ][  WITHIN_SPECIATION ] += 1;
             eventMap[ idx ] = 0.0;
             
 //#ifdef DEBUG_TRAITFIG
@@ -499,8 +499,8 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
                 //                    continue;
                 //                }
                 
-                eventMapTypes[ idx ] = SYMPATRY;
-                eventMapCounts[ i ][  SYMPATRY ] += 1;
+                eventMapTypes[ idx ] = WITHIN_SPECIATION;
+                eventMapCounts[ i ][  WITHIN_SPECIATION ] += 1;
                 eventMap[ idx ] = 0.0;
                 
                 //#ifdef DEBUG_TRAITFIG
@@ -533,8 +533,8 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
                 //                    continue;
                 //                }
                 
-                eventMapTypes[ idx ] =  SYMPATRY;
-                eventMapCounts[ i ][  SYMPATRY ] += 1;
+                eventMapTypes[ idx ] =  WITHIN_SPECIATION;
+                eventMapCounts[ i ][  WITHIN_SPECIATION ] += 1;
                 eventMap[ idx ] = 0.0;
                 
                 //#ifdef DEBUG_TRAITFIG
@@ -580,8 +580,8 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMap( void ) {
                     //#endif
                     
                     
-                    eventMapTypes[ idx ] = ALLOPATRY;
-                    eventMapCounts[ i ][  ALLOPATRY ] += 1;
+                    eventMapTypes[ idx ] = BETWEEN_SPECIATION;
+                    eventMapCounts[ i ][  BETWEEN_SPECIATION ] += 1;
                     eventMap[ idx ] = 0.0;
                     
 //#ifdef DEBUG_TRAITFIG
@@ -716,30 +716,34 @@ double TraitBiogeographyCladogeneticBirthDeathFunction::computeCutsetScore(State
     TraitBits tb = cb.second;
     
     // compute score depending on event type
-    if (event_type == SYMPATRY)
+    if (event_type == WITHIN_SPECIATION)
     {
-        const RbVector<RbVector<double> >& m_w_values = m_w->getValue();
+        const RbVector<RbVector<RbVector<double> > >& m_w_values = m_w->getValue();
         unsigned region_idx = eventMapBuddingRegions[idx];
         cost = 1.0;
-        for (size_t trait_idx = 0; trait_idx < tb.size(); trait_idx++) {
-            if (tb[trait_idx] == 1) {
-                cost *= m_w_values[trait_idx][region_idx];
-            }
+        for (size_t trait_idx = 0; trait_idx < m_w_values.size(); trait_idx++) {
+            size_t trait_val = tb[trait_idx];
+            cost *= m_w_values[trait_idx][trait_val][region_idx];
         }
-        
     }
-    else if (event_type == ALLOPATRY)
+    else if (event_type == BETWEEN_SPECIATION)
     {
-        const RbVector<RbVector<RbVector<double> > >& m_b_values = m_b->getValue();
+        const RbVector<RbVector<RbVector<RbVector<double> > > >& m_b_values = m_b->getValue();
         
         // allopatry depends on inverse sum of cutset cost of edge weights
         const std::vector<std::vector<unsigned> >& cutset = eventMapCutsets[idx];
         for (size_t i = 0; i < cutset.size(); i++) {
             for (size_t trait_idx = 0; trait_idx < tb.size(); trait_idx++) {
+                // we want the weight for the edge of trait_idx that connects region v1 to v2
+                size_t trait_val = tb[trait_idx];
                 size_t v1 = cutset[i][0];
                 size_t v2 = cutset[i][1];
-                double mean_m_b_values = (m_b_values[trait_idx][v1][v2] + m_b_values[trait_idx][v2][v1]) / 2.0;
+                
+                double mb12 = m_b_values[trait_idx][trait_val][v1][v2];
+                double mb21 = m_b_values[trait_idx][trait_val][v2][v1];
+                double mean_m_b_values = (mb12 + mb21) / 2.0;
                 cost += (1.0 / mean_m_b_values);
+                
     //            std::cout << "\t" << v1 << " -- " << v2 << " : " << bf[v1][v2] << "\n";
             }
         }
@@ -782,7 +786,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::printEventMap(std::map<Sta
     for (size_t i = 0; i < 2; i++) {
         
         std::string clado_str = "WITHIN_SPECIATION";
-        if (i == ALLOPATRY) {
+        if (i == BETWEEN_SPECIATION) {
             clado_str = "BETWEEN_SPECIATION";
         }
             
@@ -834,19 +838,19 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::swapParameterInternal(cons
 {
     if (oldP == rho_w)
     {
-        rho_w = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        rho_w = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
     }
     if (oldP == rho_b)
     {
-        rho_b = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        rho_b = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
     }
     if (oldP == m_w)
     {
-        m_w = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        m_w = static_cast<const TypedDagNode<RbVector<RbVector<RbVector<double> > > >* >( newP );
     }
     if (oldP == m_b)
     {
-        m_b = static_cast<const TypedDagNode<RbVector<RbVector<RbVector<double> > > >* >( newP );
+        m_b = static_cast<const TypedDagNode<RbVector<RbVector<RbVector<RbVector<double> > > > >* >( newP );
     }
 }
 
@@ -873,8 +877,8 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
     buildEventMapFactors();
 
     // get speciation rates across cladogenetic events
-    const std::vector<double>& rho_w_values = rho_w->getValue();
-    const std::vector<double>& rho_b_values = rho_b->getValue();
+    const RbVector<RbVector<double> >& rho_w_values = rho_w->getValue();
+    const RbVector<RbVector<double> >& rho_b_values = rho_b->getValue();
     
     // assign the correct rate to each event
     std::map<std::vector<unsigned>, unsigned>::iterator it;
@@ -886,18 +890,21 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
     
     for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
     {
-        const std::vector<unsigned>& idx = it->first;
+        const StateTriplet& idx = it->first;
+        const RangeBits& rb = statesToRangeBitsByNumOn[ idx[0] ];
+        const TraitBits& tb = statesToTraitBitsByNumOn[ idx[0] ];
         unsigned event_type = it->second;
         double speciation_rate = 0.0;
         
         // get speciation base rate
-        // TODO: make sure it's for the right trait type
-        if (event_type == 0) {
-            speciation_rate = rho_w_values[0];    // get trait type!
-        } else if (event_type == 1) {
-            speciation_rate = rho_b_values[0];    // get trait type!
+        for (size_t i = 0; i < tb.size(); i++) {
+            size_t trait_val = tb[i];
+            if (event_type == WITHIN_SPECIATION) {
+                speciation_rate = rho_w_values[i][trait_val];
+            } else if (event_type == BETWEEN_SPECIATION) {
+                speciation_rate = rho_b_values[i][trait_val];
+            }
         }
-        
         
         // divide by two if asymmetric event
         double f_asymm = ( idx[1] == idx[2] ? 1.0 : 0.5 );

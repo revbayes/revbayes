@@ -41,10 +41,10 @@ template <class valueType> class TypedDagNode;
             
         public:
             
-            TraitBiogeographyCladogeneticBirthDeathFunction(const TypedDagNode<RbVector<double> >* rw,
-                                                            const TypedDagNode<RbVector<double> >* rb,
-                                                            const TypedDagNode<RbVector<RbVector<double> > >* mw,
-                                                            const TypedDagNode<RbVector<RbVector<RbVector<double> > > >* mb,
+            TraitBiogeographyCladogeneticBirthDeathFunction(const TypedDagNode<RbVector<RbVector<double> > >* rw,
+                                                            const TypedDagNode<RbVector<RbVector<double> > >* rb,
+                                                            const TypedDagNode<RbVector<RbVector<RbVector<double> > > >* mw,
+                                                            const TypedDagNode<RbVector<RbVector<RbVector<RbVector<double> > > > >* mb,
                                                             unsigned mrs, unsigned msss, bool nss, std::string ct="cutset");
 
             virtual                                                     ~TraitBiogeographyCladogeneticBirthDeathFunction(void);
@@ -60,11 +60,11 @@ template <class valueType> class TypedDagNode;
            
             void                                              update(void);
             
-            const static unsigned NUM_CLADO_EVENT_TYPES  = 3;
+            const static unsigned NUM_CLADO_EVENT_TYPES = 3;
             
-            const static unsigned SYMPATRY               = 0; // A  -> A or AB -> AB|A
-            const static unsigned ALLOPATRY              = 1; // AB -> A|B
-            const static unsigned JUMP_DISPERSAL         = 2; // A  -> A|B
+            const static unsigned WITHIN_SPECIATION     = 0; // A  -> A or AB -> AB|A
+            const static unsigned BETWEEN_SPECIATION    = 1; // AB -> A|B
+            const static unsigned FOUNDER_SPECIATION    = 2; // A  -> A|B
         
         protected:
             
@@ -99,12 +99,13 @@ template <class valueType> class TypedDagNode;
             void                    updateEventMapCutsetWeights(void);
             
             // parameters
-            const TypedDagNode<RbVector<double> >*                         rho_w;  // within-region speciation base rate
-            const TypedDagNode<RbVector<double> >*                         rho_b;  // between-region speciation base rate
-            const TypedDagNode<RbVector<RbVector<double> > >*              m_w;    // within-region speciation relative rates
-                                                                                   //   dim1: traits, dim2: regions
-            const TypedDagNode<RbVector<RbVector<RbVector<double> > > >*   m_b;    // between-region speciation relative rates
-                                                                                   //   dim1: traits, dim2: regions, dim3: regions
+            const TypedDagNode<RbVector<RbVector<double> > >*                         rho_w;  // within-region speciation base rate
+            const TypedDagNode<RbVector<RbVector<double> > >*                         rho_b;  // between-region speciation base rate
+            const TypedDagNode<RbVector<RbVector<RbVector<double> > > >*              m_w;    // within-region speciation relative rates
+                                                                                              // dim1: trait-chars, dim2:                 trait-vals, dim3: regions
+            const TypedDagNode<RbVector<RbVector<RbVector<RbVector<double> > > > >*   m_b;    // between-region speciation relative rates
+                                                                                              // dim1: trait-chars, dim2: trait-vals,
+                                                                                              // dim3: regions, dim4: regions
             
             // dimensions
             size_t        numTraits;
