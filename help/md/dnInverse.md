@@ -14,6 +14,27 @@ This provides a way to perform inference using conditional probabilities,
 for example where 
 Pr(x | Model, Condition) = Pr(x | Model) / Pr(Condition is satisfied)
 
+In general, there may be cases where it is desirable to sample from or 
+observe a distribution subject to some form of ascertainment condition.
+For example, one may wish to sample from a normal distribution 
+`X ~ dnNormal(0, 1)` subject to some constraint _C(x)_ on _x_ – such
+as a condition that _x_ > 0.
+
+In order to compute the probability of an observed value of _x_ given
+the constraint, we need to divide Pr(x) by Pr(_C(x)_) – in this example,
+Pr(_x_ > 0).  This probability is difficult to calculate in general.
+But in specific cases, Pr(C(x)) corresponds to the probability of observing
+a specific value _y_ from some other distribution _dist_.
+
+In this case, our likelihood could be computed by 
+`dist.clamp(y); conditioned_probability = x.probability() / dist.probability()`.
+
+`dnInverse` allows such likelihoods to be computed during inference under MCMC(MC),
+where the overall probability is obtained by multiplies the probabilities of each
+indepedent component of the model.
+Hence, `Y ~ dnInverse(dist); Y.clamp(y)` gives a model element whose probability
+corresponds to `1 / dist.probability()`.
+
 ## details
 ## authors
 Martin R. Smith
