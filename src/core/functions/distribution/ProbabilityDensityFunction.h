@@ -121,11 +121,11 @@ void RevBayesCore::ProbabilityDensityFunction<valueType>::update( void )
 {
      if constexpr(std::is_base_of_v<Cloneable, valueType>) {
         // For abstract classes that cannot be instantiated directly
-        // (e.g., AbstractHomologousDiscreteCharacterData), we pass a pointer
-        // to the existing value
-        dist->setValue(const_cast<valueType*>(&x->getValue()));
+        // (e.g., AbstractHomologousDiscreteCharacterData), we clone the
+        // object and pass a pointer to the cloned value
+        dist->setValue(const_cast<valueType*>(&x->clone()->getValue()));
     } else {
-        // For other types, we create a new instance as before
+        // For other types, we create a new instance
         dist->setValue(new valueType(x->getValue()));
     }
     
