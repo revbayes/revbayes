@@ -53,6 +53,11 @@ namespace RevBayesCore {
         }
 
         // Functions from Distribution.cpp
+
+        // Overriding `touch` was found to be necessary (at 2024-10): 
+        // nodes in the associated tree were not being marked as dirty
+        // when the value of the distribution was changed.
+        // A better solution may be possible.
         void touch(const DagNode *affecter, bool touchAll) override
         {            
             dist->touch(affecter, touchAll);
