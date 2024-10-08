@@ -3,7 +3,7 @@
 ## Features
   * Allow constructing log-scaled distributions from non-log distributions (e.g. log-Cauchy) (#466).
   * Allow checking `args.size()` when there are no arguments (#479).
-  * Allow fossil age sampling with an initial tree in `dnConstrainedTopology` (481).
+  * Allow fossil age sampling with an initial tree in `dnConstrainedTopology` (#481).
   * Add exp/log/logit/invlogit/shift/scale-transformed distributions (e.g. `dnExp(1) |> tnShift(2)`) (#500).
   * Extend `type( )` to optionally show the full type-spec (#504).
   * Add a generic `vectorFlatten` function (#514).
