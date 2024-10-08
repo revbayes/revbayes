@@ -56,8 +56,24 @@ namespace RevBayesCore {
 
         // Overriding `touch` was found to be necessary (at 2024-10): 
         // nodes in the associated tree were not being marked as dirty
-        // when the value of the distribution was changed.
-        // A better solution may be possible.
+        // when the value of the distribution was changed indirectly.
+        // The override seems not to be necessary for straightforward cases
+        // such as:
+        //     inv_exp ~ dnInv(dnExp(1))
+        //     inv_exp.clamp(42)  # Touched from clamp and from invalidated children
+        // or:
+        //     k ~ dnUniform(1, 10)
+        //     kRates := [ [ 0, k],
+        //                 [ 1, 0] ]
+        //     qK := fnFreeK(kRates)
+        //     invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
+        //     invPhy.clamp(chars) # Touched likewise
+        //     k.clamp(1) # Touched likewise
+        // 
+        // The override becomes necessary for subsequent calls to e.g.
+        //     k.clamp(2)
+        //
+        // Further investigation into this latter case may yield a better solution.
         void touch(const DagNode *affecter, bool touchAll) override
         {            
             dist->touch(affecter, touchAll);
