@@ -31,17 +31,22 @@ namespace RevBayesCore {
         TransformedDistribution(const TransformedDistribution &d);
 
         // public member functions
-        TransformedDistribution*                            clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                redrawValue(void);
+        TransformedDistribution*                            clone(void) const override;                                                             //!< Create an independent clone
+        double                                              computeLnProbability(void) override;
+        void                                                redrawValue(void) override;
+	void                                                getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter) override;
 
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
-        
-        
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;               //!< Swap a parameter
+
+        // keep specialization for derived classes
+        void                                                keepSpecialization(const DagNode* affecter) override;
+        void                                                restoreSpecialization(const DagNode *restorer) override;
+        void                                                touchSpecialization(const DagNode *toucher, bool touchAll) override;
+
     private:
-        
+
         // helper methods
         void                                                simulate();
 
@@ -53,7 +58,7 @@ namespace RevBayesCore {
         // the base distribution
 	std::unique_ptr<TypedDistribution<double>>          base_dist;
     };
-    
+
 }
 
 #endif

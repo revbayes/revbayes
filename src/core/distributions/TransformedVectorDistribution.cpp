@@ -153,6 +153,27 @@ void TransformedVectorDistribution::redrawValue( void )
 }
 
 
+// Further investigation into this latter case may yield a better solution.
+void TransformedVectorDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+{
+    base_dist->touch(affecter, touchAll);
+}
+
+void TransformedVectorDistribution::restoreSpecialization( const DagNode *restorer )
+{
+    base_dist->restore(restorer);
+}
+
+void TransformedVectorDistribution::keepSpecialization( const DagNode* affecter )
+{
+    base_dist->keep(affecter);
+}
+
+void TransformedVectorDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+{
+    base_dist->getAffected(affected, affecter);
+}
+
 /** Swap a parameter of the distribution */
 void TransformedVectorDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
