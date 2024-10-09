@@ -83,7 +83,7 @@ double TransformedDistribution::computeLnProbability( void )
     {
 	base_dist->setValue( new double(*x) );
 
-	// If x = f_inverse(y) is defined, the log_f_prime(*x) should be defined.
+	// If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
 	double ln_pdf = base_dist->computeLnProbability() - log_f_prime(*x).value();
 
@@ -94,6 +94,18 @@ double TransformedDistribution::computeLnProbability( void )
 	return RbConstants::Double::neginf;
 }
 
+void TransformedDistribution::setValue(double *y, bool force)
+{
+    if (auto x = f_inverse(*y))
+    {
+	base_dist->setValue(new double(*x), force);
+
+	// free memory
+	if (y != value) delete value;
+
+	value = y;
+    }
+}
 
 void TransformedDistribution::simulate()
 {
