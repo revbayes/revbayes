@@ -7,6 +7,8 @@ project(RevBayes)
 
 set(CMAKE_CXX_STANDARD 17)
 
+
+
 # Policies relevant to the configuration of Boost libraries
 if(POLICY CMP0111)
   # Provides clear error if imported library not found
@@ -48,7 +50,8 @@ else()
    set(OPT_FLAGS "-msse -msse2 -msse3")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if (BUILD_TYPE_UPPER STREQUAL "DEBUG")
    set(OPT_FLAGS "${OPT_FLAGS} -g -O0 -Wall")
 
    # These just add noise:
