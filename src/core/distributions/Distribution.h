@@ -53,7 +53,7 @@ namespace RevBayesCore {
         void                                                    restore(const DagNode *restorer);
         virtual void                                            setMcmcMode(bool tf);                                                               //!< Change the likelihood computation to or from MCMC mode.
         void                                                    swapParameter(const DagNode *oldP, const DagNode *newP);                            //!< Exchange the parameter
-        virtual void                                            touch(const DagNode *toucher, bool touchAll);
+        void                                                    touch(const DagNode *toucher, bool touchAll);
         
         // pure virtual public methods
         virtual Distribution*                                   clone(void) const = 0;                                                              //!< Clone the distribution

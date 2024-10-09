@@ -74,9 +74,10 @@ namespace RevBayesCore {
         //     k.clamp(2)
         //
         // Further investigation into this latter case may yield a better solution.
-        void touch(const DagNode *affecter, bool touchAll) override
-        {            
-            dist->touch(affecter, touchAll);
+        
+        void touchSpecialization( const DagNode *toucher, bool touchAll )
+        {
+            dist->touch(toucher, touchAll);
         }
 
         void restore( const DagNode *restorer )
@@ -89,7 +90,7 @@ namespace RevBayesCore {
             dist->keep(affecter);
         }
 
-        void getAffected(std::set<DagNode *> &affected, DagNode* affecter)
+        void getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter) override
         {
             dist->getAffected(affected, affecter);
         }
