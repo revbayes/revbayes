@@ -115,6 +115,26 @@ void TransformedDistribution::redrawValue( void )
     simulate();
 }
 
+// Further investigation into this latter case may yield a better solution.
+void TransformedDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+{
+    base_dist->touch(affecter, touchAll);
+}
+
+void TransformedDistribution::restoreSpecialization( const DagNode *restorer )
+{
+    base_dist->restore(restorer);
+}
+
+void TransformedDistribution::keepSpecialization( const DagNode* affecter )
+{
+    base_dist->keep(affecter);
+}
+
+void TransformedDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+{
+    base_dist->getAffected(affected, affecter);
+}
 
 /** Swap a parameter of the distribution */
 void TransformedDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
