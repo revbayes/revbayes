@@ -120,7 +120,7 @@ double TransformedVectorDistribution::computeLnProbability( void )
     {
 	base_dist->setValue( new RbVector<double>( std::move(*x) ) );
 
-	// If x = f_inverse(y) is defined, the log_f_prime(*x) should be defined.
+	// If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
 	double ln_pdf = base_dist->computeLnProbability() - log_f_prime( base_dist->getValue() ).value();
 
@@ -129,6 +129,19 @@ double TransformedVectorDistribution::computeLnProbability( void )
     }
     else
 	return RbConstants::Double::neginf;
+}
+
+void TransformedVectorDistribution::setValue(RbVector<double> *y, bool force)
+{
+    if (auto x = f_inverse(*y))
+    {
+	base_dist->setValue( new RbVector<double>( std::move(*x) ), force);
+
+	// free memory
+	if (y != value) delete value;
+
+	value = y;
+    }
 }
 
 

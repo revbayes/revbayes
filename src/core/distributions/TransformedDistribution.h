@@ -22,8 +22,8 @@ namespace RevBayesCore {
     class TransformedDistribution : public TypedDistribution< double >
     {
 
-	// Allow returning nothing in case the input value is invalid.
-	typedef std::function<std::optional<double>(double)> func_t;
+        // Allow returning nothing in case the input value is invalid.
+        typedef std::function<std::optional<double>(double)> func_t;
 
     public:
         // constructor(s)
@@ -34,7 +34,8 @@ namespace RevBayesCore {
         TransformedDistribution*                            clone(void) const override;                                                             //!< Create an independent clone
         double                                              computeLnProbability(void) override;
         void                                                redrawValue(void) override;
-	void                                                getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter) override;
+        void                                                getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter) override;
+        void                                                setValue(double *v, bool f=false) override;                                             //!< Set the current value, e.g. attach an observation (clamp)
 
     protected:
         // Parameter management functions
