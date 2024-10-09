@@ -54,7 +54,7 @@ namespace RevBayesCore {
 
         // Functions from Distribution.cpp
 
-        // Overriding `touch` was found to be necessary (at 2024-10): 
+        // Overriding `touchSpecialization` was found to be necessary (at 2024-10): 
         // nodes in the associated tree were not being marked as dirty
         // when the value of the distribution was changed indirectly.
         // The override seems not to be necessary for straightforward cases
@@ -74,30 +74,24 @@ namespace RevBayesCore {
         //     k.clamp(2)
         //
         // Further investigation into this latter case may yield a better solution.
-        
-        void touchSpecialization( const DagNode *toucher, bool touchAll )
+        void touchSpecialization( const DagNode *toucher, bool touchAll ) override
         {
             dist->touch(toucher, touchAll);
         }
 
-        void restore( const DagNode *restorer )
-        {
-            dist->restore(restorer);
-        }
-
-        void keep( const DagNode* affecter )
+        void keepSpecialization( const DagNode* affecter ) override
         {
             dist->keep(affecter);
+        }
+
+        void restoreSpecialization( const DagNode *restorer ) override
+        {
+            dist->restore(restorer);
         }
 
         void getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter) override
         {
             dist->getAffected(affected, affecter);
-        }
-                
-        void removeParameter(const DagNode *p)
-        {
-            throw RbException("Call to InverseDistribution::removeParameter() is not anticipated.");
         }
 
         // functions from 'public methods' section of TypedDistribution.h
