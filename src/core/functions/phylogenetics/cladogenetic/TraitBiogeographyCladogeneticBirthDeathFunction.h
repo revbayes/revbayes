@@ -36,6 +36,7 @@ template <class valueType> class TypedDagNode;
         typedef std::set<unsigned> RangeBitset;
         typedef std::set<unsigned> TraitBitset;
         typedef std::vector<unsigned> StateTriplet;
+//        typedef std::vector<unsigned> TraitDoublet;
         typedef std::pair<RangeBits, TraitBits> CompositeBits;
         typedef std::pair<RangeBitset, TraitBitset> CompositeBitset;
             
@@ -91,7 +92,7 @@ template <class valueType> class TypedDagNode;
                                                            size_t k,
                                                            const RbVector<RbVector<double> >& g,
                                                            bool all=true);
-            double                  computeCutsetScore(StateTriplet idx, unsigned et);
+            double                  computeCutsetScore(StateTriplet idx, unsigned et, size_t trait_idx, size_t val_idx);
 //            double                  computeModularityScore(std::vector<unsigned> idx, unsigned et);
             size_t                  computeNumStates(size_t numAreas, size_t maxRangeSize);
             void                    printEventMap(std::map<StateTriplet, double > x);
@@ -108,12 +109,13 @@ template <class valueType> class TypedDagNode;
                                                                                               // dim3: regions, dim4: regions
             
             // dimensions
-            size_t        numTraits;
-            size_t        numTraitSets;
-            size_t        numRegions;
+            size_t        numTraits;        // number of traits
+            size_t        numTraitValues;   // number of values per trait
+            size_t        numTraitSets;     // number of trait-value pairs
+            size_t        numRegions;       // number of discrete regions
             size_t        numIntStates;     // number of integer states
                                             // accounts for max range size, etc.
-            size_t        numRanges;
+            size_t        numRanges;        // number of presence-absence ranges
             size_t        numCompositeStates;
             size_t        maxRangeSize;
             size_t        maxSubrangeSplitSize;
@@ -139,14 +141,15 @@ template <class valueType> class TypedDagNode;
             
             // event maps
             size_t                               numEventTypes;
-            std::map< StateTriplet, double >     eventMap;
-            std::map< StateTriplet, unsigned>    eventMapTypes;
-            std::map< size_t, std::vector<unsigned> >   eventMapCounts;
-            std::map< StateTriplet, double >     eventMapFactors;
-            std::map< StateTriplet, double >     eventMapWeights;
+            std::map< StateTriplet, double >     eventMap;                // Key is state triplet, value is absolute event rate
+//            std::map< TraitBits, std::map<StateTriplet, double > > eventMapByTraits;                // Key is state triplet, value is absolute event rate
+            std::map< StateTriplet, unsigned>    eventMapTypes;           // Key is state triplet, value is event type (e.g. within vs. between speciation)
+            std::map< size_t, std::vector<unsigned> > eventMapCounts;   // Key is integer-valued state, value is number of ways to speciate
             std::map< StateTriplet, std::vector< std::vector<unsigned> > > eventMapCutsets; // returns the vector of cut edges for a given left/right split
             std::map< StateTriplet, unsigned >   eventMapBuddingRegions; // returns the vector of cut edges for a given left/right split
-            
+//            std::map< TraitDoublet, std::vector<StateTriplet> >   eventMapTraitToRangePattern;
+            std::vector<std::vector< std::map< StateTriplet, double > > >    eventMapFactors;         // Key is state triplet, value is *unnormalized* relative speciation rate
+            std::vector<std::vector< std::map< StateTriplet, double > > >    eventMapWeights;         // Key is state triplet, value is *normalized* relative speciation rate
             
             // MJL: eventually, deprecate this stuff
             // manages string-based simplex mapping??
