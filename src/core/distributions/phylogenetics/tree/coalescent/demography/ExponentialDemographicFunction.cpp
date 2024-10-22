@@ -140,15 +140,15 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
 }
 
 /**
- * @param[in]   time    Current time in coalescent simulation process
- * @param[in]   lambda  
+ * @param[in]   time         Current time in coalescent simulation process
+ * @param[in]   lambda     Random draw from a standard exponential
  *
  * @return Waiting Time until next coalescent event
  */
-double ExponentialDemographicFunction::getWaitingTime(double time, double lambda) const
+double ExponentialDemographicFunction::getWaitingTime(double time, double lambda, double ploidy) const
 {
-    double N0 = theta_recent->getValue();
-    double N1 = theta_ancient->getValue();
+    double N0 = theta_recent->getValue() * ploidy;
+    double N1 = theta_ancient->getValue() * ploidy;
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
     
@@ -164,10 +164,14 @@ double ExponentialDemographicFunction::getWaitingTime(double time, double lambda
     else
     {
 	    double alpha = log( N1/N0 ) / (t0 - t1);
-	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
-	    if (inlog < 0)
+	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * N0;
+        
+        // we compute the value for which the waiting time is longer than this demographic function (outside its range)
+        double max_lambda = ( exp(alpha*t1) - exp(alpha*time) ) / (N0*alpha);
+        if ( max_lambda < lambda || inlog < 0)
 	    {
-	        return -1;
+            // simply return a waiting time that is just outside this demographic function range
+	        return t1-time+1.0;
 	    }
 	    else 
 	    {

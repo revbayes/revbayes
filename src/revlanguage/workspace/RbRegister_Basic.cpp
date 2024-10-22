@@ -314,6 +314,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_reverse<Real>()               );
         addFunction( new Func_reverse<Natural>()            );
         addFunction( new Func_reverse<RealPos>()            );
+        addFunction( new Func_reverse<Probability>()        );
         addFunction( new Func_reverse<RlString>()           );
         addFunction( new Func_reverse<RlBoolean>()          );
         addFunction( new Func_clear()                       );

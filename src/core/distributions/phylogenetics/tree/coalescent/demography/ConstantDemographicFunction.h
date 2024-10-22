@@ -32,7 +32,7 @@ template <class valueType> class TypedDagNode;
         ConstantDemographicFunction*                    clone(void) const;                                      //!< Clone the ConstantDemographicFunction
         double                                          getDemographic(double t) const;                         //!< Returns the demographic function N(t) at time t.
         double                                          getIntegral(double start, double finish) const;         //!< Calculates the integral 1/N(x) dx between start and finish.
-        double                                          getWaitingTime(double time, double lambda) const;       //!< Calculates the waiting time until the next coalescent event.
+        double                                          getWaitingTime(double time, double lambda, double ploidy=1.0) const;       //!< Calculates the waiting time until the next coalescent event.
         
     protected:
         virtual void                                    swapNodeInternal(const DagNode *oldN, const DagNode *newN); //!< Internally replacing a DAG node containing a variable with a different one
