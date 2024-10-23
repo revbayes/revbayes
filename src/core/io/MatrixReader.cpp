@@ -20,8 +20,9 @@ MatrixReader::MatrixReader(const std::string &fn, std::string d, size_t lines_sk
 {
     
     //First, get the size of the matrix
-    int siz = int(chars.size()) -1;//atoi( chars[0][0].c_str() );
-    matrix = MatrixReal( siz );
+    int nrow = int( chars.size() ) - 1;    //atoi( chars[0][0].c_str() );
+    int ncol = int( chars[1].size() ) - 1;
+    matrix = MatrixReal( nrow, ncol );
 
     for (size_t i = 1; i < chars.size(); ++i)
     {
