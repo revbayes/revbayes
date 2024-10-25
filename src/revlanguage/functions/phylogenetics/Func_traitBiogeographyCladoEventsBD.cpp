@@ -93,13 +93,13 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
         assert( msss > 0 );
     }
     
-    // normalize split scores?
-    bool nss = false;
+    // standardize split scores?
+    bool sss = false;
     if (this->args[6].getVariable()->getRevObject() != RevNullObject::getInstance()) {
-        nss = (bool)static_cast<const RlBoolean &>( this->args[6].getVariable()->getRevObject() ).getValue();
+        sss = (bool)static_cast<const RlBoolean &>( this->args[6].getVariable()->getRevObject() ).getValue();
     }
     
-    RevBayesCore::TraitBiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::TraitBiogeographyCladogeneticBirthDeathFunction( rho_w, rho_b, m_w, m_b, mrs, msss, nss );
+    RevBayesCore::TraitBiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::TraitBiogeographyCladogeneticBirthDeathFunction( rho_w, rho_b, m_w, m_b, mrs, msss, sss );
     
     return f;
 }
@@ -120,7 +120,7 @@ const ArgumentRules& Func_traitBiogeographyCladoEventsBD::getArgumentRules( void
         argumentRules.push_back( new ArgumentRule( "m_b", ModelVector<ModelVector<ModelVector<ModelVector<RealPos> > > >::getClassTypeSpec(), "The between-region feature matrix (traits x regions x regions).", ArgumentRule::BY_VALUE, ArgumentRule::CONSTANT, NULL ) );
         argumentRules.push_back( new ArgumentRule( "max_range_size",          Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
         argumentRules.push_back( new ArgumentRule( "max_subrange_split_size", Natural::getClassTypeSpec(), "The maximum size of a daughter subrange following a between-region speciation event.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
-        argumentRules.push_back( new ArgumentRule( "normalize_split_score", RlBoolean::getClassTypeSpec(), "Normalize the split scores to have geometric mean of 1?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argumentRules.push_back( new ArgumentRule( "standardize_split_score", RlBoolean::getClassTypeSpec(), "Standardize the split scores to have geometric mean of 1?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         
         rules_set = true;
     }

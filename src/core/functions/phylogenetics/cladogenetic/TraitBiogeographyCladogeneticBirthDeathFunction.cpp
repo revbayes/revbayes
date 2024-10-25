@@ -933,9 +933,11 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
             size_t val_idx = tb[trait_idx];
             double base_rate = 0.0;
             
+            // get pre-computed relative rates (informed by m_w, m_b, f_b)
             // rescale by relative rate factor for (anc -> left, right)
             double rel_rate = eventMapWeights[trait_idx][val_idx][idx];
             
+            // get rho_w or rho_b parameter
             if (event_type == WITHIN_SPECIATION) {
                 base_rate = rho_w_values[trait_idx][val_idx];
             } else if (event_type == BETWEEN_SPECIATION) {
@@ -949,7 +951,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
         }
         
         // save the rate in the event map
-        eventMap[ idx ] += speciation_rate;
+        eventMap[ idx ] = speciation_rate;
         speciation_rate_sum_per_state[ idx[0] ] += eventMap[ idx ];
     }
     
