@@ -312,7 +312,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::setDeathRate(const TypedDagNod
 
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right, size_t partition_index)
 {
     // compute the transition probability matrix
     updateTransitionProbabilities( root );
@@ -376,7 +376,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     computeRootCorrection(root, left, right);
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle, size_t partition_index)
 {
     // compute the transition probability matrix
     updateTransitionProbabilities( root );
@@ -445,7 +445,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     computeRootCorrection(root, left, right, middle);
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t partition_index)
 {
     // compute the transition probability matrix
     updateTransitionProbabilities( node_index );
@@ -515,7 +515,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     computeInternalNodeCorrection(node, node_index, left, right);
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle, size_t partition_index)
 {
 
     // compute the transition probability matrix
@@ -590,7 +590,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     computeInternalNodeCorrection(node, node_index, left, right, middle);
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const TopologyNode &node, size_t node_index)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const TopologyNode &node, size_t node_index, size_t partition_index)
 {
 
     double* p_node = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
@@ -1322,12 +1322,14 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 {
     //reset the per site likelihood
     double max = RbConstants::Double::neginf;
+    
+    size_t partition_index = 0;
 
     size_t node_index = node.getIndex();
 
     const double* p_node  = partialLikelihoods + activeLikelihood[node_index] * activeLikelihoodOffset  + node_index*nodeOffset + pattern*siteOffset;
 
-    double logScalingFactor = perNodeSiteLogScalingFactors[activeLikelihood[node_index]][node_index][pattern];
+    double logScalingFactor = perNodeSiteLogScalingFactors[activeLikelihood[node_index]][partition_index][node_index][pattern];
 
     //otherwise, it is an ancestral node so we add the integrated likelihood
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -1373,6 +1375,8 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 {
+    size_t partition_index = 0;
+    
     double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
@@ -1402,7 +1406,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 
             }
 
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
+            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][partition_index][node_index][site] = -log(max);
 
 
             // compute the per site probabilities
@@ -1427,7 +1431,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = 0;
+            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][partition_index][node_index][site] = 0;
         }
 
     }
@@ -1436,6 +1440,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right )
 {
+    size_t partition_index = 0;
+    
     double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
@@ -1465,7 +1471,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
             }
 
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] - log(max);
+            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][partition_index][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][partition_index][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][partition_index][right][site] - log(max);
 
 
             // compute the per site probabilities
@@ -1490,7 +1496,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site];
+            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][partition_index][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][partition_index][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][partition_index][right][site];
         }
 
     }
@@ -1498,6 +1504,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
+    size_t partition_index = 0;
+    
     double* p_node   = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
@@ -1527,7 +1535,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
             }
 
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site] - log(max);
+            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][partition_index][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][partition_index][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][partition_index][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][partition_index][middle][site] - log(max);
 
 
             // compute the per site probabilities
@@ -1552,7 +1560,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site];
+            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][partition_index][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][partition_index][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][partition_index][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][partition_index][middle][site];
         }
 
     }

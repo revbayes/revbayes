@@ -57,12 +57,13 @@ class TypeSpec;
 	template <typename Dist>
 	RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >*      setDistParameters(Dist*) const;
 
-	int                                             computeNumberOfStates() const;
+        int                                             computeNumberOfStates() const;
 
 
         RevPtr<const RevVariable>                       tree;
         RevPtr<const RevVariable>                       q;
         RevPtr<const RevVariable>                       rate;
+        RevPtr<const RevVariable>                       partition_rates;
         RevPtr<const RevVariable>                       site_rates;
         RevPtr<const RevVariable>                       site_rates_probs;
         RevPtr<const RevVariable>                       site_matrices;

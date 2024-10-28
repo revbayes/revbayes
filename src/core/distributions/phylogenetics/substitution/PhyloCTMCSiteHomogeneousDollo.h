@@ -44,11 +44,11 @@ template <class valueType> class TypedDagNode;
 
         protected:
 
-            void                                                computeRootLikelihood(size_t root, size_t l, size_t r);
-            void                                                computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
-            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
-            void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx);
+            void                                                computeRootLikelihood(size_t root, size_t l, size_t r, size_t part_idx);
+            void                                                computeRootLikelihood(size_t root, size_t l, size_t r, size_t m, size_t part_idx);
+            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t part_idx);
+            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m, size_t part_idx);
+            void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx, size_t part_idx);
 
             void                                                computeRootCorrection(size_t root, size_t l, size_t r);
             void                                                computeRootCorrection(size_t root, size_t l, size_t r, size_t m);

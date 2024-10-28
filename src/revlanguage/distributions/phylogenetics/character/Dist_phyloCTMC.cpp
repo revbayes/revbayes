@@ -106,10 +106,25 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     size_t nNodes = tau->getValue().getNumberOfNodes();
 
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_ratesNode = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_rates_node = NULL;
     if ( site_rates != NULL && site_rates->getRevObject() != RevNullObject::getInstance() )
     {
-        site_ratesNode = static_cast<const ModelVector<RealPos> &>( site_rates->getRevObject() ).getDagNode();
+        site_rates_node = static_cast<const ModelVector<RealPos> &>( site_rates->getRevObject() ).getDagNode();
+    }
+    
+    if ( partition_rates != NULL && partition_rates->getRevObject() != RevNullObject::getInstance() && partition_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* partition_rates_node = NULL;
+        partition_rates_node = static_cast<const ModelVector<RealPos> &>( partition_rates->getRevObject() ).getDagNode();
+        
+        dist->setPartitionRates( partition_rates_node );
+    }
+    else if ( partition_rates != NULL && partition_rates->getRevObject() != RevNullObject::getInstance() && partition_rates->getRevObject().isType( RealPos::getClassTypeSpec() ) )
+    {
+        RevBayesCore::TypedDagNode< double >* partition_rate_node = NULL;
+        partition_rate_node = static_cast<const RealPos &>( partition_rates->getRevObject() ).getDagNode();
+        
+        dist->setPartitionRates( partition_rate_node );
     }
     
     const RevBayesCore::TypedDagNode< RevBayesCore::Simplex > *site_rates_probsNode = NULL;
@@ -119,11 +134,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     if (site_rates_probsNode != NULL)
     {
-        if (site_ratesNode == NULL)
+        if (site_rates_node == NULL)
         {
             throw RbException( "Provided site rates probs but not using site rates." );
         }
-        else if (site_rates_probsNode->getValue().size() != site_ratesNode->getValue().size())
+        else if (site_rates_probsNode->getValue().size() != site_rates_node->getValue().size())
         {
             throw RbException( "The number of site rates probs does not match the number of site rates." );
         }
@@ -192,62 +207,63 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else
     {
-	RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-	dist->setClockRate( clockRate );
+        RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+        dist->setClockRate( clockRate );
     }
     dist->setUseSiteMatrices(use_site_matrices, sp);
 
     // set the rate matrix
     if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
     {
-	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
-	if (use_site_matrices == false)
-	{
-	    // sanity check
-	    if ( (nNodes-1) != rm->getValue().size())
-	    {
-		throw RbException( "The number of substitution matrices does not match the number of branches" );
-	    }
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+        if (use_site_matrices == false)
+        {
+            // sanity check
+            if ( (nNodes-1) != rm->getValue().size())
+            {
+                throw RbException( "The number of substitution matrices does not match the number of branches" );
+            }
 
-	    // sanity check
-	    if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
-	    {
-		throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
-	    }
-	}
-	dist->setRateMatrix( rm );
+            // sanity check
+            if ( root_frequencies == NULL || root_frequencies->getRevObject() == RevNullObject::getInstance() )
+            {
+                throw RbException( "If you provide branch-heterogeneous substitution matrices, then you also need to provide root frequencies." );
+            }
+        }
+        dist->setRateMatrix( rm );
     }
     else if (q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
     {
-	RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
-	dist->setMixtureModel( mm );
+        RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = static_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
+        dist->setMixtureModel( mm );
 
-	if ( root_frequencies and root_frequencies->getRevObject() != RevNullObject::getInstance() )
-	    throw RbException()<<"dnPhyloCTMC: can't specify 'rootFrequencies' if Q if a SiteMixtureModel";
+        if ( root_frequencies and root_frequencies->getRevObject() != RevNullObject::getInstance() )
+            throw RbException()<<"dnPhyloCTMC: can't specify 'rootFrequencies' if Q if a SiteMixtureModel";
 
-	if ( site_rates and site_rates->getRevObject() != RevNullObject::getInstance() )
-	    throw RbException()<<"dnPhyloCTMC: can't specify 'siteRates' if Q if a SiteMixtureModel";
+        if ( site_rates and site_rates->getRevObject() != RevNullObject::getInstance() )
+            throw RbException()<<"dnPhyloCTMC: can't specify 'siteRates' if Q if a SiteMixtureModel";
 
-	if ( p_inv and p_inv->getRevObject() != RevNullObject::getInstance() )
-	    throw RbException()<<"dnPhyloCTMC: can't specify 'pInv' if Q if a SiteMixtureModel";
+        if ( p_inv and p_inv->getRevObject() != RevNullObject::getInstance() )
+            throw RbException()<<"dnPhyloCTMC: can't specify 'pInv' if Q if a SiteMixtureModel";
 
-	if ( site_matrices and site_matrices->getRevObject() != RevNullObject::getInstance() )
-	    throw RbException()<<"dnPhyloCTMC: can't specify 'siteMatrices' if Q is a SiteMixtureModel";
+        if ( site_matrices and site_matrices->getRevObject() != RevNullObject::getInstance() )
+            throw RbException()<<"dnPhyloCTMC: can't specify 'siteMatrices' if Q is a SiteMixtureModel";
+        
     }
     else
     {
-	RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-	dist->setRateMatrix( rm );
+        RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+        dist->setRateMatrix( rm );
     }
 
-    if ( site_ratesNode != NULL && site_ratesNode->getValue().size() > 0 )
+    if ( site_rates_node != NULL && site_rates_node->getValue().size() > 0 )
     {
-	dist->setSiteRates( site_ratesNode );
+        dist->setSiteRates( site_rates_node );
     }
         
     if ( site_rates_probsNode != NULL && site_rates_probsNode->getValue().size() > 0 )
     {
-	dist->setSiteRatesProbs( site_rates_probsNode );
+        dist->setSiteRatesProbs( site_rates_probsNode );
     }
 
     return dist;
@@ -303,16 +319,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     else if ( dt == "PoMo" )
     {
         // we get the number of states from the rate matrix (we don't know, because PoMo is flexible about its rates)
-	int nChars = computeNumberOfStates();
+        int n_chars = computeNumberOfStates();
 
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, n_chars, !true, n, ambig, internal, gapmatch);
 
         return setDistParameters(dist);
     }
     else if ( dt == "Standard" )
     {
         // we get the number of states from the rates matrix
-	int nChars = computeNumberOfStates();
+        int n_chars = computeNumberOfStates();
 
         int cd = RevBayesCore::AscertainmentBias::ALL;
         // split the coding option on "|"
@@ -336,11 +352,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
         if (cd == RevBayesCore::AscertainmentBias::ALL)
         {
-            dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, n_chars, true, n, ambig, internal, gapmatch);
         }
         else
         {
-            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousConditional<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, RevBayesCore::AscertainmentBias::Coding(cd), internal, gapmatch);
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousConditional<RevBayesCore::StandardState>(tau, n_chars, true, n, ambig, RevBayesCore::AscertainmentBias::Coding(cd), internal, gapmatch);
         }
 
         return setDistParameters(dist);
@@ -348,19 +364,19 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     else if ( dt == "NaturalNumbers" )
     {
         // we get the number of states from the rates matrix
-	int nChars = computeNumberOfStates();
+        int n_chars = computeNumberOfStates();
 
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, nChars, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, n_chars, true, n, ambig, internal, gapmatch);
 
-	return setDistParameters(dist);
+        return setDistParameters(dist);
     }
     else if ( dt == "Binary" || dt == "Restriction" )
     {
         // we get the number of states from the rates matrix
-	int nChars = computeNumberOfStates();
+        int n_chars = computeNumberOfStates();
 
         // sanity check
-        if ( nChars != 2 )
+        if ( n_chars != 2 )
         {
             throw RbException( "Only binary characters allowed for type=Binary/Restriction" );
         }
@@ -519,6 +535,11 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         branchRateTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "branchRates", branchRateTypes, "The global or branch-specific rate multipliers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
+        std::vector<TypeSpec> partitionRateTypes;
+        partitionRateTypes.push_back( RealPos::getClassTypeSpec() );
+        partitionRateTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "partitionRates", partitionRateTypes, "The partition rate multiplier or multipliers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
         //dist_member_rules.push_back( new ArgumentRule( "siteMatrices", RlBoolean::getClassTypeSpec(), "Treat Q as vector of site mixture categories instead of branch-specific matrices?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         std::vector<TypeSpec> matrix_probs_types;
         matrix_probs_types.push_back(Simplex::getClassTypeSpec());
@@ -600,7 +621,16 @@ void Dist_phyloCTMC::printValue(std::ostream& o) const
     {
         o << "?";
     }
-    o << ", site_rates=";
+    o << ", partitionRates=";
+    if ( partition_rates != NULL )
+    {
+        o << partition_rates->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", siteRates=";
     if ( site_rates != NULL )
     {
         o << site_rates->getName();
@@ -609,7 +639,7 @@ void Dist_phyloCTMC::printValue(std::ostream& o) const
     {
         o << "?";
     }
-    o << ", site_rates_probs=";
+    o << ", siteRatesProbs=";
     if ( site_rates_probs != NULL )
     {
         o << site_rates_probs->getName();
@@ -669,6 +699,10 @@ void Dist_phyloCTMC::setConstParameter(const std::string& name, const RevPtr<con
     else if ( name == "branchRates" )
     {
         rate = var;
+    }
+    else if ( name == "partitionRates" )
+    {
+        partition_rates = var;
     }
     else if ( name == "siteRates" )
     {

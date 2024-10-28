@@ -33,11 +33,11 @@ namespace RevBayesCore {
 
     protected:
 
-        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r);
-        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
-        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
-        virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx);
+        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t part_idx);
+        virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t m, size_t part_idx);
+        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t part_idx);
+        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m, size_t part_idx);
+        virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx, size_t part_idx);
 
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r);
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r, size_t m);
@@ -404,10 +404,10 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t partition_index)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right);
+    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right, partition_index);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -417,10 +417,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLik
 
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle, size_t partition_index)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right, middle);
+    PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood(root, left, right, middle, partition_index);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -430,10 +430,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootLik
 
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t partition_index)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right);
+    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, partition_index);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -443,10 +443,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
 
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle, size_t partition_index)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, middle);
+    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, middle, partition_index);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -458,10 +458,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
 
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index, size_t partition_index)
 {
 
-    PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(node, node_index);
+    PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(node, node_index, partition_index);
 
     if (coding != AscertainmentBias::ALL)
     {
@@ -1174,8 +1174,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
 }
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( const TopologyNode &node, std::vector<charType> &data, size_t rateIndex, std::map<size_t, size_t>& charCounts) {
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( const TopologyNode &node, std::vector<charType> &data, size_t rateIndex, std::map<size_t, size_t>& charCounts) 
+{
 
+    size_t partition_index = 0;
+    
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
 
@@ -1190,7 +1193,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( cons
         const TopologyNode &child = *(*it);
 
         // update the transition probability matrix
-        this->updateTransitionProbabilities( child.getIndex() );
+        this->updateTransitionProbabilities( child.getIndex(), partition_index );
 
         unsigned long cp = parentState.getStateIndex();
 
