@@ -303,6 +303,9 @@ void Model::getOrderedStochasticNodes(const DagNode* the_dag_node, std::vector<D
         //The node has been visited before
         //we do nothing
         return;
+    } else {
+        // add myself here for safety reasons
+        visitedNodes.insert( the_dag_node );
     }
     
     if ( the_dag_node->isConstant() == false )
@@ -323,9 +326,6 @@ void Model::getOrderedStochasticNodes(const DagNode* the_dag_node, std::vector<D
         orderedStochasticNodes.push_back( const_cast<DagNode*>( the_dag_node ) );
     }
     
-    // add myself here for safety reasons
-    visitedNodes.insert( the_dag_node );
-
     // Finally I will visit my children
     std::vector<DagNode*> children = the_dag_node->getChildren() ;
     std::vector<DagNode*>::iterator it;
