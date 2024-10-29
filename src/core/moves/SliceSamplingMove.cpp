@@ -16,6 +16,7 @@
 #include "AbstractMove.h"
 #include "RbOrderedSet.h"
 #include "StochasticNode.h"
+#include "RbSettings.h" // for debugMCMC setting
 
 using boost::optional;
 
@@ -111,6 +112,15 @@ struct interval
     interval(optional<double> lb, optional<double> ub): lower_bound(lb), upper_bound(ub) {}
 };
 
+std::map<const DagNode*, double> getNodePrs(DagNode* node, const RbOrderedSet<DagNode*>& affectedNodes)
+{
+    std::map<const DagNode*, double> Prs;
+    Prs.insert({node, node->getLnProbability()});
+    for(auto affectedNode: affectedNodes)
+	Prs.insert({affectedNode, affectedNode->getLnProbability()});
+    return Prs;
+}
+
 namespace  {
 
 /// This object allow computing the probability of the current point, and also store the variable's range
@@ -152,19 +162,21 @@ namespace  {
 
         double operator()(double x)
             {
+                assert( not variable->isClamped() );
+
                 num_evals++;
 
+                // Don't set the variable to out-of-bounds values.
                 if (below_lower_bound(x) or above_upper_bound(x))
                     return RbConstants::Double::neginf;
 
-                // Don't set the variable to out-of-bounds values.
+		// NOTE: We could call variable->setValue(new double(x)),
+		//       which calls distribution->setValue(x,true) and
+		//       touches all the nodes.
+		//       But this does less allocation.
                 variable->getValue() = x;
-
-                // first we touch all the nodes
-                // that will set the flags for recomputation
+                // touch all the nodes to set flags for recomputation
                 variable->touch();
-
-                assert( not variable->isClamped() );
 
                 double Pr_ = (*this)();
 
@@ -188,6 +200,29 @@ namespace  {
              num_evals(0)
             {
                 variable->initiateGetAffectedNodes( affectedNodes );
+
+                if (RbSettings::userSettings().getDebugMCMC() > 0)
+                {
+                    std::map<const DagNode*, double> NodePrs;
+
+                    double x = current_value();
+                    double Pr = operator()();
+                    auto Prs = getNodePrs(variable,affectedNodes);
+                    double Prx = operator()(x);
+                    auto Prsx = getNodePrs(variable,affectedNodes);
+                    if (std::abs(Pr - Prx) > 1.0e-9)
+                    {
+                        std::cerr<<std::setprecision(10)<<std::endl;
+                        std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";
+                        for(auto& [n,pr1]: Prs)
+                        {
+                            double pr2 = Prsx.at(n);
+                            if (std::abs(pr1-pr2) > 1.0e-6)
+                                std::cerr<<"         cause: probability for "<<n->getName()<<" is "<<pr1<<" but should be "<<pr2<<":  delta = "<<pr1-pr2<<"\n";
+                        }
+                        std::abort();
+                    }
+                }
             }
     };
 
