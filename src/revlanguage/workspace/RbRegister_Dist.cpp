@@ -288,6 +288,7 @@
 #include "Transform_Sub2.h"
 #include "Transform_Mul.h"
 #include "Transform_Mul_Pos.h"
+#include "Transform_Mul_Prob.h"
 
 #include "Transform_Vector_Exp.h"
 #include "Transform_Vector_Log.h"
@@ -650,8 +651,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Transform_Add()         );
         AddDistribution< Real                       >( new Transform_Sub1()        );
         AddDistribution< Real                       >( new Transform_Sub2()        );
-        AddDistribution< Real                       >( new Transform_Mul()         );
+        AddDistribution< Probability                >( new Transform_Mul_Prob()    );
         AddDistribution< RealPos                    >( new Transform_Mul_Pos()     );
+        AddDistribution< Real                       >( new Transform_Mul()         );
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
