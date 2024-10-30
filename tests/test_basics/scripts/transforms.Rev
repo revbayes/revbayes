@@ -22,6 +22,7 @@ x ~ (dnExponential(1) + 1) |> tnLog()
 x ~ (1 + dnExponential(1)) |> tnLog()
 
 x ~ dnExponential(1) |> tnScale(2) |> tnLog()
+x ~ (dnExponential(1) * 2) |> tnLog()
 
 # A probability multiplied by a probability remains a probability.
 x ~ dnBeta(1,2) |> tnScale(0.5) |> tnLogit()
