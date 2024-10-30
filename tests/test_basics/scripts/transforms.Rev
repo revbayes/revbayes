@@ -26,6 +26,7 @@ x ~ (dnExponential(1) * 2) |> tnLog()
 
 # A probability multiplied by a probability remains a probability.
 x ~ dnBeta(1,2) |> tnScale(0.5) |> tnLogit()
+x ~ ( dnBeta(1,2) * 0.5 ) |> tnLogit()
 
 # But shifting or scaling by negative things is still allowed
 x ~ dnExponential(1) |> tnShift(-1)
