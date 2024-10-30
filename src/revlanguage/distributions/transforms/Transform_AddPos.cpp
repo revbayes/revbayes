@@ -1,4 +1,4 @@
-#include "Transform_Add.h"
+#include "Transform_AddPos.h"
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
@@ -9,28 +9,28 @@
 
 using namespace RevLanguage;
 
-Transform_Add::Transform_Add() : TypedDistribution< Real >(),
+Transform_AddPos::Transform_AddPos() : TypedDistribution< RealPos >(),
                                      base_distribution( NULL )
 {
     markAsTransform();
 }
 
-Transform_Add::~Transform_Add()
+Transform_AddPos::~Transform_AddPos()
 {
 }
 
-Transform_Add* Transform_Add::clone( void ) const
+Transform_AddPos* Transform_AddPos::clone( void ) const
 {
-    return new Transform_Add(*this);
+    return new Transform_AddPos(*this);
 }
 
-RevBayesCore::TransformedDistribution* Transform_Add::createDistribution( void ) const
+RevBayesCore::TransformedDistribution* Transform_AddPos::createDistribution( void ) const
 {
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
-    RevBayesCore::TypedDagNode<double>* d           = static_cast<const Real &>( delta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* d           = static_cast<const RealPos &>( delta->getRevObject() ).getDagNode();
 
     auto add_transform = [=](double x) -> optional<double> { return x + d->getValue(); };
     auto add_inverse = [=](double x) -> optional<double> { return x - d->getValue(); };
@@ -45,18 +45,18 @@ RevBayesCore::TransformedDistribution* Transform_Add::createDistribution( void )
 
 
 /* Get Rev type of object */
-const std::string& Transform_Add::getClassType(void)
+const std::string& Transform_AddPos::getClassType(void)
 {
 
-    static std::string rev_type = "Transform_Add";
+    static std::string rev_type = "Transform_AddPos";
 
     return rev_type;
 }
 
 /* Get class type spec describing type of object */
-const TypeSpec& Transform_Add::getClassTypeSpec(void)
+const TypeSpec& Transform_AddPos::getClassTypeSpec(void)
 {
-    static TypeSpec rev_type_spec ( TypedDistribution< Real >::getClassTypeSpec() );
+    static TypeSpec rev_type_spec ( TypedDistribution< RealPos >::getClassTypeSpec() );
 
     return rev_type_spec;
 }
@@ -69,7 +69,7 @@ const TypeSpec& Transform_Add::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Transform_Add::getDistributionFunctionName( void ) const
+std::string Transform_AddPos::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
     std::string d_name = "_add";
@@ -79,17 +79,17 @@ std::string Transform_Add::getDistributionFunctionName( void ) const
 
 
 /** Return member rules (no members) */
-const MemberRules& Transform_Add::getParameterRules(void) const
+const MemberRules& Transform_AddPos::getParameterRules(void) const
 {
     static MemberRules dist_member_rules;
     static bool rules_set = false;
 
     if ( rules_set == false )
     {
-	std::vector<TypeSpec> distTypes = { TypedDistribution<Real>::getClassTypeSpec(), TypedDistribution<RealPos>::getClassTypeSpec(), TypedDistribution<Probability>::getClassTypeSpec()};
+	std::vector<TypeSpec> distTypes = { TypedDistribution<RealPos>::getClassTypeSpec(), TypedDistribution<Probability>::getClassTypeSpec()};
 
         dist_member_rules.push_back( new ArgumentRule( "baseDistribution", distTypes, "The distribution to be transformed.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "delta", Real::getClassTypeSpec()   , "The amount added to base random variable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "delta", RealPos::getClassTypeSpec()   , "The amount added to base random variable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
@@ -98,7 +98,7 @@ const MemberRules& Transform_Add::getParameterRules(void) const
 }
 
 
-const TypeSpec& Transform_Add::getTypeSpec( void ) const
+const TypeSpec& Transform_AddPos::getTypeSpec( void ) const
 {
     static TypeSpec ts = getClassTypeSpec();
 
@@ -108,7 +108,7 @@ const TypeSpec& Transform_Add::getTypeSpec( void ) const
 
 
 /** Set a member variable */
-void Transform_Add::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Transform_AddPos::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     if ( name == "baseDistribution" )
     {
@@ -120,7 +120,7 @@ void Transform_Add::setConstParameter(const std::string& name, const RevPtr<cons
     }
     else
     {
-        TypedDistribution< Real >::setConstParameter(name, var);
+        TypedDistribution< RealPos >::setConstParameter(name, var);
     }
 }
 

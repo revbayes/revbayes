@@ -5,6 +5,8 @@ x ~ dnNormal(0,1) |> tnExp()
 
 x ~ 1 + dnNormal(0,1)
 x ~ dnNormal(0,1) + 1
+x ~ 1 + dnExponential(1)
+x ~ dnExponential(1) + 1
 
 x ~ dnBeta(1,2) |> tnShift(1)
 x ~ dnBeta(1,2) |> tnScale(1)
@@ -14,6 +16,9 @@ x ~ dnBeta(1,2) |> tnLogit()
 
 # Shifting or scaling by positive things retains positivity.
 x ~ dnExponential(1) |> tnShift(1) |> tnLog()
+x ~ (dnExponential(1) + 1) |> tnLog()
+x ~ (1 + dnExponential(1)) |> tnLog()
+
 x ~ dnExponential(1) |> tnScale(2) |> tnLog()
 
 # A probability multiplied by a probability remains a probability.

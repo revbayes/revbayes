@@ -283,6 +283,7 @@
 #include "Transform_Scale_Prob.h"
 
 #include "Transform_Add.h"
+#include "Transform_AddPos.h"
 #include "Transform_Sub1.h"
 #include "Transform_Sub2.h"
 
@@ -643,6 +644,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
         AddDistribution< Real                       >( new Transform_Scale()        );
 
+        AddDistribution< RealPos                    >( new Transform_AddPos()      );
         AddDistribution< Real                       >( new Transform_Add()         );
         AddDistribution< Real                       >( new Transform_Sub1()        );
         AddDistribution< Real                       >( new Transform_Sub2()        );
