@@ -7,6 +7,8 @@ x ~ 1 + dnNormal(0,1)
 x ~ dnNormal(0,1) + 1
 x ~ 1 + dnExponential(1)
 x ~ dnExponential(1) + 1
+x ~ 2 * dnNormal(0,1)
+x ~ dnNormal(0,1) * 2
 
 x ~ dnBeta(1,2) |> tnShift(1)
 x ~ dnBeta(1,2) |> tnScale(1)
