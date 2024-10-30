@@ -56,7 +56,7 @@ const std::string& Transform_Scale_Prob::getClassType(void)
 /* Get class type spec describing type of object */
 const TypeSpec& Transform_Scale_Prob::getClassTypeSpec(void)
 {
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution< Probability >::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec ( TypedDistribution< Probability >::getClassTypeSpec() );
 
     return rev_type_spec;
 }
