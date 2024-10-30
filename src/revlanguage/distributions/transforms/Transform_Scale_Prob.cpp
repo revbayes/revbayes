@@ -34,7 +34,7 @@ RevBayesCore::TransformedDistribution* Transform_Scale_Prob::createDistribution(
 
     auto scale_transform = [=](double x) -> optional<double> { return x * l->getValue(); };
     auto scale_inverse = [=](double x) -> optional<double> { return x / l->getValue(); };
-    auto log_scale_prime = [=](double x) -> optional<double> { return l->getValue(); };
+    auto log_scale_prime = [=](double x) -> optional<double> { return log(abs(l->getValue())); };
 
     RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, scale_transform, scale_inverse, log_scale_prime, {l});
 
