@@ -383,104 +383,50 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     double ln_posterior_ratio;
     ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
+    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+
     bool rejected = false;
 
     if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false )
+        rejected = true;
+    else if (ln_acceptance_ratio >= 0.0)
+        ;
+    else if (ln_acceptance_ratio < -300.0)
+        rejected = true;
+    else
+    {
+        double r = exp(ln_acceptance_ratio);
+        // Accept or reject the move
+        double u = GLOBAL_RNG->uniform01();
+        if (u < r)
+            ;
+        else
+            rejected = true;
+    }
+
+    if ( rejected )
     {
         rejected = true;
 
         proposal->undoProposal();
 
         // call restore for each node
-        for (size_t i = 0; i < touched_nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = touched_nodes[i];
-            the_node->restore();
-        }
-	}
+        for (auto node: touched_nodes)
+            node->restore();
+    }
     else
     {
+        if ( ln_posterior_ratio < -1000 )
+            throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
 
-        // finally add the Hastings ratio
-        double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+        num_accepted_total++;
+        num_accepted_current_period++;
 
-        if (ln_acceptance_ratio >= 0.0)
-        {
+        // call accept for each node
+        for (auto node: touched_nodes)
+            node->keep();
 
-            if ( ln_posterior_ratio < -1000 )
-                throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
-
-            num_accepted_total++;
-            num_accepted_current_period++;
-
-            // call accept for each node
-            for (size_t i = 0; i < touched_nodes.size(); ++i)
-            {
-                // get the pointer to the current node
-                DagNode* the_node = touched_nodes[i];
-                the_node->keep();
-            }
-
-            proposal->cleanProposal();
-        }
-        else if (ln_acceptance_ratio < -300.0)
-        {
-            rejected = true;
-
-            proposal->undoProposal();
-
-            // call restore for each node
-            for (size_t i = 0; i < touched_nodes.size(); ++i)
-            {
-                // get the pointer to the current node
-                DagNode* the_node = touched_nodes[i];
-                the_node->restore();
-            }
-        }
-        else
-        {
-            double r = exp(ln_acceptance_ratio);
-            // Accept or reject the move
-            double u = GLOBAL_RNG->uniform01();
-            if (u < r)
-            {
-                
-                if ( ln_posterior_ratio < -1000 )
-                    throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
-
-
-                num_accepted_total++;
-                num_accepted_current_period++;
-
-                // call accept for each node
-                for (size_t i = 0; i < touched_nodes.size(); ++i)
-                {
-                    // get the pointer to the current node
-                    DagNode* the_node = touched_nodes[i];
-                    the_node->keep();
-                }
-
-                proposal->cleanProposal();
-            }
-            else
-            {
-                rejected = true;
-
-                proposal->undoProposal();
-
-                // call restore for each node
-                for (size_t i = 0; i < touched_nodes.size(); ++i)
-                {
-                    // get the pointer to the current node
-                    DagNode* the_node = touched_nodes[i];
-                    the_node->restore();
-                }
-
-            }
-
-        }
-
+        proposal->cleanProposal();
     }
 
 
