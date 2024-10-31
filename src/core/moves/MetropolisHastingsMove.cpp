@@ -340,48 +340,34 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
     {
-        if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
+        if ( RbMath::isAComputableNumber(ln_prior_ratio) &&
+             RbMath::isAComputableNumber(ln_likelihood_ratio) &&
+             RbMath::isAComputableNumber(ln_hastings_ratio) )
         {
+            double ratio = 0;
+            try {
+                ratio = node->getLnProbabilityRatio();
+            }
+            catch (const RbException &e)
+            {
+                ratio = RbConstants::Double::neginf;
+
+                if ( e.getExceptionType() != RbException::MATH_ERROR )
+                {
+                    throw;
+                }
+            }
 
             if ( node->isClamped() )
-            {
-                try {
-                    ln_likelihood_ratio += node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_likelihood_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
+                ln_likelihood_ratio += ratio;
             else
-            {
-                try
-                {
-                    ln_prior_ratio += node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_prior_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
-
+                ln_prior_ratio += ratio;
         }
 
     }
 
     // exponentiate with the chain heat
-    double ln_posterior_ratio;
-    ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
     double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
@@ -406,8 +392,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if ( rejected )
     {
-        rejected = true;
-
         proposal->undoProposal();
 
         // call restore for each node
