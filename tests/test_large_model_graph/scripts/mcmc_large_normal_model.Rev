@@ -2,7 +2,7 @@
 #
 # RevBayes Test Script: A model graph with many nodes
 # 
-# Description: Tests that RevBayes does not segfault when the number of nodes in the graph is large (>5000)
+# Description: Tests that RevBayes does not segfault when the number of nodes in the graph is large (>15000)
 #
 # authors: Michael R. May
 #
@@ -11,7 +11,7 @@
 seed(12345)
 
 mvi = 0
-n = 5000 # the number of variables in the model
+n = 15000 # the number of variables in the model
 
 # make the variables
 for(i in 1:n) {
