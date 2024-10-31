@@ -264,9 +264,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
-    double ln_posterior_before_move = 0.0;
-    double ln_posterior_before_move_after_touch = 0.0;
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
     if (debugMCMC > 0)
     {
 	// --------------------------
@@ -275,53 +274,43 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	//
 	// --------------------------
 
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    ln_posterior_before_move += the_node->getLnProbability();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    ln_posterior_before_move += the_node->getLnProbability();
-	}
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    the_node->touch();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    the_node->touch();
-	}
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    ln_posterior_before_move_after_touch += the_node->getLnProbability();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    ln_posterior_before_move_after_touch += the_node->getLnProbability();
-	}
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    the_node->keep();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    the_node->keep();
-	}
+	double ln_posterior_before_move = 0.0;
+	double ln_posterior_before_move_after_touch = 0.0;
+
+	// 1. Compute posterior before move
+	for (auto node: nodes)
+	    ln_posterior_before_move += node->getLnProbability();
+
+	for (auto affected_node: affected_nodes)
+	    ln_posterior_before_move += affected_node->getLnProbability();
+
+	// 2. Touch nodes + affected_nodes
+	for (auto node: nodes)
+	    node->touch();
+
+	for (auto affected_node: affected_nodes)
+	    affected_node->touch();
+
+	// 3. Compute posterior after touch
+	for (auto node: nodes)
+	    ln_posterior_before_move_after_touch += node->getLnProbability();
+
+	for (auto affected_node: affected_nodes)
+	    ln_posterior_before_move_after_touch += affected_node->getLnProbability();
+
+	// 4. Keep nodes + affected_nodes
+	for (auto node: nodes)
+	    node->keep();
+
+	for (auto affected_node: affected_nodes)
+	    affected_node->keep();
+
+	// 5. Check that the posterior didn't change.
 	if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
 	{
-	    throw RbException()<<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' before move because posterior didn't match when re-touching: " << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
+	    throw RbException()<<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
+			       << "' before move because posterior didn't match when re-touching: "
+			       << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
 	}
 	// --------------------------
 	//
