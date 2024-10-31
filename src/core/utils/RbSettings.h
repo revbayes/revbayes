@@ -16,7 +16,7 @@ class RbSettings {
 									   return settings;
                                        }
    
-        void                        initializeUserSettings(void);                       //!< Initialize the user settings to default values
+        void                        readUserSettings(void);                       //!< Initialize the user settings to default values
     
     
         // Access functions
@@ -50,13 +50,13 @@ class RbSettings {
         void                        writeUserSettings(void);                            //!< Write the current settings into a file.
     
 		// Variables that have user settings
-        size_t                      lineWidth;
-        RevBayesCore::path          moduleDir;
-        size_t                      outputPrecision;
-        bool                        printNodeIndex;                                     //!< Should the node index of a tree be printed as a comment?
-        size_t                      scalingDensity;
-        double                      tolerance;                                          //!< Tolerance for comparison of doubles
-        bool                        useScaling;
+        size_t                      lineWidth = 160;
+        RevBayesCore::path          moduleDir = "modules";
+        size_t                      outputPrecision = 7;
+        bool                        printNodeIndex = true;                                     //!< Should the node index of a tree be printed as a comment?
+        size_t                      scalingDensity = 1;
+        double                      tolerance=10e-10;                                          //!< Tolerance for comparison of doubles
+        bool                        useScaling=true;
 };
 
 #endif

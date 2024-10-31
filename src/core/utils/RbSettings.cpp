@@ -23,7 +23,7 @@ using namespace RevBayesCore;
 RbSettings::RbSettings(void)
 {
 
-	initializeUserSettings();
+    readUserSettings();
 }
 
 
@@ -112,16 +112,8 @@ double RbSettings::getTolerance( void ) const
 
 
 /** Initialize the user settings */
-void RbSettings::initializeUserSettings(void)
+void RbSettings::readUserSettings(void)
 {
-    moduleDir = "modules";      // the default module directory
-    useScaling = true;          // the default useScaling
-    scalingDensity = 1;         // the default scaling density
-    lineWidth = 160;            // the default line width
-    tolerance = 10E-10;         // set default value for tolerance comparing doubles
-    outputPrecision = 7;
-    printNodeIndex = true;      // print node indices of tree nodes as comments
-    
     path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
