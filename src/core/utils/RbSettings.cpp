@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 
 #include "RbException.h"
 #include "RbFileManager.h"
@@ -51,6 +52,12 @@ bool RbSettings::getUseScaling( void ) const
     return useScaling;
 }
 
+int RbSettings::getDebugMCMC( void ) const
+{
+    // return the internal value
+    return debugMCMC;
+}
+
 std::string RbSettings::getOption(const std::string &key) const
 {
     if ( key == "moduledir" )
@@ -80,6 +87,10 @@ std::string RbSettings::getOption(const std::string &key) const
     else if ( key == "useScaling" )
     {
         return useScaling ? "true" : "false";
+    }
+    else if ( key == "debugMCMC" )
+    {
+        return std::to_string(debugMCMC);
     }
     else
     {
@@ -150,6 +161,7 @@ void RbSettings::listOptions() const
     std::cout << "linewidth = " << lineWidth << std::endl;
     std::cout << "useScaling = " << (useScaling ? "true" : "false") << std::endl;
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
+    std::cout << "debugMCMC = " << debugMCMC << std::endl;
 }
 
 
@@ -195,6 +207,16 @@ void RbSettings::setScalingDensity(size_t w)
 }
 
 
+void RbSettings::setDebugMCMC(int d)
+{
+    // replace the internal value with this new value
+    debugMCMC = d;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+
 void RbSettings::setOption(const std::string &key, const std::string &v, bool write)
 {
 
@@ -209,7 +231,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "outputPrecision" )
     {
-        outputPrecision = atoi(value.c_str());
+        outputPrecision = boost::lexical_cast<int>(value);
     }
     else if ( key == "printNodeIndex" )
     {
@@ -217,15 +239,11 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "tolerance" )
     {
-        //std::string::size_type sz;     // alias of size_t
-        //tolerance = std::stod (value,&sz);
-        tolerance = (double)atof(value.c_str());
+        tolerance = boost::lexical_cast<double>(value);
     }
     else if ( key == "linewidth" )
     {
-        //std::string::size_type sz;     // alias of size_t
-        //lineWidth = std::stoi (value,&sz);
-        lineWidth = atoi(value.c_str());
+        lineWidth = boost::lexical_cast<int>(value);
     }
     else if ( key == "useScaling" )
     {
@@ -233,17 +251,21 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "scalingDensity" )
     {
-        size_t w = atoi(value.c_str());
+        size_t w = boost::lexical_cast<int>(value);
         if (w < 1)
             throw(RbException("scalingDensity must be an integer greater than 0"));
         
-        scalingDensity = atoi(value.c_str());
+        scalingDensity = boost::lexical_cast<int>(value);
+    }
+    else if ( key == "debugMCMC" )
+    {
+        debugMCMC = boost::lexical_cast<int>(value);
     }
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
     }
-    
+
     if ( write == true )
     {
         writeUserSettings();
