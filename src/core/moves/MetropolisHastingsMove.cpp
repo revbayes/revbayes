@@ -268,6 +268,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const std::vector<DagNode*> nodes = getDagNodes();
 
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+    if (debugMCMC >= 2)
+	std::cerr<<"performMcmcMove: '"<< proposal->getProposalName()<<"' on '"<<nodes[0]->getName()<<"'\n";
 
     if (debugMCMC > 0)
     {
@@ -489,82 +491,33 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // --------------------------
     if (debugMCMC > 0)
     {
-	if (debugMCMC > 1)
-	    std::cerr << "Performed '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "'. The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
+	if (debugMCMC >= 2)
+	    std::cerr << "   The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
 
 	double ln_posterior_after_move = 0.0;
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    ln_posterior_after_move += the_node->getLnProbability();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    ln_posterior_after_move += the_node->getLnProbability();
-	}
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    the_node->touch();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    the_node->touch();
-	}
+	for (auto node: views::concat(nodes, affected_nodes))
+	    ln_posterior_after_move += node->getLnProbability();
+
+	for (auto node: views::concat(nodes, affected_nodes))
+	    node->touch();
+
 	double ln_posterior_after_move_after_touch = 0.0;
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    ln_posterior_after_move_after_touch += the_node->getLnProbability();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    ln_posterior_after_move_after_touch += the_node->getLnProbability();
-	}
-	for (size_t i = 0; i < nodes.size(); ++i)
-	{
-	    // get the pointer to the current node
-	    DagNode* the_node = nodes[i];
-	    the_node->keep();
-	}
-	for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	{
-	    DagNode *the_node = *it;
-	    the_node->keep();
-	}
+	for (auto node: views::concat(nodes, affected_nodes))
+	    ln_posterior_after_move_after_touch += node->getLnProbability();
+
+	for (auto node: views::concat(nodes, affected_nodes))
+	    node->keep();
+
 	if ( fabs(ln_posterior_after_move - ln_posterior_after_move_after_touch) > 1E-6 )
 	{
         
-	    for (size_t i = 0; i < nodes.size(); ++i)
-	    {
-		// get the pointer to the current node
-		DagNode* the_node = nodes[i];
-		the_node->touch();
-	    }
-	    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	    {
-		DagNode *the_node = *it;
-		the_node->touch();
-	    }
+	    for (auto node: views::concat(nodes, affected_nodes))
+		node->touch();
+
 	    double ln_posterior_after_move_after_touch2 = 0.0;
-	    for (size_t i = 0; i < nodes.size(); ++i)
-	    {
-		// get the pointer to the current node
-		DagNode* the_node = nodes[i];
-		ln_posterior_after_move_after_touch2 += the_node->getLnProbability();
-	    }
-	    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-	    {
-		DagNode *the_node = *it;
-		ln_posterior_after_move_after_touch2 += the_node->getLnProbability();
-	    }
-        
+	    for (auto node: views::concat(nodes, affected_nodes))
+		ln_posterior_after_move_after_touch2 += node->getLnProbability();
+
 	    throw RbException() << "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' after move because posterior of " << ln_posterior_after_move << " and " << ln_posterior_after_move_after_touch << "/" << ln_posterior_after_move_after_touch2 << ". The move was " << (rejected ? "rejected." : "accepted.");
 
 	    // --------------------------
