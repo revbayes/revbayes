@@ -411,7 +411,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         proposal->undoProposal();
 
         // call restore for each node
-        for (auto nodes: touched_nodes)
+        for (auto node: touched_nodes)
             node->restore();
     }
     else
