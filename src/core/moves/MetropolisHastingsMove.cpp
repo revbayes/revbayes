@@ -15,6 +15,9 @@
 #include "RbOrderedSet.h"
 #include "RbException.h"
 #include "RbSettings.h"  // for debugMCMC setting
+#include <range/v3/all.hpp> // for ranges::views
+
+namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
@@ -278,32 +281,20 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	double ln_posterior_before_move_after_touch = 0.0;
 
 	// 1. Compute posterior before move
-	for (auto node: nodes)
+	for (auto node: views::concat(nodes, affected_nodes))
 	    ln_posterior_before_move += node->getLnProbability();
 
-	for (auto affected_node: affected_nodes)
-	    ln_posterior_before_move += affected_node->getLnProbability();
-
 	// 2. Touch nodes + affected_nodes
-	for (auto node: nodes)
+	for (auto node: views::concat(nodes, affected_nodes))
 	    node->touch();
 
-	for (auto affected_node: affected_nodes)
-	    affected_node->touch();
-
 	// 3. Compute posterior after touch
-	for (auto node: nodes)
+	for (auto node: views::concat(nodes, affected_nodes))
 	    ln_posterior_before_move_after_touch += node->getLnProbability();
 
-	for (auto affected_node: affected_nodes)
-	    ln_posterior_before_move_after_touch += affected_node->getLnProbability();
-
 	// 4. Keep nodes + affected_nodes
-	for (auto node: nodes)
+	for (auto node: views::concat(nodes, affected_nodes))
 	    node->keep();
-
-	for (auto affected_node: affected_nodes)
-	    affected_node->keep();
 
 	// 5. Check that the posterior didn't change.
 	if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
@@ -345,18 +336,15 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     double ln_likelihood_ratio = 0.0;
 
     // compute the probability of the current value for each node
-    for (size_t i = 0; i < touched_nodes.size(); ++i)
+    for (auto node: views::concat(touched_nodes, affected_nodes))
     {
-        // get the pointer to the current node
-        DagNode* the_node = touched_nodes[i];
-
         if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
         {
 
-            if ( the_node->isClamped() )
+            if ( node->isClamped() )
             {
                 try {
-                    ln_likelihood_ratio += the_node->getLnProbabilityRatio();
+                    ln_likelihood_ratio += node->getLnProbabilityRatio();
                 }
                 catch (const RbException &e)
                 {
@@ -372,7 +360,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             {
                 try
                 {
-                    ln_prior_ratio += the_node->getLnProbabilityRatio();
+                    ln_prior_ratio += node->getLnProbabilityRatio();
                 }
                 catch (const RbException &e)
                 {
@@ -385,48 +373,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
                 }
             }
 
-        }
-
-    }
-
-    // then we recompute the probability for all the affected nodes
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-
-        if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
-        {
-            if ( the_node->isClamped() )
-            {
-                try
-                {
-                    ln_likelihood_ratio += the_node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_likelihood_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
-            else
-            {
-                try {
-                    ln_prior_ratio += the_node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_prior_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
         }
 
     }
