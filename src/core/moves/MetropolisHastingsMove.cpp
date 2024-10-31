@@ -338,25 +338,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     // first we touch all the nodes
     // that will set the flags for recomputation
-    for (size_t i = 0; i < touched_nodes.size(); ++i)
-    {
-
-        // get the pointer to the current node
-        DagNode* the_node = touched_nodes[i];
-
-//        // should this node be touched?
-//        std::vector<DagNode*>::iterator it = std::find( nodes_left_untouched.begin(), nodes_left_untouched.end(), the_node );
-//        bool touch_node = (it == nodes_left_untouched.end());
-
-        // flag for recomputation
-//        if (touch_node) {
-        the_node->touch();
-//        }
-    }
+    for (auto node: touched_nodes)
+        node->touch();
 
     double ln_prior_ratio = 0.0;
     double ln_likelihood_ratio = 0.0;
-
 
     // compute the probability of the current value for each node
     for (size_t i = 0; i < touched_nodes.size(); ++i)
