@@ -20,7 +20,6 @@ class RbSettings {
     
     
         // Access functions
-        bool                        getCollapseSampledAncestors(void) const;            //!< Retrieve the whether to should display sampled ancestors as 2-degree nodes when printing
         size_t                      getLineWidth(void) const;                           //!< Retrieve the line width that will be used for the screen width when printing
         const RevBayesCore::path&   getModuleDir(void) const;                           //!< Retrieve the module directory name
         std::string                 getOption(const std::string &k) const;              //!< Retrieve a user option
@@ -32,7 +31,6 @@ class RbSettings {
         void                        listOptions(void) const;                            //!< Retrieve a list of all user options and their current values
 
         // setters
-        void                        setCollapseSampledAncestors(bool);                  //!< Set whether to should display sampled ancestors as 2-degree nodes when printing
         void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
         void                        setModuleDir(const RevBayesCore::path &md);         //!< Set the module directory name
         void                        setOutputPrecision(size_t p);                       //!< Set the default output precision width
@@ -52,7 +50,6 @@ class RbSettings {
         void                        writeUserSettings(void);                            //!< Write the current settings into a file.
     
 		// Variables that have user settings
-        bool                        collapseSampledAncestors;
         size_t                      lineWidth;
         RevBayesCore::path          moduleDir;
         size_t                      outputPrecision;
