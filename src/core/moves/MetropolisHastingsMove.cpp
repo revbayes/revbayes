@@ -268,10 +268,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const std::vector<DagNode*> nodes = getDagNodes();
 
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
-    if (debugMCMC >= 2)
+    if (debugMCMC >= 3)
 	std::cerr<<"performMcmcMove: '"<< proposal->getProposalName()<<"' on '"<<nodes[0]->getName()<<"'\n";
 
-    if (debugMCMC > 0)
+    if (debugMCMC >= 2)
     {
 	// --------------------------
 	//
@@ -419,9 +419,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     //     DEBUG (BEGIN)
     //
     // --------------------------
-    if (debugMCMC > 0)
+    if (debugMCMC >= 2)
     {
-	if (debugMCMC >= 2)
+	if (debugMCMC >= 3)
 	    std::cerr << "   The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
 
 	double ln_posterior_after_move = 0.0;
