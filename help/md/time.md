@@ -7,7 +7,7 @@ Get the current system time.
 
 ## details
 
-"year" reports the current year in the Julian calendar.
+"year" reports the current year (e.g. 2000).
 
 "day" returns the index of the day in the year (e.g. Jan 1 = 1; Feb 1 = 32).
 
