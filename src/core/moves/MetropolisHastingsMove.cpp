@@ -461,7 +461,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     */
 
-    if ((debugMCMC >= 2 and not rejected) or debugMCMC >= 3)
+    /* NOTE: This can hide MCMC problems by calling touch/keep after restore. */
+    /*
+    if (debugMCMC >=1 and not rejected)
     {
         // 1. Compute PDFs after proposal, before touch
         std::map<const DagNode*, double> untouched_after_proposal;
@@ -501,6 +503,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
         if (err) throw E;
     }
+    */
 }
 
 
