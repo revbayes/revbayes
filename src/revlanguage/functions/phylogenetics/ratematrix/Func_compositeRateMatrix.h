@@ -19,6 +19,7 @@
 #include "RevPtr.h"
 #include "RlDeterministicNode.h"
 #include "RlRateGenerator.h"
+#include "RlRateMatrix.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
 
@@ -26,7 +27,7 @@ namespace RevLanguage {
 class ArgumentRules;
 class TypeSpec;
     
-    class Func_compositeRateMatrix : public TypedFunction<RateGenerator> {
+    class Func_compositeRateMatrix : public TypedFunction<RateMatrix> {
         
     public:
         Func_compositeRateMatrix( void );
