@@ -453,7 +453,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     //     DEBUG (BEGIN)
     //
     // --------------------------
-    if (debugMCMC >= 2)
+    if (debugMCMC >= 3)
     {
 	double ln_posterior_after_move = 0.0;
 	for (auto node: views::concat(nodes, affected_nodes))
