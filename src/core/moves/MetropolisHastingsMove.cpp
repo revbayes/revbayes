@@ -311,7 +311,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	    node_names.push_back(node->getName());
 
         RbException E;
-        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs don't match after touching!\n";
+        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs not up-to-date before proposal!\n";
         bool err = false;
         for(auto& [node,pr1]: untouched_before_proposal)
         {
@@ -484,7 +484,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	    node_names.push_back(node->getName());
 
         RbException E;
-        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs don't match after touching!\n";
+        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs not up-to-date after proposal!\n";
         bool err = false;
         for(auto& [node,pr1]: untouched_after_proposal)
         {
