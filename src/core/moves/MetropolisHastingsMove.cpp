@@ -277,10 +277,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     if (logMCMC >= 3)
     {
-	std::cerr<<std::setprecision(10);
-	for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
-	    std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
-	std::cerr<<"\n";
+        std::cerr<<std::setprecision(10);
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
 
     if (debugMCMC >= 2)
@@ -383,9 +383,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if (logMCMC >= 3)
     {
-	for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
-	    std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
-	std::cerr<<"\n";
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
 
     // exponentiate with the chain heat
@@ -436,19 +436,18 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
 
 
-
     if (logMCMC >= 3)
     {
-	for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
-	    std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
-	std::cerr<<"\n";
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
 
     if (logMCMC >= 2)
     {
-	std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
-	std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
-	std::cerr << "  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+        std::cerr << "  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
     }
 
     // --------------------------
