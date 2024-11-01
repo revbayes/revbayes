@@ -258,7 +258,13 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 }
 
-
+std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
+{
+    std::map<const DagNode*, double> Prs;
+    for(auto node: views::concat(nodes, affected_nodes))
+	Prs.insert({node, node->getLnProbability()});
+    return Prs;
+}
 
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
@@ -268,10 +274,15 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const std::vector<DagNode*> nodes = getDagNodes();
 
     int logMCMC = RbSettings::userSettings().getLogMCMC();
-    if (logMCMC >= 1)
-	std::cerr<<"MetropolisHastings: '"<< proposal->getProposalName()<<"' on '"<<nodes[0]->getName()<<"'\n";
-
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+    if (logMCMC >= 3)
+    {
+	std::cerr<<std::setprecision(10);
+	for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+	    std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+	std::cerr<<"\n";
+    }
+
     if (debugMCMC >= 2)
     {
 	// --------------------------
@@ -367,16 +378,17 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     }
 
+    if (logMCMC >= 3)
+    {
+	for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+	    std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+	std::cerr<<"\n";
+    }
+
     // exponentiate with the chain heat
     double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
     double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
-
-    if (logMCMC >= 2)
-    {
-	std::cerr<<"   log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
-	std::cerr<<"   log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
-    }
 
     bool rejected = false;
 
@@ -421,8 +433,20 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
 
 
+
+    if (logMCMC >= 3)
+    {
+	for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+	    std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+	std::cerr<<"\n";
+    }
+
     if (logMCMC >= 2)
-	std::cerr << "   The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
+    {
+	std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+	std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+	std::cerr << "  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+    }
 
     // --------------------------
     //
