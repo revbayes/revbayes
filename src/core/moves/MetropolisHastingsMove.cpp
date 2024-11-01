@@ -267,10 +267,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
-    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
-    if (debugMCMC >= 3)
-	std::cerr<<"performMcmcMove: '"<< proposal->getProposalName()<<"' on '"<<nodes[0]->getName()<<"'\n";
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    if (logMCMC >= 1)
+	std::cerr<<"MetropolisHastings: '"<< proposal->getProposalName()<<"' on '"<<nodes[0]->getName()<<"'\n";
 
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     if (debugMCMC >= 2)
     {
 	// --------------------------
@@ -371,6 +372,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
+    if (logMCMC >= 2)
+    {
+	std::cerr<<"   log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+	std::cerr<<"   log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+    }
+
     bool rejected = false;
 
     if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false )
@@ -414,6 +421,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
 
 
+    if (logMCMC >= 2)
+	std::cerr << "   The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
+
     // --------------------------
     //
     //     DEBUG (BEGIN)
@@ -421,9 +431,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // --------------------------
     if (debugMCMC >= 2)
     {
-	if (debugMCMC >= 3)
-	    std::cerr << "   The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
-
 	double ln_posterior_after_move = 0.0;
 	for (auto node: views::concat(nodes, affected_nodes))
 	    ln_posterior_after_move += node->getLnProbability();
