@@ -220,9 +220,6 @@ namespace  {
              num_evals(0)
             {
                 variable->initiateGetAffectedNodes( affectedNodes );
-
-                if (RbSettings::userSettings().getDebugMCMC() > 0)
-		    checkPrs();
             }
     };
 
