@@ -311,11 +311,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	    node->keep();
 
 	// 5. Check that the posterior didn't change.
-	if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
+	double reldiff = std::abs(ln_posterior_before_move - ln_posterior_before_move_after_touch)/std::abs(ln_posterior_before_move_after_touch);
+	if ( reldiff > 1E-8 )
 	{
-	    throw RbException()<<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
+	    throw RbException()<<std::setprecision(10)
+			       <<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
 			       << "' before move because posterior didn't match when re-touching: "
-			       << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
+			       << "\n  "<<ln_posterior_before_move << " and"
+			       << "\n  "<<ln_posterior_before_move_after_touch<<".";
 	}
 	// --------------------------
 	//
@@ -469,9 +472,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	for (auto node: views::concat(nodes, affected_nodes))
 	    node->keep();
 
-	if ( fabs(ln_posterior_after_move - ln_posterior_after_move_after_touch) > 1E-6 )
+	double rel_diff = std::abs(ln_posterior_after_move - ln_posterior_after_move_after_touch)/std::abs(ln_posterior_after_move_after_touch);
+	if ( rel_diff > 1E-8 )
 	{
-        
 	    for (auto node: views::concat(nodes, affected_nodes))
 		node->touch();
 
@@ -479,7 +482,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 	    for (auto node: views::concat(nodes, affected_nodes))
 		ln_posterior_after_move_after_touch2 += node->getLnProbability();
 
-	    throw RbException() << "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' after move because posterior of " << ln_posterior_after_move << " and " << ln_posterior_after_move_after_touch << "/" << ln_posterior_after_move_after_touch2 << ". The move was " << (rejected ? "rejected." : "accepted.");
+	    throw RbException() << std::setprecision(10)
+				<< "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
+				<< "' after move because posterior of "
+				<< "\n  "<<ln_posterior_after_move << " and\n  " << ln_posterior_after_move_after_touch << "/" << ln_posterior_after_move_after_touch2
+				<< ". The move was " << (rejected ? "rejected." : "accepted.");
 
 	    // --------------------------
 	    //
