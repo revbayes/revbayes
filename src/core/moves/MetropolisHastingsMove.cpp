@@ -269,6 +269,8 @@ std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, 
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
+    constexpr double rel_err_threshhold = 1.0e-11;
+    constexpr int err_precision = 11;
     
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
@@ -285,48 +287,40 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if (debugMCMC >= 2)
     {
-	// --------------------------
-	//
-	//     DEBUG (BEGIN)
-	//
-	// --------------------------
+        // 1. Compute PDFs before proposal, before touch
+        std::map<const DagNode*, double> untouched_before_proposal;
+        for (auto node: views::concat(nodes, affected_nodes))
+            untouched_before_proposal.insert({node, node->getLnProbability()});
 
-	double ln_posterior_before_move = 0.0;
-	double ln_posterior_before_move_after_touch = 0.0;
+        // 2. Touch nodes + affected_nodes
+        for (auto node: views::concat(nodes, affected_nodes))
+            node->touch();
 
-	// 1. Compute posterior before move
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_before_move += node->getLnProbability();
+        // 3. Compute PDFs before proposal, after touch
+        std::map<const DagNode*, double> touched_before_proposal;
+        for (auto node: views::concat(nodes, affected_nodes))
+            touched_before_proposal.insert({node, node->getLnProbability()});
 
-	// 2. Touch nodes + affected_nodes
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->touch();
+        // 4. Keep nodes + affected_nodes
+        for (auto node: views::concat(nodes, affected_nodes))
+            node->keep();
 
-	// 3. Compute posterior after touch
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_before_move_after_touch += node->getLnProbability();
+        // 5. Compare pdfs for each node
+        RbException E;
+        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<nodes[0]->getName()<<"): PDFs don't match after touching!\n";
+        bool err = false;
+        for(auto& [node,pr1]: untouched_before_proposal)
+        {
+            auto pr2 = touched_before_proposal.at(node);
+            if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
+            {
+                E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
+                err = true;
+            }
+        }
 
-	// 4. Keep nodes + affected_nodes
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->keep();
-
-	// 5. Check that the posterior didn't change.
-	double reldiff = std::abs(ln_posterior_before_move - ln_posterior_before_move_after_touch)/std::abs(ln_posterior_before_move_after_touch);
-	if ( reldiff > 1E-8 )
-	{
-	    throw RbException()<<std::setprecision(10)
-			       <<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
-			       << "' before move because posterior didn't match when re-touching: "
-			       << "\n  "<<ln_posterior_before_move << " and"
-			       << "\n  "<<ln_posterior_before_move_after_touch<<".";
-	}
-	// --------------------------
-	//
-	//     DEBUG (END)
-	//
-	// --------------------------
+        if (err) throw E;
     }
-
     // Propose a new value
     proposal->prepareProposal();
     double ln_hastings_ratio = RbConstants::Double::neginf;
@@ -435,7 +429,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         proposal->cleanProposal();
     }
 
-
     if (logMCMC >= 3)
     {
         for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
@@ -450,49 +443,52 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         std::cerr << "  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
     }
 
-    // --------------------------
-    //
-    //     DEBUG (BEGIN)
-    //
-    // --------------------------
-    if (debugMCMC >= 3)
+/*
+    // This fixes the problem. in #567
+    if (rejected)
     {
-	double ln_posterior_after_move = 0.0;
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_after_move += node->getLnProbability();
+        for(auto node: nodes)
+            node->touch();
+        for(auto node: nodes)
+            node->keep();
+    }
+*/
 
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->touch();
+    if ((debugMCMC >= 2 and not rejected) or debugMCMC >= 3)
+    {
+        // 1. Compute PDFs after proposal, before touch
+        std::map<const DagNode*, double> untouched_after_proposal;
+        for (auto node: views::concat(nodes, affected_nodes))
+            untouched_after_proposal.insert({node, node->getLnProbability()});
 
-	double ln_posterior_after_move_after_touch = 0.0;
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_after_move_after_touch += node->getLnProbability();
+        // 2. Touch nodes + affected_nodes
+        for (auto node: views::concat(nodes, affected_nodes))
+            node->touch();
 
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->keep();
+        // 3. Compute PDFs after proposal, after touch
+        std::map<const DagNode*, double> touched_after_proposal;
+        for (auto node: views::concat(nodes, affected_nodes))
+            touched_after_proposal.insert({node, node->getLnProbability()});
 
-	double rel_diff = std::abs(ln_posterior_after_move - ln_posterior_after_move_after_touch)/std::abs(ln_posterior_after_move_after_touch);
-	if ( rel_diff > 1E-8 )
-	{
-	    for (auto node: views::concat(nodes, affected_nodes))
-		node->touch();
+        // 4. Keep nodes + affected_nodes
+        for (auto node: views::concat(nodes, affected_nodes))
+            node->keep();
 
-	    double ln_posterior_after_move_after_touch2 = 0.0;
-	    for (auto node: views::concat(nodes, affected_nodes))
-		ln_posterior_after_move_after_touch2 += node->getLnProbability();
+        // 5. Compare pdfs for each node
+        RbException E;
+        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<nodes[0]->getName()<<"): PDFs don't match after touching!\n";
+        bool err = false;
+        for(auto& [node,pr1]: untouched_after_proposal)
+        {
+            auto pr2 = touched_after_proposal.at(node);
+            if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
+            {
+                E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
+                err = true;
+            }
+        }
 
-	    throw RbException() << std::setprecision(10)
-				<< "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
-				<< "' after move because posterior of "
-				<< "\n  "<<ln_posterior_after_move << " and\n  " << ln_posterior_after_move_after_touch << "/" << ln_posterior_after_move_after_touch2
-				<< ". The move was " << (rejected ? "rejected." : "accepted.");
-
-	    // --------------------------
-	    //
-	    //     DEBUG (END)
-	    //
-	    // --------------------------
-	}
+        if (err) throw E;
     }
 }
 
