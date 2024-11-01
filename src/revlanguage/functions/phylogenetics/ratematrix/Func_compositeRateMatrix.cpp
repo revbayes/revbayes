@@ -32,7 +32,7 @@
 using namespace RevLanguage;
 
 /** default constructor */
-Func_compositeRateMatrix::Func_compositeRateMatrix( void ) : TypedFunction<RateGenerator>( )
+Func_compositeRateMatrix::Func_compositeRateMatrix( void ) : TypedFunction<RateMatrix>( )
 {
     
 }
