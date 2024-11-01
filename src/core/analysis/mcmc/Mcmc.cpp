@@ -952,7 +952,13 @@ void Mcmc::nextCycle(bool advance_cycle)
         Move& the_move = schedule->nextMove( generation );
 
 	if (logMCMC >= 1)
-	    std::cerr<<"\ngeneration = "<<generation<<"    proposal = "<<i+1<<"/"<<proposals<<"    "<<the_move.getMoveName()<<"("<<the_move.getDagNodes()[0]->getName()<<")\n";
+	{
+	    std::vector<std::string> node_names;
+	    for(auto node: the_move.getDagNodes())
+		node_names.push_back(node->getName());
+
+	    std::cerr<<"\ngeneration = "<<generation<<"    proposal = "<<i+1<<"/"<<proposals<<"    "<<the_move.getMoveName()<<"("<<StringUtilities::join(node_names,",")<<")\n";
+	}
 
         // Perform the move
         the_move.performMcmcStep( chain_prior_heat, chain_likelihood_heat, chain_posterior_heat );

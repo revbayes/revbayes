@@ -306,8 +306,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             node->keep();
 
         // 5. Compare pdfs for each node
+	std::vector<std::string> node_names;
+	for(auto node: nodes)
+	    node_names.push_back(node->getName());
+
         RbException E;
-        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<nodes[0]->getName()<<"): PDFs don't match after touching!\n";
+        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs don't match after touching!\n";
         bool err = false;
         for(auto& [node,pr1]: untouched_before_proposal)
         {
@@ -475,8 +479,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             node->keep();
 
         // 5. Compare pdfs for each node
+	std::vector<std::string> node_names;
+	for(auto node: nodes)
+	    node_names.push_back(node->getName());
+
         RbException E;
-        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<nodes[0]->getName()<<"): PDFs don't match after touching!\n";
+        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs don't match after touching!\n";
         bool err = false;
         for(auto& [node,pr1]: untouched_after_proposal)
         {
