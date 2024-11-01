@@ -285,15 +285,18 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         std::cerr<<"\n";
     }
 
-    if (debugMCMC >= 2)
+    // NOTE: Only touch/keep nodes, not affected_nodes, when checking PDFs.
+    //       If we touch/keep affected nodes, we can hide problems by doing more recalculation.
+
+    if (debugMCMC >= 1)
     {
         // 1. Compute PDFs before proposal, before touch
         std::map<const DagNode*, double> untouched_before_proposal;
         for (auto node: views::concat(nodes, affected_nodes))
             untouched_before_proposal.insert({node, node->getLnProbability()});
 
-        // 2. Touch nodes + affected_nodes
-        for (auto node: views::concat(nodes, affected_nodes))
+        // 2. Touch nodes.
+        for (auto node: nodes)
             node->touch();
 
         // 3. Compute PDFs before proposal, after touch
@@ -301,8 +304,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         for (auto node: views::concat(nodes, affected_nodes))
             touched_before_proposal.insert({node, node->getLnProbability()});
 
-        // 4. Keep nodes + affected_nodes
-        for (auto node: views::concat(nodes, affected_nodes))
+        // 4. Keep nodes
+        for (auto node: nodes)
             node->keep();
 
         // 5. Compare pdfs for each node
@@ -447,7 +450,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         std::cerr << "  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
     }
 
-/*
+    /*
     // This fixes the problem. in #567
     if (rejected)
     {
@@ -456,7 +459,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         for(auto node: nodes)
             node->keep();
     }
-*/
+    */
 
     if ((debugMCMC >= 2 and not rejected) or debugMCMC >= 3)
     {
@@ -465,8 +468,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         for (auto node: views::concat(nodes, affected_nodes))
             untouched_after_proposal.insert({node, node->getLnProbability()});
 
-        // 2. Touch nodes + affected_nodes
-        for (auto node: views::concat(nodes, affected_nodes))
+        // 2. Touch nodes
+        for (auto node: nodes)
             node->touch();
 
         // 3. Compute PDFs after proposal, after touch
@@ -475,7 +478,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             touched_after_proposal.insert({node, node->getLnProbability()});
 
         // 4. Keep nodes + affected_nodes
-        for (auto node: views::concat(nodes, affected_nodes))
+        for (auto node: nodes)
             node->keep();
 
         // 5. Compare pdfs for each node
