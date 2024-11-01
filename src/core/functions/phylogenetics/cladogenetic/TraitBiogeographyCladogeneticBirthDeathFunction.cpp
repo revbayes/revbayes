@@ -5,7 +5,7 @@
 //  Created by Michael Landis on 9/27/24.
 //
 
-#define DEBUG_TRAITFIG 1
+//#define DEBUG_TRAITFIG 1
 
 #include "TraitBiogeographyCladogeneticBirthDeathFunction.h"
 
@@ -619,6 +619,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
     //    std::vector<std::vector<std::vector<double> > > geomean_value; // ( NUM_CLADO_EVENT_TYPES, 0.0 );
     //    std::vector<std::vector<std::vector<unsigned> > > n_value; // ( NUM_CLADO_EVENT_TYPES, 0 );
 
+    // standardization variables, (num_traits x num_trait_vals x num_event_types)
     std::vector<std::vector<std::vector<double> > > ln_sum_value( numTraits, std::vector<std::vector<double> >(numTraitValues, std::vector<double>(NUM_CLADO_EVENT_TYPES, 0.0 )));
     std::vector<std::vector<std::vector<double> > > geomean_value( numTraits, std::vector<std::vector<double> >(numTraitValues, std::vector<double>(NUM_CLADO_EVENT_TYPES, 0.0 )));
     std::vector<std::vector<std::vector<unsigned> > > n_value( numTraits, std::vector<std::vector<unsigned> >(numTraitValues, std::vector<unsigned>(NUM_CLADO_EVENT_TYPES, 0 )));
@@ -627,8 +628,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
     eventMapFactors = std::vector<std::vector<std::map<StateTriplet, double> > >(numTraits, std::vector<std::map<StateTriplet, double> >(numTraitValues));
     eventMapWeights = std::vector<std::vector<std::map<StateTriplet, double> > >(numTraits, std::vector<std::map<StateTriplet, double> >(numTraitValues));
     
-    
-    // normalization factors for each trait combination
+    // standardization factors for each trait combination
     std::map<TraitBits, double> trait_factors;
     
     // loop over all events and their types
@@ -665,24 +665,9 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
                 }
             }
         }
-
-    
-        // get event map factor statistics for renormalization
-//        if ( v > max_value[event_type] )
-//        {
-//            max_value[event_type] = v;
-//        }
-//        if (v > 0.0) {
-////            sum_value[event_type] += v;
-////            prod_value[event_type] *= v;
-//            ln_sum_value[tb][event_type] += std::log(v);
-//            n_value[tb][event_type] += 1;
-//        }
-
     }
     
-//    for (auto it = geomean_value.begin(); it != geomean_value.end(); it++) {
-//        const TraitBits& tb = it->first;
+
     for (size_t trait_idx = 0; trait_idx < numTraits; trait_idx++) {
         for (size_t val_idx = 0; val_idx < numTraitValues; val_idx++) {
             for (size_t i = 0; i < geomean_value[trait_idx][val_idx].size(); i++) {
@@ -919,30 +904,32 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
     
     for (it = eventMapTypes.begin(); it != eventMapTypes.end(); it++)
     {
-        const StateTriplet& idx = it->first;
+        const StateTriplet& idx = it->first;    // (  AB,X=0,Y=1 -> A,X=0,Y=1 | B,X=0,Y=1 )
         const RangeBits& rb = statesToRangeBitsByNumOn[ idx[0] ];
         const TraitBits& tb = statesToTraitBitsByNumOn[ idx[0] ];
         unsigned event_type = it->second;
         double speciation_rate = 0.0;
         
-        // divide by two if asymmetric event
+        // divide by two if asymmetric event (right-left vs. left-right)
         double f_asymm = ( idx[1] == idx[2] ? 1.0 : 0.5 );
         
         // add the absolute rate contributed by each trait-value pair
         for (size_t trait_idx = 0; trait_idx < tb.size(); trait_idx++) {
-            size_t val_idx = tb[trait_idx];
-            double base_rate = 0.0;
             
-            // get pre-computed relative rates (informed by m_w, m_b, f_b)
-            // rescale by relative rate factor for (anc -> left, right)
-            double rel_rate = eventMapWeights[trait_idx][val_idx][idx];
+            // get value for trait of interest
+            size_t val_idx = tb[trait_idx];
             
             // get rho_w or rho_b parameter
+            double base_rate = 0.0;
             if (event_type == WITHIN_SPECIATION) {
                 base_rate = rho_w_values[trait_idx][val_idx];
             } else if (event_type == BETWEEN_SPECIATION) {
                 base_rate = rho_b_values[trait_idx][val_idx];
             }
+            
+            // get pre-computed relative rates (informed by m_w, m_b, f_b)
+            // rescale by relative rate factor for (anc -> left, right)
+            double rel_rate = eventMapWeights[trait_idx][val_idx][idx];
             
             // compute the cladogenetic event rate
             double clado_rate = base_rate * rel_rate * f_asymm;
@@ -986,6 +973,6 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
     value->setSpeciationRateSumPerState( speciation_rate_sum_per_state );
     
     // print
-    printEventMap( this->eventMap );
+//    printEventMap( this->eventMap );
 }
 
