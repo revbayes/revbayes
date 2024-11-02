@@ -272,7 +272,7 @@ constexpr int err_precision = 11;
 void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& untouched, const std::map<const DagNode*, double>& touched, const std::string& before_after)
 {
     RbException E;
-    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<"): PDFs not up-to-date "<<before_after<<" proposal!\n";
+    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": PDFs not up-to-date "<<before_after<<" proposal!\n";
     bool err = false;
     for(auto& [node,pr1]: untouched)
     {
