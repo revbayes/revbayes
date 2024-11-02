@@ -291,18 +291,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     if (debugMCMC >= 1)
     {
         // 1. Compute PDFs before proposal, before touch
-        std::map<const DagNode*, double> untouched_before_proposal;
-        for (auto node: views::concat(nodes, affected_nodes))
-            untouched_before_proposal.insert({node, node->getLnProbability()});
+        auto untouched_before_proposal = getNodePrs(nodes, affected_nodes);
 
         // 2. Touch nodes.
         for (auto node: nodes)
             node->touch();
 
         // 3. Compute PDFs before proposal, after touch
-        std::map<const DagNode*, double> touched_before_proposal;
-        for (auto node: views::concat(nodes, affected_nodes))
-            touched_before_proposal.insert({node, node->getLnProbability()});
+        auto touched_before_proposal = getNodePrs(nodes, affected_nodes);
 
         // 4. Keep nodes
         for (auto node: nodes)
@@ -466,18 +462,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     if (debugMCMC >=1 and not rejected)
     {
         // 1. Compute PDFs after proposal, before touch
-        std::map<const DagNode*, double> untouched_after_proposal;
-        for (auto node: views::concat(nodes, affected_nodes))
-            untouched_after_proposal.insert({node, node->getLnProbability()});
+        auto untouched_after_proposal = getNodePrs(nodes, affected_nodes);
 
         // 2. Touch nodes
         for (auto node: nodes)
             node->touch();
 
         // 3. Compute PDFs after proposal, after touch
-        std::map<const DagNode*, double> touched_after_proposal;
-        for (auto node: views::concat(nodes, affected_nodes))
-            touched_after_proposal.insert({node, node->getLnProbability()});
+        auto touched_after_proposal = getNodePrs(nodes, affected_nodes);
 
         // 4. Keep nodes + affected_nodes
         for (auto node: nodes)
