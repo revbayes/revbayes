@@ -349,12 +349,16 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
 
 double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    if (debugMCMC >= 1)
+	g.checkPrs();
+
     //  assert(g(x0) > g(L) and g(x0) > g(R));
-    g.checkPrs();
     assert(g(x0) >= logy);
     assert(L < R);
     assert(L <= x0 and x0 <= R);
-    int logMCMC = RbSettings::userSettings().getLogMCMC();
 
     //double L0 = L, R0 = R;
 
