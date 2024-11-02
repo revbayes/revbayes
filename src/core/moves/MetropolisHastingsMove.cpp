@@ -266,12 +266,29 @@ std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, 
     return Prs;
 }
 
+constexpr double rel_err_threshhold = 1.0e-11;
+constexpr int err_precision = 11;
+
+void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& untouched, const std::map<const DagNode*, double>& touched, const std::string& before_after)
+{
+    RbException E;
+    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<"): PDFs not up-to-date "<<before_after<<" proposal!\n";
+    bool err = false;
+    for(auto& [node,pr1]: untouched)
+    {
+	auto pr2 = touched.at(node);
+	if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
+	{
+	    E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
+	    err = true;
+	}
+    }
+
+    if (err) throw E;
+}
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    constexpr double rel_err_threshhold = 1.0e-11;
-    constexpr int err_precision = 11;
-    
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
@@ -285,8 +302,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         std::cerr<<"\n";
     }
 
-    // NOTE: Only touch/keep nodes, not affected_nodes, when checking PDFs.
-    //       If we touch/keep affected nodes, we can hide problems by doing more recalculation.
+    /*
+     * NOTE: When checking PDFs, don't touch/keep affected nodes.  Only touch/keep nodes.
+     *       If we touch/keep affected nodes, we can hide problems by doing more recalculation.
+     */
 
     if (debugMCMC >= 1)
     {
@@ -305,25 +324,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             node->keep();
 
         // 5. Compare pdfs for each node
-	std::vector<std::string> node_names;
-	for(auto node: nodes)
-	    node_names.push_back(node->getName());
-
-        RbException E;
-        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs not up-to-date before proposal!\n";
-        bool err = false;
-        for(auto& [node,pr1]: untouched_before_proposal)
-        {
-            auto pr2 = touched_before_proposal.at(node);
-            if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
-            {
-                E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
-                err = true;
-            }
-        }
-
-        if (err) throw E;
+        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "before");
     }
+
     // Propose a new value
     proposal->prepareProposal();
     double ln_hastings_ratio = RbConstants::Double::neginf;
@@ -443,11 +446,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     {
         std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
         std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
-        std::cerr << "  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+        std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
     }
 
     /*
-    // This fixes the problem. in #567
+    // This fixes the problem in #567.
     if (rejected)
     {
         for(auto node: nodes)
@@ -457,45 +460,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     */
 
-    /* NOTE: This can hide MCMC problems by calling touch/keep after restore. */
     /*
-    if (debugMCMC >=1 and not rejected)
-    {
-        // 1. Compute PDFs after proposal, before touch
-        auto untouched_after_proposal = getNodePrs(nodes, affected_nodes);
-
-        // 2. Touch nodes
-        for (auto node: nodes)
-            node->touch();
-
-        // 3. Compute PDFs after proposal, after touch
-        auto touched_after_proposal = getNodePrs(nodes, affected_nodes);
-
-        // 4. Keep nodes + affected_nodes
-        for (auto node: nodes)
-            node->keep();
-
-        // 5. Compare pdfs for each node
-	std::vector<std::string> node_names;
-	for(auto node: nodes)
-	    node_names.push_back(node->getName());
-
-        RbException E;
-        E<<std::setprecision(err_precision)<<"Executing "<<proposal->getProposalName()<<"("<<StringUtilities::join(node_names,",")<<"): PDFs not up-to-date after proposal!\n";
-        bool err = false;
-        for(auto& [node,pr1]: untouched_after_proposal)
-        {
-            auto pr2 = touched_after_proposal.at(node);
-            if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
-            {
-                E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
-                err = true;
-            }
-        }
-
-        if (err) throw E;
-    }
-    */
+     * NOTE: Debug code probably shouldn't call touch/keep here:
+     *
+     *       Calling touch/keep after reject/restore can hide MCMC problems.
+     *       Calling touch/keep after accept should be redundant.
+     */
 }
 
 
