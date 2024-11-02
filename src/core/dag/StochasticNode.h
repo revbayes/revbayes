@@ -475,8 +475,14 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
-    
-    return getLnProbability() - stored_ln_prob;
+    double prob1 = stored_ln_prob;
+    double prob2 = getLnProbability();
+
+    // Both both are -Inf, we should not return -Inf + Inf = NaN.
+    if (prob1 == prob2)
+	return 0;
+    else
+	return (prob2 - prob1);
 }
 
 
