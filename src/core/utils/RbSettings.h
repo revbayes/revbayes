@@ -30,7 +30,7 @@ public:
     double                      getTolerance(void) const;                           //!< Retrieve the tolerance for comparing doubles
     bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
     int                         getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
-    int                         getLogMCMC(void) const;                           //!< How much work should we perform to check MCMC?
+    int                         getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
 
     // setters
     void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
@@ -42,7 +42,7 @@ public:
     void                        setTolerance(double t);                             //!< Set the tolerance for comparing double
     void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
     void                        setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
-    void                        setLogMCMC(int d);                                //!< How much work should we perform to check MCMC?
+    void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
     
 private:
     RbSettings(void);                                   //!< Default constructor
