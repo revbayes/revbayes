@@ -553,6 +553,8 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         
         dist_member_rules.push_back( new ArgumentRule( "gapMatchClamped", RlBoolean::getClassTypeSpec(), "Should we set the simulated character to be gap or missing if the corresponding character in the clamped matrix is gap or missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
+        dist_member_rules.push_back( new ArgumentRule("invertProbability", RlBoolean::getClassTypeSpec(), "Should we return the reciprocal of the probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+
         rules_set = true;
     }
 
@@ -709,6 +711,10 @@ void Dist_phyloCTMC::setConstParameter(const std::string& name, const RevPtr<con
     else if ( name == "coding" )
     {
         coding = var;
+    }
+    else if ( name == "invertProbability" )
+    {
+        invertProbability = var;
     }
     else
     {

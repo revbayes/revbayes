@@ -1,0 +1,13 @@
+
+Standard character matrix with 18 taxa and 62 characters
+========================================================
+Origination:                   "bears_morphology.nex"
+Number of taxa:                18
+Number of included taxa:       18
+Number of characters:          62
+Number of included characters: 62
+Datatype:                      Standard
+
+	
+Expect equal:	931.4533	-931.4533	
+Expect equal:	883.8272	-883.8272	

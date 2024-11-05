@@ -252,6 +252,7 @@ namespace RevBayesCore {
         bool                                                                branch_heterogeneous_clock_rates = false;
         bool                                                                branch_heterogeneous_substitution_matrices = true;
         bool                                                                rate_variation_across_sites = false;
+        bool invert_likelihood = false;
 
         // MPI variables
         size_t                                                              pattern_block_start;
@@ -961,7 +962,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     }
 
     // sum the partials up
-    this->lnProb = sumRootLikelihood();
+    this->lnProb = invert_likelihood ? - sumRootLikelihood() : sumRootLikelihood();
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( in_mcmc_mode == false )
