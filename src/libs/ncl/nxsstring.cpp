@@ -446,7 +446,7 @@ NxsString &NxsString::RightJustifyLong(
   bool clear_first)	/* if true, initialize string first to empty string */
 	{
 	bool x_negative = (x < 0L ? true : false);
-	unsigned long xabs = (x_negative ? (-x) : x);
+	std::uint64_t xabs = (x_negative ? (-x) : x);
 	unsigned num_spaces = w;
 
 	// If w = 10 and x = 123, we need 7 blank spaces before x
@@ -784,8 +784,8 @@ NxsString NxsString::ToHex(
 	char decod[] = "0123456789ABCDEF";
 	for (int i = nFours - 1; i >= 0 ; i--)
 		{
-		unsigned long k = (p >> (4*i));
-		unsigned long masked = (k & 0x000f);
+		std::uint64_t k = (p >> (4*i));
+		std::uint64_t masked = (k & 0x000f);
 		s += decod[masked];
 		}
 	return s;

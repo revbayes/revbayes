@@ -823,7 +823,7 @@ bool  MultiFormatReader::readAlnData(
 						NxsDiscreteStateCell stateCode = dm.GetStateCodeStored(c);
 						if (stateCode == NXS_INVALID_STATE_CODE)
 							{
-							err << "Illegal state code \"" << c << "\" found when reading character " << (unsigned long) row->size() << " for taxon " << n;
+							err << "Illegal state code \"" << c << "\" found when reading character " << (std::uint64_t) row->size() << " for taxon " << n;
 							throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
 							}
 						row->push_back(stateCode);
