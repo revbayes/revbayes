@@ -5,6 +5,7 @@
 #include "MonteCarloAnalysisOptions.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 

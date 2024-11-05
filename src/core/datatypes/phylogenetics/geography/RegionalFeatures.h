@@ -13,6 +13,7 @@
 #include <iosfwd>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 #include "Cloneable.h"
 #include "RegionalFeatureLayer.h"
