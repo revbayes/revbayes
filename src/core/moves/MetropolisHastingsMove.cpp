@@ -296,7 +296,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     if (logMCMC >= 3)
     {
-        std::cerr<<std::setprecision(10);
+        std::cerr<<std::setprecision(11);
         for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
         std::cerr<<"\n";
