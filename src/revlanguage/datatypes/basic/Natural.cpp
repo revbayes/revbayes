@@ -29,19 +29,6 @@ Natural::Natural( RevBayesCore::TypedDagNode<long> *v ) : Integer( v )
     
 }
 
-
-/** Construct from int */
-Natural::Natural( long x ) : Integer( x )
-{
-
-    if ( x < 0 )
-    {
-        throw RbException( "Negative value for " + getClassType() );
-    }
-    
-}
-
-
 /**
  * Generic addition operator.
  * We test if the rhs is of a type that we use for a specialized addition operation.

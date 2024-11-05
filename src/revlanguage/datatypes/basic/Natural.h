@@ -1,10 +1,12 @@
 #ifndef Natural_H
 #define Natural_H
 
+#include "RbBoolean.h"
 #include "Integer.h"
 
 #include <ostream>
 #include <string>
+#include <type_traits>  // For std::enable_if and std::is_integral
 
 
 
@@ -23,10 +25,17 @@ namespace RevLanguage {
 
         public:
         Natural(void);                                                                                      //!< Default constructor (value is 0)
-        Natural(RevBayesCore::TypedDagNode<long> *v);                                                       //!< Constructor with DAG node
-        Natural(long x);                                                                                    //!< Constructor from int
-//        Natural(unsigned long x);                                                                           //!< Constructor from size_t
+        Natural(RevBayesCore::TypedDagNode<long> *v);   
 
+        template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+            explicit Natural(T x) : Integer(x) {
+            if (x < 0) {
+                throw RbException("Negative value for " + getClassType());
+            }
+        }
+
+        explicit Natural(const RevBayesCore::Boolean& b) : Integer(b ? 1 : 0) {}
+      
         // Basic operator functions
         RevObject*                  add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements
         Natural*                    add(const Natural &rhs) const;                                          //!< Addition operator used for example in '+=' statements

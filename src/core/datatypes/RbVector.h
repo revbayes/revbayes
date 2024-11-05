@@ -33,15 +33,15 @@ namespace RevBayesCore {
         RbVector<valueType>&                                operator=(const RbVector<valueType>& ) = default;
         RbVector<valueType>&                                operator=(      RbVector<valueType>&&) = default;
         RbVector<valueType>*                                clone(void) const;                                                                      //!< Create an independent clone
-        void                                                printElement(std::ostream &o, size_t i, std::string sep="\t", int l=-1, bool left=true) const;                                          //!< Print the i-th element
+        void                                                printElement(std::ostream &o, size_t i, std::string sep="\t", std::int64_t l=-1, bool left=true) const;                                          //!< Print the i-th element
         
         void                                                sort(void);
         
     private:
         
         // private methods
-        int                                                 pivot(int l, int r);
-        void                                                quicksort(int l, int r);
+        std::int64_t                                        pivot(std::int64_t l, std::int64_t r);
+        void                                                quicksort(std::int64_t l, std::int64_t r);
         void                                                swap( valueType& a, valueType& b);
         
         // private members
@@ -49,33 +49,33 @@ namespace RevBayesCore {
     };
     
     template<>
-    class RbVector<long> : public RbVectorImpl<long, IsAbstract<long>::Is > {
+    class RbVector<std::int64_t> : public RbVectorImpl<std::int64_t, IsAbstract<std::int64_t>::Is > {
         
     public:
         // constructor(s)
-        RbVector() : RbVectorImpl<long, IsAbstract<long>::Is  >( ) {}
-        RbVector(size_t n) : RbVectorImpl<long, IsAbstract<long>::Is  >( n ) {}
-        RbVector(size_t n, const long &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( n, v ) {}
-        RbVector(const std::vector<long> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
-        RbVector(const RbVector<long> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
-        RbVector(RbVector<long> &&v) = default;
+        RbVector() : RbVectorImpl<std::int64_t, IsAbstract<std::int64_t>::Is  >( ) {}
+        RbVector(size_t n) : RbVectorImpl<std::int64_t, IsAbstract<std::int64_t>::Is  >( n ) {}
+        RbVector(size_t n, const std::int64_t &v) : RbVectorImpl<std::int64_t, IsAbstract<std::int64_t>::Is  >( n, v ) {}
+        RbVector(const std::vector<std::int64_t> &v) : RbVectorImpl<std::int64_t, IsAbstract<std::int64_t>::Is  >( v ) {}
+        RbVector(const RbVector<std::int64_t> &v) : RbVectorImpl<std::int64_t, IsAbstract<std::int64_t>::Is  >( v ) {}
+        RbVector(RbVector<std::int64_t> &&v) = default;
         virtual                                            ~RbVector(void) {}
         
         // public member functions
-        RbVector<long>&                                     operator=(const RbVector<long>& ) = default;
-        RbVector<long>&                                     operator=(      RbVector<long>&&) = default;
-        RbVector<long>*                                     clone(void) const { return new RbVector<long>( *this ); }                                                                            //!< Create an independent clone
-        void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, int l=-1, bool left=true) const { std::stringstream ss; ss << this->operator[](i); std::string s = ss.str(); StringUtilities::fillWithSpaces( s, l, left ); o << s; } //!< Print the i-th element
+        RbVector<std::int64_t>&                                     operator=(const RbVector<std::int64_t>& ) = default;
+        RbVector<std::int64_t>&                                     operator=(      RbVector<std::int64_t>&&) = default;
+        RbVector<std::int64_t>*                                     clone(void) const { return new RbVector<std::int64_t>( *this ); }                                                                            //!< Create an independent clone
+        void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, std::int64_t l=-1, bool left=true) const { std::stringstream ss; ss << this->operator[](i); std::string s = ss.str(); StringUtilities::fillWithSpaces( s, l, left ); o << s; } //!< Print the i-th element
         
         //        StringUtilities::fillWithSpaces( s, columnWidth, false );
         void                                                sort(bool ascending = true) {
             if ( ascending == true)
             {
-                std::sort(this->std::vector<long>::begin(), this->std::vector<long>::end() );
+                std::sort(this->std::vector<std::int64_t>::begin(), this->std::vector<std::int64_t>::end() );
             }
             else
             {
-                std::sort(this->std::vector<long>::rbegin(), this->std::vector<long>::rend() );
+                std::sort(this->std::vector<std::int64_t>::rbegin(), this->std::vector<std::int64_t>::rend() );
             }
         }
         
@@ -91,7 +91,7 @@ namespace RevBayesCore {
         RbVector(size_t n) : RbVectorImpl<double, IsAbstract<double>::Is  >( n ) {}
         RbVector(size_t n, const double &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( n, v ) {}
         RbVector(const std::vector<double> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( v ) {}
-        RbVector(const RbVector<long> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( ) {  for (size_t i=0; i<v.size(); ++i) push_back( double(v[i]) ); }
+        RbVector(const RbVector<std::int64_t> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( ) {  for (size_t i=0; i<v.size(); ++i) push_back( double(v[i]) ); }
         RbVector(const RbVector<double> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( v ) {}
         RbVector(RbVector<double> &&v) = default;
         virtual                                            ~RbVector(void) {}
@@ -100,7 +100,7 @@ namespace RevBayesCore {
         RbVector<double>&                                   operator=(const RbVector<double>& ) = default;
         RbVector<double>&                                   operator=(      RbVector<double>&&) = default;
         RbVector<double>*                                   clone(void) const { return new RbVector<double>( *this ); }                                                                            //!< Create an independent clone
-        void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, int l=-1, bool left=true) const {
+        void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, std::int64_t l=-1, bool left=true) const {
                                                                 std::stringstream ss;
                                                                 ss << this->operator[](i);
                                                                 std::string s = ss.str();
@@ -124,7 +124,7 @@ namespace RevBayesCore {
     };
     
     template <>
-    inline void RbVector<unsigned int>::printElement(std::ostream& o, size_t idx, std::string /*sep*/, int l, bool left) const
+    inline void RbVector<unsigned int>::printElement(std::ostream& o, size_t idx, std::string /*sep*/, std::int64_t l, bool left) const
     {
         std::stringstream ss;
         ss << this->operator[](idx);
@@ -134,7 +134,7 @@ namespace RevBayesCore {
     }
     
     template <>
-    inline void RbVector<std::string>::printElement(std::ostream& o, size_t idx, std::string /*sep*/, int l, bool left) const
+    inline void RbVector<std::string>::printElement(std::ostream& o, size_t idx, std::string /*sep*/, std::int64_t l, bool left) const
     {
         std::stringstream ss;
         ss << "\"" << this->operator[](idx) << "\"";
@@ -144,7 +144,7 @@ namespace RevBayesCore {
     }
     
     template <>
-    inline void RbVector<boost::dynamic_bitset<> >::printElement(std::ostream& o, size_t idx, std::string /*sep*/, int l, bool left) const
+    inline void RbVector<boost::dynamic_bitset<> >::printElement(std::ostream& o, size_t idx, std::string /*sep*/, std::int64_t l, bool left) const
     {
         std::stringstream ss;
         ss << this->operator[](idx);
@@ -217,7 +217,7 @@ RevBayesCore::RbVector<valueType>* RevBayesCore::RbVector<valueType>::clone(void
  * @return - the pivot element
  */
 template <class valueType>
-int RevBayesCore::RbVector<valueType>::pivot(int first, int last)
+int RevBayesCore::RbVector<valueType>::pivot(std::int64_t first, std::int64_t last)
 {
     int  p = first;
     const valueType& pivotElement = this->operator[](first);
@@ -249,7 +249,7 @@ int RevBayesCore::RbVector<valueType>::pivot(int first, int last)
 
 
 template <class valueType>
-void RevBayesCore::RbVector<valueType>::printElement(std::ostream& o, size_t idx, std::string sep, int l, bool left) const
+void RevBayesCore::RbVector<valueType>::printElement(std::ostream& o, size_t idx, std::string sep, std::int64_t l, bool left) const
 {
     
     const valueType &element = this->operator[](idx);
@@ -275,12 +275,12 @@ void RevBayesCore::RbVector<valueType>::printElement(std::ostream& o, size_t idx
 
 
 template <class valueType>
-void RevBayesCore::RbVector<valueType>::quicksort(int first, int last)
+void RevBayesCore::RbVector<valueType>::quicksort(std::int64_t first, std::int64_t last)
 {
     
     if (first < last)
     {
-        int pivotElement = pivot(first, last);
+        std::int64_t pivotElement = pivot(first, last);
         quicksort(first, pivotElement-1);
         quicksort(pivotElement+1, last);
     }
