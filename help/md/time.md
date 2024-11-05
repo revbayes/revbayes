@@ -13,7 +13,7 @@ Get the current system time.
 
 "(milli)seconds" returns the number of (milli)seconds that have elapsed since midnight.
 
-"fromBeginning", the default, returns the number of milliseconds that have elapsed since 1400-Jan-01 00:00:00, the earliest representable date in the boost library's implementation of the Gregorian date system.
+"fromBeginning", the default, returns the number of milliseconds that have elapsed since 1970-Jan-01 00:00:00, the start of the Unix epoch.
 
 ## authors
 Sebastian Hoehna
