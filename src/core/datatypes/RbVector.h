@@ -33,7 +33,7 @@ namespace RevBayesCore {
         RbVector<valueType>&                                operator=(const RbVector<valueType>& ) = default;
         RbVector<valueType>&                                operator=(      RbVector<valueType>&&) = default;
         RbVector<valueType>*                                clone(void) const;                                                                      //!< Create an independent clone
-        void                                                printElement(std::ostream &o, size_t i, std::string sep="\t", std::int64_t l=-1, bool left=true) const;                                          //!< Print the i-th element
+        void                                                printElement(std::ostream &o, size_t i, std::string sep="\t", std::int64_t l=-1, bool left=true) const override;                                          //!< Print the i-th element
         
         void                                                sort(void);
         
@@ -65,7 +65,7 @@ namespace RevBayesCore {
         RbVector<std::int64_t>&                                     operator=(const RbVector<std::int64_t>& ) = default;
         RbVector<std::int64_t>&                                     operator=(      RbVector<std::int64_t>&&) = default;
         RbVector<std::int64_t>*                                     clone(void) const { return new RbVector<std::int64_t>( *this ); }                                                                            //!< Create an independent clone
-        void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, std::int64_t l=-1, bool left=true) const { std::stringstream ss; ss << this->operator[](i); std::string s = ss.str(); StringUtilities::fillWithSpaces( s, l, left ); o << s; } //!< Print the i-th element
+        void printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, std::int64_t l=-1, bool left=true) const override { std::stringstream ss; ss << this->operator[](i); std::string s = ss.str(); StringUtilities::fillWithSpaces( s, l, left ); o << s; } //!< Print the i-th element
         
         //        StringUtilities::fillWithSpaces( s, columnWidth, false );
         void                                                sort(bool ascending = true) {
@@ -217,7 +217,7 @@ RevBayesCore::RbVector<valueType>* RevBayesCore::RbVector<valueType>::clone(void
  * @return - the pivot element
  */
 template <class valueType>
-int RevBayesCore::RbVector<valueType>::pivot(std::int64_t first, std::int64_t last)
+std::int64_t RevBayesCore::RbVector<valueType>::pivot(std::int64_t first, std::int64_t last)
 {
     int  p = first;
     const valueType& pivotElement = this->operator[](first);
