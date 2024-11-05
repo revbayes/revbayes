@@ -183,7 +183,7 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
     // 2-d vectors to keep the data (posteriors and states) of the inputTree nodes: [node][data]
     const std::vector<TopologyNode*> &summary_nodes = tree.getNodes();
     //std::vector<std::map<std::string, Sample<std::string> > > stateAbsencePresence(summary_nodes.size(), std::map<std::string, Sample<std::string> >());
-    std::vector<std::map<std::string, long> > state_counts(summary_nodes.size(), std::map<std::string, long>());
+    std::vector<std::map<std::string, std::int64_t> > state_counts(summary_nodes.size(), std::map<std::string, std::int64_t>());
 
     bool interiorOnly = true;
     bool tipsChecked = false;
@@ -876,7 +876,7 @@ double TreeSummary::cladeProbability(const Clade &c, bool verbose )
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, long>& cladeCountMap)
+TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
@@ -1216,7 +1216,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 }
 
 
-long TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
+std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 {
     summarize( verbose );
 
@@ -1933,9 +1933,9 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
     outgroup = c;
 }
 
-long TreeSummary::sampleSize(bool post) const
+std::int64_t TreeSummary::sampleSize(bool post) const
 {
-    long total = 0;
+    std::int64_t total = 0;
 
     for(auto& trace: traces)
     {
@@ -1946,7 +1946,7 @@ long TreeSummary::sampleSize(bool post) const
 }
 
 
-long TreeSummary::splitCount(const Split &n) const
+std::int64_t TreeSummary::splitCount(const Split &n) const
 {
     auto iter = clade_counts.find(n);
 

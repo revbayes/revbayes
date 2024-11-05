@@ -34,7 +34,7 @@ namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
-HeterogeneousRateBirthDeath::HeterogeneousRateBirthDeath( const TypedDagNode<double> *a, const TypedDagNode<long> *rs, const TypedDagNode<RbVector<double> > *s, const TypedDagNode<RbVector<double> > *e, const TypedDagNode<double > *ev, const TypedDagNode< double > *r, const std::string &cdt, bool allow_same, const std::vector<Taxon> &n) : AbstractCharacterHistoryBirthDeathProcess(),
+HeterogeneousRateBirthDeath::HeterogeneousRateBirthDeath( const TypedDagNode<double> *a, const TypedDagNode<std::int64_t> *rs, const TypedDagNode<RbVector<double> > *s, const TypedDagNode<RbVector<double> > *e, const TypedDagNode<double > *ev, const TypedDagNode< double > *r, const std::string &cdt, bool allow_same, const std::vector<Taxon> &n) : AbstractCharacterHistoryBirthDeathProcess(),
     root_age( a ),
     root_state( rs ),
     speciation( s ),
@@ -475,7 +475,7 @@ double HeterogeneousRateBirthDeath::computeRootLikelihood( void )
 }
 
 
-void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
     
     if ( n == "numberEvents" )
@@ -744,7 +744,7 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
     }
     else if (oldP == root_state)
     {
-        root_state = static_cast<const TypedDagNode<long>* >( newP );
+        root_state = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     else if (oldP == speciation)
     {

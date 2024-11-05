@@ -54,7 +54,7 @@ class DiscreteCharacterState;
         virtual void                                            concatenate(const AbstractHomologousDiscreteCharacterData &d, std::string type = "") = 0;   //!< Concatenate data matrices
         virtual AbstractHomologousDiscreteCharacterData*        combineCharacters(const AbstractHomologousDiscreteCharacterData &d) const = 0;              //!< Combine/expand data matrices
         virtual double                                          computeMultinomialProfileLikelihood( void ) const = 0;
-        virtual std::vector<long>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
+        virtual std::vector<std::int64_t>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
         virtual MatrixReal                                      computeStateFrequencies(void) const = 0;                                                    //!< Compute the state frequencies for this character data object
         virtual void                                            excludeCharacter(size_t i) = 0;                                                             //!< Exclude character
         void                                                    fillMissingSitesMask( std::vector<std::vector<bool> >& mask_gap, std::vector<std::vector<bool> >& mask_missing ) const;

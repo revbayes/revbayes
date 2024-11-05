@@ -44,7 +44,7 @@ RealPos::RealPos( double x ) : Real( x )
 
 
 /** Construct from int */
-RealPos::RealPos( long x ) : Real( double(x) )
+RealPos::RealPos( std::int64_t x ) : Real( double(x) )
 {
 
     if ( x < 0 )

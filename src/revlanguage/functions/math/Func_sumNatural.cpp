@@ -45,10 +45,10 @@ Func_sumNatural* Func_sumNatural::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction<long>* Func_sumNatural::createFunction( void ) const
+RevBayesCore::TypedFunction<std::int64_t>* Func_sumNatural::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<long> >* arg = static_cast<const ModelVector<Natural> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* arg = static_cast<const ModelVector<Natural> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::SumIntegerFunction* f = new RevBayesCore::SumIntegerFunction( arg );
     
     return f;

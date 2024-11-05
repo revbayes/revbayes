@@ -796,7 +796,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<std::int64_t>& num_events)
 {
 	// draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);

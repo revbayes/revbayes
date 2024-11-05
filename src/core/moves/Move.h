@@ -42,7 +42,7 @@ template <class valueType> class RbOrderedSet;
         virtual size_t                                          getNumberTriedCurrentPeriod(void) const = 0;                //!< Get the number of tries for this move since the last reset
         virtual size_t                                          getNumberTriedTotal(void) const = 0;                        //!< Get the number of tries for this move since the last reset
         virtual double                                          getUpdateWeight(void) const = 0;                            //!< Get update weight of InferenceMove
-        virtual bool                                            isActive(unsigned long gen) const = 0;                      //!< Is this move active?
+        virtual bool                                            isActive(std::uint64_t gen) const = 0;                      //!< Is this move active?
 //        virtual void                                            perform(double lHeat, double pHeat) = 0;                  //!< Perform the move.
         virtual void                                            performMcmcStep(double prHeat, double lHeat, double pHeat) = 0;            //!< Perform the move.
         virtual void                                            performHillClimbingStep(double lHeat, double pHeat) = 0;    //!< Perform the move.

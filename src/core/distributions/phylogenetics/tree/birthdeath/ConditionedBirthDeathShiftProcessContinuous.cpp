@@ -517,7 +517,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeRootLikelihood( void 
 }
 
 
-void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
     
     if ( n == "numberEvents" )

@@ -24,7 +24,7 @@ Natural::Natural( void ) : Integer( 0L )
 }
 
 
-Natural::Natural( RevBayesCore::TypedDagNode<long> *v ) : Integer( v )
+Natural::Natural( RevBayesCore::TypedDagNode<std::int64_t> *v ) : Integer( v )
 {
     
 }

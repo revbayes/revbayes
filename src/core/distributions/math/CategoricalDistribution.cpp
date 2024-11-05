@@ -22,7 +22,7 @@ using namespace RevBayesCore;
  */
 
 CategoricalDistribution::CategoricalDistribution(const TypedDagNode< Simplex > *p) :
-    TypedDistribution<long>( new long( 1 ) ),
+    TypedDistribution<std::int64_t>( new long( 1 ) ),
     probs( p )
 {
     // add the parameters to our set (in the base class)

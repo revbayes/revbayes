@@ -29,13 +29,13 @@ namespace RevBayesCore {
     
         namespace Multinomial {
             double                      pdf(const std::vector<double>& p, const std::vector<unsigned int>& x);      /*!< Multinomial(p[]) probability */
-            double                      pdf(const std::vector<double>& p, const std::vector<long>& x);              /*!< Multinomial(p[]) probability */
+            double                      pdf(const std::vector<double>& p, const std::vector<std::int64_t>& x);              /*!< Multinomial(p[]) probability */
             double                      pdf(const std::vector<double>& p, const std::vector<double>& x);            /*!< Multinomial(p[]) probability */
             double                      lnPdf(const std::vector<double>& p, const std::vector<unsigned int>& x);    /*!< Multinomial(p[]) log_e probability */
-            double                      lnPdf(const std::vector<double>& p, const std::vector<long>& x);            /*!< Multinomial(p[]) log_e probability */
+            double                      lnPdf(const std::vector<double>& p, const std::vector<std::int64_t>& x);            /*!< Multinomial(p[]) log_e probability */
             double                      lnPdf(const std::vector<double>& p, const std::vector<double>& x);          /*!< Multinomial(p[]) log_e probability */
-            std::vector<long>           rv(const std::vector<double>& p, RandomNumberGenerator& rng);               /*!< Multinomial(p[]) random variable */
-            std::vector<long>           rv(const std::vector<double>& p, size_t n, RandomNumberGenerator& rng);     /*!< Multinomial(p[]) random variable */
+            std::vector<std::int64_t>           rv(const std::vector<double>& p, RandomNumberGenerator& rng);               /*!< Multinomial(p[]) random variable */
+            std::vector<std::int64_t>           rv(const std::vector<double>& p, size_t n, RandomNumberGenerator& rng);     /*!< Multinomial(p[]) random variable */
         }
     }
 }

@@ -25,9 +25,9 @@ namespace RevBayesCore {
         
     public:
         RegionalFeatures(void);
-        RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<long> > > wc,
+        RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<std::int64_t> > > wc,
                          std::map<size_t, std::map<size_t, std::vector<double> > > wq,
-                         std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > bc,
+                         std::map<size_t, std::map<size_t, std::vector<std::vector<std::int64_t> > > > bc,
                          std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > bq);
         RegionalFeatures(const RegionalFeatures& a);
         RegionalFeatures&                                       operator=(const RegionalFeatures& a);
@@ -48,14 +48,14 @@ namespace RevBayesCore {
         void initializeFeatures();
         
         // [time_index][feature_index][this_region]
-        std::map<size_t, std::map<size_t, std::vector<long> > > withinCategorical;
+        std::map<size_t, std::map<size_t, std::vector<std::int64_t> > > withinCategorical;
         std::map<size_t, std::map<size_t, std::vector<double> > > withinQuantitative;
         
         // example: [cat_or_quant][time_index][feature_index][this_region]
         // std::vector< std::vector< std::vector< std::vector<double> > > > withinFeatures;
         
         // [time_index][feature_index][from_region][to_region]
-        std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > betweenCategorical;
+        std::map<size_t, std::map<size_t, std::vector<std::vector<std::int64_t> > > > betweenCategorical;
         std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > betweenQuantitative;
         
         // make everything look like this:

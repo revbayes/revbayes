@@ -14,7 +14,7 @@ namespace RevBayesCore { class DagNode; }
  * @param med a bool of whether to use the median values to represent each category. If false then the mean values are used
  */
 
-RevBayesCore::DiscretizeBetaFunction::DiscretizeBetaFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<long> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
+RevBayesCore::DiscretizeBetaFunction::DiscretizeBetaFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<std::int64_t> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
 alpha( a ),
 beta( b ),
 numCats(nc),
@@ -50,7 +50,7 @@ void RevBayesCore::DiscretizeBetaFunction::swapParameterInternal(const DagNode *
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }

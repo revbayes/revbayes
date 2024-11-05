@@ -89,7 +89,7 @@ void MarkovTimesDistribution::redrawValue(void)
 	this->simulateChildren();
 }
 
-void MarkovTimesDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void MarkovTimesDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     if ( n == "getNumberOfEvents" )
     {

@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  * 
  * @param x a value of type double
  */
-CeilFunction::CeilFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
+CeilFunction::CeilFunction(const TypedDagNode<double> *x) : TypedFunction<std::int64_t>( new long(0) ),
     a( x )
 {
     addParameter( x );

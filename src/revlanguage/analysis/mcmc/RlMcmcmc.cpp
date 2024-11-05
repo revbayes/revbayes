@@ -116,7 +116,7 @@ void Mcmcmc::constructInternalObject( void )
     
     if (sm == "both")
     {
-        long si2 = 0;
+        std::int64_t si2 = 0;
         if (swap_interval2->getRevObject() != RevNullObject::getInstance())
         {
             si2 = static_cast<const Natural &>( swap_interval2->getRevObject() ).getValue();

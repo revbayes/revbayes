@@ -50,8 +50,8 @@ Dist_UniformNatural* Dist_UniformNatural::clone( void ) const
 RevBayesCore::UniformIntegerDistribution* Dist_UniformNatural::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<long>* l   = static_cast<const Natural &>( lower->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* u   = static_cast<const Natural &>( upper->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* l   = static_cast<const Natural &>( lower->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* u   = static_cast<const Natural &>( upper->getRevObject() ).getDagNode();
     RevBayesCore::UniformIntegerDistribution* d    = new RevBayesCore::UniformIntegerDistribution(l, u);
     
     return d;

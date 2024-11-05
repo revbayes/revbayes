@@ -120,7 +120,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
 
         // the checkoint file (empty by default) and the checkoint interval (0 by default)
         const std::string checkpoint_file = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        long checkpoint_interval = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        std::int64_t checkpoint_interval = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
         if ( (checkpoint_file != "" && checkpoint_interval == 0) || (checkpoint_file == "" && checkpoint_interval != 0) )
         {
             throw RbException("For checkpointing you have to provide both the checkpoint file and the checkpoint frequency (interval).");

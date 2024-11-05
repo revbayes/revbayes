@@ -25,7 +25,7 @@ namespace RevLanguage {
 
         public:
         Natural(void);                                                                                      //!< Default constructor (value is 0)
-        Natural(RevBayesCore::TypedDagNode<long> *v);   
+        Natural(RevBayesCore::TypedDagNode<std::int64_t> *v);   
 
         template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
             explicit Natural(T x) : Integer(x) {

@@ -8,7 +8,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-SegregatingSitesFunction::SegregatingSitesFunction(const TypedDagNode<AbstractHomologousDiscreteCharacterData> *a, bool excl) : TypedFunction<long>( new long(0) ),
+SegregatingSitesFunction::SegregatingSitesFunction(const TypedDagNode<AbstractHomologousDiscreteCharacterData> *a, bool excl) : TypedFunction<std::int64_t>( new long(0) ),
     alignment( a ),
     exclude_ambiguous( excl )
 {

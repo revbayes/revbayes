@@ -11,7 +11,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< long > *ps) : TypedFunction< Simplex > ( new Simplex() ),
+PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< std::int64_t > *ps) : TypedFunction< Simplex > ( new Simplex() ),
     fixedNucleotideRootFrequencies( fnrf ),
     frequencyOfPolymorphismsAtTheRoot( fopar ),
     mutationRates(mr), populationSize(ps)
@@ -31,7 +31,7 @@ PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Sim
 }
 
 
-PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< long > *ps): TypedFunction< Simplex > ( new Simplex() ),
+PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< std::int64_t > *ps): TypedFunction< Simplex > ( new Simplex() ),
     fixedNucleotideRootFrequencies( fnrf ),
     frequencyOfPolymorphismsAtTheRoot( fopar ),
     mutationMatrix( mm ),
@@ -130,7 +130,7 @@ void PoMoRootFrequenciesFunction::swapParameterInternal(const DagNode *oldP, con
     }
     else if (oldP == populationSize)
     {
-        populationSize = static_cast<const TypedDagNode< long >* >( newP );
+        populationSize = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
 
     

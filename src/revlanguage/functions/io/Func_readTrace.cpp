@@ -80,7 +80,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
         
     std::vector<RevBayesCore::TraceNumeric> data;
         
-    long thinning = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t thinning = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
 
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format

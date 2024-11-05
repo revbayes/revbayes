@@ -24,7 +24,7 @@ template <class variableType> class StochasticNode;
     class BinarySwitchProposal : public Proposal {
         
     public:
-        BinarySwitchProposal( StochasticNode<long> *n);                                                                    //!<  constructor
+        BinarySwitchProposal( StochasticNode<std::int64_t> *n);                                                                    //!<  constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -46,8 +46,8 @@ template <class variableType> class StochasticNode;
     private:
         // parameters
         
-        StochasticNode<long>*               variable;                                                                           //!< The variable the Proposal is working on
-        long                                storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
+        StochasticNode<std::int64_t>*               variable;                                                                           //!< The variable the Proposal is working on
+        std::int64_t                                storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
     };
     
 }

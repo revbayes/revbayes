@@ -17,9 +17,9 @@ namespace RevBayesCore {
         double                  getESS() const;                                 //!< compute the effective sample size
         double                  getSEM() const;                                 //!< compute the standard error of the mean
 
-        double                  getMean(long begin, long end) const;            //!< compute the mean for the trace with begin and end indices of the values
-        double                  getESS(long begin, long end) const;             //!< compute the effective sample size with begin and end indices of the values
-        double                  getSEM(long begin, long end) const;             //!< compute the effective sample size with begin and end indices of the values
+        double                  getMean(std::int64_t begin, std::int64_t end) const;            //!< compute the mean for the trace with begin and end indices of the values
+        double                  getESS(std::int64_t begin, std::int64_t end) const;             //!< compute the effective sample size with begin and end indices of the values
+        double                  getSEM(std::int64_t begin, std::int64_t end) const;             //!< compute the effective sample size with begin and end indices of the values
 
         void                    computeStatistics(void);
 
@@ -34,15 +34,15 @@ namespace RevBayesCore {
     protected:
 
         void                    update() const;                                 //!< compute the correlation statistics (act,ess,sem,...)
-        void                    update(long begin, long end) const;             //!< compute the correlation statistics (act,ess,sem,...)
+        void                    update(std::int64_t begin, std::int64_t end) const;             //!< compute the correlation statistics (act,ess,sem,...)
 
         // variable holding the data
         mutable double          ess;                                            //!< effective sample size
         mutable double          mean;                                           //!< mean of trace
         mutable double          sem;                                            //!< standard error of mean
 
-        mutable long            begin;
-        mutable long            end;
+        mutable std::int64_t            begin;
+        mutable std::int64_t            end;
 
         // variable holding the data
         mutable double          essw;                                            //!< effective sample size

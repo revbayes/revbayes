@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  *
  */
 
-NegativeBinomialDistribution::NegativeBinomialDistribution(const TypedDagNode<long> *m, const TypedDagNode<double> *q) : TypedDistribution<long>( new long( 0 ) ),
+NegativeBinomialDistribution::NegativeBinomialDistribution(const TypedDagNode<std::int64_t> *m, const TypedDagNode<double> *q) : TypedDistribution<std::int64_t>( new long( 0 ) ),
     r( m ),
     p( q )
 {
@@ -73,7 +73,7 @@ void NegativeBinomialDistribution::swapParameterInternal(const DagNode *oldP, co
     }
     else if (oldP == r)
     {
-        r = static_cast<const TypedDagNode<long>* >( newP );
+        r = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
 
 }

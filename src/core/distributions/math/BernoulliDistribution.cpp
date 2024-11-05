@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  *
  */
 
-BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *p) : TypedDistribution<long>( new long( 0 ) ),
+BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *p) : TypedDistribution<std::int64_t>( new long( 0 ) ),
     p( p )
 {
     // add the parameters to our set (in the base class)

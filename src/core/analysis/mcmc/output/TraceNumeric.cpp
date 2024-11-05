@@ -83,7 +83,7 @@ double TraceNumeric::getMean() const
 }
 
 
-double TraceNumeric::getMean(long inbegin, long inend) const
+double TraceNumeric::getMean(std::int64_t inbegin, std::int64_t inend) const
 {
     if( begin != inbegin || end != inend)
     {
@@ -112,7 +112,7 @@ double TraceNumeric::getMean(long inbegin, long inend) const
  * @param end       end index for analysis
  *
  */
-double TraceNumeric::getESS(long begin, long end) const
+double TraceNumeric::getESS(std::int64_t begin, std::int64_t end) const
 {
 
     update(begin, end);
@@ -139,7 +139,7 @@ double TraceNumeric::getESS() const
  * @param end       end index for analysis
  *
  */
-double TraceNumeric::getSEM(long begin, long end) const
+double TraceNumeric::getSEM(std::int64_t begin, std::int64_t end) const
 {
 
     update(begin, end);
@@ -222,7 +222,7 @@ void TraceNumeric::update() const
  * Analyze trace within a range of values
  *
  */
-void TraceNumeric::update(long inbegin, long inend) const
+void TraceNumeric::update(std::int64_t inbegin, std::int64_t inend) const
 {
     // if we have not yet calculated the mean, do this now
     getMean(inbegin, inend);

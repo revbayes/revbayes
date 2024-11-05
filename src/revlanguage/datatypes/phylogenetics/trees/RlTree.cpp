@@ -194,7 +194,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if ( name == "getDescendantTaxa" )
     {
         found = true;
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         RevBayesCore::Tree &tree = dag_node->getValue();
         std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
@@ -203,7 +203,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         RevBayesCore::Tree &tree = dag_node->getValue();
-        std::vector<long> indices = tree.getNodeIndices();
+        std::vector<std::int64_t> indices = tree.getNodeIndices();
         ModelVector<Natural> *n = new ModelVector<Natural>( indices );
         return new RevVariable( n );
     }
@@ -238,7 +238,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         RevBayesCore::Tree &tree = dag_node->getValue();
-        long n = tree.getRoot().getIndex() + 1;
+        std::int64_t n = tree.getRoot().getIndex() + 1;
         return new RevVariable( new Natural( n ) );
     }
     else if (name == "isBinary")
@@ -252,7 +252,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
 
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
@@ -290,7 +290,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
         return new RevVariable( new RlString( n ) );
     }
@@ -405,7 +405,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         {
             tip_name = static_cast<const Taxon&>( args[0].getVariable()->getRevObject() ).getValue().getSpeciesName();
         }
-        long index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
+        std::int64_t index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
         return new RevVariable( new Natural( index ) );
     }
 

@@ -90,7 +90,7 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
         throw RbException("Unknown tree type to read.");
     }
     
-    long burnin = 0;
+    std::int64_t burnin = 0;
 
     RevObject& b = args[3].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )

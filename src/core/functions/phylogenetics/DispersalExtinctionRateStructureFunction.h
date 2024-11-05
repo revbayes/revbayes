@@ -15,7 +15,7 @@ template <class valueType> class TypedDagNode;
     class DispersalExtinctionRateStructureFunction : public TypedFunction<RbVector<double> > {
         
     public:
-        DispersalExtinctionRateStructureFunction(const TypedDagNode<RbVector<RbVector<double> > >* dr, TypedDagNode<RbVector<double> >* er, TypedDagNode<long>* rs);
+        DispersalExtinctionRateStructureFunction(const TypedDagNode<RbVector<RbVector<double> > >* dr, TypedDagNode<RbVector<double> >* er, TypedDagNode<std::int64_t>* rs);
         virtual                                            ~DispersalExtinctionRateStructureFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
@@ -36,7 +36,7 @@ template <class valueType> class TypedDagNode;
         // members
         const TypedDagNode<RbVector<RbVector<double> > >*   dispersalRates;
         const TypedDagNode<RbVector<double> >*              extinctionRates;
-        const TypedDagNode<long>*                            maxRangeSize;
+        const TypedDagNode<std::int64_t>*                            maxRangeSize;
         
         std::vector<std::vector<unsigned> >                 bits;
         std::map<std::vector<unsigned>, unsigned>           inverseBits;

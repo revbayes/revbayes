@@ -37,7 +37,7 @@ template <class valueType> class TypedDagNode;
         // members
         const TypedDagNode<RbVector<double> >*              root_frequencies;
         const TypedDagNode<Simplex>*                        rangeSize;
-//        const TypedDagNode<long>*                            maxRangeSize;
+//        const TypedDagNode<std::int64_t>*                            maxRangeSize;
         
         std::vector<std::vector<unsigned> >                 bits;
         std::map<std::vector<unsigned>, unsigned>           inverseBits;

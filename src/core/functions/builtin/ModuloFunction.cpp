@@ -7,10 +7,10 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 /* ModuloFunction of TypedDagNodes of types long
  *
- * @param l a value of type long, the dividend of the remainder division
- * @param r a value of type long, the divisor of the remainder division
+ * @param l a value of type std::int64_t, the dividend of the remainder division
+ * @param r a value of type std::int64_t, the divisor of the remainder division
  */
-ModuloFunction::ModuloFunction(const TypedDagNode<long> *l, const TypedDagNode<long> *r) : TypedFunction<long>( new long(0) ),
+ModuloFunction::ModuloFunction(const TypedDagNode<std::int64_t> *l, const TypedDagNode<std::int64_t> *r) : TypedFunction<std::int64_t>( new long(0) ),
     left( l ),
     right( r )
 {
@@ -48,12 +48,12 @@ void ModuloFunction::swapParameterInternal(const DagNode *oldP, const DagNode *n
     
     if ( oldP == left )
     {
-        left = static_cast<const TypedDagNode<long>* >( newP );
+        left = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
     if ( oldP == right )
     {
-        right = static_cast<const TypedDagNode<long>* >( newP );
+        right = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }

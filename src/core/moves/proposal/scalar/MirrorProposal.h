@@ -53,8 +53,8 @@ namespace RevBayesCore {
         double                                  sigmaHat;                                                                           //!< The currently used estimated sd of the variable from MCMC samples so far
         double                                  learnedSigmaHat;                                                                    //!< The estimated sd of the variable from MCMC samples so far
 
-        size_t                                  waitBeforeLearning;                                                                 //!< How long to wait before tracking empirical covariances
-        size_t                                  waitBeforeUsing;                                                                    //!< How long to wait before using the empirical covariances
+        size_t                                  waitBeforeLearning;                                                                 //!< How std::int64_t to wait before tracking empirical covariances
+        size_t                                  waitBeforeUsing;                                                                    //!< How std::int64_t to wait before using the empirical covariances
         size_t                                  nTried;                                                                             //!< How many times has this move been used?
         size_t                                  updates;                                                                            //!< How many updates have been tried?
         size_t                                  maxUpdates;                                                                         //!< How many updates until we stop monitoring the covariances?

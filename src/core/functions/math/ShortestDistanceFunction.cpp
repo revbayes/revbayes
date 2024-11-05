@@ -20,7 +20,7 @@ using namespace RevBayesCore;
  * @param dist a vector of vectors of doubles that represent a matrix denoting the distance between connected nodes. dist[i][j] denotes the distance between nodes i and j.
  */
 
-ShortestDistanceFunction::ShortestDistanceFunction(const TypedDagNode<RbVector<RbVector<long> > >* adj, const TypedDagNode<RbVector<RbVector<double> > >* dist) : TypedFunction<RbVector<RbVector<double> > >( new RbVector<RbVector<double> >() ),
+ShortestDistanceFunction::ShortestDistanceFunction(const TypedDagNode<RbVector<RbVector<std::int64_t> > >* adj, const TypedDagNode<RbVector<RbVector<double> > >* dist) : TypedFunction<RbVector<RbVector<double> > >( new RbVector<RbVector<double> >() ),
 num_nodes( adj->getValue().size() ),
 adjacencies( adj ),
 distances( dist )
@@ -51,7 +51,7 @@ ShortestDistanceFunction* ShortestDistanceFunction::clone( void ) const
  * @return s a vector of sets where each set denotes the adjacent nodes for that index in the vector
  *
  */
-std::vector<std::set<size_t> > ShortestDistanceFunction::createAdjacencySets(const RbVector<RbVector<long> >& adj)
+std::vector<std::set<size_t> > ShortestDistanceFunction::createAdjacencySets(const RbVector<RbVector<std::int64_t> >& adj)
 {
 
     std::vector<std::set<size_t> > s;
@@ -81,7 +81,7 @@ std::vector<std::set<size_t> > ShortestDistanceFunction::createAdjacencySets(con
  *
  */
 
-RbVector<RbVector<double> > ShortestDistanceFunction::findShortestPaths(const RbVector<RbVector<long> >& adj, const RbVector<RbVector<double> >& dist)
+RbVector<RbVector<double> > ShortestDistanceFunction::findShortestPaths(const RbVector<RbVector<std::int64_t> >& adj, const RbVector<RbVector<double> >& dist)
 {
     
     std::vector<std::set<size_t> > adj_set = createAdjacencySets(adj);
@@ -180,7 +180,7 @@ void ShortestDistanceFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == adjacencies)
     {
-        adjacencies = static_cast<const TypedDagNode<RbVector<RbVector<long> > >* >( newP );
+        adjacencies = static_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >* >( newP );
     }
     else if (oldP == distances)
     {
@@ -192,7 +192,7 @@ void ShortestDistanceFunction::swapParameterInternal(const DagNode *oldP, const 
 void ShortestDistanceFunction::update( void )
 {
     // get the new values
-    const RbVector<RbVector<long> >& adj = adjacencies->getValue();
+    const RbVector<RbVector<std::int64_t> >& adj = adjacencies->getValue();
     const RbVector<RbVector<double> >& dist = distances->getValue();
     
     // find all the shortest paths

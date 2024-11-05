@@ -82,7 +82,7 @@ namespace RevBayesCore {
     inline void Serializer<int,0>::ressurectFromString( int *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
 
     template<>
-    inline void Serializer<long,0>::ressurectFromString( long *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
+    inline void Serializer<std::int64_t,0>::ressurectFromString( std::int64_t *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
 
     
     template <typename objType>

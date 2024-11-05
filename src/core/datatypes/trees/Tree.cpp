@@ -372,12 +372,12 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "branchLength" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = getNode( index ).getBranchLength();
     }
     else if ( n == "nodeAge" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = getNode( index ).getAge();
     }
     else if ( n == "treeLength" )
@@ -442,12 +442,12 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 }
 
 
-void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
 
     if ( n == "parent" )
     {
-        long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        std::int64_t index = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         if (getNode( index ).isRoot() == true)
         {
             throw RbException("Root has no parent.");
@@ -513,7 +513,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 
     if ( n == "isContainedInClade" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         Clade clade = static_cast<const TypedDagNode<Clade> *>( args[1] )->getValue();
         clade.resetTaxonBitset( getTaxonBitSetMap() );
 
@@ -774,9 +774,9 @@ std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
 }
 
 
-std::vector<long> Tree::getNodeIndices(void) const
+std::vector<std::int64_t> Tree::getNodeIndices(void) const
 {
-    std::vector<long> indices;
+    std::vector<std::int64_t> indices;
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -1542,7 +1542,7 @@ void Tree::orderNodesByIndex( void )
 
 // Prints tree for user (rounding)
 void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
-    long previousPrecision = o.precision();
+    std::int64_t previousPrecision = o.precision();
     std::ios_base::fmtflags previousFlags = o.flags();
 
     std::fixed( o );

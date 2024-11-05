@@ -169,7 +169,7 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
 double AbstractRootedTreeDistribution::computeLnProbability( void )
 {
     
-    // proceed as long as derived classes validate a non-zero likeilhood
+    // proceed as std::int64_t as derived classes validate a non-zero likeilhood
     if ( isLnProbabilityNonZero() == false )
     {
         return RbConstants::Double::neginf;

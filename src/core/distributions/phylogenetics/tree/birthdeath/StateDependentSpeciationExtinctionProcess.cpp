@@ -89,7 +89,7 @@ StateDependentSpeciationExtinctionProcess::StateDependentSpeciationExtinctionPro
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
     average_extinction( std::vector<double>(5, 0.0) ),
-    num_shift_events( std::vector<long>(5, 0.0) ),
+    num_shift_events( std::vector<std::int64_t>(5, 0.0) ),
     time_in_states( std::vector<double>(ext->getValue().size(), 0.0) ),    
     simmap( "" ),
     cladogenesis_matrix( NULL ),
@@ -1542,7 +1542,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
 }
 
 
-void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
    
     if ( name == "numberEvents" )
@@ -1650,7 +1650,7 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::getAverageSpeciat
 }
 
 
-std::vector<long> StateDependentSpeciationExtinctionProcess::getNumberOfShiftEventsPerBranch( void ) const
+std::vector<std::int64_t> StateDependentSpeciationExtinctionProcess::getNumberOfShiftEventsPerBranch( void ) const
 {
     return num_shift_events;
 }
@@ -3281,6 +3281,6 @@ void StateDependentSpeciationExtinctionProcess::resizeVectors(size_t num_nodes)
     scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);
-    num_shift_events = std::vector<long>(num_nodes, 0.0);
+    num_shift_events = std::vector<std::int64_t>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);    
 }
