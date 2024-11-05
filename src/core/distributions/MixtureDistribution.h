@@ -111,7 +111,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::st
     
     if ( n == "getAllocationIndex" )
     {
-        rv = long(index) + 1;
+        rv = std::int64_t(index) + 1;
     }
     else
     {

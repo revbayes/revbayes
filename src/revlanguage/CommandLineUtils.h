@@ -53,7 +53,7 @@ public:
     }
     
     bool lastEffectiveSeparatorIsBlank(const char* buf) {
-        std::int64_t i = long(strlen(buf))-1;
+        std::int64_t i = std::int64_t(strlen(buf))-1;
         if (i < 0){
             return false;
         }

@@ -92,7 +92,7 @@ void RevBayesCore::EmpiricalDistribution<valueType>::executeMethod(const std::st
 
     if ( n == "getIndex" )
     {
-        rv = long(current_index) + 1;
+        rv = std::int64_t(current_index) + 1;
     }
     else
     {

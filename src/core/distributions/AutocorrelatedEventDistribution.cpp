@@ -1,6 +1,7 @@
 #include "AutocorrelatedEventDistribution.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "DagNode.h"
@@ -206,7 +207,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
     
     
     // compute the prior probability for the number of events
-    event_prior->setValue( new long( value->getNumberOfEvents() ) );
+    event_prior->setValue( new std::int64_t( value->getNumberOfEvents() ) );
     double ln_prob = event_prior->computeLnProbability();
     
     

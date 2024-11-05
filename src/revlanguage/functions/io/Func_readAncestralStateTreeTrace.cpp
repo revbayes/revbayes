@@ -100,7 +100,7 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
     else
     {
         double burninFrac = static_cast<const Probability &>(b).getValue();
-        burnin = long( floor( rv->getValue().size()*burninFrac ) );
+        burnin = std::int64_t( floor( rv->getValue().size()*burninFrac ) );
     }
 
     rv->getValue().setBurnin(burnin);

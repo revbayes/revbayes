@@ -149,7 +149,7 @@ std::int64_t RbStatistics::Geometric::quantile(double q, double p)
         return 0;
     
     /* add a fuzz to ensure left continuity */
-    return long(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
+    return std::int64_t(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
 }
 
 /*!

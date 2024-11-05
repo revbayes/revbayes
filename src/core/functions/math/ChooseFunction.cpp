@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  * @param b : value of type long
  */
 
-ChooseFunction::ChooseFunction(const TypedDagNode<std::int64_t> *a, const TypedDagNode<std::int64_t> *b) : TypedFunction<std::int64_t>( new long(0) ),
+ChooseFunction::ChooseFunction(const TypedDagNode<std::int64_t> *a, const TypedDagNode<std::int64_t> *b) : TypedFunction<std::int64_t>( new std::int64_t(0) ),
 n( a ),
 k( b )
 {

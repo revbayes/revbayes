@@ -200,8 +200,8 @@ const MemberRules& Mcmcmc::getParameterRules(void) const
         const MemberRules &parentRules = MonteCarloAnalysis::getParameterRules();
         memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
         
-        memberRules.push_back( new ArgumentRule("nchains"    , Natural::getClassTypeSpec()  , "The number of chains to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( long(4) ) ) );
-        memberRules.push_back( new ArgumentRule("swapInterval" , Natural::getClassTypeSpec(), "The interval at which swaps (between neighbor chains if the swapMethod is neighbor or both, or between chains chosen randomly if the swapMethod is random) will be attempted.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( long(10) )) );
+        memberRules.push_back( new ArgumentRule("nchains"    , Natural::getClassTypeSpec()  , "The number of chains to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( std::int64_t(4) ) ) );
+        memberRules.push_back( new ArgumentRule("swapInterval" , Natural::getClassTypeSpec(), "The interval at which swaps (between neighbor chains if the swapMethod is neighbor or both, or between chains chosen randomly if the swapMethod is random) will be attempted.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( std::int64_t(10) )) );
         memberRules.push_back( new ArgumentRule("deltaHeat"    , RealPos::getClassTypeSpec(), "The delta parameter for the heat function.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.2) ) );
         memberRules.push_back( new ArgumentRule("heats"   , ModelVector<Probability>::getClassTypeSpec(), "The heats of chains, starting from the cold chain to hotter chains so the first value must be 1.0. If heats are specified directly then the delta parameter would be ignored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule("tuneHeat"  , RlBoolean::getClassTypeSpec() , "Should we tune the heats during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( false ) ) );

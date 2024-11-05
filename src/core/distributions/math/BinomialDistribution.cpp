@@ -13,7 +13,7 @@ using namespace RevBayesCore;
  * @param n number of trials
  * @param p the probability
 */
-BinomialDistribution::BinomialDistribution(const TypedDagNode<std::int64_t> *n, const TypedDagNode<double> *p) : TypedDistribution<std::int64_t>( new long( 0 ) ),
+BinomialDistribution::BinomialDistribution(const TypedDagNode<std::int64_t> *n, const TypedDagNode<double> *p) : TypedDistribution<std::int64_t>( new std::int64_t( 0 ) ),
     n( n ),
     p( p )
 {

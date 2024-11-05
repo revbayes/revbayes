@@ -14,7 +14,7 @@ using namespace RevBayesCore;
  *  @param l lambda rate parameter
 */
 
-PoissonDistribution::PoissonDistribution(const TypedDagNode<double> *l) : TypedDistribution<std::int64_t>( new long( 1 ) ),
+PoissonDistribution::PoissonDistribution(const TypedDagNode<double> *l) : TypedDistribution<std::int64_t>( new std::int64_t( 1 ) ),
     lambda( l )
 {
     // add the parameters to our set (in the base class)

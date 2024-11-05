@@ -129,7 +129,7 @@ void BinarySwitchProposal::printParameterSummary(std::ostream &o, bool name_only
 void BinarySwitchProposal::undoProposal( void )
 {
     // swap current value and stored value
-    variable->setValue( new long(storedValue) );
+    variable->setValue( new std::int64_t(storedValue) );
     
 }
 

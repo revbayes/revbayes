@@ -259,7 +259,7 @@ void RevLanguage::Parser::getline(char* buf, size_t maxsize)
     else
     {
         foundNewline = false;
-        rrcommand.getline(buf, long(maxsize) - 3);
+        rrcommand.getline(buf, std::int64_t(maxsize) - 3);
         // Deal with line endings in case getline uses non-Unix endings
         size_t i = strlen(buf);
         if (i >= 1 && buf[i - 1] == '\r')

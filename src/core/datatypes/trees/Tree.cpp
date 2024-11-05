@@ -452,7 +452,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
         {
             throw RbException("Root has no parent.");
         }
-        rv = long( getNode( index ).getParent().getIndex() )+1;
+        rv = std::int64_t( getNode( index ).getParent().getIndex() )+1;
     }
     else if ( n == "child" )
     {

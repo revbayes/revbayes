@@ -202,7 +202,7 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::execu
     
     if ( n == "index" )
     {
-        rv = long(index);
+        rv = std::int64_t(index);
     }
     else
     {

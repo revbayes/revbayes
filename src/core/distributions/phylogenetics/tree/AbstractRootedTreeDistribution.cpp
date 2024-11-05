@@ -144,7 +144,7 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
         TopologyNode* parent = tips.at(index);
         
         // remove the randomly drawn node from the list
-        tips.erase(tips.begin()+long(index));
+        tips.erase(tips.begin()+std::int64_t(index));
         
         // add a left child
         TopologyNode* leftChild = new TopologyNode();
@@ -593,10 +593,10 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
                 // randomly pick two nodes
                 size_t index_left = static_cast<size_t>( floor(rng->uniform01()*active_nodes.size()) );
                 TopologyNode* left_child = active_nodes[index_left];
-                active_nodes.erase(active_nodes.begin()+long(index_left));
+                active_nodes.erase(active_nodes.begin()+std::int64_t(index_left));
                 size_t index_right = static_cast<size_t>( floor(rng->uniform01()*active_nodes.size()) );
                 TopologyNode* right_child = active_nodes[index_right];
-                active_nodes.erase(active_nodes.begin()+long(index_right));
+                active_nodes.erase(active_nodes.begin()+std::int64_t(index_right));
 
                 // erase the nodes also from the origin nodes vector
                 n.erase(std::remove(n.begin(), n.end(), left_child), n.end());

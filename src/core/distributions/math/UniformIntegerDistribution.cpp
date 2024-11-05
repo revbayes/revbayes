@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  * @param ma The maximum value for the distribution
  */
 
-UniformIntegerDistribution::UniformIntegerDistribution(const TypedDagNode<std::int64_t> *mi, const TypedDagNode<std::int64_t> *ma) : TypedDistribution<std::int64_t>( new long( 0 ) ),
+UniformIntegerDistribution::UniformIntegerDistribution(const TypedDagNode<std::int64_t> *mi, const TypedDagNode<std::int64_t> *ma) : TypedDistribution<std::int64_t>( new std::int64_t( 0 ) ),
     min( mi ),
     max( ma )
 {

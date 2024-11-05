@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  *
  */
 
-NegativeBinomialDistribution::NegativeBinomialDistribution(const TypedDagNode<std::int64_t> *m, const TypedDagNode<double> *q) : TypedDistribution<std::int64_t>( new long( 0 ) ),
+NegativeBinomialDistribution::NegativeBinomialDistribution(const TypedDagNode<std::int64_t> *m, const TypedDagNode<double> *q) : TypedDistribution<std::int64_t>( new std::int64_t( 0 ) ),
     r( m ),
     p( q )
 {

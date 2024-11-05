@@ -218,7 +218,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
-            burnin = long( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
+            burnin = std::int64_t( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
 
             (*rv)[i].getValue().setBurnin(burnin);
         }

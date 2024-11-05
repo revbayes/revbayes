@@ -13,7 +13,7 @@ using namespace RevBayesCore;
  * SumFunction of a RbVector Constructor.
  * @param v the vector of values of type long
  */
-SumIntegerFunction::SumIntegerFunction(const TypedDagNode<RbVector<std::int64_t> > *v) : TypedFunction<std::int64_t>( new long(0.0) ), vals( v )
+SumIntegerFunction::SumIntegerFunction(const TypedDagNode<RbVector<std::int64_t> > *v) : TypedFunction<std::int64_t>( new std::int64_t(0.0) ), vals( v )
 {
     // add the parameters as parents
     this->addParameter( vals );

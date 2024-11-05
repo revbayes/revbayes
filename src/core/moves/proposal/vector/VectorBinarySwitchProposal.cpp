@@ -89,7 +89,7 @@ double VectorBinarySwitchProposal::doProposal( void )
     double u = (size_t)(rng->uniform01() * length);
     size_t first_index = indices[u]-1;
     //    std::int64_t v = variables[u]->getValue() == 0 ? 1 : 0;
-    variables[first_index]->setValue( new long(variables[first_index]->getValue() == 0 ? 1 : 0) ); //(variables[u]->getValue() == 0 ? 1 : 0) );
+    variables[first_index]->setValue( new std::int64_t(variables[first_index]->getValue() == 0 ? 1 : 0) ); //(variables[u]->getValue() == 0 ? 1 : 0) );
     update_set.insert(first_index);
     
     // flip all remaining values in indices according to switch_probability
@@ -98,7 +98,7 @@ double VectorBinarySwitchProposal::doProposal( void )
         size_t index = ( n_indices == 0 ? i : indices[i]-1 );
         if (rng->uniform01() < switch_probability && index != first_index)
         {
-            variables[index]->setValue( new long(variables[index]->getValue() == 0 ? 1 : 0) );
+            variables[index]->setValue( new std::int64_t(variables[index]->getValue() == 0 ? 1 : 0) );
             //            val[index] = ( val[index]==0 ? 1 : 0 );
             update_set.insert( index );
         }
@@ -185,7 +185,7 @@ void VectorBinarySwitchProposal::undoProposal( void )
     // flip all remaining values in indices according to switch_probability
     for (std::set<size_t>::iterator it = update_set.begin(); it != update_set.end(); it++) {
         size_t index = *it;
-        variables[index]->setValue( new long(variables[index]->getValue() == 0 ? 1 : 0) );
+        variables[index]->setValue( new std::int64_t(variables[index]->getValue() == 0 ? 1 : 0) );
     }
     
     // clear elements in update_set

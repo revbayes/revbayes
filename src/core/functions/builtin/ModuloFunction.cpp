@@ -10,7 +10,7 @@ using namespace RevBayesCore;
  * @param l a value of type std::int64_t, the dividend of the remainder division
  * @param r a value of type std::int64_t, the divisor of the remainder division
  */
-ModuloFunction::ModuloFunction(const TypedDagNode<std::int64_t> *l, const TypedDagNode<std::int64_t> *r) : TypedFunction<std::int64_t>( new long(0) ),
+ModuloFunction::ModuloFunction(const TypedDagNode<std::int64_t> *l, const TypedDagNode<std::int64_t> *r) : TypedFunction<std::int64_t>( new std::int64_t(0) ),
     left( l ),
     right( r )
 {

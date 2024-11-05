@@ -16,7 +16,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-GeometricDistribution::GeometricDistribution(const TypedDagNode<double> *q) : TypedDistribution<std::int64_t>( new long( 1 ) ),
+GeometricDistribution::GeometricDistribution(const TypedDagNode<double> *q) : TypedDistribution<std::int64_t>( new std::int64_t( 1 ) ),
     p( q )
 {
     // add the parameters to our set (in the base class)

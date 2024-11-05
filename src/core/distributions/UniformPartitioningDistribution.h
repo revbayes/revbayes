@@ -196,7 +196,7 @@ void RevBayesCore::UniformPartitioningDistribution<valueType>::executeMethod(con
     
     if ( n == "getAllocationIndex" )
     {
-        rv = long(index) + 1;
+        rv = std::int64_t(index) + 1;
     }
     else
     {
