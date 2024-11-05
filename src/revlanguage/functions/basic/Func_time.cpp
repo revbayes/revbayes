@@ -40,7 +40,7 @@ RevPtr<RevVariable> Func_time::execute( void )
     
     boost::posix_time::ptime t = boost::posix_time::microsec_clock::local_time();
 
-    long time = 0;
+    long std::int64_t = 0;
     if ( option == "year" )
     {
         time = t.date().year();
