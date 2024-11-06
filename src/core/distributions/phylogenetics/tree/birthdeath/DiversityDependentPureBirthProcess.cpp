@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <cmath>
 #include <iosfwd>
 #include <vector>

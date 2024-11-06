@@ -1,6 +1,7 @@
 #include "Parser.h"
 
 #include <cstdio>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <list>

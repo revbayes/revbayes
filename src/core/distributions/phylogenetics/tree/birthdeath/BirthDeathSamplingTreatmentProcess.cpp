@@ -1,5 +1,6 @@
 #include <cfloat>
 #include <cstddef>
+#include <cstdint>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>

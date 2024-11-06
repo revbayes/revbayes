@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <set>
 #include <string>

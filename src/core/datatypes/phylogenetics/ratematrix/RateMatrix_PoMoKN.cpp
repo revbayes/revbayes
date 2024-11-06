@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 
 #include "RbException.h"
 #include "Cloneable.h"

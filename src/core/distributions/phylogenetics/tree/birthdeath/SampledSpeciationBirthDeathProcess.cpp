@@ -2,6 +2,7 @@
 #include <cmath>
 #include <set>
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <iterator>
 #include <string>

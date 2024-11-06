@@ -1,5 +1,6 @@
 #include <math.h>
 #include <cstdlib>
+#include <cstdint>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>
 #include <ostream>

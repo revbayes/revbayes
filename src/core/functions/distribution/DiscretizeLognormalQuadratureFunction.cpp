@@ -1,6 +1,7 @@
 #include "DiscretizeLognormalQuadratureFunction.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <cmath>
 #include <map>
 #include <utility>

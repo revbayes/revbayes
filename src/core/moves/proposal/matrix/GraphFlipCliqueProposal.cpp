@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <type_traits>
 #include <vector>

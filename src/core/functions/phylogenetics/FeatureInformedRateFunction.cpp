@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 
 namespace RevBayesCore { class DagNode; }
 

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 
 #include "MatrixReal.h"
 #include "RbException.h"
