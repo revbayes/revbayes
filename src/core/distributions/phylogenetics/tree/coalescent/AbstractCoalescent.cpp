@@ -1,6 +1,7 @@
 #include "AbstractCoalescent.h"
 
 #include <cmath>
+#include <cstdint>
 #include <iosfwd>
 
 #include "Clade.h"

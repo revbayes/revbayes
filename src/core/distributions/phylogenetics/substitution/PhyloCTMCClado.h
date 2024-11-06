@@ -101,6 +101,7 @@ namespace RevBayesCore {
 #include "RandomNumberFactory.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <map>
 #include <vector>
