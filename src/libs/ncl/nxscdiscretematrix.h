@@ -49,7 +49,7 @@
 	typedef signed char int8_t;
 	typedef unsigned char uint8_t;
 	typedef long long int64_t;
-	typedef std::uint64_t long uint64_t;
+	typedef unsigned long long uint64_t;
 #elif defined(_WIN32)
 #	include <stdint.h>
 #endif

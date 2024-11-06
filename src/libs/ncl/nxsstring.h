@@ -128,14 +128,14 @@ class NxsString
 		NxsString			&operator+=(const char c);
 		NxsString			&operator+=(const int i);
 		NxsString			&operator+=(unsigned i);
-		NxsString			&operator+=(std::uint64_t i);
+		NxsString			&operator+=(unsigned long i);
 		NxsString			&operator+=(const long l);
 		NxsString			&operator+=(const double d);
 		NxsString			&operator+=(const IndexSet &d);
 		NxsString			&operator<<(int i);
 		NxsString			&operator<<(unsigned i);
 		NxsString			&operator<<(long l);
-		NxsString			&operator<<(std::uint64_t l);
+		NxsString			&operator<<(unsigned long l);
 		NxsString			&operator<<(double d);
 		NxsString			&operator<<(const char *c);
 		NxsString			&operator<<(char c);
@@ -517,10 +517,10 @@ inline NxsString& NxsString::operator+=(
 	}
 
 /*!
-	Uses standard C function sprintf to append the std::uint64_t integer `l' to the stored string (format code %lu).
+	Uses standard C function sprintf to append the unsigned long integer `l' to the stored string (format code %lu).
 */
 inline NxsString& NxsString::operator+=(
-  const std::uint64_t l)	/* the std::uint64_t integer to be appended */
+  const unsigned long l)	/* the unsigned long integer to be appended */
 	{
 	char tmp[81];
 	snprintf(tmp, 81, "%lu", l);
@@ -641,7 +641,7 @@ inline NxsString &NxsString::operator<<(
 	Another way to call the += operator (written to make it possible to use a NxsString like an std::ostream)
 */
 inline NxsString &NxsString::operator<<(
-  std::uint64_t l)	/* the std::uint64_t integer to append */
+  unsigned long l)	/* the unsigned long integer to append */
 	{
 	return (*this += l);
 	}
