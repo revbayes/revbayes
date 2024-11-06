@@ -2,6 +2,7 @@
 #define SRC_CORE_MONITORS_NEXUSMONITOR_H_
 
 #include <iosfwd>
+#include <cstdint>
 #include <vector>
 
 #include "AbstractFileMonitor.h"

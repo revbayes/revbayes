@@ -2,6 +2,7 @@
 #define RevBayes_development_branch_StochasticBranchStateTimesMonitor_h
 
 #include <fstream>
+#include <cstdint>
 
 #include "VariableMonitor.h"
 

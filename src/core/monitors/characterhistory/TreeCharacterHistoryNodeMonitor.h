@@ -16,6 +16,7 @@
 #include "TypedDistribution.h"
 
 #include <fstream>
+#include <cstdint>
 #include <iostream>
 #include <set>
 #include <sstream>

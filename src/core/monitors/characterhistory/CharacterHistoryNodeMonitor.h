@@ -10,6 +10,7 @@
 #define __rb_mlandis__CharacterHistoryNodeMonitor__
 
 #include <fstream>
+#include <cstdint>
 #include <vector>
 #include <set>
 

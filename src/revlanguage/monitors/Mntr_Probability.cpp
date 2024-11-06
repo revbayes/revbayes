@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include <cstdint>
 #include <string>
 
 #include "ArgumentRule.h"

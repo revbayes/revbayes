@@ -8,6 +8,7 @@
 #include "DnaState.h"
 
 #include <fstream>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <typeinfo>

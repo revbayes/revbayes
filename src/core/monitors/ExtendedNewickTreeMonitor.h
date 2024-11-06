@@ -20,6 +20,7 @@
 #define ExtendedNewickTreeMonitor_H
 
 #include <fstream>
+#include <cstdint>
 #include <vector>
 
 #include "VariableMonitor.h"

@@ -2,6 +2,7 @@
 #define RandomMoveSchedule_H
 
 #include <vector>
+#include <cstdint>
 
 #include "MoveSchedule.h"
 

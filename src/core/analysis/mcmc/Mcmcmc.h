@@ -8,6 +8,7 @@
 #include "Move.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
     

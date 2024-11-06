@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <cstdint>
 #include <string>
 #include <ostream>
 #include <vector>

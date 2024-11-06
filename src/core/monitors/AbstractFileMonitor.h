@@ -2,6 +2,7 @@
 #define AbstractFileMonitor_H
 
 #include <fstream>
+#include <cstdint>
 #include <vector>
 #include "RbFileManager.h"
 

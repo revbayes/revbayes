@@ -2,6 +2,7 @@
 #define ModelMonitor_H
 
 #include <iosfwd>
+#include <cstdint>
 #include <set>
 
 #include "VariableMonitor.h"

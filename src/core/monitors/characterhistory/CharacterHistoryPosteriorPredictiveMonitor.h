@@ -11,6 +11,7 @@
 
 
 #include <fstream>
+#include <cstdint>
 #include <vector>
 #include <set>
 

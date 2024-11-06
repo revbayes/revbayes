@@ -2,6 +2,7 @@
 #define StochasticVariableMonitor_H
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "VariableMonitor.h"
 

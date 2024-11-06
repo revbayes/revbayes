@@ -1,6 +1,7 @@
 #include "Func_stirling.h"
 
 #include <string>
+#include <cstdint>
 #include <vector>
 
 #include "RbMathCombinatorialFunctions.h"

@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <cstdint>
 
 #include "MoveSchedule.h"
 

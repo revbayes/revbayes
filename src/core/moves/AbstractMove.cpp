@@ -1,6 +1,7 @@
 #include "AbstractMove.h"
 
 #include <iterator>
+#include <cstdint>
 #include <string>
 
 #include "DagNode.h"

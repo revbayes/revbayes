@@ -1,6 +1,7 @@
 #include "Mntr_AncestralState.h"
 
 #include <string>
+#include <cstdint>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"

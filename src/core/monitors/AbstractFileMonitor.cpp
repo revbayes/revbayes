@@ -1,6 +1,7 @@
 #include "AbstractFileMonitor.h"
 
 #include <string>
+#include <cstdint>
 
 #include "RbFileManager.h"
 #include "Cloneable.h"

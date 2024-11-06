@@ -1,4 +1,5 @@
 #include <ostream>
+#include <cstdint>
 #include <string>
 
 #include "ArgumentRule.h"

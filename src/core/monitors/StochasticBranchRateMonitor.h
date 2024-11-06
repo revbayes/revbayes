@@ -2,6 +2,7 @@
 #define RevBayes_development_branch_StochasticBranchRateMonitor_h
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "VariableMonitor.h"
 

@@ -10,6 +10,7 @@
 #include "RandomMoveSchedule.h"
 #include "RbVector.h"
 #include <vector>
+#include <cstdint>
 #include "SequentialMoveSchedule.h"
 
 namespace RevBayesCore {
