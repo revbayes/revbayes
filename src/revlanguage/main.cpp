@@ -48,7 +48,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
         "          DEFAULT: 160\n\n"
         "    moduleDir=<path>             Module directory name.\n\n"
         "          DEFAULT: \"modules\"\n\n"
-        "    outputPrecision=<integer>    How many significant digits to print.\n\n"
+        "    outputPrecision=<integer>    How many significant digits to print for the values of model graph nodes.\n\n"
         "          DEFAULT: 7\n\n"
         "    printNodeIndex=<true,false>  Print the node indices of a tree as annotations?\n\n"
         "          DEFAULT: true\n\n"
