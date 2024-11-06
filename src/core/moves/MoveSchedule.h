@@ -1,7 +1,7 @@
 #ifndef MoveSchedule_H
 #define MoveSchedule_H
 
-
+#include <cstdint>
 
 namespace RevBayesCore {
 class Move;
