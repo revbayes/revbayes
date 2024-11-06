@@ -6,6 +6,7 @@
  */
 
 #include <ostream>
+#include <cstdint>
 
 #include "OrderedEventTimes.h"
 #include "TypedDagNode.h"

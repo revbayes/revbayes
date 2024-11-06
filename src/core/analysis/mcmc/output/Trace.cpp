@@ -1,4 +1,5 @@
 #include "Trace.h"
+#include <cstdint>
 
 #include <cstdlib>
 

@@ -2,6 +2,7 @@
 #define TraceNumeric_H
 
 #include "Trace.h"
+#include <cstdint>
 
 namespace RevBayesCore {
 

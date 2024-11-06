@@ -2,6 +2,7 @@
 
 #include "NexusWriter.h"
 #include "RbSettings.h"
+#include <cstdint>
 #include "RbUtil.h"
 #include "Simplex.h"
 #include "StringUtilities.h"

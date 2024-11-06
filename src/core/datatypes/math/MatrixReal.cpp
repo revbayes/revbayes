@@ -2,6 +2,7 @@
 #include <cstring>
 #include <iomanip>
 #include <ostream>
+#include <cstdint>
 #include <string>
 #include <vector>
 

@@ -7,6 +7,7 @@
 
 #include <ostream>
 #include <string>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 

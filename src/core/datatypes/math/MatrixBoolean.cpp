@@ -8,6 +8,7 @@
 #include <math.h>
 #include <cstring>
 #include <iomanip>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>

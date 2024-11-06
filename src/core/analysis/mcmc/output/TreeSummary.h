@@ -3,6 +3,7 @@
 
 #include "Clade.h"
 #include "Trace.h"
+#include <cstdint>
 #include "Tree.h"
 
 namespace RevBayesCore {
