@@ -16,6 +16,7 @@
 
 #include <cstddef>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 #include <sstream> // IWYU pragma: keep
 

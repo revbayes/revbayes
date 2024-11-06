@@ -19,6 +19,7 @@
 #define DistributionMultinomial_H
 
 #include <cstdlib>
+#include <cstdint>
 #include <vector>
 
 namespace RevBayesCore {

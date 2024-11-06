@@ -18,6 +18,8 @@
 #ifndef DistributionChisq_H
 #define DistributionChisq_H
 
+#include <cstdint>
+
 namespace RevBayesCore {
     
     class RandomNumberGenerator;

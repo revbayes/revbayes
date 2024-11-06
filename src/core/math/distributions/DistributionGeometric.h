@@ -7,6 +7,8 @@
 #ifndef DistributionGeometric_H
 #define DistributionGeometric_H
 
+#include <cstdint>
+
 namespace RevBayesCore {
     
     class RandomNumberGenerator;
