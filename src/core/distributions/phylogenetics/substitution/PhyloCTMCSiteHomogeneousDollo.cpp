@@ -1,6 +1,7 @@
 #include "PhyloCTMCSiteHomogeneousDollo.h"
 
 #include <climits>
+#include <cstdint>
 #include <math.h>
 #include <algorithm>
 #include <bitset>

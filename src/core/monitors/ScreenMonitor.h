@@ -2,6 +2,7 @@
 #define ScreenMonitor_H
 
 #include <ctime>
+#include <cstdint>
 #include <iosfwd>
 #include <vector>
 
