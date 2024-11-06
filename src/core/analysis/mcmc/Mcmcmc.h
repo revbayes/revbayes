@@ -125,8 +125,8 @@ namespace RevBayesCore {
         Mcmc*                                   base_chain;
         
         std::uint64_t                           generation;
-        std::vector< std::vector<unsigned long> > num_attempted_swaps;
-        std::vector< std::vector<unsigned long> > num_accepted_swaps;
+        std::vector< std::vector<std::uint64_t> > num_attempted_swaps;
+        std::vector< std::vector<std::uint64_t> > num_accepted_swaps;
         
         std::vector< std::vector<Mcmc::tuningInfo> >  chain_moves_tuningInfo;
     };
