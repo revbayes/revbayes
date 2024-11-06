@@ -41,6 +41,7 @@ std::string short_description()
 //
 variables_map parse_cmd_line(int argc, char* argv[])
 {
+    using namespace po;
     
     std::string opt_descr =
         "    Available keys:\n\n"
@@ -69,8 +70,6 @@ variables_map parse_cmd_line(int argc, char* argv[])
         "        3 or higher: Writes out each changed probability density along with the name of the corresponding model graph node.\n"
         "        4: Writes out additional details about the mvSlice move (if present).\n\n"
         "        DEFAULT: 0";
-    
-    using namespace po;
 
     // Put all options in one group for now.
     options_description general("Options");
@@ -140,11 +139,12 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout<< usage() << std::endl;
-            std::cout<< short_description() << std::endl;
+            std::cout << usage() << std::endl;
+            std::cout << short_description() << std::endl;
             std::cout << std::endl;
-            std::cout<< general << std::endl;
-            std::cout<< "See http://revbayes.github.io for more information." << std::endl;
+            std::cout << general << std::endl;
+            std::cout << opt_descr << std::endl;
+            std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
         MPI_Finalize();
