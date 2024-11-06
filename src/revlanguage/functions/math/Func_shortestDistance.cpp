@@ -9,6 +9,7 @@
 #include "Func_shortestDistance.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "ArgumentRule.h"

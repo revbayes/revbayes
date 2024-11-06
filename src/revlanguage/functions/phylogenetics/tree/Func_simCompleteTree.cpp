@@ -1,5 +1,6 @@
 #include <math.h>       /* log2 */
 #include <cstddef>
+#include <cstdint>
 #include <algorithm>
 #include <iosfwd>
 #include <vector>

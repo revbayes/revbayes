@@ -8,6 +8,7 @@
 #include "Move_GraphShiftEdge.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 

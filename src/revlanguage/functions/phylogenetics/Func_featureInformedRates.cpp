@@ -9,6 +9,7 @@
 #include "Func_featureInformedRates.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "FeatureInformedRateFunction.h"
 #include "ModelVector.h"

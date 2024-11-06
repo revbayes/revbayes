@@ -9,6 +9,7 @@
 #include "Func_adjacentRateModifier.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 
 #include "AdjacentRateModifierFunction.h"

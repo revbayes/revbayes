@@ -1,6 +1,7 @@
 #include "Func_readDelimitedDataFile.h"
 
 #include <cstdlib>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>

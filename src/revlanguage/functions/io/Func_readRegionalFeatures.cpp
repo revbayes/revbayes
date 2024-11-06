@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <cstdlib>
+#include <cstdint>
 #include <sstream>
 #include <vector>
 

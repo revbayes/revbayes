@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <cstdlib>
+#include <cstdint>
 #include <map>
 #include <sstream>
 #include <string>

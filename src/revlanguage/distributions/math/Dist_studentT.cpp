@@ -9,6 +9,7 @@
 #include "Dist_studentT.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <string>
 
