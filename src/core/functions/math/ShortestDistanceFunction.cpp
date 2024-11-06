@@ -2,6 +2,7 @@
 #include <set>
 #include <vector>
 #include <cstddef>
+#include <cstdint>
 #include "RbConstants.h"
 #include "RbVector.h"
 #include "TypedFunction.h"

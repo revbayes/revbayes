@@ -1,6 +1,7 @@
 #include "PhylogeneticIndependentContrastsMultiSampleFunction.h"
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 #include "ContinuousCharacterData.h"

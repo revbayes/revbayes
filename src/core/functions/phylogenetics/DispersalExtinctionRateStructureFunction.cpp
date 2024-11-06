@@ -9,6 +9,7 @@
 #include "DispersalExtinctionRateStructureFunction.h"
 
 #include <cmath>
+#include <cstdint>
 #include <vector>
 #include <map>
 

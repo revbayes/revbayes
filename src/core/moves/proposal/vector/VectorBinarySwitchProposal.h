@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 
 #include "Proposal.h"

@@ -56,6 +56,7 @@ namespace RevBayesCore {
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
+#include <cstdint>
 
 template <class valueType>
 RevBayesCore::IidDistribution<valueType>::IidDistribution(std::int64_t n, TypedDistribution<valueType> *vp) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),

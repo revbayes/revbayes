@@ -9,6 +9,7 @@
 #include "DistributionExponentialError.h"
 
 #include <cmath>
+#include <cstdint>
 #include <numeric>
 #include <algorithm>
 

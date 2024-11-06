@@ -3,6 +3,7 @@
 #include "PoMoRootFrequenciesFunction.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "RbVector.h"
 #include "TypedDagNode.h"

@@ -23,6 +23,7 @@
 #include "StochasticNode.h"
 
 #include <cmath>
+#include <cstdint>
 
 namespace RevBayesCore {
 

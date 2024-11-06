@@ -3,6 +3,7 @@
 
 #include "TimeReversibleRateMatrix.h"
 #include <complex>
+#include <cstdint>
 #include <vector>
 
 

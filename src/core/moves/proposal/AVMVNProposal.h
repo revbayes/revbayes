@@ -2,6 +2,7 @@
 #define AVMVNProposal_H
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <vector>
 

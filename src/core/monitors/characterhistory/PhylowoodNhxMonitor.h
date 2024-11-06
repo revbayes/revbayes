@@ -2,6 +2,7 @@
 #define PhylowoodNhxMonitor_H
 
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <vector>
 #include <set>

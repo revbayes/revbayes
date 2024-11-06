@@ -3,6 +3,7 @@
 
 #include <set>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 
 #include "Proposal.h"

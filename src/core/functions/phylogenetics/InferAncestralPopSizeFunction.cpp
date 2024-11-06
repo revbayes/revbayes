@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <cstdint>
 
 #include "RbMathMatrix.h"
 #include "RbVector.h"

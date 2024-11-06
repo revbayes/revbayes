@@ -8,6 +8,7 @@
 #include "TransitionProbabilityMatrix.h"
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 #include <iomanip>
 #include <boost/math/special_functions/digamma.hpp>

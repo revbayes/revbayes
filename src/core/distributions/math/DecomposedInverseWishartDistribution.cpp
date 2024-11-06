@@ -1,6 +1,7 @@
 #include "DecomposedInverseWishartDistribution.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "DistributionDecomposedInverseWishart.h"

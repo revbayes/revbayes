@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "DistributionBinomial.h"

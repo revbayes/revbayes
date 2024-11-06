@@ -10,6 +10,7 @@
 #define AdjacentRateModifierFunction_h
 
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 
 #include "CharacterHistoryRateModifier.h"

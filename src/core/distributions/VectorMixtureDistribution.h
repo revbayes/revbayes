@@ -67,6 +67,7 @@ namespace RevBayesCore {
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
+#include <cstdint>
 
 template <class mixtureType>
 RevBayesCore::VectorMixtureDistribution<mixtureType>::VectorMixtureDistribution(std::vector<TypedDistribution< mixtureType > *> base_dists, const TypedDagNode< Simplex > *p, std::int64_t num_elements) : TypedDistribution< RbVector<mixtureType> >( new RbVector<mixtureType>(num_elements) ),

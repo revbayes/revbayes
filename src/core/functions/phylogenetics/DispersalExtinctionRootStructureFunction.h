@@ -2,6 +2,7 @@
 #define DispersalExtinctionRootStructureFunction_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <map>
 

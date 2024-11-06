@@ -14,6 +14,7 @@
 #include "TypedDagNode.h"
 
 #include <cstddef>
+#include <cstdint>
 
 namespace RevBayesCore { class DagNode; }
 

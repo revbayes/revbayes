@@ -2,6 +2,7 @@
 #define PhylogeneticIndependentContrastsFunction_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "RbVector.h"

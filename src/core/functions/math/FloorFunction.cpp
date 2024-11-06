@@ -1,6 +1,7 @@
 #include "FloorFunction.h"
 
 #include <cmath>
+#include <cstdint>
 
 #include "Cloneable.h"
 #include "TypedDagNode.h"

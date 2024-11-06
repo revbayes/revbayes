@@ -1,6 +1,7 @@
 #include "WishartDistribution.h"
 
 #include <cstdlib>
+#include <cstdint>
 #include <iostream>
 
 #include "RandomNumberFactory.h"

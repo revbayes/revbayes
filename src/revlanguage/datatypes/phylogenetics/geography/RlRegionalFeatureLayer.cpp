@@ -8,6 +8,7 @@
 
 #include "RlRegionalFeatureLayer.h"
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <iosfwd>
 #include <string>

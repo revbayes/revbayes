@@ -73,6 +73,7 @@ namespace RevBayesCore {
 #include "RbMathCombinatorialFunctions.h"
 
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 

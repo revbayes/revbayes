@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdint>
 #include <algorithm>
 #include <string>
 #include <exception>

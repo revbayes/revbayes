@@ -1,6 +1,7 @@
 
 
 #include <cmath>
+#include <cstdint>
 #include <sstream> // IWYU pragma: keep
 
 #include "DistributionBeta.h"

@@ -8,6 +8,7 @@
 #include "CladogeneticSpeciationRateMatrixFunction.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "RbException.h"

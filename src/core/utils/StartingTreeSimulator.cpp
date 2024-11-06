@@ -1,6 +1,7 @@
 #include "StartingTreeSimulator.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <algorithm>
 #include <iosfwd>
 #include <iterator>

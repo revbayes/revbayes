@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 
 #include "DistributionChisq.h"

@@ -2,6 +2,7 @@
 #define BirthDeathBurstProcess_H
 
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <vector>
 

@@ -1,6 +1,7 @@
 #include "CategoricalDistribution.h"
 
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 #include "RandomNumberFactory.h"

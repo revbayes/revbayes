@@ -1,6 +1,7 @@
 #include "PhylogeneticIndependentContrastsFunction.h"
 
 #include <cmath>
+#include <cstdint>
 
 #include "ContinuousCharacterData.h"
 #include "ContinuousTaxonData.h"

@@ -77,6 +77,7 @@ namespace RevBayesCore {
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
+#include <cstdint>
 
 template <class mixtureType>
 RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::ReversibleJumpMixtureConstantDistribution(const TypedDagNode< mixtureType > *cv, TypedDistribution< mixtureType > *dv, const TypedDagNode< double > *p) : TypedDistribution<mixtureType>( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( cv->getValue() ) ),

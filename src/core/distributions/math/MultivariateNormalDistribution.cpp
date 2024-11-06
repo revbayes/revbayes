@@ -1,6 +1,7 @@
 #include "MultivariateNormalDistribution.h"
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 #include "DistributionMultivariateNormal.h"

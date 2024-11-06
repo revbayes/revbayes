@@ -1,6 +1,7 @@
 #include "MultinomialDistribution.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "DistributionMultinomial.h"
 #include "RandomNumberFactory.h"

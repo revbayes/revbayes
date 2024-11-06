@@ -1,6 +1,7 @@
 #include "BernoulliDistribution.h"
 
 #include <cmath>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"

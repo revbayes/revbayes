@@ -1,6 +1,7 @@
 #include "MultiValueEventBirthDeathProposal.h"
 
 #include <cmath>
+#include <cstdint>
 
 #include "AutocorrelatedEventDistribution.h"
 #include "DistributionNormal.h"

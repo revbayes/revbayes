@@ -19,6 +19,7 @@
 #define MrcaIndexStatistic_H
 
 #include <cstddef>
+#include <cstdint>
 
 //#include "Statistic.h"
 #include "Clade.h"

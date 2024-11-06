@@ -1,6 +1,7 @@
 #include "BirthDeathBurstProcess.h"
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 #include "RandomNumberFactory.h"

@@ -2,6 +2,7 @@
 #define ShortestDistanceFunction_h
 
 #include <cstdio>
+#include <cstdint>
 #include <set>
 #include <vector>
 #include "RbVector.h"

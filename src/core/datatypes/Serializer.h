@@ -16,6 +16,7 @@
 #define Serializer_H
 
 #include <cstdlib>
+#include <cstdint>
 #include <string>
 
 #include "RbException.h"

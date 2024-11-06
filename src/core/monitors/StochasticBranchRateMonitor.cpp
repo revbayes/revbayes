@@ -1,6 +1,7 @@
 #include "StochasticBranchRateMonitor.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <vector>
 

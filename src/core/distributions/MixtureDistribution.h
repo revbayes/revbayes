@@ -70,6 +70,7 @@ namespace RevBayesCore {
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
+#include <cstdint>
 
 template <class mixtureType>
 RevBayesCore::MixtureDistribution<mixtureType>::MixtureDistribution(const TypedDagNode< RbVector<mixtureType> > *v, const TypedDagNode< Simplex > *p) : TypedDistribution<mixtureType>( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( v->getValue()[0] ) ),

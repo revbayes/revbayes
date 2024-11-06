@@ -3,6 +3,7 @@
 #include "InverseWishartDistribution.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "DistributionInverseWishart.h"
