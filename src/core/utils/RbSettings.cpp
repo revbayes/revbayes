@@ -58,6 +58,12 @@ int RbSettings::getDebugMCMC( void ) const
     return debugMCMC;
 }
 
+int RbSettings::getLogMCMC( void ) const
+{
+    // return the internal value
+    return logMCMC;
+}
+
 std::string RbSettings::getOption(const std::string &key) const
 {
     if ( key == "moduledir" )
@@ -91,6 +97,10 @@ std::string RbSettings::getOption(const std::string &key) const
     else if ( key == "debugMCMC" )
     {
         return std::to_string(debugMCMC);
+    }
+    else if ( key == "logMCMC" )
+    {
+        return std::to_string(logMCMC);
     }
     else
     {
@@ -162,6 +172,7 @@ void RbSettings::listOptions() const
     std::cout << "useScaling = " << (useScaling ? "true" : "false") << std::endl;
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
+    std::cout << "logMCMC = " << logMCMC << std::endl;
 }
 
 
@@ -217,6 +228,16 @@ void RbSettings::setDebugMCMC(int d)
 }
 
 
+void RbSettings::setLogMCMC(int d)
+{
+    // replace the internal value with this new value
+    logMCMC = d;
+
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+
 void RbSettings::setOption(const std::string &key, const std::string &v, bool write)
 {
 
@@ -260,6 +281,10 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     else if ( key == "debugMCMC" )
     {
         debugMCMC = boost::lexical_cast<int>(value);
+    }
+    else if ( key == "logMCMC" )
+    {
+        logMCMC = boost::lexical_cast<int>(value);
     }
     else
     {

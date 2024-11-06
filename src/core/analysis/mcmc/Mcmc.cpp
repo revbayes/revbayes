@@ -30,6 +30,7 @@
 #include "RbIteratorImpl.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "RbSettings.h" // for logMCMC setting
 #include "StringUtilities.h"
 
 #ifdef RB_MPI
@@ -940,6 +941,7 @@ void Mcmc::monitor(std::uint64_t g)
 
 void Mcmc::nextCycle(bool advance_cycle)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
 
     size_t proposals = size_t( round( schedule->getNumberMovesPerIteration() ) );
     
@@ -948,6 +950,15 @@ void Mcmc::nextCycle(bool advance_cycle)
         
         // Get the move
         Move& the_move = schedule->nextMove( generation );
+
+	if (logMCMC >= 1)
+	{
+	    std::vector<std::string> node_names;
+	    for(auto node: the_move.getDagNodes())
+		node_names.push_back(node->getName());
+
+	    std::cerr<<"\ngeneration = "<<generation<<"    proposal = "<<i+1<<"/"<<proposals<<"    "<<the_move.getMoveName()<<"("<<StringUtilities::join(node_names,",")<<")\n";
+	}
 
         // Perform the move
         the_move.performMcmcStep( chain_prior_heat, chain_likelihood_heat, chain_posterior_heat );
