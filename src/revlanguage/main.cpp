@@ -28,7 +28,7 @@ using po::variables_map;
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]";
+    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]\n";
     // Other usages not mentioned
 }
 
@@ -42,6 +42,34 @@ std::string short_description()
 variables_map parse_cmd_line(int argc, char* argv[])
 {
     
+    std::string opt_descr =
+        "    Available keys:\n\n"
+        "      lineWidth=<integer>          Screen width when printing (in characters).\n\n"
+        "        DEFAULT: 160\n\n"
+        "      moduleDir=<path>             Module directory name.\n\n"
+        "        DEFAULT: \"modules\"\n\n"
+        "      outputPrecision=<integer>    How many significant digits to print.\n\n"
+        "        DEFAULT: 7\n\n"
+        "      printNodeIndex=<true,false>  Print the node indices of a tree as annotations?\n\n"
+        "        DEFAULT: true\n\n"
+        "      useScaling=<true,false>      Should the likelihood in continuous-time Markov chain (CTMC) models be scaled?\n\n"
+        "        DEFAULT: true\n\n"
+        "      scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).\n\n"
+        "        DEFAULT: 1\n\n"
+        "      tolerance=<numeric>          Tolerance for comparing doubles.\n\n"
+        "        DEFAULT: 10e-10\n\n"
+        "      debugMCMC=<0,1>              How much work to perform to check MCMC?\n\n"
+        "        0: MCMC run without checks.\n"
+        "        1: MCMC run with additional checks at extra CPU time cost.\n\n"
+        "        DEFAULT: 0\n\n"
+        "      logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC?\n\n"
+        "        0: No information on individual moves written out.\n"
+        "        1 or higher: Writes out the generation, within-generation position, and name for each move.\n"
+        "        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios.\n"
+        "        3 or higher: Writes out each changed probability density along with the name of the corresponding model graph node.\n"
+        "        4: Writes out additional details about the mvSlice move (if present).\n\n"
+        "        DEFAULT: 0";
+    
     using namespace po;
 
     // Put all options in one group for now.
@@ -51,18 +79,18 @@ variables_map parse_cmd_line(int argc, char* argv[])
 	("version,v","Show version and exit.")
 
 	// implicit_value(1) means that -V => -V1
-//      RevBayes doesn't use a global verbose_logging flag.
-//	("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
+    // RevBayes doesn't use a global verbose_logging flag.
+    // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
 	("batch,b","Run in batch mode.")
-        ("jupyter,j","Run in jupyter mode.")
-        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-        ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
-        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-        ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
+    ("jupyter,j","Run in jupyter mode.")
+    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+    ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
 	// composing means that --file can occur multiple times
-        ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
-        ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value.")
+    ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
+    ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value.\n\n")
 	;
 
     // Treat all positional options as "file" options.
@@ -90,6 +118,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
             std::cout << short_description() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
+            std::cout << opt_descr << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
