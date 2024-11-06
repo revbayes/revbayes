@@ -19,7 +19,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 /* Constructor */
-PhylowoodNhxMonitor::PhylowoodNhxMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::vector<std::vector<double> > gc, std::uint64_t g, unsigned long mg, int b, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh),  geographicCoordinates(gc), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr), numSamples(0), maxGen(mg), burn(b) {
+PhylowoodNhxMonitor::PhylowoodNhxMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::vector<std::vector<double> > gc, std::uint64_t g, std::uint64_t mg, int b, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh),  geographicCoordinates(gc), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr), numSamples(0), maxGen(mg), burn(b) {
     
     std::cout << g << " " << mg << "\n";
     

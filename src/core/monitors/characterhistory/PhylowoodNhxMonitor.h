@@ -21,7 +21,7 @@ template <class variableType> class StochasticNode;
         
     public:
         // Constructors and Destructors
-        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, std::uint64_t g, unsigned long mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, std::uint64_t g, std::uint64_t mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         // new PhylowoodNhxMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
         
