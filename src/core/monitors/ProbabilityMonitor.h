@@ -25,7 +25,7 @@ class Model;
         
     public:
         // Constructors and Destructors
-        ProbabilityMonitor(unsigned long g, const std::string &fname, const std::string &del);                                  //!< Constructor
+        ProbabilityMonitor(std::uint64_t g, const std::string &fname, const std::string &del);                                  //!< Constructor
         virtual ~ProbabilityMonitor(void);
         
         
@@ -34,7 +34,7 @@ class Model;
         ProbabilityMonitor*                 clone(void) const;                                                  //!< Clone the object
         
         // public (overloaded) methods
-        void                                monitorVariables(unsigned long gen);                                //!< Monitor at generation gen
+        void                                monitorVariables(std::uint64_t gen);                                //!< Monitor at generation gen
 
         
         // getters and setters

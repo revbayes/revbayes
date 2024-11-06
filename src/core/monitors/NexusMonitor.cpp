@@ -12,7 +12,7 @@
 
 namespace RevBayesCore {
 
-NexusMonitor::NexusMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode *> &n, bool np, unsigned long g,
+NexusMonitor::NexusMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode *> &n, bool np, std::uint64_t g,
                            const std::string &fname, bool ap, bool taxa) :
     AbstractFileMonitor (t, g, fname, ap),
     isNodeParameter( np ),
@@ -75,7 +75,7 @@ void NexusMonitor::printHeader() {
     out_stream.flush();
 }
 
-void NexusMonitor::monitor(unsigned long gen) {
+void NexusMonitor::monitor(std::uint64_t gen) {
     if ( !enabled || gen % printgen != 0 ) return;
 
     out_stream.seekg(0, std::ios::end);
