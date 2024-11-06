@@ -94,8 +94,8 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     heat_ranks.resize(num_chains, 0);
     heat_temps.resize(num_chains, 0.0);
     
-    num_attempted_swaps = std::vector< std::vector<std::uint64_t> > (num_chains, std::vector<unsigned long> (num_chains, 0));
-    num_accepted_swaps = std::vector< std::vector<std::uint64_t> > (num_chains, std::vector<unsigned long> (num_chains, 0));
+    num_attempted_swaps = std::vector< std::vector<std::uint64_t> > (num_chains, std::vector<std::uint64_t> (num_chains, 0));
+    num_accepted_swaps = std::vector< std::vector<std::uint64_t> > (num_chains, std::vector<std::uint64_t> (num_chains, 0));
     
     chain_moves_tuningInfo = std::vector< std::vector<Mcmc::tuningInfo> > (num_chains);
     
