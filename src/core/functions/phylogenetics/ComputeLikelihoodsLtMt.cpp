@@ -986,7 +986,7 @@ unsigned RevBayesCore::nChoosek( unsigned n, unsigned k )
 
 unsigned RevBayesCore::factorial( unsigned n )
 {
-    std::uint64_t long res = 1;
+    std::uint64_t res = 1;
     for(int i = 1; i<=n ; i++){
         res *= i;
     }
