@@ -143,10 +143,10 @@ double RbMath::harmonicNumber(size_t n)
 double RbMath::factorial(int x)
 {
 
-	double fac = 1.0;
-	for (int i=1; i<=x; i++)
+    double fac = 1.0;
+    for (int i=1; i<=x; i++)
     {
-		fac *= i;
+	fac *= i;
     }
     
     return (fac);
@@ -236,53 +236,53 @@ double RbMath::lnFactorial(int n) {
 }
 
 
-unsigned long RbMath::stirlingFirst(int n, int k) {
-	
-	unsigned long r = 0;
-	if (n == k)
-		return 1;
-	if (k == 1)
-		return factorial(n-1);
-	if (n == 1 && k > 1)
-		return 0;
-	if (n > 0 && k == 0)
-		return 0;
-	if (k == n-1)
-		return kchoose2(n);
-	r = stirlingFirst(n-1, k-1) + ((n-1)*stirlingFirst(n-1, k));
-	return r;
+std::uint64_t RbMath::stirlingFirst(int n, int k) {
+
+    std::uint64_t r = 0;
+    if (n == k)
+        return 1;
+    if (k == 1)
+        return factorial(n-1);
+    if (n == 1 && k > 1)
+        return 0;
+    if (n > 0 && k == 0)
+        return 0;
+    if (k == n-1)
+        return kchoose2(n);
+    r = stirlingFirst(n-1, k-1) + ((n-1)*stirlingFirst(n-1, k));
+    return r;
 }
 
-int RbMath::stirlingSecond(int n, int k) {
+std::int64_t RbMath::stirlingSecond(int n, int k) {
 	
-	int r = 0;
-	if (k > n || k < 0){
-		throw RbException("Error: k must be in 0,...,n");
+    std::int64_t r = 0;
+    if (k > n || k < 0){
+	throw RbException("Error: k must be in 0,...,n");
+    }
+    else{
+	if (k == 1 || k == n) {
+	    return 1;
 	}
 	else{
-		if (k == 1 || k == n) {
-			return 1;
-		}
-		else{
-			int v1 = factorial(k);
-			int sumv = 0;
-			for (int j=0; j<k+1; j++){
-				int v2 = 1;
-				if ((k-j) % 2 == 1)
-					v2 = -1;
-				int v3 = v2 * choose(k,j) * pow(j,n);
-				sumv += v3;
-			}
-			r = sumv / v1;
-			return r;
-		}
+	    std::int64_t v1 = factorial(k);
+	    std::int64_t sumv = 0;
+	    for (int j=0; j<k+1; j++){
+		std::int64_t v2 = 1;
+		if ((k-j) % 2 == 1)
+		    v2 = -1;
+		std::int64_t v3 = v2 * choose(k,j) * pow(j,n);
+		sumv += v3;
+	    }
+	    r = sumv / v1;
+	    return r;
 	}
-	return r;
+    }
+    return r;
 }
 
-int RbMath::bell(int n) {
+std::int64_t RbMath::bell(int n) {
 
-    int r = 0;
+    std::int64_t r = 0;
     for (int k = 0; k <= n; k++)
     {
         r += stirlingSecond(n, k);
@@ -297,13 +297,13 @@ double RbMath::lnStirlingFirst(int n, int k) {
 }
 
 
-int RbMath::signedStirlingFirst(int n, int k) {
+std::int64_t RbMath::signedStirlingFirst(int n, int k) {
 	int sign = 1;
 	if ((n-k) % 2 == 1)
 		sign = -1;
-	unsigned long v = stirlingFirst(n,k);
+	auto v = stirlingFirst(n,k);
 	std::cout << v << std::endl;
-	return sign * (int)v;
+	return sign * (std::int64_t)v;
 }
 
 /*!

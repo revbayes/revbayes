@@ -19,6 +19,7 @@
 #define RbMathCombinatorialFunctions_H
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 
@@ -31,20 +32,19 @@ namespace RevBayesCore {
         double                      lnChoose(double n, double k);                                                   //!< Calculate the log factorial
         double                      lnFactorial(int n);                                                             //!< Calculate the log factorial
         double                      squaredHarmonicNumber(size_t n);                                                //!< Calculate the squared harmonic number
-        
-		// These stirling functions all have problems with overflow
-		int                         stirlingSecond(int n, int k);                                                   //!< Calculate the Stirling number of the second kind
-		int                         bell(int n);                                                                    //!< Calculate the Bell number
-		unsigned long				stirlingFirst(int n, int k);                                                    //!< Calculate the Stirling number of the first kind
-		double						lnStirlingFirst(int n, int k);                                                  //!< Calculate the log Stirling number of the first kind
-		int							signedStirlingFirst(int n, int k);                                              //!< Calculate the SIGNED Stirling number of the first kind
+
+        // These stirling functions all have problems with overflow
+        std::int64_t                stirlingSecond(int n, int k);                                                   //!< Calculate the Stirling number of the second kind
+        std::int64_t                bell(int n);                                                                    //!< Calculate the Bell number
+        std::uint64_t               stirlingFirst(int n, int k);                                                    //!< Calculate the Stirling number of the first kind
+        double                      lnStirlingFirst(int n, int k);                                                  //!< Calculate the log Stirling number of the first kind
+        std::int64_t                signedStirlingFirst(int n, int k);                                              //!< Calculate the SIGNED Stirling number of the first kind
 
         // helper functions
-        double                      lfastchoose(double n, double k);                                                //!< Calculate the log factorial
-        double                      lfastchoose2(double n, double k, int* s_choose);                                //!< Calculate the log factorial
-
+        double                      lfastchoose(double n, double k);                                                //!< Calculate the log choose function
+        double                      lfastchoose2(double n, double k, int* s_choose);                                //!< Calculate the log choose function
     }
-    
+
 }
 
 #endif
