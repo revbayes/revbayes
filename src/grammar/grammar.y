@@ -58,6 +58,7 @@
 #include "Workspace.h"
 
 #include <iostream>
+#include <cstdint>
 #include <list>
 #include <sstream>
 #include <string>
