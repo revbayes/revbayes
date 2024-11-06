@@ -8,6 +8,7 @@
 #include "MarkovTimesDistribution.h"
 
 #include <set>
+#include <cstdint>
 
 #include "AbstractEventsDistribution.h"
 #include "RandomNumberFactory.h"

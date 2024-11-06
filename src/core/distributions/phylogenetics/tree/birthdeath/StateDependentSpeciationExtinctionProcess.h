@@ -18,6 +18,7 @@
 
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
     

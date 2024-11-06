@@ -1,4 +1,5 @@
 #include <vector>
+#include <cstdint>
 
 #include "BivariatePoissonDistribution.h"
 #include "DistributionBivariatePoisson.h"

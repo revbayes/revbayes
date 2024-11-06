@@ -2,6 +2,7 @@
 #define VectorSingleElementSlideMove_H
 
 #include <ostream>
+#include <cstdint>
 #include <vector>
 
 #include "Proposal.h"

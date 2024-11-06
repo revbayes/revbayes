@@ -5,6 +5,7 @@
 #include "RbVector.h"
 
 #include <vector>
+#include <cstdint>
 #include <set>
 
 namespace RevBayesCore {

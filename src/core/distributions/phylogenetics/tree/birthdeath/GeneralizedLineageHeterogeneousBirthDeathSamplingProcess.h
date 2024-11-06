@@ -19,6 +19,7 @@
 #include "Loader.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 

@@ -1,6 +1,7 @@
 #include "GraphFlipEdgeProposal.h"
 
 #include <iostream>
+#include <cstdint>
 #include <vector>
 
 #include "RandomNumberFactory.h"

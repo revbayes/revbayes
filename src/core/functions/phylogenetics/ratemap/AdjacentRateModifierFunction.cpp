@@ -9,6 +9,7 @@
 #include "AdjacentRateModifierFunction.h"
 
 #include <string>
+#include <cstdint>
 
 #include "AdjacentRateModifier.h"
 #include "TypedDagNode.h"

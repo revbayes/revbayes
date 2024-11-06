@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include <cstdint>
 #include <vector>
 
 #include "Argument.h"

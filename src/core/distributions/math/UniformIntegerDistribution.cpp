@@ -1,6 +1,7 @@
 #include "UniformIntegerDistribution.h"
 
 #include <math.h>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"

@@ -23,6 +23,7 @@
 #include "Tree.h"
 #include "TopologyNode.h"
 #include <string>
+#include <cstdint>
 #include <vector>
 
 #include <boost/unordered_set.hpp>

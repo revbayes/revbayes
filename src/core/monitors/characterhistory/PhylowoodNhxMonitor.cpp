@@ -1,6 +1,7 @@
 #include "PhylowoodNhxMonitor.h"
 
 #include <iostream>
+#include <cstdint>
 #include <string>
 
 #include "CharacterEventDiscrete.h"

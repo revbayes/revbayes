@@ -1,6 +1,7 @@
 #include "DiscretizeDistributionFunction.h"
 
 #include <vector>
+#include <cstdint>
 
 #include "Cloneable.h"
 #include "ContinuousDistribution.h"

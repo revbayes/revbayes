@@ -4,6 +4,7 @@
 #include "Natural.h"
 
 #include <ostream>
+#include <cstdint>
 #include <string>
 
 

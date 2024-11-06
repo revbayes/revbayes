@@ -2,6 +2,7 @@
 #define Func__mod_H
 
 #include <string>
+#include <cstdint>
 #include <iosfwd>
 #include <vector>
 

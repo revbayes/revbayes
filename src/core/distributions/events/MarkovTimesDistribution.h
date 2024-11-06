@@ -9,6 +9,7 @@
 #define MARKOVTIMESDISTRIBUTION_H_
 
 #include <set>
+#include <cstdint>
 
 #include "AbstractEventTimesDistribution.h"
 #include "RbVector.h"

@@ -2,6 +2,7 @@
 #define BinarySwitchProposal_H
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "Proposal.h"
 

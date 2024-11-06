@@ -15,6 +15,7 @@
 #include "RlUserInterface.h"
 
 #include <map>
+#include <cstdint>
 #include <set>
 #include <sstream>
 

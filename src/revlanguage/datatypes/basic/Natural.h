@@ -5,6 +5,7 @@
 #include "Integer.h"
 
 #include <ostream>
+#include <cstdint>
 #include <string>
 #include <type_traits>  // For std::enable_if and std::is_integral
 

@@ -7,6 +7,7 @@
 #include "RbFileManager.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevLanguage {
     

@@ -1,6 +1,7 @@
 #include "Func_pomoState4Converter.h"
 
 #include <map>
+#include <cstdint>
 #include <string>
 #include <vector>
 

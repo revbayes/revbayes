@@ -2,6 +2,7 @@
 #define GraphShiftEdgeProposal_H
 
 #include <set>
+#include <cstdint>
 #include <string>
 
 #include "Proposal.h"

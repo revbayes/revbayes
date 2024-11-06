@@ -14,6 +14,7 @@
 #include "TopologyNode.h"
 
 #include <set>
+#include <cstdint>
 #include <string>
 #include <vector>
 

@@ -2,6 +2,7 @@
 #define DPPGibbsConcentrationMove_H
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "AbstractGibbsMove.h"
 

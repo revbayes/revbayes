@@ -11,6 +11,7 @@
 
 
 #include <vector>
+#include <cstdint>
 
 #include "RbVector.h"
 #include "TypedFunction.h"

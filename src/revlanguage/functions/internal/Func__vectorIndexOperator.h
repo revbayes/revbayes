@@ -4,6 +4,7 @@
 #include "RlTypedFunction.h"
 
 #include <string>
+#include <cstdint>
 
 namespace RevLanguage {
     

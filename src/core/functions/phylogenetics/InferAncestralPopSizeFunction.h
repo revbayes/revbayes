@@ -5,6 +5,7 @@
 #include "MatrixReal.h"
 
 #include <string>
+#include <cstdint>
 #include <vector>
 
 namespace RevBayesCore {

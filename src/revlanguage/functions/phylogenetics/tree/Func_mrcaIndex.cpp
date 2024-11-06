@@ -7,6 +7,7 @@
 //
 
 #include <iosfwd>
+#include <cstdint>
 #include <string>
 #include <vector>
 

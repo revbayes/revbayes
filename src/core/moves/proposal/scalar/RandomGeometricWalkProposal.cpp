@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdint>
 
 #include "DistributionGeometric.h"
 #include "RandomGeometricWalkProposal.h"

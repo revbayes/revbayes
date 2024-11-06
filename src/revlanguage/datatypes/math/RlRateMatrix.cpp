@@ -1,6 +1,7 @@
 #include "RlRateMatrix.h"
 
 #include <string>
+#include <cstdint>
 
 #include "ArgumentRule.h"
 #include "ModelVector.h"

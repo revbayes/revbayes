@@ -4,6 +4,7 @@
 #include "Real.h"
 
 #include <ostream>
+#include <cstdint>
 #include <string>
 
 namespace RevLanguage {

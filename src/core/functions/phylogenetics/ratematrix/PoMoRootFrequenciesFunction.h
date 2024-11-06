@@ -23,6 +23,7 @@
 #define PoMoRootFrequenciesFunction_H
 
 #include <vector>
+#include <cstdint>
 
 #include "Simplex.h"
 #include "TypedFunction.h"

@@ -2,6 +2,7 @@
 #define AutocorrelatedEventDistribution_H
 
 #include <iosfwd>
+#include <cstdint>
 #include <vector>
 
 #include "MultiValueEvent.h"

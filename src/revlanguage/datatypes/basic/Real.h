@@ -5,6 +5,7 @@
 #include "TypedDagNode.h"
 
 #include <ostream>
+#include <cstdint>
 #include <string>
 
 /**

@@ -30,6 +30,7 @@
 #include "Printable.h"
 
 #include <vector>
+#include <cstdint>
 #include <string>
 
 namespace RevBayesCore {

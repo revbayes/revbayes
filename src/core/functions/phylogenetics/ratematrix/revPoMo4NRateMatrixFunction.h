@@ -8,6 +8,7 @@
 #include "TypedFunction.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
     

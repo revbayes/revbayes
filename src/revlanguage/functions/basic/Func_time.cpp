@@ -1,6 +1,7 @@
 #include "Func_time.h"
 
 #include <string>
+#include <cstdint>
 
 #include "Natural.h"
 #include "OptionRule.h"

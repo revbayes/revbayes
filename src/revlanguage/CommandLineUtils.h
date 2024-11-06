@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <cstdint>
 std::string nonblankSeparators = "+->~()[]{}.,\"";
 std::string separators = nonblankSeparators + " ";
 std::string openingSeparators = "\"(,";

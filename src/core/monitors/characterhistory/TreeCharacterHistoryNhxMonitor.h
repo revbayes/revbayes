@@ -12,6 +12,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 
 #include <fstream>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

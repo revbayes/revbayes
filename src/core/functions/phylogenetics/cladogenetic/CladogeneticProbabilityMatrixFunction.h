@@ -8,6 +8,7 @@
 #define CladogeneticProbabilityMatrixFunction__
 
 #include <vector>
+#include <cstdint>
 #include <map>
 
 #include "AbstractCladogenicStateFunction.h"

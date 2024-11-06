@@ -6,6 +6,7 @@
 #include "RbVector.h"
 
 #include <iostream>
+#include <cstdint>
 #include <vector>
 
 namespace RevLanguage {

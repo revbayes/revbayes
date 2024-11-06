@@ -10,6 +10,7 @@
 #define Func_choose_h
 
 #include <string>
+#include <cstdint>
 #include <iosfwd>
 #include <vector>
 

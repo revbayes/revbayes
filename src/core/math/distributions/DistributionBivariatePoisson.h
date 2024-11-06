@@ -19,6 +19,7 @@
 #define DistributionBivariatePoisson_H
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 

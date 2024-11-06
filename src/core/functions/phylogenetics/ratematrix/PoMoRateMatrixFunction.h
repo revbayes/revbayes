@@ -23,6 +23,7 @@
 #define PoMoRateMatrixFunction_H
 
 #include <vector>
+#include <cstdint>
 
 #include "TypedFunction.h"
 #include "RateGenerator.h"

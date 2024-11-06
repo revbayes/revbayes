@@ -1,4 +1,5 @@
 #include <string>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
