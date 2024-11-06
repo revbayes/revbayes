@@ -164,8 +164,8 @@ void UniqueProfiler::writeReportToFile(std::string filename) const {
 
 
 double UniqueProfiler::duration(){
-	long s = timers[level].endTime.tv_sec - timers[level].startTime.tv_sec;
-	long us = timers[level].endTime.tv_usec - timers[level].startTime.tv_usec;
+	std::int64_t s = timers[level].endTime.tv_sec - timers[level].startTime.tv_sec;
+	std::int64_t us = timers[level].endTime.tv_usec - timers[level].startTime.tv_usec;
 	return ((double)s + us*1e-6);
 }
 

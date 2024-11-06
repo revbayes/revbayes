@@ -10,6 +10,7 @@
 
 #include <boost/config.hpp>
 #include <string>
+#include <cstdint>
 #include <vector>
 #include <map>
 
@@ -20,7 +21,7 @@ typedef std::vector< double > stdVectorXd;
 typedef std::vector< stdVectorXd > stdMatrixXd;
 typedef std::map< std::vector<unsigned>, double > eventMap_t;
 
-typedef size_t mapHistoriesKey_t;
+typedef std::int64_t mapHistoriesKey_t;
 typedef std::vector< std::pair<double, size_t> > mapHistoriesVal_t;
 typedef std::map< mapHistoriesKey_t, mapHistoriesVal_t > mapHistories_t;
 typedef std::vector< mapHistories_t > vecHistories_t;
@@ -103,7 +104,7 @@ public:
 	virtual double computeLogLikelihood() = 0;
 
 	virtual mapHistories_t drawHistory() = 0;
-	virtual mapHistories_t drawHistoryAndComputeRates(std::vector<double>& averageLambda, std::vector<double>& averageMu, std::vector<double>& averagePhi, std::vector<double>& averageDelta, std::vector<long>& numChanges) = 0;
+	virtual mapHistories_t drawHistoryAndComputeRates(std::vector<double>& averageLambda, std::vector<double>& averageMu, std::vector<double>& averagePhi, std::vector<double>& averageDelta, std::vector<std::int64_t>& numChanges) = 0;
 	virtual mapHistories_t drawAncestralStates() = 0;
 
 	virtual vecHistories_t drawMultipleHistories(size_t nReplicas) = 0;
