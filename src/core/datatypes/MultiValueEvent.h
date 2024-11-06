@@ -2,6 +2,7 @@
 #define MultiValueEvent_h
 
 #include <cstdio>
+#include <cstdint>
 #include <vector>
 #include <iosfwd>
 

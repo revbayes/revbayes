@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <cstdint>
 #include <utility>
 
 #include "DiscretizedContinuousState.h"

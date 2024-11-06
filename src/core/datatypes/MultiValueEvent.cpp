@@ -1,6 +1,7 @@
 #include "MultiValueEvent.h"
 
 #include <ostream>
+#include <cstdint>
 #include <string>
 
 #include "RbException.h"

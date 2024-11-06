@@ -9,6 +9,7 @@
 #define ORDEREDEVENTTIME_H_
 
 #include <set>
+#include <cstdint>
 
 #include "Cloneable.h"
 #include "MemberObject.h"

@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 
 #include "AbstractHomologousDiscreteCharacterData.h"
