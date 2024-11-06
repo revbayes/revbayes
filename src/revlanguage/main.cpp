@@ -44,32 +44,31 @@ variables_map parse_cmd_line(int argc, char* argv[])
     using namespace po;
     
     std::string opt_descr =
-        "    Available keys:\n\n"
-        "      lineWidth=<integer>          Screen width when printing (in characters).\n\n"
-        "        DEFAULT: 160\n\n"
-        "      moduleDir=<path>             Module directory name.\n\n"
-        "        DEFAULT: \"modules\"\n\n"
-        "      outputPrecision=<integer>    How many significant digits to print.\n\n"
-        "        DEFAULT: 7\n\n"
-        "      printNodeIndex=<true,false>  Print the node indices of a tree as annotations?\n\n"
-        "        DEFAULT: true\n\n"
-        "      useScaling=<true,false>      Should the likelihood in continuous-time Markov chain (CTMC) models be scaled?\n\n"
-        "        DEFAULT: true\n\n"
-        "      scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).\n\n"
-        "        DEFAULT: 1\n\n"
-        "      tolerance=<numeric>          Tolerance for comparing doubles.\n\n"
-        "        DEFAULT: 10e-10\n\n"
-        "      debugMCMC=<0,1>              How much work to perform to check MCMC?\n\n"
-        "        0: MCMC run without checks.\n"
-        "        1: MCMC run with additional checks at extra CPU time cost.\n\n"
-        "        DEFAULT: 0\n\n"
-        "      logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC?\n\n"
-        "        0: No information on individual moves written out.\n"
-        "        1 or higher: Writes out the generation, within-generation position, and name for each move.\n"
-        "        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios.\n"
-        "        3 or higher: Writes out each changed probability density along with the name of the corresponding model graph node.\n"
-        "        4: Writes out additional details about the mvSlice move (if present).\n\n"
-        "        DEFAULT: 0";
+        "    lineWidth=<integer>          Screen width when printing (in characters).\n\n"
+        "          DEFAULT: 160\n\n"
+        "    moduleDir=<path>             Module directory name.\n\n"
+        "          DEFAULT: \"modules\"\n\n"
+        "    outputPrecision=<integer>    How many significant digits to print.\n\n"
+        "          DEFAULT: 7\n\n"
+        "    printNodeIndex=<true,false>  Print the node indices of a tree as annotations?\n\n"
+        "          DEFAULT: true\n\n"
+        "    useScaling=<true,false>      Should the likelihood in continuous-time Markov chain (CTMC) models be scaled?\n\n"
+        "          DEFAULT: true\n\n"
+        "    scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).\n\n"
+        "          DEFAULT: 1\n\n"
+        "    tolerance=<numeric>          Tolerance for comparing doubles.\n\n"
+        "          DEFAULT: 10e-10\n\n"
+        "    debugMCMC=<0,1>              How much work to perform to check MCMC?\n\n"
+        "          0: MCMC run without checks.\n"
+        "          1: MCMC run with additional checks at extra CPU time cost.\n\n"
+        "          DEFAULT: 0\n\n"
+        "    logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC?\n\n"
+        "          0: No information on individual moves written out.\n"
+        "          1 or higher: Writes out the generation, within-generation position, and name for each move.\n"
+        "          2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios.\n"
+        "          3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.\n"
+        "          4: Writes out additional details about the mvSlice move (if present).\n\n"
+        "          DEFAULT: 0\n";
 
     // Put all options in one group for now.
     options_description general("Options");
@@ -89,7 +88,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
     ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
 	// composing means that --file can occur multiple times
     ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
-    ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value.\n\n")
+    ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. Available keys:")
 	;
 
     // Treat all positional options as "file" options.
