@@ -1,6 +1,8 @@
 #ifndef Mcmc_H
 #define Mcmc_H
 
+#include <cstdint>
+
 #include "MonteCarloSampler.h"
 
 namespace RevBayesCore {

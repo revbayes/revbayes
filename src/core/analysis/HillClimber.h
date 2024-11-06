@@ -1,6 +1,8 @@
 #ifndef HillClimber_H
 #define HillClimber_H
 
+#include <cstdint>
+
 #include "MaximumLikelihoodEstimation.h"
 
 namespace RevBayesCore {
