@@ -9,6 +9,7 @@
 #include "UniqueProfiler.h"
 
 #include <cstdio>
+#include <cstdint>
 #include <utility>
 
 namespace Utils {
