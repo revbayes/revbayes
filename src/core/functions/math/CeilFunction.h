@@ -1,6 +1,8 @@
 #ifndef CeilFunction_H
 #define CeilFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

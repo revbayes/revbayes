@@ -1,6 +1,8 @@
 #ifndef RoundFunction_H
 #define RoundFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

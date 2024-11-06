@@ -1,6 +1,8 @@
 #ifndef OrderedRateMatrixFunction_H
 #define OrderedRateMatrixFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RateGenerator.h"
 

@@ -1,6 +1,8 @@
 #ifndef SumIntegerFunction_H
 #define SumIntegerFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

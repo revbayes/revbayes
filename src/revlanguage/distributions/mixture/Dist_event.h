@@ -1,6 +1,8 @@
 #ifndef Dist_event_H
 #define Dist_event_H
 
+#include <cstdint>
+
 #include "EventDistribution.h"
 #include "ModelVector.h"
 #include "RealPos.h"

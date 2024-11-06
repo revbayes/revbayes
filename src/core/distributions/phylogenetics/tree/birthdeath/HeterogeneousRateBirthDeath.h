@@ -1,6 +1,8 @@
 #ifndef HeterogeneousRateBirthDeath_H
 #define HeterogeneousRateBirthDeath_H
 
+#include <cstdint>
+
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
 #include "CharacterHistoryDiscrete.h"
 #include "MemberObject.h"

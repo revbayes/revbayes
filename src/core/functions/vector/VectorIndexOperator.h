@@ -22,6 +22,8 @@
 #ifndef VectorIndexOperator_H
 #define VectorIndexOperator_H
 
+#include <cstdint>
+
 #include "RbVector.h"
 #include "Simplex.h"
 #include "TypedFunction.h"

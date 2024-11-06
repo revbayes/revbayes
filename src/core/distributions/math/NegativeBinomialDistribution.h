@@ -1,6 +1,8 @@
 #ifndef NegativeBinomialDistribution_H
 #define NegativeBinomialDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

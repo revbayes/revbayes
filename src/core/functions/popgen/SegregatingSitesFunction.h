@@ -1,6 +1,8 @@
 #ifndef SegregatingSitesFunction_H
 #define SegregatingSitesFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

@@ -1,6 +1,8 @@
 #ifndef BernoulliDistribution_H
 #define BernoulliDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

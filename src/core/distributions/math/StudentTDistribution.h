@@ -13,6 +13,8 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 #ifndef StudentTDistribution_H
 #define StudentTDistribution_H
 
+#include <cstdint>
+
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {

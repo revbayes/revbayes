@@ -1,6 +1,8 @@
 #ifndef DiversityDependentPureProcess_H
 #define DiversityDependentPureProcess_H
 
+#include <cstdint>
+
 #include "AbstractBirthDeathProcess.h"
 
 namespace RevBayesCore {

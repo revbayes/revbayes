@@ -1,6 +1,8 @@
 #ifndef FloorFunction_H
 #define FloorFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

@@ -1,6 +1,8 @@
 #ifndef DiscretizeDistributionFunction_H
 #define DiscretizeDistributionFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RbVector.h"
 

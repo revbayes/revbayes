@@ -16,6 +16,8 @@
 #ifndef ChromosomesRateMatrixFunction_H
 #define ChromosomesRateMatrixFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RateGenerator.h"
 

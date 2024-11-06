@@ -19,6 +19,8 @@
 #ifndef DiscretizeGammaFromBetaQuantilesFunction_H
 #define DiscretizeGammaFromBetaQuantilesFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "ContinuousDistribution.h"
 #include "RbVector.h"

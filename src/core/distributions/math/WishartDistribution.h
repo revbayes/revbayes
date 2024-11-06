@@ -1,6 +1,8 @@
 #ifndef WishartDistribution_H
 #define WishartDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 #include "MatrixReal.h"
 #include "TypedDagNode.h"

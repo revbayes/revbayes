@@ -1,6 +1,8 @@
 #ifndef BetaBrokenStickFunction_H
 #define BetaBrokenStickFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "Simplex.h"
 #include "RbVector.h"

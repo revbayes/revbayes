@@ -1,6 +1,8 @@
 #ifndef TruncateFunction_H
 #define TruncateFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

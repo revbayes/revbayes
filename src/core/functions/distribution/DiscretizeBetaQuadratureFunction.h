@@ -19,6 +19,8 @@
 #ifndef DiscretizeBetaQuadratureFunction_H
 #define DiscretizeBetaQuadratureFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "MatrixReal.h"
 

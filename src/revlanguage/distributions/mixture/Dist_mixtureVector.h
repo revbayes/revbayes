@@ -1,6 +1,8 @@
 #ifndef Dist_mixtureVector_H
 #define Dist_mixtureVector_H
 
+#include <cstdint>
+
 #include "VectorMixtureDistribution.h"
 #include "RealPos.h"
 #include "RlTypedDistribution.h"

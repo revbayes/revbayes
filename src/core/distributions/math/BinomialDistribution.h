@@ -1,6 +1,8 @@
 #ifndef BinomialDistribution_H
 #define BinomialDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

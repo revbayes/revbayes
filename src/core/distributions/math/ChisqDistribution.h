@@ -1,6 +1,8 @@
 #ifndef ChisqDistribution_H
 #define ChisqDistribution_H
 
+#include <cstdint>
+
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {

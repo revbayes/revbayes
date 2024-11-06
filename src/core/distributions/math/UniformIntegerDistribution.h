@@ -1,6 +1,8 @@
 #ifndef UniformIntegerDistribution_H
 #define UniformIntegerDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

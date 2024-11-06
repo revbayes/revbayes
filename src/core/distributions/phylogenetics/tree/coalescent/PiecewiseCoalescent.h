@@ -1,6 +1,8 @@
 #ifndef PiecewiseCoalescent_H
 #define PiecewiseCoalescent_H
 
+#include <cstdint>
+
 #include "AbstractCoalescent.h"
 #include "DemographicFunction.h"
 #include "ConstantDemographicFunction.h"

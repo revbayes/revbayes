@@ -1,6 +1,8 @@
 #ifndef Dist_IID_H
 #define Dist_IID_H
 
+#include <cstdint>
+
 #include "IidDistribution.h"
 #include "ModelVector.h"
 #include "RealPos.h"

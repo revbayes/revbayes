@@ -1,6 +1,8 @@
 #ifndef ModuloFunction_H
 #define ModuloFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

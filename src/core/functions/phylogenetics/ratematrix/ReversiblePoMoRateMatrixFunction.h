@@ -22,6 +22,8 @@
 #ifndef ReversiblePoMoRateMatrixFunction_H
 #define ReversiblePoMoRateMatrixFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RateGenerator.h"
 

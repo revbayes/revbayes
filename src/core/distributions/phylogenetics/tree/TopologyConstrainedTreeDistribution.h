@@ -1,6 +1,8 @@
 #ifndef TopologyConstrainedTreeDistribution_H
 #define TopologyConstrainedTreeDistribution_H
 
+#include <cstdint>
+
 #include "Clade.h"
 #include "RbVector.h"
 #include "Tree.h"

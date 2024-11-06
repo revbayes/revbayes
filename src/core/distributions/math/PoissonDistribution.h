@@ -1,6 +1,8 @@
 #ifndef PoissonDistribution_H
 #define PoissonDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

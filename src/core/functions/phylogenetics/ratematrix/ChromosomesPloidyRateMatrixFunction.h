@@ -16,6 +16,8 @@
 #ifndef ChromosomesPloidyRateMatrixFunction_H
 #define ChromosomesPloidyRateMatrixFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RateGenerator.h"
 

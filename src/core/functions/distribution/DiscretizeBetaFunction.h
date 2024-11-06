@@ -1,6 +1,8 @@
 #ifndef DiscretizeBetaFunction_H
 #define DiscretizeBetaFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RbVector.h"
 

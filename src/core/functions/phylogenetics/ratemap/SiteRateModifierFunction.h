@@ -9,6 +9,8 @@
 #ifndef SiteRateModifierFunction_h
 #define SiteRateModifierFunction_h
 
+#include <cstdint>
+
 #include "CharacterHistoryRateModifier.h"
 #include "TypedFunction.h"
 

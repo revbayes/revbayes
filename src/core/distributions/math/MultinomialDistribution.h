@@ -1,6 +1,8 @@
 #ifndef MultinomialDistribution_H
 #define MultinomialDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 #include "RbVector.h"
 

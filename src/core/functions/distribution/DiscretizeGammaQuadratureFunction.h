@@ -19,6 +19,8 @@
 #ifndef DiscretizeGammaQuadratureFunction_H
 #define DiscretizeGammaQuadratureFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "MatrixReal.h"
 

@@ -1,6 +1,8 @@
 #ifndef RandomGeometricWalkProposal_H
 #define RandomGeometricWalkProposal_H
 
+#include <cstdint>
+
 #include "Proposal.h"
 #include "StochasticNode.h"
 

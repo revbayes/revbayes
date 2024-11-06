@@ -19,6 +19,8 @@
 #ifndef DiscretizeLognormalQuadratureFunction_H
 #define DiscretizeLognormalQuadratureFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "MatrixReal.h"
 

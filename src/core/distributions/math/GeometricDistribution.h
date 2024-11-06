@@ -1,6 +1,8 @@
 #ifndef GeometricDistribution_H
 #define GeometricDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

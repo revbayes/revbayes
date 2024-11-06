@@ -21,6 +21,8 @@
 #ifndef SimplexScaleFunction_H
 #define SimplexScaleFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RbVector.h"
 

@@ -17,6 +17,8 @@
 #ifndef Signals_H
 #define Signals_H
 
+#include <cstdint>
+
 
 class Signals {
 

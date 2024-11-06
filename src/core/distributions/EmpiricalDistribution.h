@@ -17,6 +17,7 @@
 #ifndef EmpiricalDistribution_H
 #define EmpiricalDistribution_H
 
+#include <cstdint>
 
 #include "MemberObject.h"
 #include "RandomNumberFactory.h"

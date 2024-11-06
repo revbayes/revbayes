@@ -1,6 +1,8 @@
 #ifndef UltrametricTreeDistribution_H
 #define UltrametricTreeDistribution_H
 
+#include <cstdint>
+
 #include "TraceTree.h"
 #include "Tree.h"
 #include "TypedDagNode.h"

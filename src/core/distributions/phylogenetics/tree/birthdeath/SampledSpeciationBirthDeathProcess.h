@@ -1,6 +1,8 @@
 #ifndef SampledSpeciationBirthDeathProcess_h
 #define SampledSpeciationBirthDeathProcess_h
 
+#include <cstdint>
+
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
 #include "CharacterHistoryDiscrete.h"
 #include "MemberObject.h"

@@ -1,6 +1,8 @@
 #ifndef ConditionedBirthDeathShiftProcessContinuous_H
 #define ConditionedBirthDeathShiftProcessContinuous_H
 
+#include <cstdint>
+
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
 #include "CharacterHistoryContinuous.h"
 #include "MemberObject.h"

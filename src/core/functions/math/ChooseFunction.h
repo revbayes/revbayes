@@ -1,6 +1,8 @@
 #ifndef ChooseFunction_h
 #define ChooseFunction_h
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {

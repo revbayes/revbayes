@@ -1,6 +1,8 @@
 #ifndef CategoricalDistribution_H
 #define CategoricalDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {

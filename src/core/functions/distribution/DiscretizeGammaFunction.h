@@ -1,6 +1,8 @@
 #ifndef DiscretizeGammaFunction_H
 #define DiscretizeGammaFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RbVector.h"
 

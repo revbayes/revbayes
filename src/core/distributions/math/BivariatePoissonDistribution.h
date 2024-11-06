@@ -1,6 +1,8 @@
 #ifndef BivariatePoissonDistribution_H
 #define BivariatePoissonDistribution_H
 
+#include <cstdint>
+
 #include "RbVector.h"
 #include "TypedDistribution.h"
 #include "TypedDagNode.h"
