@@ -16,6 +16,7 @@
 #define Printer_H
 
 #include <string>
+#include <cstdint>
 #include <limits>
 
 #include "StringUtilities.h"

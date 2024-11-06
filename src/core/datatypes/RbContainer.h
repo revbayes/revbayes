@@ -2,6 +2,7 @@
 #define RbContainer_H
 
 #include <iostream>
+#include <cstdint>
 
 namespace RevBayesCore {
     

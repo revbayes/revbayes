@@ -11,6 +11,7 @@
 
 #include "Cloneable.h"
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 

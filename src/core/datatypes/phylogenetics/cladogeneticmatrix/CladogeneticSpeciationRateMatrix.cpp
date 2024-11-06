@@ -7,6 +7,7 @@
 #include "CladogeneticSpeciationRateMatrix.h"
 
 #include <fstream>
+#include <cstdint>
 #include <iomanip>
 #include <utility>
 

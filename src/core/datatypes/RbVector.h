@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cstdint>
 #include <sstream>
 
 namespace RevBayesCore {
