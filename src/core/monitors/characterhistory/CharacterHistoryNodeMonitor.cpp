@@ -1,6 +1,7 @@
 #include "CharacterHistoryNodeMonitor.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "CharacterEventDiscrete.h"

@@ -296,6 +296,7 @@ namespace RevBayesCore {
 #include "StochasticNode.h"
 
 #include <cmath>
+#include <cstdint>
 
 #ifdef RB_MPI
 #include <mpi.h>

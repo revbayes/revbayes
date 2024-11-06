@@ -10,6 +10,7 @@
 #include "Func_generalRateGeneratorSequence.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "GeneralRateGeneratorSequenceFunction.h"
 #include "ModelVector.h"

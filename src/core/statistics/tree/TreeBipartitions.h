@@ -2,6 +2,7 @@
 #define TreeBipartitions_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <iosfwd>
 #include <map>

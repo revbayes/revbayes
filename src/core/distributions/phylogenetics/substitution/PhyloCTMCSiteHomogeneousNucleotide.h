@@ -44,6 +44,7 @@ namespace RevBayesCore {
 #include "RbMathLogic.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #if defined (SSE_ENABLED)
 #include <xmmintrin.h>

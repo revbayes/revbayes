@@ -1,6 +1,7 @@
 #include "ProbabilityMonitor.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <set>
 #include <string>

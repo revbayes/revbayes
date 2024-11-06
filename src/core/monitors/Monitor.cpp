@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <algorithm>
 #include <map>
 #include <ostream>

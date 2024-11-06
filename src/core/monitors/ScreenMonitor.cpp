@@ -1,6 +1,7 @@
 #include "ScreenMonitor.h"
 
 #include <cmath>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <string>

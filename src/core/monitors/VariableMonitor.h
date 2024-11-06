@@ -2,6 +2,7 @@
 #define FileMonitor_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <iosfwd>
 #include "variant.h"

@@ -1,6 +1,7 @@
 #include "StochasticVariableMonitor.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>

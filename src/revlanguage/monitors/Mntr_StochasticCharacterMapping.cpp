@@ -9,6 +9,7 @@
 #include "Mntr_StochasticCharacterMapping.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "ArgumentRule.h"

@@ -47,6 +47,7 @@ namespace RevBayesCore {
 #include "RandomNumberFactory.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 
 template<class charType>

@@ -19,6 +19,7 @@
 #include "TypedDistribution.h"
 
 #include <cmath>
+#include <cstdint>
 
 namespace RevBayesCore {
 

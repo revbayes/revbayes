@@ -1,6 +1,7 @@
 #include "RandomMoveSchedule.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"

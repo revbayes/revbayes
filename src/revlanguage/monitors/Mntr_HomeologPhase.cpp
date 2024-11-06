@@ -1,6 +1,7 @@
 #include "Mntr_HomeologPhase.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "ArgumentRule.h"
