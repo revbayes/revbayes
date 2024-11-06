@@ -13,7 +13,6 @@
 #include "RevVariable.h"
 #include "RlFunction.h"
 #include "RlString.h"
-#include "RlUserInterface.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp" // IWYU pragma: keep
 #include "boost/date_time/gregorian/gregorian.hpp" // IWYU pragma: keep
@@ -65,11 +64,6 @@ RevPtr<RevVariable> Func_time::execute( void )
         boost::posix_time::time_duration duration = t - epoch_start;
 
         time = duration.total_milliseconds();
-
-        std::string str_time = "";
-        str_time += std::to_string(time) + "\n";
-        RevLanguage::UserInterface::userInterface().output(str_time, false);
-
     }
     
     return RevPtr<RevVariable>( new RevVariable( new Natural( time ) ) );
