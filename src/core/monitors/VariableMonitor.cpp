@@ -1,5 +1,6 @@
 #include "VariableMonitor.h"
 
+#include <cstdint>
 #include <fstream>
 #include <string>
 
