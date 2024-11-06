@@ -118,6 +118,7 @@ namespace RevBayesCore {
 #include "RbMathLogic.h"
 
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <sstream>
 

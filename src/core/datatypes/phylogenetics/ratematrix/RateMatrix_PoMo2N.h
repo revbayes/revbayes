@@ -22,6 +22,7 @@
 #define RateMatrix_PoMo2N_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "AbstractRateMatrix.h"

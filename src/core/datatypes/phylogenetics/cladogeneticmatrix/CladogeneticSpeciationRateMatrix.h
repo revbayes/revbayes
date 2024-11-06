@@ -8,6 +8,7 @@
 #define CladogeneticSpeciationRateMatrix_h
 
 #include <cstddef>
+#include <cstdint>
 #include <map>
 #include <vector>
 #include <iosfwd>

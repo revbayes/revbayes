@@ -13,6 +13,7 @@
 #include "RbException.h"
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <map>
 #include <vector>

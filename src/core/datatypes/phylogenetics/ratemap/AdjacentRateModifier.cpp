@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdint>
 #include <cstddef>
 #include <ostream>
 #include <set>

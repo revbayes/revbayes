@@ -2,6 +2,7 @@
 #include <string>
 #include <iomanip>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "CharacterEventDiscrete.h"
