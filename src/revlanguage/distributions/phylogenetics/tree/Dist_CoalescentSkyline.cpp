@@ -91,14 +91,14 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
     // theta
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* th       = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
     // times
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ti       = NULL;
-    if ( times != NULL && times->getRevObject() != RevNullObject::getInstance() )
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ti       = nullptr;
+    if ( times != nullptr && times->getRevObject() != RevNullObject::getInstance() )
     {
         ti = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
     }
     // number of events per interval
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<long> >* enpi       = NULL;
-    if ( events_per_interval != NULL && events_per_interval->getRevObject() != RevNullObject::getInstance() )
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<long> >* enpi       = nullptr;
+    if ( events_per_interval != nullptr && events_per_interval->getRevObject() != RevNullObject::getInstance() )
     {
         enpi = static_cast<const ModelVector<Natural> &>( events_per_interval->getRevObject() ).getDagNode();
     }
@@ -116,12 +116,12 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
     {
         meth = RevBayesCore::PiecewiseCoalescent::EVENTS;
         // we need to check that we did not get interval times
-        if ( ti != NULL )
+        if ( ti != nullptr )
         {
             // throw exception
             throw RbException("You can only provide the 'times' when you use 'method=specified'.");
         }
-        if ( enpi == NULL )
+        if ( enpi == nullptr )
         {
             // throw exception
             throw RbException("You must provide the 'events_per_interval' when you use 'method=events'.");
@@ -131,12 +131,12 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
     {
         meth = RevBayesCore::PiecewiseCoalescent::SPECIFIED;
         // we need to check that we indeed got interval times
-        if ( ti == NULL )
+        if ( ti == nullptr )
         {
             // throw exception
             throw RbException("You must provide the 'times' when you use 'method=specified'.");
         }
-        if ( enpi != NULL )
+        if ( enpi != nullptr )
         {
             // throw exception
             throw RbException("You can only provide the 'events_per_interval' when you use 'method=events'.");
@@ -238,8 +238,8 @@ const MemberRules& Dist_CoalescentSkyline::getParameterRules(void) const
     if ( !rules_set )
     {
         dist_member_rules.push_back( new ArgumentRule( "theta"               , ModelVector<RealPos>::getClassTypeSpec(), "A vector of per interval population sizes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "times"               , ModelVector<RealPos>::getClassTypeSpec(), "A vector of times for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "events_per_interval" , ModelVector<Natural>::getClassTypeSpec(), "A vector of number of coalescent events for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "times"               , ModelVector<RealPos>::getClassTypeSpec(), "A vector of times for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, nullptr ) );
+        dist_member_rules.push_back( new ArgumentRule( "events_per_interval" , ModelVector<Natural>::getClassTypeSpec(), "A vector of number of coalescent events for the intervals, if applicable.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, nullptr ) );
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "events" );
         optionsCondition.push_back( "specified" );
