@@ -258,58 +258,73 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 }
 
+std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
+{
+    std::map<const DagNode*, double> Prs;
+    for(auto node: views::concat(nodes, affected_nodes))
+	Prs.insert({node, node->getLnProbability()});
+    return Prs;
+}
 
+constexpr double rel_err_threshhold = 1.0e-11;
+constexpr int err_precision = 11;
 
+void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& untouched, const std::map<const DagNode*, double>& touched, const std::string& before_after)
+{
+    RbException E;
+    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": PDFs not up-to-date "<<before_after<<" proposal!\n";
+    bool err = false;
+    for(auto& [node,pr1]: untouched)
+    {
+	auto pr2 = touched.at(node);
+	if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
+	{
+	    E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
+	    err = true;
+	}
+    }
+
+    if (err) throw E;
+}
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
-    if (debugMCMC >= 3)
-	std::cerr<<"performMcmcMove: '"<< proposal->getProposalName()<<"' on '"<<nodes[0]->getName()<<"'\n";
-
-    if (debugMCMC >= 2)
+    if (logMCMC >= 3)
     {
-	// --------------------------
-	//
-	//     DEBUG (BEGIN)
-	//
-	// --------------------------
+        std::cerr<<std::setprecision(11);
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
+    }
 
-	double ln_posterior_before_move = 0.0;
-	double ln_posterior_before_move_after_touch = 0.0;
+    /*
+     * NOTE: When checking PDFs, don't touch/keep affected nodes.  Only touch/keep nodes.
+     *       If we touch/keep affected nodes, we can hide problems by doing more recalculation.
+     */
 
-	// 1. Compute posterior before move
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_before_move += node->getLnProbability();
+    if (debugMCMC >= 1)
+    {
+        // 1. Compute PDFs before proposal, before touch
+        auto untouched_before_proposal = getNodePrs(nodes, affected_nodes);
 
-	// 2. Touch nodes + affected_nodes
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->touch();
+        // 2. Touch nodes.
+        for (auto node: nodes)
+            node->touch();
 
-	// 3. Compute posterior after touch
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_before_move_after_touch += node->getLnProbability();
+        // 3. Compute PDFs before proposal, after touch
+        auto touched_before_proposal = getNodePrs(nodes, affected_nodes);
 
-	// 4. Keep nodes + affected_nodes
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->keep();
+        // 4. Keep nodes
+        for (auto node: nodes)
+            node->keep();
 
-	// 5. Check that the posterior didn't change.
-	if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
-	{
-	    throw RbException()<<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName()
-			       << "' before move because posterior didn't match when re-touching: "
-			       << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
-	}
-	// --------------------------
-	//
-	//     DEBUG (END)
-	//
-	// --------------------------
+        // 5. Compare pdfs for each node
+        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "before");
     }
 
     // Propose a new value
@@ -366,6 +381,13 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     }
 
+    if (logMCMC >= 3)
+    {
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
+    }
+
     // exponentiate with the chain heat
     double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
@@ -413,50 +435,37 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         proposal->cleanProposal();
     }
 
-
-    // --------------------------
-    //
-    //     DEBUG (BEGIN)
-    //
-    // --------------------------
-    if (debugMCMC >= 2)
+    if (logMCMC >= 3)
     {
-	if (debugMCMC >= 3)
-	    std::cerr << "   The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
-
-	double ln_posterior_after_move = 0.0;
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_after_move += node->getLnProbability();
-
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->touch();
-
-	double ln_posterior_after_move_after_touch = 0.0;
-	for (auto node: views::concat(nodes, affected_nodes))
-	    ln_posterior_after_move_after_touch += node->getLnProbability();
-
-	for (auto node: views::concat(nodes, affected_nodes))
-	    node->keep();
-
-	if ( fabs(ln_posterior_after_move - ln_posterior_after_move_after_touch) > 1E-6 )
-	{
-        
-	    for (auto node: views::concat(nodes, affected_nodes))
-		node->touch();
-
-	    double ln_posterior_after_move_after_touch2 = 0.0;
-	    for (auto node: views::concat(nodes, affected_nodes))
-		ln_posterior_after_move_after_touch2 += node->getLnProbability();
-
-	    throw RbException() << "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' after move because posterior of " << ln_posterior_after_move << " and " << ln_posterior_after_move_after_touch << "/" << ln_posterior_after_move_after_touch2 << ". The move was " << (rejected ? "rejected." : "accepted.");
-
-	    // --------------------------
-	    //
-	    //     DEBUG (END)
-	    //
-	    // --------------------------
-	}
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
+
+    if (logMCMC >= 2)
+    {
+        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+        std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+    }
+
+    /*
+    // This fixes the problem in #567.
+    if (rejected)
+    {
+        for(auto node: nodes)
+            node->touch();
+        for(auto node: nodes)
+            node->keep();
+    }
+    */
+
+    /*
+     * NOTE: Debug code probably shouldn't call touch/keep here:
+     *
+     *       Calling touch/keep after reject/restore can hide MCMC problems.
+     *       Calling touch/keep after accept should be redundant.
+     */
 }
 
 
