@@ -17,6 +17,7 @@
 #ifndef Signals_H
 #define Signals_H
 
+#include <cstdint>
 
 class Signals {
 
@@ -25,10 +26,10 @@ class Signals {
                                             CONTINUE    = 1L << 1,
                                             RETURN      = 1L << 2 };                            //!< RevBayes flags
 
-        void                    set(const long flag) { flags |= flag; }                         //!< Set a flag
+        void                    set(const std::uint64_t flag) { flags |= flag; }                         //!< Set a flag
         void                    clearFlags(void) { flags = 0L; }                                //!< Clear flags
         bool                    isGood(void) const { return flags == 0; }                       //!< Test all flags
-        bool                    isSet(const long flag) const { return (flags & flag) != 0; }    //!< Test a flag
+        bool                    isSet(const std::uint64_t flag) const { return (flags & flag) != 0; }    //!< Test a flag
 
         /** Get unique signals instance */
         static Signals& getSignals() {
@@ -42,7 +43,7 @@ class Signals {
 
         Signals&                operator=(const Signals& x);                                    //!< Prevent assignment
 
-        long                    flags;                                                          //!< The flags
+        std::uint64_t                    flags;                                                          //!< The flags
 };
 
 #endif
