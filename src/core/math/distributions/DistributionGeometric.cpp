@@ -25,7 +25,7 @@ using namespace RevBayesCore;
  * \return Returns a double for the cumulative probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::cdf(long n, double p) 
+double RbStatistics::Geometric::cdf(std::int64_t n, double p) 
 {
     
     if (p <= 0 || p > 1) 
@@ -60,7 +60,7 @@ double RbStatistics::Geometric::cdf(long n, double p)
  * \return Returns a double of the log probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::lnPdf(long n, double p)
+double RbStatistics::Geometric::lnPdf(std::int64_t n, double p)
 {
 
     return pdf(n, p, true);
@@ -76,7 +76,7 @@ double RbStatistics::Geometric::lnPdf(long n, double p)
  * \return Returns a double with the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::pdf(long n, double p) 
+double RbStatistics::Geometric::pdf(std::int64_t n, double p) 
 {
 
     return pdf(n, p, false);
@@ -103,7 +103,7 @@ double RbStatistics::Geometric::pdf(long n, double p)
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::pdf(long n, double p, bool asLog)
+double RbStatistics::Geometric::pdf(std::int64_t n, double p, bool asLog)
 {
     
     double prob;
@@ -135,7 +135,7 @@ double RbStatistics::Geometric::pdf(long n, double p, bool asLog)
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
-long RbStatistics::Geometric::quantile(double q, double p)
+std::int64_t RbStatistics::Geometric::quantile(double q, double p)
 {
 
     if (p <= 0 || p > 1) 
@@ -149,7 +149,7 @@ long RbStatistics::Geometric::quantile(double q, double p)
         return 0;
     
     /* add a fuzz to ensure left continuity */
-    return long(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
+    return std::int64_t(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
 }
 
 /*!
@@ -172,7 +172,7 @@ long RbStatistics::Geometric::quantile(double q, double p)
  *    New York: Springer-Verlag.
  *    Page 480.
  */
-long RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng)
+std::int64_t RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng)
 {
     if (!RbMath::isFinite(p) || p <= 0 || p > 1) 
         throw RbException("NaN produced in rgeom");
