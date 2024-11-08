@@ -24,9 +24,6 @@ using namespace RevBayesCore;
 
 const double log_0 = RbConstants::Double::neginf;
 
-// How can we make a run-time adjustable log level?
-int log_level = 0;
-
 /** 
  * Constructor
  *
@@ -112,15 +109,6 @@ struct interval
     interval(optional<double> lb, optional<double> ub): lower_bound(lb), upper_bound(ub) {}
 };
 
-std::map<const DagNode*, double> getNodePrs(DagNode* node, const RbOrderedSet<DagNode*>& affectedNodes)
-{
-    std::map<const DagNode*, double> Prs;
-    Prs.insert({node, node->getLnProbability()});
-    for(auto affectedNode: affectedNodes)
-	Prs.insert({affectedNode, affectedNode->getLnProbability()});
-    return Prs;
-}
-
 namespace  {
 
 /// This object allow computing the probability of the current point, and also store the variable's range
@@ -186,10 +174,42 @@ namespace  {
                 return Pr_;
             }
 
+        std::map<const DagNode*, double> getNodePrs()
+        {
+            std::map<const DagNode*, double> Prs;
+            Prs.insert({variable, variable->getLnProbability()});
+            for(auto affectedNode: affectedNodes)
+                Prs.insert({affectedNode, affectedNode->getLnProbability()});
+            return Prs;
+        }
+
+        void checkPrs()
+        {
+            double x = current_value();
+            double Pr = operator()();
+            auto Prs = getNodePrs();
+            double Prx = operator()(x);
+            auto Prsx = getNodePrs();
+            if (std::abs(Pr - Prx)/abs(Prx) > 1.0e-11)
+            {
+                std::cerr<<std::setprecision(11)<<std::endl;
+                std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";
+                for(auto& [n,pr1]: Prs)
+                {
+                    double pr2 = Prsx.at(n);
+                    if (std::abs(pr1-pr2)/std::abs(pr2) > 1.0e-11)
+                        std::cerr<<"         cause: probability for "<<n->getName()<<" is "<<pr1<<" but should be "<<pr2<<":  delta = "<<pr1-pr2<<"\n";
+                }
+                std::abort();
+            }
+        }
+
         double current_value() const
             {
                 return variable->getValue();
             }
+
+        std::string name() const {return variable->getName();}
 
         slice_function(StochasticNode<double> *n, optional<double> lb, optional<double> ub, double pr, double l, double p)
             :interval(lb,ub),
@@ -200,29 +220,6 @@ namespace  {
              num_evals(0)
             {
                 variable->initiateGetAffectedNodes( affectedNodes );
-
-                if (RbSettings::userSettings().getDebugMCMC() > 0)
-                {
-                    std::map<const DagNode*, double> NodePrs;
-
-                    double x = current_value();
-                    double Pr = operator()();
-                    auto Prs = getNodePrs(variable,affectedNodes);
-                    double Prx = operator()(x);
-                    auto Prsx = getNodePrs(variable,affectedNodes);
-                    if (std::abs(Pr - Prx) > 1.0e-9)
-                    {
-                        std::cerr<<std::setprecision(10)<<std::endl;
-                        std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";
-                        for(auto& [n,pr1]: Prs)
-                        {
-                            double pr2 = Prsx.at(n);
-                            if (std::abs(pr1-pr2) > 1.0e-6)
-                                std::cerr<<"         cause: probability for "<<n->getName()<<" is "<<pr1<<" but should be "<<pr2<<":  delta = "<<pr1-pr2<<"\n";
-                        }
-                        std::abort();
-                    }
-                }
             }
     };
 
@@ -231,11 +228,18 @@ namespace  {
 std::pair<double,double> 
 find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, double w,int m)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+
+    assert(x0 + w > x0);
     assert(g.in_range(x0));
 
     double u = uniform()*w;
     double L = x0 - u;
     double R = x0 + (w-u);
+    assert(L < x0);
+    assert(x0 < R);
+
+    if (logMCMC >= 4) std::cerr<<"    L = "<<L<<"  x0 = "<<x0<<"   R0 = "<<R<<"\n";
 
     // Expand the interval until its ends are outside the slice, or until
     // the limit on steps is reached.
@@ -275,6 +279,7 @@ find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, doub
 std::tuple<double,double,optional<double>,optional<double>>
 find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w, int K)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
     assert(x0 + w > x0);
     assert(g.in_range(x0));
 
@@ -309,7 +314,7 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
 
     while ( K > 0 and (gL() > logy or gR() > logy))
     {
-        if (log_level >= 4)
+        if (logMCMC >= 4)
             std::cerr<<"!!    L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
 
         double W2 = (R-L);
@@ -336,14 +341,20 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     assert(L < R);
     assert( L < (L+R)/2 and (L+R)/2 < R);
 
-    //  std::cerr<<"[]    L0 = "<<L<<"   x0 = "<<x0<<"   R0 = "<<R<<"\n";
+    if (logMCMC >= 1)
+	std::cerr<<"     L0 = "<<L<<"   x0 = "<<x0<<"   R0 = "<<R<<"\n";
 
-    // FIXME: GCC 5 complains if we don't write out the tuple type. GCC 7 does not need it.  How about GCC 6?
     return {L,R,gL_cached,gR_cached};
 }
 
 double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    if (debugMCMC >= 1)
+	g.checkPrs();
+
     //  assert(g(x0) > g(L) and g(x0) > g(R));
     assert(g(x0) >= logy);
     assert(L < R);
@@ -354,7 +365,11 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
     for (int i=0;i<200;i++)
     {
         double x1 = L + uniform()*(R-L);
+
         double gx1 = g(x1);
+
+        if (logMCMC >= 4)
+	    std::cerr<<"    L0 = "<<L<<"  x1 = "<<x1<<" g(x1) = "<<gx1<<"  R0 = "<<R<<"\n";
 
         if (gx1 >= logy) return x1;
 
@@ -375,7 +390,8 @@ bool pre_slice_sampling_check_OK(double x0, slice_function& g)
     // If x is not in the range then this could be a range that is reduced to avoid loss of precision.
     if (not g.in_range(x0))
     {
-        if (log_level >= 4) std::cerr<<x0<<" not in range!";
+        int logMCMC = RbSettings::userSettings().getLogMCMC();
+        if (logMCMC >= 4) std::cerr<<"   "<<x0<<" not in range!";
         return false;
     }
     else
@@ -444,14 +460,17 @@ double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
     assert(g.in_range(x0));
 
     double gx0 = g();
-#ifndef NDEBUG
-    volatile double diff = gx0 - g(x0);
-    assert(std::abs(diff) < 1.0e-9);
-#endif
 
     // Determine the slice level, in log terms.
 
     double logy = gx0 + log(uniform()); // - exponential(1.0);
+
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    if (logMCMC >= 1 or debugMCMC >=1)
+	std::cerr<<"mvSlice("<<g.name()<<",stepping_out):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
+
+    if (debugMCMC >= 1) g.checkPrs();
 
     // Find the initial interval to sample from.
     auto [L, R] = find_slice_boundaries_stepping_out(x0,g,logy,w,m);
@@ -471,7 +490,15 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
         return x0;
 
     // 1. Determine the slice level, in log terms.
-    double logy = g() + log(uniform()); // - exponential(1);
+    double gx0 = g();
+
+    double logy = gx0 + log(uniform()); // - exponential(1);
+
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    if (logMCMC >= 1 or debugMCMC >= 1) std::cerr<<"mvSlice("<<g.name()<<",stepping_out):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
+
+    if (debugMCMC >= 1) g.checkPrs();
 
     // 2. Find the initial interval to sample from.
     auto [L, R, gL_cached, gR_cached]  = find_slice_boundaries_doubling(x0,g,logy,w,m);

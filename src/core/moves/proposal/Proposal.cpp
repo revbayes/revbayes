@@ -220,3 +220,12 @@ void Proposal::swapNode(DagNode *oldP, DagNode *newP)
     }
     
 }
+
+std::string Proposal::getLongProposalName() const
+{
+    std::vector<std::string> node_names;
+    for(auto node: nodes)
+	node_names.push_back(node->getName());
+
+    return getProposalName() + "(" + StringUtilities::join(node_names,",") +")";
+}
