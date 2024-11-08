@@ -10,6 +10,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 
+#include <cstdint>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -49,7 +50,7 @@ namespace RevBayesCore {
     };
     
     template<>
-    class RbVector<long> : public RbVectorImpl<long, IsAbstract<long>::Is > {
+    class RbVector<std::int64_t> : public RbVectorImpl<long, IsAbstract<long>::Is > {
         
     public:
         // constructor(s)
@@ -57,14 +58,14 @@ namespace RevBayesCore {
         RbVector(size_t n) : RbVectorImpl<long, IsAbstract<long>::Is  >( n ) {}
         RbVector(size_t n, const long &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( n, v ) {}
         RbVector(const std::vector<long> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
-        RbVector(const RbVector<long> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
-        RbVector(RbVector<long> &&v) = default;
+        RbVector(const RbVector<std::int64_t> &v) : RbVectorImpl<long, IsAbstract<long>::Is  >( v ) {}
+        RbVector(RbVector<std::int64_t> &&v) = default;
         virtual                                            ~RbVector(void) {}
         
         // public member functions
-        RbVector<long>&                                     operator=(const RbVector<long>& ) = default;
-        RbVector<long>&                                     operator=(      RbVector<long>&&) = default;
-        RbVector<long>*                                     clone(void) const { return new RbVector<long>( *this ); }                                                                            //!< Create an independent clone
+        RbVector<std::int64_t>&                                     operator=(const RbVector<std::int64_t>& ) = default;
+        RbVector<std::int64_t>&                                     operator=(      RbVector<std::int64_t>&&) = default;
+        RbVector<std::int64_t>*                                     clone(void) const { return new RbVector<std::int64_t>( *this ); }                                                                            //!< Create an independent clone
         void                                                printElement(std::ostream &o, size_t i, std::string /*sep="\t"*/, int l=-1, bool left=true) const { std::stringstream ss; ss << this->operator[](i); std::string s = ss.str(); StringUtilities::fillWithSpaces( s, l, left ); o << s; } //!< Print the i-th element
         
         //        StringUtilities::fillWithSpaces( s, columnWidth, false );
@@ -91,7 +92,7 @@ namespace RevBayesCore {
         RbVector(size_t n) : RbVectorImpl<double, IsAbstract<double>::Is  >( n ) {}
         RbVector(size_t n, const double &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( n, v ) {}
         RbVector(const std::vector<double> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( v ) {}
-        RbVector(const RbVector<long> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( ) {  for (size_t i=0; i<v.size(); ++i) push_back( double(v[i]) ); }
+        RbVector(const RbVector<std::int64_t> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( ) {  for (size_t i=0; i<v.size(); ++i) push_back( double(v[i]) ); }
         RbVector(const RbVector<double> &v) : RbVectorImpl<double, IsAbstract<double>::Is  >( v ) {}
         RbVector(RbVector<double> &&v) = default;
         virtual                                            ~RbVector(void) {}
