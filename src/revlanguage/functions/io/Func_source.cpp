@@ -100,9 +100,7 @@ RevPtr<RevVariable> Func_source::execute( void )
         result = Parser::getParser().processCommand( commandLine, &Workspace::userWorkspace() );
         if ( result == 2 )
         {
-            std::ostringstream msg;
-            msg << "Problem processing line " << lineNumber << " in file \"" << fname << "\"";
-            throw RbException( msg.str() );
+            throw RbException() << "Problem processing line " << lineNumber << " in file " << fname;
         }
         
     }

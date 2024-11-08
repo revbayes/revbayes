@@ -346,18 +346,18 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBivariatePoisson")][string("description")] = string(R"(A Bivariate Poisson distribution defines probabilities for pairs of natural numbers.)");
 	help_strings[string("dnBivariatePoisson")][string("example")] = string(R"(th0 ~ dnUniform(0.0, 10.0)
-th1 ~ dnUniform(0.0, 10.0)
-th2 ~ dnUniform(0.0, 10.0)
-x ~ dnBivariatePoisson(th0, th1, th2)
-x.clamp([3, 3, 3])
-moves[1] = mvSlide(th0, delta=0.01, weight=1.0)
-moves[2] = mvSlide(th1, delta=0.01, weight=1.0)
-moves[3] = mvSlide(th2, delta=0.01, weight=1.0)
-monitors[1] = mnScreen(printgen=20000, th0)
-mymodel = model(th1)
-mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20000, tuningInterval=100)
-mymcmc.run(generations=200000))");
+    th1 ~ dnUniform(0.0, 10.0)
+    th2 ~ dnUniform(0.0, 10.0)
+    x ~ dnBivariatePoisson(th0, th1, th2)
+    x.clamp([3, 3, 3])
+    moves[1] = mvSlide(th0, delta=0.01, weight=1.0)
+    moves[2] = mvSlide(th1, delta=0.01, weight=1.0)
+    moves[3] = mvSlide(th2, delta=0.01, weight=1.0)
+    monitors[1] = mnScreen(printgen=20000, th0)
+    mymodel = model(th1)
+    mymcmc = mcmc(mymodel, monitors, moves)
+    mymcmc.burnin(generations=20000, tuningInterval=100)
+    mymcmc.run(generations=200000))");
 	help_strings[string("dnBivariatePoisson")][string("name")] = string(R"(dnBivariatePoisson)");
 	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
@@ -720,6 +720,74 @@ sd(x))");
 	help_strings[string("dnHeterochronousCoalescent")][string("name")] = string(R"(dnHeterochronousCoalescent)");
 	help_strings[string("dnHeterochronousCoalescentSkyline")][string("name")] = string(R"(dnHeterochronousCoalescentSkyline)");
 	help_strings[string("dnIID")][string("name")] = string(R"(dnIID)");
+	help_arrays[string("dnInverse")][string("authors")].push_back(string(R"(Martin R. Smith)"));
+	help_strings[string("dnInverse")][string("description")] = string(R"(`dnInverse()` inverts a probability distribution.
+
+`dnInverse(x).probability()` returns `1 / x.probability()`; 
+`dnInverse(x).lnProbability()` returns `-x.lnProbability()`.
+
+This provides a way to perform inference using conditional probabilities,
+for example where 
+Pr(x | Model, Condition) = Pr(x | Model) / Pr(Condition is satisfied)
+
+In general, there may be cases where it is desirable to sample from or 
+observe a distribution subject to some form of ascertainment condition.
+For example, one may wish to sample from a normal distribution 
+`X ~ dnNormal(0, 1)` subject to some constraint _C(x)_ on _x_ – such
+as a condition that _x_ > 0.
+
+In order to compute the probability of an observed value of _x_ given
+the constraint, we need to divide Pr(x) by Pr(_C(x)_) – in this example,
+Pr(_x_ > 0).  This probability is difficult to calculate in general.
+But in specific cases, Pr(C(x)) corresponds to the probability of observing
+a specific value _y_ from some other distribution _dist_.
+
+In this case, our likelihood could be computed by 
+`dist.clamp(y); conditioned_probability = x.probability() / dist.probability()`.
+
+`dnInverse` allows such likelihoods to be computed during inference under MCMC(MC),
+where the overall probability is obtained by multiplies the probabilities of each
+indepedent component of the model.
+Hence, `Y ~ dnInverse(dist); Y.clamp(y)` gives a model element whose probability
+corresponds to `1 / dist.probability()`.)");
+	help_strings[string("dnInverse")][string("example")] = string(R"(```
+# Compute Pr(x = 1 | x ~ exp(y), y = 1)
+
+# First we define the distributions from which x and y are drawn
+
+# y may take the values 1 or 2 with probabilities 0.4, 0.6
+p_y := simplex(0.4, 0.6)
+y ~ dnCategorical( p_y )
+inv_y ~ dnInverse(dnCategorical( p_y ))
+
+y.clamp(1)
+inv_y.clamp(1)
+
+y.probability()      # 0.4 = 2 / 5
+inv_y.probability()  # 2.5 = 5 / 2
+
+# Compute the joint probability Pr(x, y)
+function PrXandY (x_value, y_value) {
+    x_given_y ~ dnExponential( y_value )
+    x_given_y.clamp(x_value) # To calculate Pr(x | y)
+
+    y.clamp(y_value) # To calculate Pr(y)
+
+    return(x_given_y.probability() * y.probability())
+}
+
+PrXandY(1, 1) # Pr(x = 1, y = 1)
+
+# If we wish to calculate likelihood conditioned on y = 1, we need to compute
+# Pr(x = 1 | y = 1)
+
+# Here it is trivial to compute this directly, as in PrXandY, but in more complex
+# cases it may be easier to use Pr(x = 1 | y = 1) := Pr(x = 1, y = 1) / Pr(y = 1)
+
+PrXandY(1, 1) * inv_y.probability()
+```)");
+	help_strings[string("dnInverse")][string("name")] = string(R"(dnInverse)");
+	help_strings[string("dnInverse")][string("title")] = string(R"(Inverse distribution)");
 	help_arrays[string("dnInverseGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnInverseGamma")][string("description")] = string(R"(inverse-gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnInverseGamma")][string("details")] = string(R"(The inverse Gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
@@ -2129,7 +2197,7 @@ An MCMCMC analysis is initiated using the `mcmcmc.run()` method.
 The `StoppingRule[]` argument provides a mechanism to automatically terminate a run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
 The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method. An example is given on the documentation page for [`mcmc()`].)");
 	help_strings[string("mcmcmc")][string("example")] = string(R"(# Create a simple model (unclamped)
-a ~ exponential(1)
+a ~ dnExponential(1)
 mymodel = model(a)
 
 # Create a move vector and a monitor vector
