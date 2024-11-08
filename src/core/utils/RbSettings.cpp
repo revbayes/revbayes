@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 
 #include "RbException.h"
 #include "RbFileManager.h"
@@ -23,7 +24,7 @@ using namespace RevBayesCore;
 RbSettings::RbSettings(void)
 {
 
-	initializeUserSettings();
+    readUserSettings();
 }
 
 
@@ -51,10 +52,16 @@ bool RbSettings::getUseScaling( void ) const
     return useScaling;
 }
 
-bool RbSettings::getCollapseSampledAncestors( void ) const
+int RbSettings::getDebugMCMC( void ) const
 {
     // return the internal value
-    return collapseSampledAncestors;
+    return debugMCMC;
+}
+
+int RbSettings::getLogMCMC( void ) const
+{
+    // return the internal value
+    return logMCMC;
 }
 
 std::string RbSettings::getOption(const std::string &key) const
@@ -87,9 +94,13 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return useScaling ? "true" : "false";
     }
-    else if ( key == "collapseSampledAncestors" )
+    else if ( key == "debugMCMC" )
     {
-        return collapseSampledAncestors ? "true" : "false";
+        return std::to_string(debugMCMC);
+    }
+    else if ( key == "logMCMC" )
+    {
+        return std::to_string(logMCMC);
     }
     else
     {
@@ -122,18 +133,8 @@ double RbSettings::getTolerance( void ) const
 
 
 /** Initialize the user settings */
-#define	MAX_DIR_PATH	2048
-void RbSettings::initializeUserSettings(void)
+void RbSettings::readUserSettings(void)
 {
-    moduleDir = "modules";      // the default module directory
-    useScaling = true;          // the default useScaling
-    scalingDensity = 1;         // the default scaling density
-    lineWidth = 160;            // the default line width
-    tolerance = 10E-10;         // set default value for tolerance comparing doubles
-    outputPrecision = 7;
-    printNodeIndex = true;      // print node indices of tree nodes as comments
-    collapseSampledAncestors = true;
-    
     path user_dir = RevBayesCore::expandUserDir("~");
     
     // read the ini file, override defaults if applicable
@@ -170,7 +171,8 @@ void RbSettings::listOptions() const
     std::cout << "linewidth = " << lineWidth << std::endl;
     std::cout << "useScaling = " << (useScaling ? "true" : "false") << std::endl;
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
-    std::cout << "collapseSampledAncestors = " << (collapseSampledAncestors ? "true" : "false") << std::endl;
+    std::cout << "debugMCMC = " << debugMCMC << std::endl;
+    std::cout << "logMCMC = " << logMCMC << std::endl;
 }
 
 
@@ -216,10 +218,20 @@ void RbSettings::setScalingDensity(size_t w)
 }
 
 
-void RbSettings::setCollapseSampledAncestors(bool w)
+void RbSettings::setDebugMCMC(int d)
 {
     // replace the internal value with this new value
-    collapseSampledAncestors = w;
+    debugMCMC = d;
+    
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
+
+void RbSettings::setLogMCMC(int d)
+{
+    // replace the internal value with this new value
+    logMCMC = d;
 
     // save the current settings for the future.
     writeUserSettings();
@@ -240,7 +252,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "outputPrecision" )
     {
-        outputPrecision = atoi(value.c_str());
+        outputPrecision = boost::lexical_cast<int>(value);
     }
     else if ( key == "printNodeIndex" )
     {
@@ -248,15 +260,11 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "tolerance" )
     {
-        //std::string::size_type sz;     // alias of size_t
-        //tolerance = std::stod (value,&sz);
-        tolerance = (double)atof(value.c_str());
+        tolerance = boost::lexical_cast<double>(value);
     }
     else if ( key == "linewidth" )
     {
-        //std::string::size_type sz;     // alias of size_t
-        //lineWidth = std::stoi (value,&sz);
-        lineWidth = atoi(value.c_str());
+        lineWidth = boost::lexical_cast<int>(value);
     }
     else if ( key == "useScaling" )
     {
@@ -264,21 +272,25 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     else if ( key == "scalingDensity" )
     {
-        size_t w = atoi(value.c_str());
+        size_t w = boost::lexical_cast<int>(value);
         if (w < 1)
             throw(RbException("scalingDensity must be an integer greater than 0"));
         
-        scalingDensity = atoi(value.c_str());
+        scalingDensity = boost::lexical_cast<int>(value);
     }
-    else if ( key == "collapseSampledAncestors" )
+    else if ( key == "debugMCMC" )
     {
-        collapseSampledAncestors = value == "true";
+        debugMCMC = boost::lexical_cast<int>(value);
+    }
+    else if ( key == "logMCMC" )
+    {
+        logMCMC = boost::lexical_cast<int>(value);
     }
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
     }
-    
+
     if ( write == true )
     {
         writeUserSettings();
@@ -331,7 +343,6 @@ void RbSettings::writeUserSettings( void )
     writeStream << "linewidth=" << lineWidth << std::endl;
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
-    writeStream << "collapseSampledAncestors=" << (collapseSampledAncestors ? "true" : "false") << std::endl;
     writeStream.close();
 
 }

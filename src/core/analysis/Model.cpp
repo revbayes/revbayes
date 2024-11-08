@@ -297,43 +297,34 @@ std::vector<DagNode*> Model::getOrderedStochasticNodes()
  */
 void Model::getOrderedStochasticNodes(const DagNode* the_dag_node, std::vector<DagNode*>& orderedStochasticNodes, std::set<const DagNode*>& visitedNodes)
 {
-    
+    // 1. Stop searching if this node is already in the search tree.
     if (visitedNodes.find(the_dag_node) != visitedNodes.end())
-    {
-        //The node has been visited before
-        //we do nothing
         return;
-    }
-    
-    if ( the_dag_node->isConstant() == false )
-    {
-        // First I have to visit my parents
-        std::vector<const DagNode *> parents = the_dag_node->getParents() ;
-        std::vector<const DagNode *>::const_iterator it;
-        for ( it=parents.begin() ; it != parents.end(); it++ )
-        {
-            getOrderedStochasticNodes(*it, orderedStochasticNodes, visitedNodes);
-        }
-        
-    }
 
-    // Then I can add myself to the nodes visited, and to the ordered vector of stochastic nodes
-    if ( the_dag_node->isStochastic() && (visitedNodes.find(the_dag_node) == visitedNodes.end()) ) //if the node is stochastic
-    {
-        orderedStochasticNodes.push_back( const_cast<DagNode*>( the_dag_node ) );
-    }
-    
-    // add myself here for safety reasons
+    // 2. Mark this node as being in the search tree to prevent any future recursion on this node.
+    //
+    //    NOTE: If we don't do this we can ping-pong back and forth between parents and children,
+    //          which can lead to a stack overflow.
+    //
+    //    NOTE: This should not depend on whether the node is stochastic.
+    //
     visitedNodes.insert( the_dag_node );
 
-    // Finally I will visit my children
-    std::vector<DagNode*> children = the_dag_node->getChildren() ;
-    std::vector<DagNode*>::iterator it;
-    for ( it = children.begin() ; it != children.end(); it++ )
+    // 3. First I have to visit my parents
+    if ( the_dag_node->isConstant() == false )
     {
-        getOrderedStochasticNodes(*it, orderedStochasticNodes, visitedNodes);
+	// Q: can constant nodes HAVE parents?
+	for (auto parent: the_dag_node->getParents())
+            getOrderedStochasticNodes(parent, orderedStochasticNodes, visitedNodes);
     }
+
+    // 4. Add myself to the ordered vector of stochastic nodes
+    if ( the_dag_node->isStochastic() )
+        orderedStochasticNodes.push_back( const_cast<DagNode*>( the_dag_node ) );
     
+    // 5. Finally I will visit my children
+    for (auto child: the_dag_node->getChildren())
+        getOrderedStochasticNodes(child, orderedStochasticNodes, visitedNodes);
 }
 
 
