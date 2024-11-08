@@ -245,18 +245,18 @@ void CharacterHistoryNodeMonitor::printHeader()
 void CharacterHistoryNodeMonitor::swapNode(DagNode *oldN, DagNode *newN)
 {
 
-    bool found = false;
+    /* bool found = false; */
     if ( oldN == tree )
     {
         tree = static_cast< TypedDagNode< Tree > *>( newN );
-        found = true;
+        /* found = true; */
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
             branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
-            found = true;
+            /* found = true; */
         }
     }
     
