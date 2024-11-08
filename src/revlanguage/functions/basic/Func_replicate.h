@@ -4,6 +4,7 @@
 #include "ModelVector.h"
 #include "RlTypedFunction.h"
 
+#include <cmath>
 #include <string>
 
 namespace RevLanguage {
@@ -15,8 +16,8 @@ namespace RevLanguage {
      * constructs such as "v( x1, x2, ..., xn)" and "[ x1, x2, ..., xn ]" when
      * the elements are non-abstract model objects with non-abstract value types.
      */
-    template <typename valType>
-    class Func_replicate : public TypedFunction< ModelVector< valType> > {
+    template <typename valType, typename nonNegType>
+    class Func_replicate : public TypedFunction< ModelVector< valType > > {
         
     public:
         Func_replicate(void);                                                                 //!< Default constructor
@@ -51,8 +52,8 @@ namespace RevLanguage {
 
 
 /** Default constructor */
-template <typename valType>
-RevLanguage::Func_replicate<valType>::Func_replicate() : TypedFunction< ModelVector<valType> >()
+template <typename valType, typename nonNegType>
+RevLanguage::Func_replicate<valType, nonNegType>::Func_replicate() : TypedFunction< ModelVector<valType> >()
 {
 }
 
@@ -63,29 +64,35 @@ RevLanguage::Func_replicate<valType>::Func_replicate() : TypedFunction< ModelVec
  *
  * \return A new copy of the process.
  */
-template <typename valType>
-RevLanguage::Func_replicate<valType>* RevLanguage::Func_replicate<valType>::clone( void ) const
+template <typename valType, typename nonNegType>
+RevLanguage::Func_replicate<valType, nonNegType>* RevLanguage::Func_replicate<valType, nonNegType>::clone( void ) const
 {
     return new Func_replicate( *this );
 }
 
 
 /** Execute function: create deterministic replicate<valType> object */
-template <typename valType>
-RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_replicate<valType>::createFunction( void ) const
+template <typename valType, typename nonNegType>
+RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_replicate<valType, nonNegType>::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode<typename valType::valueType>* v   = static_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    int n   = (int)static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    int n   = static_cast<int>(std::floor(static_cast<const nonNegType &>( this->args[1].getVariable()->getRevObject() ).getValue()));
     
-    RevBayesCore::ReplicateFunction<typename valType::valueType>* func = new RevBayesCore::ReplicateFunction<typename valType::valueType>( v, n );
+    // Checking for negatives allows a user to pass a Real without first 
+    // coercing into RealPos
+    if (n < 0) {
+        n = 0;
+    }
+    
+    auto* func = new RevBayesCore::ReplicateFunction<typename valType::valueType>( v, n );
     
     return func;
 }
 
 
 /** Get argument rules */
-template <typename valType>
-const RevLanguage::ArgumentRules& RevLanguage::Func_replicate<valType>::getArgumentRules( void ) const
+template <typename valType, typename nonNegType>
+const RevLanguage::ArgumentRules& RevLanguage::Func_replicate<valType, nonNegType>::getArgumentRules( void ) const
 {
     static ArgumentRules argument_rules = ArgumentRules();
     static bool          rules_set = false;
@@ -94,7 +101,7 @@ const RevLanguage::ArgumentRules& RevLanguage::Func_replicate<valType>::getArgum
     {
         
         argument_rules.push_back( new ArgumentRule( "x", valType::getClassTypeSpec(), "The value that we replicate.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "n", Natural::getClassTypeSpec(), "How often we replicate the value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "n", nonNegType::getClassTypeSpec(), "How often we replicate the value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
@@ -104,18 +111,18 @@ const RevLanguage::ArgumentRules& RevLanguage::Func_replicate<valType>::getArgum
 
 
 /** Get Rev type of object (static version) */
-template <typename valType>
-const std::string& RevLanguage::Func_replicate<valType>::getClassType( void )
+template <typename valType, typename nonNegType>
+const std::string& RevLanguage::Func_replicate<valType, nonNegType>::getClassType( void )
 {
-    static std::string rev_type = "Func_replicate<" + valType::getClassType() + ">";
+    static std::string rev_type = "Func_replicate<" + valType::getClassType() + ", " + nonNegType::getClassType() + ">";
     
     return rev_type;
 }
 
 
 /** Get Rev type spec of object (static version) */
-template <typename valType>
-const RevLanguage::TypeSpec& RevLanguage::Func_replicate<valType>::getClassTypeSpec( void )
+template <typename valType, typename nonNegType>
+const RevLanguage::TypeSpec& RevLanguage::Func_replicate<valType, nonNegType>::getClassTypeSpec( void )
 {
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), &Function::getClassTypeSpec() );
     
@@ -126,8 +133,8 @@ const RevLanguage::TypeSpec& RevLanguage::Func_replicate<valType>::getClassTypeS
 /**
  * Get the primary Rev name for this function.
  */
-template <typename valType>
-std::string RevLanguage::Func_replicate<valType>::getFunctionName( void ) const
+template <typename valType, typename nonNegType>
+std::string RevLanguage::Func_replicate<valType, nonNegType>::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
     std::string f_name = "rep";
@@ -141,8 +148,8 @@ std::string RevLanguage::Func_replicate<valType>::getFunctionName( void ) const
  *
  * \return Rev aliases of constructor function.
  */
-template <typename valType>
-std::vector<std::string> RevLanguage::Func_replicate<valType>::getFunctionNameAliases( void ) const
+template <typename valType, typename nonNegType>
+std::vector<std::string> RevLanguage::Func_replicate<valType, nonNegType>::getFunctionNameAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
@@ -153,8 +160,8 @@ std::vector<std::string> RevLanguage::Func_replicate<valType>::getFunctionNameAl
 
 
 /** Get Rev type spec of object (dynamic version) */
-template <typename valType>
-const RevLanguage::TypeSpec& RevLanguage::Func_replicate<valType>::getTypeSpec( void ) const
+template <typename valType, typename nonNegType>
+const RevLanguage::TypeSpec& RevLanguage::Func_replicate<valType, nonNegType>::getTypeSpec( void ) const
 {
     return this->getClassTypeSpec();
 }
