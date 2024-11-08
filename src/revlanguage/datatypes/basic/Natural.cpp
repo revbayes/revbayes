@@ -117,38 +117,22 @@ Natural* Natural::clone( void ) const
 /** Convert to type. The caller manages the returned object. */
 RevObject* Natural::convertTo( const TypeSpec& type ) const
 {
-
-    if ( type == RlBoolean::getClassTypeSpec() )
-    {
-        return new RlBoolean( dag_node->getValue() == 0 );
-    }
+    if ( type == RlBoolean::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Natural,RlBoolean>(this);
     
-    if ( type == Real::getClassTypeSpec() )
-    {
-        return new Real( dag_node->getValue() );
-    }
+    if ( type == Real::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Natural,Real>(this);   
+    if ( type == RealPos::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Natural,RealPos>(this);
     
-    if ( type == RealPos::getClassTypeSpec() )
-    {
-        return new RealPos( dag_node->getValue() );
-    }
-    
-    if ( type == Probability::getClassTypeSpec() )
-    {
-        return new Probability( dag_node->getValue() );
-    }
+    if ( type == Probability::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Natural,Probability>(this);
 
     if ( type == RlString::getClassTypeSpec() )
     {
-
         std::ostringstream o;
         printValue( o, true );
         return new RlString( o.str() );
     }
     
     if ( type == DiscreteCharacterState::getClassTypeSpec() )
-    {
-        
+    {        
         std::ostringstream o;
         printValue( o, true );
         return new DiscreteCharacterState( RevBayesCore::StandardState( o.str() ) );

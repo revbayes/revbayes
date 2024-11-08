@@ -73,6 +73,9 @@ for t in revbayes.github.io/tutorials/*/test.sh; do
         res="error $res: $f"
         break
     fi
+    if [ $res != 0 ] ; then
+        echo "${dirname}/test.sh ==> error $res"
+    fi
 
     status+=("$res")
 
@@ -96,7 +99,7 @@ for t in test_*; do
 
     res=0
     # run the test scripts
-    for f in scripts/*; do
+    for f in scripts/*.[Rr]ev ; do
         ${rb_exec} -b $f # print output so we can see any error messages
         res="$?"
         if [ $res = 1 ]; then
@@ -108,6 +111,9 @@ for t in test_*; do
         elif [ $res != 0 ]; then
             res="error $res: $f"
             break
+        fi
+        if [ $res != 0 ] ; then
+            echo ${t}/${rb_exec} -b $f "==> error $res"
         fi
     done
 

@@ -6,6 +6,11 @@ Metropolis-Coupled MCMC analysis object
 The Mcmcmc analysis object keeps a model and the associated moves and monitors. The object is used to run Metropolis Couped Markov chain Monte Carlo (Mcmcmc) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 ## details
 The Mcmcmc analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The Mcmcmc analysis object is used to run Markov chain Monte Carlo (Mcmcmc) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
+
+An MCMCMC analysis is initiated using the `mcmcmc.run()` method.  
+The `StoppingRule[]` argument provides a mechanism to automatically terminate a run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
+The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method. An example is given on the documentation page for [`mcmc()`].
+
 ## authors
 Michael Landis
 Sebastian Hoehna
@@ -13,7 +18,7 @@ Sebastian Hoehna
 mcmc
 ## example
 	# Create a simple model (unclamped)
-	a ~ exponential(1)
+	a ~ dnExponential(1)
 	mymodel = model(a)
 	
 	# Create a move vector and a monitor vector

@@ -57,10 +57,10 @@ namespace RevBayesCore {
                                                     long age_check_precision);  //!< Constructor
 
         // public member functions
-        BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                    //!< Create an independent clone
+        BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                      //!< Create an independent clone
         void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
         bool                                            allowsSA();                                                             //!< Checks if distribution is compatible with sampled ancestors
-
+        virtual void                                    setValue(Tree *v, bool f=false);                                        //!< Sets value to specified tree
 
     protected:
         // Parameter management functions
@@ -163,6 +163,9 @@ namespace RevBayesCore {
         std::string smp = "sampling";
         std::string trt = "(serial) treatment";
         std::string etrt = "(event) treatment";
+
+        long age_check_precision;
+        std::vector<Taxon> taxa;
     };
 }
 

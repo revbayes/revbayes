@@ -1,3 +1,14 @@
+# RevBayes 1.2.4 (May 29, 2024)
+
+## Features
+  * Refactor coalescent to allow heterochronous samples and more.
+  * Allow constructing substitution models as SiteMixtureModel objects.
+  * Imputation of missing entries in AverageDistanceMatrix
+
+## Bug fixes
+  * Fix simulation of rate categories with variable coding.
+  * Fix operator[] in AverageDistanceMatrix
+
 # RevBayes 1.2.3 (Apr 26, 2024)
 
 ## Changes

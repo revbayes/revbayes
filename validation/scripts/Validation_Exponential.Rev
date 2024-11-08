@@ -31,10 +31,10 @@ for ( j in 1:NUM_VARS ) {
   mean[j] ~ dnExp( 1.0 / prior_mean )
   moves.append( mvScale(mean[j],weight=2) )
 
-  for ( i in 1:NUM_OBS){
+  for ( i in 1:NUM_OBS ) {
     index = (j-1)*NUM_OBS + i
-	x[index] ~ dnNormal(mean[j], sd=1)
-	x[index].clamp( x[index] )
+	  x[index] ~ dnNormal(mean[j], sd=1)
+	  x[index].clamp( x[index] )
   }
 }
 

@@ -10,7 +10,6 @@
 
 #include "RateGenerator.h"
 #include "RateGenerator_Epoch.h"
-#include "Assignable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "TypedDagNode.h"

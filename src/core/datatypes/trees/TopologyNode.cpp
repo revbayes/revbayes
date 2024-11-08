@@ -1842,6 +1842,13 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
+    if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
+        if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
+            std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
+            return;
+            //throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
+        }
+    }
     if ( sampled_ancestor_tip == true && propagate == true )
     {
         parent->setAge(a);
@@ -1849,12 +1856,6 @@ void TopologyNode::setAge(double a, bool propagate)
     }
 
     age = a;
-    
-//    // we should also update the taxon age if this is a tip node
-//    if ( isTip() == true )
-//    {
-//        getTaxon().setAge( a );
-//    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();
@@ -2028,5 +2029,29 @@ void TopologyNode::setTree(Tree *t)
         (*i)->setTree( t );
     }
 
+}
+
+std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
+{
+    double end_age = node.getAge();
+
+    if (not RbMath::isFinite( end_age ))
+    {
+        // we assume by default that the end is at time 0
+        end_age = 0;
+    }
+
+    double branch_length = node.getBranchLength();
+
+    // From recursivelyDrawStochasticCharacterMap
+    if (branch_length < 0.0)
+    {
+        branch_length = 1.0;
+    }
+
+    // This works for the root node.
+    double start_age = end_age + branch_length;
+
+    return {start_age, end_age};
 }
 

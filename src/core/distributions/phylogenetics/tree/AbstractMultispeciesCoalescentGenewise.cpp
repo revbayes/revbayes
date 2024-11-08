@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -9,7 +9,6 @@
 
 #include "AbstractMultispeciesCoalescentGenewise.h"
 #include "DistributionExponential.h"
-#include "ModelVector.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
