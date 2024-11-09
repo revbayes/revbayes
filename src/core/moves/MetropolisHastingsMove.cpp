@@ -276,8 +276,20 @@ void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, dou
     bool err = false;
     for(auto& [node,pr1]: untouched)
     {
-	auto pr2 = touched.at(node);
-	if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
+	auto pr2 = pdfs2.at(node);
+
+	// If they are both NaNs then they that is not a problem.
+	if (std::isnan(pr1) and std::isnan(pr2)) continue;
+
+	// Be a bit careful about computing a relative error.
+	double abs_err = std::abs(pr1 - pr2);
+	double scale = std::min(std::abs(pr1),std::abs(pr2));
+	if (scale < 1 or not RbMath::isAComputableNumber(scale))
+	    scale = 1;
+	double rel_err = abs_err/scale;
+
+	// Complain if rel_err is NaN.
+	if (not (rel_err < rel_err_threshhold))
 	{
 	    E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
 	    err = true;
