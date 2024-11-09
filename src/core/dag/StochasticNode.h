@@ -73,7 +73,7 @@ namespace RevBayesCore {
         bool                                                ignore_redraw = false;
         mutable bool                                        integrated_out = false;
         std::optional<double>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
-        double                                              stored_ln_prob;
+        std::optional<std::optional<double>>                stored_ln_prob;                                                             //!< Previous log probability if (a) there is a previous state and (b) the log probability for it is computed.
         TypedDistribution<valueType>*                       distribution;
         
     };
@@ -469,7 +469,7 @@ template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
     
-    return getLnProbability() - stored_ln_prob;
+    return getLnProbability() - stored_ln_prob.value().value();
 }
 
 
@@ -548,8 +548,8 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
     
     if ( this->touched == true )
     {
-        
-        stored_ln_prob = 1.0E6;       // An almost impossible value for the density
+        stored_ln_prob = {};
+
         if ( not lnProb )
         {
             if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
@@ -595,9 +595,17 @@ void RevBayesCore::StochasticNode<valueType>::printStructureInfo( std::ostream &
     o << "_clamped      = " << ( this->clamped ? "TRUE" : "FALSE" ) << std::endl;
     o << "_lnProb       = " << const_cast< StochasticNode<valueType>* >( this )->getLnProbability() << std::endl;
     
-    if ( this->touched == true && verbose == true)
+    if ( verbose == true)
     {
-        o << "_stored_ln_prob = " << stored_ln_prob << std::endl;
+        o << "_stored_ln_prob = ";
+        if (not stored_ln_prob)
+            o<< "EMPTY";
+        else if (not *stored_ln_prob)
+            o<< "UNCOMPUTED";
+        else
+            o<<**stored_ln_prob;
+
+        o<< std::endl;
     }
     o << "_parents      = ";
     this->printParents(o, 16, 70, verbose);
@@ -648,15 +656,15 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer
     
     if ( this->touched == true )
     {
-        lnProb              = stored_ln_prob;
-        stored_ln_prob      = 1.0E6;    // An almost impossible value for the density
-        
+        lnProb              = stored_ln_prob.value();
+        stored_ln_prob      = {};    // An almost impossible value for the density
+
         // reset flags that recalculation is not needed
         assert(lnProb);
-        
+
         // call for potential specialized handling (e.g. internal flags)
         distribution->restore(restorer);
-        
+
         // clear the list of touched element indices
         this->touched_elements.clear();
 
@@ -665,7 +673,6 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer
             // Dispatch the touch message to downstream nodes
             this->restoreAffected();
         }
-        
     }
     
     // delegate call
@@ -822,7 +829,8 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
     
     if ( this->touched == false )
     {
-        stored_ln_prob = lnProb.value();
+        assert(not stored_ln_prob);
+        stored_ln_prob = lnProb;
     }
     
     lnProb = {};
