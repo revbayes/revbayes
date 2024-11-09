@@ -269,12 +269,12 @@ std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, 
 constexpr double rel_err_threshhold = 1.0e-11;
 constexpr int err_precision = 11;
 
-void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& untouched, const std::map<const DagNode*, double>& touched, const std::string& before_after)
+void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& pdfs1, const std::map<const DagNode*, double>& pdfs2, const std::string& msg)
 {
     RbException E;
-    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": PDFs not up-to-date "<<before_after<<" proposal!\n";
+    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": "<<msg<<"!\n";
     bool err = false;
-    for(auto& [node,pr1]: untouched)
+    for(auto& [node,pr1]: pdfs1)
     {
 	auto pr2 = pdfs2.at(node);
 
@@ -301,28 +301,37 @@ void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, dou
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
+    // These are the nodes we are (directly) modifying.
     const std::vector<DagNode*> nodes = getDagNodes();
+    // These are the nodes that are (indirectly) affected.
+    const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
 
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    // Compute PDFs for nodes and affected nodes if we are going to use them.
+    std::map<const DagNode*, double> initialPdfs;
+    if (logMCMC >= 3 or debugMCMC >= 1)
+	initialPdfs = getNodePrs(nodes, affected_nodes);
+
     if (logMCMC >= 3)
     {
         std::cerr<<std::setprecision(11);
-        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+        for(auto& [node,pr]: initialPdfs)
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
         std::cerr<<"\n";
     }
 
     /*
-     * NOTE: When checking PDFs, don't touch/keep affected nodes.  Only touch/keep nodes.
-     *       If we touch/keep affected nodes, we can hide problems by doing more recalculation.
+     * NOTE: When checking PDFs, ONLY touch/keep (directly modified) nodes.
+     *       Do NOT touch/keep (indirectly) affected_nodes.
+     *       If we touch/keep affected_nodes, we can hide problems by doing more recalculation.
      */
 
     if (debugMCMC >= 1)
     {
         // 1. Compute PDFs before proposal, before touch
-        auto untouched_before_proposal = getNodePrs(nodes, affected_nodes);
+        auto& untouched_before_proposal = initialPdfs;
 
         // 2. Touch nodes.
         for (auto node: nodes)
@@ -336,7 +345,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             node->keep();
 
         // 5. Compare pdfs for each node
-        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "before");
+        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
     }
 
     // Propose a new value
@@ -447,11 +456,20 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         proposal->cleanProposal();
     }
 
+    std::map<const DagNode*, double> finalPdfs;
+    if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
+	finalPdfs = getNodePrs(nodes, affected_nodes);
+
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+        for(auto& [node,pr]: finalPdfs)
             std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
         std::cerr<<"\n";
+    }
+
+    if (debugMCMC >=1 and rejected)
+    {
+        compareNodePrs(proposal, initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
     }
 
     if (logMCMC >= 2)
