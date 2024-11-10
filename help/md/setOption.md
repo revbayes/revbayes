@@ -5,7 +5,52 @@ Set a global RevBayes option
 ## description
 Set a global option for RevBayes.
 ## details
-Options are used to personalize RevBayes and are stored on the local machine. Currently this is rather experimental.
+Runtime options are used to personalize RevBayes and are stored on the local machine. The currently available keys and their associated values are as follows:
+
+    lineWidth=<integer>          Screen width when printing (in characters).
+        
+        DEFAULT: 160
+    
+    moduleDir=<path>             Module directory name.
+        
+        DEFAULT: "modules"
+    
+    outputPrecision=<integer>    How many significant digits to print for the values of model graph nodes.
+        
+        DEFAULT: 7
+    
+    printNodeIndex=<true,false>  Print the node indices of a tree as annotations?
+        
+        DEFAULT: true
+    
+    useScaling=<true,false>      Should the likelihood in continuous-time Markov chain (CTMC) models be scaled?
+        
+        DEFAULT: true
+    
+    scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).
+        
+        DEFAULT: 1
+    
+    tolerance=<numeric>          Tolerance for comparing doubles.
+        
+        DEFAULT: 10e-10
+    
+    debugMCMC=<0,1>              How much work to perform to check MCMC?
+        
+        0: MCMC run without checks.
+        1: MCMC run with additional checks at extra CPU time cost.
+        
+        DEFAULT: 0
+    
+    logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC?
+        
+        0: No information on individual moves written out.
+        1 or higher: Writes out the generation, within-generation position, and name for each move.
+        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN, writes out why this is the case.
+        3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.
+        4: Writes out additional details about the mvSlice move (if present).
+        
+        DEFAULT: 0
 ## authors
 Sebastian Hoehna
 ## see_also
