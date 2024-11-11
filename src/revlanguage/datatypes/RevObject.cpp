@@ -206,10 +206,18 @@ const std::string& RevObject::getType( void ) const
  */
 RevBayesCore::DagNode* RevObject::getDagNode( void ) const
 {
-    
     throw RbException("Workspace objects cannot be used inside DAG's! You tried to access the DAG node of type '" + getClassType() + "'.");
     
     return NULL;
+}
+
+
+/**
+ * Get the value as a DAG node. This default implementation throws an error.
+ */
+bool RevObject::hasDagNode( void ) const
+{
+    return false;
 }
 
 
