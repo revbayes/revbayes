@@ -12,10 +12,6 @@ The currently available keys and their associated values are as follows:
         
         DEFAULT: 160
     
-    moduleDir=<path>             Module directory name.
-        
-        DEFAULT: "modules"
-    
     outputPrecision=<integer>    How many significant digits to print for the values of model graph nodes.
         
         DEFAULT: 7
@@ -24,8 +20,8 @@ The currently available keys and their associated values are as follows:
         
         DEFAULT: true
     
-    useScaling=<true,false>      Should the likelihood in continuous-time Markov chain (CTMC) models be scaled?
-        
+    useScaling=<true,false>      Should the partial likelihoods in continuous-time Markov chain (CTMC) models be scaled
+                                 to avoid underflow?
         DEFAULT: true
     
     scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).
@@ -43,7 +39,9 @@ The currently available keys and their associated values are as follows:
         
         DEFAULT: 0
     
-    logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC?
+    logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC? NOTE: This option serves for debugging and
+                                 should be considered experimental. The exact meaning of individual values may be subject
+                                 to frequent changes.
         
         0: No information on individual moves written out.
         1 or higher: Writes out the generation, within-generation position, and name for each move.
