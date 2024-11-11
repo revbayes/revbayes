@@ -79,8 +79,9 @@ FunctionTable& FunctionTable::operator=(const FunctionTable& x)
  *
  * Note that we do not check parent frames, so the function can
  * hide (override if you wish) parent functions.
+ *
  */
-void FunctionTable::addFunction( Function *func )
+bool FunctionTable::addFunction( Function *func, bool avoid_except )
 {
     std::string name = "";
     
@@ -88,13 +89,12 @@ void FunctionTable::addFunction( Function *func )
     {
         name = "_";
     }
-    
-    
+
     name += func->getFunctionName();
-    
+
     // Test function compliance with basic rules
     testFunctionValidity( name, func );
-    
+
     std::pair<std::multimap<std::string, Function *>::iterator,
               std::multimap<std::string, Function *>::iterator> ret_val;
 
@@ -103,6 +103,9 @@ void FunctionTable::addFunction( Function *func )
     {
         if ( isDistinctFormal(i->second->getArgumentRules(), func->getArgumentRules()) == false )
         {
+	    // Don't throw an exception if we are just going to ignore it.
+	    if (avoid_except) return false;
+
             std::ostringstream msg;
             i->second->printValue(msg, true);
             msg << " cannot overload " << name << " = ";
@@ -118,16 +121,16 @@ void FunctionTable::addFunction( Function *func )
     }
 
     // Insert the function
-    insert(std::pair<std::string, Function* >(name, func));
+    insert({name, func});
     
     std::vector<std::string> aliases = func->getFunctionNameAliases();
     for (size_t i=0; i < aliases.size(); ++i)
     {
         std::string a = aliases[i];
         // Insert the function
-        insert(std::pair<std::string, Function* >(a, func->clone() ));
+        insert({a, func->clone()});
     }
-
+    return true;
 }
 
 
