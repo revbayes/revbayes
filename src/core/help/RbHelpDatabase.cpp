@@ -3027,7 +3027,8 @@ a # this will be the same as above!)");
 	help_strings[string("seq")][string("title")] = string(R"(Create a sequence values)");
 	help_arrays[string("setOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("setOption")][string("description")] = string(R"(Set a global option for RevBayes.)");
-	help_strings[string("setOption")][string("details")] = string(R"(Runtime options are used to personalize RevBayes and are stored on the local machine. The currently available keys and their associated values are as follows:
+	help_strings[string("setOption")][string("details")] = string(R"(Runtime options are used to personalize RevBayes and are stored on the local machine.
+The currently available keys and their associated values are as follows:
 
     lineWidth=<integer>          Screen width when printing (in characters).
         
@@ -3068,7 +3069,8 @@ a # this will be the same as above!)");
         
         0: No information on individual moves written out.
         1 or higher: Writes out the generation, within-generation position, and name for each move.
-        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN, writes out why this is the case.
+        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN,
+                     writes out why this is the case.
         3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.
         4: Writes out additional details about the mvSlice move (if present).
         

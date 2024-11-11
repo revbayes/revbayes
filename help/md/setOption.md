@@ -5,7 +5,8 @@ Set a global RevBayes option
 ## description
 Set a global option for RevBayes.
 ## details
-Runtime options are used to personalize RevBayes and are stored on the local machine. The currently available keys and their associated values are as follows:
+Runtime options are used to personalize RevBayes and are stored on the local machine.
+The currently available keys and their associated values are as follows:
 
     lineWidth=<integer>          Screen width when printing (in characters).
         
@@ -46,7 +47,8 @@ Runtime options are used to personalize RevBayes and are stored on the local mac
         
         0: No information on individual moves written out.
         1 or higher: Writes out the generation, within-generation position, and name for each move.
-        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN, writes out why this is the case.
+        2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN,
+                     writes out why this is the case.
         3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.
         4: Writes out additional details about the mvSlice move (if present).
         
