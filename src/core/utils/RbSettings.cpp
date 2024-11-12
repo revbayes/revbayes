@@ -346,3 +346,9 @@ void RbSettings::writeUserSettings( void )
     writeStream.close();
 
 }
+
+void showDebug(const std::string& s, int level)
+{
+    if (RbSettings::userSettings().getLogMCMC() >= level)
+	std::cerr<<s<<"\n";
+}
