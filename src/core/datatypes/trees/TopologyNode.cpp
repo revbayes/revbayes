@@ -25,6 +25,8 @@
 #include "TreeChangeEventHandler.h"
 #include "RbConstants.h" // IWYU pragma: keep
 #include "StringUtilities.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 
 using namespace RevBayesCore;
 
@@ -1837,6 +1839,150 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
     {
         (*it)->renameNodeParameter(old_name, new_name);
     }
+}
+
+
+void TopologyNode::resolveMultifurcation(bool resolve_root)
+{
+
+    if ( isTip() == false )
+    {
+
+        if ( (not isRoot()) or resolve_root )
+        {
+            
+            if (use_ages)
+            {
+                // The following is adapted from UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree()
+            
+                // get the rng
+                RandomNumberGenerator* rng = GLOBAL_RNG;
+            
+                /* "Active" children are those that are younger than the child currently under consideration. We initialize this vector
+                 * with extant children (if there are any), but may subsequently expand it.
+                 */
+                std::vector<TopologyNode*> active_children;
+                std::vector<TopologyNode*> extinct_children;
+                std::vector<double> ages;
+            
+            for (size_t i = 0; i < children.size(); ++i)
+            {
+                // get the ages of all children
+                ages.push_back( children.at(i)->getAge() );
+                
+                if ( children.at(i)->getAge() == 0.0 )
+                {
+                    active_children.push_back( children.at(i) );
+                }
+                else
+                {
+                    extinct_children.push_back( children.at(i) );
+                }
+            }
+            
+            // loop backward through ages
+            size_t num_ages = ages.size();
+            double current_time = 0.0;
+
+            for(size_t i = num_ages - 1; i >= 0; i--)
+            {
+                // get the current time
+                double current_time = ages[i];
+
+                // check if any extinct nods become active
+                size_t num_extinct = extinct_children.size();
+                for(size_t j = num_extinct - 1; j >= 0; --j)
+                {
+                    if ( extinct_children.at(j)->getAge() < current_time )
+                    {
+                        // add the extinct node to the active nodes list, remove it from the extinct nodes list
+                        active_children.push_back( extinct_children.at(j) );
+                        extinct_children.erase( extinct_children.begin() + j );
+                    }
+                }
+
+                // randomly draw one child (arbitrarily called left) node from the list of active nodes
+                size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+                TopologyNode* leftChild = active_children.at(left);
+
+                // remove the randomly drawn node from the list
+                active_children.erase( active_children.begin() + long(left) );
+
+                // randomly draw one child (arbitrarily called left) node from the list of active nodes
+                size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+                TopologyNode* rightChild = active_children.at(right);
+
+                // remove the randomly drawn node from the list
+                active_children.erase( active_children.begin() + long(right) );
+
+                // add the parent
+                TopologyNode* parent = new TopologyNode; // leave the new node without index
+                parent->addChild( leftChild );
+                parent->addChild( rightChild );
+                leftChild->setParent( parent );
+                rightChild->setParent( parent );
+                parent->setAge( current_time );
+                active_children.push_back( parent );
+                
+                // replace the current node by the MRCA of the newly created subtree
+                if
+            }
+
+                // should we remove the node or add it as a fossil?
+                if ( as_fossils == true )
+                {
+                    TopologyNode *new_fossil = new TopologyNode( getTaxon() );
+                    taxon = Taxon("");
+
+                    // connect to the old fossil
+                    addChild( new_fossil );
+                    new_fossil->setParent( this );
+
+                    // set the fossil flags
+                    setSampledAncestor( false );
+                    new_fossil->setSampledAncestor( true );
+
+                    // set the age and branch-length of the fossil
+                    new_fossil->setAge( age );
+                    new_fossil->setBranchLength( 0.0 );
+                }
+                else
+                {
+                    // we are going to delete myself by connect my parent and my child
+                    TopologyNode& parent = getParent();
+                    TopologyNode& child = getChild(0);
+                    
+                    // the new branch length needs to be the branch length of the parent and child
+                    double summ = getBranchLength() + child.getBranchLength();
+                    
+                    // now remove myself from the parent
+                    parent.removeChild( this );
+                    
+                    // and my child from me
+                    removeChild( &child );
+                    
+                    // and stich my parent and my child together
+                    parent.addChild( &child );
+                    child.setParent( &parent );
+                    
+                    // finally, adapt the branch lengths
+                    child.setBranchLength(summ);
+                    
+                }
+
+
+            }
+
+        //}
+
+        // call this function recursively for all its children
+        for (size_t i=0; i<getNumberOfChildren(); ++i)
+        {
+            getChild( i ).makeBifurcating( as_fossils );
+        }
+
+    }
+
 }
 
 

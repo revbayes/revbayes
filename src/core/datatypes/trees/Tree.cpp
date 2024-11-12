@@ -1991,6 +1991,12 @@ void Tree::resetTaxonBitSetMap( void )
 }
 
 
+void Tree::resolveMultifurcations( void )
+{
+    
+}
+
+
 TopologyNode& Tree::reverseParentChild(TopologyNode &n)
 {
     // This routine makes n the new root by
