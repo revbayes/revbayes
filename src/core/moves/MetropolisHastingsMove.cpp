@@ -14,6 +14,10 @@
 #include "AbstractMove.h"
 #include "RbOrderedSet.h"
 #include "RbException.h"
+#include "RbSettings.h"  // for debugMCMC setting
+#include <range/v3/all.hpp> // for ranges::views
+
+namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
@@ -254,84 +258,74 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 }
 
+std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
+{
+    std::map<const DagNode*, double> Prs;
+    for(auto node: views::concat(nodes, affected_nodes))
+	Prs.insert({node, node->getLnProbability()});
+    return Prs;
+}
 
+constexpr double rel_err_threshhold = 1.0e-11;
+constexpr int err_precision = 11;
 
+void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& untouched, const std::map<const DagNode*, double>& touched, const std::string& before_after)
+{
+    RbException E;
+    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": PDFs not up-to-date "<<before_after<<" proposal!\n";
+    bool err = false;
+    for(auto& [node,pr1]: untouched)
+    {
+	auto pr2 = touched.at(node);
+	if (std::abs(pr1-pr2)/std::abs(pr2) > rel_err_threshhold)
+	{
+	    E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
+	    err = true;
+	}
+    }
+
+    if (err) throw E;
+}
 
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
     const std::vector<DagNode*> nodes = getDagNodes();
 
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+    if (logMCMC >= 3)
+    {
+        std::cerr<<std::setprecision(11);
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
+    }
 
+    /*
+     * NOTE: When checking PDFs, don't touch/keep affected nodes.  Only touch/keep nodes.
+     *       If we touch/keep affected nodes, we can hide problems by doing more recalculation.
+     */
 
-    // --------------------------
-    //
-    //     DEBUG (BEGIN)
-    //
-    // --------------------------
-#ifdef DEBUG_MCMC
-    double ln_posterior_before_move = 0.0;
-    for (size_t i = 0; i < nodes.size(); ++i)
+    if (debugMCMC >= 1)
     {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        ln_posterior_before_move += the_node->getLnProbability();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        ln_posterior_before_move += the_node->getLnProbability();
-    }
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        the_node->touch();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        the_node->touch();
-    }
-    double ln_posterior_before_move_after_touch = 0.0;
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        ln_posterior_before_move_after_touch += the_node->getLnProbability();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        ln_posterior_before_move_after_touch += the_node->getLnProbability();
-    }
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        the_node->keep();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        the_node->keep();
-    }
-    if ( fabs(ln_posterior_before_move - ln_posterior_before_move_after_touch) > 1E-6 )
-    {
-        throw RbException()<<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' before move because posterior didn't match when re-touching: " << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
-    }
-#endif
-    // --------------------------
-    //
-    //     DEBUG (END)
-    //
-    // --------------------------
+        // 1. Compute PDFs before proposal, before touch
+        auto untouched_before_proposal = getNodePrs(nodes, affected_nodes);
 
+        // 2. Touch nodes.
+        for (auto node: nodes)
+            node->touch();
 
+        // 3. Compute PDFs before proposal, after touch
+        auto touched_before_proposal = getNodePrs(nodes, affected_nodes);
 
+        // 4. Keep nodes
+        for (auto node: nodes)
+            node->keep();
 
-
+        // 5. Compare pdfs for each node
+        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "before");
+    }
 
     // Propose a new value
     proposal->prepareProposal();
@@ -352,311 +346,126 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     // first we touch all the nodes
     // that will set the flags for recomputation
-    for (size_t i = 0; i < touched_nodes.size(); ++i)
-    {
-
-        // get the pointer to the current node
-        DagNode* the_node = touched_nodes[i];
-
-//        // should this node be touched?
-//        std::vector<DagNode*>::iterator it = std::find( nodes_left_untouched.begin(), nodes_left_untouched.end(), the_node );
-//        bool touch_node = (it == nodes_left_untouched.end());
-
-        // flag for recomputation
-//        if (touch_node) {
-        the_node->touch();
-//        }
-    }
+    for (auto node: touched_nodes)
+        node->touch();
 
     double ln_prior_ratio = 0.0;
     double ln_likelihood_ratio = 0.0;
 
-
     // compute the probability of the current value for each node
-    for (size_t i = 0; i < touched_nodes.size(); ++i)
+    for (auto node: views::concat(touched_nodes, affected_nodes))
     {
-        // get the pointer to the current node
-        DagNode* the_node = touched_nodes[i];
-
-        if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
+        if ( RbMath::isAComputableNumber(ln_prior_ratio) &&
+             RbMath::isAComputableNumber(ln_likelihood_ratio) &&
+             RbMath::isAComputableNumber(ln_hastings_ratio) )
         {
-
-            if ( the_node->isClamped() )
+            double ratio = 0;
+            try {
+                ratio = node->getLnProbabilityRatio();
+            }
+            catch (const RbException &e)
             {
-                try {
-                    ln_likelihood_ratio += the_node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_likelihood_ratio = RbConstants::Double::neginf;
+                ratio = RbConstants::Double::neginf;
 
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
+                if ( e.getExceptionType() != RbException::MATH_ERROR )
+                {
+                    throw;
                 }
             }
+
+            if ( node->isClamped() )
+                ln_likelihood_ratio += ratio;
             else
-            {
-                try
-                {
-                    ln_prior_ratio += the_node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_prior_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
-
+                ln_prior_ratio += ratio;
         }
 
     }
 
-    // then we recompute the probability for all the affected nodes
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
+    if (logMCMC >= 3)
     {
-        DagNode *the_node = *it;
-
-        if ( RbMath::isAComputableNumber(ln_prior_ratio) && RbMath::isAComputableNumber(ln_likelihood_ratio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
-        {
-            if ( the_node->isClamped() )
-            {
-                try
-                {
-                    ln_likelihood_ratio += the_node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_likelihood_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
-            else
-            {
-                try {
-                    ln_prior_ratio += the_node->getLnProbabilityRatio();
-                }
-                catch (const RbException &e)
-                {
-                    ln_prior_ratio = RbConstants::Double::neginf;
-
-                    if ( e.getExceptionType() != RbException::MATH_ERROR )
-                    {
-                        throw e;
-                    }
-                }
-            }
-        }
-
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
 
     // exponentiate with the chain heat
-    double ln_posterior_ratio;
-    ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+
+    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
     bool rejected = false;
 
-	if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false )
-    {
+    if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false )
         rejected = true;
+    else if (ln_acceptance_ratio >= 0.0)
+        ;
+    else if (ln_acceptance_ratio < -300.0)
+        rejected = true;
+    else
+    {
+        double r = exp(ln_acceptance_ratio);
+        // Accept or reject the move
+        double u = GLOBAL_RNG->uniform01();
+        if (u < r)
+            ;
+        else
+            rejected = true;
+    }
 
+    if ( rejected )
+    {
         proposal->undoProposal();
 
         // call restore for each node
-        for (size_t i = 0; i < touched_nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = touched_nodes[i];
-            the_node->restore();
-        }
-	}
+        for (auto node: touched_nodes)
+            node->restore();
+    }
     else
     {
+        if ( ln_posterior_ratio < -1000 )
+            throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
 
-        // finally add the Hastings ratio
-        double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+        num_accepted_total++;
+        num_accepted_current_period++;
 
-        if (ln_acceptance_ratio >= 0.0)
-        {
+        // call accept for each node
+        for (auto node: touched_nodes)
+            node->keep();
 
-            if ( ln_posterior_ratio < -1000 )
-                throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
-
-            num_accepted_total++;
-            num_accepted_current_period++;
-
-            // call accept for each node
-            for (size_t i = 0; i < touched_nodes.size(); ++i)
-            {
-                // get the pointer to the current node
-                DagNode* the_node = touched_nodes[i];
-                the_node->keep();
-            }
-
-            proposal->cleanProposal();
-        }
-        else if (ln_acceptance_ratio < -300.0)
-        {
-            rejected = true;
-
-            proposal->undoProposal();
-
-            // call restore for each node
-            for (size_t i = 0; i < touched_nodes.size(); ++i)
-            {
-                // get the pointer to the current node
-                DagNode* the_node = touched_nodes[i];
-                the_node->restore();
-            }
-        }
-        else
-        {
-            double r = exp(ln_acceptance_ratio);
-            // Accept or reject the move
-            double u = GLOBAL_RNG->uniform01();
-            if (u < r)
-            {
-                
-                if ( ln_posterior_ratio < -1000 )
-                    throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
-
-
-                num_accepted_total++;
-                num_accepted_current_period++;
-
-                // call accept for each node
-                for (size_t i = 0; i < touched_nodes.size(); ++i)
-                {
-                    // get the pointer to the current node
-                    DagNode* the_node = touched_nodes[i];
-                    the_node->keep();
-                }
-
-                proposal->cleanProposal();
-            }
-            else
-            {
-                rejected = true;
-
-                proposal->undoProposal();
-
-                // call restore for each node
-                for (size_t i = 0; i < touched_nodes.size(); ++i)
-                {
-                    // get the pointer to the current node
-                    DagNode* the_node = touched_nodes[i];
-                    the_node->restore();
-                }
-
-            }
-
-        }
-
+        proposal->cleanProposal();
     }
 
-
-
-    // --------------------------
-    //
-    //     DEBUG (BEGIN)
-    //
-    // --------------------------
-#ifdef DEBUG_MCMC
-//    std::cerr << "Performed '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "'. The move was " << (rejected ? "rejected." : "accepted.") << std::endl;
-
-    double ln_posterior_after_move = 0.0;
-    for (size_t i = 0; i < nodes.size(); ++i)
+    if (logMCMC >= 3)
     {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        ln_posterior_after_move += the_node->getLnProbability();
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        ln_posterior_after_move += the_node->getLnProbability();
-    }
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        the_node->touch();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        the_node->touch();
-    }
-    double ln_posterior_after_move_after_touch = 0.0;
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        ln_posterior_after_move_after_touch += the_node->getLnProbability();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        ln_posterior_after_move_after_touch += the_node->getLnProbability();
-    }
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-        the_node->keep();
-    }
-    for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-        the_node->keep();
-    }
-    if ( fabs(ln_posterior_after_move - ln_posterior_after_move_after_touch) > 1E-6 )
-    {
-        
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = nodes[i];
-            the_node->touch();
-        }
-        for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-        {
-            DagNode *the_node = *it;
-            the_node->touch();
-        }
-        double ln_posterior_after_move_after_touch2 = 0.0;
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = nodes[i];
-            ln_posterior_after_move_after_touch2 += the_node->getLnProbability();
-        }
-        for (RbOrderedSet<DagNode*>::const_iterator it = affected_nodes.begin(); it != affected_nodes.end(); ++it)
-        {
-            DagNode *the_node = *it;
-            ln_posterior_after_move_after_touch2 += the_node->getLnProbability();
-        }
-        
-        
-        throw RbException() << "Issue in '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' after move because posterior of " << ln_posterior_after_move << " and " << ln_posterior_after_move_after_touch << "/" << ln_posterior_after_move_after_touch2 << ". The move was " << (rejected ? "rejected." : "accepted.");
-    }
-#endif
-    // --------------------------
-    //
-    //     DEBUG (END)
-    //
-    // --------------------------
 
+    if (logMCMC >= 2)
+    {
+        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+        std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+    }
 
+    /*
+    // This fixes the problem in #567.
+    if (rejected)
+    {
+        for(auto node: nodes)
+            node->touch();
+        for(auto node: nodes)
+            node->keep();
+    }
+    */
+
+    /*
+     * NOTE: Debug code probably shouldn't call touch/keep here:
+     *
+     *       Calling touch/keep after reject/restore can hide MCMC problems.
+     *       Calling touch/keep after accept should be redundant.
+     */
 }
 
 
