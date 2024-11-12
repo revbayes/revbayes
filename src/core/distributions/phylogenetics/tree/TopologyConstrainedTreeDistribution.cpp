@@ -30,6 +30,7 @@
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -235,17 +236,19 @@ TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone(
  */
 double TopologyConstrainedTreeDistribution::computeLnProbability( void )
 {
+    using namespace RbConstants;
+
     recursivelyUpdateClades( value->getRoot() );
     
     // first check if the current tree matches the clade constraints
     if ( matchesConstraints() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
     }
     
     if ( matchesBackbone() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
     }
     
     double lnProb = base_distribution->computeLnProbability();
