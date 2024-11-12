@@ -44,6 +44,7 @@ namespace RevLanguage {
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
 #include "ReplicateFunction.h"
+#include "RbException.h"
 #include "RbUtil.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
@@ -76,12 +77,17 @@ template <typename valType, typename nonNegType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_replicate<valType, nonNegType>::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode<typename valType::valueType>* v   = static_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    int n   = static_cast<int>(std::floor(static_cast<const nonNegType &>( this->args[1].getVariable()->getRevObject() ).getValue()));
+    double n_initial = static_cast<const nonNegType &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    int n = static_cast<int>(std::floor(n_initial));
+    if (n != n_initial) {
+        // Real or Integer types are permitted, but the value must be an integer
+        throw RbException("n must have an integer value; try floor(n) or ceil(n)");
+    }
     
     // Checking for negatives allows a user to pass a Real without first 
     // coercing into RealPos
     if (n < 0) {
-        n = 0;
+         throw RbException("n may not be negative");
     }
     
     auto* func = new RevBayesCore::ReplicateFunction<typename valType::valueType>( v, n );
