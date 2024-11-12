@@ -304,44 +304,13 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         return NULL;
     }
-    else if (name == "setBranchLength")
+    else if (name == "removeDuplicateTaxa")
     {
         found = true;
 
-        const RevObject& current = args[0].getVariable()->getRevObject();
-        if ( current.isType( Natural::getClassTypeSpec() ) )
-        {
-            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-            const RevObject& new_value = args[1].getVariable()->getRevObject();
-            if ( new_value.isType( RealPos::getClassTypeSpec() ) )
-            {
-                double value = static_cast<const RealPos&>( new_value ).getValue();
-                RevBayesCore::Tree &tree = dag_node->getValue();
-                
-                double used_age = tree.getRoot().doesUseAges();
-                tree.getRoot().setUseAges(false, true);
-                tree.getNode(index).setBranchLength(value);
-                tree.getRoot().setUseAges(used_age, true);
-            }
-        }
-        return NULL;
-    }
-    else if (name == "setTaxonName")
-    {
-        found = true;
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.removeDuplicateTaxa();
 
-        const RevObject& current = args[0].getVariable()->getRevObject();
-        if ( current.isType( RlString::getClassTypeSpec() ) )
-        {
-            std::string n = std::string( static_cast<const RlString&>( current ).getValue() );
-            const RevObject& new_name = args[1].getVariable()->getRevObject();
-            if ( new_name.isType( RlString::getClassTypeSpec() ) )
-            {
-                std::string name = std::string( static_cast<const RlString&>( new_name ).getValue() );
-                getDagNode()->getValue().setTaxonName( n ,name );
-                // std::cout << "new name: "<< dagNode->getValue().getTaxonData( n ).getTaxonName() << std::endl;
-            }
-        }
         return NULL;
     }
     else if (name == "renumberNodes")
@@ -350,15 +319,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const RevBayesCore::Tree &reference = static_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.renumberNodes(reference);
-        return NULL;
-    }
-    else if (name == "removeDuplicateTaxa")
-    {
-        found = true;
-
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.removeDuplicateTaxa();
-
         return NULL;
     }
     else if (name == "reroot")
@@ -381,6 +341,38 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         return NULL;
     }
+    else if (name == "resolveMultifurcations")
+    {
+        found = true;
+        
+        bool resolve_root = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.resolveMultifurcations( resolve_root );
+        
+        return NULL;
+    }
+    else if (name == "setBranchLength")
+    {
+        found = true;
+
+        const RevObject& current = args[0].getVariable()->getRevObject();
+        if ( current.isType( Natural::getClassTypeSpec() ) )
+        {
+            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            const RevObject& new_value = args[1].getVariable()->getRevObject();
+            if ( new_value.isType( RealPos::getClassTypeSpec() ) )
+            {
+                double value = static_cast<const RealPos&>( new_value ).getValue();
+                RevBayesCore::Tree &tree = dag_node->getValue();
+                
+                double used_age = tree.getRoot().doesUseAges();
+                tree.getRoot().setUseAges(false, true);
+                tree.getNode(index).setBranchLength(value);
+                tree.getRoot().setUseAges(used_age, true);
+            }
+        }
+        return NULL;
+    }
     else if (name == "setNegativeConstraint")
     {
         found = true;
@@ -388,8 +380,26 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         double tf = static_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.setNegativeConstraint(tf);
-//        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
+        // RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
 
+        return NULL;
+    }
+    else if (name == "setTaxonName")
+    {
+        found = true;
+
+        const RevObject& current = args[0].getVariable()->getRevObject();
+        if ( current.isType( RlString::getClassTypeSpec() ) )
+        {
+            std::string n = std::string( static_cast<const RlString&>( current ).getValue() );
+            const RevObject& new_name = args[1].getVariable()->getRevObject();
+            if ( new_name.isType( RlString::getClassTypeSpec() ) )
+            {
+                std::string name = std::string( static_cast<const RlString&>( new_name ).getValue() );
+                getDagNode()->getValue().setTaxonName( n ,name );
+                // std::cout << "new name: "<< dagNode->getValue().getTaxonData( n ).getTaxonName() << std::endl;
+            }
+        }
         return NULL;
     }
     else if (name == "tipIndex")

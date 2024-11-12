@@ -159,7 +159,7 @@ namespace RevBayesCore {
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
         void                                        removeTree(Tree *t);                                                                //!< Removes the tree pointer
-        void                                        resolveMultifurcation(bool resolve_root = true);                                    //!< If node has more than 2 children, randomly resolve them into a bifurcating tree
+        void                                        resolveMultifurcation(bool resolve_root = true);                                    //!< If node has more than 2 children, randomly resolve them into a bifurcating subtree
         void                                        setAge(double a, bool propagate = true );                                           //!< Set the age of this node (should only be done for tips).
         void                                        setBranchLength(double b, bool flag_dirty=true);                                    //!< Set the length of the branch leading to this node.
         void                                        setIndex(size_t idx);                                                               //!< Set the index of the node

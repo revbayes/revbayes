@@ -1991,9 +1991,18 @@ void Tree::resetTaxonBitSetMap( void )
 }
 
 
-void Tree::resolveMultifurcations( void )
+void Tree::resolveMultifurcations( bool resolve_root )
 {
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        if ( nodes[i]->getNumberOfChildren() > 2 )
+        {
+            nodes[i]->resolveMultifurcation( resolve_root );
+        }
+    }
     
+    // We need to reindex nodes because we added new ones
+    reindexNodes();
 }
 
 
