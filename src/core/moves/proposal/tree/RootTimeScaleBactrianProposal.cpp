@@ -89,11 +89,16 @@ double RootTimeScaleBactrianProposal::doProposal( void )
     
     // get the root node
     TopologyNode* node = &tau.getRoot();
+    double my_age      = node->getAge();
+
+    // store info for undoProposal before we exit
+    storedNode = node;
+    storedAge = my_age;
+
     // cannot move the root if it's a SA
     if(node->isSampledAncestorParent()) return RbConstants::Double::neginf;
     
     // we need to work with the times
-    double my_age      = node->getAge();
     double child_Age   = node->getChild( 0 ).getAge();
     if ( child_Age < node->getChild( 1 ).getAge())
     {
@@ -102,10 +107,6 @@ double RootTimeScaleBactrianProposal::doProposal( void )
     
     // the distance between root and child
     double dist_root_oldest = my_age - child_Age;
-    
-    // now we store all necessary values
-    storedNode = node;
-    storedAge = my_age;
     
     // See Yang and Rodriguez (2013) SI eqns 19 and 20
     // Currently hard-coding m = 0.95

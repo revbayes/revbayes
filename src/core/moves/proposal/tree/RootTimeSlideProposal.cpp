@@ -89,21 +89,21 @@ double RootTimeSlideProposal::doProposal( void )
     
     // get the root node
     TopologyNode* node = &tau.getRoot();
+    double my_age      = node->getAge();
+
+    // store info for undoProposal before we exit
+    stored_node = node;
+    stored_age  = my_age;
+
     // cannot move the root if it's a SA
     if(node->isSampledAncestorParent()) return RbConstants::Double::neginf;
     
     // we need to work with the times
-    double my_age      = node->getAge();
     double child_Age   = node->getChild( 0 ).getAge();
     if ( child_Age < node->getChild( 1 ).getAge())
     {
         child_Age = node->getChild( 1 ).getAge();
     }
-    
-    // now we store all necessary values
-    stored_node = node;
-    stored_age  = my_age;
-    
     
     double u           = rng->uniform01();
     double my_new_age  = my_age + ( delta * ( u - 0.5 ) );
@@ -121,7 +121,6 @@ double RootTimeSlideProposal::doProposal( void )
     }
     
     return lnHastingsratio;
-    
 }
 
 
