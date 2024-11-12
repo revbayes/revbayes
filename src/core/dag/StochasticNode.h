@@ -468,8 +468,17 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
-    
-    return getLnProbability() - stored_ln_prob.value().value();
+    // 1. If the node is not affected/touched, then the probability is the same for the current and previous state.
+    if (not stored_ln_prob)
+        return 0;
+
+    // 2. If we touched the node when the log probability was not calculated, then we don't have a value for
+    // the probability of the previous state.
+    if (not *stored_ln_prob)
+        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
+
+    // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
+    return getLnProbability() - **stored_ln_prob;
 }
 
 
