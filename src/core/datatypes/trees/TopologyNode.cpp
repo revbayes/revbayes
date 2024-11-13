@@ -1904,27 +1904,20 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                 
                 for (int i = num_ages - 1; i >= 0; i--)        // you actually need int here, not size_t!
                 {
-                    std::cout << "Running iteration " << i << std::endl;
                     // get the age of the current child
                     current_time = ages[i];
                     
                     // check if any extinct children become active
                     size_t num_extinct = extinct_children.size();
-                    std::cout << "num_extinct: " << num_extinct << std::endl;
                     for (int j = num_extinct - 1; j >= 0; --j) // ditto
                     {
-                        std::cout << "j = " << j << std::endl;
-                        std::cout << "Age of extinct_children.at(j): " << extinct_children.at(j)->getAge() << std::endl;
                         if ( extinct_children.at(j)->getAge() < current_time )
                         {
-                            std::cout << "Conditional satisfied; attempting push_back and erase." << std::endl;
                             // add the extinct child to the active children list, remove it from the extinct children list
                             active_children.push_back( extinct_children.at(j) );
                             extinct_children.erase( extinct_children.begin() + long(j) );
                         }
                     }
-                    
-                    std::cout << "New number of active_children: " << active_children.size() << std::endl;
                     
                     // randomly draw one child (arbitrarily called left) node from the list of active children
                     size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
@@ -1944,8 +1937,6 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
                     children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
                     
-                    std::cout << "Attempting erasure of children. New number of children: " << children.size() << std::endl;
-                    
                     // create a parent for the two
                     TopologyNode* prnt = new TopologyNode(); // leave the new node without index
                     prnt->addChild( leftChild );
@@ -1956,9 +1947,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     active_children.push_back( prnt );
                     
                     // add the newly created parent to the list of the children of the current node
-                    children.push_back( prnt );
-                    
-                    std::cout << "Attempting addition to children. New number of children: " << children.size() << std::endl;
+                    addChild( prnt );
+                    prnt->setParent( this );
                 }
                 
             }
@@ -1998,7 +1988,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     // we don't need active_children.push_back( prnt ) here because of the first line inside of this loop
                     
                     // add the newly created parent to the list of the children of the current node
-                    children.push_back( prnt );
+                    addChild( prnt );
+                    prnt->setParent( this );
                 }
                 
             }

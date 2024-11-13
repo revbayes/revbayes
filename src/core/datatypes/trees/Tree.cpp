@@ -1997,13 +1997,11 @@ void Tree::resolveMultifurcations( bool resolve_root )
     {
         if ( nodes[i]->getNumberOfChildren() > 2 )
         {
-            std::cout << "Found a multifurcation! This node has " << nodes[i]->getNumberOfChildren() << " children." << std::endl;
             nodes[i]->resolveMultifurcation( resolve_root );
+            // We need to reindex nodes because we added new ones
+            reindexNodes();
         }
     }
-    
-    // We need to reindex nodes because we added new ones
-    reindexNodes();
 }
 
 
