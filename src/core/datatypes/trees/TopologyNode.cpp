@@ -1857,15 +1857,36 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             
             if (use_ages)
             {
-                // The following is adapted from UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree()
+                std::cout << "Attempting to resolve a multifurcation while using ages" << std::endl;
                 
-                std::vector<TopologyNode*> extinct_children;
+                // The following is adapted from UniformSerialSampledTimeTreeDistribution::simulateCoalescentAges()
                 std::vector<double> ages;
+
+                // for each tip, simulate an age between max age and tip age
+                double max_age = getAge();
+                ages.push_back(max_age);
+                size_t num_ages = children.size() - 1;
+
+                for(size_t i = 0; i < num_ages; ++i)
+                {
+                    // get the age of the tip
+                    double a = children[i + 1]->getAge();
+
+                    // simulate the age of a node
+                    double new_age = a + rng->uniform01() * (max_age - a);
+
+                    // add the age to the vector of ages
+                    ages.push_back(new_age);
+                }
+
+                // sort the ages (from youngest to oldest)
+                std::sort(ages.begin(), ages.end(), std::greater<double>());
+                
+                // The following is adapted from UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree()
+                std::vector<TopologyNode*> extinct_children;
                 
                 for (size_t i = 0; i < children.size(); ++i)
                 {
-                    // get the ages of all children
-                    ages.push_back( children.at(i)->getAge() );
                     
                     // we initialize active_children with extant children (if there are any), but will subsequently expand it
                     if ( children.at(i)->getAge() == 0.0 )
@@ -1879,25 +1900,31 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                 }
                 
                 // loop backward through ages
-                size_t num_ages = ages.size();
                 double current_time = 0.0;
                 
-                for (size_t i = num_ages - 1; i >= 0; i--)
+                for (int i = num_ages - 1; i >= 0; i--)        // you actually need int here, not size_t!
                 {
+                    std::cout << "Running iteration " << i << std::endl;
                     // get the age of the current child
-                    double current_time = ages[i];
+                    current_time = ages[i];
                     
                     // check if any extinct children become active
                     size_t num_extinct = extinct_children.size();
-                    for (size_t j = num_extinct - 1; j >= 0; --j)
+                    std::cout << "num_extinct: " << num_extinct << std::endl;
+                    for (int j = num_extinct - 1; j >= 0; --j) // ditto
                     {
+                        std::cout << "j = " << j << std::endl;
+                        std::cout << "Age of extinct_children.at(j): " << extinct_children.at(j)->getAge() << std::endl;
                         if ( extinct_children.at(j)->getAge() < current_time )
                         {
+                            std::cout << "Conditional satisfied; attempting push_back and erase." << std::endl;
                             // add the extinct child to the active children list, remove it from the extinct children list
                             active_children.push_back( extinct_children.at(j) );
-                            extinct_children.erase( extinct_children.begin() + j );
+                            extinct_children.erase( extinct_children.begin() + long(j) );
                         }
                     }
+                    
+                    std::cout << "New number of active_children: " << active_children.size() << std::endl;
                     
                     // randomly draw one child (arbitrarily called left) node from the list of active children
                     size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
@@ -1906,7 +1933,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     // remove the randomly drawn node from the list
                     active_children.erase( active_children.begin() + long(left) );
                     
-                    // randomly draw one child (arbitrarily called left) node from the list of active children
+                    // randomly draw one child (arbitrarily called right) node from the list of active children
                     size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
                     TopologyNode* rightChild = active_children.at(right);
                     
@@ -1916,6 +1943,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     // remove the two also from the list of the children of the current node
                     children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
                     children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
+                    
+                    std::cout << "Attempting erasure of children. New number of children: " << children.size() << std::endl;
                     
                     // create a parent for the two
                     TopologyNode* prnt = new TopologyNode(); // leave the new node without index
@@ -1928,11 +1957,14 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     
                     // add the newly created parent to the list of the children of the current node
                     children.push_back( prnt );
+                    
+                    std::cout << "Attempting addition to children. New number of children: " << children.size() << std::endl;
                 }
                 
             }
             else
             {
+                std::cout << "Attempting to resolve a multifurcation while NOT using ages" << std::endl;
                 // The following is adapted from UniformTopologyDistribution::simulateClade()
                 
                 while ( children.size() >= 2 )
