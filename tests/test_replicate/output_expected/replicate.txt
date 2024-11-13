@@ -2,4 +2,4 @@
 2.0, 2.0:	[ 2.000, 2.000 ]	
 FALSE, 4/2:	[ FALSE, FALSE ]	
 4, 0:	[ ]	
-5, sqrt(4):	[ 5, 5 ]	
+'Five', sqrt(4):	[ Five, Five ]	
