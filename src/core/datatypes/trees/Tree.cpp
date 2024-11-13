@@ -1993,12 +1993,17 @@ void Tree::resetTaxonBitSetMap( void )
 
 void Tree::resolveMultifurcations( bool resolve_root )
 {
+    bool does_use_ages = isTimeTree();
+    
     for (size_t i = 0; i < nodes.size(); i++)
     {
         if ( nodes[i]->getNumberOfChildren() > 2 )
         {
+            // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
+            nodes[i]->setUseAges( does_use_ages, true );
+            // resolve the multifurcation
             nodes[i]->resolveMultifurcation( resolve_root );
-            // We need to reindex nodes because we added new ones
+            // we need to reindex nodes because we added new ones
             reindexNodes();
         }
     }

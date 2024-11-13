@@ -1857,7 +1857,6 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             
             if (use_ages)
             {
-                std::cout << "Attempting to resolve a multifurcation while using ages" << std::endl;
                 
                 // The following is adapted from UniformSerialSampledTimeTreeDistribution::simulateCoalescentAges()
                 std::vector<double> ages;
@@ -1954,7 +1953,6 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             }
             else
             {
-                std::cout << "Attempting to resolve a multifurcation while NOT using ages" << std::endl;
                 // The following is adapted from UniformTopologyDistribution::simulateClade()
                 
                 while ( children.size() >= 2 )
