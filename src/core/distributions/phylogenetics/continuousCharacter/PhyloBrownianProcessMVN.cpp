@@ -375,59 +375,18 @@ double PhyloBrownianProcessMVN::sumRootLikelihood( void )
 
 void PhyloBrownianProcessMVN::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == homogeneous_root_state )
+    // changing the root state doesn't affect the covariance matrix.
+    if ( affecter == homogeneous_root_state or affecter == heterogeneous_root_state )
+        return;
+
+    needs_covariance_recomputation = true;
+    if ( changed_covariance == false )
     {
-        
-        
+        MatrixReal *tmp = phylogenetic_covariance_matrix;
+        phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
+        stored_phylogenetic_covariance_matrix = tmp;
     }
-    else if ( affecter == heterogeneous_root_state )
-    {
-        
-        
-    }
-    else if ( affecter == this->homogeneous_clock_rate )
-    {
-        needs_covariance_recomputation = true;
-        if ( changed_covariance == false )
-        {
-            MatrixReal *tmp = phylogenetic_covariance_matrix;
-            phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-            stored_phylogenetic_covariance_matrix = tmp;
-        }
-        changed_covariance = true;
-        
-    }
-    else if ( affecter == this->heterogeneous_clock_rates )
-    {
-        needs_covariance_recomputation = true;
-        if ( changed_covariance == false )
-        {
-            MatrixReal *tmp = phylogenetic_covariance_matrix;
-            phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-            stored_phylogenetic_covariance_matrix = tmp;
-        }
-        changed_covariance = true;
-        
-    }
-    else if ( affecter == this->tau )
-    {
-        needs_covariance_recomputation = true;
-        if ( changed_covariance == false )
-        {
-            MatrixReal *tmp = phylogenetic_covariance_matrix;
-            phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-            stored_phylogenetic_covariance_matrix = tmp;
-        }
-        changed_covariance = true;
-        
-    }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    {
-        touchAll = true;
-    }
-    
+    changed_covariance = true;
 }
 
 
