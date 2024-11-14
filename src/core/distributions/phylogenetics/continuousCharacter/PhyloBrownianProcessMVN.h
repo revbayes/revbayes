@@ -61,7 +61,7 @@ namespace RevBayesCore {
         std::vector<std::vector<double> >                                   obs;
         MatrixReal*                                                         phylogenetic_covariance_matrix;
         MatrixReal*                                                         stored_phylogenetic_covariance_matrix;
-        MatrixReal                                                          inverse_phylogenetic_covariance_matrix;
+        std::optional<MatrixReal>                                           inverse_phylogenetic_covariance_matrix;
         bool                                                                changed_covariance;
         bool                                                                needs_covariance_recomputation;
         bool                                                                needs_scale_recomputation;

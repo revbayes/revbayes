@@ -30,7 +30,6 @@ PhyloBrownianProcessMVN::PhyloBrownianProcessMVN(const TypedDagNode<Tree> *t, si
     obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) ),
     phylogenetic_covariance_matrix( new MatrixReal(num_tips, num_tips) ),
     stored_phylogenetic_covariance_matrix( new MatrixReal(num_tips, num_tips) ),
-    inverse_phylogenetic_covariance_matrix( num_tips, num_tips ),
     changed_covariance(false),
     needs_covariance_recomputation( true ),
     needs_scale_recomputation( true )
@@ -130,8 +129,6 @@ double PhyloBrownianProcessMVN::computeLnProbability( void )
         phylogenetic_covariance_matrix->setCholesky( true );
         recursiveComputeCovarianceMatrix(*phylogenetic_covariance_matrix, root, rootIndex);
         needs_covariance_recomputation = false;
-        inverse_phylogenetic_covariance_matrix = phylogenetic_covariance_matrix->computeInverse();
-        inverse_phylogenetic_covariance_matrix.setCholesky( true );
     }
     
     // sum the partials up
@@ -287,7 +284,9 @@ void PhyloBrownianProcessMVN::restoreSpecialization( const DagNode* affecter )
         MatrixReal *tmp = phylogenetic_covariance_matrix;
         phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
         stored_phylogenetic_covariance_matrix = tmp;
-        
+
+        // The inverse needs to be recalculated.
+        inverse_phylogenetic_covariance_matrix = {};
     }
     
 }
@@ -358,6 +357,11 @@ std::vector<double> PhyloBrownianProcessMVN::simulateRootCharacters(size_t n)
 
 double PhyloBrownianProcessMVN::sumRootLikelihood( void )
 {
+    if (not inverse_phylogenetic_covariance_matrix)
+    {
+        inverse_phylogenetic_covariance_matrix = phylogenetic_covariance_matrix->computeInverse();
+        inverse_phylogenetic_covariance_matrix->setCholesky( true );
+    }
     
     // sum the log-likelihoods for all sites together
     double sum_site_probs = 0.0;
@@ -366,7 +370,7 @@ double PhyloBrownianProcessMVN::sumRootLikelihood( void )
         std::vector<double> m = std::vector<double>(num_tips, computeRootState(site) );
         
         double sr = this->computeSiteRate(site);
-        sum_site_probs += RbStatistics::MultivariateNormal::lnPdfPrecision(m, inverse_phylogenetic_covariance_matrix, obs[site], sr*sr);
+        sum_site_probs += RbStatistics::MultivariateNormal::lnPdfPrecision(m, *inverse_phylogenetic_covariance_matrix, obs[site], sr*sr);
     }
     
     return sum_site_probs;
@@ -385,6 +389,7 @@ void PhyloBrownianProcessMVN::touchSpecialization( const DagNode* affecter, bool
         MatrixReal *tmp = phylogenetic_covariance_matrix;
         phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
         stored_phylogenetic_covariance_matrix = tmp;
+        inverse_phylogenetic_covariance_matrix = {};
     }
     changed_covariance = true;
 }
