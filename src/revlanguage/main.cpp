@@ -30,18 +30,19 @@ std::string usage()
 {
     std::string usage_examples =
         "Usage examples:\n\n"
-        "   1. rb --args 1 2\n"
-        "   2. rb --args 1 --args 2                                 # equivalent to 1\n"
-        "   3. rb script.Rev\n"
-        "   4. rb --file script.Rev                                 # equivalent to 3\n"
-        "   5. rb --cmd script.Rev                                  # equivalent to 3 and 4\n"
-        "   6. rb --file script.Rev --args 1 2\n"
-        "   7. rb --args 1 2 --file script.Rev                      # equivalent to 6\n"
-        "   8. rb --cmd script.Rev 1 2                              # equivalent to 6 and 7\n"
-        "   9. rb --file script.Rev script2.Rev\n"
-        "  10. rb --file script.Rev --file script2.Rev              # equivalent to 9\n"
-        "  11. rb --file script.Rev --args 1 2 --file script2.Rev\n"
-        "  12. rb --file script.Rev script2.Rev --args 1 2          # equivalent to 11";
+        "   1. rb\n"
+        "   2. rb --args 1 2\n"
+        "   3. rb --args 1 --args 2                                # equivalent to 2\n"
+        "   4. rb script.Rev\n"
+        "   5. rb --file script.Rev                                # equivalent to 4\n"
+        "   6. rb --cmd script.Rev                                 # equivalent to 4 and 5\n"
+        "   7. rb --file script.Rev --args 1 2\n"
+        "   8. rb --args 1 2 --file script.Rev                     # equivalent to 7\n"
+        "   9. rb --cmd script.Rev 1 2                             # equivalent to 7 and 8\n"
+        "  10. rb --file script.Rev script2.Rev\n"
+        "  11. rb --file script.Rev --file script2.Rev             # equivalent to 10\n"
+        "  12. rb --file script.Rev --args 1 2 --file script2.Rev\n"
+        "  13. rb --file script.Rev script2.Rev --args 1 2         # equivalent to 12\n";
     return usage_examples;
 }
 
@@ -73,7 +74,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // composing means that --file can occur multiple times
     ("file",value<std::vector<std::string> >()->composing(),"Source one or more files.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments.")
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments. The --cmd flag cannot be used together with the --args flag.")
     ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 	;
 
