@@ -271,6 +271,10 @@
 #include "Func_posteriorPredictiveProbability.h"
 //#include "Func_power.h"
 //#include "Func_powerVector.h"
+#include "Func_product.h"
+#include "Func_productPositive.h"
+#include "Func_productInteger.h"
+#include "Func_productNatural.h"
 #include "Func_round.h"
 #include "Func_shortestDistance.h"
 #include "Func_sigmoid.h"
@@ -553,6 +557,12 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // normalize vector function
 		addFunction( new Func_normalize()  );
 
+        // product function
+        addFunction( new Func_product()  );
+        addFunction( new Func_productPositive()  );
+        addFunction( new Func_productInteger()  );
+        addFunction( new Func_productNatural()  );
+        
         // round function
         addFunction( new Func_round<Real,Integer>()  );
         addFunction( new Func_round<RealPos,Natural>()  );
