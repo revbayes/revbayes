@@ -34,7 +34,7 @@ invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
 invPhy.clamp(chars)
 
 # Validate printing of dataset information
-print(filename = outFile, append = TRUE, invPhy, "\n")
+print(filename = outFile, append = FALSE, invPhy, "\n")
 
 k.clamp(1)
 print(filename = outFile, append = TRUE,
