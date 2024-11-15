@@ -87,7 +87,7 @@ namespace RevBayesCore {
 	virtual void                                                       checkInvariants() const;
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true );
+        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true, bool invert = false );
         AbstractPhyloCTMCSiteHomogeneous(const AbstractPhyloCTMCSiteHomogeneous &n);                                                                                    //!< Copy constructor
         virtual                                                            ~AbstractPhyloCTMCSiteHomogeneous(void);                                                     //!< Virtual destructor
 
@@ -252,7 +252,7 @@ namespace RevBayesCore {
         bool                                                                branch_heterogeneous_clock_rates = false;
         bool                                                                branch_heterogeneous_substitution_matrices = true;
         bool                                                                rate_variation_across_sites = false;
-        bool invert_likelihood = false;
+        bool                                                                invert_likelihood;
 
         // MPI variables
         size_t                                                              pattern_block_start;
@@ -304,7 +304,7 @@ namespace RevBayesCore {
 
 
 template<class charType>
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool wd) :
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool invert, bool wd) :
 TypedDistribution< AbstractHomologousDiscreteCharacterData >(  NULL ),
 num_nodes( t->getValue().getNumberOfNodes() ),
 num_sites( nSites ),
@@ -331,7 +331,8 @@ pattern_block_start( 0 ),
 pattern_block_end( num_patterns ),
 pattern_block_size( num_patterns ),
 store_internal_nodes( internal ),
-gap_match_clamped( gapmatch )
+gap_match_clamped( gapmatch ),
+invert_likelihood( invert )
 {
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
@@ -413,6 +414,7 @@ pattern_block_end( n.pattern_block_end ),
 pattern_block_size( n.pattern_block_size ),
 store_internal_nodes( n.store_internal_nodes ),
 gap_match_clamped( n.gap_match_clamped ),
+invert_likelihood( n.invert_likelihood ),
 template_state( n.template_state ),
 has_ancestral_states( n.has_ancestral_states ),
 sampled_site_rate_component( n.sampled_site_rate_component ),
@@ -2078,11 +2080,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
             double sum = 0.0;
 
             // if the matrix is compressed use the pattern for this site
-            size_t pattern = i;
-            if ( compressed == true )
-            {
-                pattern = site_pattern[i];
-            }
+            // size_t pattern = i;
+            // if ( compressed == true )
+            // {
+            //     pattern = site_pattern[i];
+            // }
 
             // get the ambiguous character's bitset for the tip taxon
             RbBitSet bs = RbBitSet(this->num_chars);
