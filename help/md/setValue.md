@@ -10,7 +10,10 @@ Set the value of a stochastic variable
 `x.setValue()` allows calculations to be evaluated at a given value of `x`, whilst allowing the value
 of `x` to be redrawn, or to vary during MCMC.
 
-This may be useful when [debugging MCMC runs](https://revbayes.github.io/tutorials/mcmc_troubleshooting/#starting-values).
+`.setValue()` allows an MCMC run to be initialized with plausible values,
+which can expedite convergence when priors are broad
+([example](https://revbayes.github.io/tutorials/divrate/branch_specific.html#specifying-the-model)),
+and can be useful when [debugging MCMC runs](https://revbayes.github.io/tutorials/mcmc_troubleshooting/#starting-values).
 
 ## authors
 
