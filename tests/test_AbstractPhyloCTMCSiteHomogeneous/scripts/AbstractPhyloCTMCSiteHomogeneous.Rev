@@ -29,7 +29,8 @@ qK := fnFreeK(kRates)
 phy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard")
 phy.clamp(chars)
 
-invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard", invertProbability = TRUE)
+invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
+                     invertProbability = TRUE)
 invPhy.clamp(chars)
 
 # Validate printing of dataset information
@@ -45,6 +46,7 @@ print(filename = outFile, append = TRUE,
       "Expect equal:", -phy.lnProbability(), invPhy.lnProbability(), "\n")
 
 # Validate that the function can be destroyed / reset without error
-invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard", invertProbability = FALSE)
+invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
+                     invertProbability = FALSE)
 
 q()
