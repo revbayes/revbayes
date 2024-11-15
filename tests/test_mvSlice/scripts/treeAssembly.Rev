@@ -1,0 +1,43 @@
+# If there are problems here, its probably because of treeAssembly.
+# mvSlice checks that setting a variable to its current value doesn't change the likelihood.
+
+# The same errors will probably occur WITHOUT mvSlice if you enable this line:
+# setOption("debugMCMC",1)
+
+seed(0)
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+chars <- readDiscreteCharacterData("data/primates_cytb.nex")
+taxa <- chars.names()
+outgroup <- clade(taxa[1])
+nTaxa <- chars.size()
+nEdge <- 2 * nTaxa - 3
+
+topology ~ dnUniformTopology(taxa, outgroup = outgroup)
+moves.append( mvNNI(topology, weight = nEdge/2.0, tuneTarget = 0.26) )
+moves.append( mvSPR(topology, weight = nEdge/10.0, tuneTarget = 0.26) )
+tree_length ~ dnGamma(shape = 2, rate = 1)
+moves.append( mvScale(tree_length) )
+moves.append( mvSlice(tree_length) )
+
+rel_br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+moves.append( mvBetaSimplex(rel_br_lengths, weight = nEdge / 5.0, tuneTarget = 0.26) )
+moves.append( mvDirichletSimplex(rel_br_lengths, weight = nEdge / 10.0, tuneTarget = 0.26) )
+br_lengths := rel_br_lengths * tree_length
+
+phylogeny := treeAssembly(topology, br_lengths)
+
+m_morph[1] ~ dnPhyloCTMC(
+    tree = phylogeny,
+    Q = fnJC(4),
+    type = "DNA"
+)
+m_morph[1].clamp(chars)
+
+mymodel = model(phylogeny)
+        
+monitors.append( mnModel(filename="output/treeAssembly.log", printgen=5) )
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations = 100)
+q()
