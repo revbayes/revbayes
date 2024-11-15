@@ -9,5 +9,5 @@ Number of included characters: 62
 Datatype:                      Standard
 
 	
-Expect equal:	931.4533	-931.4533	
-Expect equal:	883.8272	-883.8272	
+Expect equal:	931.4533	931.4533	
+Expect equal:	883.8272	883.8272	
