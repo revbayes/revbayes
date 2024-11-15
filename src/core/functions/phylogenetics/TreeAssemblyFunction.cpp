@@ -9,6 +9,25 @@
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
 
+
+/* NOTE: keep/restore/update functions are very fragile.
+ *
+ * There have been a lot of MCMC problems where old values are not properly restored
+ * after a rejected move:
+ * - See https://github.com/revbayes/revbayes/pull/549
+ *
+ * At the same time, we want to avoid marking branch lengths are being changed
+ * when they have not been changed, because this causes too much recalculation
+ * of transition matrices and partial likelihoods.
+ *
+ * Complications:
+ * 1. we don't create a new copy of the tree, but simply annotate the input tree with branch lengths.
+ * 2. restore and update can be called multiple times after a single MCMC move.
+ * 3. restore and update might clear the list of changed branches (in touchedIndices).
+ * 4. the branch-length vector might not be up-to-date with TreeAssemblyFunction::update() or ::restore() is called.
+ * 5. the topology might change before update is called.
+ */
+
 using namespace RevBayesCore;
 
 TreeAssemblyFunction::TreeAssemblyFunction(const TypedDagNode<Tree> *t, const TypedDagNode< RbVector<double> > *b) : TypedFunction<Tree>( NULL ),
