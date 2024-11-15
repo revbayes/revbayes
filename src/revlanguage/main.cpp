@@ -28,8 +28,21 @@ using po::variables_map;
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]\n";
-    // Other usages not mentioned
+    std::string usage_examples =
+        "Usage examples:"
+        ""
+        "   1. rb --args 1 2"
+        "   2. rb --args 1 --args 2                                 # equivalent to 1"
+        "   3. rb script.Rev"
+        "   4. rb --file script.Rev                                 # equivalent to 3"
+        "   5. rb --cmd script.Rev                                  # equivalent to 3 and 4"
+        "   6. rb --file script.Rev --args 1 2"
+        "   7. rb --args 1 2 --file script.Rev                      # equivalent to 6"
+        "   8. rb --cmd script.Rev 1 2                              # equivalent to 6 and 7"
+        "   9. rb --file script.Rev script2.Rev"
+        "  10. rb --file script.Rev --file script2.Rev              # equivalent to 9"
+        "  11. rb --file script.Rev --args 1 2 --file script2.Rev";
+    return usage_examples;
 }
 
 
@@ -56,11 +69,11 @@ variables_map parse_cmd_line(int argc, char* argv[])
 	("batch,b","Run in batch mode.")
     ("jupyter,j","Run in jupyter mode.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+    ("args",value<std::vector<std::string> >()->multitoken(),"Supply command-line arguments to RevBayes. These can be accessed from within the program using the 'args' vector. See ?args for details.")
+    // composing means that --file can occur multiple times
+    ("file",value<std::vector<std::string> >()->composing(),"Source one or more files.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
-	// composing means that --file can occur multiple times
-    ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments.")
     ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 	;
 
@@ -85,10 +98,10 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout << usage() << std::endl;
             std::cout << short_description() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
+            std::cout << usage() << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
@@ -110,10 +123,10 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout << usage() << std::endl;
             std::cout << short_description() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
+            std::cout << usage() << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
