@@ -69,12 +69,11 @@ namespace RevBayesCore {
         virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                             //!< Tell affected nodes value is reset
         
         // protected members
-        bool                                                clamped;
-        bool                                                ignore_redraw;
-        mutable bool                                        integrated_out;
-        double                                              lnProb;                                                                     //!< Current log probability
-        bool                                                needs_probability_recalculation;                                            //!< Do we need recalculation of the ln prob?
-        double                                              stored_ln_prob;
+        bool                                                clamped = false;
+        bool                                                ignore_redraw = false;
+        mutable bool                                        integrated_out = false;
+        std::optional<double>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
+        std::optional<std::optional<double>>                stored_ln_prob;                                                             //!< Previous log probability if (a) there is a previous state and (b) the log probability for it is computed.
         TypedDistribution<valueType>*                       distribution;
         
     };
@@ -95,8 +94,6 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, T
     clamped( false ),
     ignore_redraw( false ),
     integrated_out( false ),
-    lnProb( RbConstants::Double::neginf ),
-    needs_probability_recalculation( true ),
     distribution( d )
 {
     this->type = DagNode::STOCHASTIC;
@@ -123,7 +120,6 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<va
     clamped( n.clamped ),
     ignore_redraw( n.ignore_redraw ),
     integrated_out( n.integrated_out ),
-    needs_probability_recalculation( true ),
     distribution( n.distribution->clone() )
 {
     this->type = DagNode::STOCHASTIC;
@@ -216,7 +212,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         clamped                             = n.clamped;
         ignore_redraw                       = n.ignore_redraw;
         integrated_out                      = n.integrated_out;
-        needs_probability_recalculation     = true;
+        lnProb                              = {};
     }
     
     return *this;
@@ -450,7 +446,7 @@ template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 {
     
-    if ( needs_probability_recalculation == true )
+    if ( not lnProb )
     {
         // compute and store log-probability
         if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
@@ -463,20 +459,26 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
         {
             lnProb = 0.0;
         }
-        
-        // reset flag
-        needs_probability_recalculation = false;
     }
-    
-    return lnProb;
+
+    return lnProb.value();
 }
 
 
 template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
-    
-    return getLnProbability() - stored_ln_prob;
+    // 1. If the node is not affected/touched, then the probability is the same for the current and previous state.
+    if (not stored_ln_prob)
+        return 0;
+
+    // 2. If we touched the node when the log probability was not calculated, then we don't have a value for
+    // the probability of the previous state.
+    if (not *stored_ln_prob)
+        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
+
+    // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
+    return getLnProbability() - **stored_ln_prob;
 }
 
 
@@ -555,9 +557,9 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
     
     if ( this->touched == true )
     {
-        
-        stored_ln_prob = 1.0E6;       // An almost impossible value for the density
-        if ( needs_probability_recalculation )
+        stored_ln_prob = {};
+
+        if ( not lnProb )
         {
             if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
             {
@@ -583,8 +585,8 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
         }
         
     }
-    
-    needs_probability_recalculation   = false;
+
+    assert( lnProb );
     
     
     // delegate call
@@ -602,9 +604,17 @@ void RevBayesCore::StochasticNode<valueType>::printStructureInfo( std::ostream &
     o << "_clamped      = " << ( this->clamped ? "TRUE" : "FALSE" ) << std::endl;
     o << "_lnProb       = " << const_cast< StochasticNode<valueType>* >( this )->getLnProbability() << std::endl;
     
-    if ( this->touched == true && verbose == true)
+    if ( verbose == true)
     {
-        o << "_stored_ln_prob = " << stored_ln_prob << std::endl;
+        o << "_stored_ln_prob = ";
+        if (not stored_ln_prob)
+            o<< "EMPTY";
+        else if (not *stored_ln_prob)
+            o<< "UNCOMPUTED";
+        else
+            o<<**stored_ln_prob;
+
+        o<< std::endl;
     }
     o << "_parents      = ";
     this->printParents(o, 16, 70, verbose);
@@ -655,15 +665,15 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer
     
     if ( this->touched == true )
     {
-        lnProb              = stored_ln_prob;
-        stored_ln_prob      = 1.0E6;    // An almost impossible value for the density
-        
+        lnProb              = stored_ln_prob.value();
+        stored_ln_prob      = {};    // An almost impossible value for the density
+
         // reset flags that recalculation is not needed
-        needs_probability_recalculation = false;
-        
+        assert(lnProb);
+
         // call for potential specialized handling (e.g. internal flags)
         distribution->restore(restorer);
-        
+
         // clear the list of touched element indices
         this->touched_elements.clear();
 
@@ -672,7 +682,6 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer
             // Dispatch the touch message to downstream nodes
             this->restoreAffected();
         }
-        
     }
     
     // delegate call
@@ -829,10 +838,11 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
     
     if ( this->touched == false )
     {
+        assert(not stored_ln_prob);
         stored_ln_prob = lnProb;
     }
     
-    needs_probability_recalculation = true;
+    lnProb = {};
     
     // call for potential specialized handling (e.g. internal flags), we might have been touched already by someone else, so we need to delegate regardless
     distribution->touch( toucher, touchAll );

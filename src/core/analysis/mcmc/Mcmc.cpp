@@ -536,38 +536,32 @@ std::string Mcmc::getStrategyDescription( void ) const
 
 void Mcmc::initializeSampler( bool prior_only )
 {
-    
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
-    
+
     // Get rid of previous move schedule, if any
     if ( schedule != NULL )
     {
         delete schedule;
     }
     schedule = NULL;
-    
+
     // Get initial ln_probability of model
-    
+
     // first we touch all nodes so that the likelihood is dirty
-    for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
+    for (auto the_node: dag_nodes)
     {
-        
-        DagNode *the_node = *i;
         the_node->setMcmcMode( true );
         the_node->setPriorOnly( prior_only );
         the_node->touch();
-        
     }
-    
-    
+
+
     if ( chain_active == false )
     {
 
-        for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+        for (auto the_node: ordered_stoch_nodes)
         {
-            DagNode *the_node = (*i);
-            
             if ( the_node->isClamped() == false && the_node->isStochastic() == true )
             {
 
@@ -584,23 +578,23 @@ void Mcmc::initializeSampler( bool prior_only )
         }
         
     }
-    
-    
+
+
     int num_tries     = 0;
     double ln_probability = 0.0;
     for ( ; num_tries < num_init_attempts; ++num_tries )
     {
         // a flag if we failed to find a valid starting value
         bool failed = false;
-        
+
         ln_probability = 0.0;
-        for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
-        {
-            DagNode* the_node = (*i);
+        for (auto the_node: dag_nodes)
             the_node->touch();
-            
+
+        for (auto the_node: dag_nodes)
+        {
             double ln_prob = the_node->getLnProbability();
-            
+
             if ( RbMath::isAComputableNumber(ln_prob) == false )
             {
                 std::stringstream ss;
@@ -608,34 +602,29 @@ void Mcmc::initializeSampler( bool prior_only )
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
-                
+
                 ss << std::endl;
                 RBOUT( ss.str() );
-                
+
                 // set the flag
                 failed = true;
-                
-                break;
             }
             ln_probability += ln_prob;
-            
         }
-        
+
         // now we keep all nodes so that the likelihood is stored
-        for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
+        for (auto the_node: dag_nodes)
         {
-            (*i)->keep();
+            the_node->keep();
         }
-        
+
         if ( failed == true )
         {
             RBOUT( "Drawing new initial states ... " );
-            for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+            for (auto the_node: ordered_stoch_nodes)
             {
-                DagNode *the_node = *i;
-                if ( the_node->isClamped() == false && (*i)->isStochastic() == true )
+                if ( the_node->isClamped() == false && the_node->isStochastic() == true )
                 {
-                    
                     the_node->redraw();
                     the_node->reInitialized();
                     
@@ -646,14 +635,17 @@ void Mcmc::initializeSampler( bool prior_only )
                     the_node->reInitialized();
                     the_node->touch();
                 }
-                
             }
+
+            for (auto the_node: ordered_stoch_nodes)
+		if (the_node->isClamped())
+		    the_node->keep();
         }
         else
         {
             break;
         }
-        
+
     }
     
     if ( num_tries == num_init_attempts )
