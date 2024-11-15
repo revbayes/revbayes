@@ -29,19 +29,19 @@ using po::variables_map;
 std::string usage()
 {
     std::string usage_examples =
-        "Usage examples:"
-        ""
-        "   1. rb --args 1 2"
-        "   2. rb --args 1 --args 2                                 # equivalent to 1"
-        "   3. rb script.Rev"
-        "   4. rb --file script.Rev                                 # equivalent to 3"
-        "   5. rb --cmd script.Rev                                  # equivalent to 3 and 4"
-        "   6. rb --file script.Rev --args 1 2"
-        "   7. rb --args 1 2 --file script.Rev                      # equivalent to 6"
-        "   8. rb --cmd script.Rev 1 2                              # equivalent to 6 and 7"
-        "   9. rb --file script.Rev script2.Rev"
-        "  10. rb --file script.Rev --file script2.Rev              # equivalent to 9"
-        "  11. rb --file script.Rev --args 1 2 --file script2.Rev";
+        "Usage examples:\n\n"
+        "   1. rb --args 1 2\n"
+        "   2. rb --args 1 --args 2                                 # equivalent to 1\n"
+        "   3. rb script.Rev\n"
+        "   4. rb --file script.Rev                                 # equivalent to 3\n"
+        "   5. rb --cmd script.Rev                                  # equivalent to 3 and 4\n"
+        "   6. rb --file script.Rev --args 1 2\n"
+        "   7. rb --args 1 2 --file script.Rev                      # equivalent to 6\n"
+        "   8. rb --cmd script.Rev 1 2                              # equivalent to 6 and 7\n"
+        "   9. rb --file script.Rev script2.Rev\n"
+        "  10. rb --file script.Rev --file script2.Rev              # equivalent to 9\n"
+        "  11. rb --file script.Rev --args 1 2 --file script2.Rev\n"
+        "  12. rb --file script.Rev script2.Rev --args 1 2          # equivalent to 11";
     return usage_examples;
 }
 
