@@ -59,11 +59,15 @@ namespace RevBayesCore {
         
         size_t                                                              num_tips;
         std::vector<std::vector<double> >                                   obs;
+
+        /* NOTE: Currently we cache both current (phylogenetic_covariance_matrix) and previous (stored_phylogenetic_covariance_matrix) values for the covariance matrix,
+                 but only the current value for the inverse (inverse_phylogenetic_covariance_matrix) of this matrix.
+                 Since the inverse is more more expensive to compute, perhaps we should just cache the matrix *inverse*, and cache for both current and previous states. */
         MatrixReal*                                                         phylogenetic_covariance_matrix;
         MatrixReal*                                                         stored_phylogenetic_covariance_matrix;
         std::optional<MatrixReal>                                           inverse_phylogenetic_covariance_matrix;
-        bool                                                                changed_covariance;
-        bool                                                                needs_covariance_recomputation;
+        bool                                                                changed_covariance;                                                                      //!< We have a stored matrix to restore from
+        bool                                                                needs_covariance_recomputation;                                                          //!< The primary matrix need to be recomputed.
         bool                                                                needs_scale_recomputation;
     };
     
