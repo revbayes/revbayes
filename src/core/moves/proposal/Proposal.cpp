@@ -104,6 +104,10 @@ void Proposal::addNode( DagNode *n )
     // only add the node if it doesn't exist already
     if ( n != NULL && exists == false )
     {
+        if (n->isClamped())
+        {
+            throw RbException("Cannot add the clamped node '" + n->getName() + "' to a proposal.");
+        }
         nodes.push_back( n );
     
         // increment reference count
