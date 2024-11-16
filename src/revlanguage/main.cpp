@@ -32,17 +32,15 @@ std::string usage()
         "Usage examples:\n\n"
         "   1. rb\n"
         "   2. rb --args 1 2\n"
-        "   3. rb --args 1 --args 2                                # equivalent to 2\n"
-        "   4. rb script.Rev\n"
-        "   5. rb --file script.Rev                                # equivalent to 4\n"
-        "   6. rb --cmd script.Rev                                 # equivalent to 4 and 5\n"
-        "   7. rb --file script.Rev --args 1 2\n"
-        "   8. rb --args 1 2 --file script.Rev                     # equivalent to 7\n"
-        "   9. rb --cmd script.Rev 1 2                             # equivalent to 7 and 8\n"
-        "  10. rb --file script.Rev script2.Rev\n"
-        "  11. rb --file script.Rev --file script2.Rev             # equivalent to 10\n"
-        "  12. rb --file script.Rev --args 1 2 --file script2.Rev\n"
-        "  13. rb --file script.Rev script2.Rev --args 1 2         # equivalent to 12\n";
+        "   3. rb script.Rev\n"
+        "   4. rb --file script.Rev                                # equivalent to 3\n"
+        "   5. rb --cmd script.Rev                                 # equivalent to 3 and 4\n"
+        "   6. rb --file script.Rev --args 1 2\n"
+        "   7. rb --args 1 2 --file script.Rev                     # equivalent to 6\n"
+        "   8. rb --cmd script.Rev 1 2                             # equivalent to 6 and 7\n"
+        "   9. rb --file script.Rev script2.Rev\n"
+        "  10. rb --file script.Rev --args 1 2 --file script2.Rev\n"
+        "  11. rb --file script.Rev script2.Rev --args 1 2         # equivalent to 10\n";
     return usage_examples;
 }
 
