@@ -71,10 +71,10 @@ variables_map parse_cmd_line(int argc, char* argv[])
         ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 
         // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-        ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+        ("args",value<std::vector<std::string> >()->multitoken(),"Supply command line arguments.")
 
         // multitoken means that `--cmd script a1 a2 a3` works the same as `--cmd script --cmd a1 --cmd a2 --cmd a3`
-        ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
+        ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command line arguments.")
 	;
 
     // Treat all positional options as "file" options.
