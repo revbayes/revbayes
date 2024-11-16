@@ -228,6 +228,29 @@ c := append(a,b))");
 	help_strings[string("append")][string("name")] = string(R"(append)");
 	help_arrays[string("append")][string("see_also")].push_back(string(R"(rep)"));
 	help_strings[string("append")][string("title")] = string(R"(Append a value)");
+	help_arrays[string("args")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("args")][string("description")] = string(R"(Vector holding command-line arguments supplied using the `--args` or `--cmd` flags. If no command-line arguments are supplied, `args` is initialized to an empty vector. Like a regular RevBayes vector, `args` uses 1-based indexing (i.e., the first element is accessed using `args[1]`), but unlike a regular vector, it can hold elements of different types.)");
+	help_strings[string("args")][string("example")] = string(R"(# args is initialized to an empty vector if no command-line arguments are supplied.
+# Assume RevBayes was called as follows: ./rb
+args                          # returns [ ]
+args.size()                   # returns 0
+
+# However, args is not a reserved keyword. We can remove it from the workspace or overwrite it.
+clear(args)
+args <- readTrees("primates.tree")[1]  # args is now a tree
+
+# Assume RevBayes was called as follows: ./rb --args 1 5
+args[1] + args[2]             # returns 6
+
+# Unlike regular vectors, args can hold values of different types.
+# Assume RevBayes was called as follows: ./rb --args 1 5 2 "Hello " "world"
+print(args[4] + args[5])      # prints "Hello world"
+type(args[4])                 # returns String
+
+(args[1] + args[2])^args[3]   # returns 36
+type(args[1])                 # returns Natural)");
+	help_strings[string("args")][string("name")] = string(R"(args)");
+	help_strings[string("args")][string("title")] = string(R"(Vector of command-line arguments)");
 	help_strings[string("beca")][string("name")] = string(R"(beca)");
 	help_strings[string("branchScoreDistance")][string("name")] = string(R"(branchScoreDistance)");
 	help_arrays[string("ceil")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -4950,6 +4973,16 @@ type(b))");
 	help_strings[string("type")][string("name")] = string(R"(type)");
 	help_arrays[string("type")][string("see_also")].push_back(string(R"(structure)"));
 	help_strings[string("type")][string("title")] = string(R"(The value type of a variable)");
+    help_arrays[string("tzard")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+    help_strings[string("tzard")][string("description")] = string(R"(The value type of a variable.)");
+    help_strings[string("tzard")][string("example")] = string(R"(a <- 2
+type(a)
+
+b <- 2.0
+type(b))");
+    help_strings[string("tzard")][string("name")] = string(R"(type)");
+    help_arrays[string("tzard")][string("see_also")].push_back(string(R"(structure)"));
+    help_strings[string("tzard")][string("title")] = string(R"(The value type of a variable)");
 	help_arrays[string("v")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("v")][string("description")] = string(R"('v' creates a vector of the elements '...')");
 	help_strings[string("v")][string("details")] = string(R"('v' creates a vector of the elements '...', which are objects of a common base type. Vector elements may themselves be vectors.)");
