@@ -28,8 +28,12 @@ using po::variables_map;
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]\n";
-    // Other usages not mentioned
+    std::ostringstream o;
+    o<<"Usage: rb [OPTIONS]\n";
+    o<<"       rb [OPTIONS] <file1> [<file2> ...] [--args <arg1> [<arg2> ...]]\n";
+    o<<"       rb [OPTIONS] --cmd <file> [<arg1> <arg2>...]\n";
+
+    return o.str();
 }
 
 
@@ -43,25 +47,34 @@ variables_map parse_cmd_line(int argc, char* argv[])
 {
     using namespace po;
 
-    // Put all options in one group for now.
+    // The "file" option is invisible, and is only intended as a way of handling positional options.
+    options_description invisible("Invisible");
+    invisible.add_options()
+	// composing means that --file can occur multiple times
+        ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.");
+
+    // Put all other options in one group for now.
     options_description general("Options");
     general.add_options()
 	("help,h","Show information on flags.")
+
 	("version,v","Show version and exit.")
 
-	// implicit_value(1) means that -V => -V1
-    // RevBayes doesn't use a global verbose_logging flag.
-    // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
-
 	("batch,b","Run in batch mode.")
-    ("jupyter,j","Run in jupyter mode.")
-    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
-    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
-	// composing means that --file can occur multiple times
-    ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
-    ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
+
+        ("jupyter,j","Run in jupyter mode.")
+
+	// implicit_value(1) means that -V => -V1
+        // RevBayes doesn't use a global verbose_logging flag.
+        // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
+
+        ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
+
+        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+        ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+
+        // multitoken means that `--cmd script a1 a2 a3` works the same as `--cmd script --cmd a1 --cmd a2 --cmd a3`
+        ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
 	;
 
     // Treat all positional options as "file" options.
@@ -71,8 +84,11 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // Parse the command line into variables_map 'args'
     variables_map args;
 
+    options_description all_options;
+    all_options.add(general).add(invisible);
+
     try {
-        store(command_line_parser(argc, argv).options(general).positional(p).run(), args);
+        store(command_line_parser(argc, argv).options(all_options).positional(p).run(), args);
     }
     catch(po::error& e)
     {
@@ -196,10 +212,19 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-    
+
     if ( args.count("args") && args.count("cmd"))
     {
-        throw RbException("command line: received both --args and --cmd");
+        std::cerr<<usage()<<"\n";
+        std::cerr<<"Error: received both --args and --cmd, but only one is allowed.\n";
+        exit(1);
+    }
+
+    if ( args.count("file") && args.count("cmd"))
+    {
+        std::cerr<<usage()<<"\n";
+        std::cerr<<"Error: filenames not allowed before --cmd.\n";
+        exit(1);
     }
     
     std::vector<std::string> rb_args;
