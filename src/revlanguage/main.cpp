@@ -28,8 +28,18 @@ using po::variables_map;
 
 std::string usage()
 {
+    std::string usage =
+        "Usage: rb [OPTIONS]\n"
+        "       rb [OPTIONS] <file1> [<file2> ...] [--args <arg1> [<arg2> ...]]";
+
+    return usage;
+}
+
+
+std::string usage_examples()
+{
     std::string usage_examples =
-        "Usage examples:\n\n"
+        "Usage examples:\n"
         "   1. rb\n"
         "   2. rb --args 1 2\n"
         "   3. rb script.Rev\n"
@@ -41,13 +51,14 @@ std::string usage()
         "   9. rb --file script.Rev script2.Rev\n"
         "  10. rb --file script.Rev --args 1 2 --file script2.Rev\n"
         "  11. rb --file script.Rev script2.Rev --args 1 2         # equivalent to 10\n";
+    
     return usage_examples;
 }
 
 
 std::string short_description()
 {
-    return "Bayesian phylogenetic inference using probabilistic graphical models and an interpreted language";
+    return "Bayesian phylogenetic inference using probabilistic graphical models and an interpreted language\n";
 }
 
 //
@@ -98,9 +109,10 @@ variables_map parse_cmd_line(int argc, char* argv[])
         if (rank == 0)
         {
             std::cout << short_description() << std::endl;
+            std::cout << usage() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
-            std::cout << usage() << std::endl;
+            std::cout << usage_examples() << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
@@ -123,9 +135,10 @@ variables_map parse_cmd_line(int argc, char* argv[])
         if (rank == 0)
         {
             std::cout << short_description() << std::endl;
+            std::cout << usage() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
-            std::cout << usage() << std::endl;
+            std::cout << usage_examples() << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
