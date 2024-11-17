@@ -84,7 +84,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // composing means that --file can occur multiple times
     ("file",value<std::vector<std::string> >()->composing(),"Source one or more files.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments. The --cmd flag cannot be used together with the --args flag.")
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments. Cannot be combined with the --args flag. If followed by the --file flag, the script sourced via --file is executed first.")
     ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 	;
 
