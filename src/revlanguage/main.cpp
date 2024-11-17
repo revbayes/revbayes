@@ -225,7 +225,9 @@ int main(int argc, char* argv[]) {
     
     if ( args.count("args") && args.count("cmd"))
     {
-        throw RbException("command line: received both --args and --cmd");
+        std::cerr << usage_examples() << "\n";
+        std::cerr << "Error: received both --args and --cmd, but only one is allowed.\n";
+        exit(1);
     }
     
     std::vector<std::string> rb_args;
