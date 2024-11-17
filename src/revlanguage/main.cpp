@@ -50,7 +50,8 @@ std::string usage_examples()
         "   8. rb --cmd script.Rev 1 2                      # equivalent to 6 and 7\n"
         "   9. rb script.Rev script2.Rev\n"
         "  10. rb script.Rev --args 1 2 --file script2.Rev\n"
-        "  11. rb script.Rev script2.Rev --args 1 2         # equivalent to 10\n";
+        "  11. rb script.Rev script2.Rev --args 1 2         # equivalent to 10\n"
+        "  12. rb --cmd script.Rev 1 2 --file script2.Rev\n";
     
     return usage_examples;
 }
