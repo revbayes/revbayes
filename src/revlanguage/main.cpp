@@ -44,13 +44,13 @@ std::string usage_examples()
         "   1. rb\n"
         "   2. rb --args 1 2\n"
         "   3. rb script.Rev\n"
-        "   4. rb --cmd script.Rev                          # equivalent to 3 but runs in batch mode\n"
-        "   5. rb script.Rev --args 1 2\n"
-        "   6. rb --args 1 2 --file script.Rev              # equivalent to 5\n"
-        "   7. rb --cmd script.Rev 1 2                      # equivalent to 5 and 6 but runs in batch mode\n"
-        "   8. rb script.Rev script2.Rev\n"
-        "   9. rb script.Rev --args 1 2 --file script2.Rev\n"
-        "  10. rb script.Rev script2.Rev --args 1 2         # equivalent to 9\n"
+        "   4. rb script.Rev --args 1 2\n"
+        "   5. rb --args 1 2 --file script.Rev              # equivalent to 4\n"
+        "   6. rb script.Rev script2.Rev\n"
+        "   7. rb script.Rev --args 1 2 --file script2.Rev\n"
+        "   8. rb script.Rev script2.Rev --args 1 2         # equivalent to 7\n"
+        "   9. rb --cmd script.Rev                          # equivalent to 3 but runs in batch mode\n"
+        "  10. rb --cmd script.Rev 1 2                      # equivalent to 4 and 5 but runs in batch mode\n"
         "  11. rb --cmd script.Rev 1 2 --file script2.Rev\n";
     
     return usage_examples;
