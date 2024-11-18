@@ -44,10 +44,10 @@ std::string usage_examples()
         "   2. rb --args 1 2\n"
         "   3. rb script.Rev\n"
         "   4. rb --file script.Rev                         # equivalent to 3\n"
-        "   5. rb --cmd script.Rev                          # equivalent to 3 and 4\n"
+        "   5. rb --cmd script.Rev                          # equivalent to 3 and 4 but runs in batch mode\n"
         "   6. rb script.Rev --args 1 2\n"
         "   7. rb --args 1 2 --file script.Rev              # equivalent to 6\n"
-        "   8. rb --cmd script.Rev 1 2                      # equivalent to 6 and 7\n"
+        "   8. rb --cmd script.Rev 1 2                      # equivalent to 6 and 7 but runs in batch mode\n"
         "   9. rb script.Rev script2.Rev\n"
         "  10. rb script.Rev --args 1 2 --file script2.Rev\n"
         "  11. rb script.Rev script2.Rev --args 1 2         # equivalent to 10\n"
@@ -77,14 +77,14 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // RevBayes doesn't use a global verbose_logging flag.
     // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
-	("batch,b","Run in batch mode.")
+	("batch,b","Run in batch mode (i.e. RevBayes will exit if it encounters an error).")
     ("jupyter,j","Run in jupyter mode.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
     ("args",value<std::vector<std::string> >()->multitoken(),"Supply command-line arguments to RevBayes. These can be accessed from within the program using the 'args' vector. See ?args for details.")
     // composing means that --file can occur multiple times
     ("file",value<std::vector<std::string> >()->composing(),"Source one or more files.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments. Cannot be combined with the --args flag. If followed by the --file flag, the script sourced via --file is executed first.")
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments in batch mode. Cannot be combined with the --args flag. If followed by the --file flag, the script sourced via --file is executed first.")
     ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 	;
 
