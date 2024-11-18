@@ -3586,16 +3586,6 @@ type(b))");
 	help_strings[string("type")][string("name")] = string(R"(type)");
 	help_arrays[string("type")][string("see_also")].push_back(string(R"(structure)"));
 	help_strings[string("type")][string("title")] = string(R"(The value type of a variable)");
-    help_arrays[string("tzard")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-    help_strings[string("tzard")][string("description")] = string(R"(The value type of a variable.)");
-    help_strings[string("tzard")][string("example")] = string(R"(a <- 2
-type(a)
-
-b <- 2.0
-type(b))");
-    help_strings[string("tzard")][string("name")] = string(R"(type)");
-    help_arrays[string("tzard")][string("see_also")].push_back(string(R"(structure)"));
-    help_strings[string("tzard")][string("title")] = string(R"(The value type of a variable)");
 	help_arrays[string("v")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("v")][string("description")] = string(R"('v' creates a vector of the elements '...')");
 	help_strings[string("v")][string("details")] = string(R"('v' creates a vector of the elements '...', which are objects of a common base type. Vector elements may themselves be vectors.)");
