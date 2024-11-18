@@ -37,7 +37,7 @@ print(y)
 z.probability()
 
 # Because x is clamped, it is invalid to call x.redraw() or mvSlide(y)
-# x will remain constant during mcmc, whereas y will be inferred.
+# x will remain constant during MCMC, whereas y will be inferred.
 mcmc(model(z), [mnScreen(x, y)], [mvSlide(y)]).run(generations = 5)
 
 
