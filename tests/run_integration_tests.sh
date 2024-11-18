@@ -171,9 +171,6 @@ while [  $i -lt ${#tests[@]} ]; do
         if [ -f XFAIL ] ; then
             ((xfailed++))
             printf ">>>> Test failed: $t (expected)\n"
-        elif [ -f test_$t/XFAIL ] ; then
-            ((xfailed++))
-            printf ">>>> Test failed: $t (expected)\n"
         else
             ((failed++))
             printf ">>>> Test failed: $t\n"
