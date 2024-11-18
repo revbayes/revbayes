@@ -29,8 +29,9 @@ using po::variables_map;
 std::string usage()
 {
     std::string usage =
-        "Usage: rb [OPTIONS]\n"
-        "       rb [OPTIONS] <file1> [<file2> ...] [--args <arg1> [<arg2> ...]]";
+        "Usage: rb [options]\n"
+        "   or: rb [options] file1 [file2 ...] [--args arg1 arg2 ...] [--file file3 ...]\n"
+        "   or: rb [options] --cmd file1 [arg1 arg2 ...] [--file file2 ...]";
 
     return usage;
 }
