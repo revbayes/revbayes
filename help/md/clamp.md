@@ -18,25 +18,31 @@ unclamp
 ## example
 x ~ dnNormal(1, 1)
 y ~ dnNormal(2, 2)
-z := x * y
 
 # Set the observed value of x
 x.clamp(1)
-
-# Evaluate P(z) at x = X, y = 1
-y.setValue(1)
-z.probability()
+# Compute the probability of the observation
+x.probability()
 
 # Modify the observed value of x
 x.clamp(2) # equivalent to x.unclamp(); x.clamp(2)
-z.probability()
+x.probability()
 
-# Evaluate P(z) at a different value of y
+# Evaluate P(y = 1)
+y.setValue(1)
+y.probability()
+
+# Select another value of y
 y.redraw()
 print(y)
-z.probability()
 
-# Because x is clamped, it is invalid to call x.redraw() or mvSlide(y)
+# Evaluate P(y) at this new value
+y.probability()
+
+# Define a model involving x and y
+z := x * y
+
+# Because x is clamped, it is invalid to call x.redraw() or mvSlide(x)
 # x will remain constant during MCMC, whereas y will be inferred.
 mcmc(model(z), [mnScreen(x, y)], [mvSlide(y)]).run(generations = 5)
 
