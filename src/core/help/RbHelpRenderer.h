@@ -29,7 +29,7 @@ class RbHelpDatabase;
         std::string                 renderHelp(const RbHelpEntry &entryHelp, size_t w);
         std::string                 renderHelp(const RbHelpFunction &functionHelp, size_t w);
         std::string                 renderHelp(const RbHelpType &typeHelp, size_t w);
-        std::string                 renderHelp(const RbHelpDatabase &hd, std::string entry_name, size_t w);
+        std::string                 renderHelp(RbHelpDatabase &hd, std::string entry_name, size_t w);
         
         
         

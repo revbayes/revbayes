@@ -400,16 +400,16 @@ std::string HelpRenderer::renderHelp(const RbHelpType &typeHelp, size_t w)
 
 
 // For rendering general database entries
-std::string HelpRenderer::renderHelp(const RbHelpDatabase &hd, std::string entry_name, size_t w)
+std::string HelpRenderer::renderHelp(RbHelpDatabase &hd, std::string entry_name, size_t w)
 {
     std::string result = "";
     
-    const std::string &title_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "title");
-    const std::string &description_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "description");
-    const std::string &details_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "details");
-    const std::string &example_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "example");
-    const std::vector<std::string> &authors_prelim = RbHelpDatabase::getHelpDatabase().getHelpStringVector(entry_name, "authors");
-    const std::vector<std::string> &see_also_prelim = RbHelpDatabase::getHelpDatabase().getHelpStringVector(entry_name, "see_also");
+    const std::string &title_prelim = hd.getHelpString(entry_name, "title");
+    const std::string &description_prelim = hd.getHelpString(entry_name, "description");
+    const std::string &details_prelim = hd.getHelpString(entry_name, "details");
+    const std::string &example_prelim = hd.getHelpString(entry_name, "example");
+    const std::vector<std::string> &authors_prelim = hd.getHelpStringVector(entry_name, "authors");
+    const std::vector<std::string> &see_also_prelim = hd.getHelpStringVector(entry_name, "see_also");
     
     std::string title = "";
     std::string description = "";
