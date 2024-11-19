@@ -26,6 +26,7 @@ namespace RevBayesCore {
         EventBranchTimeBetaProposal( StochasticNode<Tree> *n, double d, double o);                                                                //!<  constructor
         
         // Basic utility functions
+        bool                                            allowClamped() const override { return true; }                                      //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                            cleanProposal(void);                                                                //!< Clean up proposal
         EventBranchTimeBetaProposal*                    clone(void) const;                                                                  //!< Clone object
         double                                          doProposal(void);                                                                   //!< Perform proposal

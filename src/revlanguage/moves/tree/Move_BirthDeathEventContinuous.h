@@ -30,7 +30,6 @@ namespace RevLanguage {
         
 
         // Basic utility functions
-        static constexpr bool                       allowClamped() { return true; }                                                         //!< Doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         virtual Move_BirthDeathEventContinuous*     clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
