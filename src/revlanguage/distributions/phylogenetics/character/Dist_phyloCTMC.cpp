@@ -303,7 +303,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     else if ( dt == "PoMo" )
     {
         // we get the number of states from the rate matrix (we don't know, because PoMo is flexible about its rates)
-	int nChars = computeNumberOfStates();
+	    int nChars = computeNumberOfStates();
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch);
 
@@ -312,13 +312,17 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     else if ( dt == "Standard" )
     {
         // we get the number of states from the rates matrix
-	int nChars = computeNumberOfStates();
+	    int nChars = computeNumberOfStates();
 
         int cd = RevBayesCore::AscertainmentBias::ALL;
         // split the coding option on "|"
         if (code == "informative")
         {
             cd = RevBayesCore::AscertainmentBias::INFORMATIVE;
+        }
+        else if (code == "nstates")
+        {
+            cd = RevBayesCore::AscertainmentBias::NSTATES;
         }
         else if (code == "variable")
         {
@@ -328,7 +332,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         {
             std::stringstream ss;
             ss << "Invalid coding option \"" << code << "\"\n";
-            ss << "\tAvailable Standard state codings: all, informative, variable\n";
+            ss << "\tAvailable Standard state codings: all, informative, nstates, variable\n";
             ss << "\tDefault: all.\n";
             throw RbException(ss.str());
         }
@@ -348,7 +352,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     else if ( dt == "NaturalNumbers" )
     {
         // we get the number of states from the rates matrix
-	int nChars = computeNumberOfStates();
+	    int nChars = computeNumberOfStates();
 
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, nChars, true, n, ambig, internal, gapmatch);
 
@@ -357,7 +361,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     else if ( dt == "Binary" || dt == "Restriction" )
     {
         // we get the number of states from the rates matrix
-	int nChars = computeNumberOfStates();
+	    const int nChars = computeNumberOfStates();
 
         // sanity check
         if ( nChars != 2 )
@@ -388,6 +392,10 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             else if (tokens[i] == "nopresencesites")
             {
                 cd |= RevBayesCore::BinaryAscertainmentBias::NOPRESENCESITES;
+            }
+            else if (tokens[i] == "nstates")
+            {
+                cd |= RevBayesCore::AscertainmentBias::NSTATES;
             }
             else if (tokens[i] == "informative")
             {

@@ -14,7 +14,8 @@ namespace RevBayesCore {
         
         enum Coding { ALL                 = 0x00,
                       VARIABLE            = 0x03,
-                      INFORMATIVE         = 0x0F
+                      INFORMATIVE         = 0x0F,
+                      NSTATES             = 0x1F,
                     };
     };
 
@@ -855,6 +856,28 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                         }
                     }
                     else if (coding == AscertainmentBias::INFORMATIVE)
+                    {
+                        // get number of autapomorphic states
+                        size_t popcount = std::bitset<sizeof(size_t)*CHAR_BIT>(c).count();
+
+                       /* if the number of observations is <= the number of autapomorphies then
+                        * 1. don't count patterns with zero prob (num obs < num auto)
+                        * 2. don't double-count patterns (num obs == num auto)
+                        *
+                        * if num obs == num auto + 1
+                        * then don't double count the all-autapomorphies pattern
+                        */
+                        if ( (maskObservationCounts[mask] == popcount + 1 && a == 0) ||
+                             maskObservationCounts[mask] > popcount + 1)
+                        {
+                            // iterate over initial states
+                            for (size_t ci = 0; ci < this->num_chars; ci++)
+                            {
+                                prob += uc[ci];
+                            }
+                        }
+                    }
+                    else if (coding == AscertainmentBias::NSTATES)
                     {
                         // get number of autapomorphic states
                         size_t popcount = std::bitset<sizeof(size_t)*CHAR_BIT>(c).count();

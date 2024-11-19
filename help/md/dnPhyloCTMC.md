@@ -5,11 +5,24 @@
 The parameters of a phylogenetic model – a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. – collectively form a distribution called the _phylogenetic continuous-time Markov chain_.
 
 ## description
-dnPhyloCTMC gives the probability distribution of tip labels on a phylogenetic tree given an phylogenetic continuous-time Markov chain model.
+dnPhyloCTMC gives the probability distribution of tip labels on a phylogenetic tree given a phylogenetic continuous-time Markov chain model.
 
 ## details
 
 The likelihood of observed tip labels (specified via a clamped `AbstractHomologousDiscreteCharacterData` object) is computed using Felsenstein's pruning algorithm, with partial likelihoods stored for each branch of the tree. It is automatically outputted in the `Likelihood` column of the `mnFile()` and `mnScreen()` monitors (which can be suppressed with `likelihood = FALSE`).
+
+`coding` accepts a string corresponding to a coding bias.  Options are:
+
+- `coding = "all"`: 
+    All observable characters are recorded in the dataset.
+- `coding = "variable"`:
+    Only characters in which more than one state is observed at the leaves are recorded in the dataset.
+- `coding = "informative"`:
+    Only characters that are parsimony-informative – i.e. at least two states are each observed in at least two leaves – are recorded in the dataset.
+- `coding = "nstates"`:
+     Only characters in which all observable states are present in at least one leaf are recorded in the dataset.
+     For example, when analysing a partition under the 4-state Mk model provided by `fnJC(4)`,
+     each of the four states will be present in at least one taxon for each character in the dataset.
 
 ## authors
 ## see_also
