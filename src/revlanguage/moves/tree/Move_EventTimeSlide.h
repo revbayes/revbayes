@@ -27,6 +27,7 @@ namespace RevLanguage {
         
         Move_EventTimeSlide(void);                                                                                                                    //!< Default constructor
         
+        static constexpr bool                       allowClamped() { return true; }                                                         //!< Move doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         // Basic utility functions
         virtual Move_EventTimeSlide*                clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.

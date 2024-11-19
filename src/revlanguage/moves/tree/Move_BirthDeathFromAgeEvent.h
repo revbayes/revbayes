@@ -28,7 +28,8 @@ namespace RevLanguage {
         Move_BirthDeathFromAgeEvent(void);                                                                                                                    //!< Default constructor
         
         // Basic utility functions
-        virtual Move_BirthDeathFromAgeEvent*               clone(void) const;                                                                      //!< Clone object
+        static constexpr bool                       allowClamped() { return true; }                                                         //!< Doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
+        virtual Move_BirthDeathFromAgeEvent*        clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec

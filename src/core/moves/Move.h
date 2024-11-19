@@ -30,6 +30,7 @@ template <class valueType> class RbOrderedSet;
         
         // pure virtual public methods
         virtual void                                            addNode(DagNode* p) = 0;                                    //!< add a node to the proposal
+        static constexpr bool                                   allowClamped() { return false; }                            //!< Allow move to operate on clamped nodes
         virtual void                                            autoTune(void) = 0;                                         //!< Automatic tuning of the move.
         virtual Move*                                           clone(void) const = 0;                                      //!< Create a deep copy.
         virtual void                                            decrementTriedCounter(void) = 0;                            //!< Get update weight of InferenceMove
