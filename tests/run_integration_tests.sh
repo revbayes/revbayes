@@ -100,7 +100,10 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
-        ${rb_exec} -b $f # print output so we can see any error messages
+        mkdir output
+        tmp0=${f#scripts/}
+        tmp1=${tmp0%.[Rr]ev}
+        ${rb_exec} -b $f &> output/${tmp1}.errout # print output so we can see any error messages
         res="$?"
         if [ $res = 1 ]; then
             res="error: $f"
@@ -115,6 +118,10 @@ for t in test_*; do
         if [ $res != 0 ] ; then
             echo ${t}/${rb_exec} -b $f "==> error $res"
         fi
+        
+        # snip off the first 10 lines of the output file
+        tail +11 output/${tmp1}.errout > output/${tmp1}.errout.tmp
+        mv output/${tmp1}.errout.tmp output/${tmp1}.errout
     done
 
     # store the exit status
