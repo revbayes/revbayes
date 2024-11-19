@@ -238,7 +238,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode< double >*                                       homogeneous_clock_rate = nullptr;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates = nullptr;
-        const TypedDagNode< SiteMixtureModel >*                     mixture_model = nullptr;
+        const TypedDagNode< SiteMixtureModel >*                             mixture_model = nullptr;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix = nullptr;
         const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices = nullptr;
         const TypedDagNode< Simplex >*                                      root_frequencies = nullptr;
@@ -2075,13 +2075,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 
             // sum to sample
             double sum = 0.0;
-
-            // if the matrix is compressed use the pattern for this site
-            size_t pattern = i;
-            if ( compressed == true )
-            {
-                pattern = site_pattern[i];
-            }
 
             // get the ambiguous character's bitset for the tip taxon
             RbBitSet bs = RbBitSet(this->num_chars);
