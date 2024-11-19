@@ -2,6 +2,7 @@
 #define PhyloCTMCSiteHomogeneousConditional_H
 
 #include <bitset>
+#include <climits>
 #include <math.h>
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "DistributionBinomial.h"
@@ -80,11 +81,9 @@ namespace RevBayesCore {
 
 }
 
-#include <climits>
-
 template<class charType>
-RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const TypedDagNode<Tree> *t, size_t nChars, bool c, size_t nSites, bool amb, AscertainmentBias::Coding ty, bool internal, bool gapmatch) :
-    PhyloCTMCSiteHomogeneous<charType>(  t, nChars, c, nSites, amb, internal, gapmatch ), warned(false), coding(ty), N(nSites), numCorrectionMasks(0)
+RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const TypedDagNode<Tree> *t, size_t nChars, bool cmprss, size_t nSites, bool amb, AscertainmentBias::Coding ty, bool internal, bool gapmatch) :
+    PhyloCTMCSiteHomogeneous<charType>(  t, nChars, cmprss, nSites, amb, internal, gapmatch ), warned(false), coding(ty), N(nSites), numCorrectionMasks(0)
 {
     if (coding != AscertainmentBias::ALL)
     {
@@ -92,7 +91,9 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
         correctionMaskMatrix    = std::vector<std::vector<bool> >(1, std::vector<bool>(this->num_nodes,0) );
         
         // number of correction patterns per character state
-        if (coding & (AscertainmentBias::INFORMATIVE ^ AscertainmentBias::VARIABLE))
+        if (coding & (AscertainmentBias::INFORMATIVE ^
+                      AscertainmentBias::VARIABLE ^
+                      AscertainmentBias::NSTATES))
         {
             numCorrectionPatterns = std::pow(2.0f, float(this->num_chars - 1));
         }
@@ -314,6 +315,17 @@ template<class charType>
 bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternCompatible( std::map<size_t, size_t> charCounts )
 {
 
+    if (charCounts.size() == 1 && (coding == AscertainmentBias::VARIABLE)) 
+    {
+        return false;
+    }
+    
+    if (coding == AscertainmentBias::NSTATES && 
+        charCounts.size() == this->transition_prob_matrices[0].num_states)
+    {
+        return (charCounts.size() == this->transition_prob_matrices[0].num_states);
+    }
+    
     size_t num_informative = 0;
     for (std::map<size_t, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
     {
@@ -325,7 +337,7 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 
     bool informative = num_informative > 1;
 
-    if ( (charCounts.size() == 1 && (coding == AscertainmentBias::VARIABLE)) || (!informative && (coding == AscertainmentBias::INFORMATIVE)) )
+    if (!informative && (coding == AscertainmentBias::INFORMATIVE))
     {
         return false;
     }
@@ -338,8 +350,13 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 template<class charType>
 bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternCompatible( std::map<RbBitSet, size_t> charCounts )
 {
+    
     // if the pattern is constant, then it is incompatible with the variable coding
     if (charCounts.size() == 1) return !(coding & AscertainmentBias::VARIABLE);
+
+    if (coding & AscertainmentBias::NSTATES) {
+        return (charCounts.size() == this->transition_prob_matrices[0].num_states);
+    }
 
     // find the common_states
     std::map<size_t,size_t> stateCounts;
