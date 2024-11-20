@@ -150,17 +150,14 @@ while [  $i -lt ${#tests[@]} ]; do
             find output -type f -exec sed -i 's/e+00/e+0/g' {} \;
         fi
         
-        printf "Trying this"
         for f in scripts/*.[Rr]ev ; do
             tmp0=${f#scripts/}
             tmp1=${tmp0%.[Rr]ev}
-            echo $tmp1
             
             # snip off the first 13 lines of the output file
             tail +14 output/${tmp1}.errout > output/${tmp1}.errout.tmp
             mv output/${tmp1}.errout.tmp output/${tmp1}.errout
         done
-        printf "Did it work?"
         
         for f in $(ls ${exp_out_dir}); do
             if [ ! -e output/$f ]; then
