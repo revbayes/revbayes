@@ -1,6 +1,3 @@
-
-> source("scripts/ml_Partition_uniform_one_stone_at_a_time.Rev")
-   Processing file "scripts/ml_Partition_uniform_one_stone_at_a_time.Rev"
    Successfully read one character matrix from file 'data/primates_and_galeopterus_cox2.nex'
    Successfully read one character matrix from file 'data/primates_and_galeopterus_cytb.nex'
 

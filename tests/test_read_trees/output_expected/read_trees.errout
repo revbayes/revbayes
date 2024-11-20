@@ -1,6 +1,3 @@
-
-> source("scripts/read_trees.Rev")
-   Processing file "scripts/read_trees.Rev"
    Processing file "data/trees1.trees"
 
 Progress:

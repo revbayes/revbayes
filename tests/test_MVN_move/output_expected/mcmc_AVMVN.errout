@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_AVMVN.Rev")
-   Processing file "scripts/mcmc_AVMVN.Rev"
    
    Running burn-in phase of Monte Carlo sampler for 10000 iterations.
    This simulation runs 1 independent replicate.

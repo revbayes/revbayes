@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_ChromoSSE.Rev")
-   Processing file "scripts/mcmc_ChromoSSE.Rev"
    Attempting to read the contents of file "aristolochia.tree"
    Successfully read file
    -204.09

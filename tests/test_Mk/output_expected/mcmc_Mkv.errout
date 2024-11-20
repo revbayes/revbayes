@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_Mkv.rev")
-   Processing file "scripts/mcmc_Mkv.rev"
    Successfully read one character matrix from file 'data/discrete.nex'
    NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
    NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.

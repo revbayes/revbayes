@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_UCLD_noncentered.rev")
-   Processing file "scripts/mcmc_UCLD_noncentered.rev"
    Successfully read one character matrix from file 'data/Ascarina.nex'
    
    Running burn-in phase of Monte Carlo sampler for 100 iterations.

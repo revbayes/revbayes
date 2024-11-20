@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_Mk.rev")
-   Processing file "scripts/mcmc_Mk.rev"
    Successfully read one character matrix from file 'data/discrete.nex'
    
    Running MCMC simulation

@@ -1,6 +1,3 @@
-
-> source("scripts/Test_GelmanRubin.Rev")
-   Processing file "scripts/Test_GelmanRubin.Rev"
    
    Running MCMC simulation
    This simulation runs 4 independent replicates.

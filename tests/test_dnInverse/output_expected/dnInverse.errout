@@ -1,4 +1,1 @@
-
-> source("scripts/dnInverse.Rev")
-   Processing file "scripts/dnInverse.Rev"
    Successfully read one character matrix from file 'data/bears_morphology.nex'

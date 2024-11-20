@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_DEC.Rev")
-   Processing file "scripts/mcmc_DEC.Rev"
    Attempting to read the contents of file "primates.DEC.tre"
    Successfully read file
    Successfully read one character matrix from file 'data/primates_n3.DEC.nex'

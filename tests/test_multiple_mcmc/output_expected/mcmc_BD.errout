@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_BD.Rev")
-   Processing file "scripts/mcmc_BD.Rev"
    Attempting to read the contents of file "primates.tree"
    Successfully read file
    

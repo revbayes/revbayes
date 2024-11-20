@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_mixture2.rev")
-   Processing file "scripts/mcmc_mixture2.rev"
    Successfully read one character matrix from file 'data/sim1.fasta'
    Attempting to read the contents of file "test2.tree"
    Successfully read file

@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_BM.Rev")
-   Processing file "scripts/mcmc_BM.Rev"
    Successfully read one character matrix from file 'data/primates_lht.nex'
    Attempting to read the contents of file "Primates_tree.nex"
    Successfully read file

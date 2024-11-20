@@ -1,6 +1,3 @@
-
-> source("scripts/Test_topologyProb.Rev")
-   Processing file "scripts/Test_topologyProb.Rev"
    
    Running prior MCMC simulation
    This simulation runs 1 independent replicate.

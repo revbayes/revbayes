@@ -1,6 +1,3 @@
-
-> source("scripts/test1.Rev")
-   Processing file "scripts/test1.Rev"
    Successfully read one character matrix from file 'data/sim2.fasta'
    
    Running MCMC simulation

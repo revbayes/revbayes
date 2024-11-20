@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_Coal_const.Rev")
-   Processing file "scripts/mcmc_Coal_const.Rev"
    Attempting to read the contents of file "primates.tree"
    Successfully read file
    

@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_BDP_sampling.Rev")
-   Processing file "scripts/mcmc_BDP_sampling.Rev"
    Attempting to read the contents of file "primates.tree"
    Successfully read file
    

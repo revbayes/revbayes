@@ -1,6 +1,3 @@
-
-> source("scripts/FBDP_fossil_tip_age_uncetrainty.Rev")
-   Processing file "scripts/FBDP_fossil_tip_age_uncetrainty.Rev"
    Successfully read one character matrix from file 'data/bears_cytb.nex'
    Successfully read one character matrix from file 'data/bears_morphology.nex'
    

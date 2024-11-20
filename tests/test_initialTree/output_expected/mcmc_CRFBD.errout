@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_CRFBD.Rev")
-   Processing file "scripts/mcmc_CRFBD.Rev"
    Attempting to read the contents of file "crocs_T1.tre"
    Successfully read file
    Age of taxon Gracilisuchus was above the specified maximum and has been adjusted.

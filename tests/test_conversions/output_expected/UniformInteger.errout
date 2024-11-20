@@ -1,6 +1,3 @@
-
-> source("scripts/UniformInteger.Rev")
-   Processing file "scripts/UniformInteger.Rev"
    Could not compute lnProb for node 'y[6]': lnProb = -inf
    1
    

@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_JC_unrooted_uniform.Rev")
-   Processing file "scripts/mcmc_JC_unrooted_uniform.Rev"
    Successfully read one character matrix from file 'data/primates_cytb_small.nex'
    
    Running MCMC simulation

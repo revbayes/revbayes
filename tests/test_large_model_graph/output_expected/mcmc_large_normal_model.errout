@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_large_normal_model.Rev")
-   Processing file "scripts/mcmc_large_normal_model.Rev"
    
    Running MCMC simulation
    This simulation runs 1 independent replicate.

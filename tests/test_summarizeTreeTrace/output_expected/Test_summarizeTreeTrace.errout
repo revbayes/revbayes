@@ -1,6 +1,3 @@
-
-> source("scripts/Test_summarizeTreeTrace.Rev")
-   Processing file "scripts/Test_summarizeTreeTrace.Rev"
    Attempting to read the contents of file "myposterior.posterior.trees"
    Successfully read file
    Compiling majority rule consensus tree (cutoff = 0.5) from 102 trees.

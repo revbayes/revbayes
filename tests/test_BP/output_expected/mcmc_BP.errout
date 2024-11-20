@@ -1,6 +1,3 @@
-
-> source("scripts/mcmc_BP.Rev")
-   Processing file "scripts/mcmc_BP.Rev"
    
    Running burn-in phase of Monte Carlo sampler for 5000 iterations.
    This simulation runs 1 independent replicate.
