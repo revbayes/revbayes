@@ -7,15 +7,6 @@
    This simulation runs 1 independent replicate.
    The simulator uses 10 different moves in a random move schedule with 85 moves per iteration
    
-
-Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
-----------------------------------------------------------------------------------------------------
-0           |       -5756.98   |       -5741.56   |       -15.4194   |   00:00:00   |   --:--:--   |
-10          |       -3908.53   |       -3892.94   |       -15.5968   |   00:00:00   |   --:--:--   |
-20          |       -3795.51   |       -3780.53   |       -14.9827   |   00:00:00   |   00:00:00   |
-30          |        -3787.5   |       -3773.05   |       -14.4479   |   00:00:00   |   00:00:00   |
-40          |       -3777.96   |        -3763.4   |       -14.5677   |   00:00:00   |   00:00:00   |
-50          |       -3779.19   |       -3765.12   |       -14.0716   |   00:00:00   |   00:00:00   |
    Processing file "output/ASRV_pipe.trees"
 
 Progress:

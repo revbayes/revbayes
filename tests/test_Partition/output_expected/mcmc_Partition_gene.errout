@@ -8,10 +8,6 @@
    This simulation runs 2 independent replicates.
    The simulator uses 57 different moves, with a single move picked randomly per iteration
    
-
-Iter        |      Posterior   |     Likelihood   |          Prior   |             TL   |    elapsed   |        ETA   |
------------------------------------------------------------------------------------------------------------------------
-0           |       -32737.3   |       -32759.1   |        21.8009   |       3.040425   |   00:00:00   |   --:--:--   |
    Processing file "output/PS_gene_run_1.trees"
 
 Progress:

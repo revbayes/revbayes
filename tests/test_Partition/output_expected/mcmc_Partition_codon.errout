@@ -8,10 +8,6 @@
    This simulation runs 2 independent replicates.
    The simulator uses 67 different moves, with a single move picked randomly per iteration
    
-
-Iter        |      Posterior   |     Likelihood   |          Prior   |             TL   |    elapsed   |        ETA   |
------------------------------------------------------------------------------------------------------------------------
-0           |       -39124.7   |       -39132.4   |         7.7042   |       3.903072   |   00:00:00   |   --:--:--   |
    Processing file "output/PS_codon_run_1.trees"
 
 Progress:

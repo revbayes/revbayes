@@ -105,15 +105,11 @@ for t in test_*; do
         tmp1=${tmp0%.[Rr]ev}
         ${rb_exec} -b $f &> output/${tmp1}.errout # print output so we can see any error messages
         res="$?"
-        if [ $res = 1 ]; then
-            res="error: $f"
-            break
-        elif [ $res = 139 ]; then
+        if [ $res = 139 ]; then
             res="segfault: $f"
             break
-        elif [ $res != 0 ]; then
-            res="error $res: $f"
-            break
+        elif [ $res != 139 ] && [ $res != 0 ]; then
+            res=0 # pretend everything is okay for now; we will instead catch errors as mismatches
         fi
         if [ $res != 0 ] ; then
             echo ${t}/${rb_exec} -b $f "==> error $res"

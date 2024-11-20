@@ -1,14 +1,4 @@
 
-RevBayes version (1.2.5-preview)
-Build from address-360 (rapture-3174-gfacec1) on Mon Nov 18 16:05:52 CST 2024
-
-Visit the website www.RevBayes.com for more information about RevBayes.
-
-RevBayes is free software released under the GPL license, version 3. Type 'license()' for details.
-
-To quit RevBayes type 'quit()' or 'q()'.
-
-
 > source("scripts/replicate_err_neg.Rev")
    Processing file "scripts/replicate_err_neg.Rev"
    Error:	No overloaded function 'replicate' matches for arguments ( Natural, Integer )

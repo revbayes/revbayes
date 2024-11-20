@@ -255,9 +255,6 @@ monitors.append( mnModel(filename="output/FBDP_fossil_tip_age_uncertainty.log", 
 # 2. the tree #
 monitors.append( mnFile(filename="output/FBDP_fossil_tip_age_uncertainty.trees", printgen=10, pruned_tree) )
 
-# 3. and a few select parameters to be printed to the screen #
-monitors.append( mnScreen(printgen=10, age_extant, num_samp_anc, origin_time) )
-
 # Initialize the MCMC object #
 mymcmc = mcmc(mymodel, monitors, moves)
 
