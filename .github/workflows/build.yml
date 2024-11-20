@@ -259,7 +259,7 @@ jobs:
         # test on Linux. Apparently, NaN log likelihoods are unsigned on macOS
         # and Windows but signed on Linux.
         if [ ${{ matrix.arch }} = "linux64" ] ; then
-           rm -f test_CBDSP/output_expected/mcmc_CBDSP.errout
+           rm -f tests/test_CBDSP/output_expected/mcmc_CBDSP.errout
         fi
 
         echo "\"Hello World\"" | rb
