@@ -1,0 +1,149 @@
+
+> source("scripts/FBD_dating.Rev")
+   Processing file "scripts/FBD_dating.Rev"
+==
+4.9
+4.9
+==
+5.8
+5.8
+==
+0
+0
+==
+0.012
+0.012
+==
+13.7
+13.7
+==
+0
+0
+==
+4.9
+4.9
+==
+4.9
+4.9
+==
+7.75
+7.75
+==
+11.2
+11.2
+==
+0
+0
+==
+33.9
+33.9
+==
+0
+0
+==
+15.97
+15.97
+==
+13.65
+13.65
+==
+1.8
+1.8
+==
+0
+0
+==
+0
+0
+==
+0
+0
+==
+0.027
+0.027
+==
+0
+0
+==
+20
+20
+   Successfully read one character matrix from file 'data/bears_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves in a random move schedule with 76.4 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    origin_time   |    elapsed   |        ETA   |
+-----------------------------------------------------------------------------------------------------------------------
+0           |       -9407.56   |       -9138.15   |       -269.408   |             47   |   00:00:00   |   --:--:--   |
+100         |       -4599.37   |       -4450.94   |       -148.433   |       46.91878   |   00:00:00   |   --:--:--   |
+200         |       -4594.67   |       -4452.52   |       -142.145   |       47.11937   |   00:00:00   |   00:00:00   |
+300         |       -4594.93   |       -4451.77   |        -143.16   |       41.66149   |   00:00:00   |   00:00:00   |
+400         |       -4600.54   |       -4453.17   |       -147.372   |       39.11762   |   00:00:00   |   00:00:00   |
+500         |       -4589.06   |       -4454.36   |       -134.698   |       38.36632   |   00:00:00   |   00:00:00   |
+600         |       -4591.94   |       -4448.65   |       -143.288   |       39.31802   |   00:00:00   |   00:00:00   |
+700         |       -4597.72   |       -4450.14   |       -147.583   |       43.55338   |   00:00:00   |   00:00:00   |
+800         |       -4598.43   |       -4456.86   |       -141.567   |       43.10912   |   00:00:01   |   00:00:00   |
+900         |       -4597.14   |       -4452.63   |       -144.516   |       38.60527   |   00:00:01   |   00:00:00   |
+1000        |       -4593.35   |       -4451.48   |       -141.869   |       40.74599   |   00:00:01   |   00:00:00   |
+   Processing file "output/bears_FBD_extant.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Processing file "output/bears_FBD_all.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 76 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+  
+   (((((((Ursus_americanus[&index=7]:6.416928,Ursus_thibetanus[&index=5]:6.416928)[&index=11,posterior=1.000000,age_95%_HPD={4.4151,8.70795}]:1.465321,Helarctos_malayanus[&index=8]:7.882249)[&index=12,posterior=1.000000,age_95%_HPD={5.77028,10.3532}]:0.873719,Melursus_ursinus[&index=9]:8.755968)[&index=13,posterior=1.000000,age_95%_HPD={6.28855,11.2365}]:1.141497,(Ursus_arctos[&index=6]:2.632808,Ursus_maritimus[&index=10]:2.632808)[&index=14,posterior=1.000000,age_95%_HPD={1.64101,3.90898}]:7.264657)[&index=15,posterior=1.000000,age_95%_HPD={7.16494,12.9183}]:1.230212,Ursus_spelaeus[&index=1,age_95%_HPD={0.027,0.027001}]:11.100676)[&index=16,posterior=1.000000,age_95%_HPD={7.61562,14.2899}]:7.471525,(Arctodus_simus[&index=4,age_95%_HPD={0.012,0.012001}]:10.111623,Tremarctos_ornatus[&index=2]:10.123624)[&index=17,posterior=1.000000,age_95%_HPD={6.84573,13.6953}]:8.475578)[&index=18,posterior=0.921053,age_95%_HPD={12.7639,23.7015}]:2.020710,Ailuropoda_melanoleuca[&index=3]:20.619911)[&index=19,posterior=1.000000,age_95%_HPD={14.9273,26.6306}]:0.000000;
+   Compiling maximum a posteriori tree from 76 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+  
+   ((((((((Ursus_americanus[&index=9]:6.391997,Ursus_thibetanus[&index=6]:6.391997)[&index=23,posterior=0.697368,age_95%_HPD={4.70391,8.59484}]:1.531714,Helarctos_malayanus[&index=10]:7.923711)[&index=24,posterior=0.539474,age_95%_HPD={5.57987,9.53279}]:0.576470,Melursus_ursinus[&index=11]:8.500181)[&index=25,posterior=0.342105,age_95%_HPD={6.51511,11.1149}]:1.397284,((Ursus_arctos[&index=8]:1.800000,Ursus_abstrusus[&index=7,sampled_ancestor=0.947368]:0.000000)[&index=26,posterior=0.118421,age_95%_HPD={1.8,1.8}]:0.773541,Ursus_maritimus[&index=12]:2.573541)[&index=27,posterior=0.328947,age_95%_HPD={1.81287,3.49044}]:7.323923)[&index=28,posterior=1.000000,age_95%_HPD={7.16494,12.9183}]:1.359411,Ursus_spelaeus[&index=1,age_95%_HPD={0.027,0.027001}]:11.229875)[&index=29,posterior=0.157895,age_95%_HPD={8.64016,12.8004}]:10.510357,((((Tremarctos_ornatus[&index=21]:4.900000,Indarctos_punjabiensis[&index=17,sampled_ancestor=0.855263]:0.000000)[&index=30,posterior=0.250000,age_95%_HPD={4.9,4.9}]:0.900000,Ailurarctos_lufengensis[&index=19,sampled_ancestor=0.881579]:0.000000)[&index=31,posterior=0.118421,age_95%_HPD={5.8,5.8}]:6.422566,(Arctodus_simus[&index=5,age_95%_HPD={0.012,0.012001}]:11.188000,Kretzoiarctos_beatrix[&index=20,sampled_ancestor=0.618421]:0.000000)[&index=32,posterior=0.039474,age_95%_HPD={11.2,11.2}]:1.022566)[&index=33,posterior=0.092105,age_95%_HPD={11.5138,12.6453}]:6.807383,((Ursavus_primaevus[&index=18,sampled_ancestor=0.881579,age_95%_HPD={13.65,13.65}]:0.050000,Ballusia_elmensis[&index=3,sampled_ancestor=1.000000]:0.000000)[&index=34,posterior=0.065789,age_95%_HPD={13.7,13.7}]:4.948637,Ursavus_brevirhinus[&index=16,sampled_ancestor=0.868421,age_95%_HPD={15.97,15.97}]:2.678637)[&index=35,posterior=0.013158,age_95%_HPD={18.6486,18.6486}]:0.381312)[&index=36,posterior=0.039474,age_95%_HPD={19.3868,19.9529}]:2.737283)[&index=37,posterior=0.013158,age_95%_HPD={21.7672,21.7672}]:1.120520,((((Ailuropoda_melanoleuca[&index=22]:4.900001,Agriarctos_spp[&index=13,sampled_ancestor=0.750000]:0.000000)[&index=38,posterior=0.223684,age_95%_HPD={4.9,4.9}]:0.000000,Indarctos_arctoides[&index=14,sampled_ancestor=0.736842,age_95%_HPD={4.9,4.9}]:0.000000)[&index=39,posterior=0.078947,age_95%_HPD={4.9,4.9}]:2.849999,Indarctos_vireti[&index=15,sampled_ancestor=0.355263]:0.000000)[&index=40,posterior=0.013158,age_95%_HPD={7.75,7.75}]:12.250000,Zaragocyon_daamsi[&index=4,sampled_ancestor=0.921053]:0.000000)[&index=41,posterior=0.013158,age_95%_HPD={20,20}]:2.887753)[&index=42,posterior=0.776316,age_95%_HPD={20.0162,26.8427}]:11.012248,Parictis_montanus[&index=2,sampled_ancestor=0.947368]:0.000000)[&index=43,posterior=0.723684,age_95%_HPD={33.9,33.9}]:0.000000;
+   Compiling maximum clade credibility tree from 76 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+  
+   (((((((Ursus_americanus[&index=7]:6.416928,Ursus_thibetanus[&index=5]:6.416928)[&index=11,posterior=1.000000,age_95%_HPD={4.4151,8.70795}]:1.465321,Helarctos_malayanus[&index=8]:7.882249)[&index=12,posterior=1.000000,age_95%_HPD={5.77028,10.3532}]:0.873719,Melursus_ursinus[&index=9]:8.755968)[&index=13,posterior=1.000000,age_95%_HPD={6.28855,11.2365}]:1.141497,(Ursus_arctos[&index=6]:2.632808,Ursus_maritimus[&index=10]:2.632808)[&index=14,posterior=1.000000,age_95%_HPD={1.64101,3.90898}]:7.264657)[&index=15,posterior=1.000000,age_95%_HPD={7.16494,12.9183}]:1.230212,Ursus_spelaeus[&index=1,age_95%_HPD={0.027,0.027001}]:11.100676)[&index=16,posterior=1.000000,age_95%_HPD={7.61562,14.2899}]:7.471525,(Arctodus_simus[&index=4,age_95%_HPD={0.012,0.012001}]:10.111623,Tremarctos_ornatus[&index=2]:10.123624)[&index=17,posterior=1.000000,age_95%_HPD={6.84573,13.6953}]:8.475578)[&index=18,posterior=0.921053,age_95%_HPD={12.7639,23.7015}]:2.020710,Ailuropoda_melanoleuca[&index=3]:20.619911)[&index=19,posterior=1.000000,age_95%_HPD={14.9273,26.6306}]:0.000000;
+   Compiling maximum clade credibility tree from 76 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+  
+   (((((((((Tremarctos_ornatus[&index=21]:4.900000,Indarctos_punjabiensis[&index=17,sampled_ancestor=0.855263]:0.000000)[&index=23,posterior=0.250000,age_95%_HPD={4.9,4.9}]:0.900000,Ailurarctos_lufengensis[&index=19,sampled_ancestor=0.881579]:0.000000)[&index=24,posterior=0.118421,age_95%_HPD={5.8,5.8}]:5.400000,Kretzoiarctos_beatrix[&index=20,sampled_ancestor=0.618421]:0.000000)[&index=25,posterior=0.052632,age_95%_HPD={11.2,11.2}]:1.022566,Arctodus_simus[&index=5,age_95%_HPD={0.012,0.012001}]:12.210566)[&index=26,posterior=0.092105,age_95%_HPD={11.5138,12.6453}]:6.807383,((Ursavus_primaevus[&index=18,sampled_ancestor=0.881579,age_95%_HPD={13.65,13.65}]:0.050000,Ballusia_elmensis[&index=3,sampled_ancestor=1.000000]:0.000000)[&index=27,posterior=0.065789,age_95%_HPD={13.7,13.7}]:2.270000,Ursavus_brevirhinus[&index=16,sampled_ancestor=0.868421]:0.000000)[&index=28,posterior=0.039474,age_95%_HPD={15.97,15.97}]:3.059949)[&index=29,posterior=0.039474,age_95%_HPD={19.3868,19.9529}]:2.533472,(Indarctos_vireti[&index=15,sampled_ancestor=0.355263,age_95%_HPD={7.75,7.75}]:12.250000,Zaragocyon_daamsi[&index=4,sampled_ancestor=0.921053]:0.000000)[&index=30,posterior=0.065789,age_95%_HPD={20,20}]:1.563421)[&index=31,posterior=0.026316,age_95%_HPD={22.5762,22.5762}]:-0.268220,(((((Ursus_americanus[&index=9]:6.391997,Ursus_thibetanus[&index=6]:6.391997)[&index=32,posterior=0.697368,age_95%_HPD={4.70391,8.59484}]:1.531714,Helarctos_malayanus[&index=10]:7.923711)[&index=33,posterior=0.539474,age_95%_HPD={5.57987,9.53279}]:1.001417,(Melursus_ursinus[&index=11]:1.800001,Ursus_abstrusus[&index=7,sampled_ancestor=0.947368]:0.000000)[&index=34,posterior=0.184211,age_95%_HPD={1.8,1.8}]:7.125127)[&index=35,posterior=0.671053,age_95%_HPD={6.28855,11.3529}]:0.972337,(Ursus_arctos[&index=8]:2.661860,Ursus_maritimus[&index=12]:2.661860)[&index=36,posterior=0.671053,age_95%_HPD={1.64101,3.65297}]:7.235604)[&index=37,posterior=1.000000,age_95%_HPD={7.16494,12.9183}]:1.359411,Ursus_spelaeus[&index=1,age_95%_HPD={0.027,0.027001}]:11.229875)[&index=38,posterior=0.157895,age_95%_HPD={8.64016,12.8004}]:10.038326)[&index=39,posterior=0.039474,age_95%_HPD={20.4554,20.6321}]:1.592551,((Ailuropoda_melanoleuca[&index=22]:4.900001,Agriarctos_spp[&index=13,sampled_ancestor=0.750000]:0.000000)[&index=40,posterior=0.223684,age_95%_HPD={4.9,4.9}]:0.000000,Indarctos_arctoides[&index=14,sampled_ancestor=0.736842,age_95%_HPD={4.9,4.9}]:0.000000)[&index=41,posterior=0.078947,age_95%_HPD={4.9,4.9}]:17.987752)[&index=42,posterior=0.776316,age_95%_HPD={20.0162,26.8427}]:11.012248,Parictis_montanus[&index=2,sampled_ancestor=0.947368]:0.000000)[&index=43,posterior=0.723684,age_95%_HPD={33.9,33.9}]:0.000000;

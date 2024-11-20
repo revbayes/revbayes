@@ -1,0 +1,4 @@
+
+> source("scripts/basics.Rev")
+   Processing file "scripts/basics.Rev"
+   Successfully read one character matrix from file 'data/primates_cytb.nex'

@@ -1,0 +1,25 @@
+
+> source("scripts/mcmc_ChromoSSE.Rev")
+   Processing file "scripts/mcmc_ChromoSSE.Rev"
+   Attempting to read the contents of file "aristolochia.tree"
+   Successfully read file
+   -204.09
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 22 different moves, with a single move picked randomly per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
+----------------------------------------------------------------------------------------------------
+0           |       -156.516   |        -204.09   |        47.5738   |   00:00:00   |   --:--:--   |
+1           |       -156.516   |        -204.09   |        47.5738   |   00:00:01   |   --:--:--   |
+2           |       -157.615   |        -204.09   |        46.4752   |   00:00:01   |   00:00:04   |
+3           |       -156.516   |        -204.09   |        47.5738   |   00:00:02   |   00:00:04   |
+4           |       -156.516   |        -204.09   |        47.5738   |   00:00:03   |   00:00:04   |
+5           |       -156.516   |        -204.09   |        47.5738   |   00:00:03   |   00:00:03   |
+6           |       -156.517   |       -204.091   |        47.5738   |   00:00:04   |   00:00:02   |
+7           |       -156.517   |       -204.091   |        47.5738   |   00:00:05   |   00:00:02   |
+8           |       -156.517   |       -204.091   |        47.5738   |   00:00:05   |   00:00:01   |
+9           |       -156.517   |       -204.091   |        47.5738   |   00:00:06   |   00:00:00   |
+10          |       -157.605   |       -205.179   |        47.5738   |   00:00:07   |   00:00:00   |

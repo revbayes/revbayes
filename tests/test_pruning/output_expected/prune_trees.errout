@@ -1,0 +1,9 @@
+
+> source("scripts/prune_trees.Rev")
+   Processing file "scripts/prune_trees.Rev"
+   Processing file "data/unpruned.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+

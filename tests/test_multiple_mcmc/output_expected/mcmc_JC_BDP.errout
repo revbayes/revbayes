@@ -1,0 +1,15 @@
+
+> source("scripts/mcmc_JC_BDP.Rev")
+   Processing file "scripts/mcmc_JC_BDP.Rev"
+   Successfully read one character matrix from file 'data/primates_cytb_small.nex'
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 7 different moves, with a single move picked randomly per iteration
+   
+   Successfully read one character matrix from file 'data/primates_cytb_small.nex'
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   

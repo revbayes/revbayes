@@ -1,0 +1,32 @@
+
+> source("scripts/mcmc_AVMVN.Rev")
+   Processing file "scripts/mcmc_AVMVN.Rev"
+   
+   Running burn-in phase of Monte Carlo sampler for 10000 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
+----------------------------------------------------------------------------------------------------
+0           |        6.57925   |              0   |        6.57925   |   00:00:00   |   --:--:--   |
+1000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   --:--:--   |
+2000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+3000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+4000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+5000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+6000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+7000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+8000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+9000        |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |
+10000       |        6.57925   |              0   |        6.57925   |   00:00:00   |   00:00:00   |

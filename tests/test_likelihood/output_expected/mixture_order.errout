@@ -1,0 +1,6 @@
+
+> source("scripts/mixture_order.Rev")
+   Processing file "scripts/mixture_order.Rev"
+   Attempting to read the contents of file "primates.tree"
+   Successfully read file
+   Successfully read one character matrix from file 'data/primates_cytb.nex'

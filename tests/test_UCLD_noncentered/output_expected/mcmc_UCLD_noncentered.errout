@@ -1,0 +1,33 @@
+
+> source("scripts/mcmc_UCLD_noncentered.rev")
+   Processing file "scripts/mcmc_UCLD_noncentered.rev"
+   Successfully read one character matrix from file 'data/Ascarina.nex'
+   
+   Running burn-in phase of Monte Carlo sampler for 100 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 16 different moves in a random move schedule with 38 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 16 different moves in a random move schedule with 38 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |   log_clock_..   |    elapsed   |        ETA   |
+-----------------------------------------------------------------------------------------------------------------------
+0           |       -1942.49   |       -1919.25   |       -23.2328   |      -8.364973   |   00:00:00   |   --:--:--   |
+10          |       -1943.81   |       -1920.68   |       -23.1291   |      -8.181803   |   00:00:00   |   --:--:--   |
+20          |       -1939.17   |       -1921.67   |       -17.4956   |      -8.280601   |   00:00:00   |   00:00:00   |
+30          |       -1933.98   |       -1919.45   |       -14.5252   |      -7.693973   |   00:00:00   |   00:00:00   |
+40          |       -1938.92   |       -1920.39   |       -18.5287   |      -8.499107   |   00:00:00   |   00:00:00   |
+50          |       -1934.88   |        -1920.6   |       -14.2765   |      -8.191356   |   00:00:00   |   00:00:00   |
+60          |       -1936.05   |       -1921.82   |       -14.2288   |      -8.112041   |   00:00:00   |   00:00:00   |
+70          |       -1936.17   |        -1923.8   |       -12.3683   |      -7.623482   |   00:00:00   |   00:00:00   |
+80          |       -1930.01   |       -1920.37   |        -9.6327   |      -8.708324   |   00:00:00   |   00:00:00   |
+90          |       -1928.41   |       -1920.52   |        -7.8829   |      -8.990152   |   00:00:00   |   00:00:00   |
+100         |       -1932.72   |       -1923.01   |        -9.7069   |      -7.481033   |   00:00:00   |   00:00:00   |

@@ -1,0 +1,4 @@
+
+> source("scripts/Test_discCharMethods.Rev")
+   Processing file "scripts/Test_discCharMethods.Rev"
+   Successfully read one character matrix from file 'data/petromyzontiformes.nex'

@@ -1,0 +1,41 @@
+
+> source("scripts/mcmc_Mkv.rev")
+   Processing file "scripts/mcmc_Mkv.rev"
+   Successfully read one character matrix from file 'data/discrete.nex'
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 101 different moves in a random move schedule with 101 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
+----------------------------------------------------------------------------------------------------
+0           |       -6689.33   |       -6647.19   |       -42.1445   |   00:00:00   |   --:--:--   |
+1           |       -6513.06   |        -6463.1   |       -49.9605   |   00:00:00   |   --:--:--   |
+2           |        -6428.2   |       -6365.84   |       -62.3573   |   00:00:00   |   00:00:00   |
+3           |       -6338.12   |       -6265.67   |       -72.4464   |   00:00:00   |   00:00:00   |
+4           |       -6268.62   |       -6186.42   |       -82.1999   |   00:00:00   |   00:00:00   |
+5           |       -6185.05   |       -6091.39   |       -93.6593   |   00:00:00   |   00:00:00   |
+6           |       -6119.16   |       -6011.99   |       -107.171   |   00:00:00   |   00:00:00   |
+7           |       -6029.03   |       -5917.91   |       -111.121   |   00:00:00   |   00:00:00   |
+8           |       -5976.13   |       -5856.32   |       -119.809   |   00:00:00   |   00:00:00   |
+9           |       -5935.26   |       -5812.07   |       -123.195   |   00:00:00   |   00:00:00   |
+10          |       -5876.65   |       -5754.58   |       -122.075   |   00:00:00   |   00:00:00   |
+11          |       -5837.54   |       -5708.72   |       -128.818   |   00:00:00   |   00:00:00   |
+12          |       -5779.62   |       -5637.64   |       -141.977   |   00:00:00   |   00:00:00   |
+13          |       -5731.13   |        -5574.8   |       -156.337   |   00:00:00   |   00:00:00   |
+14          |       -5716.42   |       -5563.39   |       -153.024   |   00:00:00   |   00:00:00   |
+15          |       -5697.62   |       -5537.87   |       -159.749   |   00:00:00   |   00:00:00   |
+16          |       -5683.06   |        -5522.6   |       -160.464   |   00:00:00   |   00:00:00   |
+17          |       -5668.87   |       -5505.52   |       -163.351   |   00:00:00   |   00:00:00   |
+18          |       -5642.53   |       -5476.44   |       -166.098   |   00:00:00   |   00:00:00   |
+19          |       -5609.61   |       -5443.03   |       -166.576   |   00:00:00   |   00:00:00   |
+
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
+----------------------------------------------------------------------------------------------------
+20          |       -5589.73   |        -5421.3   |       -168.434   |   00:00:00   |   00:00:00   |

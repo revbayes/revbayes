@@ -1,0 +1,36 @@
+
+> source("scripts/mcmc_Partition_uniform.Rev")
+   Processing file "scripts/mcmc_Partition_uniform.Rev"
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cox2.nex'
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 52 different moves, with a single move picked randomly per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |          alpha   |         pinvar   |             TL   |    elapsed   |        ETA   |
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+0           |       -29820.4   |       -29822.1   |         1.6767   |       1.933766   |      0.6359704   |       4.503005   |   00:00:00   |   --:--:--   |
+   Processing file "output/PS_uniform_run_1.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Processing file "output/PS_uniform_run_2.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 78 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...

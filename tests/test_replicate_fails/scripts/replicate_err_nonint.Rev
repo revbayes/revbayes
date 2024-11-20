@@ -1,4 +1,0 @@
-outFile = "output/replicate_err_nonint.txt"
-write(filename = outFile, "This message denotes success")
-write(filename = outFile, append = FALSE, replicate(1, 5 / 2),
-      "An error was expected but did not occur.")

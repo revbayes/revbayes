@@ -1,0 +1,45 @@
+
+> source("scripts/mcmc_DEC.Rev")
+   Processing file "scripts/mcmc_DEC.Rev"
+   Attempting to read the contents of file "primates.DEC.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/primates_n3.DEC.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 3 different moves, with a single move picked randomly per iteration
+   
+   
+   
+   Settings
+   ========
+   
+   
+   branch_rates (d=e)
+   [ 0.010, 0.050, 0.100, 0.500 ]
+   
+   
+   Q
+   [ [ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000 ] ,
+     [ 1.0000, -3.0000, 0.0000, 0.0000, 1.0000, 1.0000, 0.0000, 0.0000 ] ,
+     [ 1.0000, 0.0000, -3.0000, 0.0000, 1.0000, 0.0000, 1.0000, 0.0000 ] ,
+     [ 1.0000, 0.0000, 0.0000, -3.0000, 0.0000, 1.0000, 1.0000, 0.0000 ] ,
+     [ 0.0000, 1.0000, 1.0000, 0.0000, -4.0000, 0.0000, 0.0000, 2.0000 ] ,
+     [ 0.0000, 1.0000, 0.0000, 1.0000, 0.0000, -4.0000, 0.0000, 2.0000 ] ,
+     [ 0.0000, 0.0000, 1.0000, 1.0000, 0.0000, 0.0000, -4.0000, 2.0000 ] ,
+     [ 0.0000, 0.0000, 0.0000, 0.0000, 1.0000, 1.0000, 1.0000, -3.0000 ] ]
+   
+   
+   Cladogenesis event probabilities
+   (s,a)=(0.5,0.5)
+   
+   
+   Model likelihood
+   ================
+   
+   
+   rate=d=e    lnLike (w/o root freqs)
+   0.01    -32.8415
+   0.05    -67.7858
+   0.1    -82.9703
+   0.5    -185.084

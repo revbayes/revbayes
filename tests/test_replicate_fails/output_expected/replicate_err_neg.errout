@@ -1,0 +1,37 @@
+
+RevBayes version (1.2.5-preview)
+Build from address-360 (rapture-3174-gfacec1) on Mon Nov 18 16:05:52 CST 2024
+
+Visit the website www.RevBayes.com for more information about RevBayes.
+
+RevBayes is free software released under the GPL license, version 3. Type 'license()' for details.
+
+To quit RevBayes type 'quit()' or 'q()'.
+
+
+> source("scripts/replicate_err_neg.Rev")
+   Processing file "scripts/replicate_err_neg.Rev"
+   Error:	No overloaded function 'replicate' matches for arguments ( Natural, Integer )
+   Potentially matching functions are:
+   rep (Integer<any> x,
+        Natural<any> n)
+   rep (Real<any> x,
+        Natural<any> n)
+   rep (Natural<any> x,
+        Natural<any> n)
+   rep (RealPos<any> x,
+        Natural<any> n)
+   rep (String<any> x,
+        Natural<any> n)
+   rep (Bool<any> x,
+        Natural<any> n)
+   rep (SiteMixtureModel<any> x,
+        Natural<any> n)
+   rep (OrderedEvents<Real><any> x,
+        Natural<any> n)
+   rep (OrderedEvents<RealPos><any> x,
+        Natural<any> n)
+   rep (OrderedEvents<Probability><any> x,
+        Natural<any> n)
+   
+   Error:	Problem processing line 4 in file "scripts/replicate_err_neg.Rev"

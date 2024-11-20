@@ -1,0 +1,9 @@
+
+> source("scripts/treeAssembly.Rev")
+   Processing file "scripts/treeAssembly.Rev"
+   Successfully read one character matrix from file 'data/primates_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 6 different moves in a random move schedule with 40.7 moves per iteration
+   

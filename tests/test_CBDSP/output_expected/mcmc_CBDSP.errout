@@ -1,0 +1,115 @@
+
+> source("scripts/mcmc_CBDSP.Rev")
+   Processing file "scripts/mcmc_CBDSP.Rev"
+   Attempting to read the contents of file "primates.tree"
+   Successfully read file
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   
+   Running burn-in phase of Monte Carlo sampler for 500 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 6 different moves, with a single move picked randomly per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 6 different moves, with a single move picked randomly per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |   extinction..   |     shift_rate   |   speciation..   |   total_num_..   |    elapsed   |        ETA   |
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0           |       -158.255   |       -156.616   |       -1.63904   |      0.2918307   |    0.002343001   |      0.3459303   |              5   |   00:00:00   |   --:--:--   |
+1000        |       -139.482   |       -140.386   |        0.90369   |      0.1282258   |    0.002343001   |      0.2008132   |              1   |   00:00:00   |   --:--:--   |
+2000        |       -128.588   |       -132.182   |        3.59459   |     0.01709286   |    0.002343001   |     0.09138693   |              0   |   00:00:01   |   00:00:01   |
+3000        |       -128.784   |       -132.266   |        3.48235   |     0.01522745   |    0.002343001   |     0.09964567   |              0   |   00:00:01   |   00:00:00   |
+4000        |       -130.386   |       -133.652   |        3.26591   |    0.009170263   |    0.002343001   |      0.1065285   |              0   |   00:00:01   |   00:00:00   |
+5000        |       -129.399   |       -132.812   |        3.41313   |     0.01485427   |    0.002343001   |      0.1048967   |              0   |   00:00:01   |   00:00:00   |
+   Processing file "output/primates_CBDSP.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 376 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+

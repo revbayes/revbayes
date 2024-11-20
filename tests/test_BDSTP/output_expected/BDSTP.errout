@@ -1,0 +1,22 @@
+
+> source("scripts/BDSTP.Rev")
+   Processing file "scripts/BDSTP.Rev"
+   Successfully read one character matrix from file 'data/bears_cytb.nex'
+   Successfully read one character matrix from file 'data/bears_morphology.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 187 different moves in a random move schedule with 405 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |     age_extant   |   num_samp_anc   |    origin_time   |    elapsed   |        ETA   |
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+0           |       -8210.94   |        -8075.2   |       -135.748   |       39.90633   |              0   |       41.47919   |   00:00:00   |   --:--:--   |
+10          |       -4705.42   |       -4669.18   |       -36.2368   |       22.16855   |              5   |       40.63946   |   00:00:00   |   --:--:--   |
+20          |       -4400.38   |        -4374.4   |       -25.9721   |       28.10123   |              6   |       37.24574   |   00:00:00   |   00:00:00   |
+   Processing file "output/BDSTP.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
