@@ -114,10 +114,6 @@ for t in test_*; do
         if [ $res != 0 ] ; then
             echo ${t}/${rb_exec} -b $f "==> error $res"
         fi
-        
-        # snip off the first 10 lines of the output file
-        tail +11 output/${tmp1}.errout > output/${tmp1}.errout.tmp
-        mv output/${tmp1}.errout.tmp output/${tmp1}.errout
     done
 
     # store the exit status
@@ -153,6 +149,11 @@ while [  $i -lt ${#tests[@]} ]; do
             find output -type f -exec sed -i 's/e-00/e-0/g' {} \;
             find output -type f -exec sed -i 's/e+00/e+0/g' {} \;
         fi
+        
+        # snip off the first 13 lines of the output file
+        tail +14 output/${tmp1}.errout > output/${tmp1}.errout.tmp
+        mv output/${tmp1}.errout.tmp output/${tmp1}.errout
+        
         for f in $(ls ${exp_out_dir}); do
             if [ ! -e output/$f ]; then
                 errs+=("missing:  $f")
