@@ -154,8 +154,9 @@ while [  $i -lt ${#tests[@]} ]; do
             tmp0=${f#scripts/}
             tmp1=${tmp0%.[Rr]ev}
             
-            # snip off the first 13 lines of the output file
-            tail +14 output/${tmp1}.errout > output/${tmp1}.errout.tmp
+            # Delete all before the 1st occurrence of the string '   Processing file' (inclusive)
+            # Use a temporary intermediate file to make this work w/ both GNU and BSD sed
+            sed '1,/   Processing file/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
             mv output/${tmp1}.errout.tmp output/${tmp1}.errout
         done
         
