@@ -21,4 +21,3 @@
    rep (OrderedEvents<Probability><any> x,
         Natural<any> n)
    
-   Error:	Problem processing line 4 in file "scripts/replicate_err_neg.Rev"
