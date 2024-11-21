@@ -33,6 +33,7 @@ namespace RevBayesCore {
         virtual const TypedDistribution<valueType>&         getDistribution(void) const;
         void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
         virtual double                                      getLnProbability(void);
+        virtual double                                      getPrevLnProbability(void) const;
         virtual double                                      getLnProbabilityRatio(void);
         virtual std::vector<double>                         getMixtureLikelihoods(bool log=true) const;
         virtual std::vector<double>                         getMixtureProbabilities(void) const;
@@ -479,6 +480,23 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 
     // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
     return getLnProbability() - **stored_ln_prob;
+}
+
+
+template<class valueType>
+double RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) const
+{
+    // 1. If the node is not affected/touched, then the probability is the same for the current and previous state.
+    if (not stored_ln_prob)
+        throw RbException()<<"getPrevLnProbability: no previous probability!";
+
+    // 2. If we touched the node when the log probability was not calculated, then we don't have a value for
+    // the probability of the previous state.
+    if (not *stored_ln_prob)
+        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
+
+    // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
+    return **stored_ln_prob;
 }
 
 

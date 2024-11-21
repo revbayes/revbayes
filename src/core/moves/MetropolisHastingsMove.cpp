@@ -380,9 +380,16 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     {
         if (fail_probability) break;
 
+        if (not node->isStochastic()) continue;
+
         double ratio = 0;
         try {
-            ratio = node->getLnProbabilityRatio();
+            // There should be a previous lnProbability because the nodes have been touched.
+            double prev = node->getPrevLnProbability();
+            // Compute the current lnProbability.
+            double current = node->getLnProbability();
+
+            ratio = current - prev;
         }
         catch (const RbException &e)
         {
