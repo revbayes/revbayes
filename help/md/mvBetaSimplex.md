@@ -7,11 +7,9 @@ The Beta Simplex move selects one element of the a vector and proposes a new val
 ## details
 ## authors
 ## see_also
-
-mvBetaSimplex
-mvDirichletSimplex
-mvDPPValueBetaSimplex
-mvElementSwapSimplex
+- mvDirichletSimplex
+- mvDPPValueBetaSimplex
+- mvElementSwapSimplex
 
 ## example
 A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root
