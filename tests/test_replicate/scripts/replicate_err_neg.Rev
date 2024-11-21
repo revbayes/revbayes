@@ -2,3 +2,5 @@ outFile = "output/replicate_err_neg.txt"
 write(filename = outFile, "This message denotes success")
 write(filename = outFile, append = FALSE, replicate(1, -1),
       "An error was expected but did not occur.")
+
+q()
