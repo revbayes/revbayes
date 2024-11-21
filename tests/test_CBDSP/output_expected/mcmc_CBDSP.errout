@@ -1,0 +1,103 @@
+   Attempting to read the contents of file "primates.tree"
+   Successfully read file
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'timetree': lnProb = nan
+   (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
+   
+   
+   Drawing new initial states ... 
+   
+   Running burn-in phase of Monte Carlo sampler for 500 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 6 different moves, with a single move picked randomly per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 6 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/primates_CBDSP.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 376 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
