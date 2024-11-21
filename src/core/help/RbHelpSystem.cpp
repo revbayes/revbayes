@@ -229,7 +229,7 @@ const RbHelpEntry& RbHelpSystem::getHelp(const std::string &qs)
     }
     else
     {
-        throw RbException("Could not find help for '" + qs + "'.");
+        throw RbException() << "Could not find help for '" <<  qs << "'.";
     }
     
 }
@@ -256,7 +256,7 @@ const RbHelpEntry& RbHelpSystem::getHelp(const std::string &baseQuery, const std
         
     }
 
-    throw RbException("Could not find help for '" + baseQuery + "." + qs + "'.");
+    throw RbException() << "Could not find help for '" << baseQuery << "." <<  qs << "'.";
     
 }
 

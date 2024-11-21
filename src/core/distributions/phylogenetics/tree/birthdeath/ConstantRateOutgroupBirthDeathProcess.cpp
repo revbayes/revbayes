@@ -219,7 +219,7 @@ void ConstantRateOutgroupBirthDeathProcess::initializeBitSets(void)
         std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
         if ( it == taxon_map.end() )
         {
-            throw RbException("Could not find taxon with name '" + name + "'.");
+            throw RbException() << "Could not find taxon with name '" <<  name << "'.";
         }
         size_t k = it->second;
         

@@ -93,7 +93,7 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
     }
     else
     {
-        throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"" + type + "\"" );
+        throw RbException() << "Cannot translate character data object of type \""<< d.getCharacter(0).getDataType() <<"\" into type \"" <<  type << "\"" ;
     }
     
     return trans_taxon_data;

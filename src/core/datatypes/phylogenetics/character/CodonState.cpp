@@ -129,7 +129,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
@@ -156,7 +156,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
@@ -176,13 +176,13 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
         else
         {
-            throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+            throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
         }
         
     }
@@ -206,7 +206,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
@@ -233,7 +233,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
         }
         else
         {
-            throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+            throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
         }
         
     }
@@ -257,7 +257,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
@@ -284,7 +284,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
         }
         else
         {
-            throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+            throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
         }
         
     }
@@ -308,7 +308,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
@@ -340,7 +340,7 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
@@ -360,19 +360,19 @@ AminoAcidState CodonState::getAminoAcidState( void ) const
             }
             else
             {
-                throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+                throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
             }
             
         }
         else
         {
-            throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+            throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
         }
         
     }
     else
     {
-        throw RbException("Unknown amino acid for codon '" + getStringValue() + "'");
+        throw RbException() << "Unknown amino acid for codon '" <<  getStringValue() << "'";
     }
 
     

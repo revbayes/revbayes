@@ -97,7 +97,7 @@ void MarkovTimesDistribution::executeMethod(const std::string &n, const std::vec
     }
     else
     {
-        throw RbException("The markov event model does not have a member method called '" + n + "'.");
+        throw RbException() << "The Markov event model does not have a member method called '" <<  n << "'.";
     }
 }
 
@@ -120,7 +120,7 @@ void MarkovTimesDistribution::executeMethod(const std::string &n, const std::vec
     }
     else
     {
-        throw RbException("The markov event model does not have a member method called '" + n + "'.");
+        throw RbException() << "The Markov event model does not have a member method called '" <<  n << "'.";
     }
 }
 

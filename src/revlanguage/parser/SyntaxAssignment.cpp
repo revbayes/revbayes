@@ -158,7 +158,7 @@ bool SyntaxAssignment::isFunctionSafe( const Environment& env, std::set<std::str
 //        const std::set<int>& indices = the_var->getElementIndices();
 //        if ( indices.empty() )
 //        {
-//            throw RbException("Cannot remove a vector variable with name '" + the_var->getName() + "' because it doesn't have elements.");
+//            throw RbException() << "Cannot remove a vector variable with name '" <<  the_var->getName() << "' because it doesn't have elements.";
 //        }
 //        // iterate over all elements
 //        for (std::set<int>::const_iterator it = indices.begin(); it != indices.end(); ++it)

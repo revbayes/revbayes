@@ -127,7 +127,7 @@ bool Environment::addFunction( Function* func )
         // free memory
         delete func;
         
-        throw RbException("There is already a variable named '" + name + "' in the workspace");
+        throw RbException() << "There is already a variable named '" <<  name << "' in the workspace";
     }
     
     function_table.addFunction( func );

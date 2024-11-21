@@ -82,7 +82,7 @@ void ContinuousCharacterData::concatenate(const RevObject &d, std::string type) 
     }
     else
     {
-        throw RbException("Cannot add an object of type '" + d.getType() + "' to a ContinuousCharacterData object.");
+        throw RbException() << "Cannot add an object of type '" <<  d.getType() << "' to a ContinuousCharacterData object.";
     }
 }
 

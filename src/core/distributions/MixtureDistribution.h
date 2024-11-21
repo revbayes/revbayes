@@ -115,7 +115,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::st
     }
     else
     {
-        throw RbException("A mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A mixture distribution does not have a member method called '" <<  n << "'.";
     }
     
 }

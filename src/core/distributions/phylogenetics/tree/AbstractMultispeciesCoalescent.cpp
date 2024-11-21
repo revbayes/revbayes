@@ -365,7 +365,7 @@ void AbstractMultispeciesCoalescent::simulateTree( void )
 
         if ( species_node == NULL )
         {
-            throw RbException("Could not match a taxon with name" + species_name + " to any of the tips in the species tree.");
+            throw RbException() << "Could not match a taxon with name" <<  species_name << " to any of the tips in the species tree.";
         }
 
         n->setAge( 0.0 );

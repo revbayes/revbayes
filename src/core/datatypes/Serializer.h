@@ -30,7 +30,7 @@ namespace RevBayesCore {
         
     public:
         //!< Create a clone of the given object.
-        static void                     ressurectFromString( objType* /*obj*/, const std::string &s ) { throw RbException("Could not resurrect object from string value:\n" + s); }
+        static void                     ressurectFromString( objType* /*obj*/, const std::string &s ) { throw RbException() << "Could not resurrect object from string value:\n" <<  s; }
         
         static void                     ressurectFromFile( objType* obj, const path &dir, const std::string &fn )
         {

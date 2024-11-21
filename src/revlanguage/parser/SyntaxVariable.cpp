@@ -73,7 +73,7 @@ RevPtr<RevVariable> SyntaxVariable::evaluateContent( Environment& env, bool dyna
         }
         else
         {
-            throw RbException("There is no namespace called '" + *it + "'.");
+            throw RbException() << "There is no namespace called '" <<  *it << "'.";
         }
         
     }

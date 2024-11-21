@@ -753,7 +753,7 @@ void RevBayesCore::CTMCProcess<charType>::executeMethod(const std::string &n, co
     }
     else
     {
-        throw RbException("The CTMC process does not have a member method called '" + n + "'.");
+        throw RbException() << "The CTMC process does not have a member method called '" <<  n << "'.";
     }
 
 }
@@ -809,7 +809,7 @@ void RevBayesCore::CTMCProcess<charType>::executeMethod(const std::string &n, co
     }
     else
     {
-        throw RbException("The CTMC process does not have a member method called '" + n + "'.");
+        throw RbException() << "The CTMC process does not have a member method called '" <<  n << "'.";
     }
 
 }

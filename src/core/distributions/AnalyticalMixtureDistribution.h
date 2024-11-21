@@ -210,7 +210,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
     }
     else
     {
-        throw RbException("A Analytical-mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A Analytical-mixture distribution does not have a member method called '" <<  n << "'.";
     }
     
 }

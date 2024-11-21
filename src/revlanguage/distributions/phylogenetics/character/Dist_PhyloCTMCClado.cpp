@@ -264,7 +264,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else
     {
-        throw RbException("Datatype \"" + dt + "\" not currently supported!");
+        throw RbException() << "Datatype \"" <<  dt << "\" not currently supported!";
     }
 }
 

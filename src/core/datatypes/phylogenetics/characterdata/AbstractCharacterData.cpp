@@ -129,7 +129,7 @@ AbstractCharacterData& AbstractCharacterData::operator=( const AbstractCharacter
 //        }
 //        else
 //        {
-//            throw RbException("Cannot add two character data objects because second character data object has no taxon with name '" + n + "n'!");
+//            throw RbException() << "Cannot add two character data objects because second character data object has no taxon with name '" << n << "n'!";
 //        }
 //    }
 //    
@@ -137,7 +137,7 @@ AbstractCharacterData& AbstractCharacterData::operator=( const AbstractCharacter
 //    {
 //        if ( used[i] == false )
 //        {
-//            throw RbException("Cannot add two character data objects because first character data object has no taxon with name '" + obsd.getTaxonNameWithIndex(i) + "n'!");
+//            throw RbException() << "Cannot add two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
 //        }
 //    }
 //    
@@ -293,7 +293,7 @@ void AbstractCharacterData::deleteTaxon(const std::string& s) {
 
 
 /**
- * Get the file name from whcih the character data object was read in.
+ * Get the file name from which the character data object was read in.
  *
  * \return    The original file name.
  */
@@ -343,7 +343,7 @@ size_t AbstractCharacterData::getIndexOfTaxon(const std::string &n) const
         }
     }
 
-    throw RbException("Cannot find taxon '" + n + "' in the CharacterData matrix.");
+    throw RbException() << "Cannot find taxon '" << n << "' in the CharacterData matrix.";
 }
 
 
@@ -496,7 +496,7 @@ const AbstractTaxonData& AbstractCharacterData::getTaxonData(size_t tn) const
     }
     else
     {
-        throw RbException("Cannot find taxon '" + name + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the CharacterData matrix.";
     }
 }
 
@@ -522,7 +522,7 @@ AbstractTaxonData& AbstractCharacterData::getTaxonData( size_t tn ) {
     }
     else
     {
-        throw RbException("Cannot find taxon '" + name + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" <<  name << "' in the CharacterData matrix.";
     }
 }
 
@@ -547,7 +547,7 @@ const AbstractTaxonData& AbstractCharacterData::getTaxonData( const std::string 
     }
     else
     {
-        throw RbException("Cannot find taxon '" + tn + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" <<  tn << "' in the CharacterData matrix.";
     }
 }
 
@@ -573,7 +573,7 @@ AbstractTaxonData& AbstractCharacterData::getTaxonData( const std::string &tn ) 
     else
     {
         
-        throw RbException("Cannot find taxon '" + tn + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" <<  tn << "' in the CharacterData matrix.";
     }
 }
 

@@ -38,7 +38,7 @@ RevPtr<RevVariable> Proc_StringToInt::execute( void )
     
     if ( StringUtilities::isIntegerNumber( string_val ) == false )
     {
-        throw RbException("'" + string_val + "' cannot be converted to integer number.");
+        throw RbException() << "'" <<  string_val << "' cannot be converted to integer number.";
     }
     
     int int_val = StringUtilities::asIntegerNumber( string_val );

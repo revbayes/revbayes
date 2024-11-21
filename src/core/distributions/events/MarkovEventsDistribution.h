@@ -347,7 +347,7 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::executeMethod(const std:
     }
     else
     {
-        throw RbException("The markov event model does not have a member method called '" + n + "'.");
+        throw RbException() << "The Markov event model does not have a member method called '" <<  n << "'.";
     }
 }
 

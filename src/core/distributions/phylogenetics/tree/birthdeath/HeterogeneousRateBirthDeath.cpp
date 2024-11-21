@@ -492,7 +492,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" <<  n << "'.";
     }
     
 }
@@ -577,7 +577,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" <<  n << "'.";
     }
     
 }

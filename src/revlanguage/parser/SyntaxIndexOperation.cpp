@@ -151,7 +151,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
             }
             else if ( c->allowsModificationToCompositeContainer() == false )
             {
-                throw RbException("An object of type '" + theParentObj.getType() + "' does not allow transformation into a composite container.");
+                throw RbException() << "An object of type '" <<  theParentObj.getType() << "' does not allow transformation into a composite container.";
             }
             else
             {
@@ -183,7 +183,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
         }
         else
         {
-            throw RbException("We cannot make a composite container from variable of type '" + theParentObj.getType() + "'.");
+            throw RbException() << "We cannot make a composite container from variable of type '" <<  theParentObj.getType() << "'.";
         }
     }
 
@@ -334,7 +334,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
 //            const std::set<int>& indices = parentVariable->getElementIndices();
 //            if ( indices.empty() )
 //            {
-//                throw RbException("Cannot create a vector variable with name '" + parentName + "' because it doesn't have elements.");
+//                throw RbException() << "Cannot create a vector variable with name '" <<  parentName << "' because it doesn't have elements.";
 //            }
             size_t max_index = parentVariable->getMaxElementIndex();
             std::vector<Argument> args;
@@ -345,7 +345,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
                 // check that the element is not NULL
                 if ( elementVar == NULL || elementVar->getRevObject() == RevNullObject::getInstance() )
                 {
-                    throw RbException("Cannot create vector variable with name '" + parentName + "' because element with name '" + element_identifier + "' is NULL." );
+                    throw RbException() << "Cannot create vector variable with name '" << parentName << "' because element with name '" <<  element_identifier << "' is NULL." ;
                 }
                 args.push_back( Argument( elementVar ) );
             }

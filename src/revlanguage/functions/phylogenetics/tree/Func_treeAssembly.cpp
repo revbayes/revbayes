@@ -64,7 +64,7 @@ RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeAssembly::createFuncti
     }
     if ( topology_in_use == true )
     {
-        throw RbException("Variable \"" + tau->getName() + "\" cannot be used with more than one treeAssembly function.");
+        throw RbException() << "Variable \"" <<  tau->getName() << "\" cannot be used with more than one treeAssembly function.";
     }
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* brlens = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
