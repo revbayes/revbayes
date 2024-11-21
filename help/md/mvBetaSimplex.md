@@ -1,9 +1,12 @@
 ## name
 mvBetaSimplex
 ## title
+Beta Simplex move
 ## description
+The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution.
 ## details
 ## authors
 ## see_also
+https://revbayes.github.io/tutorials/chromo/#root
 ## example
 ## references
