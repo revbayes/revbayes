@@ -1,6 +1,6 @@
 outFile = "output/replicate.txt"
-write(filename = outFile, append = FALSE, "1, 2:", replicate(1, 2), "\n")
-write(filename = outFile, append = TRUE, "2.0, 2.0:", replicate(2.0, 2.0), "\n")
-write(filename = outFile, append = TRUE, "FALSE, 4/2:", replicate(FALSE, 4 / 2), "\n")
-write(filename = outFile, append = TRUE, "4, 0:", replicate(4, 0), "\n")
-write(filename = outFile, append = TRUE, "'Five', sqrt(4):", replicate("Five", sqrt(4)), "\n")
+write(filename = outFile, append = FALSE, "rep(1, 2):           ", replicate(1, 2), "\n")
+write(filename = outFile, append = TRUE,  "rep(2.0, 2.0):       ", replicate(2.0, 2.0), "\n")
+write(filename = outFile, append = TRUE,  "rep(FALSE, 4/2):     ", replicate(FALSE, 4 / 2), "\n")
+write(filename = outFile, append = TRUE,  "rep(4, 0):           ", replicate(4, 0), "\n")
+write(filename = outFile, append = TRUE,  "rep('Five', sqrt(4)):", replicate("Five", sqrt(4)), "\n")
