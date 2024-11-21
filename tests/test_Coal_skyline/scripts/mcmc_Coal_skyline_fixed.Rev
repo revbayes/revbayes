@@ -81,7 +81,6 @@ mymodel = model(psi)
 
 ### set up the monitors that will output parameter values to file and screen
 monitors.append( mnModel(filename="output/coal_skyline_fixed.log",printgen=1, separator = TAB) )
-monitors.append( mnScreen(printgen=1, pop_size) )
 
 
 

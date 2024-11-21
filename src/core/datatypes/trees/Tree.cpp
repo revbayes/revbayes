@@ -436,7 +436,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else
     {
-        throw RbException("A tree object does not have a member method called '" + n + "'.");
+        throw RbException() << "A tree object does not have a member method called '" << n << "'.";
     }
 
 }
@@ -502,7 +502,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else
     {
-        throw RbException("A tree object does not have a member method called '" + n + "'.");
+        throw RbException() << "A tree object does not have a member method called '" << n << "'.";
     }
 
 }
@@ -577,7 +577,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else
     {
-        throw RbException("A tree object does not have a member method called '" + n + "'.");
+        throw RbException() << "A tree object does not have a member method called '" << n << "'.";
     }
 
 }
@@ -654,7 +654,7 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
     size_t n = getNumberOfTips();
     if ( indx > (n-2) )
     {
-        throw RbException("Cannot acces interior node '" + StringUtilities::to_string(indx) + "' for a tree with " + StringUtilities::to_string(n) + " tips.");
+        throw RbException() << "Cannot acces interior node '" << StringUtilities::to_string(indx) << "' for a tree with " << StringUtilities::to_string(n) << " tips.";
     }
     return *nodes[ indx + n ];
 }
@@ -1002,7 +1002,7 @@ size_t Tree::getTipIndex( const std::string &name ) const
     }
 
     // if name not found
-    throw RbException("Could not find tip node with name '" + name + "' in tree." );
+    throw RbException() << "Could not find tip node with name '" << name << "' in tree." ;
 }
 
 
@@ -1379,7 +1379,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
     }
     else if (num_root_children > 2)
     {
-        throw RbException("Problem when rerooting with  '" + outgroup.toString() + "'.");
+        throw RbException() << "Problem when rerooting with  '" << outgroup.toString() << "'.";
     } // end-if the root node has 3 children
     
 
@@ -1523,11 +1523,11 @@ void Tree::orderNodesByIndex( void )
     {
         if ( nodes[i]->getIndex() >= nodes.size() )
         {
-            throw RbException("Problem while working with tree: Node had bad index. Index was '" + StringUtilities::to_string( nodes[i]->getIndex() ) + "' while there are only '" + StringUtilities::to_string( nodes.size() ) + "' nodes in the tree.");
+            throw RbException() << "Problem while working with tree: Node had bad index. Index was '" << nodes[i]->getIndex() << "' while there are only '" << nodes.size() << "' nodes in the tree.";
         }
         else if ( used[nodes[i]->getIndex()] == true )
         {
-            throw RbException("Problem while working with tree: Node had bad index. Two nodes had same index of '" + StringUtilities::to_string( nodes[i]->getIndex() ) + "'.");
+            throw RbException() << "Problem while working with tree: Node had bad index. Two nodes had same index of '" << nodes[i]->getIndex() << "'.";
         }
         else
         {
@@ -1891,7 +1891,7 @@ void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
 
         if ( root->containsClade(outgroup, strict ) == false )
         {
-            throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup.toString() + "'.");
+            throw RbException() << "Cannot reroot the tree because we could not find an outgroup with name '" << outgroup.toString() << "'.";
         }
 
     }
@@ -1902,7 +1902,7 @@ void Tree::reroot(const Clade &o, bool make_bifurcating, bool reindex)
     // check that we properly got a node
     if ( outgroup_node == NULL )
     {
-        throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup.toString() + "'.");
+        throw RbException() << "Cannot reroot the tree because we could not find an outgroup with name '" << outgroup.toString() << "'.";
     }
 
     // only reroot if the node is not the root node
@@ -1930,7 +1930,7 @@ void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reind
 
     if ( outgroup_index == tip_names.size() )
     {
-        throw RbException("Cannot reroot the tree because we could not find an outgroup with name '" + outgroup + "'.");
+        throw RbException() << "Cannot reroot the tree because we could not find an outgroup with name '" << outgroup << "'.";
     }
     
     TopologyNode& outgroup_node = getTipNode( outgroup_index );

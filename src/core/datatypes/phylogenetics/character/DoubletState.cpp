@@ -100,7 +100,7 @@ std::string DoubletState::getStringValue(void) const
     if (tmp.getState() == state)
         return str_val;
 
-    throw RbException("This ambiguous doublet character (which looks like "+str_val+") is not representable as a two-letter code");
+    throw RbException() << "This ambiguous doublet character (which looks like " << str_val << ") is not representable as a two-letter code"; 
 }
 
 
@@ -143,7 +143,7 @@ void DoubletState::setMissingState( bool tf )
 void DoubletState::setState(const std::string &s)
 {
     if (s.size() != 2)
-        throw RbException("Doublet state '"+s+"' does not have size 2!");
+        throw RbException() << "Doublet state '" << s << "' does not have size 2!"; 
 
     /* A C G T */
     std::string symbol = s;
@@ -159,7 +159,7 @@ void DoubletState::setState(const std::string &s)
 
     // Complain about mixed missing/non-missing letters like A?
     if ( dna_pos_0.isMissingState() or dna_pos_1.isMissingState())
-        throw RbException("Doublet letter '"+s+"' not allowed: consider changing to '\?\?' or replacing '?' with 'N'");
+        throw RbException() << "Doublet letter '" << s << "' not allowed: consider changing to '\?\?' or replacing '?' with 'N'"; 
 
     if ( dna_pos_0.isGapState() and dna_pos_1.isGapState())
     {
@@ -169,7 +169,7 @@ void DoubletState::setState(const std::string &s)
 
     // Complain about mixed gap/non-gap letters like A-
     if ( dna_pos_0.isGapState() or dna_pos_1.isGapState())
-        throw RbException("Doublet letter '"+s+"' not allowed: consider changing to '--' or replacing '-' with 'N'");
+        throw RbException() << "Doublet letter '" << s << "' not allowed: consider changing to '--' or replacing '-' with 'N'"; 
 
     RbBitSet bs_pos_0 = dna_pos_0.getState();
     RbBitSet bs_pos_1 = dna_pos_1.getState();

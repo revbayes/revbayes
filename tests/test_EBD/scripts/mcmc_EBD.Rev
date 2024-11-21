@@ -107,7 +107,6 @@ monitors[++mni] = mnFile(filename="output/EBD_speciation_rates.log",printgen=1, 
 monitors[++mni] = mnFile(filename="output/EBD_speciation_times.log",printgen=1, separator = TAB, interval_times)#
 monitors[++mni] = mnFile(filename="output/EBD_extinction_rates.log",printgen=1, separator = TAB, extinction)
 monitors[++mni] = mnFile(filename="output/EBD_extinction_times.log",printgen=1, separator = TAB, interval_times)
-monitors[++mni] = mnScreen(printgen=1, extinction_sd, speciation_sd)
 
 
 

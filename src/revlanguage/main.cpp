@@ -203,7 +203,7 @@ int main(int argc, char* argv[]) {
             StringUtilities::stringSplit(options[i], "=", tokens);
             if (tokens.size() != 2)
             {
-                throw RbException("Option '"+options[i]+"' must have the form key=value");
+                throw RbException() << "Option '" << options[i] << "' must have the form key=value"; 
             }
             else
             {
