@@ -25,7 +25,7 @@ RealPos::RealPos( RevBayesCore::TypedDagNode<double> *x ) : Real( x )
     
     if ( x->getValue() < 0.0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }
@@ -37,7 +37,7 @@ RealPos::RealPos( double x ) : Real( x )
 
     if ( x < 0.0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }
@@ -49,7 +49,7 @@ RealPos::RealPos( long x ) : Real( double(x) )
 
     if ( x < 0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }
