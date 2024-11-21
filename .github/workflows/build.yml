@@ -256,8 +256,8 @@ jobs:
         fi
 
         # Another ugly hack: remove the *.errout file generated for the CBDSP
-        # test on Linux. Apparently, NaN log likelihoods are positive on macOS
-        # and Windows but negative on Linux. This might be a bug.
+        # test on macOS and Windows. Apparently, NaN log likelihoods are positive
+        # on these platforms but negative on Linux. This might be a bug.
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
            rm -f tests/test_CBDSP/output_expected/mcmc_CBDSP.errout
         fi
