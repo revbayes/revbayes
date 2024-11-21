@@ -877,7 +877,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
         /* Final test if we found a match */
         if ( taken[i] == false )
         {
-            throw RbException() << "Superfluous argument of type '" << passed_args[i].getVariable()->getRevObject().getType() << "' and name '" << passed_args[i].getLabel() << "' passed to function '" <<  getType() << "'.";
+            throw RbException() << "Superfluous argument of type '" << passed_args[i].getVariable()->getRevObject().getType() << "' and name '" << passed_args[i].getLabel() << "' passed to function '" << getType() << "'.";
         }
     }
 
@@ -895,7 +895,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
         // we just leave the optional arguments empty
         if ( !the_rules[i].hasDefault() )
         {
-            throw RbException() << "No argument found for parameter '" <<  the_rules[i].getArgumentLabel() << "'.";
+            throw RbException() << "No argument found for parameter '" << the_rules[i].getArgumentLabel() << "'.";
         }
         
         const ArgumentRule& theRule = the_rules[i];

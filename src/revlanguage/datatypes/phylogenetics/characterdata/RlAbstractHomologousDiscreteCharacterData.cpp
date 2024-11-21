@@ -84,7 +84,7 @@ void AbstractHomologousDiscreteCharacterData::concatenate(const RevObject &d, st
     }
     else
     {
-        throw RbException() << "Cannot add an object of type '" <<  d.getType() << "' to a character data object.";
+        throw RbException() << "Cannot add an object of type '" << d.getType() << "' to a character data object.";
     }
 
 }

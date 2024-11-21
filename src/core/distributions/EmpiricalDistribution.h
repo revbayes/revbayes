@@ -96,7 +96,7 @@ void RevBayesCore::EmpiricalDistribution<valueType>::executeMethod(const std::st
     }
     else
     {
-        throw RbException() << "A empirical distribution does not have a member method called '" <<  n << "'.";
+        throw RbException() << "A empirical distribution does not have a member method called '" << n << "'.";
     }
 
 }

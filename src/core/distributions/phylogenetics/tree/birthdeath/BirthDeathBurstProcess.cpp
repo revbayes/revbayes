@@ -222,7 +222,7 @@ void BirthDeathBurstProcess::executeMethod(const std::string &name, const std::v
     }
     else
     {
-        throw RbException() << "The character dependent birth-death process does not have a member method called '" <<  name << "'.";
+        throw RbException() << "The character dependent birth-death process does not have a member method called '" << name << "'.";
     }
     
 }

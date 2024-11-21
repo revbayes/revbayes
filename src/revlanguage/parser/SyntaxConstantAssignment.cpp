@@ -51,7 +51,7 @@ void SyntaxConstantAssignment::assign(RevPtr<RevVariable> &lhs, RevPtr<RevVariab
     // check first if the right-hand-side is a model variable
     if ( rhs->getRevObject().isModelObject() == false )
     {
-        throw RbException() << "You used a non-model object ( type=" <<  rhs->getRevObject().getType() << " ) to create a constant node. Only model objects can be used for constant nodes.";
+        throw RbException() << "You used a non-model object ( type=" << rhs->getRevObject().getType() << " ) to create a constant node. Only model objects can be used for constant nodes.";
     }
     
     // Get a reference to the Rev object value

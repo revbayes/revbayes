@@ -68,7 +68,7 @@ RevObject::~RevObject( void )
  */
 RevObject* RevObject::add(const RevObject &rhs) const
 {
-    throw RbException() << "Cannot add a value of type '" << this->getType() << "' to a value of type '" <<  rhs.getType() << "'.";
+    throw RbException() << "Cannot add a value of type '" << this->getType() << "' to a value of type '" << rhs.getType() << "'.";
     
     return NULL;
 }
@@ -92,7 +92,7 @@ void RevObject::constructInternalObject( void )
 RevObject* RevObject::convertTo(const TypeSpec& typeSpec) const
 {
         
-    throw RbException() << "Failed conversion from type '" << getType() << "' to type '" <<  typeSpec.getType() << "'" ;
+    throw RbException() << "Failed conversion from type '" << getType() << "' to type '" << typeSpec.getType() << "'" ;
     
     return NULL;
 }
@@ -104,7 +104,7 @@ RevObject* RevObject::convertTo(const TypeSpec& typeSpec) const
  */
 void RevObject::decrement( void ) 
 {
-    throw RbException() << "Cannot decrement a value of type '" <<  this->getType() << "'.";
+    throw RbException() << "Cannot decrement a value of type '" << this->getType() << "'.";
 
 }
 
@@ -119,7 +119,7 @@ void RevObject::decrement( void )
  */
 RevObject* RevObject::divide(const RevObject &rhs) const
 {
-    throw RbException() << "Cannot divide a value of type '" << this->getType() << "' to a value of type '" <<  rhs.getType() << "'.";
+    throw RbException() << "Cannot divide a value of type '" << this->getType() << "' to a value of type '" << rhs.getType() << "'.";
     
     return NULL;
 }
@@ -206,7 +206,7 @@ const std::string& RevObject::getType( void ) const
  */
 RevBayesCore::DagNode* RevObject::getDagNode( void ) const
 {
-    throw RbException() << "Workspace objects cannot be used inside DAG's! You tried to access the DAG node of type '" <<  getClassType() << "'.";
+    throw RbException() << "Workspace objects cannot be used inside DAG's! You tried to access the DAG node of type '" << getClassType() << "'.";
     
     return NULL;
 }
@@ -505,7 +505,7 @@ std::vector<RevBayesCore::RbHelpFunction> RevObject::getHelpMethods( void ) cons
 void RevObject::increment( void ) 
 {
     
-    throw RbException() << "Cannot increment a value of type '" <<  this->getType() << "'.";
+    throw RbException() << "Cannot increment a value of type '" << this->getType() << "'.";
     
 }
 
@@ -617,7 +617,7 @@ void RevObject::makeUserFunctionValue( UserFunction* fxn )
  */
 RevObject* RevObject::multiply(const RevObject &rhs) const
 {
-    throw RbException() << "Cannot multiply a value of type '" << this->getType() << "' to a value of type '" <<  rhs.getType() << "'.";
+    throw RbException() << "Cannot multiply a value of type '" << this->getType() << "' to a value of type '" << rhs.getType() << "'.";
     
     return NULL;
 }
@@ -627,7 +627,7 @@ RevObject* RevObject::multiply(const RevObject &rhs) const
 void RevObject::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    throw RbException() << "No parameter with name \"" <<  name << "\" found to set.";
+    throw RbException() << "No parameter with name \"" << name << "\" found to set.";
 }
 
 
@@ -664,7 +664,7 @@ void RevObject::setName(std::string const &n)
  */
 RevObject* RevObject::subtract(const RevObject &rhs) const
 {
-    throw RbException() << "Cannot subtract a value of type '" << rhs.getType() << "' from a value of type '" <<  this->getType() << "'.";
+    throw RbException() << "Cannot subtract a value of type '" << rhs.getType() << "' from a value of type '" << this->getType() << "'.";
     
     return NULL;
 }

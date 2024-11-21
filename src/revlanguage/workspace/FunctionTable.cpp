@@ -510,7 +510,7 @@ Function* FunctionTable::getFirstFunction( const std::string& name ) const
     
     if ( the_functions.size() == 0 )
     {
-        throw RbException() << "Could not find function with name '" <<  name << "'";
+        throw RbException() << "Could not find function with name '" << name << "'";
     }
     
     // free memory

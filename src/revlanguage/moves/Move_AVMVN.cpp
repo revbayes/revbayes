@@ -207,7 +207,7 @@ RevPtr<RevVariable> Move_AVMVN::executeMethod(const std::string& name, const std
         }
         else
         {
-            throw RbException() << "A problem occured when trying to add " <<  args[0].getVariable()->getName() << " to the move.";
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
 
         return NULL;
@@ -292,7 +292,7 @@ RevPtr<RevVariable> Move_AVMVN::executeMethod(const std::string& name, const std
         }
         else
         {
-            throw RbException() << "A problem occured when trying to remove " <<  args[0].getVariable()->getName() << " from the move.";
+            throw RbException() << "A problem occured when trying to remove " << args[0].getVariable()->getName() << " from the move.";
         }
 
         return NULL;

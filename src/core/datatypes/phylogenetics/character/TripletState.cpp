@@ -68,7 +68,7 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
@@ -95,7 +95,7 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
@@ -115,13 +115,13 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
 //        else
 //        {
-//            throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//            throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //        }
 //        
 //    }
@@ -145,7 +145,7 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
@@ -172,7 +172,7 @@
 //        }
 //        else
 //        {
-//            throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//            throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //        }
 //        
 //    }
@@ -196,7 +196,7 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
@@ -223,7 +223,7 @@
 //        }
 //        else
 //        {
-//            throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//            throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //        }
 //        
 //    }
@@ -247,7 +247,7 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
@@ -279,7 +279,7 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
@@ -299,19 +299,19 @@
 //            }
 //            else
 //            {
-//                throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//                throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //            }
 //            
 //        }
 //        else
 //        {
-//            throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//            throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //        }
 //        
 //    }
 //    else
 //    {
-//        throw RbException() << "Unknown amino acid for Triplet '" <<  getStringValue() << "'";
+//        throw RbException() << "Unknown amino acid for Triplet '" << getStringValue() << "'";
 //    }
 //    
 //    

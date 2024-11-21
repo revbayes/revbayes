@@ -394,7 +394,7 @@ void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
             if ( incomplete_clade_ages[i] == -1 )
             {
-                throw RbException() << "Could not find MRCA of clade " <<  incomplete_clades[i].toString() << " in tree.";
+                throw RbException() << "Could not find MRCA of clade " << incomplete_clades[i].toString() << " in tree.";
             }
         }
         
@@ -445,7 +445,7 @@ void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchA
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
             if ( incomplete_clade_ages[i] == -1 )
             {
-                throw RbException() << "Could not find MRCA of clade " <<  incomplete_clades[i].toString() << " in tree.";
+                throw RbException() << "Could not find MRCA of clade " << incomplete_clades[i].toString() << " in tree.";
             }
         }
 

@@ -241,7 +241,7 @@ void PiecewiseCoalescent::executeMethod(const std::string &n, const std::vector<
     }
     else
     {
-        throw RbException() << "The piecewise-constant coalescent process does not have a member method called '" <<  n << "'.";
+        throw RbException() << "The piecewise-constant coalescent process does not have a member method called '" << n << "'.";
     }
     
 }

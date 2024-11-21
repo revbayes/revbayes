@@ -217,7 +217,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         }
         else
         {
-            throw RbException() << "A problem occured when trying to add " <<  args[0].getVariable()->getName() << " to the move.";
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;
@@ -305,7 +305,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         }
         else
         {
-            throw RbException() << "A problem occured when trying to add " <<  args[0].getVariable()->getName() << " to the move.";
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;

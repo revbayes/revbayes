@@ -1551,7 +1551,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException() << "The state dependent birth-death process does not have a member method called '" <<  name << "'.";
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1574,7 +1574,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException() << "The state dependent birth-death process does not have a member method called '" <<  name << "'.";
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }

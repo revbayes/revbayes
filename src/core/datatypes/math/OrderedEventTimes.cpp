@@ -100,7 +100,7 @@ void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<co
     }
     else
     {
-        throw RbException() << "An OrderedEventTimes object does not have a member method called '" <<  n << "'.";
+        throw RbException() << "An OrderedEventTimes object does not have a member method called '" << n << "'.";
     }
 }
 
@@ -123,7 +123,7 @@ void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<co
     }
     else
     {
-        throw RbException() << "An OrderedEventTimes object does not have a member method called '" <<  n << "'.";
+        throw RbException() << "An OrderedEventTimes object does not have a member method called '" << n << "'.";
     }
 }
 

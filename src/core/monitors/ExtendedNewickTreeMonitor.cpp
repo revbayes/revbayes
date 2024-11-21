@@ -114,7 +114,7 @@ void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
         std::vector<DagNode*>::iterator it = find(nodeVariables.begin(), nodeVariables.end(), nodeVar);
         if (it == nodeVariables.end())
         {
-            throw RbException() << "Cannot replace DAG node with name\"" <<  oldN->getName() << "\" in this extended newick monitor because the monitor doesn't hold this DAG node.";
+            throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this extended newick monitor because the monitor doesn't hold this DAG node.";
         }
         *it = static_cast< TypedDagNode< RbVector<double> > *>(newN);
 //        nodeVariables.erase( nodeVar );

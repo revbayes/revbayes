@@ -194,7 +194,7 @@ RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
                     else
                         {
                         numMatricesReadForThisFile--;
-                        throw RbException() << "Unknown data type \"" <<  dType << "\".";
+                        throw RbException() << "Unknown data type \"" << dType << "\".";
                         }
                     }
                 else
@@ -228,7 +228,7 @@ RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
                     else
                         {
                         numMatricesReadForThisFile--;
-                        throw RbException() << "Unknown data type \"" <<  dType << "\".";
+                        throw RbException() << "Unknown data type \"" << dType << "\".";
                         }
                     }
                 }

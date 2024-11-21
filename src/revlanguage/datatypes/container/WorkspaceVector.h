@@ -391,7 +391,7 @@ void WorkspaceVector<rlType>::push_back( const RevObject &x )
     
     if ( x_converted == NULL )
     {
-        throw RbException() << "Could not append an element of type " << x.getType() << " to a vector of type " <<  this->getType() ;
+        throw RbException() << "Could not append an element of type " << x.getType() << " to a vector of type " << this->getType() ;
     }
     
     // Push it onto the back of the elements vector

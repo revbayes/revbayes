@@ -123,7 +123,7 @@ RevBayesCore::TypedDagNode<valueType>::~TypedDagNode( void )
 template<class valueType>
 RevBayesCore::AbstractTrace* RevBayesCore::TypedDagNode<valueType>::createTraceObject(void) const
 {
-    throw RbException() << "Cannot create a trace for variable '" <<  this->getName() << "' because there are not trace objects implemented for this value type.";
+    throw RbException() << "Cannot create a trace for variable '" << this->getName() << "' because there are not trace objects implemented for this value type.";
     
     return NULL;
 }

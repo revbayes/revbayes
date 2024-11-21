@@ -482,7 +482,7 @@ RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>
             else if ( type != "intersection" )
             {
                 to_delete.push_back( n );
-            //                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" <<  obsd.getTaxonNameWithIndex(i) << "n'!";
+            //                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
             }
         }
     }
@@ -517,7 +517,7 @@ RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>
             }
             else
             {
-                throw RbException() << "Cannot concatenate two character data objects because second character data object has no taxon with name '" <<  n << "n'!";
+                throw RbException() << "Cannot concatenate two character data objects because second character data object has no taxon with name '" << n << "n'!";
             }
         }
         
@@ -633,7 +633,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::concatenate(const 
 //            else if ( type != "intersection" )
 //            {
 //                toDelete.push_back( n );
-//                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" <<  obsd.getTaxonNameWithIndex(i) << "n'!";
+//                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
 //            }
         }
     }
@@ -664,7 +664,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::concatenate(const 
             }
             else
             {
-                throw RbException() << "Cannot concatenate two character data objects because second character data object has no taxon with name '" <<  n << "n'!";
+                throw RbException() << "Cannot concatenate two character data objects because second character data object has no taxon with name '" << n << "n'!";
             }
         }
 
@@ -1377,7 +1377,7 @@ const RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscret
     }
     else 
     {
-        throw RbException() << "Cannot find taxon '" <<  name << "' in the HomologousDiscreteCharacterData matrix.";
+        throw RbException() << "Cannot find taxon '" << name << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }
@@ -1406,7 +1406,7 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscreteChara
     }
     else 
     {
-        throw RbException() << "Cannot find taxon '" <<  name << "' in the HomologousDiscreteCharacterData matrix.";
+        throw RbException() << "Cannot find taxon '" << name << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }
@@ -1434,7 +1434,7 @@ const RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscret
     }
     else 
     {
-        throw RbException() << "Cannot find taxon '" <<  tn << "' in the HomologousDiscreteCharacterData matrix.";
+        throw RbException() << "Cannot find taxon '" << tn << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }
@@ -1463,7 +1463,7 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscreteChara
     }
     else 
     {
-        throw RbException() << "Cannot find taxon '" <<  tn << "' in the HomologousDiscreteCharacterData matrix.";
+        throw RbException() << "Cannot find taxon '" << tn << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }

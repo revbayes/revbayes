@@ -1807,7 +1807,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
     }
     else
     {
-        throw RbException() << "The PhyloCTMC process does not have a member method called '" <<  n << "'.";
+        throw RbException() << "The PhyloCTMC process does not have a member method called '" << n << "'.";
     }
 
 }
@@ -1927,7 +1927,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
     }
     else
     {
-        throw RbException() << "The PhyloCTMC process does not have a member method called '" <<  n << "'.";
+        throw RbException() << "The PhyloCTMC process does not have a member method called '" << n << "'.";
     }
 
 }

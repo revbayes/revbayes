@@ -196,7 +196,7 @@ void RevBayesCore::OrderedEvents<valueType>::executeMethod(const std::string &n,
     }
     else
     {
-        throw RbException() << "The Markov event model does not have a member method called '" <<  n << "'.";
+        throw RbException() << "The Markov event model does not have a member method called '" << n << "'.";
     }
 }
 

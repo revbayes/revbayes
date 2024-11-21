@@ -352,7 +352,7 @@ bool AbstractMove::isActive(unsigned long generation) const
 void AbstractMove::performHillClimbingMove(double lHeat, double pHeat)
 {
     
-    throw RbException() << "A '" <<  getMoveName() << "' cannot be used for the hill-climbing algorithm." ;
+    throw RbException() << "A '" << getMoveName() << "' cannot be used for the hill-climbing algorithm." ;
 }
 
 

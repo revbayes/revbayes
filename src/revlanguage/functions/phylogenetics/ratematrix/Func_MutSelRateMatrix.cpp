@@ -26,7 +26,7 @@ RevBayesCore::ConcreteTimeReversibleRateMatrix* MutSelFunc(const RevBayesCore::R
     const int n = q_.getNumberOfStates();
 
     if (fitnesses.size() != n)
-        throw RbException() << "fnMutSel: there should be " <<  n << " fitnesses.";
+        throw RbException() << "fnMutSel: there should be " << n << " fitnesses.";
 
     auto q = dynamic_cast<const RevBayesCore::TimeReversibleRateMatrix*>(&q_);
 

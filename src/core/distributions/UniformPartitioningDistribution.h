@@ -200,7 +200,7 @@ void RevBayesCore::UniformPartitioningDistribution<valueType>::executeMethod(con
     }
     else
     {
-        throw RbException() << "A uniform partitions distribution does not have a member method called '" <<  n << "'.";
+        throw RbException() << "A uniform partitions distribution does not have a member method called '" << n << "'.";
     }
     
 }

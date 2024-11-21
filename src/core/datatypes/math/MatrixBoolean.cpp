@@ -167,7 +167,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     }
     else
     {
-        throw RbException() << "A matrix object does not have a member method called '" <<  n << "'.";
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -182,7 +182,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     }
     else
     {
-        throw RbException() << "A matrix object does not have a member method called '" <<  n << "'.";
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }

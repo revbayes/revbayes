@@ -83,7 +83,7 @@ RevPtr<RevVariable> MemberProcedure::execute( void )
     
     if ( found == false )
     {
-        throw RbException() << "Couldn't find member procedure called '" <<  getFunctionName() << "'";
+        throw RbException() << "Couldn't find member procedure called '" << getFunctionName() << "'";
     }
     
     if (object->getRevObject().hasDagNode())

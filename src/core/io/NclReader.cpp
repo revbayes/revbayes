@@ -1528,7 +1528,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &file_nam
             }
             else
             {
-                throw RbException() << "Unknown data type '" <<  data_type << "' for fasta formatted files.";
+                throw RbException() << "Unknown data type '" << data_type << "' for fasta formatted files.";
             }
         }
         else if (file_format == "phylip")

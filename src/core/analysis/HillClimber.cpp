@@ -541,7 +541,7 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             // error checking
             if ( theNewNode == NULL )
             {
-                throw RbException() << "Cannot find node with name '" <<  the_node->getName() << "' in the model but received a move working on it.";
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a move working on it.";
             }
 
             // now swap the node
@@ -578,7 +578,7 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             // error checking
             if ( theNewNode == NULL )
             {
-                throw RbException() << "Cannot find node with name '" <<  the_node->getName() << "' in the model but received a monitor working on it.";
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a monitor working on it.";
             }
 
             // now swap the node
