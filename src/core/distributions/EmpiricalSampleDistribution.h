@@ -366,7 +366,7 @@ void RevBayesCore::EmpiricalSampleDistribution<mixtureType>::executeMethod(const
     }
     else
     {
-        throw RbException("An empirical-sample distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "An empirical-sample distribution does not have a member method called '" << n << "'.";
     }
     
 }
