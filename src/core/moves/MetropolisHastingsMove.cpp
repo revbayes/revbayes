@@ -370,36 +370,38 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     for (auto node: touched_nodes)
         node->touch();
 
+    bool fail_probability = not std::isfinite(ln_hastings_ratio);
+
     double ln_prior_ratio = 0.0;
     double ln_likelihood_ratio = 0.0;
 
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
     {
-        if ( RbMath::isAComputableNumber(ln_prior_ratio) &&
-             RbMath::isAComputableNumber(ln_likelihood_ratio) &&
-             RbMath::isAComputableNumber(ln_hastings_ratio) )
+        if (fail_probability) break;
+
+        double ratio = 0;
+        try {
+            ratio = node->getLnProbabilityRatio();
+        }
+        catch (const RbException &e)
         {
-            double ratio = 0;
-            try {
-                ratio = node->getLnProbabilityRatio();
-            }
-            catch (const RbException &e)
+            ratio = RbConstants::Double::neginf;
+
+            if ( e.getExceptionType() != RbException::MATH_ERROR )
             {
-                ratio = RbConstants::Double::neginf;
-
-                if ( e.getExceptionType() != RbException::MATH_ERROR )
-                {
-                    throw;
-                }
+                throw;
             }
-
-            if ( node->isClamped() )
-                ln_likelihood_ratio += ratio;
-            else
-                ln_prior_ratio += ratio;
         }
 
+        if ( node->isClamped() )
+            ln_likelihood_ratio += ratio;
+        else
+            ln_prior_ratio += ratio;
+
+        if ( not RbMath::isAComputableNumber(ln_prior_ratio) or
+             not RbMath::isAComputableNumber(ln_likelihood_ratio))
+            fail_probability = true;
     }
 
     if (logMCMC >= 3)
