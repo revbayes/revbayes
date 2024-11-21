@@ -106,9 +106,6 @@ monitors.append( mnModel(filename="output/test1.log", printgen=10) )
 # 2. the tree #
 monitors.append( mnFile(filename="output/test1.trees", printgen=10, fbd_tree) )
 
-# 3. and a few select parameters to be printed to the screen #
-monitors.append( mnScreen(printgen=10, num_samp_anc, origin_time) )
-
 # Initialize the MCMC object #
 mymcmc = mcmc(mymodel, monitors, moves)
 

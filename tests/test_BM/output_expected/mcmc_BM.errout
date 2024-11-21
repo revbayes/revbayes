@@ -1,0 +1,18 @@
+   Successfully read one character matrix from file 'data/primates_lht.nex'
+   Attempting to read the contents of file "Primates_tree.nex"
+   Successfully read file
+   
+   Running burn-in phase of Monte Carlo sampler for 5000 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 2 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 2 moves per iteration
+   
