@@ -165,7 +165,7 @@ while [  $i -lt ${#tests[@]} ]; do
             sed '/   Error:\tProblem processing/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
             mv output/${tmp1}.errout.tmp output/${tmp1}.errout
             
-            # The dos2unix utility does not always catch OS-specific differences in path separators
+            # Account for OS-specific differences in path separators
             if [ "$windows" = "true" ]; then
                 sed 's/\\/\//g' output/${tmp1}.errout > output/${tmp1}.errout.tmp
                 mv output/${tmp1}.errout.tmp output/${tmp1}.errout
