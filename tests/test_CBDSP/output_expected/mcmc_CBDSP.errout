@@ -1,31 +1,31 @@
    Attempting to read the contents of file "primates.tree"
    Successfully read file
-   Could not compute lnProb for node 'timetree': lnProb = nan
+   Could not compute lnProb for node 'timetree': lnProb = -nan
    (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
    
    
    Drawing new initial states ... 
-   Could not compute lnProb for node 'timetree': lnProb = nan
+   Could not compute lnProb for node 'timetree': lnProb = -nan
    (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
    
    
    Drawing new initial states ... 
-   Could not compute lnProb for node 'timetree': lnProb = nan
+   Could not compute lnProb for node 'timetree': lnProb = -nan
    (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
    
    
    Drawing new initial states ... 
-   Could not compute lnProb for node 'timetree': lnProb = nan
+   Could not compute lnProb for node 'timetree': lnProb = -nan
    (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
    
    
    Drawing new initial states ... 
-   Could not compute lnProb for node 'timetree': lnProb = nan
+   Could not compute lnProb for node 'timetree': lnProb = -nan
    (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
    
    
    Drawing new initial states ... 
-   Could not compute lnProb for node 'timetree': lnProb = nan
+   Could not compute lnProb for node 'timetree': lnProb = -nan
    (((((((Galago_senegalensis[&index=23]:16.988890,Oto...
    
    
