@@ -375,6 +375,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     double ln_prior_ratio = 0.0;
     double ln_likelihood_ratio = 0.0;
 
+    bool zero_or_nan_to_finite = false;
+
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
     {
@@ -389,7 +391,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             // Compute the current lnProbability.
             double current = node->getLnProbability();
 
-            ratio = current - prev;
+            if (std::isfinite(current) and (std::isnan(prev) or prev == RbConstants::Double::neginf))
+                zero_or_nan_to_finite = true;
+            else
+                ratio = current - prev;
         }
         catch (const RbException &e)
         {
@@ -425,6 +430,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false )
         rejected = true;
+    else if (zero_or_nan_to_finite)
+        ;
     else if (ln_acceptance_ratio >= 0.0)
         ;
     else if (ln_acceptance_ratio < -300.0)
