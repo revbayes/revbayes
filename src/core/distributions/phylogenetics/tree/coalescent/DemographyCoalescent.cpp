@@ -416,7 +416,7 @@ void DemographyCoalescent::swapParameterInternal(const DagNode *oldP, const DagN
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped for the demographic function coalescent process: " + oldP->getName() + " to " + newP->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped for the demographic function coalescent process: " << oldP->getName() << " to " << newP->getName(); 
     }
     
 }

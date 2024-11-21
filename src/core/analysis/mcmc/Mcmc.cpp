@@ -1010,7 +1010,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_node->getName() == "" )
             {
-                throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
+                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
             }
             
             DagNode* the_new_node = NULL;

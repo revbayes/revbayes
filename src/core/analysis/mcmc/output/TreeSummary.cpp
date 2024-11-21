@@ -277,7 +277,7 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
                         }
                         else
                         {
-                            throw RbException("Too few parameters for this tree during the tree annotation. Problematic tree: "+ sample_tree.getNewickRepresentation());
+                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
                         }
 
                     }
@@ -553,7 +553,7 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
                     // check if this parameter exists
                     if ( params.size() <= paramIndex )
                     {
-                        throw RbException("Too few parameters for this tree during the tree annotation. Problematic tree: "+ sample_tree.getNewickRepresentation());
+                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
                     }
 
                     std::string tmp = params[paramIndex];

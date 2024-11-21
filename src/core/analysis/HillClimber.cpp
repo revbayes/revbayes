@@ -526,7 +526,7 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             // error checking
             if ( the_node->getName() == "" )
             {
-                throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
+                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
             }
 
             DagNode* theNewNode = NULL;

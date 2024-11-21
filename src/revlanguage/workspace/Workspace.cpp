@@ -187,7 +187,7 @@ const TypeSpec& Workspace::getClassTypeSpecOfType(std::string const &type) const
         }
         else
         {
-            throw RbException( "Type '" + type + "' does not exist in environment" );;
+            throw RbException() << "Type '" << type << "' does not exist in environment" ; 
         }
         
     }
@@ -283,7 +283,7 @@ RevObject* Workspace::makeNewDefaultObject(const std::string& type) const
         }
         else
         {
-            throw RbException( "Type '" + type + "' does not exist in environment" );
+            throw RbException() << "Type '" << type << "' does not exist in environment" ; 
         }
     }
     else

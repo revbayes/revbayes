@@ -482,7 +482,7 @@ void AutocorrelatedEventDistribution::swapParameterInternal( const DagNode *oldP
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + oldP->getName() + " to " + newP->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << oldP->getName() << " to " << newP->getName(); 
     }
     
 }

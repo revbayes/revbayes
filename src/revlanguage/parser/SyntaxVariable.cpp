@@ -188,7 +188,7 @@ bool SyntaxVariable::retrievesExternVar( const Environment& env, std::set<std::s
     if ( !env.existsVariable( identifier ) )
     {
         if ( !inLHS )
-            throw RbException( "No variable named '" + identifier + "'" );
+            throw RbException() << "No variable named '" << identifier << "'" ; 
 
         localVars.insert( identifier );
 

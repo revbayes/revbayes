@@ -567,7 +567,7 @@ const Function& FunctionTable::getFunction(const std::string& name, const std::v
 
     if ( the_function == NULL )
     {
-        throw RbException("No function named '"+ name + "'");
+        throw RbException() << "No function named '" << name << "'"; 
     }
     
     return *the_function;
@@ -683,7 +683,7 @@ bool FunctionTable::isProcedure(const std::string& name) const
     }
     else
     {
-        throw RbException( "No function or procedure '" + name + "'" );
+        throw RbException() << "No function or procedure '" << name << "'" ; 
     }
     
 }

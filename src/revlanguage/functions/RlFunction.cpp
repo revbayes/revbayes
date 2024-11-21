@@ -755,7 +755,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 
                     if ( filled[j] )
                     {
-                        throw RbException( "Duplicate argument labels '" + passed_args[i].getLabel() );
+                        throw RbException() << "Duplicate argument labels '" << passed_args[i].getLabel() ; 
                     }
 
                     p_args[i]               = the_rules[j].fitArgument( p_args[i], once );
@@ -813,11 +813,11 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 
         if (num_matches > 1)
         {
-            throw RbException( "Argument label '" + passed_args[i].getLabel() + "' matches mutliple parameter labels." );
+            throw RbException() << "Argument label '" << passed_args[i].getLabel() << "' matches mutliple parameter labels." ; 
         }
         else if (num_matches < 1)
         {
-            throw RbException( "Argument label '" + passed_args[i].getLabel() + "' matches no untaken parameter labels." );
+            throw RbException() << "Argument label '" << passed_args[i].getLabel() << "' matches no untaken parameter labels." ; 
         }
         
         if ( num_matches == 1)

@@ -109,7 +109,7 @@ void Environment::addAlias( const std::string& name, const RevPtr<RevVariable>& 
      would make it impossible to hide global variables. */
     if ( variableTable.find( name ) != variableTable.end() )
     {
-        throw RbException( "Variable " + name + " already exists in frame" );
+        throw RbException() << "Variable " << name << " already exists in frame" ; 
     }
     
     /* Insert new alias to variable in variable table (we do not and should not name it) */
@@ -169,7 +169,7 @@ void Environment::addReference( const std::string& name, const RevPtr<RevVariabl
      would make it impossible to hide global variables. */
     if ( variableTable.find( name ) != variableTable.end() )
     {
-        throw RbException( "Variable " + name + " already exists in frame" );
+        throw RbException() << "Variable " << name << " already exists in frame" ; 
     }
     
     /* Insert new reference variable in variable table */
@@ -195,7 +195,7 @@ void Environment::addVariable( const std::string& name, const RevPtr<RevVariable
         would make it impossible to hide global variables. */
     if ( variableTable.find( name ) != variableTable.end() )
     {
-        throw RbException( "Variable " + name + " already exists in frame" );
+        throw RbException() << "Variable " << name << " already exists in frame" ; 
     }
     
     /* Insert new RevVariable in variable table */

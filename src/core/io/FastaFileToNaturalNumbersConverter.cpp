@@ -76,7 +76,7 @@ void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std:
 
       // if the sequence indentifier does not include a taxa names throw an error 
       } else {
-        throw RbException( "Sequence \"" + line + "\" does not belong to any of the taxa. Make sure every sequence starts with one of the taxa names.");
+        throw RbException() << "Sequence \"" << line << "\" does not belong to any of the taxa. Make sure every sequence starts with one of the taxa names."; 
       }
 
     }
@@ -218,10 +218,10 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
       
         // pointing out some typical invalid counts: null counts (e.g., 0,0,0,0) and >2-allelic counts (e.g., 0,1,1,1)
         if (n_counts==0){
-          throw RbException( "Unexpected allelic counts at site " + std::to_string(s) + " and taxa " + taxa_name + ". PoMos require at least one postive count.");
+          throw RbException() << "Unexpected allelic counts at site " << s << " and taxa " << taxa_name << ". PoMos require at least one postive count."; 
         }
         if (n_counts>2){
-          throw RbException( "Unexpected allelic couts at site " + std::to_string(s) + " and taxa " + taxa_name + ". PoMos only accept monoallelic or biallelic counts.");
+          throw RbException() << "Unexpected allelic couts at site " << std::s << " and taxa " << taxa_name << ". PoMos only accept monoallelic or biallelic counts."; 
         }
       
         // sampling a 0:n_individuals frequency from the weight vector 
