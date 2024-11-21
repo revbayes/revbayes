@@ -221,7 +221,7 @@ const size_t FastaFileToNaturalNumbersConverter::getState(std::vector<int>& coun
           throw RbException() << "Unexpected allelic counts at site " << s << " and taxa " << taxa_name << ". PoMos require at least one postive count."; 
         }
         if (n_counts>2){
-          throw RbException() << "Unexpected allelic couts at site " << std::s << " and taxa " << taxa_name << ". PoMos only accept monoallelic or biallelic counts."; 
+          throw RbException() << "Unexpected allelic couts at site " << s << " and taxa " << taxa_name << ". PoMos only accept monoallelic or biallelic counts."; 
         }
       
         // sampling a 0:n_individuals frequency from the weight vector 
