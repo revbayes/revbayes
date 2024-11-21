@@ -1,6 +1,8 @@
 #ifndef CategoricalDistribution_H
 #define CategoricalDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
@@ -26,7 +28,7 @@ template <class valueType> class TypedDagNode;
      *
      */
 
-    class CategoricalDistribution : public TypedDistribution<long> {
+    class CategoricalDistribution : public TypedDistribution<std::int64_t> {
         
     public:
         CategoricalDistribution(const TypedDagNode< Simplex >* p);

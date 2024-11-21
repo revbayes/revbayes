@@ -1,5 +1,6 @@
 #include <math.h>
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -55,7 +56,7 @@ RevBayesCore::BinomialDistribution* Dist_binomial::createDistribution( void ) co
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<long>*    vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* vp = static_cast<const Probability &>( p->getRevObject() ).getDagNode();
     RevBayesCore::BinomialDistribution* d  = new RevBayesCore::BinomialDistribution( vn, vp );
     return d;

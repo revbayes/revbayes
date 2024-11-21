@@ -9,6 +9,7 @@
 #define ORDEREDEVENTTIME_H_
 
 #include <set>
+#include <cstdint>
 
 #include "Cloneable.h"
 #include "MemberObject.h"
@@ -16,7 +17,7 @@
 
 namespace RevBayesCore {
 
-	class OrderedEventTimes : public Cloneable, public MemberObject<long>, public MemberObject< RbVector<double> > {
+	class OrderedEventTimes : public Cloneable, public MemberObject<std::int64_t>, public MemberObject< RbVector<double> > {
 
 	public:
 
@@ -38,7 +39,7 @@ namespace RevBayesCore {
 		size_t                    size() const;
 
 		// expose methods
-        void                      executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const; //!< Map the member methods to internal function calls
+        void                      executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const; //!< Map the member methods to internal function calls
         void                      executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const; //!< Map the member methods to internal function calls
 
 

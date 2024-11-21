@@ -2,6 +2,7 @@
 #define RevBayes_development_branch_StochasticBranchRateMonitor_h
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "VariableMonitor.h"
 
@@ -19,14 +20,14 @@ template <class variableType> class StochasticNode;
     public:
         
         // Constructors and Destructors
-        StochasticBranchRateMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, const std::string &del);
+        StochasticBranchRateMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, const std::string &del);
         StochasticBranchRateMonitor(const StochasticBranchRateMonitor &m);
         virtual ~StochasticBranchRateMonitor(void);
         
         StochasticBranchRateMonitor*                        clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                                monitorVariables(unsigned long gen);                                 //!< Monitor at generation gen
+        void                                                monitorVariables(std::uint64_t gen);                                 //!< Monitor at generation gen
         void                                                printFileHeader(void);                                              //!< Print header
         
         // getters and setters

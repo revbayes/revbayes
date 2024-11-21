@@ -1,6 +1,8 @@
 #ifndef FloorFunction_H
 #define FloorFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -13,7 +15,7 @@ template <class valueType> class TypedDagNode;
      * The floor function rounds a real number down to the next integer number.
      *
      */
-    class FloorFunction : public TypedFunction<long> {
+    class FloorFunction : public TypedFunction<std::int64_t> {
         
     public:
         FloorFunction(const TypedDagNode<double> *a);

@@ -1,6 +1,7 @@
 #include "RateMatrix_PoMo2N.h"
 
 #include <cassert>
+#include <cstdint>
 #include <cstddef>
 
 #include "RbException.h"
@@ -25,7 +26,7 @@ phi( in_k, 1.0 )
 */
 
 /** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual population size */
-RateMatrix_PoMo2N::RateMatrix_PoMo2N(long num_states, long in_n )  : 
+RateMatrix_PoMo2N::RateMatrix_PoMo2N(std::int64_t num_states, std::int64_t in_n )  : 
 AbstractRateMatrix( num_states ), 
 N( in_n ),
 mu( 2 , 0.01 ),
@@ -207,7 +208,7 @@ std::vector<double> RateMatrix_PoMo2N::getStationaryFrequencies( void ) const
 
 
 
-void RateMatrix_PoMo2N::setN( long & ni )
+void RateMatrix_PoMo2N::setN( std::int64_t & ni )
 {
     N = ni;
     

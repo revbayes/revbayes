@@ -8,6 +8,7 @@
 #define CladogeneticSpeciationRateMatrixFunction__
 
 #include <vector>
+#include <cstdint>
 #include <map>
 
 #include "AbstractCladogenicStateFunction.h"
@@ -24,7 +25,7 @@ template <class valueType> class TypedDagNode;
     public:
         
         //CladogeneticSpeciationRateMatrixFunction( const TypedDagNode< RbVector< double > >* sr, unsigned mc );
-        CladogeneticSpeciationRateMatrixFunction( const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates, int n_states );
+        CladogeneticSpeciationRateMatrixFunction( const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates, int n_states );
         virtual                                                                         ~CladogeneticSpeciationRateMatrixFunction(void);
         
         // public member functions
@@ -43,7 +44,7 @@ template <class valueType> class TypedDagNode;
         void                                                                            updateSpeciationRates(void);
         
         // members
-        const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >*     cladogenetic_events;
+        const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >*     cladogenetic_events;
         std::map< std::vector<unsigned>, double >                                       event_map;
         unsigned                                                                        num_states;
         const TypedDagNode< RbVector<double> >*                                         speciation_rates;

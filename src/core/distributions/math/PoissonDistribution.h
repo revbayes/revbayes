@@ -1,6 +1,8 @@
 #ifndef PoissonDistribution_H
 #define PoissonDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
@@ -16,7 +18,7 @@ template <class valueType> class TypedDagNode;
      * Instances of this class can be associated to stochastic variables.
      *
      */
-    class PoissonDistribution : public TypedDistribution<long> {
+    class PoissonDistribution : public TypedDistribution<std::int64_t> {
         
     public:
         PoissonDistribution(const TypedDagNode<double> *l);

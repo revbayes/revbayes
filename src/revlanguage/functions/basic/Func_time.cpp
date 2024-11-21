@@ -1,6 +1,7 @@
 #include "Func_time.h"
 
 #include <string>
+#include <cstdint>
 
 #include "Natural.h"
 #include "OptionRule.h"
@@ -40,7 +41,7 @@ RevPtr<RevVariable> Func_time::execute( void )
     
     boost::posix_time::ptime t = boost::posix_time::microsec_clock::local_time();
 
-    long time = 0;
+    std::int64_t time = 0;
     if ( option == "year" )
     {
         time = t.date().year();
@@ -59,10 +60,9 @@ RevPtr<RevVariable> Func_time::execute( void )
     }
     else if ( option == "fromBeginning" )
     {
-        boost::posix_time::ptime t1 = boost::posix_time::microsec_clock::local_time();
-        boost::posix_time::ptime t2(boost::posix_time::min_date_time);
-        boost::posix_time::time_duration duration = t1-t2;
-         
+        boost::posix_time::ptime epoch_start(boost::posix_time::ptime(boost::gregorian::date(1970,1,1)));
+        boost::posix_time::time_duration duration = t - epoch_start;
+
         time = duration.total_milliseconds();
     }
     

@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <cstdint>
 
 #include "MoveSchedule.h"
 
@@ -20,7 +21,7 @@ template <class valueType> class RbVector;
         SingleRandomMoveSchedule*                       clone(void) const;
         double                                          getNumberMovesPerIteration(void) const;
         void                                            setNumberMovesPerIteration(double);
-        Move&                                           nextMove(unsigned long g);
+        Move&                                           nextMove(std::uint64_t g);
         
     private:
         

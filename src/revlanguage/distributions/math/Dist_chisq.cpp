@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -47,7 +48,7 @@ RevBayesCore::ChisqDistribution* Dist_chisq::createDistribution( void ) const
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<long>*    df = static_cast<const Natural     &>( degrees->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    df = static_cast<const Natural     &>( degrees->getRevObject() ).getDagNode();
     RevBayesCore::ChisqDistribution* d  = new RevBayesCore::ChisqDistribution( df );
     
     return d;

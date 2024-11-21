@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -41,7 +42,7 @@ void Mntr_Screen::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new Mntr_Screen object
-    unsigned long g = (unsigned long) static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
+    std::uint64_t g = (std::uint64_t) static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
     std::vector<RevBayesCore::DagNode *> n;

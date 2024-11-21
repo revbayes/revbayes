@@ -1,6 +1,7 @@
 #include "SingleRandomMoveSchedule.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -42,7 +43,7 @@ double SingleRandomMoveSchedule::getNumberMovesPerIteration( void ) const
 }
 
 
-Move& SingleRandomMoveSchedule::nextMove( unsigned long gen )
+Move& SingleRandomMoveSchedule::nextMove( std::uint64_t gen )
 {
     
     RandomNumberGenerator* rng = GLOBAL_RNG;

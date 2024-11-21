@@ -8,6 +8,7 @@
 #include <math.h>
 #include <cstring>
 #include <iomanip>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -147,7 +148,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     
     if ( n == "[]" )
     {
-        size_t index = (size_t)static_cast<const TypedDagNode<long> *>( args[0] )->getValue() - 1;
+        size_t index = (size_t)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue() - 1;
         boost::dynamic_bitset<> tmp = elements[index];
         
         for (size_t i = 0; i < tmp.size(); i++)

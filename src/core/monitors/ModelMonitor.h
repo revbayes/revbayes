@@ -2,6 +2,7 @@
 #define ModelMonitor_H
 
 #include <iosfwd>
+#include <cstdint>
 #include <set>
 
 #include "VariableMonitor.h"
@@ -23,7 +24,7 @@ class Model;
         
     public:
         // Constructors and Destructors
-        ModelMonitor(unsigned long g, const path &fname, const SampleFormat &f, std::set<std::string> exclude_list);                        //!< Constructor
+        ModelMonitor(std::uint64_t g, const path &fname, const SampleFormat &f, std::set<std::string> exclude_list);                        //!< Constructor
         virtual ~ModelMonitor(void);
         
         

@@ -1,6 +1,8 @@
 #ifndef HillClimber_H
 #define HillClimber_H
 
+#include <cstdint>
+
 #include "MaximumLikelihoodEstimation.h"
 
 namespace RevBayesCore {
@@ -46,7 +48,7 @@ namespace RevBayesCore {
         std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
         bool                                                hasConverged(double m);
         void                                                initializeSampler(void);                                                                //!< Initialize objects for HillClimber sampling
-        void                                                monitor(unsigned long g);
+        void                                                monitor(std::uint64_t g);
         void                                                nextCycle(void);
         void                                                removeMonitors(void);
         void                                                reset(void);                                                                            //!< Reset the sampler and set all the counters back to 0.

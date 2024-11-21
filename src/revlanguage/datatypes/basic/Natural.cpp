@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cstdint>
 #include <string>
 
 #include "RlBoolean.h"
@@ -18,29 +19,16 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-Natural::Natural( void ) : Integer( 0L )
+Natural::Natural( void ) : Integer( std::int64_t(0) )
 {
 
 }
 
 
-Natural::Natural( RevBayesCore::TypedDagNode<long> *v ) : Integer( v )
+Natural::Natural( RevBayesCore::TypedDagNode<std::int64_t> *v ) : Integer( v )
 {
     
 }
-
-
-/** Construct from int */
-Natural::Natural( long x ) : Integer( x )
-{
-
-    if ( x < 0 )
-    {
-        throw RbException( "Negative value for " + getClassType() );
-    }
-    
-}
-
 
 /**
  * Generic addition operator.

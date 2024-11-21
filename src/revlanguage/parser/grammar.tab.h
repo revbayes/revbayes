@@ -180,7 +180,6 @@ union YYSTYPE
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    long                                             longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
@@ -190,6 +189,7 @@ union YYSTYPE
     std::list<RevLanguage::SyntaxElement*>*         syntaxElementList;
     std::list<RevLanguage::SyntaxLabeledExpr*>*     argumentList;
     std::list<RevLanguage::SyntaxFormal*>*          formalList;
+    std::int64_t                                             longIntValue;
 
 #line 195 "./grammar.tab.h"
 

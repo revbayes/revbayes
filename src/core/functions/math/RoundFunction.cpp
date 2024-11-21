@@ -1,6 +1,7 @@
 #include "RoundFunction.h"
 
 #include <cmath>
+#include <cstdint>
 
 #include "Cloneable.h"
 #include "TypedDagNode.h"
@@ -13,7 +14,7 @@ using namespace RevBayesCore;
  *
  * @param x a double of the value to be rounded
  */
-RoundFunction::RoundFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
+RoundFunction::RoundFunction(const TypedDagNode<double> *x) : TypedFunction<std::int64_t>( new std::int64_t(0) ),
     a( x )
 {
     

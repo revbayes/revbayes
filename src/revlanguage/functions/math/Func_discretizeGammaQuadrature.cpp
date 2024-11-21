@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -43,7 +44,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_discretizeGammaQua
     
     RevBayesCore::TypedDagNode<double>* shape = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* rate = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::DiscretizeGammaQuadratureFunction *func = new RevBayesCore::DiscretizeGammaQuadratureFunction( shape, rate, numCats);
     

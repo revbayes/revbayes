@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <cstdint>
 #include <string>
 #include <ostream>
 #include <vector>
@@ -69,7 +70,7 @@ void Mntr_File::constructInternalObject( void )
     bool wv = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
 
     SampleFormat Format = (fmt == "json") ? SampleFormat(JSONFormat()) : SampleFormat(SeparatorFormat(sep));
-    value = new RevBayesCore::VariableMonitor(n, (unsigned long)g, fn, Format, pp, l, pr, app, wv);
+    value = new RevBayesCore::VariableMonitor(n, (std::uint64_t)g, fn, Format, pp, l, pr, app, wv);
 }
 
 /** Get Rev type of object */

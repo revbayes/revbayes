@@ -2,6 +2,7 @@
 #define SRC_CORE_MONITORS_NEXUSMONITOR_H_
 
 #include <iosfwd>
+#include <cstdint>
 #include <vector>
 
 #include "AbstractFileMonitor.h"
@@ -18,12 +19,12 @@ template <class valueType> class TypedDagNode;
 * */
 class NexusMonitor: public AbstractFileMonitor {
 public:
-    NexusMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode*> &n, bool np, unsigned long g, const std::string &fname,
+    NexusMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode*> &n, bool np, std::uint64_t g, const std::string &fname,
                  bool ap = false, bool taxa = true);
     NexusMonitor* clone(void) const;
 
     virtual void printHeader();
-    virtual void monitor(unsigned long gen);
+    virtual void monitor(std::uint64_t gen);
     virtual void closeStream();    
     void swapNode(DagNode *oldN, DagNode *newN);
 

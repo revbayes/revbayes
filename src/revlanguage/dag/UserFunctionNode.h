@@ -7,6 +7,7 @@
 #include "RbFileManager.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevLanguage {
     
@@ -140,7 +141,7 @@ UserFunctionNode<rlType>::~UserFunctionNode( void )
  * Assignment operator. We make sure we detach ourselves from
  * the old user function parameters and attach ourselves to the
  * parameters of the new user function. There is no need to update
- * the returnVariable, as long as we mark ourselves as dirty.
+ * the returnVariable, as std::int64_t as we mark ourselves as dirty.
  */
 template<typename rlType>
 UserFunctionNode<rlType>& UserFunctionNode<rlType>::operator=( const UserFunctionNode<rlType>& x )

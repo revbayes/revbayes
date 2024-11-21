@@ -1,6 +1,7 @@
 #include "MultivariateNormalDistribution.h"
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 
 #include "DistributionMultivariateNormal.h"
@@ -134,7 +135,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> MultivariateNormalDistribution::ex
     {
         found = true;
         
-        int    index = (int)static_cast<const TypedDagNode<long>   *>( args[0] )->getValue() - 1;
+        int    index = (int)static_cast<const TypedDagNode<std::int64_t>   *>( args[0] )->getValue() - 1;
         double v     = static_cast<const TypedDagNode<double>*>( args[1] )->getValue();
         
         clampAt(index, v);

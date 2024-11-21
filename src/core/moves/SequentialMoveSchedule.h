@@ -23,6 +23,7 @@
 #include "RbVector.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
     
@@ -35,7 +36,7 @@ namespace RevBayesCore {
         // pure virtual public methods
         SequentialMoveSchedule*                         clone(void) const;
         double                                          getNumberMovesPerIteration(void) const;
-        Move&                                           nextMove(unsigned long g);
+        Move&                                           nextMove(std::uint64_t g);
         
     private:
         

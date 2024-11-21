@@ -8,6 +8,7 @@
 #include "TransitionProbabilityMatrix.h"
 
 #include <cmath>
+#include <cstdint>
 #include <string>
 #include <iomanip>
 #include <boost/math/special_functions/digamma.hpp>
@@ -15,7 +16,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_revPoMoNeutralM4N::RateMatrix_revPoMoNeutralM4N( long num_states, long in_m ) : TimeReversibleRateMatrix( num_states ),
+RateMatrix_revPoMoNeutralM4N::RateMatrix_revPoMoNeutralM4N( std::int64_t num_states, std::int64_t in_m ) : TimeReversibleRateMatrix( num_states ),
     N( 2 ),
     M( in_m ),
     pi(4, 0.25),
@@ -434,7 +435,7 @@ void RateMatrix_revPoMoNeutralM4N::tiProbsComplexEigens(double t, TransitionProb
 }
 
 
-void RateMatrix_revPoMoNeutralM4N::setN(long ps)
+void RateMatrix_revPoMoNeutralM4N::setN(std::int64_t ps)
 {
     N = ps;
     // set flags
@@ -442,7 +443,7 @@ void RateMatrix_revPoMoNeutralM4N::setN(long ps)
 }
 
 
-void RateMatrix_revPoMoNeutralM4N::setM(long vps)
+void RateMatrix_revPoMoNeutralM4N::setM(std::int64_t vps)
 {
     M = vps;
     // set flags

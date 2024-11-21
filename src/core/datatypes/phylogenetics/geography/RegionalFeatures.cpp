@@ -13,6 +13,7 @@
 #include "RbException.h"
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -27,9 +28,9 @@ RegionalFeatures::RegionalFeatures(void) {
 }
 
 
-RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<long> > > wc,
+RegionalFeatures::RegionalFeatures(std::map<size_t, std::map<size_t, std::vector<std::int64_t> > > wc,
                                    std::map<size_t, std::map<size_t, std::vector<double> > > wq,
-                                   std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > bc,
+                                   std::map<size_t, std::map<size_t, std::vector<std::vector<std::int64_t> > > > bc,
                                    std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > bq) :
     withinCategorical(wc),
     withinQuantitative(wq),

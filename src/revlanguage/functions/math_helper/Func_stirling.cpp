@@ -1,6 +1,7 @@
 #include "Func_stirling.h"
 
 #include <string>
+#include <cstdint>
 #include <vector>
 
 #include "RbMathCombinatorialFunctions.h"
@@ -51,7 +52,7 @@ RevPtr<RevVariable> Func_stirling::execute()
 	}
 	else if (kind == "first")
     {
-		unsigned long sN = RevBayesCore::RbMath::stirlingFirst(n, k);
+		std::uint64_t sN = RevBayesCore::RbMath::stirlingFirst(n, k);
 		Natural* value = new Natural( sN );
 		return new RevVariable( value );
 	}

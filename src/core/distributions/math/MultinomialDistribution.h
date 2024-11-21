@@ -1,6 +1,8 @@
 #ifndef MultinomialDistribution_H
 #define MultinomialDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 #include "RbVector.h"
 
@@ -19,10 +21,10 @@ template <class valueType> class TypedDagNode;
      * Instances of this class can be associated to stochastic variables.
      *
      */
-    class MultinomialDistribution : public TypedDistribution< RbVector<long> > {
+    class MultinomialDistribution : public TypedDistribution< RbVector<std::int64_t> > {
         
     public:
-        MultinomialDistribution(const TypedDagNode< Simplex > *p, const TypedDagNode<long> *n);
+        MultinomialDistribution(const TypedDagNode< Simplex > *p, const TypedDagNode<std::int64_t> *n);
         virtual                                            ~MultinomialDistribution(void);                                                //!< Virtual destructor
         
         // public member functions
@@ -38,7 +40,7 @@ template <class valueType> class TypedDagNode;
         
         // members
         const TypedDagNode<Simplex>*                        p;
-        const TypedDagNode<long>*                           n;
+        const TypedDagNode<std::int64_t>*                           n;
     };
     
 }

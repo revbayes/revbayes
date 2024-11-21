@@ -1,6 +1,7 @@
 #include "MultiValueEventBirthDeathProposal.h"
 
 #include <cmath>
+#include <cstdint>
 
 #include "AutocorrelatedEventDistribution.h"
 #include "DistributionNormal.h"
@@ -119,7 +120,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     MultiValueEvent &mve = event_var->getValue();
-    long n_events = mve.getNumberOfEvents();
+    std::int64_t n_events = mve.getNumberOfEvents();
     
     double hr = 0.0;
 
@@ -138,7 +139,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         mve.setNumberOfEvents( n_events + 1 );
         
         // get the offsets
-        const std::vector<long> &offset = dist_mve.getMinimumNumberOfEvents();
+        const std::vector<std::int64_t> &offset = dist_mve.getMinimumNumberOfEvents();
         
         std::vector< TypedDistribution<double> * > priors = dist_mve.getValuePriors();
         
@@ -226,7 +227,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         mve.setNumberOfEvents( n_events - 1 );
         
         // get the offsets
-        const std::vector<long> &offset = dist_mve.getMinimumNumberOfEvents();
+        const std::vector<std::int64_t> &offset = dist_mve.getMinimumNumberOfEvents();
         
         // randomly pick an index
         size_t idx = floor( n_events * rng->uniform01() );
@@ -276,7 +277,7 @@ double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValu
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
     MultiValueEvent &mve = event_var->getValue();
-    long n_events = mve.getNumberOfEvents();
+    std::int64_t n_events = mve.getNumberOfEvents();
     
     double hr = 0.0;
 
@@ -320,7 +321,7 @@ double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValu
         mve.setNumberOfEvents( n_events - 1 );
         
         // get the offsets
-        const std::vector<long> &offset = dist_mve.getMinimumNumberOfEvents();
+        const std::vector<std::int64_t> &offset = dist_mve.getMinimumNumberOfEvents();
         
         // randomly pick an index
         size_t idx = floor( n_events * rng->uniform01() );
@@ -393,7 +394,7 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
     
     MultiValueEvent &mve = event_var->getValue();
     const MultiValueEventDistribution &dist_mve = static_cast< const MultiValueEventDistribution &>( event_var->getDistribution() );
-    long n_events = mve.getNumberOfEvents();
+    std::int64_t n_events = mve.getNumberOfEvents();
     
     // undo the proposal
     if ( was_birth == true )
@@ -403,7 +404,7 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
         mve.setNumberOfEvents( n_events - 1 );
         
         // get the offsets
-        const std::vector<long> &offset = dist_mve.getMinimumNumberOfEvents();
+        const std::vector<std::int64_t> &offset = dist_mve.getMinimumNumberOfEvents();
         
         // remove the proposed values
         for (size_t i=0; i<mve.getNumberOfValues(); ++i)
@@ -427,7 +428,7 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
         mve.setNumberOfEvents( n_events + 1 );
         
         // get the offsets
-        const std::vector<long> &offset = dist_mve.getMinimumNumberOfEvents();
+        const std::vector<std::int64_t> &offset = dist_mve.getMinimumNumberOfEvents();
 
         std::vector< TypedDistribution<double> * > priors = dist_mve.getValuePriors();
         for (size_t i=0; i<priors.size(); ++i)

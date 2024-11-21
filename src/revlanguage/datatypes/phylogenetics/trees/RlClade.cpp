@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <sstream>
 #include <set>
 #include <string>
@@ -172,7 +173,7 @@ void Clade::constructInternalObject( void )
     // set the number of missing if provided
     if ( missing->getRevObject() != RevNullObject::getInstance() )
     {
-        long n = static_cast<const Natural &>( missing->getRevObject() ).getValue();
+        std::int64_t n = static_cast<const Natural &>( missing->getRevObject() ).getValue();
         c->setNumberMissingTaxa( (int)n );
     }
 

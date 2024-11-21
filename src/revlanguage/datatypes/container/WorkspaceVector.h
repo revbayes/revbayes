@@ -7,6 +7,7 @@
 #include "WorkspaceToCoreWrapperObject.h"
 
 #include <iostream>
+#include <cstdint>
 #include <vector>
 
 namespace RevLanguage {
@@ -221,7 +222,7 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     else if ( name == "append" )

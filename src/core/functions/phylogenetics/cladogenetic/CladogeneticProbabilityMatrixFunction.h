@@ -8,6 +8,7 @@
 #define CladogeneticProbabilityMatrixFunction__
 
 #include <vector>
+#include <cstdint>
 #include <map>
 
 #include "AbstractCladogenicStateFunction.h"
@@ -23,7 +24,7 @@ namespace RevBayesCore {
         
     public:
         
-        CladogeneticProbabilityMatrixFunction( const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states );
+        CladogeneticProbabilityMatrixFunction( const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states );
         virtual                                                                         ~CladogeneticProbabilityMatrixFunction(void);
         
         // public member functions
@@ -42,7 +43,7 @@ namespace RevBayesCore {
         void                                                                            updateProbabilitys(void);
         
         // members
-        const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >*    cladogenetic_events;
+        const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >*    cladogenetic_events;
         std::map< std::vector<unsigned>, double >                                       event_map;
         unsigned                                                                        num_states;
         const TypedDagNode< RbVector<double> >*                                         probabilities;

@@ -22,6 +22,8 @@
 #ifndef ReversiblePoMoRateMatrixFunction_H
 #define ReversiblePoMoRateMatrixFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "RateGenerator.h"
 
@@ -34,7 +36,7 @@ template <class valueType> class TypedDagNode;
     class ReversiblePoMoRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        ReversiblePoMoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RbVector<double> > *rho, const TypedDagNode< Simplex > *pi  );
+        ReversiblePoMoRateMatrixFunction(const TypedDagNode< std::int64_t > *ps, const TypedDagNode< RbVector<double> > *rho, const TypedDagNode< Simplex > *pi  );
 
         virtual                                             ~ReversiblePoMoRateMatrixFunction(void);                                                    //!< Virtual destructor
 
@@ -49,7 +51,7 @@ template <class valueType> class TypedDagNode;
 
         // members
 
-        const TypedDagNode< long >*                         population_size;
+        const TypedDagNode< std::int64_t >*                         population_size;
         // const TypedDagNode< RateGenerator >*                mutationMatrix;
         const TypedDagNode< RbVector<double> >*             exchangeabilities;
         const TypedDagNode< Simplex >*                      equilibrium_frequencies;

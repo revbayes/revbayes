@@ -19,6 +19,7 @@
 #define MrcaIndexStatistic_H
 
 #include <cstddef>
+#include <cstdint>
 
 //#include "Statistic.h"
 #include "Clade.h"
@@ -29,7 +30,7 @@ class DagNode;
 class Tree;
 template <class valueType> class TypedDagNode;
     
-    class MrcaIndexStatistic : public TypedFunction<long> {
+    class MrcaIndexStatistic : public TypedFunction<std::int64_t> {
         
     public:
         MrcaIndexStatistic(const TypedDagNode<Tree> *t, const Clade &c);                                                                                   //!< Default constructor

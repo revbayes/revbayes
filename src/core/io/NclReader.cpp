@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdint>
 #include <algorithm>
 #include <string>
 #include <exception>
@@ -1812,7 +1813,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
         }
         else if (file_format == "phylip")
         {
-            // phylip file format with long taxon names
+            // phylip file format with std::int64_t taxon names
             nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
         }
         else if (file_format == "newick")

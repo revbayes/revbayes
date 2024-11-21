@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <cstdint>
 
 #include "RbMathMatrix.h"
 #include "RbVector.h"
@@ -46,7 +47,7 @@ InferAncestralPopSizeFunction::InferAncestralPopSizeFunction( 	const TypedDagNod
 	                                                          	const TypedDagNode<double> *inoccurrence,
 	                                                          	const TypedDagNode<double> *ineventsampling,
 	                                                          	const TypedDagNode<double> *intreatment,
-		                                                        const TypedDagNode<long> *n,
+		                                                        const TypedDagNode<std::int64_t> *n,
 	                                                          	const std::string& cdt,
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
 	                                                          	const std::vector<double> &tau,
@@ -118,7 +119,7 @@ InferAncestralPopSizeFunction* InferAncestralPopSizeFunction::clone( void ) cons
 void InferAncestralPopSizeFunction::update( void )
 {
     size_t S = time_points.size();
-    long N = maxHiddenLin->getValue();
+    std::int64_t N = maxHiddenLin->getValue();
 
     const Tree& tree = timeTree->getValue();
     const double sa = start_age->getValue();
@@ -206,7 +207,7 @@ void InferAncestralPopSizeFunction::swapParameterInternal( const DagNode *oldP, 
     }
     else if (oldP == maxHiddenLin)
     {
-        maxHiddenLin = static_cast<const TypedDagNode< long >* >( newP );
+        maxHiddenLin = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
     else if (oldP == timeTree)
     {

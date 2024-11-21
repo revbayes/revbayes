@@ -19,6 +19,8 @@
 #ifndef DiscretizeGammaQuadratureFunction_H
 #define DiscretizeGammaQuadratureFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "MatrixReal.h"
 
@@ -29,7 +31,7 @@ template <class valueType> class TypedDagNode;
     class DiscretizeGammaQuadratureFunction : public TypedFunction< MatrixReal >{
         
     public:
-        DiscretizeGammaQuadratureFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc);
+        DiscretizeGammaQuadratureFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<std::int64_t> *nc);
         
         DiscretizeGammaQuadratureFunction*  clone(void) const;                                                  //!< Create a clon.
         void                                update(void);                                                       //!< Recompute the value
@@ -40,7 +42,7 @@ template <class valueType> class TypedDagNode;
     private:
         const TypedDagNode<double>*         shape;
         const TypedDagNode<double>*         rate;
-        const TypedDagNode<long>*           numCats;
+        const TypedDagNode<std::int64_t>*           numCats;
     };
 }
 

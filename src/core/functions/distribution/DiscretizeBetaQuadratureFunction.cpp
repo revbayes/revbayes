@@ -1,6 +1,7 @@
 #include "DiscretizeBetaQuadratureFunction.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <cmath>
 #include <map>
 #include <utility>
@@ -15,7 +16,7 @@ namespace RevBayesCore { class DagNode; }
 
 
 
-RevBayesCore::DiscretizeBetaQuadratureFunction::DiscretizeBetaQuadratureFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<long> *nc) : TypedFunction< MatrixReal >( new MatrixReal(2, nc->getValue(), 1.0) ),
+RevBayesCore::DiscretizeBetaQuadratureFunction::DiscretizeBetaQuadratureFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<std::int64_t> *nc) : TypedFunction< MatrixReal >( new MatrixReal(2, nc->getValue(), 1.0) ),
 alpha( a ),
 beta( b ),
 numCats(nc)
@@ -50,7 +51,7 @@ void RevBayesCore::DiscretizeBetaQuadratureFunction::swapParameterInternal(const
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }

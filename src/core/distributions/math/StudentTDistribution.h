@@ -13,6 +13,8 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 #ifndef StudentTDistribution_H
 #define StudentTDistribution_H
 
+#include <cstdint>
+
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {
@@ -33,7 +35,7 @@ namespace RevBayesCore {
     class StudentTDistribution : public ContinuousDistribution {
         
     public:
-        StudentTDistribution(const TypedDagNode<long> *df);
+        StudentTDistribution(const TypedDagNode<std::int64_t> *df);
         virtual                                            ~StudentTDistribution(void);                                             //!< Virtual destructor
         
         // public member functions
@@ -52,7 +54,7 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode<long>*                            degrees;
+        const TypedDagNode<std::int64_t>*                            degrees;
     };
     
 }

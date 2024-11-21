@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -98,7 +99,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_occurrenceBirthDeathProcess::creat
                                         init        = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
     // maximum number of hidden lineages
-    RevBayesCore::TypedDagNode< long >* n           = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n           = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
     // birth rate
     RevBayesCore::DagNode*              l           = lambda->getRevObject().getDagNode();
     // death rate

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "DistributionBinomial.h"
@@ -21,7 +22,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-GraphShiftEdgeProposal::GraphShiftEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<long>& v, double l, bool s) : Proposal(),
+GraphShiftEdgeProposal::GraphShiftEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<std::int64_t>& v, double l, bool s) : Proposal(),
 array(NULL),
 matrix( n ),
 vertices( v ),

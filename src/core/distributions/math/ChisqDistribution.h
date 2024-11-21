@@ -1,6 +1,8 @@
 #ifndef ChisqDistribution_H
 #define ChisqDistribution_H
 
+#include <cstdint>
+
 #include "ContinuousDistribution.h"
 
 namespace RevBayesCore {
@@ -18,7 +20,7 @@ template <class valueType> class TypedDagNode;
     class ChisqDistribution : public ContinuousDistribution {
         
         public:
-                                            ChisqDistribution(const TypedDagNode<long> *df);
+                                            ChisqDistribution(const TypedDagNode<std::int64_t> *df);
             virtual                        ~ChisqDistribution(void);                                            //!< Virtual destructor
             double                          cdf(void) const;                                                    //!< Cumulative density function
             ChisqDistribution*              clone(void) const;                                                  //!< Create an independent clone
@@ -32,7 +34,7 @@ template <class valueType> class TypedDagNode;
             void                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Swap a parameter
             
         private:
-            const TypedDagNode<long>*       degrees;
+            const TypedDagNode<std::int64_t>*       degrees;
     };
 }
 

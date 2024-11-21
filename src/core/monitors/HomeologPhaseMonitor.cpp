@@ -1,4 +1,5 @@
 #include <map>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -15,7 +16,7 @@ using namespace RevBayesCore;
 
 
 /* Constructor for CTMC */
-HomeologPhaseMonitor::HomeologPhaseMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, const std::string &del) :
+HomeologPhaseMonitor::HomeologPhaseMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, const std::string &del) :
     VariableMonitor(ch, g, fname, del, false, false, false),
     ctmc( ch )
 {
@@ -53,7 +54,7 @@ HomeologPhaseMonitor* HomeologPhaseMonitor::clone(void) const
  *
  * \param[in]   gen    The current generation.
  */
-void HomeologPhaseMonitor::monitorVariables(unsigned long gen)
+void HomeologPhaseMonitor::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
 

@@ -1,6 +1,8 @@
 #ifndef Mcmc_H
 #define Mcmc_H
 
+#include <cstdint>
+
 #include "MonteCarloSampler.h"
 
 namespace RevBayesCore {
@@ -59,7 +61,7 @@ namespace RevBayesCore {
         std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
         void                                                initializeSampler(bool priorOnly=false);                                                //!< Initialize objects for mcmc sampling
         void                                                initializeSamplerFromCheckpoint( void );                                                //!< Initialize the MCMC sampler form the checkpoint file.
-        void                                                monitor(unsigned long g);
+        void                                                monitor(std::uint64_t g);
         void                                                nextCycle(bool advanceCycle);
         bool                                                isChainActive(void);
         void                                                printOperatorSummary(bool current_period);

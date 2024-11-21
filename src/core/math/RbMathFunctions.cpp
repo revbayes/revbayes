@@ -16,6 +16,7 @@
 
 #include <cstddef>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 #include <algorithm>
 #include <sstream> // IWYU pragma: keep
@@ -249,7 +250,7 @@ double RbMath::gamma(double x)
     
     /* If the argument is exactly zero or a negative integer
      * then return NaN. */
-    if (x == 0 || (x < 0 && x == (long)x)) 
+    if (x == 0 || (x < 0 && x == (std::int64_t)x)) 
     {
         std::ostringstream s;
         s << "Cannot compute gamma function for x = " << x;

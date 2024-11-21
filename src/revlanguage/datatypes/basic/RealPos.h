@@ -4,6 +4,7 @@
 #include "Real.h"
 
 #include <ostream>
+#include <cstdint>
 #include <string>
 
 namespace RevLanguage {
@@ -19,7 +20,7 @@ namespace RevLanguage {
         RealPos(void);                                                              //!< Default constructor
         RealPos(RevBayesCore::TypedDagNode<double> *x);                             //!< Construct from double
         RealPos(double x);                                                          //!< Construct from double
-        RealPos(long x);                                                             //!< Construct from int
+        RealPos(std::int64_t x);                                                             //!< Construct from int
         RealPos(bool x);                                                             //!< Construct from bool
 
         // Basic operator functions

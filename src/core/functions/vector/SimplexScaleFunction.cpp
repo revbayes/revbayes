@@ -9,6 +9,7 @@
 #include "SimplexScaleFunction.h"
 
 #include <cstddef>
+#include <cstdint>
 
 #include "TypedDagNode.h"
 #include "Cloneable.h"
@@ -20,7 +21,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-SimplexScaleFunction::SimplexScaleFunction(const TypedDagNode< RbVector< double > > *s, const TypedDagNode< double > *f, const TypedDagNode< long > *i) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+SimplexScaleFunction::SimplexScaleFunction(const TypedDagNode< RbVector< double > > *s, const TypedDagNode< double > *f, const TypedDagNode< std::int64_t > *i) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     simplex( s ),
     factor( f ),
     index( i )
@@ -89,7 +90,7 @@ void SimplexScaleFunction::swapParameterInternal(const DagNode *oldP, const DagN
         simplex = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
     } 
     else if ( oldP == index ) {
-        index = static_cast<const TypedDagNode< long >* >( newP );
+        index = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
     else {
         TypedFunction< RbVector< double> >::swapParameter( oldP, newP );

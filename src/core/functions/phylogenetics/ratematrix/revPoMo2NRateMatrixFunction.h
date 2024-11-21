@@ -8,6 +8,7 @@
 #include "TypedFunction.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
     
@@ -27,7 +28,7 @@ namespace RevBayesCore {
         
     public:
 
-        revPoMo2NRateMatrixFunction(const TypedDagNode< long > *ni, 
+        revPoMo2NRateMatrixFunction(const TypedDagNode< std::int64_t > *ni, 
                                     const TypedDagNode< Simplex > *bf,
                                     const TypedDagNode< double > *ex, 
                                     const TypedDagNode< RbVector<double> > *f ) ;
@@ -44,10 +45,10 @@ namespace RevBayesCore {
         
     private:
         
-        long                                                    computeNumStates( long ni );
+        std::int64_t                                                    computeNumStates( std::int64_t ni );
 
         // members
-        const TypedDagNode< long >*                             N;
+        const TypedDagNode< std::int64_t >*                             N;
         const TypedDagNode< Simplex >*                          pi;
         const TypedDagNode< double >*                           rho;
         const TypedDagNode< RbVector<double> >*                 phi;

@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <cstdint>
 std::string nonblankSeparators = "+->~()[]{}.,\"";
 std::string separators = nonblankSeparators + " ";
 std::string openingSeparators = "\"(,";
@@ -53,7 +54,7 @@ public:
     }
     
     bool lastEffectiveSeparatorIsBlank(const char* buf) {
-        long i = long(strlen(buf))-1;
+        std::int64_t i = std::int64_t(strlen(buf))-1;
         if (i < 0){
             return false;
         }

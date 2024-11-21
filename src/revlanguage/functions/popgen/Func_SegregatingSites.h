@@ -5,6 +5,7 @@
 #include "RlTypedFunction.h"
 
 #include <map>
+#include <cstdint>
 #include <string>
 
 namespace RevLanguage {
@@ -36,7 +37,7 @@ namespace RevLanguage {
         const TypeSpec&                             getTypeSpec(void) const;                                    //!< Get the type spec of the instance
         
         // Function functions you have to override
-        RevBayesCore::TypedFunction< long >*        createFunction(void) const;                                 //!< Create internal function object
+        RevBayesCore::TypedFunction< std::int64_t >*        createFunction(void) const;                                 //!< Create internal function object
         const ArgumentRules&                        getArgumentRules(void) const;                               //!< Get argument rules
         
     };

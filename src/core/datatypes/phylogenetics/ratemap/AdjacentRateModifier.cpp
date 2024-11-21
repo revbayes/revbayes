@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdint>
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -200,7 +201,7 @@ void AdjacentRateModifier::setWidth(size_t w)
     width = w;
 }
 
-void AdjacentRateModifier::setContextMatrix(const RbVector<RbVector<long> >& c)
+void AdjacentRateModifier::setContextMatrix(const RbVector<RbVector<std::int64_t> >& c)
 {
 
     context_type = "array";

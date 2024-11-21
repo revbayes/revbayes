@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -140,7 +141,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         found = true;
 
         // get the member with give index
-        long gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::int64_t gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;
         if ( args[2].getVariable()->getRevObject() != RevNullObject::getInstance() )
@@ -161,7 +162,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
          * stones with indices ranging from 0 to 127)
          */
         size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        long gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::int64_t gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;
         if ( args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )

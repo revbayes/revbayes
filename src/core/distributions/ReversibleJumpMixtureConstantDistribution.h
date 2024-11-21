@@ -22,7 +22,7 @@ namespace RevBayesCore {
      * @since 2014-11-18, version 1.0
      */
     template <class mixtureType>
-    class ReversibleJumpMixtureConstantDistribution : public TypedDistribution<mixtureType>, public MemberObject<long> {
+    class ReversibleJumpMixtureConstantDistribution : public TypedDistribution<mixtureType>, public MemberObject<std::int64_t> {
         
     public:
         // constructor(s)
@@ -37,7 +37,7 @@ namespace RevBayesCore {
         // public member functions
         ReversibleJumpMixtureConstantDistribution*                  clone(void) const;                                                                              //!< Create an independent clone
         double                                                      computeLnProbability(void);
-        void                                                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;    //!< Map the member methods to internal function calls
+        void                                                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;    //!< Map the member methods to internal function calls
         const TypedDistribution<mixtureType>&                       getBaseDistribution(void) const;
         TypedDistribution<mixtureType>&                             getBaseDistribution(void);
         const mixtureType&                                          getConstantValue(void) const;
@@ -77,6 +77,7 @@ namespace RevBayesCore {
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
+#include <cstdint>
 
 template <class mixtureType>
 RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::ReversibleJumpMixtureConstantDistribution(const TypedDagNode< mixtureType > *cv, TypedDistribution< mixtureType > *dv, const TypedDagNode< double > *p) : TypedDistribution<mixtureType>( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( cv->getValue() ) ),
@@ -197,12 +198,12 @@ double RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::com
 
 
 template <class mixtureType>
-void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( n == "index" )
     {
-        rv = long(index);
+        rv = std::int64_t(index);
     }
     else
     {

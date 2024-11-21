@@ -1,5 +1,6 @@
 #include <cfloat>
 #include <cstddef>
+#include <cstdint>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -65,7 +66,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
                                                                         Tree *t,
-                                                                        long age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        std::int64_t age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),

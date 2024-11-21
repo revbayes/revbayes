@@ -1,6 +1,8 @@
 #ifndef TruncateFunction_H
 #define TruncateFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -12,7 +14,7 @@ template <class valueType> class TypedDagNode;
  * The Truncate function removes all the digits after the decimal to make the number an integer.
  * In other words, truncate is a ceiling function for negative numbers and a floor function for positive numbers.
  */
-    class TruncateFunction : public TypedFunction<long> {
+    class TruncateFunction : public TypedFunction<std::int64_t> {
         
     public:
         TruncateFunction(const TypedDagNode<double> *a);

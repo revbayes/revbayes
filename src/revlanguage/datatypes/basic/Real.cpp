@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -49,7 +50,7 @@ Real::Real( RevBayesCore::TypedDagNode<double> *v ) : ModelObject<double>( v )
 
 
 /* Construct from int */
-Real::Real(long v) : ModelObject<double>( new double(v) )
+Real::Real(std::int64_t v) : ModelObject<double>( new double(v) )
 {
 
 }

@@ -2,6 +2,7 @@
 #define PhylogeneticIndependentContrastsMultiSampleFunction_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <iosfwd>
 
@@ -19,7 +20,7 @@ template <class valueType> class TypedDagNode;
     class PhylogeneticIndependentContrastsMultiSampleFunction : public TypedFunction< RbVector<double> > {
         
     public:
-        PhylogeneticIndependentContrastsMultiSampleFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<long>* s, const std::vector<Taxon> &ta, bool n);
+        PhylogeneticIndependentContrastsMultiSampleFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, bool n);
         virtual                                                ~PhylogeneticIndependentContrastsMultiSampleFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
@@ -39,7 +40,7 @@ template <class valueType> class TypedDagNode;
         // members
         const TypedDagNode<Tree>*                                           tau;
         const TypedDagNode<ContinuousCharacterData>*                        data;
-        const TypedDagNode<long>*                                           site;
+        const TypedDagNode<std::int64_t>*                                           site;
         bool                                                                normalized;
         std::vector<Taxon>                                                  taxa;
 

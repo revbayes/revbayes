@@ -1,6 +1,8 @@
 #ifndef GeometricDistribution_H
 #define GeometricDistribution_H
 
+#include <cstdint>
+
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
@@ -16,7 +18,7 @@ template <class valueType> class TypedDagNode;
      *
      *
      */
-    class GeometricDistribution : public TypedDistribution<long> {
+    class GeometricDistribution : public TypedDistribution<std::int64_t> {
         
     public:
         GeometricDistribution(const TypedDagNode<double> *p);

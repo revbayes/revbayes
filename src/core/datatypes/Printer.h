@@ -16,6 +16,7 @@
 #define Printer_H
 
 #include <string>
+#include <cstdint>
 #include <limits>
 
 #include "StringUtilities.h"
@@ -31,7 +32,7 @@ namespace RevBayesCore {
         //!< Printer the given object.
         static void                     printForUser( const objType &a, std::ostream &o, const std::string & /*sep*/, int /*l*/, bool /*left*/ ) {
             
-            long previousPrecision = o.precision();
+            std::int64_t previousPrecision = o.precision();
             std::ios_base::fmtflags previousFlags = o.flags();
             
             std::fixed( o );

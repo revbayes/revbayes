@@ -1,6 +1,8 @@
 #ifndef BivariatePoissonDistribution_H
 #define BivariatePoissonDistribution_H
 
+#include <cstdint>
+
 #include "RbVector.h"
 #include "TypedDistribution.h"
 #include "TypedDagNode.h"
@@ -20,7 +22,7 @@ namespace RevBayesCore {
      * @since 2018-12-19, version 1.0
      *
      */
-  class BivariatePoissonDistribution : public TypedDistribution< RbVector<long> > {
+  class BivariatePoissonDistribution : public TypedDistribution< RbVector<std::int64_t> > {
 
     public:
     BivariatePoissonDistribution(const TypedDagNode< double > *theta1, const TypedDagNode< double > *theta2, const TypedDagNode< double > *theta0);

@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cstdint>
 #include <cmath>
 #include <iostream>
 #include <map>
@@ -913,7 +914,7 @@ void Mcmc::initializeMonitors(void)
 }
 
 
-void Mcmc::monitor(unsigned long g)
+void Mcmc::monitor(std::uint64_t g)
 {
     
     if ( chain_active == true && process_active == true )

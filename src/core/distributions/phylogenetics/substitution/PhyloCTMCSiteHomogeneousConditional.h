@@ -80,6 +80,7 @@ namespace RevBayesCore {
 }
 
 #include <climits>
+#include <cstdint>
 
 template<class charType>
 RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const TypedDagNode<Tree> *t, size_t nChars, bool c, size_t nSites, bool amb, AscertainmentBias::Coding ty, bool internal, bool gapmatch) :
@@ -1192,7 +1193,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( cons
         // update the transition probability matrix
         this->updateTransitionProbabilities( child.getIndex() );
 
-        unsigned long cp = parentState.getStateIndex();
+        std::uint64_t cp = parentState.getStateIndex();
 
         double *freqs = this->transition_prob_matrices[ rateIndex ][ cp ];
 

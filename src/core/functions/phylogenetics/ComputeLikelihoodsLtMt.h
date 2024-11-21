@@ -20,6 +20,7 @@
 #include "MatrixReal.h"
 
 #include <string>
+#include <cstdint>
 #include <vector>
 
 struct Event {
@@ -51,7 +52,7 @@ namespace RevBayesCore {
                                                               const std::vector<double> &omega,
                                                               const TypedDagNode<double> *rho,
                                                               const std::vector<double> &removalPr,
-                                                              const TypedDagNode<long> *maxHiddenLin,
+                                                              const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                               const std::string &cond,
                                                               const std::vector<double> &time_points,
                                                               bool useMt,
@@ -68,7 +69,7 @@ namespace RevBayesCore {
                                                               const std::vector<double> &omega,
                                                               const TypedDagNode<double> *rho,
                                                               const std::vector<double> &removalPr,
-                                                              const TypedDagNode<long> *maxHiddenLin,
+                                                              const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                               const std::string &cond,
                                                               bool useMt,
                                                               bool verbose,
@@ -84,7 +85,7 @@ namespace RevBayesCore {
                                                               const std::vector<double> &omega,
                                                               const TypedDagNode<double> *rho,
                                                               const std::vector<double> &removalPr,
-                                                              const TypedDagNode<long> *maxHiddenLin,
+                                                              const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                               const std::string& cond,
                                                               const std::vector<double> &time_points,
                                                               bool returnLogLikelihood,
@@ -101,7 +102,7 @@ namespace RevBayesCore {
                                                               const std::vector<double> &omega,
                                                               const TypedDagNode<double> *rho,
                                                               const std::vector<double> &removalPr,
-                                                              const TypedDagNode<long> *maxHiddenLin,
+                                                              const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                               const std::string& cond,
                                                               const std::vector<double> &time_points,
                                                               bool verbose,

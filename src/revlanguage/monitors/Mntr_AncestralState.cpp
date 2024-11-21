@@ -1,6 +1,7 @@
 #include "Mntr_AncestralState.h"
 
 #include <string>
+#include <cstdint>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
@@ -59,7 +60,7 @@ void Mntr_AncestralState::constructInternalObject( void )
     if (character == "NaturalNumbers")
     {
         
-        RevBayesCore::AncestralStateMonitor<RevBayesCore::NaturalNumbersState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ch, (unsigned long)g, fn, sep);
+        RevBayesCore::AncestralStateMonitor<RevBayesCore::NaturalNumbersState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ch, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion( wv );
         value = m;
@@ -68,7 +69,7 @@ void Mntr_AncestralState::constructInternalObject( void )
     else if (character == "DNA")
     {
         
-        RevBayesCore::AncestralStateMonitor<RevBayesCore::DnaState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::DnaState>(t, ch, (unsigned long)g, fn, sep);
+        RevBayesCore::AncestralStateMonitor<RevBayesCore::DnaState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::DnaState>(t, ch, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion( wv );
         value = m;
@@ -77,7 +78,7 @@ void Mntr_AncestralState::constructInternalObject( void )
     else if (character == "StandardState")
     {
         
-        RevBayesCore::AncestralStateMonitor<RevBayesCore::StandardState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::StandardState>(t, ch, (unsigned long)g, fn, sep);
+        RevBayesCore::AncestralStateMonitor<RevBayesCore::StandardState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::StandardState>(t, ch, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion( wv );
         value = m;

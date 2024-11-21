@@ -12,6 +12,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 
 #include <fstream>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -23,7 +24,7 @@ namespace RevBayesCore {
         
     public:
         // Constructors and Destructors
-        TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, const TimeAtlas* ta, unsigned long g, unsigned long mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, const TimeAtlas* ta, std::uint64_t g, std::uint64_t mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         TreeCharacterHistoryNhxMonitor(const TreeCharacterHistoryNhxMonitor& f);
         
@@ -31,7 +32,7 @@ namespace RevBayesCore {
         TreeCharacterHistoryNhxMonitor*   clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                    monitor(unsigned long gen);                                                  //!< Monitor at generation gen
+        void                                    monitor(std::uint64_t gen);                                                  //!< Monitor at generation gen
         void                                    swapNode(DagNode *oldN, DagNode *newN);
         
         // FileMonitor functions
@@ -40,7 +41,7 @@ namespace RevBayesCore {
         void                                    printHeader(void);                                                  //!< Print header
         std::vector<unsigned int>               getChildCharacterCounts(int idx);
         std::vector<unsigned int>               getParentCharacterCounts(int idx);
-        long                                    getNumSamples(void);
+        std::int64_t                                    getNumSamples(void);
         
     private:
         std::string                             buildExtendedNewick();
@@ -74,9 +75,9 @@ namespace RevBayesCore {
         bool                                append;
         bool                                showMetadata;
         bool                                showRates;
-        long                                numSamples;
-        unsigned long                       maxGen;
-        long                                burn;
+        std::int64_t                                numSamples;
+        std::uint64_t                       maxGen;
+        std::int64_t                                burn;
         
     };
     
@@ -90,7 +91,7 @@ namespace RevBayesCore {
 
 /* Constructor */
 template<class charType>
-RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, const TimeAtlas* ta, unsigned long g, unsigned long mg, int b, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) :
+RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::TreeCharacterHistoryNhxMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, const TimeAtlas* ta, std::uint64_t g, std::uint64_t mg, int b, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) :
 Monitor(g,t),
 outStream(),
 variable( s ),
@@ -281,10 +282,10 @@ std::string RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::buildExtende
 
 /** Monitor value at generation gen */
 template<class charType>
-void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::monitor(unsigned long gen) {
+void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::monitor(std::uint64_t gen) {
     
     // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    std::uint64_t samplingFrequency = printgen;
     
     if (gen % samplingFrequency == 0 && gen != maxGen) { // && gen >= burn) {
         
@@ -428,7 +429,7 @@ std::vector<unsigned int> RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>
 }
 
 template<class charType>
-long RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::getNumSamples(void)
+std::int64_t RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::getNumSamples(void)
 {
     return numSamples;
 }

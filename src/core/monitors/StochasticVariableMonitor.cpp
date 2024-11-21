@@ -1,6 +1,7 @@
 #include "StochasticVariableMonitor.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>
@@ -13,7 +14,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-StochasticVariableMonitor::StochasticVariableMonitor(unsigned long g, const path &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del)
+StochasticVariableMonitor::StochasticVariableMonitor(std::uint64_t g, const path &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del)
 {
     posterior  = false;
     prior      = false;

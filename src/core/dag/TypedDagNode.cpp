@@ -2,6 +2,7 @@
 
 #include "NexusWriter.h"
 #include "RbSettings.h"
+#include <cstdint>
 #include "RbUtil.h"
 #include "Simplex.h"
 #include "StringUtilities.h"
@@ -19,7 +20,7 @@
 using namespace RevBayesCore;
 
 template<>
-AbstractTrace*  TypedDagNode<long>::createTraceObject(void) const
+AbstractTrace*  TypedDagNode<std::int64_t>::createTraceObject(void) const
 {
     return new TraceNumericInteger();
 }
@@ -53,7 +54,7 @@ AbstractTrace*  TypedDagNode<Tree>::createTraceObject(void) const
 // isSimpleNumeric //
 /////////////////////
 template<>
-bool TypedDagNode<long>::isSimpleNumeric(void) const
+bool TypedDagNode<std::int64_t>::isSimpleNumeric(void) const
 {
     return true;
 } 
@@ -65,7 +66,7 @@ bool TypedDagNode<double>::isSimpleNumeric(void) const
 }
 
 template<>
-bool TypedDagNode<RbVector<long> >::isSimpleNumeric(void) const
+bool TypedDagNode<RbVector<std::int64_t> >::isSimpleNumeric(void) const
 {
     return true;
 }
@@ -112,7 +113,7 @@ void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep
 
     
 template<>
-void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
+void TypedDagNode<std::int64_t>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const
 {
         
     std::stringstream ss;

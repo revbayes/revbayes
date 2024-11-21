@@ -10,6 +10,7 @@
 #define Func_choose_h
 
 #include <string>
+#include <cstdint>
 #include <iosfwd>
 #include <vector>
 
@@ -52,7 +53,7 @@ class TypeSpec;
         const TypeSpec&                                 getTypeSpec(void) const;                                    //!< Get the type spec of the instance
         
         // Function functions you have to override
-        RevBayesCore::TypedFunction<long>*              createFunction(void) const;                                 //!< Create internal function object
+        RevBayesCore::TypedFunction<std::int64_t>*              createFunction(void) const;                                 //!< Create internal function object
         const ArgumentRules&                            getArgumentRules(void) const;                               //!< Get argument rules
 
     };

@@ -9,6 +9,7 @@
 #include "DistributionExponentialError.h"
 
 #include <cmath>
+#include <cstdint>
 #include <numeric>
 #include <algorithm>
 
@@ -117,7 +118,7 @@ AverageDistanceMatrix RbStatistics::ExponentialError::rv(const AverageDistanceMa
     std::vector<double> DirichParams(vect_len, 1);
     std::vector<double> DirichRandomVars = RbStatistics::Dirichlet::rv(DirichParams, rng);
     
-    // get an equally long vector of signs (-1 or 1):
+    // get an equally std::int64_t vector of signs (-1 or 1):
     std::vector<double> Signs(vect_len);
     for (size_t i=0; i<vect_len; i++)
     {
@@ -255,7 +256,7 @@ AverageDistanceMatrix RbStatistics::ExponentialError::rv(const DistanceMatrix &d
     std::vector<double> DirichParams(vect_len, 1);
     std::vector<double> DirichRandomVars = RbStatistics::Dirichlet::rv(DirichParams, rng);
     
-    // get an equally long vector of signs (-1 or 1):
+    // get an equally std::int64_t vector of signs (-1 or 1):
     std::vector<double> Signs(vect_len);
     for (size_t i=0; i<vect_len; i++)
     {

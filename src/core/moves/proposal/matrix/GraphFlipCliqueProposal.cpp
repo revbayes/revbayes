@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <type_traits>
 #include <vector>
@@ -25,7 +26,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-GraphFlipCliqueProposal::GraphFlipCliqueProposal( StochasticNode<MatrixReal> *n, const RbVector<long>& v, double sr, double vp, double ep, bool s) : Proposal(),
+GraphFlipCliqueProposal::GraphFlipCliqueProposal( StochasticNode<MatrixReal> *n, const RbVector<std::int64_t>& v, double sr, double vp, double ep, bool s) : Proposal(),
 array(NULL),
 matrix( n ),
 vertices( v ),

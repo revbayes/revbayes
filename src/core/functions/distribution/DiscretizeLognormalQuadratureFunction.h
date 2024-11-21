@@ -19,6 +19,8 @@
 #ifndef DiscretizeLognormalQuadratureFunction_H
 #define DiscretizeLognormalQuadratureFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 #include "MatrixReal.h"
 
@@ -29,7 +31,7 @@ template <class valueType> class TypedDagNode;
     class DiscretizeLognormalQuadratureFunction : public TypedFunction< MatrixReal >{
         
     public:
-        DiscretizeLognormalQuadratureFunction(const TypedDagNode<double> *m, const TypedDagNode<double> *s, const TypedDagNode<long> *nc);
+        DiscretizeLognormalQuadratureFunction(const TypedDagNode<double> *m, const TypedDagNode<double> *s, const TypedDagNode<std::int64_t> *nc);
         
         DiscretizeLognormalQuadratureFunction*  clone(void) const;                                                  //!< Create a clon.
         void                                update(void);                                                       //!< Recompute the value
@@ -40,7 +42,7 @@ template <class valueType> class TypedDagNode;
     private:
         const TypedDagNode<double>*         mean;
         const TypedDagNode<double>*         sd;
-        const TypedDagNode<long>*           numCats;
+        const TypedDagNode<std::int64_t>*           numCats;
     };
 }
 

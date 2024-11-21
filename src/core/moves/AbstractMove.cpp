@@ -1,6 +1,7 @@
 #include "AbstractMove.h"
 
 #include <iterator>
+#include <cstdint>
 #include <string>
 
 #include "DagNode.h"
@@ -340,7 +341,7 @@ double AbstractMove::getUpdateWeight( void ) const
  *
  * @param   generation    Generation number at which to check active status.
  */
-bool AbstractMove::isActive(unsigned long generation) const
+bool AbstractMove::isActive(std::uint64_t generation) const
 {
     return true;
 }

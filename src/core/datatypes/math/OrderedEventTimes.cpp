@@ -6,6 +6,7 @@
  */
 
 #include <ostream>
+#include <cstdint>
 
 #include "OrderedEventTimes.h"
 #include "TypedDagNode.h"
@@ -92,7 +93,7 @@ bool OrderedEventTimes::changeEventTime(double old_time, double new_time)
 	return true;
 }
 
-void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const
+void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const
 {
     if ( n == "getNumberOfEvents" )
     {

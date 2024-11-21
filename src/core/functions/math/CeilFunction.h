@@ -1,6 +1,8 @@
 #ifndef CeilFunction_H
 #define CeilFunction_H
 
+#include <cstdint>
+
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -13,7 +15,7 @@ template <class valueType> class TypedDagNode;
      * The ceil function rounds the real number up to the next number.
      *
      */
-    class CeilFunction : public TypedFunction<long> {
+    class CeilFunction : public TypedFunction<std::int64_t> {
         
     public:
         CeilFunction(const TypedDagNode<double> *a);

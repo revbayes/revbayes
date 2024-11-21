@@ -1,5 +1,6 @@
 #include <math.h>
 #include <cstddef>
+#include <cstdint>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -96,7 +97,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
      * Therefore, this distribution has no user-facing (= Rev-level) "age check precision" argument, but because
      * TopologyConstrainedTreeDistribution expects one, here we set it to 0 and pass it to the constructor.
      */
-    long pr = 0;
+    std::int64_t pr = 0;
     
     // create the internal distribution object
     RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init, pr); // , bb);

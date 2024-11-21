@@ -2,6 +2,7 @@
 #include <cmath>
 #include <set>
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -390,7 +391,7 @@ double SampledSpeciationBirthDeathProcess::computeRootLikelihood( void )
 }
 
 
-void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
     
     if ( n == "numberEvents" )

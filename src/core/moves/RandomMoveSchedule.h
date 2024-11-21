@@ -2,6 +2,7 @@
 #define RandomMoveSchedule_H
 
 #include <vector>
+#include <cstdint>
 
 #include "MoveSchedule.h"
 
@@ -18,7 +19,7 @@ template <class valueType> class RbVector;
         // pure virtual public methods
         RandomMoveSchedule*                             clone(void) const;
         double                                          getNumberMovesPerIteration(void) const;
-        Move&                                           nextMove(unsigned long g);
+        Move&                                           nextMove(std::uint64_t g);
 
     private:
         
