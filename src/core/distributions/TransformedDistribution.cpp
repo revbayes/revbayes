@@ -83,9 +83,9 @@ double TransformedDistribution::computeLnProbability( void )
     // 2. Compute probability density
     if (auto x = f_inverse(transform_params, y))
     {
-	base_dist->setValue( new double(*x) );
+        base_dist->setValue( new double(*x) );
 
-	// If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
+        // If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
         double ln_pdf = base_dist->computeLnProbability();
 
@@ -93,12 +93,11 @@ double TransformedDistribution::computeLnProbability( void )
 
         ln_pdf -= J;
 
-	// 3. Return value
-        assert(std::isfinite(ln_pdf));
-	return ln_pdf;
+        // 3. Return value
+        return ln_pdf;
     }
     else
-	return RbConstants::Double::neginf;
+        return RbConstants::Double::neginf;
 }
 
 void TransformedDistribution::setValue(double *y, bool force)
