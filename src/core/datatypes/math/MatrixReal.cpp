@@ -1282,7 +1282,11 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const MatrixReal& x)
     // print the RbMatrix with each column of equal width and each column centered on the decimal
     for (size_t i=0; i < x.getNumberOfRows(); i++) 
     {
-        o << "  [ ";
+        if (i == 0)
+            o << "[ ";
+        else
+            o << "  [ ";
+            
         for (size_t j = 0; j < x.getNumberOfColumns(); ++j) 
         {
             if (j != 0)
