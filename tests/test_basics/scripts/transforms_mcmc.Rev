@@ -1,0 +1,16 @@
+seed(0)
+sigma ~ dnExponential(1)
+
+x1 ~ dnNormal(0,sigma)
+x2 ~ dnNormal(0,1)*sigma                
+
+m = model(sigma)
+
+moves = [mvSlice(sigma), mvSlice(x1), mvSlice(x2)]
+monitors = [mnModel(filename="test.log")]
+analysis = mcmc(m,monitors,moves)
+
+analysis.burnin(100,1)
+analysis.run(1000)
+
+q()
