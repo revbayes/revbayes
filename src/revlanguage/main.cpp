@@ -51,7 +51,8 @@ std::string usage_examples()
         "   8. rb script.Rev script2.Rev --args 1 2         # equivalent to 7\n"
         "   9. rb --cmd script.Rev                          # equivalent to 3 but runs in batch mode\n"
         "  10. rb --cmd script.Rev 1 2                      # equivalent to 4 and 5 but runs in batch mode\n"
-        "  11. rb --cmd script.Rev 1 2 --file script2.Rev\n";
+        "  11. rb --cmd script.Rev 1 2 --file script2.Rev\n"
+        "  12. rb --setOption outputPrecision=8\n";
     
     return usage_examples;
 }
