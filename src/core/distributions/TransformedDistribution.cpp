@@ -12,7 +12,8 @@ TransformedDistribution::TransformedDistribution(const TypedDistribution<double>
       f(F),
       f_inverse(FI),
       log_f_prime(LFP),
-      base_dist( d.clone() )
+      base_dist( d.clone() ),
+      transform_params(p)
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -22,7 +23,7 @@ TransformedDistribution::TransformedDistribution(const TypedDistribution<double>
     for (auto& parameter: base_dist->getParameters())
         this->addParameter( parameter );
 
-    for (auto& parameter: p)
+    for (auto& parameter: transform_params)
         this->addParameter( parameter );
 
     simulate();
@@ -34,7 +35,8 @@ TransformedDistribution::TransformedDistribution( const TransformedDistribution 
       f(d.f),
       f_inverse(d.f_inverse),
       log_f_prime(d.log_f_prime),
-      base_dist (d.base_dist->clone())
+      base_dist (d.base_dist->clone()),
+      transform_params(d.transform_params)
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -79,15 +81,20 @@ double TransformedDistribution::computeLnProbability( void )
     double y = *value;
 
     // 2. Compute probability density
-    if (auto x = f_inverse(y))
+    if (auto x = f_inverse(transform_params, y))
     {
 	base_dist->setValue( new double(*x) );
 
 	// If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
-	double ln_pdf = base_dist->computeLnProbability() - log_f_prime(*x).value();
+        double ln_pdf = base_dist->computeLnProbability();
+
+        double J = log_f_prime(transform_params, *x).value();
+
+        ln_pdf -= J;
 
 	// 3. Return value
+        assert(std::isfinite(ln_pdf));
 	return ln_pdf;
     }
     else
@@ -96,7 +103,7 @@ double TransformedDistribution::computeLnProbability( void )
 
 void TransformedDistribution::setValue(double *y, bool force)
 {
-    if (auto x = f_inverse(*y))
+    if (auto x = f_inverse(transform_params, *y))
     {
 	base_dist->setValue(new double(*x), force);
 
@@ -113,7 +120,7 @@ void TransformedDistribution::simulate()
 
     double x = base_dist->getValue();
 
-    auto y = f(x);
+    auto y = f(transform_params, x);
 
     if (not y)
 	throw RbException()<<"TransformedDistribution::simulated(): f(x) is not defined for simulated value "<<x<<" from base distribution!";
@@ -151,6 +158,13 @@ void TransformedDistribution::getAffected(RbOrderedSet<DagNode *> &affected, con
 /** Swap a parameter of the distribution */
 void TransformedDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
+    for(auto& param: transform_params)
+        if (param == oldP)
+        {
+            param = newP;
+            return;
+        }
+
     base_dist->swapParameter(oldP,newP);
 }
 
