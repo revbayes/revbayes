@@ -30,13 +30,13 @@ RevBayesCore::TransformedDistribution* Transform_Mul::createDistribution( void )
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
-    RevBayesCore::TypedDagNode<double>* d           = static_cast<const Real &>( delta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l           = static_cast<const Real &>( delta->getRevObject() ).getDagNode();
 
-    auto mul_transform = [=](double x) -> optional<double> { return d->getValue() * x; };
-    auto mul_inverse = [=](double x) -> optional<double> { return d->getValue() / x; };
-    auto log_mul_prime = [=](double x) -> optional<double> { return log(abs(d->getValue())); };
+    auto mul_transform = [=](double x) -> optional<double> { return x * l->getValue(); };
+    auto mul_inverse = [=](double x) -> optional<double> { return x / l->getValue(); };
+    auto log_mul_prime = [=](double x) -> optional<double> { return log(abs(l->getValue())); };
 
-    RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, mul_transform, mul_inverse, log_mul_prime, {d});
+    RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, mul_transform, mul_inverse, log_mul_prime, {l});
 
     delete vp;
 
