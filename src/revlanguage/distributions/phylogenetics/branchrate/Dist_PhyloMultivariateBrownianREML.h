@@ -1,7 +1,7 @@
 #ifndef Dist_PhyloMultivariateBrownianREML_H
 #define Dist_PhyloMultivariateBrownianREML_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
-#include <math.h>
+#include <cmath>
 #include <set>
 #include <string>
 #include <sstream>
