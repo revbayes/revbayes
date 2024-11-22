@@ -510,7 +510,7 @@ Function* FunctionTable::getFirstFunction( const std::string& name ) const
     
     if ( the_functions.size() == 0 )
     {
-        throw RbException("Could not find function with name '" + name + "'");
+        throw RbException() << "Could not find function with name '" << name << "'";
     }
     
     // free memory
@@ -567,7 +567,7 @@ const Function& FunctionTable::getFunction(const std::string& name, const std::v
 
     if ( the_function == NULL )
     {
-        throw RbException("No function named '"+ name + "'");
+        throw RbException() << "No function named '" << name << "'"; 
     }
     
     return *the_function;
@@ -683,7 +683,7 @@ bool FunctionTable::isProcedure(const std::string& name) const
     }
     else
     {
-        throw RbException( "No function or procedure '" + name + "'" );
+        throw RbException() << "No function or procedure '" << name << "'" ; 
     }
     
 }

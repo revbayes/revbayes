@@ -213,7 +213,7 @@ void MatrixReal::executeMethod(const std::string &n, const std::vector<const Dag
     }
     else
     {
-        throw RbException("A matrix object does not have a member method called '" + n + "'.");
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -227,7 +227,7 @@ void MatrixReal::executeMethod(const std::string &n, const std::vector<const Dag
     }
     else
     {
-        throw RbException("A matrix object does not have a member method called '" + n + "'.");
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }

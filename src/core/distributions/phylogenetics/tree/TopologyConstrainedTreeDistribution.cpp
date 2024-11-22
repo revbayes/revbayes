@@ -273,7 +273,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                 std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                 if ( it == taxon_map.end() )
                 {
-                    throw RbException("Could not find taxon with name '" + name + "'.");
+                    throw RbException() << "Could not find taxon with name '" << name << "'.";
                 }
                 size_t k = it->second;
                 
@@ -295,7 +295,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                     std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                     if ( it == taxon_map.end() )
                     {
-                        throw RbException("Could not find taxon with name '" + name + "'.");
+                        throw RbException() << "Could not find taxon with name '" << name << "'.";
                     }
                     size_t s = it->second;
                     
@@ -495,7 +495,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyAddBackboneConstraints(
         std::map<std::string, size_t>::const_iterator it = taxon_map.find(name);
         if (it == taxon_map.end()) {
             
-            throw RbException("Taxon named " + it->first + " not found in tree's taxon map!");
+            throw RbException() << "Taxon named " << it->first << " not found in tree's taxon map!";
         }
         tmp.set( it->second );
     }

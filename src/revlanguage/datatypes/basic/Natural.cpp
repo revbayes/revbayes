@@ -36,7 +36,7 @@ Natural::Natural( long x ) : Integer( x )
 
     if ( x < 0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }

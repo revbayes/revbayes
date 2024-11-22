@@ -96,7 +96,7 @@ void PoMoState::populateWeightedStatesForMonoallelicState(size_t ind_first, int 
         
     }
     else  {
-        throw RbException( "PoMo string state not correct. We found "+ StringUtilities::to_string(ind_first)  );
+        throw RbException() << "PoMo string state not correct. We found " << ind_first;
     }
     
     for (size_t i =0; i < weights.size(); ++i)
@@ -128,7 +128,7 @@ void PoMoState::setState(const std::string &symbol)
     StringUtilities::stringSplit(symbol, ",", counts);
     
     if (counts.size() != num_raw_states)
-        throw RbException( "PoMo string state not correctly formatted. We found "+ symbol +", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." );
+        throw RbException() << "PoMo string state not correctly formatted. We found " << symbol << ", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." ; 
     
     
     //    //Checking if we have the preferred format, i.e. counts.
@@ -195,7 +195,7 @@ void PoMoState::setState(const std::string &symbol)
         
         if ( id2 > num_raw_states )
         {
-            throw RbException( "PoMo string state not correct. We found "+ symbol  );
+            throw RbException() << "PoMo string state not correct. We found " << symbol  ; 
         }
         
         std::cout << "basicIndex: "<<basicIndex <<std::endl;
