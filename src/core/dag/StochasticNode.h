@@ -486,7 +486,15 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) const
 {
-    // 1. If the node is not affected/touched, then the probability is the same for the current and previous state.
+    /*
+     * NOTE: If there is no previous probability then we could do a few things:
+     *         (1) throw an exception (current done).
+     *         (2) return an optional<double> to indicate if there is a previous probability or not.
+     *         (3) return the current probability.  This would make the method non-const.
+     *       Right now we do (1).
+     */
+
+    // 1. If the node is not affected/touched, then throw an exception.
     if (not stored_ln_prob)
         throw RbException()<<"getPrevLnProbability: no previous probability!";
 
