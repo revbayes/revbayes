@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 using namespace RevLanguage;
 
@@ -25,15 +26,13 @@ Transform_Sub1* Transform_Sub1::clone( void ) const
 
 RevBayesCore::TransformedDistribution* Transform_Sub1::createDistribution( void ) const
 {
+    using namespace Transforms;
+
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( first_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TypedDagNode<double>* sec        = static_cast<const Real &>( second->getRevObject() ).getDagNode();
-
-    auto sub1_transform = [=](double x) -> optional<double> { return x - sec->getValue(); };
-    auto sub1_inverse = [=](double x) -> optional<double> { return x + sec->getValue(); };
-    auto log_sub1_prime = [=](double x) -> optional<double> { return 0; };
 
     RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, sub1_transform, sub1_inverse, log_sub1_prime, {sec});
 

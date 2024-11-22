@@ -24,11 +24,11 @@ namespace RevBayesCore {
 
     public:
         // Allow returning nothing in case the input value is invalid.
-        typedef std::function<std::optional<std::vector<double>>(const std::vector<double>&)> func_t;
+        typedef std::function<std::optional<std::vector<double>>(const std::vector<const DagNode*>&, const std::vector<double>&)> func_t;
 
-        typedef std::function<std::optional<double>(const std::vector<double>&)> jacobian_t;
+        typedef std::function<std::optional<double>(const std::vector<const DagNode*>&, const std::vector<double>&)> jacobian_t;
 
-        typedef std::function<std::optional<double>(double)> scalar_func_t;
+        typedef std::function<std::optional<double>(const std::vector<const DagNode*>&, double)> scalar_func_t;
 
         // constructor(s)
         TransformedVectorDistribution(std::unique_ptr<TypedDistribution<RbVector<double>>>& vp, func_t F, func_t FI, jacobian_t LFP, const std::vector<const DagNode*>& p = {});
@@ -60,6 +60,7 @@ namespace RevBayesCore {
         func_t                                              f = nullptr;
         func_t                                              f_inverse = nullptr;
         jacobian_t                                          log_f_prime = nullptr;
+        std::vector<const DagNode*>                         transform_params;                                                                       //!< Parameters used by the transformation.
 
         // the base distribution
 	std::unique_ptr<TypedDistribution<RbVector<double>>>  base_dist;

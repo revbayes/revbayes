@@ -6,8 +6,10 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 using namespace RevLanguage;
+namespace Core = RevBayesCore;
 
 Transform_Scale_Pos::Transform_Scale_Pos() : TypedDistribution< RealPos >(),
                                      base_distribution( NULL )
@@ -26,17 +28,15 @@ Transform_Scale_Pos* Transform_Scale_Pos::clone( void ) const
 
 RevBayesCore::TransformedDistribution* Transform_Scale_Pos::createDistribution( void ) const
 {
+    using namespace Transforms;
+
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TypedDagNode<double>* l           = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
 
-    auto scale_transform = [=](double x) -> optional<double> { return x * l->getValue(); };
-    auto scale_inverse = [=](double x) -> optional<double> { return x / l->getValue(); };
-    auto log_scale_prime = [=](double x) -> optional<double> { return log(abs(l->getValue())); };
-
-    RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, scale_transform, scale_inverse, log_scale_prime, {l});
+    RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, mul_transform, mul_inverse, log_mul_prime, {l});
 
     delete vp;
 

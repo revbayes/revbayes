@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 using namespace RevLanguage;
 
@@ -26,17 +27,15 @@ Transform_Shift* Transform_Shift::clone( void ) const
 
 RevBayesCore::TransformedDistribution* Transform_Shift::createDistribution( void ) const
 {
+    using namespace Transforms;
+
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TypedDagNode<double>* d           = static_cast<const Real &>( delta->getRevObject() ).getDagNode();
 
-    auto shift_transform = [=](double x) -> optional<double> { return x + d->getValue(); };
-    auto shift_inverse = [=](double x) -> optional<double> { return x - d->getValue(); };
-    auto log_shift_prime = [=](double x) -> optional<double> { return 0; };
-
-    RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, shift_transform, shift_inverse, log_shift_prime, {d});
+    RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, add_transform, add_inverse, log_add_prime, {d});
 
     delete vp;
 

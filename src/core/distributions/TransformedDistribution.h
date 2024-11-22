@@ -23,7 +23,7 @@ namespace RevBayesCore {
     {
 
         // Allow returning nothing in case the input value is invalid.
-        typedef std::function<std::optional<double>(double)> func_t;
+        typedef std::function<std::optional<double>(const std::vector<const DagNode*>& params, double)> func_t;
 
     public:
         // constructor(s)
@@ -52,9 +52,10 @@ namespace RevBayesCore {
         void                                                simulate();
 
 	// the transformation
-	func_t                                              f = nullptr;
-	func_t                                              f_inverse = nullptr;
-	func_t                                              log_f_prime = nullptr;
+        func_t                                              f = nullptr;
+        func_t                                              f_inverse = nullptr;
+        func_t                                              log_f_prime = nullptr;
+        std::vector<const DagNode*>                         transform_params;                                                                       //!< Parameters used by the transformation.
 
         // the base distribution
 	std::unique_ptr<TypedDistribution<double>>          base_dist;
