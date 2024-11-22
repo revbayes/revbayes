@@ -1,6 +1,6 @@
 #include "Func_summarizeCharacterMaps.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <sstream>
 #include <vector>

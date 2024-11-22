@@ -1,7 +1,7 @@
 #include "PoMoState4.h"
 
 #include <boost/lexical_cast.hpp>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <cstddef>
 #include <string>

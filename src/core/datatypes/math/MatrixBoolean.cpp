@@ -5,7 +5,7 @@
 //  Created by David Cerny on 2019-10-15.
 //
 
-#include <math.h>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <ostream>
