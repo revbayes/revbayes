@@ -707,6 +707,69 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable (partition);
     }
+    else if (name == "getObsStatesVector")
+    {
+        found = true;
+
+        RevBayesCore::AbstractHomologousDiscreteCharacterData &v = dag_node->getValue();
+        size_t nChars = v.getNumberOfCharacters();
+        size_t nTaxa = v.getNumberOfTaxa();
+
+        bool warn = false;
+
+        std::vector<RevBayesCore::AbstractHomologousDiscreteCharacterData*> matVec;
+
+        for (size_t x = 0; x < v.getNumberOfStates(); x++)
+        {
+            matVec.push_back(v.clone());
+        }
+
+        for (size_t i = 0; i < nChars; i++)
+        {
+            // only set state number partition for previously included characters
+            if ( !v.isCharacterExcluded(i) )
+            {
+                RevBayesCore::RbBitSet observed(v.getNumberOfStates());
+                size_t max = 0;
+                for (size_t j = 0; j < nTaxa; j++)
+                {
+                    const RevBayesCore::AbstractDiscreteTaxonData& taxon_data = v.getTaxonData(j);
+                    if ( taxon_data.getCharacter(i).isMissingState() == false && taxon_data.getCharacter(i).isGapState() == false)
+                    {
+                        // Ignore ambiguous codings:
+                        // each state must be unambiguously observed to be counted.
+                        if (taxon_data.getCharacter(i).getNumberObservedStates() == 1)
+                        {
+                            size_t k = taxon_data.getCharacter(i).getStateIndex();
+                            observed.set(k);
+                        }
+                    }
+                }
+
+                const size_t n_obs_ij = observed.count();
+                for (size_t x = 0; x < v.getNumberOfStates(); x++)
+                {
+                    if ( !v.isCharacterExcluded(i) && n_obs_ij == x ) // only consider previously included characters
+                    {
+                        matVec[x]->includeCharacter(i);
+                    }
+                    else
+                    {
+                        matVec[x]->excludeCharacter(i);
+                    }
+                }
+            }
+        }
+
+        ModelVector<AbstractHomologousDiscreteCharacterData>* partition = new ModelVector<AbstractHomologousDiscreteCharacterData>();
+
+        for( size_t i = 0; i < matVec.size(); i++ )
+        {
+            partition->push_back(AbstractHomologousDiscreteCharacterData(matVec[i]));
+        }
+
+        return new RevVariable (partition);
+    }
     else if ( name == "translateCharacters" )
     {
         found = true;
@@ -799,6 +862,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* empiricalBaseArgRules                    = new ArgumentRules();
     ArgumentRules* expandCharactersArgRules                 = new ArgumentRules();
     ArgumentRules* getNumStatesVectorArgRules               = new ArgumentRules();
+    ArgumentRules* getObsStatesVectorArgRules               = new ArgumentRules();
     ArgumentRules* getPairwiseDifferenceArgRules            = new ArgumentRules();
     ArgumentRules* getStateDescriptionsArgRules             = new ArgumentRules();
     ArgumentRules* ishomologousArgRules                     = new ArgumentRules();
@@ -876,6 +940,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "excludeMissingSites",                     RlUtils::Void,                      exclude_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
+    methods.addFunction( new MemberProcedure( "getObsStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getObsStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
     methods.addFunction( new MemberProcedure( "getInvariantSiteIndices",                ModelVector<Natural>::getClassTypeSpec(), invSiteIndicesArgRules           ) );
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
