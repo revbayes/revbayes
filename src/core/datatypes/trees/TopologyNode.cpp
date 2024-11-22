@@ -308,7 +308,7 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     // fire tree change event
     if ( tree != NULL )
     {
-        tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+        tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
     }
 }
 
@@ -1795,7 +1795,7 @@ size_t TopologyNode::removeChild(TopologyNode* c)
     // fire tree change event
     if ( tree != NULL )
     {
-        tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+        // tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
         tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
     }
 
@@ -1845,6 +1845,18 @@ void TopologyNode::setAge(double a, bool propagate)
     if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
         if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
             std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
+
+            // NOTE: This code intentionally constructs trees with different ages for sampled-ancestors-parents and sampled-ancestor-tips.
+	    //
+	    // If we try to set the age of a sampled-ancestor parent to an age outside of the age rate, then this code will leave the
+	    // sampled-ancestor-parent and sampled-ancestor-top with different ages.
+	    //
+            // If a proposal is setting the age, then the proposed should have a -Inf probability and be rejected.
+	    //
+            // However, if this occurs somewhere else (such as during undoProposal), then this can leave the tree in an inconsistent state
+	    // So: AVOID situations where undoProposal tries to set the age of a sampled-ancestor-parent to an age outside of the age
+	    //     range.
+
             return;
             //throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
         }
@@ -1936,7 +1948,7 @@ void TopologyNode::setNumberOfShiftEvents(size_t n)
     num_shift_events = n;
 }
 
-void TopologyNode::setParent(TopologyNode* p)
+void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
 {
 
     // we only do something if this isn't already our parent
@@ -1944,14 +1956,25 @@ void TopologyNode::setParent(TopologyNode* p)
     {
         // we do not own the parent so we do not have to delete it
         parent = p;
-
-        // we need to recompute our branch length
-        recomputeBranchLength();
-
-        // fire tree change event
-        if ( tree != NULL )
+        
+        if (recompute_branch_length == true)
         {
-            tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::DEFAULT );
+            // we need to recompute our branch length
+            recomputeBranchLength();
+            
+            // fire tree change event
+            if ( tree != NULL )
+            {
+                tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::DEFAULT );
+            }
+        }
+        else
+        {
+            // fire tree change event
+            if ( tree != NULL && parent != NULL )
+            {
+                tree->getTreeChangeEventHandler().fire( *parent, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+            }
         }
 
     }

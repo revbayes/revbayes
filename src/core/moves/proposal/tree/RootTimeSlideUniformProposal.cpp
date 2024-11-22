@@ -88,7 +88,6 @@ double RootTimeSlideUniformProposal::getProposalTuningParameter( void ) const
  */
 double RootTimeSlideUniformProposal::doProposal( void )
 {
-
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
@@ -106,15 +105,17 @@ double RootTimeSlideUniformProposal::doProposal( void )
     Tree& tau = *tmp;
 
     TopologyNode* root = &tau.getRoot();
-    // cannot move the root if it's a SA
+
+    // Save the stored age here so that we can reset to a reasonable value in undoproposal.
+    double my_age      = root->getAge();
+    storedAge          = my_age;
+
+    // Cannot move the root if it's a SA
+    // NOTE: UndoProposal may still be called!
     if(root->isSampledAncestorParent()) return RbConstants::Double::neginf;
 
     // we need to work with the times
-    double my_age      = root->getAge();
     double child_Age   = std::max( root->getChild( 0 ).getAge(), root->getChild( 1 ).getAge() );
-
-    // now we store all necessary values
-    storedAge = my_age;
     
     // draw new ages and compute the hastings ratio at the same time
     double my_new_age = (origin->getValue() - child_Age) * rng->uniform01() + child_Age;

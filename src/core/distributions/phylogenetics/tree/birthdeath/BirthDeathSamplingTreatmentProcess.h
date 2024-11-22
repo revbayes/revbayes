@@ -57,21 +57,21 @@ namespace RevBayesCore {
                                                     long age_check_precision);  //!< Constructor
 
         // public member functions
-        BirthDeathSamplingTreatmentProcess*             clone(void) const;                                                      //!< Create an independent clone
-        void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
-        bool                                            allowsSA();                                                             //!< Checks if distribution is compatible with sampled ancestors
-        virtual void                                    setValue(Tree *v, bool f=false);                                        //!< Sets value to specified tree
+        BirthDeathSamplingTreatmentProcess*             clone(void) const override;                                             //!< Create an independent clone
+        void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC) override;//!< Draw a new random value from the distribution
+        bool                                            allowsSA() override;                                                    //!< Checks if distribution is compatible with sampled ancestors
+        virtual void                                    setValue(Tree *v, bool f=false) override;                               //!< Sets value to specified tree
 
     protected:
         // Parameter management functions
-        double                                          computeLnProbabilityDivergenceTimes(void) const;                        //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void) const override;               //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);        //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;//!< Swap a parameter
 
         // helper functions
         void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
         void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
-        double                                          computeLnProbabilityTimes(void) const;                                  //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityTimes(void) const override;                         //!< Compute the log-transformed probability of the current value.
         bool                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
         double                                          lnD(size_t i, double t) const;                                          //!< Branch-segment probability at time t with index i, using pre-computed vectors
         double                                          E(size_t i, double t, bool computeSurvival = false) const;                                       //!< Extinction probability at time t with index i, using pre-computed vectors
@@ -81,13 +81,13 @@ namespace RevBayesCore {
         size_t                                          findIndex(double t, const std::vector<double>& timeline) const;
         void                                            getOffset(void) const;
         bool                                            isConstantRate(void) const;                                             //!< Checks if we have a constant-rate process
-        double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
-        double                                          lnProbTreeShape(void) const;
+        double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
+        double                                          lnProbTreeShape(void) const override;
         void                                            prepareTimeline(void) const;
         void                                            prepareProbComputation(void) const override;
         double                                          pSampling(double t) const;
-        double                                          pSurvival(double start, double end) const;
-        double                                          simulateDivergenceTime(double origin, double present) const;            //!< Simulate a speciation event.
+        double                                          pSurvival(double start, double end) const override;
+        double                                          simulateDivergenceTime(double origin, double present) const override;   //!< Simulate a speciation event.
         void                                            sortGlobalTimesAndVectorParameter(void) const;                          //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
         void                                            sortNonGlobalTimesAndVectorParameter(std::vector<double>& times, std::vector<double>& par) const;     //!< Sorts times to run from 0->inf, and orders par to match
         int                                             survivors(double t) const;                                              //!< Number of species alive at time t.
