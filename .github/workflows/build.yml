@@ -136,7 +136,7 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          brew install pkg-config boost ccache coreutils meson openlibm
+          brew install boost ccache coreutils meson openlibm
 
     - name: Install meson
       run: |
