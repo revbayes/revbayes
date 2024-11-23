@@ -181,7 +181,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
         characterType tmp = characterType();
         if ( dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() != tmp.getDataType() )
         {
-            throw RbException("The character type in the ancestral state monitor does not match. \" The data has type " + dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() + "\" but the monitor expected \"" + tmp.getDataType() + "\".");
+            throw RbException() << "The character type in the ancestral state monitor does not match. \" The data has type " << dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() << "\" but the monitor expected \"" << tmp.getDataType() << "\".";
         }
             
         // now give as an object that we can clone.
@@ -212,7 +212,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
         characterType tmp = characterType();
         if ( dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() != tmp.getDataType() )
         {
-            throw RbException("The character type in the ancestral state monitor does not match. \" The data has type " + dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() + "\" but the monitor expected \"" + tmp.getDataType() + "\".");
+            throw RbException() << "The character type in the ancestral state monitor does not match. \" The data has type " << dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() << "\" but the monitor expected \"" << tmp.getDataType() << "\".";
         }
 
         // now give as an object that we can clone.

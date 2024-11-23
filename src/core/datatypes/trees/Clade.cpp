@@ -553,7 +553,7 @@ void Clade::resetTaxonBitset(const std::map<std::string, size_t> map)
         }
         else
         {
-            throw RbException("Missing taxon with name '" + taxa[i].getName() + "'.");
+            throw RbException() << "Missing taxon with name '" << taxa[i].getName() << "'.";
         }
     }
     
@@ -738,7 +738,7 @@ void Clade::setAges(const std::vector<Taxon>& taxa)
         }
         if ( found == false )
         {
-            throw RbException("set_ages_for_constraint: can't find taxon " + getTaxonName(j) + " in full taxon set!");
+            throw RbException() << "set_ages_for_constraint: can't find taxon " << getTaxonName(j) << " in full taxon set!";
         }
     }
 }

@@ -61,6 +61,7 @@ namespace RevLanguage {
         virtual RevObject*                                      convertTo(const TypeSpec& type) const;                                                          //!< Convert to type
         virtual RevPtr<RevVariable>                             executeMethod(const std::string& name, const std::vector<Argument>& args, bool &found);         //!< Execute member method (if applicable)
         virtual RevBayesCore::DagNode*                          getDagNode(void) const;                                                                         //!< Get my internal value node (if applicable)
+        virtual bool                                            hasDagNode(void) const;                                                                         //!< Check if we have an internal value node.
         virtual const MemberRules&                              getParameterRules(void) const;                                                                  //!< Get member rules
         virtual bool                                            isAbstract(void) const;                                                                         //!< Is this an abstract type/object?
         virtual bool                                            isAssignable(void) const;                                                                       //!< Is object or upstream members assignable?

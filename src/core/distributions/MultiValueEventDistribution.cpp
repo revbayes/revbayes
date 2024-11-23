@@ -187,7 +187,7 @@ void MultiValueEventDistribution::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("The multi-value event does not have a member method called '" + n + "'.");
+        throw RbException() << "The multi-value event does not have a member method called '" << n << "'.";
     }
     
 }
@@ -209,7 +209,7 @@ void MultiValueEventDistribution::executeMethod(const std::string &n, const std:
     //    }
     else
     {
-        throw RbException("The multi-value event does not have a member method called '" + n + "'.");
+        throw RbException() << "The multi-value event does not have a member method called '" << n << "'.";
     }
     
 }
@@ -306,7 +306,7 @@ void MultiValueEventDistribution::swapParameterInternal( const DagNode *oldP, co
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + oldP->getName() + " to " + newP->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << oldP->getName() << " to " << newP->getName(); 
     }
     
 }

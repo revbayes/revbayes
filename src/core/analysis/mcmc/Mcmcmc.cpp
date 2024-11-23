@@ -477,6 +477,7 @@ void Mcmcmc::initializeSamplerFromCheckpoint( bool priorOnly, bool suppressChara
         if ( chains[i] != NULL )
         {
             chains[i]->initializeSamplerFromCheckpoint( priorOnly, suppressCharacterData );
+            setCurrentGeneration(chains[i]->getCurrentGeneration());
         }
         
     }

@@ -118,13 +118,13 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
         return 0.0;
     }
 
-    // pick a random node which is not the root and neithor the direct descendant of the root
+    // pick a random node which is not the root, a tip, or the parent of a SA
     TopologyNode* node;
     do {
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() );
+    } while ( node->isRoot() || node->isTip() || node -> isSampledAncestorParent() );
     
     TopologyNode& parent = node->getParent();
     TopologyNode& childA = node->getChild( 0 );
