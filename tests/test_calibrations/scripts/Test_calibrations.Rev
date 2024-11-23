@@ -153,7 +153,6 @@ monitors.append( mnModel(filename="output/node_calibration.log",
                          printgen=20) )
 monitors.append( mnFile(filename="output/node_calibration.trees",
                         printgen=20, timetree) )
-monitors.append( mnScreen(printgen=20, extant_mrca, diversification) )
 
 # Initialize the MCMC object
 mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
