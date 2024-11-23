@@ -1,0 +1,6 @@
+   Successfully read one character matrix from file 'data/bears_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves in a random move schedule with 37 moves per iteration
+   
