@@ -155,7 +155,7 @@ monitors.append( mnFile(filename="output/node_calibration_no_data.trees",
                         printgen=20, timetree) )
 
 # Initialize the MCMC object
-mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+mymcmc = mcmc(mymodel, monitors, moves)
 
 # Run the MCMC under the prior. This unclamps all stochastic variables, meaning that all
 # types of data will be suppressed: both the sequence data (to which we clamped 'phySeq')
@@ -163,16 +163,6 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
 # and divergence times of the tree will be determined solely by the birth-death prior.
 
 mymcmc.run(generations=500, tuningInterval=100, underPrior=true)
-
-##########################
-# Summarizing the output #
-##########################
-
-# Read the trace file
-trace = readTreeTrace("output/node_calibration_no_data.trees", nruns=2)
-
-# Generate the maximum clade credibility tree
-mccTree(trace, file="output/node_calibration_no_data.mcc.tre")
 
 clear()
 q()

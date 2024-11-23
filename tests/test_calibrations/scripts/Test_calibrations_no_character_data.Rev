@@ -155,7 +155,7 @@ monitors.append( mnFile(filename="output/node_calibration_no_character_data.tree
                         printgen=20, timetree) )
 
 # Initialize the MCMC object
-mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+mymcmc = mcmc(mymodel, monitors, moves)
 
 # Run the MCMC with character data suppressed. This will unclamp the 'phySeq; variable,
 # which is clamped to molecular sequence data, but not the 'obs_age_ursinae' variable,
@@ -163,16 +163,6 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
 # therefore be informed both by the birth-death prior and by the specified calibration.
 
 mymcmc.run(generations=500, tuningInterval=100, suppressCharacterData=true)
-
-##########################
-# Summarizing the output #
-##########################
-
-# Read the trace file
-trace = readTreeTrace("output/node_calibration_no_character_data.trees", nruns=2)
-
-# Generate the maximum clade credibility tree
-mccTree(trace, file="output/node_calibration_no_character_data.mcc.tre")
 
 clear()
 q()

@@ -155,20 +155,10 @@ monitors.append( mnFile(filename="output/node_calibration.trees",
                         printgen=20, timetree) )
 
 # Initialize the MCMC object
-mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+mymcmc = mcmc(mymodel, monitors, moves)
 
 # Run the MCMC
 mymcmc.run(generations=500, tuningInterval=100)
-
-##########################
-# Summarizing the output #
-##########################
-
-# Read the trace file
-trace = readTreeTrace("output/node_calibration.trees", nruns=2)
-
-# Generate the maximum clade credibility tree
-mccTree(trace, file="output/node_calibration.mcc.tre")
 
 clear()
 q()
