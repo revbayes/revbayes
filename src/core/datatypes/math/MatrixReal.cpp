@@ -1284,9 +1284,9 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const MatrixReal& x)
     {
         if (i == 0)
             o << "[ ";
-        else 
-            o << "  ";
-        
+        else
+            o << "  [ ";
+            
         for (size_t j = 0; j < x.getNumberOfColumns(); ++j) 
         {
             if (j != 0)
