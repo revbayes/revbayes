@@ -127,14 +127,10 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         }
 
         bool prior = static_cast<const RlBoolean &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        if ( prior == true )
-        {
-            value->runModifiedSampler( true, false, gen, rules, tuning_interval, checkpoint_file, checkpoint_interval );
-        }
         bool suppress_chardata = static_cast<const RlBoolean &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        if ( suppress_chardata == true )
+        if ( prior or suppress_chardata )
         {
-            value->runModifiedSampler( false, true, gen, rules, tuning_interval, checkpoint_file, checkpoint_interval );
+            value->runModifiedSampler( prior, suppress_chardata, gen, rules, tuning_interval, checkpoint_file, checkpoint_interval );
         }
         else
         {
