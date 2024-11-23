@@ -1,0 +1,22 @@
+   Successfully read one character matrix from file 'data/bears_cytb.nex'
+   NOTE: The 'underPrior' option overrides the 'suppressCharacterData' option.
+   
+   
+   Running prior MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves in a random move schedule with 37 moves per iteration
+   
+Checking for identity with trees obtained by sampling under the prior...
+   Processing file "output/node_calibration_try_both.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Processing file "output/node_calibration_no_data.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+Success; all are identical!
