@@ -1311,29 +1311,8 @@ bool Tree::isTimeTree(void) const
     return all_node_times;
 }
 
-void Tree::makeInternalNodesBifurcating(bool reindex, bool as_fossils)
-{
-    // If reindex is false, then makeInternalNodesBifurcating will either
-    // * do nothing (if no sampled ancestors)
-    // * crash ( if there are sampled ancestors)
-    assert(reindex);
 
-    // delegate the call to the nodes which will make the tree bifurcating recursively.
-    getRoot().makeBifurcating( as_fossils );
-
-    // reindex here, in case makeBifurcating
-    // * added new fossil tips with no index
-    // * removed out-degree-1 nodes ("knuckles")
-    
-    // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
-    setRoot( &getRoot(), true );
-
-    // clear the taxon bitset map
-    // the next time someone call getTaxonBitset() it will be rebuilt
-    taxon_bitset_map.clear();
-}
-
-void Tree::makeRootBifurcating(const Clade& outgroup, bool as_fossils)
+void Tree::makeRootBifurcating(const Clade& outgroup)
 {
     size_t num_root_children = root->getNumberOfChildren();
     if ( num_root_children == 3 )
@@ -1945,21 +1924,19 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
-    // if we have a trifurcation at the root, we need to change it into a bifurcation
+    // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
     {
-        // first, we make the root bifurcating
-        makeRootBifurcating(n.getClade(), reindex);
+        // first, if we have a trifurcation at the root, we need to change it into a bifurcation
+        makeRootBifurcating(n.getClade());
 
-        // second, we make all other nodes bifurcating
-        makeInternalNodesBifurcating(reindex, true);
+        // second, we suppress any internal nodes of outdegree 1 ("knuckles" / sampled ancestors)
+        suppressOutdegreeOneInternalNodes(reindex, true);
         
     } // end-if we do not want to make the tree bifurcating
 
-
     // set the new root
     setRoot( &n.getParent(), reindex );
-
 }
 
 
@@ -2182,6 +2159,29 @@ void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxo
     // the next time someone call getTaxonBitset() it will be rebuilt
     taxon_bitset_map.clear();
 
+}
+
+
+void Tree::suppressOutdegreeOneInternalNodes(bool reindex, bool replace)
+{
+    // If reindex is false, then suppressOutdegreeOneInternalNodes will either
+    // * do nothing (if no sampled ancestors)
+    // * crash      (if there are sampled ancestors)
+    assert(reindex);
+
+    // delegate the call to the nodes which will recursively suppress outdegree-1 nnodes.
+    getRoot().suppressOutdegreeOneNodes( replace );
+
+    // reindex here, in case suppressOutdegreeOneNodes
+    // * replaced outdegree-1 nodes ("knuckles") by new tips with no index (replace = true)
+    // * removed them entirely                                             (replace = false)
+    
+    // we need to reset the root so that the vector of nodes get filled again with the new number of nodes
+    setRoot( &getRoot(), true );
+
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 }
 
 
