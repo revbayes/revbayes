@@ -582,10 +582,10 @@ std::string TopologyNode::computePlainNewick( void ) const
 {
     /* NOTE: Representing a topology as with WITH NO ANNOTATIONS
      * means that we have to represent sampled ancestors as
-     * out-degree-1 nodes.
+     * outdegree-1 nodes.
      *
      * If you want to build a tree object from that, you may
-     * need to call tree->makeInternalNodesBifurcating(true,true).
+     * need to call tree->suppressOutdegreeOneInternalNodes(true, true).
      */
 
     // test whether this is a internal or external node

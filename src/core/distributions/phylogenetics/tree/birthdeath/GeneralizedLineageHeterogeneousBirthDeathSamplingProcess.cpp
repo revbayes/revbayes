@@ -674,10 +674,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
 {
 
-    // make sure the input tree is binary
-    v->makeInternalNodesBifurcating(true, true);
+    // Suppress outdegree-1 internal nodes (= sampled ancestors)
+    v->suppressOutdegreeOneInternalNodes(true, true);
 
-	// check that tree is binary (this seems redundant? MRM 7/26/2023)
+	// Check that tree is binary. This may still not be the case if there are multifurcations.
     if (v->isBinary() == false)
     {
         throw RbException("The process is only implemented for binary trees.");
