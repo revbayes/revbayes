@@ -1330,7 +1330,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup)
                 good_bl = root->getChild(i).getBranchLength();
                 half_bl = good_bl / 2.0;
                 root->getChild(i).setBranchLength(half_bl);
-//                    root->getChild(i).setAge(root->getChild(i).getAge() + half_bl);
+                //  root->getChild(i).setAge(root->getChild(i).getAge() + half_bl);
                 break;
             }
         }
@@ -1358,7 +1358,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup)
     }
     else if (num_root_children > 2)
     {
-        throw RbException() << "Problem when rerooting with  '" << outgroup.toString() << "'.";
+        throw RbException() << "Cannot reroot on '" << outgroup.toString() << "'; the root has more than 3 children.";
     } // end-if the root node has 3 children
     
 
