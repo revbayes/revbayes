@@ -33,6 +33,7 @@ namespace RevBayesCore {
         virtual const TypedDistribution<valueType>&         getDistribution(void) const;
         void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
         virtual double                                      getLnProbability(void);
+        virtual double                                      getPrevLnProbability(void) const;
         virtual double                                      getLnProbabilityRatio(void);
         virtual std::vector<double>                         getMixtureLikelihoods(bool log=true) const;
         virtual std::vector<double>                         getMixtureProbabilities(void) const;
@@ -479,6 +480,31 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 
     // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
     return getLnProbability() - **stored_ln_prob;
+}
+
+
+template<class valueType>
+double RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) const
+{
+    /*
+     * NOTE: If there is no previous probability then we could do a few things:
+     *         (1) throw an exception (current done).
+     *         (2) return an optional<double> to indicate if there is a previous probability or not.
+     *         (3) return the current probability.  This would make the method non-const.
+     *       Right now we do (1).
+     */
+
+    // 1. If the node is not affected/touched, then throw an exception.
+    if (not stored_ln_prob)
+        throw RbException()<<"getPrevLnProbability: no previous probability!";
+
+    // 2. If we touched the node when the log probability was not calculated, then we don't have a value for
+    // the probability of the previous state.
+    if (not *stored_ln_prob)
+        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
+
+    // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
+    return **stored_ln_prob;
 }
 
 
