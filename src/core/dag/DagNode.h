@@ -87,6 +87,7 @@ template <class valueType> class RbOrderedSet;
         size_t                                                      getNumberOfChildren(void) const;                                                            //!< Get the number of children for this node
         virtual size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
         virtual std::vector<const DagNode*>                         getParents(void) const;                                                                     //!< Get the set of parents (empty set here)
+        virtual double                                              getPrevLnProbability(void) const;
         size_t                                                      getReferenceCount(void) const;                                                              //!< Get the reference count for reference counting in smart pointers
         const std::set<size_t>&                                     getTouchedElementIndices(void) const;                                                       //!< Get the indices of the touches elements. If the set is empty, then all elements might have changed.
         bool                                                        getVisitFlag(const size_t flagType) const;

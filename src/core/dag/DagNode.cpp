@@ -1108,3 +1108,8 @@ void DagNode::touchAffected(bool touchAll)
         child->touchMe( this, touchAll );
     }
 }
+
+double DagNode::getPrevLnProbability(void) const
+{
+    throw RbException()<<"getPrevLnProbability: not a stochastic node!";
+}

@@ -100,7 +100,7 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
-        mkdir output
+        mkdir -p output
         tmp0=${f#scripts/}
         tmp1=${tmp0%.[Rr]ev}
         ${rb_exec} -b $f &> output/${tmp1}.errout # print output so we can see any error messages
