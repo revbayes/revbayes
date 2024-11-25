@@ -585,7 +585,7 @@ std::string TopologyNode::computePlainNewick( void ) const
      * outdegree-1 nodes.
      *
      * If you want to build a tree object from that, you may
-     * need to call tree->suppressOutdegreeOneInternalNodes(true, true).
+     * need to call tree->suppressOutdegreeOneNodes(true, true).
      */
 
     // test whether this is a internal or external node

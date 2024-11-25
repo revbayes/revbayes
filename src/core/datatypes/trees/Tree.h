@@ -152,7 +152,7 @@ namespace RevBayesCore {
         void                                                setTaxonIndices(const TaxonMap &tm);                                                                //!< Set the indices of the taxa from the taxon map
         void                                                setTaxonName(const std::string& currentName, const std::string& newName);                           //!< Change the name of a taxon
         void                                                setTaxonObject(const std::string& currentName, const Taxon &newName);                               //!< Change the name of a taxon
-        void                                                suppressOutdegreeOneInternalNodes(bool reindex, bool replace);                                       //!< Suppress all internal nodes of outdegree 1
+        void                                                suppressOutdegreeOneNodes(bool reindex, bool replace);                                           //!< Suppress all internal nodes of outdegree 1
         void                                                unroot(void);                                                                                       //!< Unroot the tree, if it was previously rooted.
 
     protected:
