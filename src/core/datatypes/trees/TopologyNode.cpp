@@ -1986,72 +1986,67 @@ void TopologyNode::setUseAges(bool tf, bool recursive)
  */
 void TopologyNode::suppressOutdegreeOneNodes( bool replace )
 {
-    // we need to be able to bifurcate sampled ancestor root nodes
-    //if ( isRoot() == false )
-    //{
+    
+    if ( getNumberOfChildren() == 1 )
+    {
 
-        if ( getNumberOfChildren() == 1 )
+        /* Should we remove the node or replace it by a bifurcation with a zero-length branch instead?
+         * I.e.,
+         *
+         *    A                   A                 A
+         *    |                   |                 |
+         *    B      -->      B --+--\      or      |
+         *    |                      |              |
+         *    C                      C              C
+         *
+         *                 (replace = true)  (replace = false)
+         */
+        if ( replace == true ) // this solution is general enough to handle sampled ancestor root nodes
         {
+            TopologyNode *new_fossil = new TopologyNode( getTaxon() );
+            taxon = Taxon("");
 
-            /* Should we remove the node or replace it by a bifurcation with a zero-length branch instead?
-             * I.e.,
-             *
-             *    A                   A                 A
-             *    |                   |                 |
-             *    B      -->      B --+--\      or      |
-             *    |                      |              |
-             *    C                      C              C
-             *
-             *                 (replace = true)  (replace = false)
-             */
-            if ( replace == true )
+            // connect to the old sampled ancestor
+            addChild( new_fossil );
+            new_fossil->setParent( this );
+
+            // set the sampled ancestor flags
+            setSampledAncestor( false );
+            new_fossil->setSampledAncestor( true );
+
+            // set the age and branch length of the newly added tip
+            new_fossil->setAge( age );
+            new_fossil->setBranchLength( 0.0 );
+                
+            // call this function recursively for all children of this node
+            for (size_t i = 0; i < getNumberOfChildren(); ++i)
             {
-                TopologyNode *new_fossil = new TopologyNode( getTaxon() );
-                taxon = Taxon("");
-
-                // connect to the old fossil
-                addChild( new_fossil );
-                new_fossil->setParent( this );
-
-                // set the fossil flags
-                setSampledAncestor( false );
-                new_fossil->setSampledAncestor( true );
-
-                // set the age and branch-length of the fossil
-                new_fossil->setAge( age );
-                new_fossil->setBranchLength( 0.0 );
+                getChild( i ).suppressOutdegreeOneNodes( replace );
             }
-            else
-            {
-                // we are going to delete myself by connect my parent and my child
-                TopologyNode& parent = getParent();
-                TopologyNode& child = getChild(0);
+        }
+        else // this only works for non-root nodes; the root is handled at the Tree level instead
+        {
+            // we are going to delete myself by connecting my parent and my child
+            TopologyNode& parent = getParent();
+            TopologyNode& child = getChild(0);
                     
-                // the new branch length needs to be the branch length of the parent and child
-                double summ = getBranchLength() + child.getBranchLength();
+            // the new branch length needs to be the branch length of the parent and child
+            double summ = getBranchLength() + child.getBranchLength();
                     
-                // now remove myself from the parent
-                parent.removeChild( this );
+            // now remove myself from the parent
+            parent.removeChild( this );
                     
-                // and my child from me
-                removeChild( &child );
+            // and my child from me
+            removeChild( &child );
                     
-                // and stich my parent and my child together
-                parent.addChild( &child );
-                child.setParent( &parent );
+            // and stich my parent and my child together
+            parent.addChild( &child );
+            child.setParent( &parent );
                     
-                // finally, adapt the branch lengths
-                child.setBranchLength(summ);
-            }
-
+            // finally, adapt the branch lengths
+            child.setBranchLength(summ);
         }
 
-    //}
-
-    // call this function recursively for all its children
-    for (size_t i=0; i<getNumberOfChildren(); ++i)
-    {
-        getChild( i ).suppressOutdegreeOneNodes( replace );
     }
 
 }

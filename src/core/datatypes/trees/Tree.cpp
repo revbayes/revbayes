@@ -2126,7 +2126,7 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
  * Change the name of a taxon
  *
  * \param[in] current_name    self explanatory.
- * \param[in] newName         self explanatory.
+ * \param[in] new_name         self explanatory.
  */
 void Tree::setTaxonName(const std::string& current_name, const std::string& new_name)
 {
@@ -2164,8 +2164,53 @@ void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxo
 
 void Tree::suppressOutdegreeOneNodes(bool replace)
 {
-    // delegate the call to the nodes which will recursively suppress outdegree-1 nnodes.
-    getRoot().suppressOutdegreeOneNodes( replace );
+    // if we are replacing rather than removing outdegree-1 nodes, we can let recursion take care of the
+    // entire tree
+    if (replace)
+    {
+        getRoot().suppressOutdegreeOneNodes( true );
+    }
+    // if we want them removed, we need to iterate over all nodes (potentially multiple times)
+    else
+    {
+        size_t outdegreeOneNodes = 1;
+        while (outdegreeOneNodes > 0)
+        {
+            for (size_t i = 0; i < nodes.size(); i++)
+            {
+                if (nodes[i]->getNumberOfChildren() == 1)
+                {
+                    if ( not nodes[i]->isRoot() )
+                    {
+                        // this will only have effect if nodes[i]->getNumberOfChildren() == 1
+                        nodes[i]->suppressOutdegreeOneNodes( false );
+                        // we need to reindex nodes because we removed an index
+                        reindexNodes();
+                    }
+                    else
+                    {
+                        TopologyNode* new_root = &nodes[i]->getChild(0);
+                        double new_bl = nodes[i]->getBranchLength() + new_root->getBranchLength();
+                        nodes[i]->removeChild( new_root );
+                        new_root->setParent( NULL );
+                        new_root->setBranchLength( new_bl );
+
+                        root = new_root;
+                        root->setTree(this);
+                    }
+                }
+            }
+            
+            outdegreeOneNodes = 0;
+            for (size_t i = 0; i < nodes.size(); i++)
+            {
+                if (nodes[i]->getNumberOfChildren() == 1)
+                {
+                    outdegreeOneNodes++;
+                }
+            }
+        }
+    }
 
     // reindex here, in case suppressOutdegreeOneNodes
     // * replaced outdegree-1 nodes ("knuckles") by new tips with no index (replace = true)
