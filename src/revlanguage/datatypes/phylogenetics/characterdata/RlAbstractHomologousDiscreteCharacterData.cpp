@@ -35,6 +35,7 @@
 #include "RlUtils.h"
 #include "Simplex.h"
 #include "StringUtilities.h"
+#include "TaxaState.h"
 #include "TypeSpec.h"
 
 using namespace RevLanguage;
@@ -715,11 +716,10 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         size_t nChars = v.getNumberOfCharacters();
         size_t nTaxa = v.getNumberOfTaxa();
 
-        bool warn = false;
-
         std::vector<RevBayesCore::AbstractHomologousDiscreteCharacterData*> matVec;
+        matVec.reserve(v.getNumberOfStates() + 1);
 
-        for (size_t x = 0; x < v.getNumberOfStates(); x++)
+        for (size_t x = 0; x < v.getNumberOfStates() + 1; x++)
         {
             matVec.push_back(v.clone());
         }
@@ -746,11 +746,12 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                     }
                 }
 
-                const size_t n_obs_ij = observed.count();
-                for (size_t x = 0; x < v.getNumberOfStates(); x++)
+                const size_t n_obs_i = observed.count();
+                for (size_t x = 0; x < v.getNumberOfStates() + 1; x++)
                 {
-                    if ( !v.isCharacterExcluded(i) && n_obs_ij == x ) // only consider previously included characters
-                    {
+                    assert(!v.isCharacterExcluded(i)); // We are only considering characters that are presently included
+                    if ( n_obs_i == x )
+                    {   
                         matVec[x]->includeCharacter(i);
                     }
                     else
@@ -769,6 +770,86 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         }
 
         return new RevVariable (partition);
+    }
+    else if ( name == "relabelStates" )
+    {
+        found = true;
+
+        // TODO Following the model of the  if block below, should this perhaps be implemented 
+        // as a method of this->dag_node->getValue()?
+        RevBayesCore::AbstractHomologousDiscreteCharacterData &orig = dag_node->getValue();
+        size_t nChars = orig.getNumberOfCharacters();
+        size_t nTaxa = orig.getNumberOfTaxa();
+
+        bool warn = false;
+
+        RevBayesCore::AbstractHomologousDiscreteCharacterData *ret = orig.clone();
+        for (size_t i = nChars; i--;) 
+        {
+            ret->excludeCharacter(i);
+        }
+        ret->removeExcludedCharacters();
+
+        for (size_t i = 0; i < nChars; i++)
+        {
+            RevBayesCore::RbBitSet observed(orig.getNumberOfStates());
+            size_t max = 0;
+            for (size_t j = 0; j < nTaxa; j++)
+            {
+                const RevBayesCore::AbstractDiscreteTaxonData& taxon_data = orig.getTaxonData(j);
+                if ( taxon_data.getCharacter(i).isMissingState() == false && taxon_data.getCharacter(i).isGapState() == false)
+                {
+                    // Ignore ambiguous codings:
+                    // each state must be unambiguously observed to be counted.
+                    if (taxon_data.getCharacter(i).getNumberObservedStates() == 1)
+                    {
+                        size_t k = taxon_data.getCharacter(i).getStateIndex();
+                        observed.set(k);
+                    }
+                }
+            }
+
+            const size_t n_obs_i = observed.count();
+            std::vector<size_t> oldLabel(n_obs_i);
+            size_t nextLabel = 0;
+            for (size_t x = 0; nextLabel != n_obs_i; x++)
+            {
+                if (observed.test(x))
+                {
+                    oldLabel[nextLabel] = x;
+                    nextLabel++;
+                }
+            }
+            for (size_t j = 0; j < nTaxa; j++)
+            {
+                const RevBayesCore::AbstractDiscreteTaxonData& taxon_data = orig.getTaxonData(j);
+                if ( taxon_data.getCharacter(i).isMissingState() == false && taxon_data.getCharacter(i).isGapState() == false)
+                {
+                    const RevBayesCore::DiscreteCharacterState &ch = taxon_data.getCharacter(i);
+                    const RevBayesCore::RbBitSet& oldState = ch.getState();
+                    // It would be natural to set the number of states to n_obs_i,
+                    // but the number must be uniform across all characters.
+                    RevBayesCore::TaxaState relabelled(orig.getNumberOfStates());
+                    size_t seen = 0;
+
+                    for (size_t k = 0; k != n_obs_i; k++)
+                    {
+                        if (oldState.test(oldLabel[k]))
+                        {
+                            relabelled.addState(k);
+                        }
+                    }
+                    
+                    ret->getTaxonData(j).addCharacter(relabelled);
+                } else {
+                    // As we don't modify the states, we simply use the existing character -
+                    // including the ambiguous/gap annotation.
+                    ret->getTaxonData(j).addCharacter(taxon_data.getCharacter(i));
+                }
+            }
+        }
+
+        return new RevVariable( new AbstractHomologousDiscreteCharacterData(ret) );
     }
     else if ( name == "translateCharacters" )
     {
@@ -843,15 +924,15 @@ const TypeSpec& AbstractHomologousDiscreteCharacterData::getTypeSpec( void ) con
 void AbstractHomologousDiscreteCharacterData::initMethods( void )
 {
 
-        // add the DAG node member methods
-        // note that this is a sage case because all DAG nodes are member objects
+    // add the DAG node member methods
+    // note that this is a sage case because all DAG nodes are member objects
     if ( dag_node != NULL )
     {
         const MethodTable &dagMethods = dynamic_cast<RevMemberObject*>( dag_node )->getMethods();
         methods.insertInheritedMethods( dagMethods );
     }
 
-        // insert the character data specific methods
+    // insert the character data specific methods
     MethodTable charDataMethods = getCharacterDataMethods();
     methods.insertInheritedMethods( charDataMethods );
 
@@ -880,9 +961,10 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* minPairwiseDifferenceArgRules            = new ArgumentRules();
     ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
     ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
+    ArgumentRules* relabelStatesArgRules                    = new ArgumentRules();
     ArgumentRules* remove_excluded_characters_arg_rules     = new ArgumentRules();
-    ArgumentRules* replace_random_sites_arg_rules            = new ArgumentRules();
-    ArgumentRules* exclude_missing_sites_arg_rules           = new ArgumentRules();
+    ArgumentRules* replace_random_sites_arg_rules           = new ArgumentRules();
+    ArgumentRules* exclude_missing_sites_arg_rules          = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2               = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules            = new ArgumentRules();
@@ -939,8 +1021,8 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "computeMultinomialProfileLikelihood",    Real::getClassTypeSpec(),           compMultiLikeArgRules           ) );
     methods.addFunction( new MemberProcedure( "excludeMissingSites",                     RlUtils::Void,                      exclude_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
-    methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
-    methods.addFunction( new MemberProcedure( "getObsStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getObsStatesVectorArgRules      ) );
+    methods.addFunction( new MemberProcedure( "getNumStatesVector",                     ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
+    methods.addFunction( new MemberProcedure( "getObsStatesVector",                     ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getObsStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
     methods.addFunction( new MemberProcedure( "getInvariantSiteIndices",                ModelVector<Natural>::getClassTypeSpec(), invSiteIndicesArgRules           ) );
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
@@ -958,6 +1040,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "meanGcContentByCodonPosition",           Probability::getClassTypeSpec(),    meanGcContentByCodonPositionArgRules                ) );
     methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules     ) );
     methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules ) );
+    methods.addFunction( new MemberProcedure( "relabelStates",                          AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),    relabelStatesArgRules      ) );
     methods.addFunction( new MemberProcedure( "removeExcludedCharacters",               RlUtils::Void,                    remove_excluded_characters_arg_rules ) );
     methods.addFunction( new MemberProcedure( "replaceRandomSitesByMissingData",        RlUtils::Void,                      replace_random_sites_arg_rules   ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );

@@ -1,12 +1,14 @@
+clear()
 seed(54321)
 
 ####################
 # read in the data #
-data <- readDiscreteCharacterData("data/discrete.nex")
+data <- readDiscreteCharacterData("../tests/data/discrete3.nex")
 taxa <- data.taxa()
 
 # global variables
 n_taxa <- taxa.size()
+relabelled <- data.relabelStates()
 
 # vector for the moves and monitors
 moves    = VectorMoves()
@@ -31,13 +33,25 @@ TL := sum(br_lens)
 phylogeny := treeAssembly(topology, br_lens)
 
 # loop over the characters by num state #
-partition_vector <- data.getNumStatesVector()
-for (i in 2:partition_vector.size()) {
-    Q[i-1] := fnJC(i)  # simple Mk model
+# print(data.getObsStatesVector()) # n included: 1, 1, 128, 86, 18, 1
+print(relabelled.getNumStatesVector())
+stop()
+print(relabelled.getObsStatesVector())
+partition_vector <- relabelled.getObsStatesVector()
+for (pv in 3:partition_vector.size()) {
+    i = pv - 2;
+    k_obs = i + 1;
+    Q[i] := fnJC(k_obs)  # simple Mk model
     
     # create the substitution model and clamp with observed data
-    seq_informative[i-1] ~ dnPhyloCTMC(tree=phylogeny, Q=Q[i-1], type="Standard", coding="nstates")
-    seq_informative[i-1].clamp(partition_vector[i])
+    seq_informative[i] ~ dnPhyloCTMC(tree = phylogeny, Q = Q[i], type = "Standard", coding = "nstates")
+
+    partition_vector[pv].removeExcludedCharacters() # Reduce memory footprint; see #552
+    relabelled[i] = partition_vector[pv].relabelStates()
+
+    write(i, pv, partition_vector[pv], relabelled[i]) ## TODO remove this temporary check
+
+    seq_informative[i].clamp(relabelled[i])
 }
 
 mymodel = model(phylogeny)
@@ -58,4 +72,4 @@ mymcmc.run(generations=10)
 
 #################
 # quit RevBayes #
-q()
+stoq()
