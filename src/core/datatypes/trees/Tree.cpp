@@ -1931,7 +1931,7 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
         makeRootBifurcating(n.getClade());
 
         // second, we suppress any internal nodes of outdegree 1 ("knuckles" / sampled ancestors)
-        suppressOutdegreeOneNodes(reindex, true);
+        suppressOutdegreeOneNodes(true);
         
     } // end-if we do not want to make the tree bifurcating
 
@@ -2162,13 +2162,8 @@ void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxo
 }
 
 
-void Tree::suppressOutdegreeOneNodes(bool reindex, bool replace)
+void Tree::suppressOutdegreeOneNodes(bool replace)
 {
-    // If reindex is false, then suppressOutdegreeOneNodes will either
-    // * do nothing (if no sampled ancestors)
-    // * crash      (if there are sampled ancestors)
-    assert(reindex);
-
     // delegate the call to the nodes which will recursively suppress outdegree-1 nnodes.
     getRoot().suppressOutdegreeOneNodes( replace );
 

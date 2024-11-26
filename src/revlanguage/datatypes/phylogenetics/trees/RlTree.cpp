@@ -376,8 +376,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         bool replace = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
         
         RevBayesCore::Tree &tree = dag_node->getValue();
-        bool reindex = true;
-        tree.suppressOutdegreeOneNodes( reindex, replace );
+        tree.suppressOutdegreeOneNodes( replace );
         
         return NULL;
     }

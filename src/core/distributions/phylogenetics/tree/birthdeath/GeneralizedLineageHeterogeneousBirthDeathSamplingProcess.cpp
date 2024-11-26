@@ -675,7 +675,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 {
 
     // Suppress outdegree-1 internal nodes (= sampled ancestors)
-    v->suppressOutdegreeOneNodes(true, true);
+    v->suppressOutdegreeOneNodes(true);
 
 	// Check that tree is binary. This may still not be the case if there are multifurcations.
     if (v->isBinary() == false)
