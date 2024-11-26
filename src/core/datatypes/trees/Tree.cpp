@@ -2173,43 +2173,40 @@ void Tree::suppressOutdegreeOneNodes(bool replace)
     // if we want them removed, we need to iterate over all nodes (potentially multiple times)
     else
     {
-        size_t outdegreeOneNodes = 1;
-        while (outdegreeOneNodes > 0)
+        for (size_t i = 0; i < nodes.size(); i++)
         {
-            for (size_t i = 0; i < nodes.size(); i++)
+            if (nodes[i]->isRoot() and nodes[i]->getNumberOfChildren() == 1)
             {
-                if (nodes[i]->getNumberOfChildren() == 1)
-                {
-                    if ( not nodes[i]->isRoot() )
-                    {
-                        // this will only have effect if nodes[i]->getNumberOfChildren() == 1
-                        nodes[i]->suppressOutdegreeOneNodes( false );
-                        // we need to reindex nodes because we removed an index
-                        reindexNodes();
-                    }
-                    else
-                    {
-                        TopologyNode* new_root = &nodes[i]->getChild(0);
-                        double new_bl = nodes[i]->getBranchLength() + new_root->getBranchLength();
-                        nodes[i]->removeChild( new_root );
-                        new_root->setParent( NULL );
-                        new_root->setBranchLength( new_bl );
+                TopologyNode* new_root = &nodes[i]->getChild(0);
+                double new_bl = nodes[i]->getBranchLength() + new_root->getBranchLength();
+                nodes[i]->removeChild( new_root );
+                new_root->setParent( NULL );
+                new_root->setBranchLength( new_bl );
 
-                        root = new_root;
-                        root->setTree(this);
-                    }
-                }
+                root = new_root;
+                root->setTree(this);
             }
-            
-            outdegreeOneNodes = 0;
-            for (size_t i = 0; i < nodes.size(); i++)
+            else
             {
-                if (nodes[i]->getNumberOfChildren() == 1)
-                {
-                    outdegreeOneNodes++;
-                }
+                // this will only have effect if nodes[i]->getNumberOfChildren() == 1
+                nodes[i]->suppressOutdegreeOneNodes( false );
+                // we need to reindex nodes because we removed an index
+                reindexNodes();
             }
         }
+            
+        int outdegreeOneNodes = 0;
+        for (size_t i = 0; i < nodes.size(); i++)
+        {
+            if (nodes[i]->getNumberOfChildren() == 1)
+            {
+                outdegreeOneNodes++;
+            }
+        }
+            
+        // we have eliminated cases of -->A--> but not of -->A-->B-->; call myself recursively to handle
+        // the latter as well
+        if (outdegreeOneNodes > 0) suppressOutdegreeOneNodes( false );
     }
 
     // reindex here, in case suppressOutdegreeOneNodes
