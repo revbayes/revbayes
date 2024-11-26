@@ -1980,9 +1980,9 @@ void TopologyNode::setUseAges(bool tf, bool recursive)
 
 /**
  * If this node has an outdegree of 1 (i.e., only one descendant), either replace it
- * by a bifurcation where one child is subtended by a zero-length branch, or
- * remove it entirely, and then do the same for all its children by calling this function
- * recursively.
+ * by a bifurcation where one child is subtended by a zero-length branch, and do
+ * the same for all its children by calling this function recursively, or remove the
+ * node entirely.
  */
 void TopologyNode::suppressOutdegreeOneNodes( bool replace )
 {
