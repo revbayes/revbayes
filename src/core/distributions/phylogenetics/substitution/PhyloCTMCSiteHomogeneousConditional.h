@@ -88,14 +88,14 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
     if (coding != AscertainmentBias::ALL)
     {
         numCorrectionMasks      = 1;
-        correctionMaskMatrix    = std::vector<std::vector<bool> >(1, std::vector<bool>(this->num_nodes,0) );
+        correctionMaskMatrix    = std::vector<std::vector<bool> >(1, std::vector<bool>(this->num_nodes, 0) );
         
         // number of correction patterns per character state
         if (coding & (AscertainmentBias::INFORMATIVE ^
                       AscertainmentBias::VARIABLE ^
                       AscertainmentBias::NSTATES))
         {
-            numCorrectionPatterns = std::pow(2.0f, float(this->num_chars - 1));
+            numCorrectionPatterns = 1 << (this->num_chars - 1);
         }
         else
         {
@@ -319,11 +319,25 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
     {
         return false;
     }
-    
-    if (coding == AscertainmentBias::NSTATES && 
-        charCounts.size() == this->transition_prob_matrices[0].num_states)
-    {
-        return (charCounts.size() == this->transition_prob_matrices[0].num_states);
+
+    if (coding & AscertainmentBias::NSTATES) {
+        std::uint64_t observed = 0;
+        for (std::map<size_t, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
+        {
+            observed |= it->first;
+            throw RbException() << "MRS: Not tested, probably incorrect.";
+        }
+
+        // We are expecting a bitmatch ending in all ones.
+        for (++observed;      // 011...11++ = 100...00
+             !(observed & 1); // Stop when we hit the first 1
+             observed >>= 1   // Chop off the final 0
+             ) {
+        }
+        if (observed != 1) {
+            // As there are additional 1s set, not every state was observed.
+            return false;
+        }
     }
     
     size_t num_informative = 0;
@@ -355,76 +369,89 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
     if (charCounts.size() == 1) return !(coding & AscertainmentBias::VARIABLE);
 
     if (coding & AscertainmentBias::NSTATES) {
-        // Perhaps this could be accomplished more elegantly using RbBitSets in place of uint64_t?
         std::uint64_t observed = 0;
         for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
         {
             observed |= it->first.to_ulong();
         }
-        std::uint64_t in_model = (std::uint64_t(1) << this->transition_prob_matrices[0].num_states) - 1;
-        return (observed == in_model);
-    }
 
-    // find the common_states
-    std::map<size_t,size_t> stateCounts;
-    size_t max = 0;
-
-    for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
-    {
-        RbBitSet r = it->first;
-        for (size_t i = 0; i < r.size(); i++)
-        {
-            stateCounts[i] += r.test(i) * it->second;
-            if (stateCounts[i] > max)
-            {
-                max = stateCounts[i];
-            }
+        // We are expecting a bitmatch ending in all ones.
+        for (++observed;      // 011...11++ = 100...00
+             !(observed & 1); // Stop when we hit the first 1
+             observed >>= 1   // Chop off the final 0
+             ) {
+        }
+        if (observed != 1) {
+            // As there are additional 1s set, not every state was observed.
+            return false;
         }
     }
 
-    std::vector<size_t> common_states;
-    for (std::map<size_t, size_t>::iterator it = stateCounts.begin(); it != stateCounts.end(); it++)
+    if (coding & AscertainmentBias::INFORMATIVE)
     {
-        if (it->second == max)
-        {
-            common_states.push_back(it->first);
-        }
-    }
 
-    // find characters not intersecting common state
-    // then get state counts
-    stateCounts.clear();
-    for (size_t i = 0; i < common_states.size(); i++)
-    {
+        // find the common_states
+        std::map<size_t,size_t> stateCounts;
+        size_t max = 0;
+
         for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
         {
             RbBitSet r = it->first;
-
-            if ( r.test(common_states[i]) ) continue;
-
-            if ( it->second > 1 )
-            {
-                return true;
-            }
-
             for (size_t i = 0; i < r.size(); i++)
             {
-                // if a state is found more than once among characters lacking the common state
-                // then this site pattern is parsimony informative
-                if (stateCounts.find(i) != stateCounts.end() )
+                stateCounts[i] += r.test(i) * it->second;
+                if (stateCounts[i] > max)
                 {
-                    return true;
-                }
-                else
-                {
-                    stateCounts[i] += r.test(i);
+                    max = stateCounts[i];
                 }
             }
         }
-    }
 
-    // if the pattern is uninformative, then it is incompatible with the informative coding
-    return (coding != AscertainmentBias::INFORMATIVE);
+        std::vector<size_t> common_states;
+        for (std::map<size_t, size_t>::iterator it = stateCounts.begin(); it != stateCounts.end(); it++)
+        {
+            if (it->second == max)
+            {
+                common_states.push_back(it->first);
+            }
+        }
+
+        // find characters not intersecting common state
+        // then get state counts
+        stateCounts.clear();
+        for (size_t i = 0; i < common_states.size(); i++)
+        {
+            for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
+            {
+                RbBitSet r = it->first;
+
+                if ( r.test(common_states[i]) ) continue;
+
+                if ( it->second > 1 )
+                {
+                    return true;
+                }
+
+                for (size_t i = 0; i < r.size(); i++)
+                {
+                    // if a state is found more than once among characters lacking the common state
+                    // then this site pattern is parsimony informative
+                    if (stateCounts.find(i) != stateCounts.end() )
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        stateCounts[i] += r.test(i);
+                    }
+                }
+            }
+        }
+
+        // if the pattern is uninformative, then it is incompatible with the informative coding
+        return (coding != AscertainmentBias::INFORMATIVE);
+    }
+    return true;
 }
 
 
@@ -528,7 +555,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
                         break;
 
                     // get bit pattern for this constant/autapomorphic state
-                    size_t c = ( i == 0 ? 0 : std::pow(2.0f, float(i - 1)) );
+                    size_t c = ( i == 0 ? 0 : 1 << (i - 1) );
 
                     std::vector<double>::iterator         uc = u  + c*this->num_chars;
 
@@ -903,25 +930,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                     }
                     else if (coding == AscertainmentBias::NSTATES)
                     {
-                        // get number of autapomorphic states
-                        size_t popcount = std::bitset<sizeof(size_t)*CHAR_BIT>(c).count();
-
-                       /* if the number of observations is <= the number of autapomorphies then
-                        * 1. don't count patterns with zero prob (num obs < num auto)
-                        * 2. don't double-count patterns (num obs == num auto)
-                        *
-                        * if num obs == num auto + 1
-                        * then don't double count the all-autapomorphies pattern
-                        */
-                        if ( (maskObservationCounts[mask] == popcount + 1 && a == 0) ||
-                             maskObservationCounts[mask] > popcount + 1)
-                        {
-                            // iterate over initial states
-                            for (size_t ci = 0; ci < this->num_chars; ci++)
-                            {
-                                prob += uc[ci];
-                            }
-                        }
+                        
                     }
                 }
             }
