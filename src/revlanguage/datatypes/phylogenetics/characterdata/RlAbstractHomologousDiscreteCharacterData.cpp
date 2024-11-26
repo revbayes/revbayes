@@ -775,8 +775,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        // TODO Following the model of the  if block below, should this perhaps be implemented 
-        // as a method of this->dag_node->getValue()?
+        // TODO Per the if block below, should this be implemented as a method of this->dag_node->getValue()?
         RevBayesCore::AbstractHomologousDiscreteCharacterData &orig = dag_node->getValue();
         size_t nChars = orig.getNumberOfCharacters();
         size_t nTaxa = orig.getNumberOfTaxa();

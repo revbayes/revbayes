@@ -355,7 +355,14 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
     if (charCounts.size() == 1) return !(coding & AscertainmentBias::VARIABLE);
 
     if (coding & AscertainmentBias::NSTATES) {
-        return (charCounts.size() == this->transition_prob_matrices[0].num_states);
+        // Perhaps this could be accomplished more elegantly using RbBitSets in place of uint64_t?
+        std::uint64_t observed = 0;
+        for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
+        {
+            observed |= it->first.to_ulong();
+        }
+        std::uint64_t in_model = (std::uint64_t(1) << this->transition_prob_matrices[0].num_states) - 1;
+        return (observed == in_model);
     }
 
     // find the common_states
