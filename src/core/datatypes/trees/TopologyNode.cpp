@@ -2001,7 +2001,7 @@ void TopologyNode::suppressOutdegreeOneNodes( bool replace )
          *
          *                 (replace = true)  (replace = false)
          */
-        if ( replace == true ) // this solution is general enough to handle sampled ancestor root nodes
+        if (replace) // this solution is general enough to handle sampled ancestor root nodes
         {
             TopologyNode *new_fossil = new TopologyNode( getTaxon() );
             taxon = Taxon("");
@@ -2017,12 +2017,6 @@ void TopologyNode::suppressOutdegreeOneNodes( bool replace )
             // set the age and branch length of the newly added tip
             new_fossil->setAge( age );
             new_fossil->setBranchLength( 0.0 );
-                
-            // call this function recursively for all children of this node
-            for (size_t i = 0; i < getNumberOfChildren(); ++i)
-            {
-                getChild( i ).suppressOutdegreeOneNodes( replace );
-            }
         }
         else // this only works for non-root nodes; the root is handled at the Tree level instead
         {
@@ -2047,6 +2041,15 @@ void TopologyNode::suppressOutdegreeOneNodes( bool replace )
             child.setBranchLength(summ);
         }
 
+    }
+    
+    if (replace)
+    {
+        // call this function recursively for all children of this node
+        for (size_t i = 0; i < getNumberOfChildren(); ++i)
+        {
+            getChild( i ).suppressOutdegreeOneNodes( true );
+        }
     }
 
 }
