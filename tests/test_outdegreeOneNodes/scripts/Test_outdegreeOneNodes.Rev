@@ -1,0 +1,49 @@
+################################################################################
+#
+# RevBayes Test-Script: Reading/parsing trees containing outdegree-1 nodes and
+#                       suppressing these nodes via replacement by bifurcations
+#                       or removal
+#
+# authors: David Cerny
+#
+################################################################################
+
+# Source trees courtesy of Bruno Petrucci and his R paleobuddy package
+
+# First, test the handling of a tree with a bifurcating root and several internal
+# outdegree-1 nodes
+
+internal <- readTrees("data/outdegree_one_internal.nex")[1]
+internal_copy <- internal
+print( "Number of taxa: " + internal.taxa().size() )
+
+print("Replacing outdegree-1 nodes by bifurcations")
+internal.suppressOutdegreeOneNodes(replace = TRUE)
+writeNexus(filename="output/outdegree_one_internal_bifurcated.nex", internal)
+print( "Number of taxa (should stay the same): " + internal.taxa().size() )
+
+print("Removing outdegree-1 nodes entirely")
+internal_copy.suppressOutdegreeOneNodes(replace = FALSE)
+writeNexus(filename="output/outdegree_one_internal_replaced.nex", internal_copy)
+print( "Number of taxa (should be lower): " + internal_copy.taxa().size() )
+
+# Second, test the handling of a tree where the root itself is also an outdegre-1
+# node
+
+root <- readTrees("data/outdegree_one_root.nex")[1]
+root_copy <- root
+print( "Number of taxa: " + root.taxa().size() )
+
+print("Replacing outdegree-1 nodes by bifurcations")
+root.suppressOutdegreeOneNodes(replace = TRUE)
+writeNexus(filename="output/outdegree_one_root_bifurcated.nex", root)
+print( "Number of taxa (should stay the same): " + root.taxa().size() )
+
+print("Removing outdegree-1 nodes entirely")
+root_copy.suppressOutdegreeOneNodes(replace = FALSE)
+writeNexus(filename="output/outdegree_one_root_replaced.nex", root_copy)
+print( "Number of taxa (should be lower): " + root_copy.taxa().size() )
+
+clear()
+
+q()
