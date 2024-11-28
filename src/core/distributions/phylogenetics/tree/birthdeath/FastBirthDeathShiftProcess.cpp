@@ -10,7 +10,7 @@
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
-#include "SSE_ODE.h"
+#include "BDS_ODE.h"
 #include "DistributionExponential.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "FastBirthDeathShiftProcess.h"
@@ -2388,21 +2388,20 @@ void FastBirthDeathShiftProcess::touchSpecialization(const DagNode *affecter, bo
 void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
 {
     const std::vector<double> &extinction_rates = mu->getValue();
-    SSE_ODE ode = SSE_ODE(extinction_rates, &getEventRateMatrix(), getEventRate(), backward_time, extinction_only, allow_rate_shifts_on_extinct_lineages);
+    BDS_ODE ode = BDS_ODE(extinction_rates, &getEventRateMatrix(), getEventRate(), backward_time, extinction_only, allow_rate_shifts_on_extinct_lineages);
 
     const std::vector<double> &speciation_rates = lambda->getValue();
     ode.setSpeciationRate( speciation_rates );
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
-//    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
-    boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
+    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-6, 1E-3, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
+    //boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
     
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
     for (size_t i = 0; i < 2 * num_states; ++i)
     {
-        
         // Sebastian: The likelihoods here are probability densities (not log-transformed).
         // These are densities because they are multiplied by the probability density of the speciation event happening.
         likelihoods[i] = ( likelihoods[i] < 0.0 ? 0.0 : likelihoods[i] );

@@ -6,7 +6,7 @@
 #include "RateMatrix.h"
 #include "RateMatrix_JC.h"
 #include "Simplex.h"
-#include "SSE_ODE.h"
+#include "BDS_ODE.h"
 #include "Taxon.h"
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
