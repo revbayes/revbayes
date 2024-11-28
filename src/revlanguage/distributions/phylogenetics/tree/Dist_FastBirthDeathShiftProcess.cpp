@@ -198,15 +198,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     // set the number of time slices for the numeric ODE
     double n = static_cast<const RealPos &>( num_time_slices->getRevObject() ).getValue();
     d->setNumberOfTimeSlices( n );
-    
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ps = NULL;
-    if ( psi->getRevObject() != RevNullObject::getInstance() )
-    {
-        ps  = static_cast<const ModelVector<RealPos> &>( psi->getRevObject() ).getDagNode();
-
-        d->setSerialSamplingRates( ps );
-    }
-
+   
     return d;
 }
 
@@ -319,10 +311,7 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         elabels.push_back("extinctionRates");
         elabels.push_back("mu");
         memberRules.push_back( new ArgumentRule( elabels     , ModelVector<RealPos>::getClassTypeSpec() , "The vector of extinction rates."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
-        std::vector<std::string> flabels;
-        flabels.push_back("psi");
-        flabels.push_back("phi");
-        memberRules.push_back( new ArgumentRule( flabels     , ModelVector<RealPos>::getClassTypeSpec() , "The vector of serial sampling rates."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
+        
         memberRules.push_back( new ArgumentRule( "Q"         , RateGenerator::getClassTypeSpec()        , "The rate matrix of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "delta"     , RealPos::getClassTypeSpec()              , "The rate-factor of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
         memberRules.push_back( new ArgumentRule( "pi"        , Simplex::getClassTypeSpec()              , "State frequencies at the root."              , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
@@ -386,10 +375,6 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     else if ( name == "extinctionRates" || name == "mu" )
     {
         extinction_rates = var;
-    }
-    else if ( name == "psi" || name == "phi" )
-    {
-        psi = var;
     }
     else if ( name == "Q" )
     {

@@ -93,7 +93,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     process_age( age ),
     mu( ext ),
     lambda(NULL),
-    phi( NULL),
     pi( p ),
     Q( q ),
     rate( r ),
@@ -339,12 +338,7 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
 
             if ( node.isFossil() )
             {
-                if ( phi == NULL )
-                {
-                    throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
-                }
-                sampling = phi->getValue();
-                extinction = pExtinction(0.0, node.getAge());
+                throw(RbException("The model does not support fossil tips."));
             }
             
             RbBitSet obs_state(num_states);
@@ -401,19 +395,13 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
 
             speciation_rates = lambda->getValue();
             
-            bool speciation_node = true;
-            if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
-            {
-                speciation_node = (phi == NULL);
-            }
-
             // merge descendant likelihoods
             for (size_t i=0; i<num_states; ++i)
             {
                 node_likelihood[i] = left_likelihoods[i];
 
                 node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-                node_likelihood[num_states + i] *= speciation_node ? speciation_rates[i] : 1.0;
+                node_likelihood[num_states + i] *= speciation_rates[i];
             }
             
         }
@@ -524,19 +512,13 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
 
     speciation_rates = lambda->getValue();
 
-    bool speciation_node = true;
-    if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
-    {
-        speciation_node = (phi == NULL);
-    }
-
     // merge descendant likelihoods
     for (size_t i=0; i<num_states; ++i)
     {
         node_likelihood[i] = left_likelihoods[i];
 
         node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-        node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
+        node_likelihood[num_states + i] *= speciation_rates[i];
     }
     
     // calculate likelihoods for the root branch
@@ -1304,28 +1286,6 @@ void FastBirthDeathShiftProcess::restoreSpecialization(const DagNode *affecter)
     }
 
 }
-
-
-
-void FastBirthDeathShiftProcess::setSerialSamplingRates(const TypedDagNode< RbVector<double> >* r)
-{
-
-    // remove the old parameter first
-    this->removeParameter( phi );
-
-    // set the value
-    phi = r;
-
-    // add the new parameter
-    this->addParameter( phi );
-
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-}
-
 
 void FastBirthDeathShiftProcess::setSampleCharacterHistory(bool sample_history)
 {
@@ -2441,10 +2401,6 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
-    if ( oldP == phi )
-    {
-        phi = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
-    }
     if ( oldP == Q )
     {
         Q = static_cast<const TypedDagNode<RateGenerator>* >( newP );
@@ -2522,13 +2478,6 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 
     const std::vector<double> &speciation_rates = lambda->getValue();
     ode.setSpeciationRate( speciation_rates );
-
-    if ( phi != NULL )
-    {
-        const std::vector<double> &serial_sampling_rates = phi->getValue();
-        ode.setSerialSamplingRate( serial_sampling_rates );
-    }
-    
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
