@@ -6,25 +6,43 @@
 #include "BDS_ODE.h"
 #include "RateGenerator.h"
 #include "TimeInterval.h"
+#include <boost/numeric/ublas/matrix.hpp>
 
 using namespace RevBayesCore;
 
+// consider replacing this with some openBLAS/LAPACK
+// function, dsymv
+// double precision, symmetric matrix vector multiplication
+// implemented in Fortran. should be faster
+void dsymv(
+        std::vector<double> &y, 
+        const boost::numeric::ublas::matrix<double> &Q,
+        const std::vector<double> &x){
+    for (size_t i = 0; i < Q.size1(); i++){
+        for (size_t j = 0; j < Q.size2(); j++){
+            y[i] += Q(i,j) * x[i];
+        }
+    }
+}
 
-BDS_ODE::BDS_ODE( const std::vector<double> &m, const RateGenerator* q, double r, bool backward_time, bool extinction_only, bool allow_shifts_extinct ) :
+BDS_ODE::BDS_ODE( 
+        const std::vector<double> &l,
+        const std::vector<double> &m,
+        const RateGenerator* q 
+        ) :
     mu( m ),
+    lambda( l ),
     num_states( q->getNumberOfStates() ),
-    Q( q ),
-    rate( r ),
-    extinction_only( extinction_only ),
-    backward_time( backward_time ),
-    allow_rate_shifts_extinction( allow_shifts_extinct )
-{
-    
+    Q( q ){
+
 }
 
 
 void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
+    const double age = 0.0; // need to delete this
+    const double rate = 1.0;
+                      
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
     std::vector< double > safe_x = x;
@@ -33,12 +51,8 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         safe_x[i] = ( x[i] < 0.0 ? 0.0 : x[i] );
     }
     
-    double age = 0.0;
     for (size_t i = 0; i < num_states; ++i)
     {
-        
-        // extinction event
-        dxdt[i] = mu[i];
         
         // no event
         double no_event_rate = mu[i] + lambda[i];
@@ -50,10 +64,8 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
             }
         }
 
-        dxdt[i] -= no_event_rate * safe_x[i];
-        
-        // speciation event
-        dxdt[i] += lambda[i] * safe_x[i] * safe_x[i];
+        // for E(t)
+        dxdt[i] = mu[i] - no_event_rate * safe_x[i] + lambda[i] * safe_x[i] * safe_x[i];
         
         // anagenetic state change
         for (size_t j = 0; j < num_states; ++j)
@@ -64,95 +76,18 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
             }
         }
 
-        if ( backward_time == false )
+        // for D(t)
+        dxdt[i + num_states] = -no_event_rate * safe_x[i + num_states] + 2 * lambda[i] * safe_x[i] * safe_x[i + num_states];
+        // anagenetic state change
+        for (size_t j = 0; j < num_states; ++j)
         {
-            dxdt[i] = -dxdt[i];
+            if ( i != j )
+            {
+                dxdt[i + num_states] += Q->getRate(j, i, age, rate) * safe_x[j + num_states];
+            }
         }
-        
-        if ( extinction_only == false )
-        {
-            // no event
-            dxdt[i + num_states] = -no_event_rate * safe_x[i + num_states];
-            
-            // speciation event
-            if ( use_speciation_from_event_map == true )
-            {
-                std::map<std::vector<unsigned>, double>::iterator it;
-                for (it = event_map.begin(); it != event_map.end(); it++)
-                {
-                    const std::vector<unsigned>& states = it->first;
-                    double lambda = it->second;
-                    if ( backward_time == true )
-                    {
-                        if (i == states[0])
-                        {
-                            double term1 = safe_x[states[1] + num_states] * safe_x[states[2]];
-                            double term2 = safe_x[states[2] + num_states] * safe_x[states[1]];
-                            dxdt[i + num_states] += lambda * (term1 + term2 );
-                        }
-                    }
-                    else
-                    {
-                        if (i == states[1])
-                        {
-                            dxdt[i + num_states] += lambda * safe_x[states[0] + num_states] * safe_x[states[2]];
-                        }
-                        if (i == states[2])
-                        {
-                            dxdt[i + num_states] += lambda * safe_x[states[0] + num_states] * safe_x[states[1]];
-                        }
-                    }
-                }
-            }
-            else
-            {
-                dxdt[i + num_states] += 2 * lambda[i] * safe_x[i] * safe_x[i + num_states];
-            }
-        
-            // anagenetic state change
-            for (size_t j = 0; j < num_states; ++j)
-            {
-                if ( i != j )
-                {
-                    if ( backward_time == true )
-                    {
-                        dxdt[i + num_states] += Q->getRate(i, j, age, rate) * safe_x[j + num_states];
-                    }
-                    else
-                    {
-                        dxdt[i + num_states] += Q->getRate(j, i, age, rate) * safe_x[j + num_states];
-                    }
-                }
-                
-            }
-            
-        } // end if extinction_only
-        
     } // end for num_states
     
 }
 
-
-void BDS_ODE::setEventMap( const std::map<std::vector<unsigned>, double> &e )
-{
-    
-    use_speciation_from_event_map = true;
-    event_map = e;
-}
-
-
-void BDS_ODE::setSpeciationRate( const std::vector<double> &s )
-{
-    
-    use_speciation_from_event_map = false;
-    lambda = s;
-    
-}
-
-void BDS_ODE::setSerialSamplingRate( const std::vector<double> &s )
-{
-
-    psi = s;
-
-}
 

@@ -2387,11 +2387,10 @@ void FastBirthDeathShiftProcess::touchSpecialization(const DagNode *affecter, bo
  */
 void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
 {
-    const std::vector<double> &extinction_rates = mu->getValue();
-    BDS_ODE ode = BDS_ODE(extinction_rates, &getEventRateMatrix(), getEventRate(), backward_time, extinction_only, allow_rate_shifts_on_extinct_lineages);
-
     const std::vector<double> &speciation_rates = lambda->getValue();
-    ode.setSpeciationRate( speciation_rates );
+    const std::vector<double> &extinction_rates = mu->getValue();
+
+    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
