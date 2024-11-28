@@ -69,7 +69,6 @@ namespace RevBayesCore {
         void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
-        void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
         void                                                            drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates);

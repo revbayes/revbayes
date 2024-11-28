@@ -196,8 +196,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     }
     
     // set the number of time slices for the numeric ODE
-    double n = static_cast<const RealPos &>( num_time_slices->getRevObject() ).getValue();
-    d->setNumberOfTimeSlices( n );
    
     return d;
 }
@@ -325,7 +323,6 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         optionsCondition.push_back( "time" );
         optionsCondition.push_back( "survival" );
         memberRules.push_back( new OptionRule( "condition"    , new RlString("time"), optionsCondition, "The condition of the birth-death process." ) );
-        memberRules.push_back( new ArgumentRule("nTimeSlices", RealPos::getClassTypeSpec(), "The number of time slices for the numeric ODE.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(500.0) ) );
         std::vector<std::string> optionsSimulateCondition;
         optionsSimulateCondition.push_back("startTime");
         optionsSimulateCondition.push_back("numTips");
@@ -391,10 +388,6 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     else if ( name == "condition" )
     {
         condition = var;
-    }
-    else if ( name == "nTimeSlices" )
-    {
-        num_time_slices = var;
     }
     else if ( name == "minNumLineages" )
     {

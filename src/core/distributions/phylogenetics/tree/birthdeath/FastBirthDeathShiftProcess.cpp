@@ -107,8 +107,7 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     prune_extinct_lineages( prune ),
     condition_on_tip_states( condition_on_tip_states ),
     condition_on_num_tips( condition_on_num_tips ),
-    condition_on_tree( condition_on_tree ),
-    NUM_TIME_SLICES( 500.0 )
+    condition_on_tree( condition_on_tree )
 {
     addParameter( mu );
     addParameter( pi );
@@ -123,7 +122,7 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     }
     
     // set the length of the time slices used by the ODE for numerical integration
-    dt = process_age->getValue() / NUM_TIME_SLICES * 10.0;
+    dt = process_age->getValue() / 500 * 10.0;
 
     value->getTreeChangeEventHandler().addListener( this );
 
@@ -411,46 +410,8 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
         
         if ( node.isSampledAncestorTip() == false )
         {
-            // calculate likelihoods for this branch
-            if ( sample_character_history == false )
-            {
-                // numerically integrate over the entire branch length
-                numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
-            }
-            else
-            {
-                // calculate the conditional likelihoods for each time slice moving
-                // along this branch backwards in time from the tip towards the root
-
-                std::vector<std::vector<double> > branch_likelihoods;
-                size_t current_dt = 0;
-                
-                // calculate partial likelihoods for each time slice and store them in branch_likelihoods
-                while ( (current_dt * dt) + begin_age < end_age )
-                {
-
-                    std::vector<double> dt_likelihood;
-
-                    double current_dt_start = (current_dt * dt) + begin_age;
-                    double current_dt_end = ((current_dt + 1) * dt) + begin_age;
-                    if (current_dt_end > end_age)
-                    {
-                        current_dt_end = end_age;
-                    }
-                    numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, true, false);
-
-                    std::vector<double>::const_iterator first = node_likelihood.begin() + num_states;
-                    std::vector<double>::const_iterator last = node_likelihood.begin() + (num_states * 2);
-                    dt_likelihood = std::vector<double>(first, last);
-
-                    branch_likelihoods.push_back(dt_likelihood);
-                    current_dt++;
-
-                }
-                
-                // save the branch conditional likelihoods
-                branch_partial_likelihoods[node_index] = branch_likelihoods;
-            }
+            // numerically integrate over the entire branch length
+            numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
         }
         
         if ( RbSettings::userSettings().getUseScaling() == true ) //&& node_index % RbSettings::userSettings().getScalingDensity() == 0 )
@@ -527,45 +488,8 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
         double begin_age = getRootAge();
         double end_age = getOriginAge();
 
-        if ( sample_character_history == false )
-        {
-            // numerically integrate over the entire branch length
-            numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
-        }
-        else
-        {
-            // calculate the conditional likelihoods for each time slice moving
-            // along this branch backwards in time from the tip towards the root
-
-            std::vector<std::vector<double> > branch_likelihoods;
-            size_t current_dt = 0;
-
-            // calculate partial likelihoods for each time slice and store them in branch_likelihoods
-            while ( (current_dt * dt) + begin_age < end_age )
-            {
-
-                std::vector<double> dt_likelihood;
-
-                double current_dt_start = (current_dt * dt) + begin_age;
-                double current_dt_end = ((current_dt + 1) * dt) + begin_age;
-                if (current_dt_end > end_age)
-                {
-                    current_dt_end = end_age;
-                }
-                numericallyIntegrateProcess(node_likelihood, current_dt_start, current_dt_end, true, false);
-
-                std::vector<double>::const_iterator first = node_likelihood.begin() + num_states;
-                std::vector<double>::const_iterator last = node_likelihood.begin() + (num_states * 2);
-                dt_likelihood = std::vector<double>(first, last);
-
-                branch_likelihoods.push_back(dt_likelihood);
-                current_dt++;
-
-            }
-
-            // save the branch conditional likelihoods
-            branch_partial_likelihoods[node_index] = branch_likelihoods;
-        }
+        // numerically integrate over the entire branch length
+        numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
     }
 
     // sum the root likelihoods
@@ -1357,16 +1281,6 @@ void FastBirthDeathShiftProcess::setSpeciationRates(const TypedDagNode< RbVector
         this->redrawValue();
     }
 }
-
-
-void FastBirthDeathShiftProcess::setNumberOfTimeSlices( double n )
-{
-    
-    NUM_TIME_SLICES = n;
-    dt = process_age->getValue() / NUM_TIME_SLICES;
-    
-}
-
 
 /**
  * Set the current value.
