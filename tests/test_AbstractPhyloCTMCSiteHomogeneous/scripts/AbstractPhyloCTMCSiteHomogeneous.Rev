@@ -1,8 +1,8 @@
 ################################################################################
 #
-# RevBayes Validation Test: dnInverse
+# RevBayes Validation Test: AbstractPhyloCTMCSiteHomogeneous
 #
-# These tests validate the behaviour of dnInverse()
+# These tests validate the behaviour of dnPhyloCTMC()
 #
 #
 # Authors: Martin R. Smith
@@ -10,20 +10,7 @@
 ################################################################################
 
 seed(42)
-outFile = "output/Test_dnInverse.txt"
-
-exp ~ dnExp(1)
-exp.clamp(42)
-
-inv_exp ~ dnInv(dnExp(1))
-inv_exp.clamp(42)
-print(filename = outFile, append = FALSE,
-      "Expect 42:", -exp.lnProbability(), inv_exp.lnProbability(), "\n")
-
-exp.clamp(21)
-inv_exp.clamp(21)
-print(filename = outFile, append = TRUE,
-      "Expect 21:", -exp.lnProbability(), inv_exp.lnProbability(), "\n")
+outFile = "output/Test_dnPhyloCTMC.txt"
 
 chars <- readDiscreteCharacterData("data/bears_morphology.nex")
 
@@ -42,11 +29,12 @@ qK := fnFreeK(kRates)
 phy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard")
 phy.clamp(chars)
 
-invPhy ~ dnInv(dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard"))
+invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
+                     invertProbability = TRUE)
 invPhy.clamp(chars)
 
 # Validate printing of dataset information
-print(filename = outFile, append = TRUE, invPhy, "\n")
+print(filename = outFile, append = FALSE, invPhy, "\n")
 
 k.clamp(1)
 print(filename = outFile, append = TRUE,
@@ -58,6 +46,7 @@ print(filename = outFile, append = TRUE,
       "Expect equal:", -phy.lnProbability(), invPhy.lnProbability(), "\n")
 
 # Validate that the function can be destroyed / reset without error
-inv_exp ~ dnInv(dnExp(1))
+invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
+                     invertProbability = FALSE)
 
 q()

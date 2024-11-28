@@ -1,5 +1,3 @@
-Expect 42:	42	42	
-Expect 21:	21	21	
 
 Standard character matrix with 18 taxa and 62 characters
 ========================================================
@@ -11,5 +9,5 @@ Number of included characters: 62
 Datatype:                      Standard
 
 	
-Expect equal:	842.8669	842.8669	
-Expect equal:	830.57	830.57	
+Expect equal:	931.4533	931.4533	
+Expect equal:	883.8272	883.8272	

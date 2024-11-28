@@ -24,7 +24,7 @@ namespace RevBayesCore {
     class PhyloCTMCSiteHomogeneousConditional : public PhyloCTMCSiteHomogeneous<charType> {
 
     public:
-        PhyloCTMCSiteHomogeneousConditional(const TypedDagNode< Tree > *t, size_t nChars, bool c, size_t nSites, bool amb, AscertainmentBias::Coding cod = AscertainmentBias::ALL, bool internal = false, bool gapmatch = true);
+        PhyloCTMCSiteHomogeneousConditional(const TypedDagNode< Tree > *t, size_t nChars, bool c, size_t nSites, bool amb, AscertainmentBias::Coding cod = AscertainmentBias::ALL, bool internal = false, bool gapmatch = true, bool invert = false);
         PhyloCTMCSiteHomogeneousConditional(const PhyloCTMCSiteHomogeneousConditional &n);
         virtual                                            ~PhyloCTMCSiteHomogeneousConditional(void);                                                                   //!< Virtual destructor
 
@@ -82,8 +82,8 @@ namespace RevBayesCore {
 }
 
 template<class charType>
-RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const TypedDagNode<Tree> *t, size_t nChars, bool cmprss, size_t nSites, bool amb, AscertainmentBias::Coding ty, bool internal, bool gapmatch) :
-    PhyloCTMCSiteHomogeneous<charType>(  t, nChars, cmprss, nSites, amb, internal, gapmatch ), warned(false), coding(ty), N(nSites), numCorrectionMasks(0)
+RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const TypedDagNode<Tree> *t, size_t nChars, bool cmprss, size_t nSites, bool amb, AscertainmentBias::Coding ty, bool internal, bool gapmatch, bool invert) :
+    PhyloCTMCSiteHomogeneous<charType>(  t, nChars, cmprss, nSites, amb, internal, gapmatch, invert ), warned(false), coding(ty), N(nSites), numCorrectionMasks(0)
 {
     if (coding != AscertainmentBias::ALL)
     {
