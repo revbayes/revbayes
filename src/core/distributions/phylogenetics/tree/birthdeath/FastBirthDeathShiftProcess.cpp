@@ -11,7 +11,6 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "SSE_ODE.h"
-#include "CladogeneticSpeciationRateMatrix.h"
 #include "DistributionExponential.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "FastBirthDeathShiftProcess.h"
@@ -61,21 +60,21 @@ using namespace RevBayesCore;
  * and initializes the probability density by computing the combinatorial constant of the tree structure.
  */
 FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double> *age,
-                                                                                   const TypedDagNode<RbVector<double> > *ext,
-                                                                                   const TypedDagNode<RateGenerator>* q,
-                                                                                   const TypedDagNode<double>* r,
-                                                                                   const TypedDagNode< Simplex >* p,
-                                                                                   const std::string &cdt,
-                                                                                   bool uo,
-                                                                                   size_t min_num_lineages,
-                                                                                   size_t max_num_lineages,
-                                                                                   size_t exact_num_lineages,
-                                                                                   double max_t,
-                                                                                   bool prune,
-                                                                                   bool condition_on_tip_states,
-                                                                                   bool condition_on_num_tips,
-                                                                                   bool condition_on_tree,
-                                                                                   bool allow_shifts_extinct) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
+                                                       const TypedDagNode<RbVector<double> > *ext,
+                                                       const TypedDagNode<RateGenerator>* q,
+                                                       const TypedDagNode<double>* r,
+                                                       const TypedDagNode< Simplex >* p,
+                                                       const std::string &cdt,
+                                                       bool uo,
+                                                       size_t min_num_lineages,
+                                                       size_t max_num_lineages,
+                                                       size_t exact_num_lineages,
+                                                       double max_t,
+                                                       bool prune,
+                                                       bool condition_on_tip_states,
+                                                       bool condition_on_num_tips,
+                                                       bool condition_on_tree,
+                                                       bool allow_shifts_extinct) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
     condition( cdt ),
     active_likelihood( std::vector<bool>(5, 0) ),
     changed_nodes( std::vector<bool>(5, false) ),
@@ -84,7 +83,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     extinction_probabilities( std::vector<std::vector<double> >( 500.0, std::vector<double>( ext->getValue().size(), 0) ) ),
     num_states( ext->getValue().size() ),
     scaling_factors( std::vector<std::vector<double> >(5, std::vector<double>(2,0.0) ) ),
-    use_cladogenetic_events( false ),
     use_origin( uo ),
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
@@ -92,7 +90,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     num_shift_events( std::vector<long>(5, 0.0) ),
     time_in_states( std::vector<double>(ext->getValue().size(), 0.0) ),    
     simmap( "" ),
-    cladogenesis_matrix( NULL ),
     process_age( age ),
     mu( ext ),
     lambda(NULL),
@@ -168,24 +165,11 @@ std::vector<double> FastBirthDeathShiftProcess::calculateTotalSpeciationRatePerS
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
     std::map<std::vector<unsigned>, double>::iterator it;
-    if ( use_cladogenetic_events == true )
+
+    speciation_rates = lambda->getValue();
+    for (size_t i = 0; i < num_states; i++)
     {
-        // get cladogenesis event map (sparse speciation rate matrix)
-        eventMap = cladogenesis_matrix->getValue().getEventMap();
-        // iterate over each cladogenetic event possible
-        for (it = eventMap.begin(); it != eventMap.end(); it++)
-        {
-            const std::vector<unsigned>& states = it->first;
-            total_rates[states[0]] += it->second;
-        }
-    }
-    else
-    {
-        speciation_rates = lambda->getValue();
-        for (size_t i = 0; i < num_states; i++)
-        {
-            total_rates[i] += speciation_rates[i];
-        }
+        total_rates[i] += speciation_rates[i];
     }
     return total_rates;
 }
@@ -414,15 +398,8 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
 
             std::map<std::vector<unsigned>, double> eventMap;
             std::vector<double> speciation_rates;
-            if ( use_cladogenetic_events == true )
-            {
-                // get cladogenesis event map (sparse speciation rate matrix)
-                eventMap = cladogenesis_matrix->getValue().getEventMap();
-            }
-            else
-            {
-                speciation_rates = lambda->getValue();
-            }
+
+            speciation_rates = lambda->getValue();
             
             bool speciation_node = true;
             if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
@@ -435,29 +412,8 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
             {
                 node_likelihood[i] = left_likelihoods[i];
 
-                if ( use_cladogenetic_events == true && speciation_node == true )
-                {
-                    
-                    double like_sum = 0.0;
-                    std::map<std::vector<unsigned>, double>::iterator it;
-                    for (it = eventMap.begin(); it != eventMap.end(); it++)
-                    {
-                        const std::vector<unsigned>& states = it->first;
-                        double speciation_rate = it->second;
-                        if (i == states[0])
-                        {
-                            double likelihoods = left_likelihoods[num_states + states[1]] * right_likelihoods[num_states + states[2]];
-                            like_sum += speciation_rate * likelihoods;
-                        }
-                    }
-                    node_likelihood[num_states + i] = like_sum;
-                    
-                }
-                else
-                {
-                    node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-                    node_likelihood[num_states + i] *= speciation_node ? speciation_rates[i] : 1.0;
-                }
+                node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
+                node_likelihood[num_states + i] *= speciation_node ? speciation_rates[i] : 1.0;
             }
             
         }
@@ -565,15 +521,8 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
 
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
-    if ( use_cladogenetic_events == true )
-    {
-        // get cladogenesis event map (sparse speciation rate matrix)
-        eventMap = cladogenesis_matrix->getValue().getEventMap();
-    }
-    else
-    {
-        speciation_rates = lambda->getValue();
-    }
+
+    speciation_rates = lambda->getValue();
 
     bool speciation_node = true;
     if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
@@ -586,33 +535,8 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
     {
         node_likelihood[i] = left_likelihoods[i];
 
-        // MRM 03/23/2020: the root is a cladogenetic event, so the
-        // cladogenetic events should be included at the root. right now,
-        // I am just forcing the cladogenetic events at the root, but there
-        // may be a better solution.
-		if ( use_cladogenetic_events == true && speciation_node == true )
-        {
-
-            double like_sum = 0.0;
-            std::map<std::vector<unsigned>, double>::iterator it;
-            for (it = eventMap.begin(); it != eventMap.end(); it++)
-            {
-                const std::vector<unsigned>& states = it->first;
-                double speciation_rate = it->second;
-                if (i == states[0])
-                {
-                    double likelihoods = left_likelihoods[num_states + states[1]] * right_likelihoods[num_states + states[2]];
-                    like_sum += speciation_rate * likelihoods;
-                }
-            }
-            node_likelihood[num_states + i] = like_sum;
-
-        }
-        else
-        {
-            node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-            node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
-        }
+        node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
+        node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
     }
     
     // calculate likelihoods for the root branch
@@ -697,15 +621,8 @@ void FastBirthDeathShiftProcess::drawJointConditionalAncestralStates(std::vector
     
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
-    if ( use_cladogenetic_events == true )
-    {
-        // get cladogenesis event map (sparse speciation rate matrix)
-        eventMap = cladogenesis_matrix->getValue().getEventMap();
-    }
-    else
-    {
-        speciation_rates = lambda->getValue();
-    }
+
+    speciation_rates = lambda->getValue();
     
     // get the likelihoods of descendant nodes
     const TopologyNode          &root               = value->getRoot();
@@ -725,32 +642,11 @@ void FastBirthDeathShiftProcess::drawJointConditionalAncestralStates(std::vector
     std::map<std::vector<unsigned>, double>::iterator it;
     
     // calculate probabilities for each state
-    if ( use_cladogenetic_events == true )
-    {
-        // iterate over each cladogenetic event possible
-        // and initialize probabilities for each clado event
-        for (it = eventMap.begin(); it != eventMap.end(); it++)
-        {
-            const std::vector<unsigned>& states = it->first;
-            double speciation_rate = it->second;
-            
-            // we need to sample from the ancestor, left, and right states jointly,
-            // so keep track of the probability of each clado event
-            double prob = left_likelihoods[num_states + states[1]] * right_likelihoods[num_states + states[2]];
-            prob *= freqs[states[0]] * speciation_rate;
-            sample_probs[ states ] = prob;
-            sample_probs_sum += prob;
-        }
-    }
-    else
-    {
-        for (size_t i = 0; i < num_states; i++)
-        {
+    for (size_t i = 0; i < num_states; i++) {
             double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
             std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
             sample_probs[ states ] = likelihood * freqs[i];
             sample_probs_sum += likelihood * freqs[i];
-        }
     }
     
     // sample ancestor, left, and right character states from probs
@@ -888,15 +784,7 @@ void FastBirthDeathShiftProcess::recursivelyDrawJointConditionalAncestralStates(
         
         std::map<std::vector<unsigned>, double> event_map;
         std::vector<double> speciation_rates;
-        if ( use_cladogenetic_events == true )
-        {
-            // get cladogenesis event map (sparse speciation rate matrix)
-            event_map = cladogenesis_matrix->getValue().getEventMap();
-        }
-        else
-        {
-            speciation_rates = lambda->getValue();
-        }
+        speciation_rates = lambda->getValue();
         
         // get likelihoods of descendant nodes
         const TopologyNode &left = node.getChild(0);
@@ -911,35 +799,15 @@ void FastBirthDeathShiftProcess::recursivelyDrawJointConditionalAncestralStates(
         std::map<std::vector<unsigned>, double>::iterator it;
 
         // calculate probabilities for each state
-        if ( use_cladogenetic_events == true )
-        {
-            // iterate over each cladogenetic event possible
-            // and initialize probabilities for each clado event
-            for (it = event_map.begin(); it != event_map.end(); it++)
-            {
-                const std::vector<unsigned>& states = it->first;
-                double speciation_rate = it->second;
-                
-                // we need to sample from the ancestor, left, and right states jointly,
-                // so keep track of the probability of each clado event
-                double prob = left_likelihoods[num_states + states[1]] * right_likelihoods[num_states + states[2]];
-                prob *= speciation_rate * branch_conditional_probs[num_states + states[0]];
-                sample_probs[ states ] = prob;
-                sample_probs_sum += prob;
-            }
-        }
-        else
-        {
-            for (size_t i = 0; i < num_states; i++)
-            {
+        for (size_t i = 0; i < num_states; i++){
                 double prob = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
                 prob *= branch_conditional_probs[num_states + i];
                 std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
                 sample_probs[ states ] = prob;
                 sample_probs_sum += prob;
-            }
         }
-        
+
+
         // finally, sample ancestor, left, and right character states from probs
         size_t a = 0, l = 0, r = 0;
 
@@ -1046,15 +914,7 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
         // now begin the root-to-tip pass, drawing ancestral states for each time slice conditional on the start states
         std::map<std::vector<unsigned>, double> eventMap;
         std::vector<double> speciation_rates;
-        if ( use_cladogenetic_events == true )
-        {
-            // get cladogenesis event map (sparse speciation rate matrix)
-            eventMap = cladogenesis_matrix->getValue().getEventMap();
-        }
-        else
-        {
-            speciation_rates = lambda->getValue();
-        }
+        speciation_rates = lambda->getValue();
         
         // get the likelihoods of descendant nodes
         const TopologyNode          &root               = value->getRoot();
@@ -1074,34 +934,13 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
         std::map<std::vector<unsigned>, double>::iterator it;
         
         // calculate probabilities for each state
-        if ( use_cladogenetic_events == true )
-        {
-            // iterate over each cladogenetic event possible
-            // and initialize probabilities for each clado event
-            for (it = eventMap.begin(); it != eventMap.end(); it++)
-            {
-                const std::vector<unsigned>& states = it->first;
-                double speciation_rate = it->second;
-                
-                // we need to sample from the ancestor, left, and right states jointly,
-                // so keep track of the probability of each clado event
-                double prob = left_likelihoods[num_states + states[1]] * right_likelihoods[num_states + states[2]];
-                prob *= freqs[states[0]] * speciation_rate;
-                sample_probs[ states ] = prob;
-                sample_probs_sum += prob;
-            }
+        for (size_t i = 0; i < num_states; i++){
+            double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
+            sample_probs[ states ] = likelihood * freqs[i];
+            sample_probs_sum += likelihood * freqs[i];
         }
-        else
-        {
-            for (size_t i = 0; i < num_states; i++)
-            {
-                double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
-                std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-                sample_probs[ states ] = likelihood * freqs[i];
-                sample_probs_sum += likelihood * freqs[i];
-            }
-        }
-        
+
         // sample ancestor, left, and right character states from probs
         size_t a = 0, l = 0, r = 0;
         
@@ -1341,15 +1180,10 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
     }
     else
     {
-        // the last time slice of the branch will be the state of the node before any cladogenetic events
+        // the last time slice of the branch will be the state of the node 
         
         std::map<std::vector<unsigned>, double> event_map;
-        if ( use_cladogenetic_events == true )
-        {
-            // get cladogenesis event map (sparse speciation rate matrix)
-            event_map = cladogenesis_matrix->getValue().getEventMap();
-        }
-        
+       
         // get likelihoods of descendant nodes
         const TopologyNode     &left                = node.getChild(0);
         size_t                  left_index          = left.getIndex();
@@ -1363,33 +1197,13 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
         std::map<std::vector<unsigned>, double>::iterator it;
         
         // calculate probabilities for each state
-        if ( use_cladogenetic_events == true )
+        for (size_t i = 0; i < num_states; i++)
         {
-            // iterate over each cladogenetic event possible
-            // and initialize probabilities for each clado event
-            for (it = event_map.begin(); it != event_map.end(); it++)
-            {
-                const std::vector<unsigned>& states = it->first;
-                double speciation_rate = it->second;
-                
-                // we need to sample from the ancestor, left, and right states jointly,
-                // so keep track of the probability of each clado event
-                double prob = left_likelihoods[num_states + states[1]] * right_likelihoods[num_states + states[2]];
-                prob *= speciation_rate * branch_conditional_probs[num_states + states[0]];
-                sample_probs[ states ] = prob;
-                sample_probs_sum += prob;
-            }
-        }
-        else
-        {
-            for (size_t i = 0; i < num_states; i++)
-            {
-                double prob = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
-                prob *= branch_conditional_probs[num_states + i];
-                std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-                sample_probs[ states ] = prob;
-                sample_probs_sum += prob;
-            }
+            double prob = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            prob *= branch_conditional_probs[num_states + i];
+            std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
+            sample_probs[ states ] = prob;
+            sample_probs_sum += prob;
         }
         
         // finally, sample ancestor, left, and right character states from probs
@@ -1912,29 +1726,6 @@ void FastBirthDeathShiftProcess::restoreSpecialization(const DagNode *affecter)
 
 
 
-void FastBirthDeathShiftProcess::setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix >* cm)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( cladogenesis_matrix );
-    
-    // set the value
-    cladogenesis_matrix = cm;
-    
-    // should we use the event map for the speciation rates?
-    use_cladogenetic_events = true;
-    
-    // add the new parameter
-    this->addParameter( cladogenesis_matrix );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-}
-
-
 void FastBirthDeathShiftProcess::setSerialSamplingRates(const TypedDagNode< RbVector<double> >* r)
 {
 
@@ -2015,9 +1806,6 @@ void FastBirthDeathShiftProcess::setSpeciationRates(const TypedDagNode< RbVector
     
     // set the value
     lambda = r;
-    
-    // should we use the event map for the speciation rates?
-    use_cladogenetic_events = false;
     
     // add the new parameter
     this->addParameter( lambda );
@@ -2105,10 +1893,6 @@ void FastBirthDeathShiftProcess::setValue(Tree *v, bool f )
 bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts )
 {
 
-    if ( use_cladogenetic_events == true )
-    {
-        throw RbException("Simulations conditioned on the tip states are not yet implemented for cladogenetic SSE models.");
-    }
     if ( prune_extinct_lineages == false )
     {
         throw RbException("Simulations conditioned on the tip states are currently implemented only when pruneExtinctLineages is set to true.");
@@ -2579,14 +2363,8 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
     std::map<std::vector<unsigned>, double>::iterator it;
-    if ( use_cladogenetic_events == true )
-    {
-        eventMap = cladogenesis_matrix->getValue().getEventMap();
-    }
-    else
-    {
-        speciation_rates = lambda->getValue();
-    }
+    speciation_rates = lambda->getValue();
+
     const RateGenerator *rate_matrix = &getEventRateMatrix();
 
     // a vector of all nodes in our simulated tree
@@ -2604,8 +2382,6 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
     root->setNumberOfShiftEvents(0);
     nodes.push_back(root);
 
-    // now draw a state for the root cladogenetic event
-    
     // get root frequencies
     const RbVector<double> &root_freqs = getRootFrequencies();
     
@@ -2613,30 +2389,10 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
     double sample_probs_sum = 0.0;
     
     // calculate probabilities for each state
-    if ( use_cladogenetic_events == true )
-    {
-        // iterate over each cladogenetic event possible
-        // and initialize probabilities for each clado event
-        for (it = eventMap.begin(); it != eventMap.end(); it++)
-        {
-            const std::vector<unsigned>& states = it->first;
-            double speciation_rate = it->second;
-            
-            // we need to sample from the ancestor, left, and right states jointly,
-            // so keep track of the probability of each clado event
-            double prob = root_freqs[states[0]] * speciation_rate;
-            sample_probs[ states ] = prob;
-            sample_probs_sum += prob;
-        }
-    }
-    else
-    {
-        for (size_t i = 0; i < num_states; i++)
-        {
-            std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-            sample_probs[ states ] = root_freqs[i] * speciation_rates[i];
-            sample_probs_sum += root_freqs[i] * speciation_rates[i];
-        }
+    for (size_t i = 0; i < num_states; i++){
+        std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
+        sample_probs[ states ] = root_freqs[i] * speciation_rates[i];
+        sample_probs_sum += root_freqs[i] * speciation_rates[i];
     }
     
     // sample left and right character states from probs
@@ -2935,30 +2691,12 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
 
             // gather the probabilities for each type of cladogenetic event
             std::map<std::vector<unsigned>, double> sample_probs;
+
             double sample_probs_sum = 0.0;
-            if ( use_cladogenetic_events == true )
-            {
-                // iterate over each cladogenetic event possible
-                for (it = eventMap.begin(); it != eventMap.end(); it++)
-                {
-                    const std::vector<unsigned>& states = it->first;
-                    double speciation_rate = it->second;
-                    if (states[0] == event_state) 
-                    {
-                        // we need to sample from the ancestor, left, and right states jointly,
-                        // so keep track of the probability of each clado event
-                        double prob = speciation_rate;
-                        sample_probs[ states ] = prob;
-                        sample_probs_sum += prob;
-                    }
-                }
-            }
-            else
-            {
-                std::vector<unsigned> states = boost::assign::list_of(event_state)(event_state)(event_state);
-                sample_probs[ states ] = speciation_rates[event_state];
-                sample_probs_sum += speciation_rates[event_state];
-            }
+
+            std::vector<unsigned> states = boost::assign::list_of(event_state)(event_state)(event_state);
+            sample_probs[ states ] = speciation_rates[event_state];
+            sample_probs_sum += speciation_rates[event_state];
             
             // sample left and right character states from probs
             size_t l = 0, r = 0;
@@ -3146,10 +2884,6 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         rho_per_state = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
-    if ( oldP == cladogenesis_matrix )
-    {
-        cladogenesis_matrix = static_cast<const TypedDagNode<CladogeneticSpeciationRateMatrix>* >( newP );
-    }
     
 }
 
@@ -3204,20 +2938,9 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 {
     const std::vector<double> &extinction_rates = mu->getValue();
     SSE_ODE ode = SSE_ODE(extinction_rates, &getEventRateMatrix(), getEventRate(), backward_time, extinction_only, allow_rate_shifts_on_extinct_lineages);
-    if ( use_cladogenetic_events == true )
-    {
-        cladogenesis_matrix->getValue(); // we must call getValue() to update the speciation and extinction rates in the event map
-        
-        // get cladogenesis event map (sparse speciation rate matrix)
-        std::map<std::vector<unsigned>, double> event_map = cladogenesis_matrix->getValue().getEventMap();
-        
-        ode.setEventMap( event_map );
-    }
-    else
-    {
-        const std::vector<double> &speciation_rates = lambda->getValue();
-        ode.setSpeciationRate( speciation_rates );
-    }
+
+    const std::vector<double> &speciation_rates = lambda->getValue();
+    ode.setSpeciationRate( speciation_rates );
 
     if ( phi != NULL )
     {

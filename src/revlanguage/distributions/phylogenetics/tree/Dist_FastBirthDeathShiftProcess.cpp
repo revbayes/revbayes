@@ -15,7 +15,6 @@
 #include "RealPos.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
-#include "RlCladogeneticSpeciationRateMatrix.h"
 #include "RlDistributionMemberFunction.h"
 #include "RlRateGenerator.h"
 #include "RlSimplex.h"
@@ -23,7 +22,6 @@
 #include "RlTimeTree.h"
 #include "FastBirthDeathShiftProcess.h"
 #include "StochasticNode.h"
-#include "CladogeneticSpeciationRateMatrix.h"
 #include "ConstantNode.h"
 #include "DagMemberFunction.h"
 #include "DagNode.h"
@@ -96,15 +94,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     
     // get speciation rates or cladogenetic speciation rate event map
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp = nullptr;
-    RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticSpeciationRateMatrix>* cp = nullptr;
-    if ( speciation_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
-    {
-        sp  = static_cast<const ModelVector<RealPos> &>( speciation_rates->getRevObject() ).getDagNode();
-    }
-    else if ( speciation_rates->getRevObject().isType( CladogeneticSpeciationRateMatrix::getClassTypeSpec() ) )
-    {
-        cp = static_cast<const CladogeneticSpeciationRateMatrix &>( speciation_rates->getRevObject() ).getDagNode();
-    } 
+    sp  = static_cast<const ModelVector<RealPos> &>( speciation_rates->getRevObject() ).getDagNode();
         
     // rate matrix
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* q      = NULL;
@@ -165,16 +155,8 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     size_t sp_size = 0;
     
     // set speciation/cladogenetic event rates
-    if (speciation_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ))
-    {
-        d->setSpeciationRates( sp );
-        sp_size = sp->getValue().size();
-    }
-    else if (speciation_rates->getRevObject().isType( CladogeneticSpeciationRateMatrix::getClassTypeSpec() ))
-    {
-        d->setCladogenesisMatrix( cp );
-        sp_size = cp->getValue().getNumberOfStates();
-    } 
+    d->setSpeciationRates( sp );
+    sp_size = sp->getValue().size();
 
     std::stringstream ss_err;
     if (ex_size != q_size)
@@ -329,11 +311,10 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         std::vector<std::string> slabels;
         slabels.push_back("speciationRates");
         slabels.push_back("lambda");
-        slabels.push_back("cladoEventMap");
         std::vector<TypeSpec> speciationTypes;
-        speciationTypes.push_back( CladogeneticSpeciationRateMatrix::getClassTypeSpec() );
         speciationTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
-        memberRules.push_back( new ArgumentRule( slabels     , speciationTypes ,                          "The vector of speciation rates (for anagenetic-only models), or the map of speciation rates to cladogenetic event types."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule( slabels     , speciationTypes ,                          "The vector of speciation rates."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+
         std::vector<std::string> elabels;
         elabels.push_back("extinctionRates");
         elabels.push_back("mu");

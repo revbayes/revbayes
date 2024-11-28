@@ -3,7 +3,6 @@
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "TreeDiscreteCharacterData.h"
-#include "CladogeneticSpeciationRateMatrix.h"
 #include "RateMatrix.h"
 #include "RateMatrix_JC.h"
 #include "Simplex.h"
@@ -65,7 +64,6 @@ namespace RevBayesCore {
         std::vector<double>                                             getTimeInStates(void) const;
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
-        void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
         void                                                            setSampleCharacterHistory(bool sample_history);                                                     //!< Set whether or not we are sampling the character history along branches.
         void                                                            setSamplingFraction(const TypedDagNode< double > *r);
         void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
@@ -125,7 +123,6 @@ namespace RevBayesCore {
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
         size_t                                                          num_states;
         mutable std::vector<std::vector<double> >                       scaling_factors;
-        bool                                                            use_cladogenetic_events;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
         bool                                                            use_origin;
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
         std::vector<double>                                             average_speciation;
@@ -135,7 +132,6 @@ namespace RevBayesCore {
         std::string                                                     simmap;
         
         // parameters
-        const TypedDagNode< CladogeneticSpeciationRateMatrix >*         cladogenesis_matrix;
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
         const TypedDagNode<RbVector<double> >*                          mu;
         const TypedDagNode<RbVector<double> >*                          lambda;
