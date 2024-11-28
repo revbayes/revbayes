@@ -92,7 +92,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     // extinction rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex  = static_cast<const ModelVector<RealPos> &>( extinction_rates->getRevObject() ).getDagNode();
     
-    // get speciation rates or cladogenetic speciation rate event map
+    // get speciation rates 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp = nullptr;
     sp  = static_cast<const ModelVector<RealPos> &>( speciation_rates->getRevObject() ).getDagNode();
         
