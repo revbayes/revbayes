@@ -34,6 +34,7 @@ namespace RevBayesCore {
         
     public:
         FastBirthDeathShiftProcess(const TypedDagNode<double> *root,
+                                                  const TypedDagNode<RbVector<double> >* s,
                                                   const TypedDagNode<RbVector<double> >* m,
                                                   const TypedDagNode<RateGenerator>* q,
                                                   const TypedDagNode<double>* r,
@@ -68,7 +69,6 @@ namespace RevBayesCore {
         void                                                            setSamplingFraction(const TypedDagNode< double > *r);
         void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
-        void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
         void                                                            drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates);

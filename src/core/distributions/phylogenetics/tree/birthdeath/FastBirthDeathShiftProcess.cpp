@@ -63,6 +63,7 @@ using namespace RevBayesCore;
  * and initializes the probability density by computing the combinatorial constant of the tree structure.
  */
 FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double> *age,
+                                                       const TypedDagNode<RbVector<double> > *sp,
                                                        const TypedDagNode<RbVector<double> > *ext,
                                                        const TypedDagNode<RateGenerator>* q,
                                                        const TypedDagNode<double>* r,
@@ -95,7 +96,7 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     simmap( "" ),
     process_age( age ),
     mu( ext ),
-    lambda(NULL),
+    lambda( sp ),
     pi( p ),
     Q( q ),
     rate( r ),
@@ -1257,26 +1258,6 @@ void FastBirthDeathShiftProcess::setSamplingFraction(const TypedDagNode< RbVecto
     
     // add the new parameter
     this->addParameter( rho_per_state );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-}
-
-
-void FastBirthDeathShiftProcess::setSpeciationRates(const TypedDagNode< RbVector<double> >* r)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( lambda );
-    
-    // set the value
-    lambda = r;
-    
-    // add the new parameter
-    this->addParameter( lambda );
     
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
