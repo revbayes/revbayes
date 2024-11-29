@@ -171,7 +171,7 @@ namespace RevBayesCore {
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
-        void                                        suppressOutdegreeOneNodes(bool replace);                                            //!< Replace or remove this node if its outdegree = 1, and do the same for all its descendants.
+        void                                        suppressOutdegreeOneNodes(bool replace);                                            //!< If this node's outdegree = 1, turn it and its descendants into bifurcations, or remove it.
 
         // internal helper functions
         bool getBurstSpeciation(void) const { return burst_speciation; }
