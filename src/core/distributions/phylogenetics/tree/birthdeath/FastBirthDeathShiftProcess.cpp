@@ -65,6 +65,8 @@ using namespace RevBayesCore;
 FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double> *age,
                                                        const TypedDagNode<RbVector<double> > *sp,
                                                        const TypedDagNode<RbVector<double> > *ext,
+                                                       const TypedDagNode<double> *r_sp,
+                                                       const TypedDagNode<double> *r_ext,
                                                        const TypedDagNode<RateGenerator>* q,
                                                        const TypedDagNode<double>* r,
                                                        const TypedDagNode< Simplex >* p,
@@ -95,8 +97,10 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     time_in_states( std::vector<double>(ext->getValue().size(), 0.0) ),    
     simmap( "" ),
     process_age( age ),
-    mu( ext ),
     lambda( sp ),
+    mu( ext ),
+    alpha( r_sp ),
+    beta( r_ext ),
     pi( p ),
     Q( q ),
     rate( r ),
@@ -2376,8 +2380,10 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 
 
 
-    double alpha = 0.001;
-    double beta = 0.002;
+    //double alpha = 0.001;
+    //double beta = 0.002;
+    const double &a = alpha ->getValue();
+    const double &b = beta ->getValue();
 
     // construct the Q matrix
     size_t n = sqrt(num_states);
@@ -2406,9 +2412,9 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 
             if (n_changes == 1){
                 if (A[i] != A[j]){
-                    Q(i,j) = alpha / (n-1);
+                    Q(i,j) = a / (n-1);
                 }else{
-                    Q(i,j) = beta / (n-1);
+                    Q(i,j) = b / (n-1);
                 }
             }else{
                 Q(i,j) = 0;
@@ -2417,7 +2423,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
         }
     }
     for (size_t i; i < num_states; i++){
-        Q(i,i) = -(alpha+beta);
+        Q(i,i) = -(a+b);
     }
     //std::cout << Q << std::endl;
 

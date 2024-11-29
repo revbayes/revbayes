@@ -44,6 +44,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                                   root_frequencies;
         RevPtr<const RevVariable>                                   speciation_rates;
         RevPtr<const RevVariable>                                   extinction_rates;
+        RevPtr<const RevVariable>                                   alpha;
+        RevPtr<const RevVariable>                                   beta;
         RevPtr<const RevVariable>                                   psi;
         RevPtr<const RevVariable>                                   event_rate_matrix;
         RevPtr<const RevVariable>                                   event_rate;

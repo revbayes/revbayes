@@ -34,22 +34,24 @@ namespace RevBayesCore {
         
     public:
         FastBirthDeathShiftProcess(const TypedDagNode<double> *root,
-                                                  const TypedDagNode<RbVector<double> >* s,
-                                                  const TypedDagNode<RbVector<double> >* m,
-                                                  const TypedDagNode<RateGenerator>* q,
-                                                  const TypedDagNode<double>* r,
-                                                  const TypedDagNode<Simplex>* p,
-                                                  const std::string &cdt,
-                                                  bool uo,
-                                                  size_t min_num_lineages,
-                                                  size_t max_num_lineages,
-                                                  size_t exact_num_lineages,
-                                                  double max_t,
-                                                  bool prune,
-                                                  bool condition_on_tip_states,
-                                                  bool condition_on_num_tips,
-                                                  bool condition_on_tree,
-                                                  bool allow_shifts_extinct);
+                                  const TypedDagNode<RbVector<double> >* s,
+                                  const TypedDagNode<RbVector<double> >* m,
+                                  const TypedDagNode<double> * rsp,
+                                  const TypedDagNode<double> * rext,
+                                  const TypedDagNode<RateGenerator>* q,
+                                  const TypedDagNode<double>* r,
+                                  const TypedDagNode<Simplex>* p,
+                                  const std::string &cdt,
+                                  bool uo,
+                                  size_t min_num_lineages,
+                                  size_t max_num_lineages,
+                                  size_t exact_num_lineages,
+                                  double max_t,
+                                  bool prune,
+                                  bool condition_on_tip_states,
+                                  bool condition_on_num_tips,
+                                  bool condition_on_tree,
+                                  bool allow_shifts_extinct);
         
         // pure virtual member functions
         virtual FastBirthDeathShiftProcess*                             clone(void) const;
@@ -132,6 +134,8 @@ namespace RevBayesCore {
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
         const TypedDagNode<RbVector<double> >*                          mu;
         const TypedDagNode<RbVector<double> >*                          lambda;
+        const TypedDagNode<double>*                                     alpha;
+        const TypedDagNode<double>*                                     beta;
         const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
         const TypedDagNode<RateGenerator>*                              Q;
         const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.

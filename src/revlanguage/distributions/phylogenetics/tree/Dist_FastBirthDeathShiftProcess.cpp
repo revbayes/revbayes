@@ -95,6 +95,10 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     // get speciation rates 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp = nullptr;
     sp  = static_cast<const ModelVector<RealPos> &>( speciation_rates->getRevObject() ).getDagNode();
+
+    // get alpha and beta
+    RevBayesCore::TypedDagNode<double>* r_sp = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r_ext = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
         
     // rate matrix
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* q      = NULL;
@@ -147,7 +151,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
     
     // finally make the distribution 
-    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp, ex, q, r, bf, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
+    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp, ex, r_sp, r_ext, q, r, bf, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
    
     
     size_t ex_size = ex->getValue().size();
@@ -303,6 +307,9 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         elabels.push_back("extinctionRates");
         elabels.push_back("mu");
         memberRules.push_back( new ArgumentRule( elabels     , ModelVector<RealPos>::getClassTypeSpec() , "The vector of extinction rates."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+
+        memberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()        , "the rate of shifts in speciation rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
+        memberRules.push_back( new ArgumentRule( "beta", RealPos::getClassTypeSpec()        , "the rate of shifts in extinction rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         
         memberRules.push_back( new ArgumentRule( "Q"         , RateGenerator::getClassTypeSpec()        , "The rate matrix of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "delta"     , RealPos::getClassTypeSpec()              , "The rate-factor of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
@@ -366,6 +373,14 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     else if ( name == "extinctionRates" || name == "mu" )
     {
         extinction_rates = var;
+    }
+    else if ( name == "alpha" )
+    {
+        alpha = var;
+    }
+    else if ( name == "beta" )
+    {
+        beta = var;
     }
     else if ( name == "Q" )
     {
