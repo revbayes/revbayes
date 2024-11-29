@@ -300,7 +300,9 @@ double FastBirthDeathShiftProcess::computeLnProbability( void )
     
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeRootLikelihood();
-    
+   
+    std::cout << "calculating ln prob now" << std::endl;
+    std::cout << "the ln prob is " << lnProbTimes << std::endl;
     return lnProbTimes + lnProbTreeShape();
 }
 
@@ -2342,14 +2344,8 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     const std::vector<double> &extinction_rates = mu->getValue();
 
 
-
-    //double alpha = 0.001;
-    //double beta = 0.002;
-
     // construct the Q matrix
-
     //updateQmatrix();
-
 
     boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
 
