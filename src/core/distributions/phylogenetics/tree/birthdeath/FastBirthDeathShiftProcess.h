@@ -3,8 +3,8 @@
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "TreeDiscreteCharacterData.h"
-#include "RateMatrix.h"
-#include "RateMatrix_JC.h"
+//#include "RateMatrix.h"
+//#include "RateMatrix_JC.h"
 #include "Simplex.h"
 #include "BDS_ODE.h"
 #include "Taxon.h"
@@ -38,8 +38,6 @@ namespace RevBayesCore {
                                   const TypedDagNode<RbVector<double> >* m,
                                   const TypedDagNode<double> * rsp,
                                   const TypedDagNode<double> * rext,
-                                  const TypedDagNode<RateGenerator>* q,
-                                  const TypedDagNode<double>* r,
                                   const TypedDagNode<Simplex>* p,
                                   const std::string &cdt,
                                   bool uo,
@@ -81,8 +79,6 @@ namespace RevBayesCore {
         
     protected:
         
-        double                                                          getEventRate(void) const;
-        const RateGenerator&                                            getEventRateMatrix(void) const;
         std::vector<double>                                             getRootFrequencies(void) const;
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
@@ -139,12 +135,9 @@ namespace RevBayesCore {
         const TypedDagNode<double>*                                     alpha;
         const TypedDagNode<double>*                                     beta;
         const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
-        const TypedDagNode<RateGenerator>*                              Q;
-        const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
         const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
 
-        RateMatrix_JC                                                   Q_default;
         size_t                                                          min_num_lineages;
         size_t                                                          max_num_lineages;
         size_t                                                          exact_num_lineages;

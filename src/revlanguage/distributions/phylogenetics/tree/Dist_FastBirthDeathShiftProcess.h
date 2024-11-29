@@ -47,8 +47,6 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                                   alpha;
         RevPtr<const RevVariable>                                   beta;
         RevPtr<const RevVariable>                                   psi;
-        RevPtr<const RevVariable>                                   event_rate_matrix;
-        RevPtr<const RevVariable>                                   event_rate;
         RevPtr<const RevVariable>                                   rho;
         RevPtr<const RevVariable>                                   condition;                                                                              //!< The condition of the process (none/survival/#Taxa)
         RevPtr<const RevVariable>                                   allow;                                                                              //!< The condition of the process (none/survival/#Taxa)

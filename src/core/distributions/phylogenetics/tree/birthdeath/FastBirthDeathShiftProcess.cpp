@@ -18,7 +18,7 @@
 #include "FastBirthDeathShiftProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "RateMatrix_JC.h"
+//#include "RateMatrix_JC.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RlString.h"
@@ -30,7 +30,7 @@
 #include "DiscreteCharacterState.h"
 #include "DiscreteTaxonData.h"
 #include "NaturalNumbersState.h"
-#include "RateGenerator.h"
+//#include "RateGenerator.h"
 #include "RbBitSet.h"
 #include "RbException.h"
 #include "RbSettings.h"
@@ -67,8 +67,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
                                                        const TypedDagNode<RbVector<double> > *ext,
                                                        const TypedDagNode<double> *r_sp,
                                                        const TypedDagNode<double> *r_ext,
-                                                       const TypedDagNode<RateGenerator>* q,
-                                                       const TypedDagNode<double>* r,
                                                        const TypedDagNode< Simplex >* p,
                                                        const std::string &cdt,
                                                        bool uo,
@@ -102,12 +100,9 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     alpha( r_sp ),
     beta( r_ext ),
     pi( p ),
-    Q( q ),
     //Qmatrix( boost::numeric::ublas::matrix<double>::matrix(num_states, num_states) ),
-    rate( r ),
     rho( new ConstantNode<double>("", new double(1.0)) ),
     rho_per_state( NULL ),
-    Q_default( ext->getValue().size() ),
     min_num_lineages( min_num_lineages ),
     max_num_lineages( max_num_lineages ),
     exact_num_lineages( exact_num_lineages ),
@@ -120,9 +115,7 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
 {
     addParameter( mu );
     addParameter( pi );
-    addParameter( Q );
     addParameter( rho );
-    addParameter( rate );
     addParameter( process_age );
 
     // set the new Q matrix
@@ -191,14 +184,13 @@ std::vector<double> FastBirthDeathShiftProcess::calculateTotalSpeciationRatePerS
 std::vector<double> FastBirthDeathShiftProcess::calculateTotalAnageneticRatePerState( void ) const
 {
     std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
     for (size_t i = 0; i < num_states; i++)
     {
         for (size_t j = 0; j < num_states; j++)
         {
             if (i != j)
             {
-                total_rates[i] += rate_matrix->getRate(i, j, 0.0, getEventRate());
+                total_rates[i] += Qmatrix(i,j);
             }
         }
     }
@@ -921,41 +913,6 @@ void FastBirthDeathShiftProcess::getAffected(RbOrderedSet<DagNode *> &affected, 
 }
 
 
-/**
- * Get the event rate
- */
-double FastBirthDeathShiftProcess::getEventRate(void) const
-{
-
-    if ( rate != NULL )
-    {
-        return rate->getValue();
-    }
-    else
-    {
-        return 1.0;
-    }
-
-}
-
-
-/**
- * Get the event rate generator
- */
-const RateGenerator& FastBirthDeathShiftProcess::getEventRateMatrix(void) const
-{
-
-    if ( Q != NULL )
-    {
-        return Q->getValue();
-    }
-    else
-    {
-        return Q_default;
-    }
-
-}
-
 
 double FastBirthDeathShiftProcess::getOriginAge( void ) const
 {
@@ -1364,7 +1321,6 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
 
     // vectors keeping track of the total rate of all
     // speciation/anagenetic/extinction events for each state
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
     std::vector<double> extinction_rates = mu->getValue();
     std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState();
     std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState();
@@ -1534,7 +1490,7 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
                 {
                     if (i != j && lineages_in_state[j].size() > 0) 
                     {
-                        prob_transition[i][j] = rate_matrix->getRate(i, j, 0.0, getEventRate()) * (lineages_in_state[i].size() + 1) * exp(-1 * dt * total_rate_ana[j]);
+                        prob_transition[i][j] = Qmatrix(i,j) * (lineages_in_state[i].size() + 1) * exp(-1 * dt * total_rate_ana[j]);
                         prob_transition_sum[i] += prob_transition[i][j];
                     }
                 }
@@ -1810,12 +1766,10 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
     }
 
     // get the speciation rates, extinction rates, and Q matrix
-    std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
     std::map<std::vector<unsigned>, double>::iterator it;
     speciation_rates = lambda->getValue();
 
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
 
     // a vector of all nodes in our simulated tree
     std::vector<TopologyNode*> nodes;
@@ -2068,7 +2022,7 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
             {
                 if (i != event_state)
                 {
-                    u -= rate_matrix->getRate( event_state, i, 0, getEventRate() );
+                    u -= Qmatrix(i,0);
                     if (u < 0.0)
                     {
                         new_state = i;
@@ -2319,14 +2273,6 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         beta = static_cast<const TypedDagNode<double>* >( newP );
         updateQmatrix();
-    }
-    if ( oldP == Q )
-    {
-        Q = static_cast<const TypedDagNode<RateGenerator>* >( newP );
-    }
-    if ( oldP == rate )
-    {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
     }
     if ( oldP == pi )
     {
