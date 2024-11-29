@@ -28,12 +28,14 @@ void dsymv(
 BDS_ODE::BDS_ODE( 
         const std::vector<double> &l,
         const std::vector<double> &m,
-        const RateGenerator* q 
+        const boost::numeric::ublas::matrix<double> &q
+        //const size_t ns
+        //const RateGenerator* q 
         ) :
     mu( m ),
     lambda( l ),
-    num_states( q->getNumberOfStates() ),
-    Q( q ){
+    Q( q )
+{
 
 }
 
@@ -42,6 +44,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
 {
     const double age = 0.0; // need to delete this
     const double rate = 1.0;
+    const size_t num_states = Q.size1();
                       
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
@@ -60,7 +63,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         {
             if ( i != j ) 
             {
-                no_event_rate += Q->getRate(i, j, age, rate);
+                no_event_rate += Q(i,j);
             }
         }
 
@@ -72,7 +75,8 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         {
             if ( i != j ) 
             {
-                dxdt[i] += Q->getRate(i, j, age, rate) * safe_x[j];
+                //dxdt[i] += Q->getRate(i, j, age, rate) * safe_x[j];
+                dxdt[i] += Q(i,j) * safe_x[j];
             }
         }
 
@@ -83,7 +87,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         {
             if ( i != j )
             {
-                dxdt[i + num_states] += Q->getRate(j, i, age, rate) * safe_x[j + num_states];
+                dxdt[i + num_states] += Q(i,j) * safe_x[j + num_states];
             }
         }
     } // end for num_states

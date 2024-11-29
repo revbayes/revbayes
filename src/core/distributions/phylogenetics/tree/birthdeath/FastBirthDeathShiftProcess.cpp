@@ -7,6 +7,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
@@ -45,6 +47,7 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 #include "boost/numeric/odeint.hpp" // IWYU pragma: keep
+
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -2390,7 +2393,58 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     const std::vector<double> &speciation_rates = lambda->getValue();
     const std::vector<double> &extinction_rates = mu->getValue();
 
-    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
+
+
+    double alpha = 0.001;
+    double beta = 0.002;
+
+    // construct the Q matrix
+    size_t n = sqrt(num_states);
+    std::vector<size_t> A;
+    std::vector<size_t> B;
+    for (size_t i = 0; i < n; i++){
+        for (size_t j = 0; j < n; j++){
+            A.push_back(i);
+            B.push_back(j);
+        }
+    }
+
+    boost::numeric::ublas::matrix<double> Q(num_states, num_states);
+    boost::numeric::ublas::matrix<double> &Qref = Q;
+
+    for (size_t i = 0; i < num_states; i++){
+        for (size_t j = 0; j < num_states; j++){
+
+            size_t n_changes = 0;
+            if (A[i] != A[j]){
+                n_changes += 1;
+            }
+            if (B[i] != B[j]){
+                n_changes += 1;
+            }
+
+            if (n_changes == 1){
+                if (A[i] != A[j]){
+                    Q(i,j) = alpha / (n-1);
+                }else{
+                    Q(i,j) = beta / (n-1);
+                }
+            }else{
+                Q(i,j) = 0;
+            }
+
+        }
+    }
+    for (size_t i; i < num_states; i++){
+        Q(i,i) = -(alpha+beta);
+    }
+    //std::cout << Q << std::endl;
+
+
+
+
+    //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
+    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, Qref);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 

@@ -5,6 +5,7 @@
 #include "RateMatrix.h"
 
 #include <vector>
+#include <boost/numeric/ublas/matrix.hpp>
 
 namespace RevBayesCore {
     
@@ -16,7 +17,7 @@ namespace RevBayesCore {
         
     public:
         
-        BDS_ODE( const std::vector<double> &l, const std::vector<double> &m, const RateGenerator* q );
+        BDS_ODE( const std::vector<double> &l, const std::vector<double> &m, const boost::numeric::ublas::matrix<double> &q );
         
         void operator() ( const std::vector< double > &x, std::vector< double > &dxdt , const double t );
         
@@ -25,7 +26,8 @@ namespace RevBayesCore {
         std::vector<double>                         mu;                                 //!< vector of extinction rates, one rate for each character state
         std::vector<double>                         lambda;                             //!< vector of speciation rates, one rate for each character state
         size_t                                      num_states;                         //!< the number of character states = q->getNumberOfStates()
-        const RateGenerator*                        Q;                                  //!< anagenetic rate matrix
+        const boost::numeric::ublas::matrix<double> Q;
+        //const RateGenerator*                        Q;                                  //!< anagenetic rate matrix
         
         // flags to modify behabior
     };
