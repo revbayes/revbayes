@@ -261,9 +261,6 @@ MethodTable Dist_FastBirthDeathShiftProcess::getDistributionMethods( void ) cons
     ArgumentRules* getCharDataArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getCharData", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), getCharDataArgRules ) ); 
     
-    ArgumentRules* getCharHistoryArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getCharHistory", RlString::getClassTypeSpec(), getCharHistoryArgRules   ) );
-    
     ArgumentRules* avgSpeciationArgRules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_FastBirthDeathShiftProcess, ModelVector<RealPos> >( "averageSpeciationRate", variable, avgSpeciationArgRules   ) );
 
