@@ -77,6 +77,7 @@ namespace RevBayesCore {
         void                                                            recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<size_t>& startStates, std::vector<size_t>& endStates);
         void                                                            numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool use_backward, bool extinction_only) const; //!< Wrapper function for the ODE time stepper function.
         void                                                            resizeVectors(size_t num_nodes);
+        void                                                            updateQmatrix();
         
     protected:
         
@@ -120,6 +121,7 @@ namespace RevBayesCore {
         mutable std::vector<std::vector<std::vector<double> > >         node_partial_likelihoods;
         mutable std::map<size_t, std::vector<std::vector<double> > >    branch_partial_likelihoods;
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
+        mutable boost::numeric::ublas::matrix<double>                   Qmatrix;
         size_t                                                          num_states;
         mutable std::vector<std::vector<double> >                       scaling_factors;
         bool                                                            use_origin;

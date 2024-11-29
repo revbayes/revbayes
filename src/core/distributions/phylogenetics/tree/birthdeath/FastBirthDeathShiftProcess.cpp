@@ -103,6 +103,7 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     beta( r_ext ),
     pi( p ),
     Q( q ),
+    //Qmatrix( boost::numeric::ublas::matrix<double>::matrix(num_states, num_states) ),
     rate( r ),
     rho( new ConstantNode<double>("", new double(1.0)) ),
     rho_per_state( NULL ),
@@ -123,6 +124,13 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     addParameter( rho );
     addParameter( rate );
     addParameter( process_age );
+
+    // set the new Q matrix
+    boost::numeric::ublas::matrix<double> Qm(num_states, num_states);
+    Qmatrix = Qm;
+
+    //std::cout << "first item Q matrix: \t " << Qmatrix(0,0) << std::endl;
+    updateQmatrix();
     
     if ( min_num_lineages > max_num_lineages )
     {
@@ -135,7 +143,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     value->getTreeChangeEventHandler().addListener( this );
 
 }
-
 
 /**
  * The clone function is a convenience function to create proper copies of inherited objected.
@@ -2303,6 +2310,16 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
+    if ( oldP == alpha )
+    {
+        alpha = static_cast<const TypedDagNode<double>* >( newP );
+        updateQmatrix();
+    }
+    if ( oldP == beta )
+    {
+        beta = static_cast<const TypedDagNode<double>* >( newP );
+        updateQmatrix();
+    }
     if ( oldP == Q )
     {
         Q = static_cast<const TypedDagNode<RateGenerator>* >( newP );
@@ -2382,52 +2399,13 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 
     //double alpha = 0.001;
     //double beta = 0.002;
-    const double &a = alpha ->getValue();
-    const double &b = beta ->getValue();
 
     // construct the Q matrix
-    size_t n = sqrt(num_states);
-    std::vector<size_t> A;
-    std::vector<size_t> B;
-    for (size_t i = 0; i < n; i++){
-        for (size_t j = 0; j < n; j++){
-            A.push_back(i);
-            B.push_back(j);
-        }
-    }
 
-    boost::numeric::ublas::matrix<double> Q(num_states, num_states);
-    boost::numeric::ublas::matrix<double> &Qref = Q;
-
-    for (size_t i = 0; i < num_states; i++){
-        for (size_t j = 0; j < num_states; j++){
-
-            size_t n_changes = 0;
-            if (A[i] != A[j]){
-                n_changes += 1;
-            }
-            if (B[i] != B[j]){
-                n_changes += 1;
-            }
-
-            if (n_changes == 1){
-                if (A[i] != A[j]){
-                    Q(i,j) = a / (n-1);
-                }else{
-                    Q(i,j) = b / (n-1);
-                }
-            }else{
-                Q(i,j) = 0;
-            }
-
-        }
-    }
-    for (size_t i; i < num_states; i++){
-        Q(i,i) = -(a+b);
-    }
-    //std::cout << Q << std::endl;
+    //updateQmatrix();
 
 
+    boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
 
 
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
@@ -2473,6 +2451,51 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     }
     
 }
+
+void FastBirthDeathShiftProcess::updateQmatrix(){
+
+    const double &a = alpha ->getValue();
+    const double &b = beta ->getValue();
+
+    size_t n = sqrt(num_states);
+    std::vector<size_t> A;
+    std::vector<size_t> B;
+    for (size_t i = 0; i < n; i++){
+        for (size_t j = 0; j < n; j++){
+            A.push_back(i);
+            B.push_back(j);
+        }
+    }
+
+    for (size_t i = 0; i < num_states; i++){
+        for (size_t j = 0; j < num_states; j++){
+            //std::cout << "i= " << i << "  j= " << j << std::endl;
+            //std::cout << "Qith entry: \t " << Qmatrix(i,j) << std::endl;
+
+            size_t n_changes = 0;
+            if (A[i] != A[j]){
+                n_changes += 1;
+            }
+            if (B[i] != B[j]){
+                n_changes += 1;
+            }
+
+            if (n_changes == 1){
+                if (A[i] != A[j]){
+                    Qmatrix(i,j) = a / (n-1);
+                }else{
+                    Qmatrix(i,j) = b / (n-1);
+                }
+            }else{
+                Qmatrix(i,j) = 0;
+            }
+
+        }
+    }
+    for (size_t i; i < num_states; i++){
+        Qmatrix(i,i) = -(a+b);
+    }
+} 
 
 
 /**
