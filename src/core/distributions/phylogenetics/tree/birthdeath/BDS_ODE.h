@@ -17,16 +17,24 @@ namespace RevBayesCore {
         
     public:
         
-        BDS_ODE( const std::vector<double> &l, const std::vector<double> &m, const boost::numeric::ublas::matrix<double> &q );
+        BDS_ODE( 
+                const std::vector<double> &l, 
+                const std::vector<double> &m, 
+                const boost::numeric::ublas::matrix<double> &qmatrix,
+                const boost::numeric::ublas::matrix<double> &bmatrix,
+                const double &b
+                );
         
         void operator() ( const std::vector< double > &x, std::vector< double > &dxdt , const double t );
         
     private:
         
-        std::vector<double>                         mu;                                 //!< vector of extinction rates, one rate for each character state
-        std::vector<double>                         lambda;                             //!< vector of speciation rates, one rate for each character state
-        size_t                                      num_states;                         //!< the number of character states = q->getNumberOfStates()
+        const std::vector<double>                         mu;                                 //!< vector of extinction rates, one rate for each character state
+        const std::vector<double>                         lambda;                             //!< vector of speciation rates, one rate for each character state
+        //const size_t                                      num_states;                         //!< the number of character states = q->getNumberOfStates()
         const boost::numeric::ublas::matrix<double> Q;
+        const boost::numeric::ublas::matrix<double> B;
+        const double beta;
         //const RateGenerator*                        Q;                                  //!< anagenetic rate matrix
         
         // flags to modify behabior
