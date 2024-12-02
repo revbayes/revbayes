@@ -29,8 +29,6 @@ BDS_ODE::BDS_ODE(
         const std::vector<double> &l,
         const std::vector<double> &m,
         const boost::numeric::ublas::matrix<double> &q
-        //const size_t ns
-        //const RateGenerator* q 
         ) :
     mu( m ),
     lambda( l ),
@@ -42,8 +40,6 @@ BDS_ODE::BDS_ODE(
 
 void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
-    const double age = 0.0; // need to delete this
-    const double rate = 1.0;
     const size_t num_states = Q.size1();
                       
     // catch negative extinction probabilities that can result from
@@ -53,45 +49,37 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
     {
         safe_x[i] = ( x[i] < 0.0 ? 0.0 : x[i] );
     }
-    
+
+    // do the diagonal elements
     for (size_t i = 0; i < num_states; ++i)
     {
-        
         // no event
         double no_event_rate = mu[i] + lambda[i];
-        for (size_t j = 0; j < num_states; ++j)
-        {
-            if ( i != j ) 
-            {
-                no_event_rate += Q(i,j);
-            }
-        }
 
         // for E(t)
         dxdt[i] = mu[i] - no_event_rate * safe_x[i] + lambda[i] * safe_x[i] * safe_x[i];
-        
-        // anagenetic state change
-        for (size_t j = 0; j < num_states; ++j)
-        {
-            if ( i != j ) 
-            {
-                //dxdt[i] += Q->getRate(i, j, age, rate) * safe_x[j];
-                dxdt[i] += Q(i,j) * safe_x[j];
-            }
-        }
-
         // for D(t)
         dxdt[i + num_states] = -no_event_rate * safe_x[i + num_states] + 2 * lambda[i] * safe_x[i] * safe_x[i + num_states];
-        // anagenetic state change
+    }
+    
+    // the matrix-vector products
+    for (size_t i = 0; i < num_states; ++i)
+    {
+        // note: it's better not to merge the two next loops
+        // because we want to access contiguous memory
+        
+        // Q * E
         for (size_t j = 0; j < num_states; ++j)
         {
-            if ( i != j )
-            {
-                dxdt[i + num_states] += Q(i,j) * safe_x[j + num_states];
-            }
+            dxdt[i]              += Q(i,j) * safe_x[j];
         }
-    } // end for num_states
-    
+
+        // and Q * D
+        for (size_t j = 0; j < num_states; ++j)
+        {
+            dxdt[i + num_states] += Q(i,j) * safe_x[j + num_states];
+        }
+    } 
 }
 
 
