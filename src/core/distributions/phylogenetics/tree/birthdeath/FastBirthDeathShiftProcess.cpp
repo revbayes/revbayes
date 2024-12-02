@@ -130,9 +130,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
 
     // set the B matrix
     size_t num_classes = sqrt(num_states);
-    boost::numeric::ublas::matrix<double> Bm (num_classes, num_classes);
-    Bmatrix = Bm;
-    updateBmatrix();
     
     if ( min_num_lineages > max_num_lineages )
     {
@@ -2279,13 +2276,11 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         alpha = static_cast<const TypedDagNode<double>* >( newP );
         updateQmatrix();
-        updateBmatrix();
     }
     if ( oldP == beta )
     {
         beta = static_cast<const TypedDagNode<double>* >( newP );
         updateQmatrix();
-        updateBmatrix();
     }
     if ( oldP == pi )
     {
@@ -2361,7 +2356,6 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     //updateQmatrix();
 
     boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
-    boost::numeric::ublas::matrix<double> &Bref = Bmatrix;
 
 
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
@@ -2453,24 +2447,6 @@ void FastBirthDeathShiftProcess::updateQmatrix(){
         Qmatrix(i,i) = -(a+b);
     }
 } 
-
-void FastBirthDeathShiftProcess::updateBmatrix(){
-    const double &a = alpha ->getValue();
-    const double &b = beta ->getValue();
-
-    size_t num_classes = Bmatrix.size1();
-
-    for (size_t i; i < num_classes; i++){
-        for (size_t j; j < num_classes; j++){
-            if (i != j){
-                Bmatrix(i,j) = b / (num_classes -1);
-            }else{
-                Bmatrix(i,j) = -(a+b);
-            }
-
-        }
-    }
-}
 
 
 /**

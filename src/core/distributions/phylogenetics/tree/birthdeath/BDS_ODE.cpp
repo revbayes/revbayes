@@ -10,25 +10,47 @@
 
 using namespace RevBayesCore;
 
-// consider replacing this with some openBLAS/LAPACK
-// function, dmv
-// double precision, matrix vector multiplication
-// if implemented in Fortran might be be faster
-void dmv(
-        std::vector<double> &y, 
-        const boost::numeric::ublas::matrix<double> &Q,
-        const std::vector<double> &x)
-{
-    for (size_t i = 0; i < Q.size1(); i++){
-        for (size_t j = 0; j < Q.size2(); j++){
-            y[i] += Q(i,j) * x[j];
-        }
-    }
-}
-
+// specialized double-precision matrix-vector multiply
+// works when we have
+//
+// y = Q * x,
+//
+// where Q is a square (n*n) by (n*n) matrix,
+// and has the particular shape (example with n=3)
+//
+//      [ B C C 
+// Q =    C B C
+//        C C B ]
+//
+// where B and C are also matrices 
+//
+//      [ -(a+b)   a/2     a/2 
+// B =    a/2    -(a+b)    a/2
+//        a/2      a/2   -(a+b) 
+// and
+//      [ b/2                 
+// C =             b/2     
+//                         b/2 ]
+//
+// the idea is to split x into
+//      [ u
+// x  =   v 
+//        w ]
+//
+// and calculate the product
+//
+//         [ Bu + Cv + Cw 
+// Q * x =   Cu + Bu + Cw 
+//           Cu + Cv + Bw ]
+//
+// Notice that there are some repeated
+// block matrices (Cu, Cv and Cw two times)
+// which allows us to use fewer amount of 
+// operations than general matrix-vector multiply.
+// The algorithm should have time complexity
+// O(n^3) instead of O(n^4), theoretically
 void dmv_special(
         std::vector<double> &y,
-        //const boost::numeric::ublas::matrix<double> &B,
         const std::vector<double> &x,
         const size_t &n,
         const double &alpha,
