@@ -124,8 +124,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     // set the new Q matrix
     boost::numeric::ublas::matrix<double> Qm(num_states, num_states);
     Qmatrix = Qm;
-
-    //std::cout << "first item Q matrix: \t " << Qmatrix(0,0) << std::endl;
     updateQmatrix();
 
     // set the B matrix
@@ -174,7 +172,6 @@ FastBirthDeathShiftProcess::~FastBirthDeathShiftProcess( void )
 std::vector<double> FastBirthDeathShiftProcess::calculateTotalSpeciationRatePerState( void ) const
 {
     std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
     std::map<std::vector<unsigned>, double>::iterator it;
 
@@ -373,14 +370,7 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                 
                 if ( obs_state.test( j ) == true || gap == true )
                 {
-                	if ( node.isFossil() )
-                	{
-                		node_likelihood[num_states+j] = sampling[j] * extinction[j];
-                	}
-                	else
-                	{
-                		node_likelihood[num_states+j] = sampling[j];
-                	}
+                    node_likelihood[num_states+j] = sampling[j];
                 }
                 else
                 {
@@ -404,7 +394,6 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
             const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
             const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
 
-            std::map<std::vector<unsigned>, double> eventMap;
             std::vector<double> speciation_rates;
 
             speciation_rates = lambda->getValue();
@@ -429,7 +418,7 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
             numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
         }
         
-        if ( RbSettings::userSettings().getUseScaling() == true ) //&& node_index % RbSettings::userSettings().getScalingDensity() == 0 )
+        if ( RbSettings::userSettings().getUseScaling() == true ) 
         {
             // rescale the conditional likelihoods at the "end" of the branch
             double max = 0.0;
@@ -440,7 +429,6 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                     max = node_likelihood[num_states+i];
                 }
             }
-//            max *= num_states;
             
             for (size_t i=0; i<num_states; ++i)
             {
@@ -483,7 +471,6 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
 
     std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
 
-    std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
 
     speciation_rates = lambda->getValue();
@@ -540,7 +527,6 @@ void FastBirthDeathShiftProcess::drawJointConditionalAncestralStates(std::vector
 {
     // now begin the root-to-tip pass, drawing ancestral states conditional on the start states
     
-    std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
 
     speciation_rates = lambda->getValue();
