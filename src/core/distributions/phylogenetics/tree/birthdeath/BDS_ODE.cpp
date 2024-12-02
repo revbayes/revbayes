@@ -28,17 +28,20 @@ void dmv(
 
 void dmv_special(
         std::vector<double> &y,
-        const boost::numeric::ublas::matrix<double> &B,
+        //const boost::numeric::ublas::matrix<double> &B,
         const std::vector<double> &x,
+        const size_t &n,
+        const double &alpha,
         const double &beta){
 
+    // __n__ is
     // number of rate classes
     // (NOT) rate categories
-    const size_t n = B.size1();
 
-    const double alpha = B(1,2);
-    const double r = beta / (n-1);
+    const double alpha_small = alpha / (n-1);
+    const double beta_small  = beta  / (n-1);
 
+    // offset because we do it for E and D
     for (size_t offset_index = 0; offset_index < 2; offset_index++){
         size_t offset = 0;
         if (offset_index == 0){
@@ -47,40 +50,20 @@ void dmv_special(
             offset = n*n;
         }
 
-        std::cout << "offset_index: " << offset_index << ", offset: " << offset << std::endl;
-
-        // compute
         // [
         //   Cu + Cv + Cw
         //   Cu + Cv + Cw
         //   Cu + Cv + Cw
         // ]
-        // about 0.60 microseconds
         for (size_t i = 0; i < n; i++){
-            size_t a = n*(i+1)+1;
+            size_t a = n*i;
             for (size_t k=0; k < n; k++){
-                double xka = x[k+a+offset] * r;
-
                 for (size_t j = 0; j < n; j++){
-                    //std::cout << "i: " << i << ", k: " << k << ", j: " << j << std::endl;
-                    size_t b = n*(j-1)+1;
-                    y[k+b+offset] += xka;
+                    size_t b = n*j;
+                    y[k+a+offset] += x[k+b+offset] * beta_small;
+                    // there should be an if k+a+offset != k+b+offset here
+                    // but we subtract it later instead
                 }
-            }
-        }
-
-        // subtract
-        // [
-        //   Cu + 0  +  0
-        //   0  + Cv +  0
-        //   0  + 0  +  Cw
-        // ]
-        // we didnt actually want to add the diagonal in previous loop
-        for (size_t i = 0; i < n; i++){
-            size_t a = n*(i-1)+1;
-            for (size_t k = 0; k < n; k++){
-                //std::cout << "i: " << i << ", k: " << k << std::endl;
-                y[a+k+offset] -= x[a+k+offset] * r;
             }
         }
 
@@ -90,20 +73,24 @@ void dmv_special(
         //    0  + Bv  +  0
         //    0  +  0  + Bw
         // ]
-        // about 60ns microseconds
         for (size_t i = 0; i < n; i++){
             for (size_t k = 0; k < n; k++){
                 for (size_t j = 0; j < n; j++){
-                    //std::cout << "i: " << i << ", k: " << k << ", j: " << j << std::endl;
                     size_t a = k*n;
-                    //std::cout << "i+a+offset: (" << i+a+offset << ")" << std::endl;
-                    //std::cout << "j+a+offset: (" << j+a+offset << ")" << std::endl;
-                    y[i+a+offset] += B(i,j) * x[j+a+offset];
+                    y[i+a+offset] += x[j+a+offset] * alpha_small;
+                    // there should be an if i+a+offset != j+a+offset here
+                    // but we subtract it later instead
                 }
             }
         }
+
+        for (size_t i = 0; i < n*n; i++){
+            // we didnt actually want to add the diagonal in previous loops
+            double c1 = alpha_small + beta_small; 
+            double c2 = alpha + beta; // also subtract (alpha+beta)*x_i
+            y[i+offset] -= x[i+offset] * (c1+c2);
+        }
     }
-    std::cout << "finished fast mv" << std::endl;
 }
    
 
@@ -111,13 +98,13 @@ BDS_ODE::BDS_ODE(
         const std::vector<double> &l,
         const std::vector<double> &m,
         const boost::numeric::ublas::matrix<double> &qmatrix,
-        const boost::numeric::ublas::matrix<double> &bmatrix,
+        const double &a,
         const double &b
         ) :
     mu( m ),
     lambda( l ),
     Q( qmatrix ),
-    B( bmatrix ),
+    alpha( a ),
     beta( b )
 {
 
@@ -127,6 +114,7 @@ BDS_ODE::BDS_ODE(
 void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
     const size_t num_states = Q.size1();
+    const size_t num_classes = sqrt(num_states);
                       
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
@@ -168,9 +156,8 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         }
     } 
     */
-
-    //const double beta
-    dmv_special(dxdt, B, x, beta);
+    
+    dmv_special(dxdt, x, num_classes, alpha, beta);
 }
 
 

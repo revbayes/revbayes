@@ -2353,6 +2353,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 {
     const std::vector<double> &speciation_rates = lambda->getValue();
     const std::vector<double> &extinction_rates = mu->getValue();
+    const double &alpha_ref = alpha->getValue();
     const double &beta_ref = beta->getValue();
 
 
@@ -2364,7 +2365,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 
 
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
-    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, Qref, Bref, beta_ref);
+    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, Qref, alpha_ref, beta_ref);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
