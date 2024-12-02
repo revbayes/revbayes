@@ -114,6 +114,9 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     condition_on_tree( condition_on_tree )
 {
     addParameter( mu );
+    addParameter( lambda );
+    addParameter( alpha );
+    addParameter( beta );
     addParameter( pi );
     addParameter( rho );
     addParameter( process_age );
@@ -301,8 +304,8 @@ double FastBirthDeathShiftProcess::computeLnProbability( void )
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeRootLikelihood();
    
-    std::cout << "calculating ln prob now" << std::endl;
-    std::cout << "the ln prob is " << lnProbTimes << std::endl;
+    //std::cout << "calculating ln prob now" << std::endl;
+    //std::cout << "the ln prob is " << lnProbTimes << std::endl;
     return lnProbTimes + lnProbTreeShape();
 }
 
