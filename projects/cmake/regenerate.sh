@@ -32,7 +32,7 @@ INCLUDE_DIRECTORIES('
         sort |
         uniq |
         sed 's|^|    ${PROJECT_SOURCE_DIR}/|g'
-    echo ' ${Boost_INCLUDE_DIR} )
+    echo ' ${Boost_INCLUDE_DIRS} )
 '
 ) > "$SRC_DIR/generated_include_dirs.cmake"
 

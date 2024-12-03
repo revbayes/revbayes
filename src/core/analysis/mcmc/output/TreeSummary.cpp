@@ -277,7 +277,7 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
                         }
                         else
                         {
-                            throw RbException("Too few parameters for this tree during the tree annotation. Problematic tree: "+ sample_tree.getNewickRepresentation());
+                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
                         }
 
                     }
@@ -553,7 +553,7 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
                     // check if this parameter exists
                     if ( params.size() <= paramIndex )
                     {
-                        throw RbException("Too few parameters for this tree during the tree annotation. Problematic tree: "+ sample_tree.getNewickRepresentation());
+                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
                     }
 
                     std::string tmp = params[paramIndex];
@@ -956,7 +956,7 @@ MatrixReal TreeSummary::computeConnectivity(double credible_interval_size, const
         sample_count.push_back( freq );
 
         Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->makeInternalNodesBifurcating(true, true);
+        current_tree->suppressOutdegreeOneNodes(true);
         unique_trees.push_back( current_tree );
         
 //        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1052,7 +1052,7 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
         sample_count.push_back( freq );
 
         Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->makeInternalNodesBifurcating(true, true);
+        current_tree->suppressOutdegreeOneNodes(true);
         unique_trees.push_back( current_tree );
         
         std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1303,7 +1303,7 @@ std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bo
         total_prob += p;
 
         Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->makeInternalNodesBifurcating(true, true);
+        current_tree->suppressOutdegreeOneNodes(true);
         unique_trees.push_back( *current_tree );
         delete current_tree;
         if ( total_prob >= credible_interval_size )
@@ -1551,7 +1551,7 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
     std::string bestNewick = tree_samples.rbegin()->first;
     NewickConverter converter;
     Tree* tmp_best_tree = converter.convertFromNewick( bestNewick );
-    tmp_best_tree->makeInternalNodesBifurcating(true,true);
+    tmp_best_tree->suppressOutdegreeOneNodes(true);
 
     Tree* tmp_tree = NULL;
 
@@ -1604,7 +1604,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
 
             NewickConverter converter;
             Tree* tmp_tree = converter.convertFromNewick( newick );
-            tmp_tree->makeInternalNodesBifurcating(true, true);
+            tmp_tree->suppressOutdegreeOneNodes(true);
             if ( clock == true )
             {
                 best_tree = TreeUtilities::convertTree( *tmp_tree );

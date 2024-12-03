@@ -177,7 +177,7 @@ const RevLanguage::MemberRules& RevLanguage::Dist_mixtureVector<valType>::getPar
     if ( rules_set == false )
     {
         dist_member_rules.push_back( new ArgumentRule( "baseDistributions", WorkspaceVector< TypedDistribution<valType> >::getClassTypeSpec(), "The base distribution for the per category values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "probabilities"    , Simplex::getClassTypeSpec(), "The probabilitoes for each value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "probabilities"    , Simplex::getClassTypeSpec(), "The probabilities for each value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "numValues",        Natural::getClassTypeSpec(), "The number of values.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;

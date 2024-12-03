@@ -1,9 +1,10 @@
+#!/usr/bin/env python3
 import yaml
 import io
 import sys
 
-stream = io.open(sys.argv[1], 'r')
-data = yaml.load(stream)
+with io.open(sys.argv[1], 'r') as stream:
+        data = yaml.safe_load(stream)
 
 sections = ["name","title","description","details","authors","see_also","example","references"]
 

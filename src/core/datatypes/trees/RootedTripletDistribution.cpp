@@ -152,7 +152,7 @@ void RootedTripletDistribution::executeMethod(const std::string &n, const std::v
     }
     else
     {
-        throw RbException("A tree object does not have a member method called '" + n + "'.");
+        throw RbException() << "A tree object does not have a member method called '" << n << "'.";
     }
     
 }

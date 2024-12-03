@@ -131,6 +131,7 @@
 /* Distribution types (in folder "distributions") */
 
 #include "Dist_EmpiricalSample.h"
+#include "Dist_Inverse.h"
 #include "Dist_WeightedSample.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
@@ -219,8 +220,7 @@
 #include "Dist_dirichlet.h"
 #include "Dist_exponential.h"
 #include "Dist_exponentialError.h"
-#include "Dist_exponentialOffset.h"
-#include "Dist_exponentialOffsetPositive.h"
+#include "Dist_exponentialNegativeOffset.h"
 #include "Dist_gamma.h"
 #include "Dist_geom.h"
 #include "Dist_GilbertGraph.h"
@@ -234,8 +234,7 @@
 #include "Dist_LKJ.h"
 #include "Dist_LKJPartial.h"
 #include "Dist_lnorm.h"
-#include "Dist_lnormOffset.h"
-#include "Dist_lnormOffsetPositive.h"
+#include "Dist_lnormNegativeOffset.h"
 #include "Dist_logExponential.h"
 #include "Dist_logUniform.h"
 #include "Dist_multinomial.h"
@@ -265,6 +264,8 @@
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
+#include "Dist_Log.h"
+#include "Dist_MultivariateLog.h"
 #include "Dist_markovTimes.h"
 #include "Dist_markovEvents.h"
 #include "Dist_mixture.h"
@@ -273,6 +274,21 @@
 #include "Dist_MultiValueEvent.h"
 #include "Dist_reversibleJumpMixtureConstant.h"
 #include "Dist_upp.h"
+
+#include "Transform_Exp.h"
+#include "Transform_Log.h"
+#include "Transform_Logit.h"
+#include "Transform_InvLogit.h"
+#include "Transform_Shift.h"
+#include "Transform_Shift_Pos.h"
+#include "Transform_Scale.h"
+#include "Transform_Scale_Pos.h"
+#include "Transform_Scale_Prob.h"
+
+#include "Transform_Vector_Exp.h"
+#include "Transform_Vector_Log.h"
+#include "Transform_Vector_Logit.h"
+#include "Transform_Vector_Invlogit.h"
 
 /// Functions ///
 
@@ -506,8 +522,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // exponential distribution
         AddContinuousDistribution< RealPos          >( new Dist_exponential() );
-        AddContinuousDistribution< Real             >( new Dist_exponentialOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_exponentialOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_exponentialNegativeOffset() );
 
         // Laplace distribution
         AddContinuousDistribution< Real             >( new Dist_Laplace() );
@@ -521,8 +536,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // lognormal distribution
         AddContinuousDistribution< RealPos          >( new Dist_lnorm() );
-        AddContinuousDistribution< Real             >( new Dist_lnormOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_lnormOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_lnormNegativeOffset() );
 
         // LogExponential distribution
         AddContinuousDistribution< Real             >( new Dist_logExponential() );
@@ -603,6 +617,42 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Natural>       >( new Dist_IID<Natural>()      );
         AddDistribution< ModelVector<Integer>       >( new Dist_IID<Integer>()      );
         AddDistribution< ModelVector<Probability>   >( new Dist_IID<Probability>()  );
+
+        // Inverse distribution
+        AddDistribution< Integer                    >( new Dist_Inverse<Integer>() );
+        AddDistribution< Natural                    >( new Dist_Inverse<Natural>() );
+        AddDistribution< Probability                >( new Dist_Inverse<Probability>() );
+        AddDistribution< Real                       >( new Dist_Inverse<Real>() );
+        AddDistribution< RealPos                    >( new Dist_Inverse<RealPos>() );
+        AddDistribution< Simplex                    >( new Dist_Inverse<Simplex>() );
+        AddDistribution< AbstractHomologousDiscreteCharacterData  >( new Dist_Inverse< AbstractHomologousDiscreteCharacterData >());
+        AddDistribution< ModelVector<Integer>       >( new Dist_Inverse< ModelVector<Integer> >());
+        AddDistribution< ModelVector<Natural>       >( new Dist_Inverse< ModelVector<Natural> >());
+        AddDistribution< ModelVector<Probability>   >( new Dist_Inverse< ModelVector<Probability> >() );
+        AddDistribution< ModelVector<Real>          >( new Dist_Inverse< ModelVector<Real> >());
+        AddDistribution< ModelVector<RealPos>       >( new Dist_Inverse< ModelVector<RealPos> >());
+        AddDistribution< ModelVector<TimeTree>      >( new Dist_Inverse< ModelVector<TimeTree> >());
+        AddDistribution< ModelVector< ModelVector<TimeTree> >                  >( new Dist_Inverse< ModelVector<ModelVector<TimeTree> > >());
+        AddDistribution< ModelVector<BranchLengthTree>                         >( new Dist_Inverse< ModelVector<BranchLengthTree> >());
+        AddDistribution< ModelVector<AbstractHomologousDiscreteCharacterData>  >( new Dist_Inverse< ModelVector<AbstractHomologousDiscreteCharacterData> >());
+//        AddDistribution< AbstractHomologousDiscreteCharacterData >( new Dist_phyloCTMCClado() );
+
+        AddDistribution< RealPos                    >( new Dist_Log()               );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_MultivariateLog()   );
+        AddDistribution< RealPos                    >( new Transform_Exp()          );
+        AddDistribution< Real                       >( new Transform_Log()          );
+        AddDistribution< Real                       >( new Transform_Logit()        );
+        AddDistribution< Probability                >( new Transform_InvLogit()     );
+        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
+        AddDistribution< Real                       >( new Transform_Shift()        );
+        AddDistribution< Probability                >( new Transform_Scale_Prob()   );
+        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
+        AddDistribution< Real                       >( new Transform_Scale()        );
+
+        AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Logit() );
+        AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
