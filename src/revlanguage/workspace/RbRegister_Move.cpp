@@ -46,7 +46,6 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "RevPtr.h"
-#include "ReversibleJumpMixtureProposal.h"
 #include "RlTree.h"
 #include "SimpleProposal.h"
 #include "Simplex.h"
@@ -118,6 +117,7 @@
 #include "Move_SingleElementScale.h"
 #include "Move_SingleElementSlide.h"
 #include "Move_EllipticalSliceSamplingSimple.h"
+#include "Move_RandomCategoryWalk.h"
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
@@ -159,6 +159,7 @@
 
 
 /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
+#include "Move_AdaptiveReversibleJumpSwitch.h"
 #include "Move_DPPAllocateAuxGibbsMove.h"
 #include "Move_DPPGibbsConcentration.h"
 #include "Move_DPPTableValueUpdate.h"
@@ -301,6 +302,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HSRFHyperpriorsGibbs() );
         addType( new Move_HSRFIntervalSwap() );
         addType( new Move_HSRFUnevenGridHyperpriorsGibbs() );
+        addType( new Move_RandomCategoryWalk() );
         addType( new Move_SingleElementSlide() );
         addType( new Move_SingleElementScale() );
         addType( new Move_ShrinkExpand() );
@@ -393,6 +395,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsMixtureAllocation<RateGenerator>( ) );
         addType( new Move_UPPAllocation<RealPos>() );
 
+        addType( new Move_AdaptiveReversibleJumpSwitch( )                );
+        
         addType( new Move_ReversibleJumpSwitch<Real>( )                  );
         addType( new Move_ReversibleJumpSwitch<RealPos>( )               );
         addType( new Move_ReversibleJumpSwitch<Natural>( )               );

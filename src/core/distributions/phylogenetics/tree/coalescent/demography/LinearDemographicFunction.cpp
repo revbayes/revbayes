@@ -142,14 +142,14 @@ double LinearDemographicFunction::getIntegral(double start, double finish) const
 
 /**
  * @param[in]   time    Current time in coalescent simulation process
- * @param[in]   lambda
+ * @param[in]   lambda  Waiting time under a standardized coalescent with constant population of theta=1 
  *
  * @return Waiting Time until next coalescent event
  */
-double LinearDemographicFunction::getWaitingTime(double time, double lambda) const
+double LinearDemographicFunction::getWaitingTime(double time, double lambda, double ploidy) const
 {
-    double N0 = theta_recent->getValue();
-    double N1 = theta_ancient->getValue();
+    double N0 = theta_recent->getValue() * ploidy;
+    double N1 = theta_ancient->getValue() * ploidy;
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
     
@@ -165,8 +165,20 @@ double LinearDemographicFunction::getWaitingTime(double time, double lambda) con
     else
     {
         double alpha = ( N1-N0 ) / (t1 - t0);
-        return (N0 + (time-t0) * alpha) * lambda;
+        // we compute the value for which the waiting time is longer than this demographic function (outside its range)
+        return ( exp(alpha*lambda + log(N0 + alpha * t0)) - N0 )  /  alpha;
+//        double max_lambda = t1 / (N0 + (time-t0) * alpha);
+//        if ( max_lambda < lambda )
+//        {
+//            // simply return a waiting time that is just outside this demographic function range
+//            return t1-time+1.0;
+//        }
+//        else
+//        {
+//            return (N0 + (time-t0) * alpha) * lambda;
+//        }
     }
+
 }
 
 /**

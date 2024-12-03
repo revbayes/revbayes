@@ -9,7 +9,6 @@
 namespace RevBayesCore {
     
     class TransitionProbabilityMatrix;
-class Assignable;
     
     /**
      * @brief Infinite Sites rate matrix class.

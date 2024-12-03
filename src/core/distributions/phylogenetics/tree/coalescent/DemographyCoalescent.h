@@ -40,8 +40,8 @@ namespace RevBayesCore {
     private:
                 
         // members
-        const TypedDagNode< RbVector<double> >*             intervals; //!<The start times for intervals
-        RbVector< DemographicFunction >                     demographies; //!< a vector of functions that model how the demogrpahy changes over the course of that interval
+        const TypedDagNode< RbVector<double> >*             intervals;                                                                                      //!<The start times for intervals
+        RbVector< DemographicFunction >                     demographies;                                                                                   //!< a vector of functions that model how the demogrpahy changes over the course of that interval
     };
     
 }

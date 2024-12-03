@@ -1,5 +1,5 @@
-#ifndef Func_reverse_H
-#define Func_reverse_H
+#ifndef Func_BSPInterval_H
+#define Func_BSPInterval_H
 
 #include "ModelVector.h"
 #include "RlTypedFunction.h"
@@ -9,20 +9,20 @@
 namespace RevLanguage {
     
     /**
-     * @brief Func_reverse: function creating model vectors
+     * @brief Func_BSPInterval: function creating model vectors
      *
      * This templated function constructs vectors and is used for language
      * constructs such as "v( x1, x2, ..., xn)" and "[ x1, x2, ..., xn ]" when
      * the elements are non-abstract model objects with non-abstract value types.
      */
     template <typename valType>
-    class Func_reverse : public TypedFunction< ModelVector< valType> > {
+    class Func_BSPInterval : public TypedFunction< ModelVector< valType > > {
         
     public:
-        Func_reverse(void);                                                                 //!< Default constructor
+        Func_BSPInterval(void);                                                                 //!< Default constructor
         
         // Basic utility functions
-        Func_reverse*                                                                                   clone(void) const;                                          //!< Clone the object
+        Func_BSPInterval*                                                                                 clone(void) const;                                          //!< Clone the object
         static const std::string&                                                                       getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                                                          getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                                                     getFunctionName(void) const;
@@ -42,8 +42,9 @@ namespace RevLanguage {
 
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
-#include "VectorReverse.h"
+#include "BSPIntervalFunction.h"
 #include "RbUtil.h"
+#include "RbVector.h"
 #include "RlDeterministicNode.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
@@ -52,7 +53,7 @@ namespace RevLanguage {
 
 /** Default constructor */
 template <typename valType>
-RevLanguage::Func_reverse<valType>::Func_reverse() : TypedFunction< ModelVector<valType> >()
+RevLanguage::Func_BSPInterval<valType>::Func_BSPInterval() : TypedFunction< ModelVector<valType> >()
 {
 }
 
@@ -64,19 +65,20 @@ RevLanguage::Func_reverse<valType>::Func_reverse() : TypedFunction< ModelVector<
  * \return A new copy of the process.
  */
 template <typename valType>
-RevLanguage::Func_reverse<valType>* RevLanguage::Func_reverse<valType>::clone( void ) const
+RevLanguage::Func_BSPInterval<valType>* RevLanguage::Func_BSPInterval<valType>::clone( void ) const
 {
-    return new Func_reverse( *this );
+    return new Func_BSPInterval( *this );
 }
 
 
-/** Execute function: create deterministic append<valType> object */
+/** Execute function: create deterministic replicate<valType> object */
 template <typename valType>
-RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_reverse<valType>::createFunction( void ) const
+RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_BSPInterval<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v = static_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v  = static_cast<const ModelVector< valType > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<long> >* n                         = static_cast<const ModelVector< Natural > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::VectorReverse<typename valType::valueType>* func = new RevBayesCore::VectorReverse<typename valType::valueType>( v );
+    RevBayesCore::BSPIntervalFunction<typename valType::valueType>* func = new RevBayesCore::BSPIntervalFunction<typename valType::valueType>( v, n );
     
     return func;
 }
@@ -84,7 +86,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType
 
 /** Get argument rules */
 template <typename valType>
-const RevLanguage::ArgumentRules& RevLanguage::Func_reverse<valType>::getArgumentRules( void ) const
+const RevLanguage::ArgumentRules& RevLanguage::Func_BSPInterval<valType>::getArgumentRules( void ) const
 {
     static ArgumentRules argument_rules = ArgumentRules();
     static bool          rules_set = false;
@@ -92,8 +94,9 @@ const RevLanguage::ArgumentRules& RevLanguage::Func_reverse<valType>::getArgumen
     if ( rules_set == false )
     {
         
-        argument_rules.push_back( new ArgumentRule( "v", ModelVector< valType >::getClassTypeSpec(), "The vector that we want to reverse.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        
+        argument_rules.push_back( new ArgumentRule( "x", ModelVector< valType >::getClassTypeSpec(), "The values that we replicate.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "n", ModelVector< Natural >::getClassTypeSpec(), "How often we replicate each value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+
         rules_set = true;
     }
     
@@ -103,9 +106,9 @@ const RevLanguage::ArgumentRules& RevLanguage::Func_reverse<valType>::getArgumen
 
 /** Get Rev type of object (static version) */
 template <typename valType>
-const std::string& RevLanguage::Func_reverse<valType>::getClassType( void )
+const std::string& RevLanguage::Func_BSPInterval<valType>::getClassType( void )
 {
-    static std::string rev_type = "Func_reverse<" + valType::getClassType() + ">";
+    static std::string rev_type = "Func_BSPInterval<" + valType::getClassType() + ">";
     
     return rev_type;
 }
@@ -113,7 +116,7 @@ const std::string& RevLanguage::Func_reverse<valType>::getClassType( void )
 
 /** Get Rev type spec of object (static version) */
 template <typename valType>
-const RevLanguage::TypeSpec& RevLanguage::Func_reverse<valType>::getClassTypeSpec( void )
+const RevLanguage::TypeSpec& RevLanguage::Func_BSPInterval<valType>::getClassTypeSpec( void )
 {
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), &Function::getClassTypeSpec() );
     
@@ -125,10 +128,10 @@ const RevLanguage::TypeSpec& RevLanguage::Func_reverse<valType>::getClassTypeSpe
  * Get the primary Rev name for this function.
  */
 template <typename valType>
-std::string RevLanguage::Func_reverse<valType>::getFunctionName( void ) const
+std::string RevLanguage::Func_BSPInterval<valType>::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "reverse";
+    std::string f_name = "BSPInterval";
     
     return f_name;
 }
@@ -140,11 +143,10 @@ std::string RevLanguage::Func_reverse<valType>::getFunctionName( void ) const
  * \return Rev aliases of constructor function.
  */
 template <typename valType>
-std::vector<std::string> RevLanguage::Func_reverse<valType>::getFunctionNameAliases( void ) const
+std::vector<std::string> RevLanguage::Func_BSPInterval<valType>::getFunctionNameAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "rev" );
     
     return a_names;
 }
@@ -152,7 +154,7 @@ std::vector<std::string> RevLanguage::Func_reverse<valType>::getFunctionNameAlia
 
 /** Get Rev type spec of object (dynamic version) */
 template <typename valType>
-const RevLanguage::TypeSpec& RevLanguage::Func_reverse<valType>::getTypeSpec( void ) const
+const RevLanguage::TypeSpec& RevLanguage::Func_BSPInterval<valType>::getTypeSpec( void ) const
 {
     return this->getClassTypeSpec();
 }

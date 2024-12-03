@@ -871,7 +871,8 @@ void AbstractCharacterData::switchHomeologPhase(const std::string& tipName1, con
 }
 
 
-std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractCharacterData& x) {
+std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractCharacterData& x)
+{
     
     std::stringstream s;
     
@@ -881,9 +882,9 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const AbstractCharacterD
     o << s.str();
     
     for ( size_t i = 0; i < s.str().length() - 1; ++i )
-        {
+    {
         o << "=";
-        }
+    }
     o << std::endl;
 
     o << "Origination:                   " << x.getFilename().filename() << std::endl;

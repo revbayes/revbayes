@@ -267,7 +267,9 @@ void Monitor::openStream( bool reopen )
  * Overwrite this method for specialized behavior.
  */
 void Monitor::printHeader( void )
-{}
+{
+    
+}
 
 
 

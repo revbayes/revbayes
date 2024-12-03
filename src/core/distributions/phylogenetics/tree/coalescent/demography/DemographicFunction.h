@@ -32,7 +32,7 @@ namespace RevBayesCore {
         virtual DemographicFunction*                            clone(void) const = 0;                                      //!< Clone the DemographicFunction
         virtual double                                          getDemographic(double t) const = 0;                         //!< Returns the demographic function N(t) at time t.
         virtual double                                          getIntegral(double start, double finish) const = 0;         //!< Calculates the integral 1/N(x) dx between start and finish.
-        virtual double                                          getWaitingTime(double time, double lambda) const = 0;       //!< Calculates the waiting time until the next coalescent event.
+        virtual double                                          getWaitingTime(double time, double lambda, double ploidy=1.0) const = 0;       //!< Calculates the waiting time until the next coalescent event.
 
     protected:
         DemographicFunction(void);                                                                                          //!< Default constructor
