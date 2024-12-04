@@ -257,28 +257,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
     }
-    else if (name == "makeBifurcating")
-    {
-        found = true;
-        bool fossils_only = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-        
-        RevBayesCore::Tree &tree = dag_node->getValue();
-        bool reindex = true;
-        tree.makeInternalNodesBifurcating( reindex, fossils_only );
-
-        if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
-        {
-            const RevBayesCore::Clade& outgroup = static_cast<Clade &>( args[1].getVariable()->getRevObject() ).getValue();
-            tree.makeRootBifurcating( outgroup, true );
-        }
-        else
-        {
-            RevBayesCore::Clade outgroup = tree.getRoot().getChild(0).getClade();
-            tree.makeRootBifurcating( outgroup, true );
-        }
-        
-        return NULL;
-    }
     else if (name == "names" || name == "taxa")
     {
         found = true;
@@ -400,6 +378,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
                 // std::cout << "new name: "<< dagNode->getValue().getTaxonData( n ).getTaxonName() << std::endl;
             }
         }
+        return NULL;
+    }
+    else if (name == "suppressOutdegreeOneNodes")
+    {
+        found = true;
+        bool replace = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.suppressOutdegreeOneNodes( replace );
+        
         return NULL;
     }
     else if (name == "tipIndex")
@@ -605,10 +593,9 @@ void Tree::initMethods( void )
     getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "getDescendantTaxa", ModelVector<Taxon>::getClassTypeSpec(), getDescendantTaxaArgRules ) );
 
-    ArgumentRules* makeBifurcatingArgRules = new ArgumentRules();
-    makeBifurcatingArgRules->push_back( new ArgumentRule( "fossils_only", RlBoolean::getClassTypeSpec(), "Do we want to bifurcate only nodes with degree 1, or all nodes with degree different from 2?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-    makeBifurcatingArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-    methods.addFunction( new MemberProcedure( "makeBifurcating", RlUtils::Void, makeBifurcatingArgRules   ) );
+    ArgumentRules* suppressOutdegreeOneNodeArgRules = new ArgumentRules();
+    suppressOutdegreeOneNodeArgRules->push_back( new ArgumentRule( "replace", RlBoolean::getClassTypeSpec(), "Should we replace outdegree-1 nodes with bifurcations plus zero-length branches, or should we remove them altogether?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+    methods.addFunction( new MemberProcedure( "suppressOutdegreeOneNodes", RlUtils::Void, suppressOutdegreeOneNodeArgRules   ) );
 
     // member functions
     ArgumentRules* parentArgRules = new ArgumentRules();

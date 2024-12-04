@@ -84,7 +84,7 @@ HomologousDiscreteCharacterData<NaturalNumbersState>* BitsetCharacterDataConvert
             }
             ss << "->" << numberState;
             ss << ", max=" << numStates;
-            throw RbException("Converted state value for " + taxon.getTaxonName() + " exceeds number of states: " + ss.str());
+            throw RbException() << "Converted state value for " << taxon.getTaxonName() << " exceeds number of states: " << ss.str();
         }
         
         // create NaturalNumberState character

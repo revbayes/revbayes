@@ -59,12 +59,12 @@ std::string Func_readDelimitedCharacterData::bitToState(const std::string &s)
     
     if (parsed > RbConstants::Integer::max)
     {
-        throw RbException("ERROR: readTSVBitsetData token " + s + " too large to store as NaturalNumber");
+        throw RbException() << "readTSVBitsetData token " << s << " too large to store as NaturalNumber";
     }
     
     if (s.find_first_not_of("01") != std::string::npos)
     {
-        throw RbException("ERROR: readTSVBitsetData token " + s + " contains non-binary characters");
+        throw RbException() << "readTSVBitsetData token " << s << " contains non-binary characters";
     }
     
     ss << parsed;

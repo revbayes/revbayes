@@ -216,7 +216,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::executeMethod(const s
     }
     else
     {
-        throw RbException("A vector-mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A vector-mixture distribution does not have a member method called '" << n << "'.";
     }
     
 }
@@ -302,7 +302,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::swapParameterInternal
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + old_p->getName() + " to " + new_p->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << old_p->getName() << " to " << new_p->getName(); 
     }
 }
 

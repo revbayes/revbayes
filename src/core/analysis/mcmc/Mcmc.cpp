@@ -871,7 +871,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
         StringUtilities::stringSplit( values[0], "=", key_value);
         if ( moves[i].getDagNodes()[0]->getName() != key_value[1] )
         {
-            throw RbException("The order of the moves from the checkpoint file does not match. A move working on node '" + moves[i].getDagNodes()[0]->getName() + "' received a stored counterpart working on node '" + values[0] + "'.");
+            throw RbException() << "The order of the moves from the checkpoint file does not match. A move working on node '" << moves[i].getDagNodes()[0]->getName() << "' received a stored counterpart working on node '" << values[0] << "'.";
         }
         
         key_value.clear();
@@ -1010,7 +1010,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_node->getName() == "" )
             {
-                throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
+                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
             }
             
             DagNode* the_new_node = NULL;
@@ -1025,7 +1025,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_new_node == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a move working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a move working on it.";
             }
             
             // now swap the node
@@ -1062,7 +1062,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_new_node == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a monitor working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a monitor working on it.";
             }
             
             // now swap the node

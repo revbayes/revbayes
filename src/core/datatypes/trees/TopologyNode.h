@@ -152,7 +152,6 @@ namespace RevBayesCore {
         bool                                        isSampledAncestorTipOrParent() const;                                               //!< Is node or child node a tip a sampled ancestor?
         bool                                        isSampledAncestorKnuckle() const;                                                   //!< Does this one have only one child?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
@@ -166,7 +165,7 @@ namespace RevBayesCore {
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
         void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
-        void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
+        void                                        setParent(TopologyNode* p, bool recompute_branch_length = true);                    //!< Sets the node's parent
         void                                        setParentAge(double minbl);                                                         //!< Sets the age of the parent to the age of the oldest of its children + minbl
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
         void                                        setSpeciesName(std::string const &n);                                               //!< Set the species name of this node
@@ -174,6 +173,7 @@ namespace RevBayesCore {
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
+        void                                        suppressOutdegreeOneNodes(bool replace);                                            //!< If this node's outdegree = 1, turn it and its descendants into bifurcations, or remove it.
 
         // internal helper functions
         bool getBurstSpeciation(void) const { return burst_speciation; }
