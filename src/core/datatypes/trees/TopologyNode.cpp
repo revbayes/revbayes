@@ -2136,7 +2136,7 @@ void TopologyNode::setParentAge(double minbl)
     //    3. if (all children have ages)
     //           get children's ages
     //       else
-    //           call myself on the child that doesn't have an age
+    //           call myself on the ageless child's first child
     //    4. set the age of the parent to the age of the oldest child + min br. len.
     
     TopologyNode& parent = getParent();
