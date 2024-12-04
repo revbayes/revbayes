@@ -2128,6 +2128,38 @@ void TopologyNode::setParent(TopologyNode* p)
     }
 }
 
+
+void TopologyNode::setParentAge(double minbl)
+{
+    //    1. get my parent
+    //    2. get the other children of my parent
+    //    3. if (all children have ages)
+    //           get children's ages
+    //       else
+    //           call myself on the child that doesn't have an age
+    //    4. set the age of the parent to the age of the oldest child + min br. len.
+    
+    TopologyNode& parent = getParent();
+    
+    const std::vector<TopologyNode*>& children = parent.getChildren();
+    std::vector<double> ages;
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        if ( not std::isnan( children[i]->getAge() ) )
+        {
+            ages.push_back( children[i]->getAge() );
+        }
+        else
+        {
+            children[i]->getChild(0).setParentAge(minbl);
+        }
+    }
+    
+    double max_age = *std::max_element(ages.begin(), ages.end());
+    parent.setAge(max_age + minbl);
+}
+
+
 void TopologyNode::setUseAges(bool tf, bool recursive)
 {
 
