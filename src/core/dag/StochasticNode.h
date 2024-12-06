@@ -801,6 +801,10 @@ void RevBayesCore::StochasticNode<valueType>::setIgnoreData(bool tf)
         throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it has children! (e.g. "<<this->children[0]->getName()<<")";
 
     ignore_data = tf;
+
+    assert(not stored_ln_prob);
+
+    lnProb = 0;
 }
 
 /**
