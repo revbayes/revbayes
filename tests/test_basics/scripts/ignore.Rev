@@ -1,0 +1,26 @@
+seed(1)
+
+mu ~ dnNormal(0,1)
+
+x1 ~ dnNormal(mu,1)
+x2 ~ dnNormal(mu,1)
+
+f := x1*x1
+
+x1.clamp(-2)
+x2.clamp(2)
+
+mymodel = model(mu)
+
+#mymodel.ignoreData(mu)
+#mymodel.ignoreData(x1)
+#mymodel.ignoreData(f)
+mymodel.ignoreData(x2)
+
+mymodel.graph("output/ignore.dot")
+
+mymcmc = mcmc(mymodel,moves=[mvSlice(mu)],monitors=[mnModel(filename="output/ignore.log")])
+
+mymcmc.run(1000)
+
+q()
