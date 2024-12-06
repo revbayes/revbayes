@@ -553,7 +553,7 @@ void Mcmc::initializeSampler( bool prior_only )
     {
         the_node->setMcmcMode( true );
         if (the_node->isClamped())
-            the_node->setPriorOnly( prior_only );
+            the_node->setIgnoreData( prior_only );
         the_node->touch();
     }
 

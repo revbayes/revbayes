@@ -1049,9 +1049,9 @@ void DagNode::setParentNamePrefix(const std::string &p)
 }
 
 
-void DagNode::setPriorOnly(bool tf)
+void DagNode::setIgnoreData(bool tf)
 {
-    throw RbException()<<"setPriorOnly("<<tf<<"): node is not stochastic!";
+    throw RbException()<<"Error: can't ignore data at node '"<<getName()<<"' because it is not a stochastic node!";
 
 }
 

@@ -354,7 +354,7 @@ void HillClimber::initializeSampler( void )
 
         DagNode *the_node = *i;
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( false );
+        the_node->setIgnoreData( false );
         the_node->touch();
 
     }

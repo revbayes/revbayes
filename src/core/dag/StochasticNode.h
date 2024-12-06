@@ -52,7 +52,7 @@ namespace RevBayesCore {
         void                                                setIntegratedOut(bool tf=true);
         virtual void                                        setIntegrationIndex( size_t i );
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
-        virtual void                                        setPriorOnly(bool tf);                                                      //!< Set whether we want to have the probability of the prior only.
+        virtual void                                        setIgnoreData(bool tf);                                                 //!< Set whether we want to have the probability of the prior only.
         virtual void                                        setValue(valueType *val, bool touch=true);                                  //!< Set the value of this node
         void                                                setValueFromFile(const path &dir);                                          //!< Set value from string.
         void                                                setValueFromString(const std::string &v);                                   //!< Set value from string.
@@ -73,7 +73,7 @@ namespace RevBayesCore {
         
         // protected members
         bool                                                clamped = false;
-        bool                                                prior_only = false;
+        bool                                                ignore_data = false;                                                    //!< The PDF for this node is set to 1, removing the effects of the node.  Only for clamped nodes with no children.
         bool                                                ignore_redraw = false;
         mutable bool                                        integrated_out = false;
         std::optional<double>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
@@ -121,7 +121,7 @@ template<class valueType>
 RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<valueType> &n )
     : DynamicNode<valueType>( n ),
       clamped( n.clamped ),
-      prior_only( n.prior_only ),
+      ignore_data( n.ignore_data ),
       ignore_redraw( n.ignore_redraw ),
       integrated_out( n.integrated_out ),
       distribution( n.distribution->clone() )
@@ -214,7 +214,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         distribution->setStochasticNode( this );
         
         clamped                             = n.clamped;
-        prior_only                          = n.prior_only;
+        ignore_data                     = n.ignore_data;
         ignore_redraw                       = n.ignore_redraw;
         integrated_out                      = n.integrated_out;
         lnProb                              = {};
@@ -454,15 +454,13 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
     if ( not lnProb )
     {
         // compute and store log-probability
-        if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
+        if ( integrated_out or ignore_data )
+            lnProb = 0.0;
+        else
         {
             RbOrderedSet<DagNode *> integrated_parents;
             getIntegratedParents(integrated_parents);
             lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-        }
-        else
-        {
-            lnProb = 0.0;
         }
     }
 
@@ -591,15 +589,13 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
 
         if ( not lnProb )
         {
-            if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
+            if (integrated_out or ignore_data)
+                lnProb = 0.0;
+            else
             {
                 RbOrderedSet<DagNode *> integrated_parents;
                 getIntegratedParents(integrated_parents);
                 lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-            }
-            else
-            {
-                lnProb = 0.0;
             }
         }
         
@@ -787,15 +783,15 @@ void RevBayesCore::StochasticNode<valueType>::setMcmcMode(bool tf)
 }
 
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::setPriorOnly(bool tf)
+void RevBayesCore::StochasticNode<valueType>::setIgnoreData(bool tf)
 {
     if (tf and not isClamped())
-        throw RbException()<<"Error: cannot call setPriorOnly(true) on a clamped node!";
+        throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it is not clamped (has no data)!";
 
     if (tf and not this->children.empty())
-        throw RbException()<<"Error: cannot call setPriorOnly(true) on a node with children!";
+        throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it has children! (e.g. "<<this->children[0]->getName()<<")";
 
-    prior_only = tf;
+    ignore_data = tf;
 }
 
 /**
