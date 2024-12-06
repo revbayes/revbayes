@@ -182,6 +182,7 @@ jobs:
           ./b2 link=static install
           echo -e "\n    BOOST root is at $(cd ../installed-boost-1.84.0; pwd)\n"
           echo BOOST_ROOT=$(cd ../installed-boost-1.84.0; pwd) >> $GITHUB_ENV
+          echo CMAKE_PREFIX_PATH=$(cd ../installed-boost-1.84.0; pwd) >> $GITHUB_ENV
         )
 
     - name: Install BOOST and set up build (Windows meson cross compile)
