@@ -549,12 +549,15 @@ void Mcmc::initializeSampler( bool prior_only )
     // Get initial ln_probability of model
 
     // first we touch all nodes so that the likelihood is dirty
-    for (auto the_node: dag_nodes)
+    if (prior_only)
     {
-        the_node->setMcmcMode( true );
-        if (the_node->isClamped())
-            the_node->setIgnoreData( prior_only );
-        the_node->touch();
+        for (auto the_node: dag_nodes)
+        {
+            the_node->setMcmcMode( true );
+            if (the_node->isClamped())
+                the_node->setIgnoreData( true );
+            the_node->touch();
+        }
     }
 
 
