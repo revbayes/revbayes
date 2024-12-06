@@ -552,7 +552,8 @@ void Mcmc::initializeSampler( bool prior_only )
     for (auto the_node: dag_nodes)
     {
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( prior_only );
+        if (the_node->isClamped())
+            the_node->setPriorOnly( prior_only );
         the_node->touch();
     }
 

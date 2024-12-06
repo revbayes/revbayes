@@ -2,6 +2,7 @@
 #define StochasticNode_H
 
 #include "DynamicNode.h"
+#include "RbException.h"
 
 namespace RevBayesCore {
     
@@ -51,6 +52,7 @@ namespace RevBayesCore {
         void                                                setIntegratedOut(bool tf=true);
         virtual void                                        setIntegrationIndex( size_t i );
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
+        virtual void                                        setPriorOnly(bool tf);                                                      //!< Set whether we want to have the probability of the prior only.
         virtual void                                        setValue(valueType *val, bool touch=true);                                  //!< Set the value of this node
         void                                                setValueFromFile(const path &dir);                                          //!< Set value from string.
         void                                                setValueFromString(const std::string &v);                                   //!< Set value from string.
@@ -71,6 +73,7 @@ namespace RevBayesCore {
         
         // protected members
         bool                                                clamped = false;
+        bool                                                prior_only = false;
         bool                                                ignore_redraw = false;
         mutable bool                                        integrated_out = false;
         std::optional<double>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
@@ -91,11 +94,9 @@ namespace RevBayesCore {
 
 
 template<class valueType>
-RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, TypedDistribution<valueType> *d ) : DynamicNode<valueType>( n ),
-    clamped( false ),
-    ignore_redraw( false ),
-    integrated_out( false ),
-    distribution( d )
+RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, TypedDistribution<valueType> *d )
+    : DynamicNode<valueType>( n ),
+      distribution( d )
 {
     this->type = DagNode::STOCHASTIC;
     
@@ -117,11 +118,13 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, T
 
 
 template<class valueType>
-RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<valueType> &n ) : DynamicNode<valueType>( n ),
-    clamped( n.clamped ),
-    ignore_redraw( n.ignore_redraw ),
-    integrated_out( n.integrated_out ),
-    distribution( n.distribution->clone() )
+RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<valueType> &n )
+    : DynamicNode<valueType>( n ),
+      clamped( n.clamped ),
+      prior_only( n.prior_only ),
+      ignore_redraw( n.ignore_redraw ),
+      integrated_out( n.integrated_out ),
+      distribution( n.distribution->clone() )
 {
     this->type = DagNode::STOCHASTIC;
     
@@ -211,6 +214,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         distribution->setStochasticNode( this );
         
         clamped                             = n.clamped;
+        prior_only                          = n.prior_only;
         ignore_redraw                       = n.ignore_redraw;
         integrated_out                      = n.integrated_out;
         lnProb                              = {};
@@ -782,7 +786,17 @@ void RevBayesCore::StochasticNode<valueType>::setMcmcMode(bool tf)
     
 }
 
+template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::setPriorOnly(bool tf)
+{
+    if (tf and not isClamped())
+        throw RbException()<<"Error: cannot call setPriorOnly(true) on a clamped node!";
 
+    if (tf and not this->children.empty())
+        throw RbException()<<"Error: cannot call setPriorOnly(true) on a node with children!";
+
+    prior_only = tf;
+}
 
 /**
  * Set the value.

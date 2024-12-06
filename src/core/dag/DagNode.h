@@ -151,7 +151,6 @@ template <class valueType> class RbOrderedSet;
         std::vector<Monitor*>                                       monitors;
         std::vector<Move*>                                          moves;
         std::string                                                 name;
-        bool                                                        prior_only;
         std::set<size_t>                                            touched_elements;
         DagNodeTypes                                                type;
 
