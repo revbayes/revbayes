@@ -8,7 +8,6 @@
   * Extend `type( )` to optionally show the full type-spec (#504).
   * Add a generic `vectorFlatten` function (#514).
   * Extend the starting tree simulator to account for origin/root age (#561).
-  * Add a `dnInverse` distribution to allow inference under a conditional (#562).
 
 ## Bug fixes
   * Fix fossil age sampling with an initial tree in `dnBDSTP` (#480).
