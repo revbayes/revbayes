@@ -8,6 +8,7 @@
 
 #include <ostream>
 #include <string>
+#include <set>
 
 namespace RevLanguage {
     
@@ -47,6 +48,7 @@ namespace RevLanguage {
         virtual void                                printValue(std::ostream& o, bool user) const;                                                      //!< Print value (for user)
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);     //!< Set member variable
         void                                        printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std::string &bgc);
+        void                                        ignoreDataAtNodes(const std::set<std::string>& names);
         
         std::set<RevPtr<const RevVariable> >        sources;
         

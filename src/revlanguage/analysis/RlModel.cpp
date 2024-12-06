@@ -30,6 +30,10 @@
 
 using namespace RevLanguage;
 
+using std::vector;
+using std::set;
+using std::string;
+
 Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
 {
  
@@ -38,6 +42,10 @@ Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
     dotArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Verbose output?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     dotArgRules->push_back( new ArgumentRule("bg", RlString::getClassTypeSpec(), "The background color.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("lavenderblush2") ) );
     methods.addFunction( new MemberProcedure("graph", RlUtils::Void, dotArgRules) );
+
+    ArgumentRules* ignoreDataRules = new ArgumentRules();
+    ignoreDataRules->push_back( new Ellipsis( "variables.", RevObject::getClassTypeSpec() ) );
+    methods.addFunction( new MemberProcedure("ignoreData", RlUtils::Void, ignoreDataRules) );
 
 }
 
@@ -87,7 +95,21 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
         const std::string&   bg      = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
         printModelDotGraph(fn, vb, bg);
         
-        return NULL;
+        return nullptr;
+    }
+    else if (name == "ignoreData")
+    {
+        found = true;
+
+        set<string> names;
+        for(auto& arg: args)
+        {
+            names.insert( arg.getVariable()->getName() );
+        }
+
+        ignoreDataAtNodes( names );
+
+        return nullptr;
     }
     
     return RevObject::executeMethod( name, args, found );
@@ -338,7 +360,11 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                 o << "   n_" << stname;
                 o << " [shape=";
                 o << "oval, ";
-                if ((*it)->isClamped()){
+                if ((*it)->isIgnoredData()){
+                    o << "style=filled, fillcolor=white, color=gray, fontcolor=gray,";
+                    nrank += "; n_" + stname;
+                }
+                else if ((*it)->isClamped()){
                     o << "style=filled, fillcolor=gray, ";
                     nrank += "; n_" + stname;
                 }
@@ -437,6 +463,19 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     o << "   graph [bgcolor=" << bgc << ", pad=0.25]\n";
     o << "}";
     o.close();
-    
-    
+}
+
+/* Write a file in DOT format for viewing the model DAG in graphviz */
+//   This requires the user to have graphviz installed, or they can paste the file contents
+//   into http://graphviz-dev.appspot.com/
+
+void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
+{
+    const std::vector<RevBayesCore::DagNode*>& graphNodes = value->getDagNodes();
+
+    for(auto& node: graphNodes)
+    {
+        if (namesToIgnore.count(node->getName()))
+            node->setIgnoreData(true);
+    }
 }
