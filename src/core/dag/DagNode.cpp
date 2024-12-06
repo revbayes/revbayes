@@ -613,6 +613,12 @@ bool DagNode::isHidden( void ) const
     return hidden;
 }
 
+bool DagNode::isIgnoredData( void ) const
+{
+
+    return false;
+}
+
 
 bool DagNode::isIntegratedOut( void ) const
 {

@@ -43,6 +43,7 @@ namespace RevBayesCore {
         const valueType&                                    getValue(void) const;
         bool                                                isClamped(void) const;                                                      //!< Is this DAG node clamped?
         bool                                                isIntegratedOut(void) const;
+        bool                                                isIgnoredData(void) const;
         bool                                                isStochastic(void) const;                                                   //!< Is this DAG node stochastic?
         virtual void                                        printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
         void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);                  //!< Redraw the current value of the node (applies only to stochastic nodes)
@@ -564,6 +565,14 @@ bool RevBayesCore::StochasticNode<valueType>::isIntegratedOut(void) const
 {
     
     return integrated_out;
+}
+
+
+template<class valueType>
+bool RevBayesCore::StochasticNode<valueType>::isIgnoredData(void) const
+{
+
+    return ignore_data;
 }
 
 
