@@ -24,6 +24,7 @@
 #include "RevVariable.h"
 #include "RlBoolean.h"
 #include "RlUtils.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "Workspace.h"
 #include "WorkspaceToCoreWrapperObject.h"
@@ -492,18 +493,20 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     o.close();
 }
 
-/* Write a file in DOT format for viewing the model DAG in graphviz */
-//   This requires the user to have graphviz installed, or they can paste the file contents
-//   into http://graphviz-dev.appspot.com/
-
 void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
 {
     auto& graphNodes = value->getDagNodes();
 
+    std::map<string,RevBayesCore::DagNode*> nodeForName;
     for(auto& node: graphNodes)
+        nodeForName.insert({node->getName(), node});
+
+    for(auto& name: namesToIgnore)
     {
-        if (namesToIgnore.count(node->getName()))
-            node->setIgnoreData(true);
+        if (not nodeForName.count(name))
+            RBOUT("Warning: can't ignore data at node '" + name + "' because it is not in the model.");
+        else
+            nodeForName.at(name)->setIgnoreData(true);
     }
 }
 
