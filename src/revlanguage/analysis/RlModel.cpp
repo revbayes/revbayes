@@ -37,16 +37,18 @@ using std::string;
 Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
 {
  
-    ArgumentRules* dotArgRules = new ArgumentRules();
+    auto* dotArgRules = new ArgumentRules();
     dotArgRules->push_back( new ArgumentRule("file", RlString::getClassTypeSpec(), "The name of the file where to save the model graph.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     dotArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Verbose output?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     dotArgRules->push_back( new ArgumentRule("bg", RlString::getClassTypeSpec(), "The background color.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("lavenderblush2") ) );
     methods.addFunction( new MemberProcedure("graph", RlUtils::Void, dotArgRules) );
 
-    ArgumentRules* ignoreDataRules = new ArgumentRules();
+    auto* ignoreDataRules = new ArgumentRules();
     ignoreDataRules->push_back( new Ellipsis( "variables.", RevObject::getClassTypeSpec() ) );
     methods.addFunction( new MemberProcedure("ignoreData", RlUtils::Void, ignoreDataRules) );
 
+    auto ignoreAllDataRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure("ignoreAllData", RlUtils::Void, ignoreAllDataRules) );
 }
 
 
@@ -108,6 +110,14 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
         }
 
         ignoreDataAtNodes( names );
+
+        return nullptr;
+    }
+    else if (name == "ignoreAllData")
+    {
+        found = true;
+
+        ignoreAllData();
 
         return nullptr;
     }
@@ -471,11 +481,22 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
 
 void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
 {
-    const std::vector<RevBayesCore::DagNode*>& graphNodes = value->getDagNodes();
+    auto& graphNodes = value->getDagNodes();
 
     for(auto& node: graphNodes)
     {
         if (namesToIgnore.count(node->getName()))
+            node->setIgnoreData(true);
+    }
+}
+
+void Model::ignoreAllData()
+{
+    auto& graphNodes = value->getDagNodes();
+
+    for(auto& node: graphNodes)
+    {
+        if (node->isClamped())
             node->setIgnoreData(true);
     }
 }
