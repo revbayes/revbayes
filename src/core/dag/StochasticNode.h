@@ -797,8 +797,10 @@ void RevBayesCore::StochasticNode<valueType>::setIgnoreData(bool tf)
     if (tf and not isClamped())
         throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it is not clamped (has no data)!";
 
-    if (tf and not this->children.empty())
-        throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it has children! (e.g. "<<this->children[0]->getName()<<")";
+//    PROBLEM: Right now vectors are children of their elements, so this prohibits using vectors.
+//             We check for stochastic descendants?
+//    if (tf and not this->children.empty())
+//        throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it has children! (e.g. "<<this->children[0]->getName()<<")";
 
     ignore_data = tf;
 
