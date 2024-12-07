@@ -126,20 +126,11 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
             throw RbException("For checkpointing you have to provide both the checkpoint file and the checkpoint frequency (interval).");
         }
 
-        bool prior = static_cast<const RlBoolean &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        if ( prior == true )
-        {
-            value->runPriorSampler( gen, rules, tuning_interval );
-        }
-        else
-        {
 #ifdef RB_MPI
-            value->run( gen, rules, MPI_COMM_WORLD, tuning_interval, checkpoint_file, checkpoint_interval );
+        value->run( gen, rules, MPI_COMM_WORLD, tuning_interval, checkpoint_file, checkpoint_interval );
 #else
-            value->run( gen, rules, tuning_interval, checkpoint_file, checkpoint_interval );
+        value->run( gen, rules, tuning_interval, checkpoint_file, checkpoint_interval );
 #endif
-        }
-        
         return NULL;
     }
     else if (name == "burnin")
@@ -149,12 +140,11 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         // get the member with give index
         int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool prior = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
 
 #ifdef RB_MPI
-        value->burnin( gen, MPI_COMM_WORLD, tuningInterval, prior );
+        value->burnin( gen, MPI_COMM_WORLD, tuningInterval );
 #else
-        value->burnin( gen, tuningInterval, prior );
+        value->burnin( gen, tuningInterval );
 #endif
         
         return NULL;
@@ -279,13 +269,11 @@ void MonteCarloAnalysis::initializeMethods()
     run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a files for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
-    run_arg_rules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "Should we run this analysis under the prior only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
     
     ArgumentRules* burninArgRules = new ArgumentRules();
     burninArgRules->push_back( new ArgumentRule( "generations"   , Natural::getClassTypeSpec(), "The number of generation to run this burnin simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
-    burninArgRules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "Should we run this analysis under the prior only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burninArgRules) );
     

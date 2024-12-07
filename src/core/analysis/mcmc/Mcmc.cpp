@@ -534,7 +534,7 @@ std::string Mcmc::getStrategyDescription( void ) const
 }
 
 
-void Mcmc::initializeSampler( bool prior_only )
+void Mcmc::initializeSampler()
 {
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
@@ -549,17 +549,11 @@ void Mcmc::initializeSampler( bool prior_only )
     // Get initial ln_probability of model
 
     // first we touch all nodes so that the likelihood is dirty
-    if (prior_only)
+    for (auto the_node: dag_nodes)
     {
-        for (auto the_node: dag_nodes)
-        {
-            the_node->setMcmcMode( true );
-            if (the_node->isClamped())
-                the_node->setIgnoreData( true );
-            the_node->touch();
-        }
+        the_node->setMcmcMode( true );
+        the_node->touch();
     }
-
 
     if ( chain_active == false )
     {
