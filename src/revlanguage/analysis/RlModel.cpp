@@ -84,6 +84,22 @@ void Model::constructInternalObject( void )
 //    printModelDotGraph();
 }
 
+vector<RevPtr<const RevVariable>> getElementVariables(RevPtr<const RevVariable> var)
+{
+    if (not var->isVectorVariable())
+        return {var};
+
+    vector<RevPtr<const RevVariable>> elems;
+    for(int i=0;i<var->getMaxElementIndex();i++)
+    {
+        auto elem = var->getElementVariable(i);
+        auto sub_elems = getElementVariables(elem);
+        elems.insert(elems.end(), sub_elems.begin(), sub_elems.end());
+    }
+
+    return elems;
+}
+
 /* Map calls to member methods */
 RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
@@ -106,7 +122,8 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
         set<string> names;
         for(auto& arg: args)
         {
-            names.insert( arg.getVariable()->getName() );
+            for(auto& var: getElementVariables( arg.getVariable() ) )
+                names.insert( var->getName() );
         }
 
         ignoreDataAtNodes( names );
