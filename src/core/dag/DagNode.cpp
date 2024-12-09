@@ -257,7 +257,7 @@ void DagNode::executeMethod(const std::string &n, const std::vector<const DagNod
     }
     else
     {
-        throw RbException("A DAG node does not have a member method called '" + n + "'.");
+        throw RbException() << "A DAG node does not have a member method called '" << n << "'.";
     }
 
 }
@@ -1107,4 +1107,9 @@ void DagNode::touchAffected(bool touchAll)
         DagNode *child = *it;
         child->touchMe( this, touchAll );
     }
+}
+
+double DagNode::getPrevLnProbability(void) const
+{
+    throw RbException()<<"getPrevLnProbability: not a stochastic node!";
 }

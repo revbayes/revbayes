@@ -118,7 +118,6 @@ chromotree.lnProbability()
 
 # set up monitors and run MCMC
 monitors[1] = mnFile(filename="output/mcmc_ChromoSSE.out", printgen=sample_freq, clado_demipoly, clado_fission, clado_fusion, clado_no_change, clado_polyploid, delta, delta_l, eta, gamma, gamma_l, root_frequencies, turnover)
-monitors[2] = mnScreen(printgen=sample_freq)
 
 mymodel = model(chromotree)
 

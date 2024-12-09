@@ -144,7 +144,7 @@ void ContinuousCharacterData::concatenate(const ContinuousCharacterData &obsd, s
             }
             else
             {
-                throw RbException("Cannot add two character data objects because second character data object has no taxon with name '" + n + "n'!");
+                throw RbException() << "Cannot add two character data objects because second character data object has no taxon with name '" << n << "n'!";
             }
         }
 
@@ -171,7 +171,7 @@ void ContinuousCharacterData::concatenate(const ContinuousCharacterData &obsd, s
             }
             else if ( type != "intersection" )
             {
-                throw RbException("Cannot concatenate two character data objects because first character data object has no taxon with name '" + obsd.getTaxonNameWithIndex(i) + "n'!");
+                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
             }
         }
     }
@@ -397,7 +397,7 @@ void ContinuousCharacterData::executeMethod(const std::string &n, const std::vec
     }
     else
     {
-        throw RbException("A continuous character data object does not have a member method called '" + n + "'.");
+        throw RbException() << "A continuous character data object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -989,7 +989,7 @@ const ContinuousTaxonData& ContinuousCharacterData::getTaxonData( size_t tn ) co
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + name + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the CharacterData matrix.";
     }
     
 }
@@ -1017,7 +1017,7 @@ ContinuousTaxonData& ContinuousCharacterData::getTaxonData( size_t tn )
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + name + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the CharacterData matrix.";
     }
     
 }
@@ -1044,7 +1044,7 @@ const ContinuousTaxonData& ContinuousCharacterData::getTaxonData( const std::str
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + tn + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << tn << "' in the CharacterData matrix.";
     }
     
 }
@@ -1073,7 +1073,7 @@ ContinuousTaxonData& ContinuousCharacterData::getTaxonData( const std::string &t
     else 
     {
         
-        throw RbException("Cannot find taxon '" + tn + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << tn << "' in the CharacterData matrix.";
     }
     
 }

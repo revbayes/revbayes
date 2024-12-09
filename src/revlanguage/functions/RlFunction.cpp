@@ -755,7 +755,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 
                     if ( filled[j] )
                     {
-                        throw RbException( "Duplicate argument labels '" + passed_args[i].getLabel() );
+                        throw RbException() << "Duplicate argument labels '" << passed_args[i].getLabel() ; 
                     }
 
                     p_args[i]               = the_rules[j].fitArgument( p_args[i], once );
@@ -813,11 +813,11 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 
         if (num_matches > 1)
         {
-            throw RbException( "Argument label '" + passed_args[i].getLabel() + "' matches mutliple parameter labels." );
+            throw RbException() << "Argument label '" << passed_args[i].getLabel() << "' matches mutliple parameter labels." ; 
         }
         else if (num_matches < 1)
         {
-            throw RbException( "Argument label '" + passed_args[i].getLabel() + "' matches no untaken parameter labels." );
+            throw RbException() << "Argument label '" << passed_args[i].getLabel() << "' matches no untaken parameter labels." ; 
         }
         
         if ( num_matches == 1)
@@ -877,7 +877,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
         /* Final test if we found a match */
         if ( taken[i] == false )
         {
-            throw RbException("Superfluous argument of type '" + passed_args[i].getVariable()->getRevObject().getType() + "' and name '" + passed_args[i].getLabel() + "' passed to function '" + getType() + "'.");
+            throw RbException() << "Superfluous argument of type '" << passed_args[i].getVariable()->getRevObject().getType() << "' and name '" << passed_args[i].getLabel() << "' passed to function '" << getType() << "'.";
         }
     }
 
@@ -895,7 +895,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
         // we just leave the optional arguments empty
         if ( !the_rules[i].hasDefault() )
         {
-            throw RbException("No argument found for parameter '" + the_rules[i].getArgumentLabel() + "'.");
+            throw RbException() << "No argument found for parameter '" << the_rules[i].getArgumentLabel() << "'.";
         }
         
         const ArgumentRule& theRule = the_rules[i];
