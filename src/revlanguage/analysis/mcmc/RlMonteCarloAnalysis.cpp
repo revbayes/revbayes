@@ -35,7 +35,7 @@
 #include "RlUtils.h"
 #include "Trace.h"
 #include "WorkspaceToCoreWrapperObject.h"
-#include "src/revlanguage/ui/RlUserInterface.h"
+#include "RlUserInterface.h"
 
 using namespace RevLanguage;
 
