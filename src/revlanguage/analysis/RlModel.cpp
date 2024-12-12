@@ -45,7 +45,7 @@ Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
     methods.addFunction( new MemberProcedure("graph", RlUtils::Void, dotArgRules) );
 
     auto* ignoreDataRules = new ArgumentRules();
-    ignoreDataRules->push_back( new Ellipsis( "variables.", RevObject::getClassTypeSpec() ) );
+    ignoreDataRules->push_back( new Ellipsis( "Clamped variables to ignore.", RevObject::getClassTypeSpec() ) );
     methods.addFunction( new MemberProcedure("ignoreData", RlUtils::Void, ignoreDataRules) );
 
     auto ignoreAllDataRules = new ArgumentRules();
