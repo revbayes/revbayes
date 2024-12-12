@@ -9,6 +9,16 @@
 
 namespace RevLanguage {
 
+    /* This class creates a distribution that implements
+     *
+     *    value - distribution
+     *
+     * This is equivalent to distribution |> tnScale(-1) |> tnShift(value).
+     *
+     * Note that Transform_Sub1 and Transform_Sub2 implement different argument
+     * orders and therefore different transformations.
+     */
+
     class Transform_Sub2 : public TypedDistribution<Real> {
 
     public:
