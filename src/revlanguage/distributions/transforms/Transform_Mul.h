@@ -17,6 +17,25 @@
 
 namespace RevLanguage {
 
+    /* This class creates a distribution that implements either
+     *
+     *    tnShift(distribution, value)      if isOp == false
+     *             or
+     *    distribution + value              if isOp == true.
+     *
+     */
+
+    /*
+     * The class is templated to depend on type variable T
+     * where T is either Real or RealPos.
+     *
+     * The signatures are then
+     *
+     *    distribution<Real>    + Real    -> distribution<Real>
+     *    distribution<RealPos> + RealPos -> distribution<RealPos>
+     *
+     */
+
     template <class T, bool isOp=true>
     class Transform_Mul : public TypedDistribution<T> {
 
@@ -125,6 +144,21 @@ namespace RevLanguage {
 
         if ( rules_set == false )
         {
+            /* This should be simple but is a bit complicated because
+             * the subtype relationships for T don't work on Distribution<T>
+             *
+             * That is:  RevBayes knows that Probability < RealPos < Real.
+             *           RevBayes does NOT know that Distribution__Probability < Distribution__RealPos < Distribution__Real.
+             *
+             * Therefore, depending on T, we need to list the types of the distributions that are allowed.
+             * - for T=Real, the distribution can be on Real, RealPos, or Probability.
+             * - for T=RealPos, the distribution can be on RealPos or Probability.
+             * - for T=Probability, the distribution can be on Probability.
+             * This encodes the fact that:
+             * - a RealPos times a RealPos yields a RealPos.
+             * - a Probability times a Probability yields a Probability.
+             */
+             
             std::vector<TypeSpec> distTypes;
 
             if (Real::getClassTypeSpec().isDerivedOf(T::getClassTypeSpec()))
