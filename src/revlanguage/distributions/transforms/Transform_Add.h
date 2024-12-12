@@ -17,6 +17,26 @@
 
 namespace RevLanguage {
 
+    /* This class creates a distribution that implements either
+     *
+     *    tnScale(distribution, value)      if isOp == false
+     *             or
+     *    distribution * value              if isOp == true.
+     *
+     */
+
+    /*
+     * The class is templated to depend on type variable T
+     * where T is Real, RealPos, or Probability.
+     *
+     * The signatures are then
+     *
+     *    distribution<Real>        * Real      -> distribution<Real>
+     *    distribution<RealPos>     * RealPos   -> distribution<RealPos>
+     *    distribution<Probability> * Probility -> distribution<Probability>
+     *
+     */
+
     template <class T, bool isOp=true>
     class Transform_Add : public TypedDistribution<T> {
 
@@ -25,6 +45,7 @@ namespace RevLanguage {
         {
             this->markAsTransform();
         }
+
         virtual ~Transform_Add() {}
 
         //!< Clone the object
@@ -123,7 +144,19 @@ namespace RevLanguage {
 
         if ( rules_set == false )
         {
-             std::vector<TypeSpec> distTypes;
+            /* This should be simple but is a bit complicated because
+             * the subtype relationships for T don't work on Distribution<T>
+             *
+             * That is:  RevBayes knows that RealPos < Real.
+             *           RevBayes does NOT know that Distribution__RealPos < Distribution__Real.
+             *
+             * Therefore, depending on T, we need to list the types of the distributions that are allowed.
+             * - for T=Real, the distribution can be on Real, RealPos, or Probability.
+             * - for T=RealPos, the distribution can be on RealPos or Probability.
+             * This encodes the fact that a RealPos plus a RealPos yields a RealPos.
+             */
+             
+            std::vector<TypeSpec> distTypes;
 
             if (Real::getClassTypeSpec().isDerivedOf(T::getClassTypeSpec()))
                 distTypes.push_back(TypedDistribution<Real>::getClassTypeSpec());
