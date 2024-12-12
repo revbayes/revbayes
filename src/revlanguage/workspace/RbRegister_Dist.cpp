@@ -434,8 +434,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // uniform topology with branch lengths distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
 
-		// empirical tree distributions
-		AddDistribution< Tree                       >( new Dist_empiricalTree() );
+        // empirical tree distributions
+        AddDistribution< Tree                       >( new Dist_empiricalTree() );
 
         // ultrametric tree distributions
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
@@ -443,8 +443,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // branch rate tree distributions
         AddDistribution< BranchLengthTree           >( new Dist_BranchRateTree() );
 
-		// Distance Matrix Gamma distribution
-		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
+        // Distance Matrix Gamma distribution
+        AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
 
 
         /* Statistical distributions on simple variables (in folder "distributions/math") */
@@ -592,10 +592,10 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // dirichlet process prior distribution
         AddDistribution< ModelVector<Real>          >( new Dist_dpp<Real>()         );
-		AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
-		AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
-		AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
-		AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
+        AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
+        AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
+        AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
         AddDistribution< ModelVector<Simplex>       >( new Dist_dpp<Simplex>()      );
 
         // event distribution
@@ -663,9 +663,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // mixture distribution
         AddDistribution< Real                       >( new Dist_mixture<Real>() );
-		AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
-		AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
-		AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
+        AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
+        AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
+        AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
         AddDistribution< Probability                >( new Dist_mixture<Probability>() );
         AddDistribution< Simplex                    >( new Dist_mixture<Simplex>() );
         AddDistribution< ModelVector<Real>          >( new Dist_mixture< ModelVector<Real> >() );
