@@ -278,9 +278,6 @@
 #include "Transform_InvLogit.h"
 #include "Transform_Shift.h"
 #include "Transform_Shift_Pos.h"
-#include "Transform_Scale.h"
-#include "Transform_Scale_Pos.h"
-#include "Transform_Scale_Prob.h"
 
 #include "Transform_Add.h"
 #include "Transform_AddPos.h"
@@ -641,9 +638,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Probability                >( new Transform_InvLogit()     );
         AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
         AddDistribution< Real                       >( new Transform_Shift()        );
-        AddDistribution< Probability                >( new Transform_Scale_Prob()   );
-        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
-        AddDistribution< Real                       >( new Transform_Scale()        );
+        AddDistribution< Probability                >( new Transform_Mul<Probability, false>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Mul<Real       , false>() );
 
         AddDistribution< RealPos                    >( new Transform_AddPos()      );
         AddDistribution< Real                       >( new Transform_Add()         );

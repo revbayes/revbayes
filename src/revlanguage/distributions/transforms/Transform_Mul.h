@@ -17,19 +17,68 @@
 
 namespace RevLanguage {
 
-    template <class T>
+    template <class T, bool isOp=true>
     class Transform_Mul : public TypedDistribution<T> {
 
     public:
-        Transform_Mul( void );
-        virtual ~Transform_Mul();
+        Transform_Mul( void )
+        {
+            this->markAsTransform();
+        }
 
-        // Basic utility functions
-        Transform_Mul*                                  clone(void) const;                                                                      //!< Clone the object
-        static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
-        static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
-        std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
-        const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
+        virtual ~Transform_Mul() {}
+
+        //!< Clone the object
+        Transform_Mul* clone(void) const
+        {
+            return new Transform_Mul(*this);
+        }
+
+        //!< Get Rev type
+        static const std::string&                       getClassType(void)
+        {
+            static std::string rev_type = "Transform_Mul";
+
+            return rev_type;
+        }
+
+        //!< Get class type spec
+        static const TypeSpec&                          getClassTypeSpec(void)
+        {
+            static TypeSpec rev_type_spec ( TypedDistribution< T >::getClassTypeSpec() );
+
+            return rev_type_spec;
+        }
+
+        //!< Get the type spec of the instance
+        const TypeSpec&                                 getTypeSpec(void) const
+        {
+            static TypeSpec ts = getClassTypeSpec();
+
+            return ts;
+        }
+
+        /**
+         * Get the Rev name for the distribution.
+         * This name is used for the constructor and the distribution functions,
+         * such as the density and random value function
+         *
+         * \return Rev name of constructor function.
+         */
+        //!< Get the Rev-name for this distribution.
+        std::string                                     getDistributionFunctionName(void) const
+        {
+            // create a distribution name variable that is the same for all instance of this class
+            if constexpr (isOp)
+            {
+                return "_mul";
+            }
+            else
+            {
+                return "scale";
+            }
+        }
+
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
 
 
@@ -42,31 +91,13 @@ namespace RevLanguage {
 
 
     private:
-        RevPtr<const RevVariable>                       base_distribution;
-	RevPtr<const RevVariable>                       lambda;
+        RevPtr<const RevVariable>                       base_distribution = nullptr;
+	RevPtr<const RevVariable>                       lambda = nullptr;
     };
 
 
-    template <class T>
-    Transform_Mul<T>::Transform_Mul() : TypedDistribution< T >(),
-                                     base_distribution( NULL )
-    {
-        this->markAsTransform();
-    }
-
-    template <class T>
-    Transform_Mul<T>::~Transform_Mul()
-    {
-    }
-
-    template <class T>
-    Transform_Mul<T>* Transform_Mul<T>::clone( void ) const
-    {
-        return new Transform_Mul(*this);
-    }
-
-    template <class T>
-    RevBayesCore::TransformedDistribution* Transform_Mul<T>::createDistribution( void ) const
+    template <class T, bool isOp>
+    RevBayesCore::TransformedDistribution* Transform_Mul<T,isOp>::createDistribution( void ) const
     {
         using namespace Transforms;
         namespace Core = RevBayesCore;
@@ -85,46 +116,9 @@ namespace RevLanguage {
     }
 
 
-    /* Get Rev type of object */
-    template <class T>
-    const std::string& Transform_Mul<T>::getClassType(void)
-    {
-
-        static std::string rev_type = "Transform_Mul";
-
-        return rev_type;
-    }
-
-    /* Get class type spec describing type of object */
-    template <class T>
-    const TypeSpec& Transform_Mul<T>::getClassTypeSpec(void)
-    {
-        static TypeSpec rev_type_spec ( TypedDistribution< T >::getClassTypeSpec() );
-
-        return rev_type_spec;
-    }
-
-
-    /**
-     * Get the Rev name for the distribution.
-     * This name is used for the constructor and the distribution functions,
-     * such as the density and random value function
-     *
-     * \return Rev name of constructor function.
-     */
-    template <class T>
-    std::string Transform_Mul<T>::getDistributionFunctionName( void ) const
-    {
-        // create a distribution name variable that is the same for all instance of this class
-        std::string d_name = "_mul";
-
-        return d_name;
-    }
-
-
     /** Return member rules (no members) */
-    template <class T>
-    const MemberRules& Transform_Mul<T>::getParameterRules(void) const
+    template <class T, bool isOp>
+    const MemberRules& Transform_Mul<T, isOp>::getParameterRules(void) const
     {
         static MemberRules dist_member_rules;
         static bool rules_set = false;
@@ -152,19 +146,10 @@ namespace RevLanguage {
     }
 
 
-    template <class T>
-    const TypeSpec& Transform_Mul<T>::getTypeSpec( void ) const
-    {
-        static TypeSpec ts = getClassTypeSpec();
-
-        return ts;
-    }
-
-
 
     /** Set a member variable */
-    template <class T>
-    void Transform_Mul<T>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+    template <class T, bool isOp>
+    void Transform_Mul<T, isOp>::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
     {
         if ( name == "baseDistribution" )
         {
