@@ -2,7 +2,7 @@ seed(0)
 sigma ~ dnExponential(1)
 
 x1 ~ dnNormal(0,sigma)
-x2 ~ dnNormal(0,1)*sigma                
+x2 ~ dnNormal(0,1)*sigma
 
 m = model(sigma)
 
