@@ -35,7 +35,7 @@
 #include "RlUtils.h"
 #include "Trace.h"
 #include "WorkspaceToCoreWrapperObject.h"
-
+#include "src/revlanguage/ui/RlUserInterface.h"
 
 using namespace RevLanguage;
 
@@ -81,6 +81,30 @@ MonteCarloAnalysis* MonteCarloAnalysis::clone(void) const
 //    value->setScheduleType( sched );
 //}
 
+void deprecateUnderPrior(const std::string& method, const Argument& arg)
+{
+    static int warned = 0;
+
+    auto& underPriorObject = arg.getVariable()->getRevObject();
+
+    // If the argument is NULL the the user didn't specify `underPrior=value`.
+    if (underPriorObject == RevNullObject::getInstance()) return;
+
+    // What value did the user specify?
+    auto underPrior = static_cast<const RlBoolean &>( underPriorObject ).getValue();
+
+    // Skip if this is a warning and we've already showed the warning twice.
+    if (not underPrior and warned > 2) return;
+
+    RBOUT("\nWarning! The `underPrior` argument to `"+method+"` was removed in version 1.2.5 and now has no effect.");
+    RBOUT("         You can accomplish the same effect as `underPrior=TRUE` with `model.ignoreAllData()`.");
+    RBOUT("         See help on `model` for more information.\n");
+
+    if (underPrior)
+        throw RbException()<<method<<": argument `underPrior=TRUE` has no effect.";
+
+    warned++;
+}
 
 /* Map calls to member methods */
 RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
@@ -126,6 +150,8 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
             throw RbException("For checkpointing you have to provide both the checkpoint file and the checkpoint frequency (interval).");
         }
 
+        deprecateUnderPrior("run", args[args_index++]);
+
 #ifdef RB_MPI
         value->run( gen, rules, MPI_COMM_WORLD, tuning_interval, checkpoint_file, checkpoint_interval );
 #else
@@ -140,6 +166,8 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         // get the member with give index
         int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+
+        deprecateUnderPrior("burnin", args[2]);
 
 #ifdef RB_MPI
         value->burnin( gen, MPI_COMM_WORLD, tuningInterval );
@@ -269,14 +297,15 @@ void MonteCarloAnalysis::initializeMethods()
     run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a files for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
+    run_arg_rules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "DEPRECATED", ArgumentRule::BY_VALUE, ArgumentRule::ANY, nullptr ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
-    
+
     ArgumentRules* burninArgRules = new ArgumentRules();
     burninArgRules->push_back( new ArgumentRule( "generations"   , Natural::getClassTypeSpec(), "The number of generation to run this burnin simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
-    
+    burninArgRules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "DEPRECATED", ArgumentRule::BY_VALUE, ArgumentRule::ANY, nullptr ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burninArgRules) );
-    
+
     ArgumentRules* operatorSummaryArgRules = new ArgumentRules();
     operatorSummaryArgRules->push_back( new ArgumentRule( "currentPeriod" , RlBoolean::getClassTypeSpec(), "Should the operator summary (number of tries and acceptance, and the acceptance ratio) of only the current period (i.e., after the last tuning) be printed?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     methods.addFunction( new MemberProcedure( "operatorSummary", RlUtils::Void, operatorSummaryArgRules) );
