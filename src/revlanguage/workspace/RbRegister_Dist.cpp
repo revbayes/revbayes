@@ -276,11 +276,8 @@
 #include "Transform_Log.h"
 #include "Transform_Logit.h"
 #include "Transform_InvLogit.h"
-#include "Transform_Shift.h"
-#include "Transform_Shift_Pos.h"
 
 #include "Transform_Add.h"
-#include "Transform_AddPos.h"
 #include "Transform_Sub1.h"
 #include "Transform_Sub2.h"
 #include "Transform_Mul.h"
@@ -636,16 +633,16 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Transform_Log()          );
         AddDistribution< Real                       >( new Transform_Logit()        );
         AddDistribution< Probability                >( new Transform_InvLogit()     );
-        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
-        AddDistribution< Real                       >( new Transform_Shift()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Add<Real       , false>() );
         AddDistribution< Probability                >( new Transform_Mul<Probability, false>() );
         AddDistribution< RealPos                    >( new Transform_Mul<RealPos    , false>() );
         AddDistribution< Real                       >( new Transform_Mul<Real       , false>() );
 
-        AddDistribution< RealPos                    >( new Transform_AddPos()      );
-        AddDistribution< Real                       >( new Transform_Add()         );
         AddDistribution< Real                       >( new Transform_Sub1()        );
         AddDistribution< Real                       >( new Transform_Sub2()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Add<Real>()        );
         AddDistribution< Probability                >( new Transform_Mul<Probability>() );
         AddDistribution< RealPos                    >( new Transform_Mul<RealPos>()     );
         AddDistribution< Real                       >( new Transform_Mul<Real>()        );
