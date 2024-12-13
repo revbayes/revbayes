@@ -25,27 +25,19 @@ From: ubuntu:24.04
     git checkout {{ version }}
 
 %environment
-    export PATH=$PATH:/revbayes
-
-%runscript
-    exec rb $@
+    export PATH=$PATH:/scif/apps/rb/bin:/scif/apps/rb-mpi/bin
 
 %appinstall rb
     cd /revbayes-build/projects/cmake/
     rm -rf build
-    ./build.sh
-    mv rb /revbayes/rb
-
-%apprun rb
-    exec rb $@
+    ./build.sh -DCMAKE_INSTALL_PREFIX=${SCIF_APPROOT} -DCMAKE_BUILD_TYPE=Release
+    cd build
+    make install
 
 %appinstall rbmpi
-
     apt-get install -y libopenmpi-dev
     cd /revbayes-build/projects/cmake/
-    rm -rf build
-    ./build.sh -mpi true
-    mv rb-mpi /revbayes/rb-mpi
-
-%apprun rbmpi
-    exec rb-mpi $@
+    rm -rf build-mpi
+    ./build.sh -mpi true -DCMAKE_INSTALL_PREFIX=${SCIF_APPROOT} -DCMAKE_BUILD_TYPE=Release
+    cd build-mpi
+    make install
