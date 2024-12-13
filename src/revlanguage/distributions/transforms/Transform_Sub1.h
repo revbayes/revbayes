@@ -1,5 +1,5 @@
-#ifndef Transform_Scale_Prob_H
-#define Transform_Scale_Prob_H
+#ifndef Transform_Sub1_H
+#define Transform_Sub1_H
 
 #include "ModelVector.h"
 #include "RealPos.h"
@@ -9,14 +9,24 @@
 
 namespace RevLanguage {
 
-    class Transform_Scale_Prob : public TypedDistribution<Probability> {
+    /* This class creates a distribution that implements
+     *
+     *    distribution - value
+     *
+     * This is equivalent to distribution |> tnShift(-value).
+     *
+     * Note that Transform_Sub1 and Transform_Sub2 implement different argument
+     * orders and therefore different transformations.
+     */
+
+    class Transform_Sub1 : public TypedDistribution<Real> {
 
     public:
-        Transform_Scale_Prob( void );
-        virtual ~Transform_Scale_Prob();
+        Transform_Sub1( void );
+        virtual ~Transform_Sub1();
 
         // Basic utility functions
-        Transform_Scale_Prob*                                clone(void) const;                                                                      //!< Clone the object
+        Transform_Sub1*                                  clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
@@ -33,10 +43,10 @@ namespace RevLanguage {
 
 
     private:
-        RevPtr<const RevVariable>                       base_distribution;
-	RevPtr<const RevVariable>                       lambda;
+        RevPtr<const RevVariable>                       first_distribution = nullptr;
+	RevPtr<const RevVariable>                       second = nullptr;
     };
 
 }
 
-#endif // Transform_Scale_Prob_H
+#endif // Transform_Sub1_H

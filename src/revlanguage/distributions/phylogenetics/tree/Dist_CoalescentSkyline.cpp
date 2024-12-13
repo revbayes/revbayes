@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -143,7 +143,7 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
         }
     }
 
-    RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES demfun;// = RevBayesCore::PiecewiseConstantCoalescent::CONSTANT;
+    RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES demfun;
     if ( dem == "constant" )
     {
         demfun = RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES::CONSTANT;
@@ -152,6 +152,8 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
     {
         demfun = RevBayesCore::PiecewiseCoalescent::DEMOGRAPHY_FUNCTION_TYPES::LINEAR;
     }
+    else
+        throw RbException()<<"Demography '"<<dem<<"' not recognized!";
     
     // create the internal distribution object
     RevBayesCore::PiecewiseCoalescent*   d = new RevBayesCore::PiecewiseCoalescent(th, ti, enpi, meth, demfun, ta, c);
