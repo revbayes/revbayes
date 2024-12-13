@@ -1,1 +1,1 @@
-sudo singularity build RevBayes_Singularity_1.1.1.simg Singularity
+sudo singularity build --fakeroot --build-arg version=development revbayes.simg Singularity
