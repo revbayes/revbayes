@@ -2169,7 +2169,18 @@ parameters that influence or are influenced by the likelihood of `x`.
 
 Because `model` works with copies of objects, conducting an mcmc(mc) analysis
 on a model object will not change the values of the objects in the RevBayes
-workspace.)");
+workspace.
+
+The model object can be modified to ignore specific data elements using the
+method `ignoreData`.  Thus to run without the sequence data `phySeq` you
+might specify:
+
+   mymodel.ignoreData(phySeq)
+
+Only clamped nodes can be ignored. To ignore all clamped nodes you can use
+the method `ignoreAllData`:
+
+   mymodel.ignoreAllData())");
 	help_strings[string("model")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
 b ~ dnExponential(a)

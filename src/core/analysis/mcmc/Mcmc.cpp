@@ -534,7 +534,7 @@ std::string Mcmc::getStrategyDescription( void ) const
 }
 
 
-void Mcmc::initializeSampler( bool prior_only )
+void Mcmc::initializeSampler()
 {
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
@@ -552,10 +552,8 @@ void Mcmc::initializeSampler( bool prior_only )
     for (auto the_node: dag_nodes)
     {
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( prior_only );
         the_node->touch();
     }
-
 
     if ( chain_active == false )
     {

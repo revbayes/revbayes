@@ -162,9 +162,9 @@ void MonteCarloAnalysis::addMonitor(const Monitor &m)
 
 /** Run burnin and auto-tune */
 #ifdef RB_MPI
-void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool verbose)
 #else
-void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool verbose)
 #endif
 {
     
@@ -174,7 +174,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
         
         if ( runs[i] != NULL )
         {
-            runs[i]->initializeSampler(underPrior);
+            runs[i]->initializeSampler();
         }
         
     }
@@ -814,193 +814,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 #else
     MpiUtilities::synchronizeRNG(  );
 #endif
-    
-}
-
-
-
-void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval )
-{
-    
-    // get the current generation
-    size_t gen = 0;
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL )
-        {
-            gen = runs[i]->getCurrentGeneration();
-        }
-        
-    }
-    
-    // Let user know what we are doing
-    if ( process_active == true && runs[0] != NULL )
-    {
-        std::stringstream ss;
-        if ( runs[0]->getCurrentGeneration() == 0 )
-        {
-            ss << "\n";
-            ss << "Running prior MCMC simulation\n";
-        }
-        else
-        {
-            ss << "Appending to previous MCMC simulation of " << runs[0]->getCurrentGeneration() << " iterations\n";
-        }
-        ss << "This simulation runs " << replicates << " independent replicate" << (replicates > 1 ? "s" : "") << ".\n";
-        ss << runs[0]->getStrategyDescription();
-        RBOUT( ss.str() );
-    }
-    
-    // Initialize objects needed by chain
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL )
-        {
-            runs[i]->initializeSampler(true);
-        }
-        
-    }
-    
-    
-    // Start monitor(s)
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        // Sebastian (2016/04/16): We should always reset the monitors so that the ETA starts fresh
-        // if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
-        if ( runs[i] != NULL )
-        {
-            
-            if ( i > 0 )
-            {
-                runs[i]->disableScreenMonitor(true, i);
-            }
-            
-            runs[i]->startMonitors( kIterations, runs[i]->getCurrentGeneration() > 0 );
-            
-        }
-        
-    }
-    
-    // Sebastian: This is very important here!
-    // We need to wait first for all processes and chains to have opened the filestreams
-    // before we start printing (e.g., the headers) anything.
-#ifdef RB_MPI
-    // wait until all chains opened the monitor
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
-    
-    // Write headers and print first line
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
-        {
-            
-            runs[i]->writeMonitorHeaders( false );
-            runs[i]->monitor(0);
-            
-        }
-        
-    }
-    
-    
-    // reset the counters for the move schedules
-    for (size_t i=0; i<replicates; ++i)
-    {
-        if ( runs[i] != NULL )
-        {
-            runs[i]->reset();
-        }
-    }
-    
-    // reset the stopping rules
-    for (size_t i=0; i<rules.size(); ++i)
-    {
-        rules[i].setNumberOfRuns( replicates );
-        rules[i].runStarted();
-    }
-    
-    
-    // Run the chain
-    bool finished = false;
-    bool converged = false;
-    do {
-        ++gen;
-        for (size_t i=0; i<replicates; ++i)
-        {
-            if ( runs[i] != NULL )
-            {
-                runs[i]->nextCycle(true);
-                
-                // Monitor
-                runs[i]->monitor(gen);
-                
-                // check for autotuning
-                if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
-                {
-                    
-                    runs[i]->tune();
-                    
-                }
-            }
-
-        }
-        
-        converged = true;
-        size_t numConvergenceRules = 0;
-        // do the stopping test
-        for (size_t i=0; i<rules.size(); ++i)
-        {
-            
-            if ( rules[i].isConvergenceRule() )
-            {
-                converged &= rules[i].checkAtIteration(gen) && rules[i].stop( gen );
-                ++numConvergenceRules;
-            }
-            else
-            {
-                if ( rules[i].checkAtIteration(gen) && rules[i].stop( gen ) )
-                {
-                    finished = true;
-                    break;
-                }
-            }
-            
-        }
-        converged &= numConvergenceRules > 0;
-        
-    } while ( finished == false && converged == false);
-    
-#ifdef RB_MPI
-    // wait until all replicates complete
-    MPI_Barrier( MPI_COMM_WORLD );
-#endif
-    
-    // Monitor
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL )
-        {
-            runs[i]->finishMonitors( replicates, trace_combination );
-        }
-        
-    }
-    
-    
-#ifdef RB_MPI
-    // wait until all replicates complete
-    MPI_Barrier( MPI_COMM_WORLD );
-    
-    // to be safe, we should synchronize the random number generators
-    MpiUtilities::synchronizeRNG( MPI_COMM_WORLD );
-#else
-    MpiUtilities::synchronizeRNG(  );
-#endif
-    
     
 }
 
