@@ -5,12 +5,20 @@ mu ~ dnNormal(0,1)
 x1 ~ dnNormal(mu,1)
 y[1][1] ~ dnNormal(mu,1)
 y[1][2] ~ dnNormal(mu,1)
+z[1][1][1] ~ dnNormal(mu,1)
+z[1][1][2] ~ dnNormal(mu,1)
+z[1][2][1] ~ dnNormal(mu,1)
+z[1][2][2] ~ dnNormal(mu,1)
 
 f := x1*x1
 
 x1.clamp(-2)
 y[1][1].clamp(2)
 y[1][2].clamp(2)
+z[1][1][1].clamp(2)
+z[1][1][2].clamp(2)
+z[1][2][1].clamp(2)
+z[1][2][2].clamp(2)
 
 mymodel = model(mu)
 
@@ -20,6 +28,7 @@ mymodel.graph("output/ignore.dot")
 # mymodel.ignoreData(x1)
 # mymodel.ignoreData(f)
 mymodel.ignoreData(y)
+mymodel.ignoreData(z)
 
 mymodel.graph("output/ignore.dot")
 
