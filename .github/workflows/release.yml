@@ -6,32 +6,12 @@ on:
       - "*"
 
 jobs:
-  # The scripts actions/create-release and actions/upload-release-asset are unmaintained.
-  # So eventually we need to change how the release is generated.
-  # For examples of the new way, see:
+  # Other ways to upload multiple artifacts to a release:
   #  * https://gist.github.com/youhide/121750fc4878801ea8e908080b535beb
   #  * https://www.lucavall.in/blog/how-to-create-a-release-with-multiple-artifacts-from-a-github-actions-workflow-using-the-matrix-strategy
   #  * https://github.com/lucavallin/vodo/blob/main/.github/workflows/release.yml
 
-  create_release:
-    name: Create release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
-
   build_singularity_and_upload:
-    needs: create_release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -55,17 +35,16 @@ jobs:
         echo "archive_path=${HOME}/${PACKAGE}" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.create_image.outputs.archive_path }}
-        asset_name: ${{ steps.create_image.outputs.archive_name }}
-        asset_content_type: application/octet-stream
+        name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+        files: ${{ steps.create_image.outputs.archive_path }}
 
   build_and_upload:
-    needs: create_release
     strategy:
       matrix:
         name: [ubuntu-gcc-9,
@@ -299,14 +278,14 @@ jobs:
         echo ::endgroup::
 
     - name: Upload test files if they failed
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
         path: tests
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: testiphy-results-${{ matrix.name }}
@@ -328,14 +307,14 @@ jobs:
         echo "archive=${TAR}" >> $GITHUB_OUTPUT
 
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ needs.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.create_tarball.outputs.archive }}
-        asset_name: ${{ steps.create_tarball.outputs.archive }}
-        asset_content_type: application/zip
+        name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+        files: ./${{ steps.create_tarball.outputs.archive }}
 
   notify:
     name: Notify Slack
