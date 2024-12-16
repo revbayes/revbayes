@@ -192,6 +192,43 @@ clade_67_or_68 = clade( clade_67, clade_68, optional_match=true ))");
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(tmrca)"));
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(mrcaIndex)"));
 	help_strings[string("clade")][string("title")] = string(R"(Clade)");
+	help_strings[string("clamp")][string("description")] = string(R"(`x.clamp(data)` fixes the value of the stochastic variable `x` to the observation `data`, and marks the variable as corresponding to an observation.)");
+	help_strings[string("clamp")][string("details")] = string(R"(Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped – either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
+
+`x.setValue()` evaluates probabilities at a specific value of `x` without fixing the value.)");
+	help_strings[string("clamp")][string("example")] = string(R"(x ~ dnNormal(1, 1)
+y ~ dnNormal(2, 2)
+
+# Set the observed value of x
+x.clamp(1)
+# Compute the probability of the observation
+x.probability()
+
+# Modify the observed value of x
+x.clamp(2) # equivalent to x.unclamp(); x.clamp(2)
+x.probability()
+
+# Evaluate P(y = 1)
+y.setValue(1)
+y.probability()
+
+# Select another value of y
+y.redraw()
+print(y)
+
+# Evaluate P(y) at this new value
+y.probability()
+
+# Define a model involving x and y
+z := x * y
+
+# Because x is clamped, it is invalid to call x.redraw() or mvSlide(x)
+# x will remain constant during MCMC, whereas y will be inferred.
+mcmc(model(z), [mnScreen(x, y)], [mvSlide(y)]).run(generations = 5))");
+	help_strings[string("clamp")][string("name")] = string(R"(Clamp)");
+	help_arrays[string("clamp")][string("see_also")].push_back(string(R"(setValue)"));
+	help_arrays[string("clamp")][string("see_also")].push_back(string(R"(unclamp)"));
+	help_strings[string("clamp")][string("title")] = string(R"(Clamp a stochastic variable to a fixed/observed value)");
 	help_arrays[string("clear")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("clear")][string("description")] = string(R"(Clear (e.g., remove) variables and functions from the workspace.)");
 	help_strings[string("clear")][string("details")] = string(R"(The clear function removes either a given variable or all variables from the workspace. Clearing the workspace is very useful between analysis if you do not want to have old connections between variables hanging around.)");
@@ -2200,7 +2237,18 @@ parameters that influence or are influenced by the likelihood of `x`.
 
 Because `model` works with copies of objects, conducting an mcmc(mc) analysis
 on a model object will not change the values of the objects in the RevBayes
-workspace.)");
+workspace.
+
+The model object can be modified to ignore specific data elements using the
+method `ignoreData`.  Thus to run without the sequence data `phySeq` you
+might specify:
+
+   mymodel.ignoreData(phySeq)
+
+Only clamped nodes can be ignored. To ignore all clamped nodes you can use
+the method `ignoreAllData`:
+
+   mymodel.ignoreAllData())");
 	help_strings[string("model")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
 b ~ dnExponential(a)
@@ -2569,7 +2617,12 @@ moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
 	help_strings[string("mvScaleBactrianCauchy")][string("name")] = string(R"(mvScaleBactrianCauchy)");
 	help_strings[string("mvShrinkExpand")][string("name")] = string(R"(mvShrinkExpand)");
 	help_strings[string("mvShrinkExpandScale")][string("name")] = string(R"(mvShrinkExpandScale)");
-	help_strings[string("mvSlice")][string("name")] = string(R"(mvSlice)");
+	help_strings[string("mvSlice")][string("description")] = string(R"(Instead of using a fixed move size, `mvSlice` determines the size of a move proposal based on the current shape of the likelihood function.
+This allows small moves to be proposed in certain parts of parameter space,
+and large moves in other parts of the space, as appropriate.)");
+	help_strings[string("mvSlice")][string("name")] = string(R"(Slice move)");
+	help_arrays[string("mvSlice")][string("see_also")].push_back(string(R"(`mvSlide` and `mvScale` are possible alternatives where a fixed move size is desired.)"));
+	help_strings[string("mvSlice")][string("title")] = string(R"(Propose a slice move)");
 	help_strings[string("mvSlide")][string("name")] = string(R"(mvSlide)");
 	help_strings[string("mvSlideBactrian")][string("name")] = string(R"(mvSlideBactrian)");
 	help_arrays[string("mvSpeciesNarrow")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
@@ -3084,6 +3137,30 @@ getOption("linewidth"))");
 	help_strings[string("setOption")][string("name")] = string(R"(setOption)");
 	help_arrays[string("setOption")][string("see_also")].push_back(string(R"(getOption)"));
 	help_strings[string("setOption")][string("title")] = string(R"(Set a global RevBayes option)");
+	help_strings[string("setValue")][string("description")] = string(R"(`x.setValue(value)` sets the value of the stochastic variable `x` to `value`.)");
+	help_strings[string("setValue")][string("details")] = string(R"(`x.setValue()` allows calculations to be evaluated at a given value of `x`, whilst allowing the value
+of `x` to be redrawn, or to vary during MCMC.
+
+`.setValue()` allows an MCMC run to be initialized with plausible values,
+which can expedite convergence when priors are broad
+([example](https://revbayes.github.io/tutorials/divrate/branch_specific.html#specifying-the-model)),
+and can be useful when [debugging MCMC runs](https://revbayes.github.io/tutorials/mcmc_troubleshooting/#starting-values).)");
+	help_strings[string("setValue")][string("example")] = string(R"(x ~ dnNormal(1, 1)
+
+# Evaluate P(x) at x = 1
+x.setValue(1)
+x.probability()
+
+# Modify the observed value of x
+x.redraw()
+x.probability()
+
+# Initialize an MCMC run with a specific value
+x.setValue(40000)
+mcmc(model(x), [mnScreen(x)], [mvScale(x)]).run(generations = 5))");
+	help_strings[string("setValue")][string("name")] = string(R"(Set value)");
+	help_arrays[string("setValue")][string("see_also")].push_back(string(R"(clamp)"));
+	help_strings[string("setValue")][string("title")] = string(R"(Set the value of a stochastic variable)");
 	help_arrays[string("setwd")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("setwd")][string("description")] = string(R"(Set the current working directory which RevBayes uses.)");
 	help_strings[string("setwd")][string("example")] = string(R"(# get the current working directory

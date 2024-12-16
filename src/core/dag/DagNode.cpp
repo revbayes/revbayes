@@ -24,7 +24,6 @@ DagNode::DagNode( const std::string &n ) : Parallelizable(),
     monitors(),
     moves(),
     name( n ),
-    prior_only( false ),
     touched_elements(),
     ref_count( 0 ),
     visit_flags( std::vector<bool>(5, false) )
@@ -48,7 +47,6 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     monitors( ),
     moves( ),
     name( n.name ),
-    prior_only( n.prior_only ),
     touched_elements( n.touched_elements ),
     ref_count( 0 ),
     visit_flags( n.visit_flags )
@@ -92,7 +90,6 @@ DagNode& DagNode::operator=(const DagNode &d)
         name             = d.name;
         elementVar       = d.elementVar;
         hidden           = d.hidden;
-        prior_only       = d.prior_only;
         touched_elements = d.touched_elements;
         visit_flags      = d.visit_flags;
     }
@@ -616,6 +613,12 @@ bool DagNode::isHidden( void ) const
     return hidden;
 }
 
+bool DagNode::isIgnoredData( void ) const
+{
+
+    return false;
+}
+
 
 bool DagNode::isIntegratedOut( void ) const
 {
@@ -1052,10 +1055,9 @@ void DagNode::setParentNamePrefix(const std::string &p)
 }
 
 
-void DagNode::setPriorOnly(bool tf)
+void DagNode::setIgnoreData(bool tf)
 {
-
-    prior_only = tf;
+    throw RbException()<<"Error: can't ignore data at node '"<<getName()<<"' because it is not a stochastic node!";
 
 }
 
