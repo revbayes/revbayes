@@ -22,8 +22,6 @@ z[1][2][2].clamp(2)
 
 mymodel = model(mu)
 
-mymodel.graph("output/ignore.dot")
-
 # mymodel.ignoreData(mu)
 # mymodel.ignoreData(x1)
 # mymodel.ignoreData(f)
