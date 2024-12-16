@@ -1,7 +1,7 @@
 #include "CharacterHistory.h"
 
 #include <cassert>
-#include <math.h>
+#include <cmath>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
