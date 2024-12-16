@@ -19,20 +19,21 @@ namespace RevLanguage {
 
     /* This class creates a distribution that implements either
      *
-     *    tnShift(distribution, value)      if isOp == false
+     *    tnScale(distribution, value)      if isOp == false
      *             or
-     *    distribution + value              if isOp == true.
+     *    distribution * value              if isOp == true.
      *
      */
 
     /*
      * The class is templated to depend on type variable T
-     * where T is either Real or RealPos.
+     * where T is Real, RealPos, or Probability.
      *
      * The signatures are then
      *
-     *    distribution<Real>    + Real    -> distribution<Real>
-     *    distribution<RealPos> + RealPos -> distribution<RealPos>
+     *    distribution<Real>        * Real      -> distribution<Real>
+     *    distribution<RealPos>     * RealPos   -> distribution<RealPos>
+     *    distribution<Probability> * Probility -> distribution<Probability>
      *
      */
 
