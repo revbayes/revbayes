@@ -1258,7 +1258,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 }
 
 
-Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, std::vector<Taxon>& taxa, double minBrLen)
+Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(const Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToScale.getNumberOfTips();
@@ -1290,18 +1290,20 @@ Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, std::vect
         throw RbException("Tip names of the initial tree do not match the taxon names.");
     }
     
-    // Alter the tip age values of treeToScale in place
+    // Modify a new tree
+    RevBayesCore::Tree *p = (Tree*)&treeToScale;
+    
+    // Alter the tip age values of p in place
     for (size_t i = 0; i < tax_num; ++i)
     {
         std::string tip_name = taxa[i].getName();
-        treeToScale.setTaxonObject( tip_name, taxa[i] );
+        p->setTaxonObject( tip_name, taxa[i] );
     }
     
     // Grab the first tip; which one we start with should not matter
-    TopologyNode& node = treeToScale.getTipNode( 0 );
+    TopologyNode& node = p->getTipNode( 0 );
     node.setParentAge( minBrLen );
     
-    RevBayesCore::Tree *p = &treeToScale;
     return p;
 }
 
