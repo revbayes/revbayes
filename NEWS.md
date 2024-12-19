@@ -1,46 +1,63 @@
-# RevBayes 1.2.5 (unreleased)
-
-## Features
-  * Allow constructing log-scaled distributions from non-log distributions (e.g. log-Cauchy) (#466).
-  * Allow checking `args.size()` when there are no arguments (#479).
-  * Allow fossil age sampling with an initial tree in `dnConstrainedTopology` (#481).
-  * Add exp/log/logit/invlogit/shift/scale-transformed distributions (e.g. `dnExp(1) |> tnShift(2)`) (#500).
-  * Extend `type( )` to optionally show the full type-spec (#504).
-  * Add a generic `vectorFlatten` function (#514).
-  * Extend the starting tree simulator to account for origin/root age (#561).
-
-## Bug fixes
-  * Fix fossil age sampling with an initial tree in `dnBDSTP` (#480).
-  * Fix FBD checkpointing bugs related to `dnBDSTP` (#484) and fossil time moves (#502, #517).
-  * Multiple fixes for building, especially on Windows (#490, #491, #493, #494, #495, #496, #498).
-  * Fix `dnMixture` of rate matrices and other `Cloneable` objects (#501).
-  * Fix `treeAssembly` sometimes failing to initialize branch lengths (#509).
-  * Don't crash if a file changes while we are `source( )`-ing it (#510).
-  * Fix segfault with `dnConstrainedTopology` + `dnUniformTimeTree` (#513).
-  * Fix operator summary for MC^3 when moves are tuned (#522).
-  * Fix FBD initialization issues (#537, #561).
-  * Fix type conversion so that it employs deterministic nodes (#545).
-  * Fix MC^3 checkpointing bug (#553).
-  * Make `RealPos` coherent between conversion and construction (#554).
-  * Fix Gelman-Rubin (PSRF) and stationarity stopping rules (#555).
-  * Don't move fossil tips outside their age ranges (#559).
-
-## Documentation improvements
-  * `dnPhyloCTMC` (#487).
-  * `model` (#538).
-  * Stopping and convergence rules (#488).
-  * The `.run( )` method of `mcmc` and `mcmcmc` objects (#485, #488).
-  * The `.initializeFromCheckpoint( )` method of `mcmc` and `mcmcmc` objects (#505).
-  * The `weight` parameter of moves and `moveschedule` parameter of `mcmc` (#506).
-  * Corrections to `dnBivariatePoisson` (#539) and `mcmcmc` (#541).
-  
-## Changes
-  * Refactor `dnExp` and `dnLnorm` to consolidate them with their offset versions (#503).
-  * Add invariant checks to the likelihood calculator in `AbstractPhyloCTMCSiteHomogeneous` (#550).
+# RevBayes 1.2.5 (Dec 19, 2025)
 
 ## Backwards-incompatible changes
+  * Remove `underPrior` argument to `mcmc.run( )` and `mcmcmc.run( )`.  You can use `model.ignoreAllData()` instead.
   * Remove `dnLogexponential`. You can use `dnExponential(l) |> tnLog()` instead.
+  * Rename `tree.makeBifurcating()` to `tree.suppressOutdegreeOneNodes()`.
 
+## Features
+  * Allow fossil age sampling with an initial tree in `dnConstrainedTopology` (#481).
+  * Transformed distributions:
+      - Add shift/scale/exp/log/logit/invlogit-transformed distributions (e.g. `dnExp(1) |> tnShift(2)`). (#466, #500)
+      - Allow `C + dist`, `C - dist`, `dist - C`, and `C*dist` for a constant `C` and distribution `dist`. (#617)
+  * Allow ignoring data from specific nodes with `model.ignoreData(seqData,morphData)` (#628)
+  * Extend `type( )` to optionally show the full type-spec (#504).
+
+## Bug fixes
+  * Multiple fixes for building, especially on Windows (#490, #491, #493, #494, #495, #496, #498).
+  * Checkpointing
+      - Fix FBD checkpointing bugs related to `dnBDSTP` (#484) and fossil time moves (#502, #517).
+      - Fix MC^3 checkpointing bug (#553).
+  * Types
+      - Fix type conversion to integer so that it employs deterministic nodes (#545).
+      - Make `RealPos` coherent between conversion and construction (#554).
+      - Make `vectorFlatten` work on more type (#514).
+  * Crash / NaN
+      - Fix `dnMixture` of rate matrices and other `Cloneable` objects (#501).
+      - Fix `treeAssembly` sometimes failing to initialize branch lengths (#509).
+      - Fix crash if a file changes while we are `source( )`-ing it (#510).
+      - Fix segfault with `dnConstrainedTopology` + `dnUniformTimeTree` (#513).
+      - Fix a segfault in Model::getOrderedStochasticNodes (#569).
+  * MCMC: initialization
+      - Fix fossil age sampling with an initial tree in `dnBDSTP` (#480).
+      - Fix FBD initialization issues (#537, #561).
+      - Extend the starting tree simulator to account for origin/root age (#561).
+  * MCMC
+      - Fix recalculation of likelihoods for brownian motion distributions (#596).
+      - Fix recalculation of likelihoods with mvRootNodeTimeSlideUniform (#594).
+      - Fix recalculation of likelihood with treeAssembly (#549).
+      - Fix Gelman-Rubin (PSRF) and stationarity stopping rules (#555).
+      - Don't move fossil tips outside their age ranges (#559).
+      - Fix operator summary for MC^3 when moves are tuned (#522).
+  * Debug: Log reason for -Inf and NaN probabilities.
+  * Misc
+      - Allow reading non-square matrices (#564).
+      - Allow checking `args.size()` when no arguments are given. (#479).
+      - Balance braces when printing Matrix<Real> (615).
+
+## Documentation improvements
+  * `dnPhyloCTMC( )` (#487).
+  * `fnDiscretizeBeta( )` (#625).
+  * `model( )` (#538).
+  * `time( )` (#572, #574)
+  * `--setOption` / `setOption()` / `getOption()` (#583)
+  * Clarify differences between `.clamp()` and `.setValue()` (#599).
+  * Stopping and convergence rules (#488).
+  * `mcmc` and `mcmcmc`
+    - `.run( )` (#485, #488).
+    - `.initializeFromCheckpoint( )` (#505).
+    - `moveschedule` parameter and the `weight` parameter of moves (#506).
+  * Corrections to `dnBivariatePoisson` (#539) and `mcmcmc` (#541).
 
 # RevBayes 1.2.4 (May 29, 2024)
 
