@@ -3,7 +3,8 @@
 ## Backwards-incompatible changes
   * Remove `underPrior` argument to `mcmc.run( )` and `mcmcmc.run( )`.  You can use `model.ignoreAllData()` instead.
   * Remove `dnLogexponential`. You can use `dnExponential(l) |> tnLog()` instead.
-  * Rename `tree.makeBifurcating()` to `tree.suppressOutdegreeOneNodes()`.
+  * Remove `tree.makeBifurcating()` in favor of `tree.suppressOutdegreeOneNodes()`.  To resolve a trifurcation
+    at the root you can use `reroot(..., makeBifurcating=TRUE)` instead.
 
 ## Features
   * Allow fossil age sampling with an initial tree in `dnConstrainedTopology` (#481).
@@ -27,19 +28,21 @@
       - Fix `treeAssembly` sometimes failing to initialize branch lengths (#509).
       - Fix crash if a file changes while we are `source( )`-ing it (#510).
       - Fix segfault with `dnConstrainedTopology` + `dnUniformTimeTree` (#513).
-      - Fix a segfault in Model::getOrderedStochasticNodes (#569).
+      - Fix a segfault in `Model::getOrderedStochasticNodes` (#569).
   * MCMC: initialization
       - Fix fossil age sampling with an initial tree in `dnBDSTP` (#480).
       - Fix FBD initialization issues (#537, #561).
       - Extend the starting tree simulator to account for origin/root age (#561).
   * MCMC
-      - Fix recalculation of likelihoods for brownian motion distributions (#596).
-      - Fix recalculation of likelihoods with mvRootNodeTimeSlideUniform (#594).
-      - Fix recalculation of likelihood with treeAssembly (#549).
+      - Fix recalculation of likelihoods for Brownian motion distributions (#596).
+      - Fix recalculation of likelihoods with `mvRootTimeSlideUniform` (#594).
+      - Fix recalculation of likelihood with `treeAssembly` (#549).
       - Fix Gelman-Rubin (PSRF) and stationarity stopping rules (#555).
       - Don't move fossil tips outside their age ranges (#559).
       - Fix operator summary for MC^3 when moves are tuned (#522).
-  * Debug: Log reason for -Inf and NaN probabilities.
+  * Debug:
+      - Log reason for -Inf and NaN probabilities (#592).
+      - Add options `debugMCMC` and `logMCMC` for investigating likelihood recalculation bugs (#570, #575, #593).
   * Misc
       - Allow reading non-square matrices (#564).
       - Allow checking `args.size()` when no arguments are given. (#479).
