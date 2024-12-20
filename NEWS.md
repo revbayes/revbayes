@@ -43,6 +43,7 @@
   * Debug:
       - Log reason for -Inf and NaN probabilities (#592).
       - Add options `debugMCMC` and `logMCMC` for investigating likelihood recalculation bugs (#570, #575, #593).
+      - More informative error message in `treeAssembly` when number of branch lengths is wrong (#605).
   * Misc
       - Allow reading non-square matrices (#564).
       - Allow checking `args.size()` when no arguments are given. (#479).
