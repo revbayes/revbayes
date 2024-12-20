@@ -47,7 +47,7 @@
   * Misc
       - Allow reading non-square matrices (#564).
       - Allow checking `args.size()` when no arguments are given. (#479).
-      - Balance braces when printing Matrix<Real> (615).
+      - Balance braces when printing Matrix<Real> (#615).
 
 ## Documentation improvements
   * `dnPhyloCTMC( )` (#487).
