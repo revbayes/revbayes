@@ -27,7 +27,8 @@ namespace RevBayesCore {
         ContinuousEventBirthDeathProposal( StochasticNode<Tree> *n);                                                                //!<  constructor
         
         // Basic utility functions
-        ContinuousEventBirthDeathProposal*        clone(void) const;                                                                  //!< Clone object
+        bool                                    allowClamped() const override { return true; }                                      //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
+        ContinuousEventBirthDeathProposal*      clone(void) const;                                                                  //!< Clone object
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         
     protected:

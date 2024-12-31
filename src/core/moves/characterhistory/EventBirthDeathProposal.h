@@ -23,22 +23,24 @@ namespace RevBayesCore {
     class EventBirthDeathProposal : public Proposal {
         
     public:
-        virtual EventBirthDeathProposal*        clone(void) const = 0;                                                                  //!< Clone object
-        virtual const std::string&              getProposalName(void) const = 0;                                                        //!< Get the name of the proposal for summary printing
+        virtual EventBirthDeathProposal*        clone(void) const = 0;                                                              //!< Clone object
+        virtual const std::string&              getProposalName(void) const = 0;                                                    //!< Get the name of the proposal for summary printing
         
         
         // Basic utility functions
+        bool                                    allowClamped() const override { return true; }                                            //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
         double                                  doProposal(void);                                                                   //!< Perform proposal
+        virtual void                            initialize();                                                                       //!< Initialize the proposal
         double                                  getProposalTuningParameter(void) const;
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
         void                                    setProposalTuningParameter(double tp);
         void                                    tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        EventBirthDeathProposal( StochasticNode<Tree> *n);                                                                //!<  constructor
+        EventBirthDeathProposal( StochasticNode<Tree> *n);                                                                          //!<  constructor
 
         // pure virtual methods
         virtual CharacterEvent*                 drawNewEvent(double event_time) = 0;

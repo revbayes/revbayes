@@ -28,6 +28,7 @@ namespace RevBayesCore {
         virtual                                                ~Proposal(void);                                                                         //!< Destructor
         
         // public methods
+        virtual bool                                            allowClamped() const { return false; }                                                  //!< Allow proposal to operate on clamped nodes; see #600
         const std::vector<DagNode*>&                            getNodes(void) const;                                                                   //!< Get the vector of nodes for which the proposal is drawing new values.
         void                                                    swapNode(DagNode *oldN, DagNode *newN);                                                 //!< Swap the pointers to the variable on which the move works on.
         void                                                    setMove(Move *m);                                                                       //!< Set the pointer to move object holding this proposal

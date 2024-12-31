@@ -24,9 +24,10 @@ namespace RevBayesCore {
     class DiscreteEventBirthDeathProposal : public EventBirthDeathProposal {
         
     public:
-        DiscreteEventBirthDeathProposal( StochasticNode<Tree> *n);                                                                //!<  constructor
+        DiscreteEventBirthDeathProposal( StochasticNode<Tree> *n);                                                                  //!<  constructor
         
         // Basic utility functions
+        bool                                    allowClamped() const override { return true; }                                                    //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         DiscreteEventBirthDeathProposal*        clone(void) const;                                                                  //!< Clone object
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         

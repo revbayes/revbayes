@@ -675,6 +675,9 @@ void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
     // draw the value
     if ( ignore_redraw == false )
     {
+        if (this->isClamped()) {
+            throw RbException("Cannot modify the value of a clamped node.");
+        }
         distribution->redrawValue( c );
     }
     
