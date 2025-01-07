@@ -1521,6 +1521,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     // NOTE: ambiguous tip states are sampled along with internal node states
     end_state = end_states[node_index][site].getStateIndex();
 
+
     // set up vectors to hold the character transition events
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;
@@ -2053,14 +2054,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
     // for now, always sample the clamped character
+    
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> site_indices = getIncludedSiteIndices();
 
     // sample characters conditioned on start states, going to end states
     std::vector<double> p(this->num_chars, 0.0);
     for (size_t i = 0; i < this->num_sites; i++)
     {
-
-        charType c = td.getCharacter(i);
-
+        charType c = td.getCharacter(site_indices[i]);
 
         if ( c.isAmbiguous() == false )
         {
