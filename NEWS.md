@@ -1,3 +1,6 @@
+# RevBayes 1.2.6 (unreleased)
+
+
 # RevBayes 1.2.5 (Dec 19, 2025)
 
 ## Backwards-incompatible changes
