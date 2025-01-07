@@ -2326,10 +2326,11 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     //updateQmatrix();
 
     boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
+    const size_t num_classes = sqrt(speciation_rates.size());
 
 
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
-    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, Qref, alpha_ref, beta_ref);
+    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_classes, alpha_ref, beta_ref);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 

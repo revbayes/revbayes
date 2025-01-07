@@ -20,7 +20,8 @@ namespace RevBayesCore {
         BDS_ODE( 
                 const std::vector<double> &l, 
                 const std::vector<double> &m, 
-                const boost::numeric::ublas::matrix<double> &qmatrix,
+                //const boost::numeric::ublas::matrix<double> &qmatrix,
+                const size_t &n,
                 const double &a,
                 const double &b
                 );
@@ -32,7 +33,8 @@ namespace RevBayesCore {
         const std::vector<double>                         mu;                                 //!< vector of extinction rates, one rate for each character state
         const std::vector<double>                         lambda;                             //!< vector of speciation rates, one rate for each character state
         //const size_t                                      num_states;                         //!< the number of character states = q->getNumberOfStates()
-        const boost::numeric::ublas::matrix<double> Q;
+        //const boost::numeric::ublas::matrix<double> Q;
+        const size_t num_classes;
         const double alpha;
         const double beta;
         //const RateGenerator*                        Q;                                  //!< anagenetic rate matrix

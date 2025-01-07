@@ -119,13 +119,15 @@ void dmv_special(
 BDS_ODE::BDS_ODE( 
         const std::vector<double> &l,
         const std::vector<double> &m,
-        const boost::numeric::ublas::matrix<double> &qmatrix,
+        const size_t &n, // number of rate classes
+        //const boost::numeric::ublas::matrix<double> &qmatrix,
         const double &a,
         const double &b
         ) :
     mu( m ),
     lambda( l ),
-    Q( qmatrix ),
+    //Q( qmatrix ),
+    num_classes( n ),
     alpha( a ),
     beta( b )
 {
@@ -135,16 +137,20 @@ BDS_ODE::BDS_ODE(
 
 void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
-    const size_t num_states = Q.size1();
-    const size_t num_classes = sqrt(num_states);
+    //const size_t num_classes = sqrt(num_states);
+    const size_t num_states = num_classes * num_classes; 
                       
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
-    std::vector< double > safe_x = x;
+    std::vector< double > safe_x = x; // I imagine this is quite slow, re-allocating a new vector every time
     for (size_t i = 0; i < num_states * 2; ++i)
     {
         safe_x[i] = ( x[i] < 0.0 ? 0.0 : x[i] );
+        dxdt[i] = 0.0;
     }
+
+    // the matrix-vector product
+    dmv_special(dxdt, safe_x, num_classes, alpha, beta);
 
     // do the diagonal elements
     for (size_t i = 0; i < num_states; ++i)
@@ -153,33 +159,11 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         double no_event_rate = mu[i] + lambda[i];
 
         // for E(t)
-        dxdt[i] = mu[i] - no_event_rate * safe_x[i] + lambda[i] * safe_x[i] * safe_x[i];
+        dxdt[i] += mu[i] - no_event_rate * safe_x[i] + lambda[i] * safe_x[i] * safe_x[i];
         // for D(t)
-        dxdt[i + num_states] = -no_event_rate * safe_x[i + num_states] + 2 * lambda[i] * safe_x[i] * safe_x[i + num_states];
+        dxdt[i + num_states] += -no_event_rate * safe_x[i + num_states] + 2 * lambda[i] * safe_x[i] * safe_x[i + num_states];
     }
    
-    /*
-    // the matrix-vector products
-    for (size_t i = 0; i < num_states; ++i)
-    {
-        // note: it's better not to merge the two next loops
-        // because we want to access contiguous memory
-        
-        // Q * E
-        for (size_t j = 0; j < num_states; ++j)
-        {
-            dxdt[i]              += Q(i,j) * safe_x[j];
-        }
-
-        // and Q * D
-        for (size_t j = 0; j < num_states; ++j)
-        {
-            dxdt[i + num_states] += Q(i,j) * safe_x[j + num_states];
-        }
-    } 
-    */
-    
-    dmv_special(dxdt, x, num_classes, alpha, beta);
 }
 
 
