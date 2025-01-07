@@ -67,7 +67,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
                                                        const TypedDagNode<RbVector<double> > *ext,
                                                        const TypedDagNode<double> *r_sp,
                                                        const TypedDagNode<double> *r_ext,
-                                                       const TypedDagNode< Simplex >* p,
                                                        const std::string &cdt,
                                                        bool uo,
                                                        size_t min_num_lineages,
@@ -99,7 +98,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     mu( ext ),
     alpha( r_sp ),
     beta( r_ext ),
-    pi( p ),
     //Qmatrix( boost::numeric::ublas::matrix<double>::matrix(num_states, num_states) ),
     rho( new ConstantNode<double>("", new double(1.0)) ),
     rho_per_state( NULL ),
@@ -117,7 +115,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     addParameter( lambda );
     addParameter( alpha );
     addParameter( beta );
-    addParameter( pi );
     addParameter( rho );
     addParameter( process_age );
 
@@ -967,16 +964,7 @@ double FastBirthDeathShiftProcess::getRootAge( void ) const
  */
 std::vector<double> FastBirthDeathShiftProcess::getRootFrequencies(void) const
 {
-
-    if ( pi != NULL )
-    {
-        return pi->getValue();
-    }
-    else
-    {
-        return std::vector<double>(num_states, 1.0/num_states);
-    }
-
+    return std::vector<double>(num_states, 1.0/num_states);
 }
 
 
@@ -2267,10 +2255,6 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         beta = static_cast<const TypedDagNode<double>* >( newP );
         updateQmatrix();
-    }
-    if ( oldP == pi )
-    {
-        pi = static_cast<const TypedDagNode<Simplex>* >( newP );
     }
     if ( oldP == rho )
     {

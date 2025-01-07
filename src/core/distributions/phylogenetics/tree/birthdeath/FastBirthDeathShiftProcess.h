@@ -38,7 +38,6 @@ namespace RevBayesCore {
                                   const TypedDagNode<RbVector<double> >* m,
                                   const TypedDagNode<double> * rsp,
                                   const TypedDagNode<double> * rext,
-                                  const TypedDagNode<Simplex>* p,
                                   const std::string &cdt,
                                   bool uo,
                                   size_t min_num_lineages,
@@ -134,7 +133,6 @@ namespace RevBayesCore {
         const TypedDagNode<RbVector<double> >*                          lambda;
         const TypedDagNode<double>*                                     alpha;
         const TypedDagNode<double>*                                     beta;
-        const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
         const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
 

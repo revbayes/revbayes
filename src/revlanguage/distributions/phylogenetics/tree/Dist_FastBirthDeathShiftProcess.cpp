@@ -100,12 +100,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     RevBayesCore::TypedDagNode<double>* r_sp = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* r_ext = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
         
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* bf = NULL;
-    if ( root_frequencies->getRevObject() != RevNullObject::getInstance() )
-    {
-        bf = static_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();
-    }
-    
     // condition
     const std::string& cond                  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
    
@@ -138,7 +132,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
     
     // finally make the distribution 
-    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp, ex, r_sp, r_ext, bf, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
+    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp, ex, r_sp, r_ext, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
    
     
     size_t ex_size = ex->getValue().size();
@@ -285,8 +279,6 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         memberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()        , "the rate of shifts in speciation rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "beta", RealPos::getClassTypeSpec()        , "the rate of shifts in extinction rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         
-        memberRules.push_back( new ArgumentRule( "pi"        , Simplex::getClassTypeSpec()              , "State frequencies at the root."              , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        
         std::vector<TypeSpec> sampling_fraction_types;
         sampling_fraction_types.push_back( Probability::getClassTypeSpec() );
         sampling_fraction_types.push_back( ModelVector<Probability>::getClassTypeSpec() );
@@ -333,10 +325,6 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     {
         start_age = var;
         start_condition = name;
-    }
-    else if ( name == "pi" )
-    {
-        root_frequencies = var;
     }
     else if ( name == "speciationRates" || name == "lambda" || name == "cladoEventMap" )
     {

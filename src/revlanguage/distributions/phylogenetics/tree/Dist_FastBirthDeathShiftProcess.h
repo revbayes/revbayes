@@ -41,7 +41,6 @@ namespace RevLanguage {
     private:
         
         RevPtr<const RevVariable>                                   start_age;
-        RevPtr<const RevVariable>                                   root_frequencies;
         RevPtr<const RevVariable>                                   speciation_rates;
         RevPtr<const RevVariable>                                   extinction_rates;
         RevPtr<const RevVariable>                                   alpha;
