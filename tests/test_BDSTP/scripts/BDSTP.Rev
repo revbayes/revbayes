@@ -1,7 +1,7 @@
 ################################################################################
 #
 # RevBayes Example: Total-evidence dating under the fossilized birth-death model
-# 
+#
 # This file: Runs the full MCMC ...
 #
 # authors: Tracy A. Heath, Walker C. Pett, April M. Wright
@@ -42,13 +42,13 @@ speciation_rate ~ dnExponential(10)
 extinction_rate ~ dnExponential(10)
 
 # Specify a scale move on the speciation_rate parameter #
-# This move will be applied with 3 different tuning values (lambda) to help improve mixing # 
+# This move will be applied with 3 different tuning values (lambda) to help improve mixing #
 moves.append( mvScale(speciation_rate, lambda=0.01, weight=1) )
 moves.append( mvScale(speciation_rate, lambda=0.1,  weight=1) )
 moves.append( mvScale(speciation_rate, lambda=1.0,  weight=1) )
 
 # Specify a sliding-window move on the extinction_rate parameter #
-# This move will be applied with 3 different window widths (delta) to help improve mixing # 
+# This move will be applied with 3 different window widths (delta) to help improve mixing #
 moves.append( mvScale(extinction_rate, lambda=0.01, weight=1) )
 moves.append( mvScale(extinction_rate, lambda=0.1,  weight=1) )
 moves.append( mvScale(extinction_rate, lambda=1,    weight=1) )
@@ -62,10 +62,10 @@ turnover := extinction_rate/speciation_rate
 rho <- 1.0
 
 # Assume an exponential prior on the rate of sampling fossils (psi) #
-psi ~ dnExponential(10) 
+psi ~ dnExponential(10)
 
 # Specify a scale move on the psi parameter #
-# This move will be applied with 3 different tuning values (lambda) to help improve mixing # 
+# This move will be applied with 3 different tuning values (lambda) to help improve mixing #
 moves.append( mvScale(psi, lambda=0.01, weight=1) )
 moves.append( mvScale(psi, lambda=0.1,  weight=1) )
 moves.append( mvScale(psi, lambda=1,    weight=1) )
@@ -75,7 +75,7 @@ moves.append( mvScale(psi, lambda=1,    weight=1) )
 origin_time ~ dnUnif(37.0, 55.0)
 
 # Specify a sliding-window move on the origin_time parameter #
-# This move will be applied with 3 different window widths (delta) to help improve mixing # 
+# This move will be applied with 3 different window widths (delta) to help improve mixing #
 moves.append( mvSlide(origin_time, delta=0.01, weight=5.0) )
 moves.append( mvSlide(origin_time, delta=0.1,  weight=5.0) )
 moves.append( mvSlide(origin_time, delta=1,    weight=5.0) )
@@ -86,15 +86,15 @@ fbd_dist = dnBDSTP(origin=origin_time, lambda=speciation_rate, mu=extinction_rat
 
 # The will be a random variable of a constrained topology distribution that is governed by the FBD #
 # this distribution will generate FBD trees that match the monophyly constraints defined above #
-clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus", 
-                      "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus", 
+clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus",
+                      "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus",
                       "Ursus_abstrusus", "Ursus_spelaeus")
 
 constraints = v(clade_ursinae)
 fbd_tree ~ dnConstrainedTopology(fbd_dist, constraints=constraints)
 
 # Specify moves on the tree and node times #
-# These moves update the tree topology 
+# These moves update the tree topology
 moves.append( mvFNPR(fbd_tree, weight=15.0) )
 moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
 
@@ -112,22 +112,23 @@ for(i in 1:fossils.size())
 {
     t[i] := tmrca(fbd_tree, clade(fossils[i]))
 
-    a_i = fossils[i].getMinAge()
-    b_i = fossils[i].getMaxAge()
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
 
-    F[i] ~ dnUniform(t[i] - b_i, t[i] - a_i)
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
     F[i].clamp( 0 )
+    moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
+    moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
 }
 
 # Add a move to sample the fossil times #
-moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, weight=5.0) )
 
 
 ### Create deterministic nodes to monitor various tree statistics ###
 # Monitor the number of sampled ancestors in the FBD-tree #
 num_samp_anc := fbd_tree.numSampledAncestors();
 
-                    
+
 # Monitor the age of the extant bears #
 clade_extant = clade("Ailuropoda_melanoleuca","Tremarctos_ornatus","Melursus_ursinus",
                     "Ursus_arctos","Ursus_maritimus","Helarctos_malayanus",
@@ -147,7 +148,7 @@ pruned_tree := fnPruneTree(fbd_tree, prune=v(taxa[17],taxa[20]))
 # The rate along each branch is drawn from an exponential prior
 branch_rates_mean ~ dnExponential(10.0)
 
-# The mean will be operated on by scale moves.append( 
+# The mean will be operated on by scale moves.append(
 moves.append( mvScale(branch_rates_mean, lambda=0.01, weight=1.0) )
 moves.append( mvScale(branch_rates_mean, lambda=0.1,  weight=1.0) )
 moves.append( mvScale(branch_rates_mean, lambda=1.0,  weight=1.0) )
@@ -254,9 +255,6 @@ monitors.append( mnModel(filename="output/BDSTP.log", printgen=10) )
 
 # 2. the tree #
 monitors.append( mnFile(filename="output/BDSTP.trees", printgen=10, pruned_tree) )
-
-# 3. and a few select parameters to be printed to the screen #
-monitors.append( mnScreen(printgen=10, age_extant, num_samp_anc, origin_time) )
 
 # Initialize the MCMC object #
 mymcmc = mcmc(mymodel, monitors, moves)

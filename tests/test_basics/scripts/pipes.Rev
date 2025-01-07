@@ -1,6 +1,12 @@
 1 |> ln()
 
 fnJC(4) |> fnX3() |> fndNdS(2)
+fnJC(4) |> fnGammaASRV(1) |> fnInvASRV(0.1)
+
+pi1 ~ dnDirichlet([1,1,1,1])
+pi2 ~ dnDirichlet([1,1,1,1])
+mix ~ dnDirichlet([1,1])
+fnMixtureASRV([fnF81(pi1),fnF81(pi2)],mix) |> fnGammaASRV(1)
 
 1 |> ln(_)
 

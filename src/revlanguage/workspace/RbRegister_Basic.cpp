@@ -66,6 +66,7 @@
 #include "RlConstantNode.h"                               // for ConstantNode
 #include "RlDeterministicNode.h"                          // for Determinist...
 #include "RlRateGenerator.h"                              // for RateGenerator
+#include "RlSiteMixtureModel.h"                               // for MixtureModel
 #include "RlTimeTree.h"                                   // for TimeTree
 #include "RlTypedFunction.h"                              // for TypedFunction
 #include "ScalarMatrixMultiplication.h"                   // for ScalarMatri...
@@ -337,6 +338,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_replicate<RealPos>()          );
         addFunction( new Func_replicate<RlString>()         );
         addFunction( new Func_replicate<RlBoolean>()        );
+        addFunction( new Func_replicate<SiteMixtureModel>() );
         addFunction( new Func_seed()                        );
         addFunction( new Func_replicateEvents<Real>()       );
         addFunction( new Func_replicateEvents<RealPos>()    );

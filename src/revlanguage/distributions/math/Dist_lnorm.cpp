@@ -9,7 +9,6 @@
 #include "LognormalDistribution.h"
 #include "Real.h"
 #include "RealPos.h"
-#include "RbHelpReference.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -20,23 +19,26 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution() {
+Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution()
+{
     
 }
 
 
-Dist_lnorm* Dist_lnorm::clone( void ) const {
+
+Dist_lnorm* Dist_lnorm::clone( void ) const
+{
     return new Dist_lnorm(*this);
 }
 
 
 RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) const
 {
-
     // get the parameters
     RevBayesCore::TypedDagNode<double>* m   = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* s   = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-    RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s);
+    RevBayesCore::TypedDagNode<double>* o   = static_cast<const RealPos &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s, o);
     
     return d;
 }
@@ -44,11 +46,12 @@ RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) cons
 
 
 /* Get Rev type of object */
-const std::string& Dist_lnorm::getClassType(void) { 
+const std::string& Dist_lnorm::getClassType(void)
+{
     
     static std::string rev_type = "Dist_lnorm";
     
-	return rev_type; 
+    return rev_type;
 }
 
 /* Get class type spec describing type of object */
@@ -57,7 +60,7 @@ const TypeSpec& Dist_lnorm::getClassTypeSpec(void)
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( PositiveContinuousDistribution::getClassTypeSpec() ) );
     
-	return rev_type_spec; 
+    return rev_type_spec;
 }
 
 
@@ -91,6 +94,7 @@ std::string Dist_lnorm::getDistributionFunctionName( void ) const
     return d_name;
 }
 
+
 /** Return member rules (no members) */
 const MemberRules& Dist_lnorm::getParameterRules(void) const
 {
@@ -98,12 +102,12 @@ const MemberRules& Dist_lnorm::getParameterRules(void) const
     static MemberRules memberRules;
     static bool rules_set = false;
     
-    if ( !rules_set ) 
+    if ( !rules_set )
     {
-        
-        memberRules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m))." , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m)).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
+        memberRules.push_back( new ArgumentRule( "offset", RealPos::getClassTypeSpec(), "The offset in real-space."                        , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        
         rules_set = true;
     }
     
@@ -111,7 +115,8 @@ const MemberRules& Dist_lnorm::getParameterRules(void) const
 }
 
 
-const TypeSpec& Dist_lnorm::getTypeSpec( void ) const {
+const TypeSpec& Dist_lnorm::getTypeSpec( void ) const
+{
     
     static TypeSpec ts = getClassTypeSpec();
     
@@ -120,18 +125,34 @@ const TypeSpec& Dist_lnorm::getTypeSpec( void ) const {
 
 
 /** Print value for user */
-void Dist_lnorm::printValue(std::ostream& o) const {
+void Dist_lnorm::printValue(std::ostream& o) const
+{
     
     o << "lognormal(mean=";
-    if ( mean != NULL ) {
+    if ( mean != NULL )
+    {
         o << mean->getName();
-    } else {
+    }
+    else
+    {
         o << "?";
     }
     o << ", sd=";
-    if ( sd != NULL ) {
+    if ( sd != NULL )
+    {
         o << sd->getName();
-    } else {
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", offset=";
+    if ( offset != NULL )
+    {
+        o << offset->getName();
+    }
+    else
+    {
         o << "?";
     }
     o << ")";
@@ -141,15 +162,19 @@ void Dist_lnorm::printValue(std::ostream& o) const {
 /** Set a member variable */
 void Dist_lnorm::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
-    if ( name == "mean" ) 
+    if ( name == "mean" )
     {
         mean = var;
     }
-    else if ( name == "sd" ) 
+    else if ( name == "sd" )
     {
         sd = var;
     }
-    else 
+    else if ( name == "offset" )
+    {
+        offset = var;
+    }
+    else
     {
         PositiveContinuousDistribution::setConstParameter(name, var);
     }

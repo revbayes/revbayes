@@ -1,7 +1,7 @@
 #ifndef Dist_CTMC_H
 #define Dist_CTMC_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

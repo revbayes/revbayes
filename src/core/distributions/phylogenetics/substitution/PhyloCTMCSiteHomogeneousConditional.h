@@ -2,7 +2,7 @@
 #define PhyloCTMCSiteHomogeneousConditional_H
 
 #include <bitset>
-#include <math.h>
+#include <cmath>
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "DistributionBinomial.h"
 #include "DistributionNegativeBinomial.h"
@@ -1048,8 +1048,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
 
     // sample the rate categories in proportion to the total probability (correction) for each mixture.
     double total = 0.0;
+    std::vector<double> mixtureProbs = this->getMixtureProbs();
     for ( size_t i = 0; i < this->num_site_mixtures; ++i )
-        total += perMaskMixtureCorrections[i];
+        total += mixtureProbs[i];
 
     std::vector<size_t> perSiteRates;
     for ( size_t i = 0; i < this->num_sites; ++i )
@@ -1061,7 +1062,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
         double tmp = 0.0;
         while(tmp < u)
         {
-            tmp += perMaskMixtureCorrections[rateIndex];
+            tmp += mixtureProbs[rateIndex];
             if (tmp < u)
                 rateIndex++;
         }

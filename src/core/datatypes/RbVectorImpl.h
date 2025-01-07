@@ -78,7 +78,7 @@ namespace RevBayesCore {
         {
             if ( i >= std::vector<valueType>::size() )
             {
-                throw RbException("Vector index out of range. You tried to access index '" + StringUtilities::to_string(i) + "' for a vector of size '" + StringUtilities::to_string(std::vector<valueType>::size()) + "'.");
+                throw RbException() << "Vector index out of range. You tried to access index '" << StringUtilities::to_string(i) << "' for a vector of size '" << StringUtilities::to_string(std::vector<valueType>::size()) << "'.";
             }
             return std::vector<valueType>::operator [](i);
         }
@@ -90,6 +90,7 @@ namespace RevBayesCore {
             }
             return std::vector<valueType>::operator [](i);
         }
+        void                                                setElement(int i, const valueType& v) { (*this)[i] = v;}
         void                                                swap( valueType& a, valueType& b)
         {
             valueType temp = a;
@@ -267,6 +268,7 @@ namespace RevBayesCore {
         RbIterator<valueType>                               find(const valueType &x) { return RbIterator<valueType>( std::find(this->values.begin(), this->values.end(), &x) ); }
         RbConstIterator<valueType>                          find(const valueType &x) const { return RbConstIterator<valueType>( std::find(this->values.begin(), this->values.end(), &x) ); }
         size_t                                              size(void) const { return this->values.size(); }
+        void                                                setElement(int i, const valueType& v) { delete values[i]; values[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone(v);}
 
         void                                                swap( valueType& a, valueType& b)
         {

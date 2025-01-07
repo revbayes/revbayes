@@ -9,7 +9,6 @@
 #include "RateMatrix_TVM.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "TimeReversibleRateMatrix.h"
@@ -66,23 +65,6 @@ RateMatrix_TVM& RateMatrix_TVM::operator=(const RateMatrix_TVM &r)
     
     return *this;
 }
-
-
-RateMatrix_TVM& RateMatrix_TVM::assign(const Assignable &m)
-{
-    
-    const RateMatrix_TVM *rm = dynamic_cast<const RateMatrix_TVM*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */

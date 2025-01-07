@@ -108,7 +108,6 @@ phyloSeq.clamp(data)
 mymodel = model(psi)
 
 # add monitors
-monitors[++mni] = mnScreen(alpha, pinvar, TL, printgen=1000)
 monitors[++mni] = mnFile(psi, filename="output/PS_uniform.trees", printgen=10)
 monitors[++mni] = mnModel(filename="output/PS_uniform.log",printgen=10)
 

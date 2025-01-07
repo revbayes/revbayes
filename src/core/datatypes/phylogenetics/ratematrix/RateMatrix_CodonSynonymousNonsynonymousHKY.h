@@ -42,7 +42,6 @@ namespace RevBayesCore {
         RateMatrix_CodonSynonymousNonsynonymousHKY&             operator=(const RateMatrix_CodonSynonymousNonsynonymousHKY& r);
         
         // RateMatrix functions
-        virtual RateMatrix_CodonSynonymousNonsynonymousHKY&     assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_CodonSynonymousNonsynonymousHKY*             clone(void) const;
         void                                                    setNucleotideFrequencies(const std::vector<double> &f);                             //!< Set the nucleotide frequencies

@@ -733,10 +733,11 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
  * This function calculates the log of the beta function. The code was adapted from R.
  *
  * \brief Natural log of the beta function.
- * \param alp is the parameter of the beta function. 
+ * \param a is the alpha parameter of the beta function. 
+ * \param b is the beta parameter of the beta function. 
  * \return Returns the log of the beta function. 
  * \throws Does not throw an error.
- * \see R version 2.12.2
+ * \see function lbeta() in R version 2.12.2
  */
 double RbMath::lnBeta(double a, double b)
 {

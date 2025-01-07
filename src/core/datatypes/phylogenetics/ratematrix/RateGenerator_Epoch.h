@@ -31,7 +31,6 @@ namespace RevBayesCore {
 //        RateGenerator_Epoch&                operator=(const RateGenerator_Epoch& r);
         
         // RateMatrix functions
-        RateGenerator_Epoch&                assign(const Assignable &m);
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateGenerator_Epoch*                clone(void) const;
         double                              getRate(size_t from, size_t to, double age, double rate) const;                                    //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
@@ -42,7 +41,7 @@ namespace RevBayesCore {
         void                                setEpochGenerators(const RbVector<RateGenerator>& rg);                                                              //!< Directly set the epoch generators
         void                                setEpochTimes(const RbVector<double> &t);                                                                           //!< Directly set the epoch times
         void                                setEpochRates(const RbVector<double>& r);                                                                           //!< Directly set the epoch rates
-        virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times);
+        virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times) const;
         virtual void                        printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;            //!< print object for user (in user-formatted way)
         void                                update(void);
         

@@ -12,7 +12,6 @@
 #include <vector>
 #include <iosfwd>
 
-#include "Assignable.h"
 #include "CladogeneticProbabilityMatrix.h"
 #include "Cloneable.h"
 #include "DagNode.h"
@@ -23,7 +22,7 @@
 
 namespace RevBayesCore {
     
-    class CladogeneticSpeciationRateMatrix : public Cloneable, public Assignable, public Printable, public Serializable, public MemberObject<double>, public MemberObject<RbVector<double> >, public MemberObject<RbVector<RbVector<long> > >, public MemberObject<CladogeneticProbabilityMatrix> {
+    class CladogeneticSpeciationRateMatrix : public Cloneable, public Printable, public Serializable, public MemberObject<double>, public MemberObject<RbVector<double> >, public MemberObject<RbVector<RbVector<long> > >, public MemberObject<CladogeneticProbabilityMatrix> {
         
     public:
 
@@ -37,7 +36,6 @@ namespace RevBayesCore {
         bool                                                    operator<=(const CladogeneticSpeciationRateMatrix &rm) const { return operator<(rm) || operator==(rm); }
         
         // pure virtual methods
-        virtual CladogeneticSpeciationRateMatrix&               assign(const Assignable &m);
         virtual CladogeneticSpeciationRateMatrix*               clone(void) const;
         virtual void                                            initFromString( const std::string &s );
         

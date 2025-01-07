@@ -48,18 +48,13 @@ GewekeStoppingRule* GewekeStoppingRule::clone( void ) const
 
 /**
  * Should we stop now?
- * Yes, if the minimum ESS is larger than the provided threshold.
+ * Yes, if the Geweke test statistic is significant at the provided alpha level.
  */
 bool GewekeStoppingRule::stop( size_t g )
 {
-    
-    bool passed = true;
-    
-    for ( size_t i = 1; i <= numReplicates; ++i)
+    for ( size_t i = 0; i < numReplicates; ++i)
     {
-        path fn = filename;
-        if ( numReplicates > 1 )
-            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
         
         TraceContinuousReader reader = TraceContinuousReader( fn );
         
@@ -85,11 +80,10 @@ bool GewekeStoppingRule::stop( size_t g )
         for ( size_t j = 0; j < data.size(); ++j)
         {
             data[j].setBurnin( maxBurnin );
-            passed &= gTest.assessConvergence( data[j] );
+            if ( !gTest.assessConvergence( data[j] ) ) return false;
         }
         
     }
     
-    
-    return passed;
+    return true;
 }

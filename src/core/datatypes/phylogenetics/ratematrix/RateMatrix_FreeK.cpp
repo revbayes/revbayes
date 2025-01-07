@@ -15,7 +15,6 @@
 #include "RbMathMatrix.h"
 #include "RbSettings.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "GeneralRateMatrix.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -144,21 +143,6 @@ RateMatrix_FreeK& RateMatrix_FreeK::operator=(const RateMatrix_FreeK &r)
     }
     
     return *this;
-}
-
-
-RateMatrix_FreeK& RateMatrix_FreeK::assign(const Assignable &m)
-{
-    const RateMatrix_FreeK *rm = dynamic_cast<const RateMatrix_FreeK*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
 }
 
 

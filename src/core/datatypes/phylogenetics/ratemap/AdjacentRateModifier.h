@@ -21,7 +21,6 @@ namespace RevBayesCore
         AdjacentRateModifier(const AdjacentRateModifier& g);
         
         
-        AdjacentRateModifier&               assign(const Assignable &m);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, CharacterEventDiscrete* currState, CharacterEventDiscrete* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, unsigned currState, unsigned newState, unsigned charIdx=0, double age=0.0);

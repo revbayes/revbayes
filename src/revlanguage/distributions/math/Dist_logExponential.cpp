@@ -6,7 +6,6 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Dist_logExponential.h"
-#include "LogExponentialDistribution.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RbHelpReference.h"
@@ -40,13 +39,9 @@ Dist_logExponential* Dist_logExponential::clone( void ) const
 }
 
 
-RevBayesCore::LogExponentialDistribution* Dist_logExponential::createDistribution( void ) const
+RevBayesCore::ContinuousDistribution* Dist_logExponential::createDistribution( void ) const
 {
-    // get the parameters
-    RevBayesCore::TypedDagNode<double>*       l = static_cast<const Real &>( lambda->getRevObject() ).getDagNode();
-    RevBayesCore::LogExponentialDistribution* d = new RevBayesCore::LogExponentialDistribution( l );
-    
-    return d;
+    throw RbException()<<"dnLogExponential has been removed from RevBayes.\n  * If you want the log of an exponentially distributed variable, consider `y ~ dnExponential(lambda); x := log(y)`.\n  * If you want a distribution whose log is exponential, consider `x ~ dnLog(dnExponential(lambda))`";
 }
 
 
