@@ -130,17 +130,16 @@ namespace RevBayesCore {
         std::string                                                     simmap;
         
         // parameters
-        const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
+        const TypedDagNode<double>*                                     process_age;        //!< Time since the origin.
         const TypedDagNode<double>*                                     speciation_scale;
         const TypedDagNode<double>*                                     extinction_scale;
         const TypedDagNode<double>*                                     speciation_sd;
         const TypedDagNode<double>*                                     extinction_sd;
         const TypedDagNode<double>*                                     alpha;
         const TypedDagNode<double>*                                     beta;
-        const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
+        const TypedDagNode<double>*                                     rho;                //!< Sampling probability of each species.
         std::vector<double>                                             lambda;
         std::vector<double>                                             mu;
-        const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
 
         size_t                                                          min_num_lineages;
         size_t                                                          max_num_lineages;
