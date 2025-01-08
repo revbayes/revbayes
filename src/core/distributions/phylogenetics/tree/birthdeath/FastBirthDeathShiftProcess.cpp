@@ -25,7 +25,6 @@
 #include "DiscreteCharacterState.h"
 #include "DiscreteTaxonData.h"
 #include "NaturalNumbersState.h"
-#include "RbBitSet.h"
 #include "RbException.h"
 #include "RbSettings.h"
 #include "RbVector.h"
@@ -78,7 +77,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     changed_nodes( std::vector<bool>(5, false) ),
     dirty_nodes( std::vector<bool>(5, true) ),
     node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*num_classes*num_classes,0))) ),
-    extinction_probabilities( std::vector<std::vector<double> >( 500.0, std::vector<double>( num_classes*num_classes, 0) ) ),
     num_states( num_classes*num_classes ),
     scaling_factors( std::vector<std::vector<double> >(5, std::vector<double>(2,0.0) ) ),
     use_origin( uo ),
@@ -99,7 +97,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     lambda( std::vector<double>(num_classes * num_classes, 0.0) ),
     mu( std::vector<double>(num_classes * num_classes, 0.0) ),
     rho( new ConstantNode<double>("", new double(1.0)) ),
-    rho_per_state( NULL ),
     min_num_lineages( min_num_lineages ),
     max_num_lineages( max_num_lineages ),
     exact_num_lineages( exact_num_lineages ),
@@ -125,9 +122,6 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     updateQmatrix();
     update_rates();
 
-    // set the B matrix
-    //size_t num_classes = sqrt(num_states);
-    
     if ( min_num_lineages > max_num_lineages )
     {
         throw RbException("minNumLineages cannot be greater than maxNumLineages.");
@@ -326,23 +320,14 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
 
             std::vector<double> sampling;
             std::vector<double> extinction;
-            if ( rho != NULL && rho_per_state == NULL )
+            if ( rho != NULL )
             {
                 sampling   = std::vector<double>(num_states, rho->getValue());
                 extinction = std::vector<double>(num_states, 1.0 - rho->getValue());
             }
-            else if ( rho == NULL && rho_per_state != NULL )
-            {
-                sampling   = rho_per_state->getValue();
-                extinction = std::vector<double>(num_states, 1.0);
-                for (size_t i=0; i<num_states; ++i)
-                {
-                    extinction[i] = 1.0 - sampling[i];
-                }
-            }
             else
             {
-                throw RbException("Either a global sampling fraction or state-specific sampling fraction needs to be set.");
+                throw RbException("A species sampling probability needs to be set.");
             }
 
             if ( node.isFossil() )
@@ -350,30 +335,10 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                 throw(RbException("The model does not support fossil tips."));
             }
             
-            RbBitSet obs_state(num_states);
-            obs_state.set();
-            bool gap = true;
-
-            if ( tree->hasCharacterData() == true )
-            {
-                const DiscreteCharacterState &state = tree->getCharacterData().getTaxonData( node.getTaxon().getName() )[0];
-                obs_state = state.getState();
-                gap = (state.isMissingState() == true || state.isGapState() == true);
-            }
-
             for (size_t j = 0; j < num_states; ++j)
             {
-                
                 node_likelihood[j] = extinction[j];
-                
-                if ( obs_state.test( j ) == true || gap == true )
-                {
-                    node_likelihood[num_states+j] = sampling[j];
-                }
-                else
-                {
-                    node_likelihood[num_states+j] = 0.0;
-                }
+                node_likelihood[num_states+j] = sampling[j];
             }
             
         }
@@ -474,7 +439,6 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
 
         node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
         node_likelihood[num_states + i] *= lambda[i];
-
     }
 
     if (use_origin == true){
