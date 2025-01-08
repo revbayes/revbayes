@@ -296,26 +296,23 @@ double FastBirthDeathShiftProcess::computeLnProbability( void )
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeRootLikelihood();
    
-    //std::cout << "calculating ln prob now" << std::endl;
-    //std::cout << "the ln prob is " << lnProbTimes << std::endl;
     return lnProbTimes + lnProbTreeShape();
 }
 
 
 void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::TopologyNode &node, size_t node_index) const
 {
-    
+   
     // check for recomputation
     if ( dirty_nodes[node_index] == true || sample_character_history == true )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+        std::vector<double> &node_likelihood = node_partial_likelihoods[node_index][active_likelihood[node_index]];
 
-        if ( node.isTip() == true )
+        if ( node.isTip() ) // this is a tip node
         {
-            // this is a tip node
             TreeDiscreteCharacterData* tree = static_cast<TreeDiscreteCharacterData*>( this->value );
 
             std::vector<double> sampling;
@@ -340,15 +337,15 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                 node_likelihood[j] = extinction[j];
                 node_likelihood[num_states+j] = sampling[j];
             }
-            
+
+            scaling_factors[node_index][active_likelihood[node_index]] = 0.0;
         }
-        else
+        else // this is an internal node
         {
-            
-            // this is an internal node
             const TopologyNode          &left           = node.getChild(0);
             size_t                      left_index      = left.getIndex();
             computeNodeProbability( left, left_index );
+
             const TopologyNode          &right          = node.getChild(1);
             size_t                      right_index     = right.getIndex();
             computeNodeProbability( right, right_index );
@@ -357,7 +354,6 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
             const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
             const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
 
-            
             // merge descendant likelihoods
             for (size_t i=0; i<num_states; ++i)
             {
@@ -366,21 +362,35 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                 node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
                 node_likelihood[num_states + i] *= lambda[i];
             }
+
+            // propagate the scaling factor (not re-scaling yet)
+            scaling_factors[node_index][active_likelihood[node_index]] = scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
             
         }
-        
-        double begin_age = node.getAge();
-        double end_age = node.getParent().getAge();
-        
-        if ( node.isSampledAncestorTip() == false )
-        {
-            // numerically integrate over the entire branch length
-            numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
+      
+        // find the time span for the ODE
+        double begin_age;
+        double end_age;
+
+        if (node.isRoot()){
+            begin_age = getRootAge();
+
+            if (use_origin == true){
+                end_age = getOriginAge();
+            }else{
+                end_age = begin_age;
+            }
+        }else{
+            begin_age = node.getAge();
+            end_age = node.getParent().getAge();
         }
         
+        // numerically integrate over the branch 
+        numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
+        
+        // rescale the probability densities at the "end" of the branch
         if ( RbSettings::userSettings().getUseScaling() == true ) 
         {
-            // rescale the conditional likelihoods at the "end" of the branch
             double max = 0.0;
             for (size_t i=0; i<num_states; ++i)
             {
@@ -395,19 +405,8 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                 node_likelihood[num_states+i] /= max;
             }
 
-            scaling_factors[node_index][active_likelihood[node_index]] = log(max);
-
-            if ( node.isTip() == false )
-            {
-                const TopologyNode          &left           = node.getChild(0);
-                size_t                      left_index      = left.getIndex();
-                const TopologyNode          &right          = node.getChild(1);
-                size_t                      right_index     = right.getIndex();
-                scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
-            }
-            
+            scaling_factors[node_index][active_likelihood[node_index]] += log(max);
         }
-        
     }
 
 }
@@ -418,36 +417,9 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
     // get the likelihoods of descendant nodes
     const TopologyNode     &root            = value->getRoot();
     size_t                  node_index      = root.getIndex();
-    const TopologyNode     &left            = root.getChild(0);
-    size_t                  left_index      = left.getIndex();
-    computeNodeProbability( left, left_index );
-    const TopologyNode     &right           = root.getChild(1);
-    size_t                  right_index     = right.getIndex();
-    computeNodeProbability( right, right_index );
-
-    // get the likelihoods of descendant nodes
-    const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
-    const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
-
-    std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
-
-
-    // merge descendant likelihoods
-    for (size_t i=0; i<num_states; ++i)
-    {
-        node_likelihood[i] = left_likelihoods[i];
-
-        node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-        node_likelihood[num_states + i] *= lambda[i];
-    }
-
-    if (use_origin == true){
-        double begin_age = getRootAge();
-        double end_age   = getOriginAge();
-
-        // numerically integrate over the entire branch length
-        numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
-    }
+  
+    computeNodeProbability( root, node_index);
+    std::vector<double> &node_likelihood = node_partial_likelihoods[node_index][active_likelihood[node_index]];
 
     // sum the root likelihoods
     const RbVector<double> &freqs = getRootFrequencies();
@@ -457,8 +429,6 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
     {
         prob += freqs[i] * node_likelihood[num_states + i];
     }
-
-    scaling_factors[node_index][active_likelihood[node_index]] = scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
     
     return log(prob) + scaling_factors[node_index][active_likelihood[node_index]];
 }
@@ -468,7 +438,6 @@ void FastBirthDeathShiftProcess::fireTreeChangeEvent( const RevBayesCore::Topolo
 {
     // call a recursive flagging of all node above (closer to the root) and including this node
     recursivelyFlagNodeDirty( n );
-
 }
 
 
