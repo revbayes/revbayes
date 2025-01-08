@@ -49,8 +49,7 @@ namespace RevBayesCore {
                                   bool prune,
                                   bool condition_on_tip_states,
                                   bool condition_on_num_tips,
-                                  bool condition_on_tree,
-                                  bool allow_shifts_extinct);
+                                  bool condition_on_tree);
         
         // pure virtual member functions
         virtual FastBirthDeathShiftProcess*                             clone(void) const;

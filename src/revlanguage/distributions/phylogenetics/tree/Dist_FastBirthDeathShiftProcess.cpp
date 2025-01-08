@@ -119,8 +119,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     
     size_t prune = static_cast<const RlBoolean &>( prune_extinct_lineages->getRevObject() ).getValue();
     
-    bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
-    
     // finally make the distribution 
     RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( 
             ra, 
@@ -140,8 +138,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
             prune, 
             cond_tip_states,
             cond_num_tips,
-            cond_tree,
-            allow_shifts_extinct );
+            cond_tree);
    
     
 
@@ -287,7 +284,6 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         memberRules.push_back( new ArgumentRule("exactNumLineages", Natural::getClassTypeSpec(), "The exact number of lineages to simulate; applied under the numTips condition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
         memberRules.push_back( new ArgumentRule("maxTime", RealPos::getClassTypeSpec(), "Maximum time for lineages to coalesce when simulating; applied under the numTips and tipStates condition.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1000.0) ) );
         memberRules.push_back( new ArgumentRule("pruneExtinctLineages", RlBoolean::getClassTypeSpec(), "When simulating should extinct lineages be pruned off?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        memberRules.push_back( new ArgumentRule("allowRateShiftsAtExtinctLineages", RlBoolean::getClassTypeSpec(), "Should we allow rate shifts to occur on extinct lineages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }
@@ -373,10 +369,6 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     else if ( name == "simulateCondition" )
     {
         simulation_condition = var;
-    }
-    else if ( name == "allowRateShiftsAtExtinctLineages" )
-    {
-        allow = var;
     }
     else
     {

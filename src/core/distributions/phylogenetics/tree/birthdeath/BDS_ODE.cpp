@@ -1,12 +1,7 @@
 #include <cstddef>
-#include <map>
-#include <utility>
 #include <vector>
 
 #include "BDS_ODE.h"
-#include "RateGenerator.h"
-#include "TimeInterval.h"
-#include <boost/numeric/ublas/matrix.hpp>
 
 using namespace RevBayesCore;
 
@@ -120,13 +115,11 @@ BDS_ODE::BDS_ODE(
         const std::vector<double> &l,
         const std::vector<double> &m,
         const size_t &n, // number of rate classes
-        //const boost::numeric::ublas::matrix<double> &qmatrix,
         const double &a,
         const double &b
         ) :
     mu( m ),
     lambda( l ),
-    //Q( qmatrix ),
     num_classes( n ),
     alpha( a ),
     beta( b )
@@ -142,7 +135,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
                       
     // catch negative extinction probabilities that can result from
     // rounding errors in the ODE stepper
-    std::vector< double > safe_x = x; // I imagine this is quite slow, re-allocating a new vector every time
+    std::vector< double > safe_x = x; 
     for (size_t i = 0; i < num_states * 2; ++i)
     {
         safe_x[i] = ( x[i] < 0.0 ? 0.0 : x[i] );
