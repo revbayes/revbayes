@@ -1,6 +1,5 @@
 #include <math.h>
 #include <cstddef>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -11,49 +10,29 @@
 #include "Natural.h"
 #include "OptionRule.h"
 #include "Probability.h"
-#include "RateGenerator.h"
 #include "RealPos.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlBoolean.h"
 #include "RlDistributionMemberFunction.h"
-#include "RlRateGenerator.h"
 #include "RlSimplex.h"
 #include "RlString.h"
 #include "RlTimeTree.h"
 #include "FastBirthDeathShiftProcess.h"
 #include "StochasticNode.h"
-#include "ConstantNode.h"
-#include "DagMemberFunction.h"
-#include "DagNode.h"
-#include "DeterministicNode.h"
-#include "DistributionMemberFunction.h"
-#include "DynamicNode.h"
-#include "IndirectReferenceFunction.h"
 #include "Integer.h"
 #include "MemberProcedure.h"
 #include "MethodTable.h"
-#include "ModelObject.h"
-#include "RbBoolean.h"
-#include "RbException.h"
-#include "RbVector.h"
 #include "RevNullObject.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
-#include "RlConstantNode.h"
-#include "RlDagMemberFunction.h"
-#include "RlDeterministicNode.h"
 #include "RlDistribution.h"
-#include "RlStochasticNode.h"
 #include "RlTypedDistribution.h"
-#include "RlTypedFunction.h"
 #include "RlUtils.h"
 #include "Tree.h"
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
-#include "TypedFunction.h"
-#include "UserFunctionNode.h"
 
 namespace RevBayesCore { class Simplex; }
 
@@ -143,12 +122,31 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
     
     // finally make the distribution 
-    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp_scale, ex_scale, sp_sd, ex_sd, r_sp, r_ext, num_classes, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
+    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( 
+            ra, 
+            sp_scale, 
+            ex_scale, 
+            sp_sd, 
+            ex_sd, 
+            r_sp, 
+            r_ext, 
+            num_classes, 
+            cond, 
+            uo, 
+            min_l,
+            max_l,
+            exact_l,
+            max_t,
+            prune, 
+            cond_tip_states,
+            cond_num_tips,
+            cond_tree,
+            allow_shifts_extinct );
    
     
 
     // set sampling probabilities/fractions
-    RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* rh = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
     d->setSamplingFraction( rh );
     
    

@@ -1,12 +1,9 @@
 #include <boost/assign/list_of.hpp>
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
-#include <map>
-#include <ostream>
-#include <string>
-#include <utility>
 #include <vector>
+#include <cstddef>
+#include <string>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
@@ -19,19 +16,15 @@
 #include "FastBirthDeathShiftProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-//#include "RateMatrix_JC.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
-#include "RlString.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "AbstractDiscreteTaxonData.h"
 #include "AbstractTaxonData.h"
-#include "Cloneable.h"
 #include "DiscreteCharacterState.h"
 #include "DiscreteTaxonData.h"
 #include "NaturalNumbersState.h"
-//#include "RateGenerator.h"
 #include "RbBitSet.h"
 #include "RbException.h"
 #include "RbSettings.h"
@@ -40,7 +33,6 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "Simplex.h"
-#include "StringUtilities.h"
 #include "Taxon.h"
 #include "Tree.h"
 #include "TreeChangeEventHandler.h"
@@ -127,6 +119,7 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     addParameter( beta );
     addParameter( rho );
     addParameter( process_age );
+
 
     // set the new Q matrix
     boost::numeric::ublas::matrix<double> Qm(num_states, num_states);

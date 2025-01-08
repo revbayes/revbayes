@@ -1,22 +1,19 @@
 #ifndef FastBirthDeathShiftProcess_H
 #define FastBirthDeathShiftProcess_H
 
+#include <vector>
+#include <boost/numeric/ublas/matrix.hpp>
+
 #include "AbstractHomologousDiscreteCharacterData.h"
-#include "TreeDiscreteCharacterData.h"
-//#include "RateMatrix.h"
-//#include "RateMatrix_JC.h"
+#include "TypedDistribution.h"
 #include "Simplex.h"
-#include "BDS_ODE.h"
-#include "Taxon.h"
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDagNode.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
-#include "RlString.h"
 
 
-#include <vector>
 
 namespace RevBayesCore {
     
