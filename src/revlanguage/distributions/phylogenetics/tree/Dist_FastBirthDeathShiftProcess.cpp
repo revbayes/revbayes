@@ -89,16 +89,27 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     // condition off origin age or root age?
     bool uo = ( start_condition == "originAge" ? true : false );
    
-    // extinction rates
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex  = static_cast<const ModelVector<RealPos> &>( extinction_rates->getRevObject() ).getDagNode();
-    
-    // get speciation rates 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp = nullptr;
-    sp  = static_cast<const ModelVector<RealPos> &>( speciation_rates->getRevObject() ).getDagNode();
+    // get speciation scale 
+    RevBayesCore::TypedDagNode<double>* sp_scale = nullptr;
+    sp_scale = static_cast<const RealPos &>( speciation_scale->getRevObject() ).getDagNode();
+
+    // extinction scale
+    RevBayesCore::TypedDagNode<double>* ex_scale = nullptr;
+    ex_scale = static_cast<const RealPos &>( extinction_scale->getRevObject() ).getDagNode();
+
+    // get spread parameters
+    RevBayesCore::TypedDagNode<double>* sp_sd = nullptr;
+    sp_sd = static_cast<const RealPos &>( speciation_sd->getRevObject() ).getDagNode();
+
+    RevBayesCore::TypedDagNode<double>* ex_sd = nullptr;
+    ex_sd = static_cast<const RealPos &>( extinction_sd->getRevObject() ).getDagNode();
 
     // get alpha and beta
     RevBayesCore::TypedDagNode<double>* r_sp = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* r_ext = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
+
+    // get number of rate classes
+    size_t num_classes = static_cast<const Integer &>( num_rate_classes->getRevObject() ).getValue();
         
     // condition
     const std::string& cond                  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
@@ -132,39 +143,14 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     bool allow_shifts_extinct = static_cast<const RlBoolean &>( allow->getRevObject() ).getValue();
     
     // finally make the distribution 
-    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp, ex, r_sp, r_ext, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
+    RevBayesCore::FastBirthDeathShiftProcess*   d = new RevBayesCore::FastBirthDeathShiftProcess( ra, sp_scale, ex_scale, sp_sd, ex_sd, r_sp, r_ext, num_classes, cond, uo, min_l, max_l, exact_l, max_t, prune, cond_tip_states, cond_num_tips, cond_tree, allow_shifts_extinct );
    
     
-    size_t ex_size = ex->getValue().size();
-    size_t sp_size = sp->getValue().size();
-
-    std::stringstream ss_err;
-    if (ex_size != sp_size)
-    {
-        ss_err << "State count mismatch between extinction rates (" << ex_size << ") and speciation rates (" << sp_size << ")";
-        throw RbException(ss_err.str());
-    }
 
     // set sampling probabilities/fractions
-    if (rho->getRevObject().isType( Probability::getClassTypeSpec() ))
-    {
-        RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
-        d->setSamplingFraction( rh );
-    }
-    else if (rho->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
-    {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rh   = static_cast<const ModelVector<Probability> &>( rho->getRevObject() ).getDagNode();
-        
-        if (rh->getValue().size() != ex_size)
-        {
-            ss_err << "State count mismatch between extinction rates (" << ex_size << ") and sampling probabilities (" << rh->getValue().size() << ")";
-            throw RbException(ss_err.str());
-        }
-        
-        d->setSamplingFraction( rh );
-    }
+    RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    d->setSamplingFraction( rh );
     
-    // set the number of time slices for the numeric ODE
    
     return d;
 }
@@ -264,20 +250,24 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         aliases.push_back("rootAge");
         aliases.push_back("originAge");
         memberRules.push_back( new ArgumentRule( aliases, RealPos::getClassTypeSpec()    , "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+
         std::vector<std::string> slabels;
-        slabels.push_back("speciationRates");
-        slabels.push_back("lambda");
+        slabels.push_back("speciationScale");
         std::vector<TypeSpec> speciationTypes;
-        speciationTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
-        memberRules.push_back( new ArgumentRule( slabels     , speciationTypes ,                          "The vector of speciation rates."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+        speciationTypes.push_back( RealPos::getClassTypeSpec() );
+        memberRules.push_back( new ArgumentRule( slabels     , speciationTypes ,                          "The scale (in the log-normal distribution) of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
 
         std::vector<std::string> elabels;
-        elabels.push_back("extinctionRates");
-        elabels.push_back("mu");
-        memberRules.push_back( new ArgumentRule( elabels     , ModelVector<RealPos>::getClassTypeSpec() , "The vector of extinction rates."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+        elabels.push_back("extinctionScale");
+        memberRules.push_back( new ArgumentRule( elabels     , RealPos::getClassTypeSpec() , "The scale (in the log-normal distribution) of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+
+        memberRules.push_back( new ArgumentRule( "speciationSD", RealPos::getClassTypeSpec(), "The spread (sigma-parameter in the log-normal distribution) of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.587)));
+        memberRules.push_back( new ArgumentRule( "extinctionSD", RealPos::getClassTypeSpec(), "The spread (sigma-parameter in the log-normal distribution) of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.587)));
 
         memberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()        , "the rate of shifts in speciation rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "beta", RealPos::getClassTypeSpec()        , "the rate of shifts in extinction rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
+        memberRules.push_back( new ArgumentRule( "numClasses", Natural::getClassTypeSpec(), "The number of rate classes (the number of rate categories will be n^2).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(6) ) );
         
         std::vector<TypeSpec> sampling_fraction_types;
         sampling_fraction_types.push_back( Probability::getClassTypeSpec() );
@@ -326,13 +316,21 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
         start_age = var;
         start_condition = name;
     }
-    else if ( name == "speciationRates" || name == "lambda" || name == "cladoEventMap" )
+    else if ( name == "speciationScale" ) 
     {
-        speciation_rates = var;
+        speciation_scale = var;
     }
-    else if ( name == "extinctionRates" || name == "mu" )
+    else if ( name == "extinctionScale" )
     {
-        extinction_rates = var;
+        extinction_scale = var;
+    }
+    else if ( name == "speciationSD" )
+    {
+        speciation_sd = var;
+    }
+    else if ( name == "extinctionSD" )
+    {
+        extinction_sd = var;
     }
     else if ( name == "alpha" )
     {
@@ -341,6 +339,10 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     else if ( name == "beta" )
     {
         beta = var;
+    }
+    else if ( name == "numClasses" )
+    {
+        num_rate_classes = var;
     }
     else if ( name == "rho" )
     {

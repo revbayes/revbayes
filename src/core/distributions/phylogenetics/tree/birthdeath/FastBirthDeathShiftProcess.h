@@ -24,20 +24,25 @@ namespace RevBayesCore {
     
     /**
      * @file
-     * This file contains the declaration of the random variable class for the character-dependent
-     * cladogenetic birth-death process: ClaSSE as described in Golberg & Igic 2012
      *
-     * Will Freyman 6/22/16
+     * Birth-death-shift model with two shift parameters, controlling 
+     *      i) the rate of shifts in speciation rate, and
+     *      ii) the rate of shifts in the extinction rate.
+     *
+     *  BTK
      *
      */
     class FastBirthDeathShiftProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
         
     public:
         FastBirthDeathShiftProcess(const TypedDagNode<double> *root,
-                                  const TypedDagNode<RbVector<double> >* s,
-                                  const TypedDagNode<RbVector<double> >* m,
+                                  const TypedDagNode<double>* s,
+                                  const TypedDagNode<double>* m,
+                                  const TypedDagNode<double>* ssd,
+                                  const TypedDagNode<double>* msd,
                                   const TypedDagNode<double> * rsp,
                                   const TypedDagNode<double> * rext,
+                                  size_t num_cls,
                                   const std::string &cdt,
                                   bool uo,
                                   size_t min_num_lineages,
@@ -75,6 +80,7 @@ namespace RevBayesCore {
         void                                                            numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool use_backward, bool extinction_only) const; //!< Wrapper function for the ODE time stepper function.
         void                                                            resizeVectors(size_t num_nodes);
         void                                                            updateQmatrix();
+        void                                                            update_rates();
         
     protected:
         
@@ -118,6 +124,7 @@ namespace RevBayesCore {
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
         mutable boost::numeric::ublas::matrix<double>                   Qmatrix;
         size_t                                                          num_states;
+        size_t                                                          num_rate_classes;
         mutable std::vector<std::vector<double> >                       scaling_factors;
         bool                                                            use_origin;
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
@@ -129,11 +136,15 @@ namespace RevBayesCore {
         
         // parameters
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
-        const TypedDagNode<RbVector<double> >*                          mu;
-        const TypedDagNode<RbVector<double> >*                          lambda;
+        const TypedDagNode<double>*                                     speciation_scale;
+        const TypedDagNode<double>*                                     extinction_scale;
+        const TypedDagNode<double>*                                     speciation_sd;
+        const TypedDagNode<double>*                                     extinction_sd;
         const TypedDagNode<double>*                                     alpha;
         const TypedDagNode<double>*                                     beta;
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
+        std::vector<double>                                             lambda;
+        std::vector<double>                                             mu;
         const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
 
         size_t                                                          min_num_lineages;

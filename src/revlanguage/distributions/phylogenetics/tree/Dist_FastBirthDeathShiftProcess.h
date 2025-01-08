@@ -8,10 +8,9 @@ namespace RevLanguage {
     
     /**
      * @file
-     * This file contains the declaration of the Rev character-dependent birth-death tree distribution
+     * This file contains the declaration of the Rev birth-death-shift tree distribution
      *
-     *
-     * @author Sebastian Hoehna
+     * @author BTK
      */
     class Dist_FastBirthDeathShiftProcess : public TypedDistribution<TimeTree> {
         
@@ -41,10 +40,13 @@ namespace RevLanguage {
     private:
         
         RevPtr<const RevVariable>                                   start_age;
-        RevPtr<const RevVariable>                                   speciation_rates;
-        RevPtr<const RevVariable>                                   extinction_rates;
+        RevPtr<const RevVariable>                                   speciation_scale;
+        RevPtr<const RevVariable>                                   extinction_scale;
+        RevPtr<const RevVariable>                                   speciation_sd;
+        RevPtr<const RevVariable>                                   extinction_sd;
         RevPtr<const RevVariable>                                   alpha;
         RevPtr<const RevVariable>                                   beta;
+        RevPtr<const RevVariable>                                   num_rate_classes;
         RevPtr<const RevVariable>                                   rho;
         RevPtr<const RevVariable>                                   condition;                                                                              //!< The condition of the process (none/survival/#Taxa)
         RevPtr<const RevVariable>                                   allow;                                                                              //!< The condition of the process (none/survival/#Taxa)

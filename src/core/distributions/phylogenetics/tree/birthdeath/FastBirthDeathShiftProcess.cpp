@@ -10,6 +10,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include "DistributionLognormal.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "BDS_ODE.h"
@@ -63,10 +64,13 @@ using namespace RevBayesCore;
  * and initializes the probability density by computing the combinatorial constant of the tree structure.
  */
 FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double> *age,
-                                                       const TypedDagNode<RbVector<double> > *sp,
-                                                       const TypedDagNode<RbVector<double> > *ext,
+                                                       const TypedDagNode<double> *sp,
+                                                       const TypedDagNode<double> *ext,
+                                                       const TypedDagNode<double> *sp_sd,
+                                                       const TypedDagNode<double> *ext_sd,
                                                        const TypedDagNode<double> *r_sp,
                                                        const TypedDagNode<double> *r_ext,
+                                                       size_t num_classes, 
                                                        const std::string &cdt,
                                                        bool uo,
                                                        size_t min_num_lineages,
@@ -82,23 +86,27 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     active_likelihood( std::vector<bool>(5, 0) ),
     changed_nodes( std::vector<bool>(5, false) ),
     dirty_nodes( std::vector<bool>(5, true) ),
-    node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*ext->getValue().size(),0))) ),
-    extinction_probabilities( std::vector<std::vector<double> >( 500.0, std::vector<double>( ext->getValue().size(), 0) ) ),
-    num_states( ext->getValue().size() ),
+    node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*num_classes*num_classes,0))) ),
+    extinction_probabilities( std::vector<std::vector<double> >( 500.0, std::vector<double>( num_classes*num_classes, 0) ) ),
+    num_states( num_classes*num_classes ),
     scaling_factors( std::vector<std::vector<double> >(5, std::vector<double>(2,0.0) ) ),
     use_origin( uo ),
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
     average_extinction( std::vector<double>(5, 0.0) ),
     num_shift_events( std::vector<long>(5, 0.0) ),
-    time_in_states( std::vector<double>(ext->getValue().size(), 0.0) ),    
+    time_in_states( std::vector<double>(num_classes*num_classes, 0.0) ),    
     simmap( "" ),
     process_age( age ),
-    lambda( sp ),
-    mu( ext ),
+    num_rate_classes ( num_classes ),
+    speciation_scale( sp ),
+    extinction_scale( ext ),
+    speciation_sd( sp_sd ),
+    extinction_sd( ext_sd ),
     alpha( r_sp ),
     beta( r_ext ),
-    //Qmatrix( boost::numeric::ublas::matrix<double>::matrix(num_states, num_states) ),
+    lambda( std::vector<double>(num_classes * num_classes, 0.0) ),
+    mu( std::vector<double>(num_classes * num_classes, 0.0) ),
     rho( new ConstantNode<double>("", new double(1.0)) ),
     rho_per_state( NULL ),
     min_num_lineages( min_num_lineages ),
@@ -111,8 +119,10 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     condition_on_num_tips( condition_on_num_tips ),
     condition_on_tree( condition_on_tree )
 {
-    addParameter( mu );
-    addParameter( lambda );
+    addParameter( sp );
+    addParameter( ext );
+    addParameter( sp_sd );
+    addParameter( ext_sd );
     addParameter( alpha );
     addParameter( beta );
     addParameter( rho );
@@ -122,9 +132,10 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     boost::numeric::ublas::matrix<double> Qm(num_states, num_states);
     Qmatrix = Qm;
     updateQmatrix();
+    update_rates();
 
     // set the B matrix
-    size_t num_classes = sqrt(num_states);
+    //size_t num_classes = sqrt(num_states);
     
     if ( min_num_lineages > max_num_lineages )
     {
@@ -172,10 +183,9 @@ std::vector<double> FastBirthDeathShiftProcess::calculateTotalSpeciationRatePerS
     std::vector<double> speciation_rates;
     std::map<std::vector<unsigned>, double>::iterator it;
 
-    speciation_rates = lambda->getValue();
     for (size_t i = 0; i < num_states; i++)
     {
-        total_rates[i] += speciation_rates[i];
+        total_rates[i] += lambda[i];
     }
     return total_rates;
 }
@@ -391,9 +401,6 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
             const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
             const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
 
-            std::vector<double> speciation_rates;
-
-            speciation_rates = lambda->getValue();
             
             // merge descendant likelihoods
             for (size_t i=0; i<num_states; ++i)
@@ -401,7 +408,7 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
                 node_likelihood[i] = left_likelihoods[i];
 
                 node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-                node_likelihood[num_states + i] *= speciation_rates[i];
+                node_likelihood[num_states + i] *= lambda[i];
             }
             
         }
@@ -468,9 +475,6 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
 
     std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
 
-    std::vector<double> speciation_rates;
-
-    speciation_rates = lambda->getValue();
 
     // merge descendant likelihoods
     for (size_t i=0; i<num_states; ++i)
@@ -478,14 +482,13 @@ double FastBirthDeathShiftProcess::computeRootLikelihood( void ) const
         node_likelihood[i] = left_likelihoods[i];
 
         node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-        node_likelihood[num_states + i] *= speciation_rates[i];
+        node_likelihood[num_states + i] *= lambda[i];
+
     }
-    
-    // calculate likelihoods for the root branch
-    if ( use_origin == true )
-    {
+
+    if (use_origin == true){
         double begin_age = getRootAge();
-        double end_age = getOriginAge();
+        double end_age   = getOriginAge();
 
         // numerically integrate over the entire branch length
         numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
@@ -524,9 +527,6 @@ void FastBirthDeathShiftProcess::drawJointConditionalAncestralStates(std::vector
 {
     // now begin the root-to-tip pass, drawing ancestral states conditional on the start states
     
-    std::vector<double> speciation_rates;
-
-    speciation_rates = lambda->getValue();
     
     // get the likelihoods of descendant nodes
     const TopologyNode          &root               = value->getRoot();
@@ -547,7 +547,7 @@ void FastBirthDeathShiftProcess::drawJointConditionalAncestralStates(std::vector
     
     // calculate probabilities for each state
     for (size_t i = 0; i < num_states; i++) {
-            double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+            double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * lambda[i];
             std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
             sample_probs[ states ] = likelihood * freqs[i];
             sample_probs_sum += likelihood * freqs[i];
@@ -687,8 +687,6 @@ void FastBirthDeathShiftProcess::recursivelyDrawJointConditionalAncestralStates(
         numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
         
         std::map<std::vector<unsigned>, double> event_map;
-        std::vector<double> speciation_rates;
-        speciation_rates = lambda->getValue();
         
         // get likelihoods of descendant nodes
         const TopologyNode &left = node.getChild(0);
@@ -704,7 +702,7 @@ void FastBirthDeathShiftProcess::recursivelyDrawJointConditionalAncestralStates(
 
         // calculate probabilities for each state
         for (size_t i = 0; i < num_states; i++){
-                double prob = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * speciation_rates[i];
+                double prob = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * lambda[i];
                 prob *= branch_conditional_probs[num_states + i];
                 std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
                 sample_probs[ states ] = prob;
@@ -1050,7 +1048,7 @@ double FastBirthDeathShiftProcess::pSurvival(double start, double end, bool spec
 {
 
     std::vector< double > initial_state = pExtinction(start,end);
-    std::vector<double>   speciation_rates = calculateTotalSpeciationRatePerState();
+    std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState();
 
     double prob = 0.0;
     const RbVector<double> &freqs = getRootFrequencies();
@@ -1303,7 +1301,6 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
 
     // vectors keeping track of the total rate of all
     // speciation/anagenetic/extinction events for each state
-    std::vector<double> extinction_rates = mu->getValue();
     std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState();
     std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState();
     std::vector<double> r = std::vector<double>(num_states, 0);
@@ -1374,10 +1371,10 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
         {
             for (size_t i = 0; i < num_states; ++i)
             {
-                extinction_rates[i] -= t/10; // TODO make this a user option
-                if (extinction_rates[i] < 0)
+                mu[i] -= t/10; // TODO make this a user option
+                if (mu[i] < 0)
                 {
-                    extinction_rates[i] = 0.0;
+                    mu[i] = 0.0;
                 }
             }
         }
@@ -1392,7 +1389,7 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
             }
             if (lineages_in_state[i].size() > 0)
             {
-                r[i] += extinction_rates[i] + total_anagenetic_rates[i];
+                r[i] += mu[i] + total_anagenetic_rates[i];
             }
         }
         double g = 0;
@@ -1466,7 +1463,7 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
                 {
                     prob_speciation[i] = total_speciation_rates[i] * (lineages_in_state[i].size() - 1) * exp(-1 * dt * total_rate_spec);
                 }
-                prob_extinction[i] = extinction_rates[i] * (lineages_in_state[i].size() + 1) * exp(-1 * dt * total_rate_ext);
+                prob_extinction[i] = mu[i] * (lineages_in_state[i].size() + 1) * exp(-1 * dt * total_rate_ext);
 
                 for (size_t j = 0; j < num_states; ++j)
                 {
@@ -1686,7 +1683,7 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
         {
             time_in_states[j] += sim_tree->getNodes()[i]->getTimeInStates()[j];
             branch_total_speciation += sim_tree->getNodes()[i]->getTimeInStates()[j] * total_speciation_rates[j];
-            branch_total_extinction += sim_tree->getNodes()[i]->getTimeInStates()[j] * extinction_rates[j];
+            branch_total_extinction += sim_tree->getNodes()[i]->getTimeInStates()[j] * mu[j];
         }
         if (sim_tree->getNodes()[i]->getBranchLength() > 0)
         {
@@ -1738,19 +1735,16 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
 
     // vectors keeping track of the total rate of all
     // cladogenetic/anagenetic/extinction events for each state
-    std::vector<double> extinction_rates = mu->getValue();
     std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState();
     std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState();
     std::vector<double> total_rate_for_state = std::vector<double>(num_states, 0);
     for (size_t i = 0; i < num_states; i++)
     {
-        total_rate_for_state[i] = extinction_rates[i] + total_speciation_rates[i] + total_anagenetic_rates[i];
+        total_rate_for_state[i] = mu[i] + total_speciation_rates[i] + total_anagenetic_rates[i];
     }
 
     // get the speciation rates, extinction rates, and Q matrix
-    std::vector<double> speciation_rates;
     std::map<std::vector<unsigned>, double>::iterator it;
-    speciation_rates = lambda->getValue();
 
 
     // a vector of all nodes in our simulated tree
@@ -1777,8 +1771,8 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
     // calculate probabilities for each state
     for (size_t i = 0; i < num_states; i++){
         std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-        sample_probs[ states ] = root_freqs[i] * speciation_rates[i];
-        sample_probs_sum += root_freqs[i] * speciation_rates[i];
+        sample_probs[ states ] = root_freqs[i] * lambda[i];
+        sample_probs_sum += root_freqs[i] * lambda[i];
     }
     
     // sample left and right character states from probs
@@ -1957,7 +1951,7 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
         std::string event_type = ""; 
         u = rng->uniform01() * total_rate_for_state[event_state];
         while (true) {
-            u = u - extinction_rates[event_state];
+            u = u - mu[event_state];
             if (u < 0) 
             {
                 event_type = "extinction";
@@ -2081,8 +2075,8 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
             double sample_probs_sum = 0.0;
 
             std::vector<unsigned> states = boost::assign::list_of(event_state)(event_state)(event_state);
-            sample_probs[ states ] = speciation_rates[event_state];
-            sample_probs_sum += speciation_rates[event_state];
+            sample_probs[ states ] = lambda[event_state];
+            sample_probs_sum += lambda[event_state];
             
             // sample left and right character states from probs
             size_t l = 0, r = 0;
@@ -2201,7 +2195,7 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
         {
             time_in_states[j] += sim_tree->getNodes()[i]->getTimeInStates()[j];
             branch_total_speciation += sim_tree->getNodes()[i]->getTimeInStates()[j] * total_speciation_rates[j];
-            branch_total_extinction += sim_tree->getNodes()[i]->getTimeInStates()[j] * extinction_rates[j];
+            branch_total_extinction += sim_tree->getNodes()[i]->getTimeInStates()[j] * mu[j];
         }
         if (sim_tree->getNodes()[i]->getBranchLength() > 0)
         {
@@ -2238,13 +2232,25 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         process_age = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if ( oldP == mu )
+    if ( oldP == speciation_scale )
     {
-        mu = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        speciation_scale = static_cast<const TypedDagNode<double>* >( newP );
+        update_rates();
     }
-    if ( oldP == lambda )
+    if ( oldP == extinction_scale )
     {
-        lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        extinction_scale = static_cast<const TypedDagNode<double>* >( newP );
+        update_rates();
+    }
+    if ( oldP == speciation_sd )
+    {
+        speciation_sd = static_cast<const TypedDagNode<double>* >( newP );
+        update_rates();
+    }
+    if ( oldP == extinction_sd )
+    {
+        extinction_sd = static_cast<const TypedDagNode<double>* >( newP );
+        update_rates();
     }
     if ( oldP == alpha )
     {
@@ -2316,8 +2322,8 @@ void FastBirthDeathShiftProcess::touchSpecialization(const DagNode *affecter, bo
  */
 void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
 {
-    const std::vector<double> &speciation_rates = lambda->getValue();
-    const std::vector<double> &extinction_rates = mu->getValue();
+    const std::vector<double> &speciation_rates = lambda;
+    const std::vector<double> &extinction_rates = mu;
     const double &alpha_ref = alpha->getValue();
     const double &beta_ref = beta->getValue();
 
@@ -2326,11 +2332,11 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     //updateQmatrix();
 
     boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
-    const size_t num_classes = sqrt(speciation_rates.size());
+    //const size_t num_classes = sqrt(speciation_rates.size());
 
 
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
-    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_classes, alpha_ref, beta_ref);
+    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
@@ -2371,6 +2377,38 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
         }
     }
     
+}
+
+void FastBirthDeathShiftProcess::update_rates(){
+    size_t num_categories = num_rate_classes * num_rate_classes;
+
+    double lambda_scale = speciation_scale->getValue();
+    double lambda_sd    = speciation_sd   ->getValue();
+
+    double mu_scale = extinction_scale->getValue();
+    double mu_sd    = extinction_sd   ->getValue();
+
+    std::vector<double> v_lambda;
+    std::vector<double> v_mu;
+
+    for (size_t i=0; i < num_rate_classes; ++i){
+        double p = (i+0.5)/num_rate_classes;
+
+        double lambda_quantile = RbStatistics::Lognormal::quantile(log(lambda_scale), lambda_sd, p);
+        double mu_quantile     = RbStatistics::Lognormal::quantile(log(mu_scale),     mu_sd,     p);
+
+        v_lambda.push_back(lambda_quantile);
+        v_mu.push_back(mu_quantile);
+    }
+
+    size_t q = 0;
+    for (size_t i = 0; i < num_rate_classes; i++){
+        for (size_t j = 0; j < num_rate_classes; j++){
+            lambda[q] = v_lambda[i]; 
+            mu[q] = v_mu[j]; 
+            q++;
+        }
+    }
 }
 
 
