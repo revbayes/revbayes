@@ -441,7 +441,7 @@ static void menuitem_load_response( gchar *string )
 
         if ( not read_stream )
         {
-//            throw RbException( "Could not open file " + filename );
+//            throw RbException() << "Could not open file " << filename ; 
             std::cerr << "Could not open file with name '" << std::string(filename) << "'." << std::endl;
         }
         

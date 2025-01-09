@@ -55,7 +55,7 @@ BirthDeathBurstProcess::BirthDeathBurstProcess( const TypedDagNode<double> *ra,
     addParameter( time_burst );
     addParameter( rho );
     
-    simulateTree();
+    simulateTree(true);
     
 }
 
@@ -222,7 +222,7 @@ void BirthDeathBurstProcess::executeMethod(const std::string &name, const std::v
     }
     else
     {
-        throw RbException("The character dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The character dependent birth-death process does not have a member method called '" << name << "'.";
     }
     
 }
@@ -475,7 +475,7 @@ void BirthDeathBurstProcess::redrawValue( SimulationCondition condition )
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            simulateTree(true);
         }
     }
     else if ( condition == SimulationCondition::VALIDATION )

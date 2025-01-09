@@ -31,7 +31,6 @@ class Assignable;
         virtual                                             ~CladogeneticProbabilityMatrix_Epoch(void);
         
         // pure virtual methods
-        virtual CladogeneticProbabilityMatrix_Epoch&        assign(const Assignable &m);
         virtual CladogeneticProbabilityMatrix_Epoch*        clone(void) const;
         virtual void                                        initFromString( const std::string &s );
         

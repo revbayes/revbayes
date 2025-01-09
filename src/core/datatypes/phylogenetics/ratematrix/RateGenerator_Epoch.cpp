@@ -20,7 +20,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "RateMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "RateGenerator.h"
@@ -44,21 +43,6 @@ RateGenerator_Epoch::~RateGenerator_Epoch(void)
 {
 
 }
-
-RateGenerator_Epoch& RateGenerator_Epoch::assign(const Assignable &m)
-{
-    
-    const RateGenerator_Epoch *rm = dynamic_cast<const RateGenerator_Epoch*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 /** Calculate the transition probabilities */
 void RateGenerator_Epoch::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
@@ -222,7 +206,7 @@ void RateGenerator_Epoch::setEpochRates(const RbVector<double>& r)
     assignEpochDominatingRates();
 }
 
-bool RateGenerator_Epoch::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times)
+bool RateGenerator_Epoch::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times) const
 {
     if ( dynamic_cast<const RateMatrix*>( &epochRateGenerators[0] ) == NULL )
     {

@@ -216,7 +216,16 @@ void Proposal::swapNode(DagNode *oldP, DagNode *newP)
     }
     else
     {
-        throw RbException("Could not find the Proposal parameter to be swapped: " + oldP->getName());
+        throw RbException() << "Could not find the Proposal parameter to be swapped: " << oldP->getName();
     }
     
+}
+
+std::string Proposal::getLongProposalName() const
+{
+    std::vector<std::string> node_names;
+    for(auto node: nodes)
+	node_names.push_back(node->getName());
+
+    return getProposalName() + "(" + StringUtilities::join(node_names,",") +")";
 }

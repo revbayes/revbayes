@@ -1,6 +1,6 @@
 #include "Func_readAncestralStateTreeTrace.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <map>
 #include <iostream>

@@ -78,7 +78,7 @@ SyntaxFormal::SyntaxFormal( const std::string& type, const std::string& label, S
         
     // Check that we have a supported modifier
     if ( modifier != "" && modifier != "const" && modifier != "dynamic" )
-        throw RbException( "Formal type modifier '" + modifier + "' not supported (yet)" );
+        throw RbException() << "Formal type modifier '" << modifier << "' not supported (yet)" ; 
     
     // Find the type specification
     const TypeSpec& typeSpec = Workspace::userWorkspace().getClassTypeSpecOfType( typeName );

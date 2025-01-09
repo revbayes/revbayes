@@ -33,7 +33,6 @@ namespace RevBayesCore
         HostSwitchRateModifier(const HostSwitchRateModifier& g);
         
         
-        HostSwitchRateModifier&   assign(const Assignable &m);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, double age=0.0);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, std::vector<size_t> counts, double age=0.0);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, std::vector<std::set<size_t> > sites_with_states, double age=0.0);

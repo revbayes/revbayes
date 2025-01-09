@@ -1,6 +1,6 @@
 #include "TraceNumeric.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <vector>
 

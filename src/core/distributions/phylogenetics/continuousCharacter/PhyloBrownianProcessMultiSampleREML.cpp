@@ -99,14 +99,11 @@ double PhyloBrownianProcessMultiSampleREML::computeLnProbability( void )
     
     // only necessary if the root is actually dirty
     if ( this->dirty_nodes[root_index] )
-    {
-        
         recursiveComputeLnProbability( root, root_index );
-        
-        // sum the partials up
-        this->ln_prob = sumRootLikelihood();
-        
-    }
+
+    // sum the partials up
+    this->ln_prob = sumRootLikelihood();
+
     return this->ln_prob;
 }
 

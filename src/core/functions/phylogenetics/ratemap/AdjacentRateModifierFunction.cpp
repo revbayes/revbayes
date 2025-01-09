@@ -12,7 +12,6 @@
 
 #include "AdjacentRateModifier.h"
 #include "TypedDagNode.h"
-#include "Assignable.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"

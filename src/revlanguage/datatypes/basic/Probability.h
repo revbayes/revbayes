@@ -48,6 +48,9 @@ class TypeSpec;
         std::string                     getGuiUnicodeSymbol(void) { return "P"; }
         std::string                     getGuiInfo(void) { return ""; }
 
+	void                            validate() const;
+	void                            validate(double x) const;
+
     protected:
         void                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
 

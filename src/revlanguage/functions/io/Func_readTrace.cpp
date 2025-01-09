@@ -1,6 +1,6 @@
 #include "Func_readTrace.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <map>
 #include <sstream>

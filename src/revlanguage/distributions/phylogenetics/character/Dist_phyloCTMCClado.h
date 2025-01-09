@@ -25,6 +25,9 @@ namespace RevLanguage {
         
         // Distribution functions you have to override
         RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >*      createDistribution(void) const;
+
+	template <typename State>
+        RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >*      createDistributionForState(void) const;
         
     protected:
         

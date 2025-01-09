@@ -1,0 +1,22 @@
+setOption("outputPrecision",14,FALSE)
+
+tree <- readTrees( "data/primates.tree" )[1]
+
+data <- readDiscreteCharacterData("data/primates_cytb.nex")
+
+M1 := fnJC(4) |> fnGammaASRV(1) |> fnInvASRV(0.1)
+
+seq1 ~ dnPhyloCTMC(tree=tree, Q=M1, type="DNA")
+seq1.clamp(data)
+write("likelihood for JC+Gamma+INV (SiteMixtureModel) =",seq1.lnProbability(),"\n",filename="output/primates.like.txt")
+
+M2 := fnJC(4) |> fnInvASRV(0.1) |> fnGammaASRV(1)
+seq2 ~ dnPhyloCTMC(tree=tree, Q=M2, type="DNA")
+seq2.clamp(data)
+write("likelihood for JC+INV+Gamma (SiteMixtureModel) =",seq2.lnProbability(),"\n",filename="output/primates.like.txt",append=TRUE)
+
+seq3 ~ dnPhyloCTMC(tree=tree, Q=fnJC(4), siteRates=fnDiscretizeGamma(1,1,4), pInv=0.1, type="DNA")
+seq3.clamp(data)
+write("likelihood for JC+Gamma+INV (phyloCTMC args)   =",seq3.lnProbability(),"\n",filename="output/primates.like.txt",append=TRUE)
+
+q()

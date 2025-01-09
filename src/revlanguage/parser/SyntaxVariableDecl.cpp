@@ -94,11 +94,11 @@ RevPtr<RevVariable> SyntaxVariableDecl::evaluateContent( Environment& env, bool 
     
     // Check if variable exists
     if ( env.existsVariable( variableName ) )
-        throw RbException( "Illegal attempt to redefine variable " + variableName );
+        throw RbException() << "Illegal attempt to redefine variable " << variableName ; 
     
     // Check if type exists
     if ( !Workspace::userWorkspace().existsType( elementTypeName ) )
-        throw RbException( "Type '" + elementTypeName + "' does not exist" );
+        throw RbException() << "Type '" << elementTypeName << "' does not exist" ; 
 
     // Evaluate length specification
     std::vector<size_t> lengths;

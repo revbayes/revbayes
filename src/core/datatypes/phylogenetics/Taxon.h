@@ -46,7 +46,10 @@ namespace RevBayesCore {
         const std::string&                    getName(void) const;                        //!< Get the name for this taxon.
         const std::map<TimeInterval, size_t>& getOccurrences(void) const;                 //!< Get the occurrence ages and counts.
         const std::string&                    getSpeciesName(void) const;                 //!< Get the name of the species.
+
         void                                  setAge(double a);                           //!< Set the age.
+        void                                  setMinAge(double a);                        //!< Set the min age.
+        void                                  setMaxAge(double a);                        //!< Set the max age.
         void                                  setAgeRange(const TimeInterval &d);         //!< Set the date info.
         void                                  setExtinct(bool extinct);                   //!< Set the extinct status flag.
         void                                  setName(const std::string &n);              //!< Set the name.

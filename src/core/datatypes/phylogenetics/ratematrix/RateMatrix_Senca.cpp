@@ -11,7 +11,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "AminoAcidState.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "DiscreteCharacterState.h"
 #include "RbVector.h"
@@ -70,23 +69,6 @@ RateMatrix_Senca& RateMatrix_Senca::operator=(const RateMatrix_Senca &r)
     
     return *this;
 }
-
-
-RateMatrix_Senca& RateMatrix_Senca::assign(const Assignable &m)
-{
-    
-    const RateMatrix_Senca *rm = dynamic_cast<const RateMatrix_Senca*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */

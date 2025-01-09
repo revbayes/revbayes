@@ -1,4 +1,4 @@
-#include <math.h>       /* log2 */
+#include <cmath>       /* log2 */
 #include <cstddef>
 #include <algorithm>
 #include <iosfwd>

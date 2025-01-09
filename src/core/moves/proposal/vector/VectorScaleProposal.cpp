@@ -1,6 +1,6 @@
 #include "VectorScaleProposal.h"
 
-#include <math.h>
+#include <cmath>
 #include <ostream>
 
 #include "RandomNumberFactory.h"

@@ -20,6 +20,7 @@
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -168,13 +169,14 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
 
 double AbstractRootedTreeDistribution::computeLnProbability( void )
 {
-    
+    using namespace RbConstants;
+
     // proceed as long as derived classes validate a non-zero likeilhood
     if ( isLnProbabilityNonZero() == false )
     {
-        return RbConstants::Double::neginf;
+        return Double::neginf;
     }
-    
+
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent
     const std::vector<TopologyNode*>& nodes = value->getNodes();
@@ -186,37 +188,47 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
         {
             if( the_node.isTip() )
             {
-                if ( the_node.isSampledAncestor() == true )
+                if ( the_node.isSampledAncestorTip() == true )
                 {
                     if ( the_node.getAge() - the_node.getParent().getAge() != 0 )
                     {
-                        return RbConstants::Double::neginf;
+                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor "<<the_node.getTaxon().getName()<<" tip age "<<the_node.getAge()<<" differs from parent age "<<the_node.getParent().getAge();
                     }
                     else if ( the_node.isFossil() == false )
                     {
-                        return RbConstants::Double::neginf;
+                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" is not a fossil";
                     }
                     else if ( the_node.getBranchLength() != 0 )
                     {
-                        return RbConstants::Double::neginf;
+                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" has non-zero branch length "<<the_node.getBranchLength();
                     }
 
                 }
+                auto taxon = the_node.getTaxon();
+                if(taxon.getName() != "" && taxon.getMinAge() != taxon.getMaxAge())
+                {
+                    if(the_node.getAge() < taxon.getMinAge() || the_node.getAge() > taxon.getMaxAge())
+                    {
+                        std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
+                        return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
+                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<taxon.getMaxAge()<<"]";
+                    }
+                }
             }
-            else if( the_node.getAge() - the_node.getParent().getAge() > 0 )
+            if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {
-                return RbConstants::Double::neginf;
+                return withReason(Double::neginf)<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than parent age "<<the_node.getParent().getAge();
             }
             
         }
         else if ( the_node.getAge() > getOriginAge() )
         {
-            return RbConstants::Double::neginf;
+            return withReason(Double::neginf)<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than origin age "<<getOriginAge();
         }
         
         if ( the_node.getBranchLength() < 0 )
         {
-            return RbConstants::Double::neginf;
+	    return withReason(Double::neginf)<<"Pr(tree)=0: branch length "<<the_node.getBranchLength()<<" < 0";
         }
 
     }
@@ -224,18 +236,23 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     // present time
     double ra = value->getRoot().getAge();
     
-    if ( ra > getOriginAge() || ra != getRootAge() )
+    if ( ra > getOriginAge())
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: root age ("<<ra<<") > origin age ("<<getOriginAge()<<")";
+    }
+
+    if ( ra != getRootAge() )
+    {
+        return withReason(Double::neginf)<<"Pr(tree)=0: root age ("<<ra<<") != getRootAge() ("<<getRootAge()<<")";
     }
         
     const std::vector<TopologyNode*> &c = value->getRoot().getChildren();
     
-    for (std::vector<TopologyNode*>::const_iterator it = c.begin(); it != c.end(); ++it)
+    for (auto child: c)
     {
-        if ( ra < (*it)->getAge() )
+        if ( ra < child->getAge() )
         {
-            return RbConstants::Double::neginf;
+            return withReason(Double::neginf)<<"Pr(tree)=0: node age ("<<child->getAge()<<") greater than root age ("<<ra<<")";
         }
     }
     
@@ -375,7 +392,7 @@ std::vector<double> AbstractRootedTreeDistribution::getAgesOfTipsFromMostRecentS
     {
         
         const TopologyNode& n = *(nodes[i]);
-        if ( n.isTip() == true && n.isSampledAncestor() == false )
+        if ( n.isTip() == true && n.isSampledAncestorTip() == false )
         {
             double t = n.getAge() - minTipAge;
             ages.push_back(t);
@@ -483,12 +500,24 @@ void AbstractRootedTreeDistribution::recomputeDivergenceTimesSinceOrigin( void )
 }
 
 
+void AbstractRootedTreeDistribution::redrawValue( SimulationCondition c )
+{
+    
+    if ( starting_tree == NULL )
+    {
+        // if we are initializing an MCMC run, we don't care that the starting value comes from the "true" distribution
+        bool alwaysReturn = (c == SimulationCondition::MCMC); 
+        simulateTree(alwaysReturn);
+    }
+}
+
 void AbstractRootedTreeDistribution::redrawValue( void )
 {
     
     if ( starting_tree == NULL )
     {
-        simulateTree();
+        // if no condition is specified, assume the most restrictive
+        redrawValue(SimulationCondition::VALIDATION);
     }
 }
 
@@ -511,7 +540,7 @@ void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affect
 }
 
 
-void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &n, double age, double present)
+void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn)
 {
 
     // Get the rng
@@ -567,7 +596,7 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
         {
 
             // now we simulate new ages
-            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age);
+            double next_sim_age = simulateNextAge(active_nodes.size()-2, age, present, current_age, alwaysReturn);
 
             if ( next_sim_age < next_node_age )
             {
@@ -644,25 +673,26 @@ void AbstractRootedTreeDistribution::simulateClade(std::vector<TopologyNode *> &
 }
 
 
-double AbstractRootedTreeDistribution::simulateCladeAge(size_t n, double origin, double present, double min) const
+double AbstractRootedTreeDistribution::simulateCladeAge(size_t n, double origin, double present, double min, bool alwaysReturn) const
 {
     
-    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min);
+    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min, alwaysReturn);
     
     return times.back();
 }
 
 
-double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, double present, double min) const
+double AbstractRootedTreeDistribution::simulateNextAge(size_t n, double origin, double present, double min, bool alwaysReturn) const
 {
 
-    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min);
+    std::vector<double> times = simulateDivergenceTimes(n, origin, present, min, alwaysReturn);
 
     return times.front();
 }
-
-
-void AbstractRootedTreeDistribution::simulateTree( void )
+/**
+ * @param alwaysReturn whether the simulation can return times which are not valid draws from the distribution (for initial values)
+ **/
+void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
 {
     
     // the time tree object (topology & times)
@@ -721,7 +751,7 @@ void AbstractRootedTreeDistribution::simulateTree( void )
         }
     }
 
-    simulateClade(nodes, ra, min_node_age);
+    simulateClade(nodes, ra, min_node_age, alwaysReturn);
 
     TopologyNode *root = nodes[0];
 
@@ -777,6 +807,8 @@ void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
         }
         
     }
+
+    value->checkTaxonAges(true);
     
 }
 

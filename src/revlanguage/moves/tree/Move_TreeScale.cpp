@@ -68,7 +68,7 @@ void Move_TreeScale::constructInternalObject( void )
     }
     else
     {
-        throw RbException("Wrong tree type '" + tree->getRevObject().getType() + "'.");
+        throw RbException() << "Wrong tree type '" << tree->getRevObject().getType() << "'.";
     }
 
     RevBayesCore::StochasticNode<double> *ra = NULL;

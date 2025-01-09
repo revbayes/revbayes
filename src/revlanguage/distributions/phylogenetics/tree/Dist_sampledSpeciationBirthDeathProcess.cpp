@@ -6,7 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

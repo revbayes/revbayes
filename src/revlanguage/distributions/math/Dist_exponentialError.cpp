@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -267,7 +267,8 @@ const MemberRules& Dist_exponentialError::getParameterRules(void) const
 }
 
 
-const TypeSpec& Dist_exponentialError::getTypeSpec( void ) const {
+const TypeSpec& Dist_exponentialError::getTypeSpec( void ) const
+{
     
     static TypeSpec ts = getClassTypeSpec();
     
@@ -276,7 +277,8 @@ const TypeSpec& Dist_exponentialError::getTypeSpec( void ) const {
 
 
 /** Print value for user */
-void Dist_exponentialError::printValue(std::ostream& o) const {
+void Dist_exponentialError::printValue(std::ostream& o) const
+{
     
     o << " ExponentialError(";
     o << ")";
@@ -284,18 +286,23 @@ void Dist_exponentialError::printValue(std::ostream& o) const {
 
 
 /** Set a member variable */
-void Dist_exponentialError::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
+void Dist_exponentialError::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
     
-    if ( name == "avgDistMat" ) {
+    if ( name == "avgDistMat" )
+    {
         avgDistMat = var;
     }
-    else if ( name == "distMat" ) {
+    else if ( name == "distMat" )
+    {
         distMat = var;
     }
-    else if ( name == "lambda" ) {
+    else if ( name == "lambda" )
+    {
         lambda = var;
     }
-    else {
+    else
+    {
         Distribution::setConstParameter(name, var);
     }
 }

@@ -3,6 +3,7 @@
 
 #include "Cloneable.h"
 #include "MemberObject.h"
+#include "RbBoolean.h"
 #include "RbVector.h"
 
 #include <cstddef>
@@ -20,7 +21,7 @@ namespace RevBayesCore {
      * in conjunction with other matrix objects as a Boolean mask.
      */
     
-    class MatrixBoolean : public Cloneable, public MemberObject<boost::dynamic_bitset<> >, public MemberObject<MatrixBoolean> {
+    class MatrixBoolean : public Cloneable, public MemberObject< RbVector<Boolean> >, public MemberObject<MatrixBoolean> {
         
     public:
         MatrixBoolean(void);                                                        //!< Default constructor required by revlanguage use of this class
@@ -51,9 +52,9 @@ namespace RevBayesCore {
         void                                    clear(void);
         MatrixBoolean*                          clone(void) const;
         MatrixBoolean                           negate(void) const;             //!< Element-wise bit flipping (turns every 'true' into 'false' and every 'false' into 'true')
-        void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, boost::dynamic_bitset<> &rv) const; //!< Map the member methods to internal function calls
+        void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<Boolean> &rv) const;                                                         //!< Map the member methods to internal function calls
         void                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixBoolean &rv) const;                              //!< Map the member methods to internal function calls
-        boost::dynamic_bitset<>                 getColumn(size_t i) const;      //!< Get the i-th column of the matrix
+        RbVector<Boolean>                       getColumn(size_t i) const;      //!< Get the i-th column of the matrix
         size_t                                  getDim() const;                 //!< Get matrix dimensions on the assumption that it is a square matrix
         size_t                                  getNumberOfColumns(void) const; //!< Get the number of columns for the general case
         size_t                                  getNumberOfRows(void) const;    //!< Get the number of rows for the general case

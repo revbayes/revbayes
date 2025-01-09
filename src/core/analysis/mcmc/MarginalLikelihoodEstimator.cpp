@@ -97,10 +97,19 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
             
                 continue;
             }
-        
+
+            // check for broken lines
+            if( columns.size() <= powerColumnIndex || columns.size() <= likelihoodColumnIndex ) 
+                throw RbException() << "Please check format of file " << fn << ", missing power and likelihood columns in some lines";
+
+            double p, l;
             // get the power entry
             std::string tmp = columns[powerColumnIndex];
-            double p = atof( tmp.c_str() );
+            try {
+                p = std::stod(tmp);
+            } catch (std::invalid_argument&) {
+                throw RbException() << "Please check format of file " << fn << ", non-numeric input in power column";
+            }
             if ( p != previousPower )
             {
                 previousPower = p;
@@ -111,7 +120,11 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
         
             // get the likelihood entry
             tmp = columns[likelihoodColumnIndex];
-            double l = atof( tmp.c_str() );
+            try {
+                l = std::stod(tmp);
+            } catch (std::invalid_argument&) {
+                throw RbException() << "Please check format of file " << fn << ", non-numeric input in likelihood column";
+}
             likelihoodSamples[index-1].push_back( l );
 
         }

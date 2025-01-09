@@ -5,6 +5,7 @@
 
 #include "DistributionNormal.h"
 #include "Cloner.h"
+#include "RbException.h"
 #include "TraceNumeric.h"
 
 using namespace RevBayesCore;
@@ -22,6 +23,16 @@ bool GewekeTest::assessConvergence(const TraceNumeric& trace)
 {
     // get the sample size
     size_t sampleSize = trace.size(true);
+    
+    // make sure the sample size is sufficient
+    if ( sampleSize < 1 / std::min(frac1, frac2) )
+    {
+        std::stringstream ss;
+        ss << "Insufficient sample size to calculate the Geweke convergence diagnostic.\n";
+        ss << "             Make sure the interval at which the Geweke diagnostic is calculated exceeds the interval\n";
+        ss << "             at which iterations are logged at least by a factor of " << 1 / std::min(frac1, frac2) - 1 << ".\n";
+        throw RbException( ss.str() );
+    }
     
     // set the indices for start and end of the first window
     size_t startwindow1    = trace.getBurnin();

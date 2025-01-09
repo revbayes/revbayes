@@ -54,6 +54,10 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     std::string command_line;
     int result = 0;
 
+    // Ensure that args exists and has size 0.
+    command_line = "args = [\"\"]; args.erase(\"\")";
+    RevLanguage::Parser::getParser().processCommand(command_line, &RevLanguage::Workspace::userWorkspace());
+
     for (unsigned int i =0 ; i < args.size(); ++i)
     {
         if ( StringUtilities::isNumber( args[i] ) )

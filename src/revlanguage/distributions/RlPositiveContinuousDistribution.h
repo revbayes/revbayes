@@ -20,7 +20,7 @@
 #ifndef RlPositiveContinuousDistribution_H
 #define RlPositiveContinuousDistribution_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

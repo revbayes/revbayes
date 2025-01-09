@@ -52,7 +52,6 @@ namespace RevBayesCore {
         virtual                                    ~RateMatrix_ReversiblePoMo(void);                     //!< Destructor
 
         // RateMatrix functions
-        virtual RateMatrix_ReversiblePoMo&          assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         double                                      averageRate(void) const;
         void                                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_ReversiblePoMo*                  clone(void) const;

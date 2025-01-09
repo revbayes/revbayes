@@ -20,6 +20,9 @@ namespace RevBayesCore {
     void                    formatError(const path& p, std::string& errorStr);  //!< Format the error string when (mis)reading files
 
     void                    createDirectoryForFile(const path& p);
+
+    std::stringstream       readFileAsStringStream(const path& fname);
+    std::string             readFileAsString(const path& fname);
 }
 
 #endif

@@ -14,7 +14,6 @@
 #include <vector>
 #include <iosfwd>
 
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "Printable.h"
 #include "Serializable.h"
@@ -23,7 +22,7 @@ namespace RevBayesCore {
     
 //    class TransitionProbabilityMatrix;
     
-    class CladogeneticProbabilityMatrix : public Cloneable, public Assignable, public Printable, public Serializable {
+    class CladogeneticProbabilityMatrix : public Cloneable, public Printable, public Serializable {
         
     public:
         CladogeneticProbabilityMatrix(void);                                                   //!< Construct rate matrix with
@@ -36,7 +35,6 @@ namespace RevBayesCore {
         bool                                operator<=(const CladogeneticProbabilityMatrix &rm) const { return operator<(rm) || operator==(rm); }
         
         // virtual methods
-        virtual CladogeneticProbabilityMatrix&              assign(const Assignable &m);
         virtual CladogeneticProbabilityMatrix*              clone(void) const;
         virtual void                                        initFromString( const std::string &s );
         

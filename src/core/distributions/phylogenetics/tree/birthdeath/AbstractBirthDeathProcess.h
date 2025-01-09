@@ -27,7 +27,7 @@ namespace RevBayesCore {
         
         // helper functions
         double                                              computeLnProbabilityDivergenceTimes(void) const;                                        //!< Compute the log-transformed probability of divergence times.
-        virtual std::vector<double>                         simulateDivergenceTimes(size_t n, double origin, double present, double min) const;     //!< Simulate n speciation events.
+        virtual std::vector<double>                         simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const;     //!< Simulate n speciation events.
         
         // members
         std::string                                         condition;                                          //!< The condition of the process (none/survival/#taxa).

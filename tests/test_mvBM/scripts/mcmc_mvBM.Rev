@@ -72,7 +72,6 @@ mymodel = model(psi)
 
 mni = 0
 monitors[++mni] = mnModel(filename="output/primates_mvBM.log",printgen=10, separator = TAB)
-monitors[++mni] = mnScreen(printgen=1000, rate, covariance)
 
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=5000,tuningInterval=250)
