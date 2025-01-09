@@ -384,7 +384,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
-
+        
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
 

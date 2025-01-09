@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
     public:
         
-        MultiValueEvent(void);                                              //!< Default constructor
+        MultiValueEvent(void);                                                                                                          //!< Default constructor
         virtual                             ~MultiValueEvent() {}
         
         bool                                operator==(const MultiValueEvent &mve) const;
@@ -33,18 +33,18 @@ namespace RevBayesCore {
         bool                                operator<=(const MultiValueEvent &mve) const { return operator<(mve) || operator==(mve); }
 
         // public methods
-        void                                addValues(const RbVector<double> &v, const std::string &n);                               //!< Set the age.
+        void                                addValues(const RbVector<double> &v, const std::string &n);                                 //!< Set the age.
         void                                clear(void);
         MultiValueEvent*                    clone(void) const;
         const std::string&                  getName(size_t i) const;
         long                                getNumberOfEvents(void) const;
         size_t                              getNumberOfValues(void) const;
-        RbVector<double>&                   getValues(size_t i);                                                //!< Get the values for this element.
-        const RbVector<double>&             getValues(size_t i) const;                                          //!< Get the values for this element.
-        RbVector<double>&                   getValues(const std::string& n);                              //!< Get the values for this element.
-        const RbVector<double>&             getValues(const std::string& n) const;                              //!< Get the values for this element.
+        RbVector<double>&                   getValues(size_t i);                                                                        //!< Get the values for this element.
+        const RbVector<double>&             getValues(size_t i) const;                                                                  //!< Get the values for this element.
+        RbVector<double>&                   getValues(const std::string &n);                                                            //!< Get the values for this element.
+        const RbVector<double>&             getValues(const std::string &n) const;                                                      //!< Get the values for this element.
         void                                setNumberOfEvents(long n);
-        void                                setValues(const RbVector<double>& v, const std::string& n);                               //!< Set the age.
+        void                                setValues(const RbVector<double> &v, const std::string &n);                                 //!< Set the age.
 
 
     private:
@@ -52,7 +52,7 @@ namespace RevBayesCore {
         // private members
         std::vector<std::string>            names;
         long                                num_events;
-        std::vector<RbVector<double> >      values;
+        std::vector< RbVector<double> >     values;
 
     };
     
