@@ -934,17 +934,13 @@ std::vector<double> FastBirthDeathShiftProcess::pExtinction(double start, double
     
     
     std::vector<double> sampling_probability;
-    if ( rho != NULL && rho_per_state == NULL )
+    if ( rho != NULL )
     {
-        sampling_probability   = std::vector<double>(num_states, rho->getValue());
-    }
-    else if ( rho == NULL && rho_per_state != NULL )
-    {
-        sampling_probability   = rho_per_state->getValue();
+        sampling_probability = std::vector<double>(num_states, rho->getValue());
     }
     else
     {
-        throw RbException("Either a global sampling fraction or state-specific sampling fraction needs to be set.");
+        throw RbException("A global sampling fraction needs to be set.");
     }
 
     std::vector< double > initial_state = std::vector<double>(2*num_states,0);
@@ -1095,41 +1091,14 @@ void FastBirthDeathShiftProcess::setSampleCharacterHistory(bool sample_history)
 
 void FastBirthDeathShiftProcess::setSamplingFraction(const TypedDagNode<double> *f)
 {
-    
     // remove the old parameter first
     this->removeParameter( rho );
-    this->removeParameter( rho_per_state );
 
-    
     // set the value
     rho = f;
-    rho_per_state = NULL;
     
     // add the new parameter
     this->addParameter( rho );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-}
-
-
-void FastBirthDeathShiftProcess::setSamplingFraction(const TypedDagNode< RbVector<double> > *f)
-{
-    
-    // remove the old parameter first
-    this->removeParameter( rho );
-    this->removeParameter( rho_per_state );
-
-    
-    // set the value
-    rho_per_state = f;
-    rho = NULL;
-    
-    // add the new parameter
-    this->addParameter( rho_per_state );
     
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
@@ -2190,11 +2159,6 @@ void FastBirthDeathShiftProcess::swapParameterInternal(const DagNode *oldP, cons
     {
         rho = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if ( oldP == rho_per_state )
-    {
-        rho_per_state = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
-    }
-    
 }
 
 
