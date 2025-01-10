@@ -391,24 +391,32 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
         // rescale the probability densities at the "end" of the branch
         if ( RbSettings::userSettings().getUseScaling() == true ) 
         {
-            double max = 0.0;
-            for (size_t i=0; i<num_states; ++i)
-            {
-                if ( node_likelihood[num_states+i] > max )
-                {
-                    max = node_likelihood[num_states+i];
-                }
-            }
-            
-            for (size_t i=0; i<num_states; ++i)
-            {
-                node_likelihood[num_states+i] /= max;
-            }
+            double max;
+            max = rescaleProbabilities(node_likelihood);
 
             scaling_factors[node_index][active_likelihood[node_index]] += log(max);
         }
     }
 
+}
+
+double FastBirthDeathShiftProcess::rescaleProbabilities(std::vector<double>& probabilities) const
+{
+    double max = 0.0;
+    for (size_t i=0; i<num_states; ++i)
+    {
+        if ( probabilities[num_states+i] > max )
+        {
+            max = probabilities[num_states+i];
+        }
+    }
+    
+    for (size_t i=0; i<num_states; ++i)
+    {
+        probabilities[num_states+i] /= max;
+    }
+
+    return max;
 }
 
 

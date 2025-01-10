@@ -108,6 +108,7 @@ namespace RevBayesCore {
         std::vector<double>                                             calculateTotalSpeciationRatePerState(void) const;
         void                                                            computeNodeProbability(const TopologyNode &n, size_t nIdx) const;
         double                                                          computeRootLikelihood() const;
+        double                                                          rescaleProbabilities(std::vector<double> & probabilities) const;
         
         // members
         std::string                                                     condition;                                                                                          //!< The condition of the process (none/survival/#taxa).
