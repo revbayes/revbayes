@@ -180,7 +180,6 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
     {
         return RbConstants::Double::neginf;
     }
-//    bh->print();
 
     // check parent and child states to make sure they match with the
     // ancestral and descendant branches; otherwise, return -Inf
@@ -196,13 +195,8 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
         {
             if ( static_cast<CharacterEventDiscrete*>(end_state[j])->getState() != static_cast<CharacterEventDiscrete*>(child_state[j])->getState() )
             {
-//                std::cerr << "Rejecting: " << end_state[j]->getState() << " -- " << child_state[j]->getState() << std::endl;
                 return RbConstants::Double::neginf;
             }
-//            else
-//            {
-//                std::cerr << "Not rejecting: " << end_state[j]->getState() << " -- " << child_state[j]->getState() << std::endl;
-//            }
         }
     }
 
@@ -217,12 +211,6 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
     double current_age = node.getParent().getAge();
     double end_age = node.getAge();
     double event_age;
-    
-//    if ( history.size() > 1 )
-//    {
-//        
-//        double dummy = 0.0;
-//    }
     
     for (it_h = history.rbegin(); it_h != history.rend(); ++it_h)
     {
@@ -362,21 +350,36 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::initializeTipValues(
                 {
                     DiscreteCharacterState &state = d[j];
                     unsigned s = 0;
-
-                    s = (unsigned) state.getStateIndex();
-
-                    if ( state.isGapState() == true )
+                    
+                    if ( state.isGapState() == true || state.isMissingState() == true )
                     {
-                        //                        std::cerr << state.getStateIndex() << std::endl;
                         s = 0;
                     }
-
-                    CharacterEvent* evt = new CharacterEventDiscrete(j, s, 1.0);
+                    else if ( state.isAmbiguous() == true )
+                    {
+                        RbBitSet obs_states = state.getState();
+                        s = obs_states.find_first();
+                    }
+                    else
+                    {
+                        s = (unsigned) state.getStateIndex();
+                    }
+                    
+                    CharacterEventDiscrete* evt = new CharacterEventDiscrete(j, s, 1.0);
+                    
+                    if ( state.isGapState() == true || state.isMissingState() == true )
+                    {
+                        evt->setMissingState( true );
+                    }
+                    else if ( state.isAmbiguous() == true )
+                    {
+                        RbBitSet obs_states = state.getState();
+                        evt->setAmbiguousState( obs_states );
+                    }
                     tipState.push_back( evt );
                 }
 
                 this->histories[node->getIndex()].setChildCharacters(tipState);
-                //                tipState.clear();
             }
         }
 

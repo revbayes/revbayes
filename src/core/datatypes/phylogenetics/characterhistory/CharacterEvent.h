@@ -30,6 +30,7 @@ namespace RevBayesCore {
         // setters
         void                                setAge(double a);
         void                                setEventType(size_t t);
+        void                                setMissingState(bool tf);
         void                                setSiteIndex(size_t i);
         void                                print(void) const ;
         
@@ -39,12 +40,11 @@ namespace RevBayesCore {
     protected:
         CharacterEvent(void);
         CharacterEvent(size_t ch_ind, double a, size_t t=CharacterEventType::UNDEFINED);
-        CharacterEvent(const CharacterEvent& c);
 
         size_t                              site_index;                                        // from 0 to N character ("sites")
         double                              age;
         size_t                              event_type;
-        
+        bool                                missing;
         
     };
 }

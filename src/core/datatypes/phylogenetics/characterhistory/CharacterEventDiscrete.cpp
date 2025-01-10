@@ -13,7 +13,8 @@ CharacterEventDiscrete::CharacterEventDiscrete(void) : CharacterEvent()
 }
 
 CharacterEventDiscrete::CharacterEventDiscrete(size_t i, size_t s, double a, size_t t) : CharacterEvent(i,a,t),
-    state(s)
+    state(s),
+    ambiguous_state()
 {
 
 }
@@ -41,6 +42,28 @@ std::string CharacterEventDiscrete::getStateStr(void) const
 //    ss << (char)(70+state);
     ss << state;
     return ss.str();
+}
+
+
+bool CharacterEventDiscrete::isValidState(size_t s) const
+{
+    if ( missing == true )
+    {
+        return true;
+    }
+    
+    if ( ambiguous_state.size() > s )
+    {
+        return ambiguous_state.test( s );
+    }
+    
+    return s == state;
+}
+
+
+void CharacterEventDiscrete::setAmbiguousState(RbBitSet bs)
+{
+    ambiguous_state = bs;
 }
 
 

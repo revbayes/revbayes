@@ -18,14 +18,6 @@ CharacterEvent::CharacterEvent(size_t ch_ind, double a, size_t t) :
     
 }
 
-CharacterEvent::CharacterEvent(const CharacterEvent& c) :
-    site_index(c.site_index),
-    age(c.age),
-    event_type(c.event_type)
-{
-    
-}
-
 CharacterEvent::~CharacterEvent(void)
 {
     
@@ -63,15 +55,21 @@ void CharacterEvent::setAge(double a)
 }
 
 
-void CharacterEvent::setEventType(size_t t)
-{
-    event_type = t;
-}
-
-
 void CharacterEvent::setSiteIndex(size_t i)
 {
     site_index = i;
+}
+
+
+void CharacterEvent::setMissingState(bool tf)
+{
+    missing = tf;
+}
+
+
+void CharacterEvent::setEventType(size_t t)
+{
+    event_type = t;
 }
 
 

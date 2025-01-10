@@ -141,7 +141,7 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
 
     // make all internal nodes bifurcating
     // this is important for fossil trees which have sampled ancestors
-    t->makeInternalNodesBifurcating( reindex, true );
+//    t->makeInternalNodesBifurcating( reindex, true );
 
     // trees with 2-degree root nodes should not be rerooted
     t->setRooted( root->getNumberOfChildren() == 2 );

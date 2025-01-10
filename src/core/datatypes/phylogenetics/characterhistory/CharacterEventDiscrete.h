@@ -6,6 +6,7 @@
 
 #include "CharacterEvent.h"
 #include "CharacterEventType.h"
+#include "RbBitSet.h"
 
 namespace RevBayesCore {
     
@@ -20,6 +21,8 @@ namespace RevBayesCore {
         CharacterEventDiscrete*             clone(void) const;
         size_t                              getState(void) const;
         std::string                         getStateStr(void) const;
+        bool                                isValidState(size_t s) const;
+        void                                setAmbiguousState(RbBitSet bs);
         void                                setState(size_t s);
 
     protected:
@@ -28,7 +31,7 @@ namespace RevBayesCore {
     private:
 
         size_t                              state;                                             // from statespace -- possibly make a set of state/positions...
-        
+        RbBitSet                            ambiguous_state;
 
     };
 }
