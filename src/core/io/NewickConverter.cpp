@@ -205,7 +205,7 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
     //   fixme: actually, the string 'a;' is valid newick.
     if ( c != '(')
     {
-        throw RbException("Error while converting Newick tree. We expected an opening parenthesis, but didn't get one. Problematic string: " + n);
+        throw RbException() << "Error while converting Newick tree. We expected an opening parenthesis, but didn't get one. Problematic string: " << n;
     }
 
     TopologyNode *node = new TopologyNode();

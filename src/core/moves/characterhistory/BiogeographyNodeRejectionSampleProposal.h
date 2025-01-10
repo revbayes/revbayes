@@ -422,7 +422,7 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::compute
     }
     else
     {
-        throw RbException( "cladogenetic event type \"" + clado_type + "\" not found!");
+        throw RbException() << "cladogenetic event type \"" << clado_type << "\" not found!"; 
     }
     
     double lnP = log(p);

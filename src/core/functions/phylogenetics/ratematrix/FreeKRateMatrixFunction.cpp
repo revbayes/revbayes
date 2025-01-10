@@ -1,6 +1,6 @@
 #include "FreeKRateMatrixFunction.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <vector>
 

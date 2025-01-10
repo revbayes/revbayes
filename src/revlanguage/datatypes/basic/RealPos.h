@@ -1,18 +1,3 @@
-/**
- * @file
- * This file contains the declaration of RealPos, which
- * is the primitive RevBayes type for positive real numbers.
- *
- * @brief Declaration of RealPos
- *
- * (c) Copyright 2009-
- * @date Last modified: $Date$
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- *
- * $Id$
- */
-
 #ifndef RealPos_H
 #define RealPos_H
 
@@ -25,6 +10,9 @@ namespace RevLanguage {
 
     class Natural;
     
+    /** Primitive type for real positive numbers (i.e. >= 0) 
+     * NB: the equivalent integer class is Natural, not IntegerPos (which excludes 0)
+    */
     class RealPos : public Real {
 
         public:
@@ -32,6 +20,7 @@ namespace RevLanguage {
         RealPos(RevBayesCore::TypedDagNode<double> *x);                             //!< Construct from double
         RealPos(double x);                                                          //!< Construct from double
         RealPos(long x);                                                             //!< Construct from int
+        RealPos(bool x);                                                             //!< Construct from bool
 
         // Basic operator functions
         virtual RevObject*              add(const RevObject &rhs) const;            //!< Addition operator used for example in '+=' statements

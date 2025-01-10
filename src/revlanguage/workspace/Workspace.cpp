@@ -114,7 +114,7 @@ bool Workspace::addDistribution( Distribution *dist )
     if ( typeTable.find( dist->getDistributionFunctionName() ) != typeTable.end() )
     {
         delete dist;
-        throw RbException("There is already a type named '" + dist->getType() + "' in the workspace");
+        throw RbException() << "There is already a type named '" << dist->getType() << "' in the workspace";
     }
     
     function_table.addFunction( new ConstructorFunction( dist ) );
@@ -153,7 +153,7 @@ bool Workspace::addType( RevObject *templ )
         // free memory
         delete templ;
 
-        throw RbException("There is already a type named '" + name + "' in the workspace");
+        throw RbException() << "There is already a type named '" << name << "' in the workspace";
     }
     // otherwise, add the template to the type table
     else
@@ -187,7 +187,7 @@ const TypeSpec& Workspace::getClassTypeSpecOfType(std::string const &type) const
         }
         else
         {
-            throw RbException( "Type '" + type + "' does not exist in environment" );;
+            throw RbException() << "Type '" << type << "' does not exist in environment" ; 
         }
         
     }
@@ -283,7 +283,7 @@ RevObject* Workspace::makeNewDefaultObject(const std::string& type) const
         }
         else
         {
-            throw RbException( "Type '" + type + "' does not exist in environment" );
+            throw RbException() << "Type '" << type << "' does not exist in environment" ; 
         }
     }
     else
