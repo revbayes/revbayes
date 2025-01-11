@@ -555,7 +555,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
             u -= (state_probs[i]/sum);
             if ( u <= 0.0 )
             {
-//                        s = i;
                 break;
             }
             ++s;

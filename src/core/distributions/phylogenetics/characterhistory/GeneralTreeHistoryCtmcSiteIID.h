@@ -354,11 +354,41 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::initializeTipValues(
                     if ( state.isGapState() == true || state.isMissingState() == true )
                     {
                         s = 0;
+                        double u = GLOBAL_RNG->uniform01();
+                        std::vector<double> state_probs(this->num_states, 1.0/this->num_states);
+                        for ( size_t i=0; i<this->num_states; ++i )
+                        {
+                            u -= state_probs[i];
+                            if ( u <= 0.0 )
+                            {
+                                break;
+                            }
+                            ++s;
+                        }
                     }
                     else if ( state.isAmbiguous() == true )
                     {
                         RbBitSet obs_states = state.getState();
-                        s = obs_states.find_first();
+                        double u = GLOBAL_RNG->uniform01();
+                        std::vector<double> state_probs(this->num_states, 0.0);
+                        for ( size_t i=0; i<this->num_states; ++i )
+                        {
+                            if ( obs_states.test(i) )
+                            {
+                                state_probs[i] = 1.0/obs_states.count();
+                            }
+                        }
+                        
+                        s = 0;
+                        for ( size_t i=0; i<this->num_states; ++i )
+                        {
+                            u -= state_probs[i];
+                            if ( u <= 0.0 )
+                            {
+                                break;
+                            }
+                            ++s;
+                        }
                     }
                     else
                     {
