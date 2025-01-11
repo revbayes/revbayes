@@ -1258,7 +1258,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 }
 
 
-void RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen)
+Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToScale.getNumberOfTips();
@@ -1297,9 +1297,12 @@ void RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std:
         treeToScale.setTaxonObject( tip_name, taxa[i] );
     }
     
-    // The algorithm is supposed to start at the root
+    // The algorithm starts at the root
     TopologyNode& root_node = treeToScale.getRoot();
     root_node.setParentAge( minBrLen );
+    
+    RevBayesCore::Tree *p = &treeToScale;
+    return p;
 }
 
 

@@ -2065,19 +2065,18 @@ void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
 
 void TopologyNode::setParentAge(double minbl)
 {
-    //    2. get all my children
-    //    3. if (a child is a tip)
+    //    1. get all my children
+    //    2. if (a child is a tip)
     //           set its age based on the taxon it contains
     //       else
     //           call myself on the child
-    //    4. collect the ages of all my children
-    //    5. set my age to the age of the oldest of my children + min br. len.
-    //    6. recompute the branch lengths of all my children
+    //    3. collect the ages of all my children
+    //    4. set my age to the age of the oldest of my children + min br. len.
+    //    5. recompute the branch lengths of all my children
     
     const std::vector<TopologyNode*>& children = getChildren();
     for (size_t i = 0; i < children.size(); i++)
     {
-        std::cout << "Looking at child " << children[i]->getName() << std::endl;
         if ( children[i]->isTip() )
         {
             double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;

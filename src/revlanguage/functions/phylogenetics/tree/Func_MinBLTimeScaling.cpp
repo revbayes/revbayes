@@ -1,24 +1,34 @@
+#include <string>
+#include <iosfwd>
+#include <vector>
+
 #include "Func_MinBLTimeScaling.h"
 
-#include "Tree.h"
-#include "ModelVector.h"
-#include "RlDeterministicNode.h"
-#include "MinBLTimeScalingFunction.h"
-#include "TypedDagNode.h"
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "RevVariable.h"
-#include "RlTree.h"
-#include "RlTaxon.h"
-#include "TypeSpec.h"
+#include "ConstantNode.h"
+#include "DagNode.h"
+#include "DeterministicNode.h"
+#include "ModelVector.h"
 #include "Taxon.h"
+#include "Tree.h"
+#include "TreeUtilities.h"
+#include "TypedDagNode.h"
+#include "TypedFunction.h"
+#include "TypeSpec.h"
+#include "RevPtr.h"
+#include "RevVariable.h"
+#include "RlConstantNode.h"
+#include "RlFunction.h"
+#include "RlTaxon.h"
+#include "RlTimeTree.h"
+#include "RlTree.h"
 
 using namespace RevLanguage;
 
-
-/** default constructor */
-Func_MinBLTimeScaling::Func_MinBLTimeScaling( void ) : TypedFunction< Tree >( )
+/** Default constructor */
+Func_MinBLTimeScaling::Func_MinBLTimeScaling( void ) : Procedure()
 {
     
 }
@@ -37,27 +47,25 @@ Func_MinBLTimeScaling* Func_MinBLTimeScaling::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_MinBLTimeScaling::createFunction( void ) const
+/** Execute function */
+RevPtr<RevVariable> Func_MinBLTimeScaling::execute( void )
 {
+    RevBayesCore::Tree* treeToScale              = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getValue().clone();
+    std::vector<RevBayesCore::Taxon> taxonVector = static_cast<const ModelVector<Taxon> &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    double minBranchLength                       = static_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode< RevBayesCore::Tree >* treeToScale = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::Tree *my_tree = RevBayesCore::TreeUtilities::minBLTimeScaling( *treeToScale, taxonVector, minBranchLength );
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Taxon> >* taxonVector = static_cast<const ModelVector<Taxon> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    
-    RevBayesCore::TypedDagNode< double >* minBranchLength = static_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();;
-    
-    RevBayesCore::MinBLTimeScalingFunction* f = new RevBayesCore::MinBLTimeScalingFunction( treeToScale, taxonVector, minBranchLength );
-    
-    return f;
+    return new RevVariable( new TimeTree( my_tree ) );
 }
 
 
-/* Get argument rules */
+/** Get argument rules */
 const ArgumentRules& Func_MinBLTimeScaling::getArgumentRules( void ) const
 {
     
     static ArgumentRules argumentRules = ArgumentRules();
-    static bool          rules_set     = false;
+    static bool rules_set = false;
     
     if ( !rules_set )
     {
@@ -73,6 +81,7 @@ const ArgumentRules& Func_MinBLTimeScaling::getArgumentRules( void ) const
 }
 
 
+/** Get Rev type of object */
 const std::string& Func_MinBLTimeScaling::getClassType(void)
 {
     
@@ -82,19 +91,17 @@ const std::string& Func_MinBLTimeScaling::getClassType(void)
 }
 
 
-/* Get class type spec describing type of object */
+/** Get class type spec describing type of object */
 const TypeSpec& Func_MinBLTimeScaling::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedFunction<Tree>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }
 
 
-/**
- * Get the primary Rev name for this function.
- */
+/** Get the primary Rev name for this function */
 std::string Func_MinBLTimeScaling::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instances of this class
@@ -104,10 +111,20 @@ std::string Func_MinBLTimeScaling::getFunctionName( void ) const
 }
 
 
+/** Get type spec */
 const TypeSpec& Func_MinBLTimeScaling::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
     
     return type_spec;
+}
+
+
+/** Get return type */
+const TypeSpec& Func_MinBLTimeScaling::getReturnType( void ) const
+{
+    
+    static TypeSpec return_typeSpec = TimeTree::getClassTypeSpec();
+    return return_typeSpec;
 }
