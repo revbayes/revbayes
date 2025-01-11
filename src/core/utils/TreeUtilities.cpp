@@ -1290,16 +1290,16 @@ void RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std:
         throw RbException("Tip names of the initial tree do not match the taxon names.");
     }
     
-    // Alter the tip age values of p in place
+    // Alter the tip age values of treeToScale in place
     for (size_t i = 0; i < tax_num; ++i)
     {
         std::string tip_name = taxa[i].getName();
         treeToScale.setTaxonObject( tip_name, taxa[i] );
     }
     
-    // Grab the first tip; which one we start with should not matter
-    TopologyNode& node = treeToScale.getTipNode( 0 );
-    node.setParentAge( minBrLen );
+    // The algorithm is supposed to start at the root
+    TopologyNode& root_node = treeToScale.getRoot();
+    root_node.setParentAge( minBrLen );
 }
 
 

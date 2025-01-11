@@ -3,12 +3,12 @@
  * This file contains the declaration of the MinBLTimeScaling function, which time-scales
  * a tree using the minimum branch length approach based on a vector of tip ages.
  *
- * @brief Declaration of the AvgDistanceMatrixFunction
+ * @brief Declaration of MinBLTimeScalingFunction
  *
- * @author Laura Mulvey, David Cerny
+ * @author David Cerny, Laura Mulvey
  * @license GPL version 3
- * @version 1.2.5
- * @since 2024-12-18, version 1.2.5
+ * @version 1.2.6
+ * @since 2024-12-18, version 1.2.6
  *
  */
 

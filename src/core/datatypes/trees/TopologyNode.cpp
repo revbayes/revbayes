@@ -2065,32 +2065,44 @@ void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
 
 void TopologyNode::setParentAge(double minbl)
 {
-    //    1. get my parent
-    //    2. get the other children of my parent
-    //    3. if (all children have ages)
-    //           get children's ages
+    //    2. get all my children
+    //    3. if (a child is a tip)
+    //           set its age based on the taxon it contains
     //       else
-    //           call myself on the ageless child's first child
-    //    4. set the age of the parent to the age of the oldest child + min br. len.
+    //           call myself on the child
+    //    4. collect the ages of all my children
+    //    5. set my age to the age of the oldest of my children + min br. len.
+    //    6. recompute the branch lengths of all my children
     
-    TopologyNode& parent = getParent();
-    
-    const std::vector<TopologyNode*>& children = parent.getChildren();
-    std::vector<double> ages;
+    const std::vector<TopologyNode*>& children = getChildren();
     for (size_t i = 0; i < children.size(); i++)
     {
-        if ( not std::isnan( children[i]->getAge() ) )
+        std::cout << "Looking at child " << children[i]->getName() << std::endl;
+        if ( children[i]->isTip() )
         {
-            ages.push_back( children[i]->getAge() );
+            double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;
+            children[i]->setAge( tip_age );
         }
         else
         {
-            children[i]->getChild(0).setParentAge(minbl);
+            children[i]->setParentAge(minbl);
         }
     }
     
+    std::vector<double> ages;
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        ages.push_back( children[i]->getAge() );
+    }
+    
     double max_age = *std::max_element(ages.begin(), ages.end());
-    parent.setAge(max_age + minbl);
+    setAge(max_age + minbl);
+    
+    // now we need to recompute the branch lengths of my children
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        children[i]->recomputeBranchLength();
+    }
 }
 
 

@@ -41,9 +41,9 @@ void MinBLTimeScalingFunction::update( void )
 {
     delete value;
     
-    // get a copy of the parent tree
     value = treeToTimeScale->getValue().clone();
     
+    std::cout << "About to apply time-scaling." << std::endl;
     // apply the function
     TreeUtilities::minBLTimeScaling( *value, taxonVector->getValue(), minimumBranchLength->getValue() );
 }
