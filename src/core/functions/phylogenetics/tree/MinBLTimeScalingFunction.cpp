@@ -39,7 +39,13 @@ MinBLTimeScalingFunction* MinBLTimeScalingFunction::clone( void ) const
 
 void MinBLTimeScalingFunction::update( void )
 {
-    value = TreeUtilities::minBLTimeScaling( treeToTimeScale->getValue(), taxonVector->getValue(), minimumBranchLength->getValue() );
+    delete value;
+    
+    // get a copy of the parent tree
+    value = treeToTimeScale->getValue().clone();
+    
+    // apply the function
+    TreeUtilities::minBLTimeScaling( *value, taxonVector->getValue(), minimumBranchLength->getValue() );
 }
 
 
