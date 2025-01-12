@@ -1666,11 +1666,12 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
 	help_strings[string("fnMinBLTimeScaling")][string("description")] = string(R"(Time-scales an undated tree based on a vector of tip ages using the minimum
 branch length ("MBL") approach (Laurin 2004; Bapst 2014).)");
-	help_strings[string("fnMinBLTimeScaling")][string("details")] = string(R"(The age of each internal node is set to the age of the oldest tip descended
-from it plus some user-supplied constant. This prevents the appearance
-of zero-length branches, which would otherwise arise when the oldest descendant
-of a node is also the oldest descendant of that node's parent, and has the
-effect of shifting node ages deeper into the past.
+	help_strings[string("fnMinBLTimeScaling")][string("details")] = string(R"(The age of each internal node is based on the age of the oldest tip descended
+from it. However, if t0 is the oldest tip descended from a given node (denoted
+x) and also the oldest tip descended from that node's parent (denoted y), then
+setting t(x) = t(y) = t(t0) would produce zero-length branches y->x and x->t0.
+We avoid this by requiring every branch to be no shorter than some user-supplied
+constant. This has the effect of shifting node ages deeper into the past.
 
 Conceptually, the undated tree would usually correspond either to a bare
 topology (a tree without branch lengths) or a tree with branch lengths in units
