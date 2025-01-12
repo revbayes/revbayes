@@ -369,7 +369,6 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::initializeTipValues(
                     else if ( state.isAmbiguous() == true )
                     {
                         RbBitSet obs_states = state.getState();
-                        double u = GLOBAL_RNG->uniform01();
                         std::vector<double> state_probs(this->num_states, 0.0);
                         for ( size_t i=0; i<this->num_states; ++i )
                         {
@@ -379,6 +378,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::initializeTipValues(
                             }
                         }
                         
+                        double u = GLOBAL_RNG->uniform01();
                         s = 0;
                         for ( size_t i=0; i<this->num_states; ++i )
                         {

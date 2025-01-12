@@ -355,14 +355,13 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::prepareProposal( void )
 
     // store node state values
     storedTipState.clear();
-//    storedSubrootState.clear();
 
     size_t num_sites = p->getNumberOfSites();
     storedTipState.resize(num_sites,0);
-    const std::vector<CharacterEvent*>& nodeState = p->getHistory(*node).getChildCharacters();
+    const std::vector<CharacterEvent*>& curr_tip_state = p->getHistory(*node).getChildCharacters();
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(nodeState[site_index])->getState();
+        size_t s = static_cast<CharacterEventDiscrete*>(curr_tip_state[site_index])->getState();
         storedTipState[site_index] = s;
     }
 
@@ -433,6 +432,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
 
         std::vector<double> state_probs(numStates,0.0);
         double sum = 0.0;
+        size_t num_valid_states = 0;
         for ( size_t i=0; i<numStates; ++i )
         {
             if ( static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->isValidState(i) )
@@ -440,7 +440,12 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
                 double p = tip_tp_matrix[ancS][i];
                 sum += p;
                 state_probs[i] = p;
+                ++num_valid_states;
             }
+        }
+        if ( num_valid_states > 2 )
+        {
+            std::cerr << "Too many valid stated:\t" << num_valid_states << std::endl;
         }
 
         unsigned int s = 0;
