@@ -5,7 +5,11 @@
 using namespace RevBayesCore;
 
 
-CharacterEvent::CharacterEvent(void)
+CharacterEvent::CharacterEvent(void) :
+    site_index(0),
+    age(0),
+    event_type( CharacterEventType::UNDEFINED ),
+    missing( false )
 {
     
 }
@@ -13,7 +17,8 @@ CharacterEvent::CharacterEvent(void)
 CharacterEvent::CharacterEvent(size_t ch_ind, double a, size_t t) :
     site_index(ch_ind),
     age(a),
-    event_type(t)
+    event_type(t),
+    missing( false )
 {
     
 }
