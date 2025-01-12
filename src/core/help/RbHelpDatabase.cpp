@@ -192,6 +192,43 @@ clade_67_or_68 = clade( clade_67, clade_68, optional_match=true ))");
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(tmrca)"));
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(mrcaIndex)"));
 	help_strings[string("clade")][string("title")] = string(R"(Clade)");
+	help_strings[string("clamp")][string("description")] = string(R"(`x.clamp(data)` fixes the value of the stochastic variable `x` to the observation `data`, and marks the variable as corresponding to an observation.)");
+	help_strings[string("clamp")][string("details")] = string(R"(Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped – either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
+
+`x.setValue()` evaluates probabilities at a specific value of `x` without fixing the value.)");
+	help_strings[string("clamp")][string("example")] = string(R"(x ~ dnNormal(1, 1)
+y ~ dnNormal(2, 2)
+
+# Set the observed value of x
+x.clamp(1)
+# Compute the probability of the observation
+x.probability()
+
+# Modify the observed value of x
+x.clamp(2) # equivalent to x.unclamp(); x.clamp(2)
+x.probability()
+
+# Evaluate P(y = 1)
+y.setValue(1)
+y.probability()
+
+# Select another value of y
+y.redraw()
+print(y)
+
+# Evaluate P(y) at this new value
+y.probability()
+
+# Define a model involving x and y
+z := x * y
+
+# Because x is clamped, it is invalid to call x.redraw() or mvSlide(x)
+# x will remain constant during MCMC, whereas y will be inferred.
+mcmc(model(z), [mnScreen(x, y)], [mvSlide(y)]).run(generations = 5))");
+	help_strings[string("clamp")][string("name")] = string(R"(Clamp)");
+	help_arrays[string("clamp")][string("see_also")].push_back(string(R"(setValue)"));
+	help_arrays[string("clamp")][string("see_also")].push_back(string(R"(unclamp)"));
+	help_strings[string("clamp")][string("title")] = string(R"(Clamp a stochastic variable to a fixed/observed value)");
 	help_arrays[string("clear")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("clear")][string("description")] = string(R"(Clear (e.g., remove) variables and functions from the workspace.)");
 	help_strings[string("clear")][string("details")] = string(R"(The clear function removes either a given variable or all variables from the workspace. Clearing the workspace is very useful between analysis if you do not want to have old connections between variables hanging around.)");
@@ -1625,6 +1662,42 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_strings[string("fnK81")][string("name")] = string(R"(fnK81)");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
+	help_strings[string("fnMinBLTimeScaling")][string("description")] = string(R"(Time-scales an undated tree based on a vector of tip ages using the minimum
+branch length ("MBL") approach (Laurin 2004; Bapst 2014).)");
+	help_strings[string("fnMinBLTimeScaling")][string("details")] = string(R"(The age of each internal node is set to the age of the oldest tip descended
+from it plus some user-supplied constant. This prevents the appearance
+of zero-length branches, which would otherwise arise when the oldest descendant
+of a node is also the oldest descendant of that node's parent, and has the
+effect of shifting node ages deeper into the past.
+
+Conceptually, the undated tree would usually correspond either to a bare
+topology (a tree without branch lengths) or a tree with branch lengths in units
+of expected change; in practice, both `BrachLengthTree` and `TimeTree` arguments
+are accepted. In this implementation of the MBL approach, both terminal and
+internal branches are required to be greater than or equal to the specified
+minimum. If there is uncertainty associated with the age of a given tip,
+the midpoint of the uncertainty range is used for time-scaling.
+
+The algorithm is not stochastic (i.e., it always returns the same time-scaled
+tree for a given input), and is primarily intended to generate a plausible
+starting tree for MCMC analyses.)");
+	help_strings[string("fnMinBLTimeScaling")][string("example")] = string(R"(# Read in an undated tree
+undated_tree <- readTrees("undated.nex")[1]
+
+# Read tip age data from a file
+taxa <- readTaxonData("tipages.tsv")
+
+# Time-scale using a minimum branch length of 3 Myr
+dated_tree <- fnMinBLTimeScaling(undated_tree, taxa, 3.0)
+
+print(undated_tree) # The original tree remains unchanged
+print(dated_tree)   # A new, dated tree has been returned)");
+	help_strings[string("fnMinBLTimeScaling")][string("name")] = string(R"(fnMinBLTimeScaling)");
+	help_references[string("fnMinBLTimeScaling")].push_back(RbHelpReference(R"(Bapst DW (2014). Assessing the effect of time-scaling methods on phylogeny-based analyses in the fossil record. Paleobiology, 40(3):331-351.)",R"(10.1666/13033)",R"()"));
+	help_references[string("fnMinBLTimeScaling")].push_back(RbHelpReference(R"(Laurin M (2004). The evolution of body size, Cope's rule and the origin of amniotes. Systematic Biology, 53(4):594-622.)",R"(10.1080/10635150490445706)",R"()"));
+	help_arrays[string("fnMinBLTimeScaling")][string("see_also")].push_back(string(R"(simStartingTree)"));
 	help_arrays[string("fnMixtureASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of site models.)");
 	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the input site models, which may also
@@ -2569,7 +2642,12 @@ moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
 	help_strings[string("mvScaleBactrianCauchy")][string("name")] = string(R"(mvScaleBactrianCauchy)");
 	help_strings[string("mvShrinkExpand")][string("name")] = string(R"(mvShrinkExpand)");
 	help_strings[string("mvShrinkExpandScale")][string("name")] = string(R"(mvShrinkExpandScale)");
-	help_strings[string("mvSlice")][string("name")] = string(R"(mvSlice)");
+	help_strings[string("mvSlice")][string("description")] = string(R"(Instead of using a fixed move size, `mvSlice` determines the size of a move proposal based on the current shape of the likelihood function.
+This allows small moves to be proposed in certain parts of parameter space,
+and large moves in other parts of the space, as appropriate.)");
+	help_strings[string("mvSlice")][string("name")] = string(R"(Slice move)");
+	help_arrays[string("mvSlice")][string("see_also")].push_back(string(R"(`mvSlide` and `mvScale` are possible alternatives where a fixed move size is desired.)"));
+	help_strings[string("mvSlice")][string("title")] = string(R"(Propose a slice move)");
 	help_strings[string("mvSlide")][string("name")] = string(R"(mvSlide)");
 	help_strings[string("mvSlideBactrian")][string("name")] = string(R"(mvSlideBactrian)");
 	help_arrays[string("mvSpeciesNarrow")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
@@ -3084,6 +3162,30 @@ getOption("linewidth"))");
 	help_strings[string("setOption")][string("name")] = string(R"(setOption)");
 	help_arrays[string("setOption")][string("see_also")].push_back(string(R"(getOption)"));
 	help_strings[string("setOption")][string("title")] = string(R"(Set a global RevBayes option)");
+	help_strings[string("setValue")][string("description")] = string(R"(`x.setValue(value)` sets the value of the stochastic variable `x` to `value`.)");
+	help_strings[string("setValue")][string("details")] = string(R"(`x.setValue()` allows calculations to be evaluated at a given value of `x`, whilst allowing the value
+of `x` to be redrawn, or to vary during MCMC.
+
+`.setValue()` allows an MCMC run to be initialized with plausible values,
+which can expedite convergence when priors are broad
+([example](https://revbayes.github.io/tutorials/divrate/branch_specific.html#specifying-the-model)),
+and can be useful when [debugging MCMC runs](https://revbayes.github.io/tutorials/mcmc_troubleshooting/#starting-values).)");
+	help_strings[string("setValue")][string("example")] = string(R"(x ~ dnNormal(1, 1)
+
+# Evaluate P(x) at x = 1
+x.setValue(1)
+x.probability()
+
+# Modify the observed value of x
+x.redraw()
+x.probability()
+
+# Initialize an MCMC run with a specific value
+x.setValue(40000)
+mcmc(model(x), [mnScreen(x)], [mvScale(x)]).run(generations = 5))");
+	help_strings[string("setValue")][string("name")] = string(R"(Set value)");
+	help_arrays[string("setValue")][string("see_also")].push_back(string(R"(clamp)"));
+	help_strings[string("setValue")][string("title")] = string(R"(Set the value of a stochastic variable)");
 	help_arrays[string("setwd")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("setwd")][string("description")] = string(R"(Set the current working directory which RevBayes uses.)");
 	help_strings[string("setwd")][string("example")] = string(R"(# get the current working directory
