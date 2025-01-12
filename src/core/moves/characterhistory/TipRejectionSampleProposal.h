@@ -432,7 +432,6 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
 
         std::vector<double> state_probs(numStates,0.0);
         double sum = 0.0;
-        size_t num_valid_states = 0;
         for ( size_t i=0; i<numStates; ++i )
         {
             if ( static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->isValidState(i) )
@@ -440,12 +439,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
                 double p = tip_tp_matrix[ancS][i];
                 sum += p;
                 state_probs[i] = p;
-                ++num_valid_states;
             }
-        }
-        if ( num_valid_states > 2 )
-        {
-            std::cerr << "Too many valid stated:\t" << num_valid_states << std::endl;
         }
 
         unsigned int s = 0;
