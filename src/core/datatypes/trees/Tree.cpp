@@ -1984,6 +1984,9 @@ void Tree::resolveMultifurcations( bool resolve_root )
             reindexNodes();
         }
     }
+    
+    // eliminate any outdegree-1 nodes
+    suppressOutdegreeOneNodes( false );
 }
 
 
