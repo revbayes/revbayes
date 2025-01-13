@@ -41,7 +41,6 @@ namespace RevBayesCore {
         RateMatrix_TamuraNei&                operator=(const RateMatrix_TamuraNei& r);
         
         // RateMatrix functions
-        virtual RateMatrix_TamuraNei&        assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_TamuraNei*                clone(void) const;
         void                                setKappa(double k1, double k2);

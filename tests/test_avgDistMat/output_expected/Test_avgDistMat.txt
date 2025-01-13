@@ -1,0 +1,48 @@
+Print the average distance matrix:
+
+AverageDistanceMatrix with 5 tips. 
+A	0.000 F	1.762 T	1.905 T	2.000 T	0.000 F
+B	1.762 T	0.000 F	1.585 T	1.633 T	2.000 T
+C	1.905 T	1.585 T	0.000 F	1.632 T	2.000 T
+D	2.000 T	1.633 T	1.632 T	0.000 F	2.000 T
+E	0.000 F	2.000 T	2.000 T	2.000 T	0.000 F
+
+Print the element in row 4, column 1:
+[ 2, TRUE ]
+
+Print the underlying distance matrix:
+[ [ 0.0000, 1.7619, 1.9047, 2.0000, 0.0000 ] ,
+  [ 1.7619, 0.0000, 1.5851, 1.6327, 2.0000 ] ,
+  [ 1.9047, 1.5851, 0.0000, 1.6323, 2.0000 ] ,
+  [ 2.0000, 1.6327, 1.6323, 0.0000, 2.0000 ] ,
+  [ 0.0000, 2.0000, 2.0000, 2.0000, 0.0000 ] ]
+
+Print the Boolean mask indicating which distances to include in further calculations:
+[ [ F, T, T, T, F ] ,
+  [ T, F, T, T, T ] ,
+  [ T, T, F, T, T ] ,
+  [ T, T, T, F, T ] ,
+  [ F, T, T, T, F ] ]
+
+Calculate matrix completeness as the proportion of non-missing ('T' or diagonal) entries:
+0.92
+
+Extract the 1st column of the underlying distance matrix:
+[ 0.000, 1.762, 1.905, 2.000, 0.000 ]
+
+Extract the 1st column of the Boolean mask:
+[ FALSE, TRUE, TRUE, TRUE, FALSE ]
+
+Impute missing entries using the 3-point condition satisfied by ultrametric distances.
+
+Print the new matrix:
+
+AverageDistanceMatrix with 5 tips. 
+A	0.000 F	1.762 T	1.905 T	2.000 T	2.000 T
+B	1.762 T	0.000 F	1.585 T	1.633 T	2.000 T
+C	1.905 T	1.585 T	0.000 F	1.632 T	2.000 T
+D	2.000 T	1.633 T	1.632 T	0.000 F	2.000 T
+E	2.000 T	2.000 T	2.000 T	2.000 T	0.000 F
+
+Recalculate matrix completeness:
+1

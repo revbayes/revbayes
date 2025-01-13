@@ -102,6 +102,11 @@ std::string Func_logistic::getFunctionName( void ) const
     return f_name;
 }
 
+std::vector<std::string> Func_logistic::getFunctionNameAliases( void ) const
+{
+    // This is the name from R
+    return { "invlogit" };
+}
 
 const TypeSpec& Func_logistic::getTypeSpec( void ) const
 {

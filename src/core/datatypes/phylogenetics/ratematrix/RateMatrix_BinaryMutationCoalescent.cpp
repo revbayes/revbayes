@@ -28,25 +28,6 @@ RateMatrix_BinaryMutationCoalescent::~RateMatrix_BinaryMutationCoalescent(void)
 }
 
 
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_BinaryMutationCoalescent& RateMatrix_BinaryMutationCoalescent::assign(const Assignable &m)
-{
-    
-    const RateMatrix_BinaryMutationCoalescent *rm = dynamic_cast<const RateMatrix_BinaryMutationCoalescent*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 double RateMatrix_BinaryMutationCoalescent::averageRate(void) const
 {
     return 1.0;

@@ -1,6 +1,6 @@
 #include "BirthDeathForwardSimulator.h"
 
-#include <math.h>
+#include <cmath>
 #include <iterator>
 #include <set>
 #include <string>
@@ -1045,7 +1045,7 @@ Tree* BirthDeathForwardSimulator::simulateTreeConditionTime(double start_age, SI
         {
             n.setName("Tip_"+ StringUtilities::toString(i+1) );
         }
-        else if ( n.isSampledAncestor() == true )
+        else if ( n.isSampledAncestorTip() == true )
         {
             n.setName("Tip_"+ StringUtilities::toString(i+1) );
         }

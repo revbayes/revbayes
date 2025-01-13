@@ -5,7 +5,6 @@
 
 #include "CharacterEventDiscrete.h"
 #include "SiteRateModifier.h"
-#include "Assignable.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Cloneable.h"
 #include "RbException.h"
@@ -38,20 +37,6 @@ SiteRateModifier::SiteRateModifier(const SiteRateModifier& g) : CharacterHistory
         site_classes = g.site_classes;
         num_event_classes = g.num_event_classes;
         num_site_classes = g.num_site_classes;
-    }
-}
-
-SiteRateModifier& SiteRateModifier::assign(const Assignable &m)
-{
-    
-    const SiteRateModifier *crm = dynamic_cast<const SiteRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
     }
 }
 

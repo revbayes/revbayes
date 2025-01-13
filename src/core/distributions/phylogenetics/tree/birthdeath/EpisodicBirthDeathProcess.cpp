@@ -57,7 +57,7 @@ EpisodicBirthDeathProcess::EpisodicBirthDeathProcess(const TypedDagNode<double> 
 
     if ( starting_tree == NULL )
     {
-        simulateTree();
+        simulateTree(true);
     }
 }
 

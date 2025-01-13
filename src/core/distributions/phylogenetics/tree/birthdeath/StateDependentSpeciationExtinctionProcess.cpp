@@ -227,11 +227,11 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -245,7 +245,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -271,7 +271,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
         num_initial_lineages = 1;
     }
     // if conditioning on root, root node must be a "true" bifurcation event
-    else if (root.getChild(0).isSampledAncestor() || root.getChild(1).isSampledAncestor())
+    else if (root.getChild(0).isSampledAncestorTip() || root.getChild(1).isSampledAncestorTip())
     {
         return RbConstants::Double::neginf;
     }
@@ -425,7 +425,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
             }
             
             bool speciation_node = true;
-            if ( left.isSampledAncestor() || right.isSampledAncestor() )
+            if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
             {
                 speciation_node = (phi == NULL);
             }
@@ -465,7 +465,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         double begin_age = node.getAge();
         double end_age = node.getParent().getAge();
         
-        if ( node.isSampledAncestor() == false )
+        if ( node.isSampledAncestorTip() == false )
         {
             // calculate likelihoods for this branch
             if ( sample_character_history == false )
@@ -576,7 +576,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     }
 
     bool speciation_node = true;
-    if ( left.isSampledAncestor() || right.isSampledAncestor() )
+    if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
     {
         speciation_node = (phi == NULL);
     }
@@ -1551,7 +1551,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1574,7 +1574,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }

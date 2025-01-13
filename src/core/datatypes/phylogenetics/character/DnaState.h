@@ -31,14 +31,14 @@ namespace RevBayesCore {
                                         DnaState(const std::string &s);                     //!< Constructor with nucleotide observation
                                         DnaState(const RbBitSet& bs);                       //!< Constructor with which letters are observed.
 
-        bool                            operator==(const CharacterState& x) const override;
+        bool                            operator==(const CharacterState& x) const;
         bool                            operator==(const DnaState& x) const;
-//        bool                            operator<(const DnaState& x) const override;
-        void                            operator+=(int) override;
-        void                            operator-=(int) override;
+//        bool                            operator<(const DnaState& x) const;
+        void                            operator+=(int);
+        void                            operator-=(int);
 
-        bool                            isAmbiguous(void) const override;
-        size_t                          getStateIndex(void) const override;                 //!< Get the index of the current state
+        bool                            isAmbiguous(void) const;
+        size_t                          getStateIndex(void) const;                          //!< Get the index of the current state
 
         DnaState*                       clone(void) const;                                  //!< Get a copy of this object
 

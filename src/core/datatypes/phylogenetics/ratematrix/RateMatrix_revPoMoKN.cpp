@@ -84,23 +84,6 @@ RateMatrix_revPoMoKN& RateMatrix_revPoMoKN::operator=(const RateMatrix_revPoMoKN
 }
 
 
-RateMatrix_revPoMoKN& RateMatrix_revPoMoKN::assign(const Assignable &m)
-{
-    
-    const RateMatrix_revPoMoKN *rm = dynamic_cast<const RateMatrix_revPoMoKN*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
-
 /** Do precalculations on eigenvectors */
 void RateMatrix_revPoMoKN::calculateCijk(void)
 {

@@ -38,6 +38,7 @@ namespace RevBayesCore {
         virtual Proposal*                                       clone(void) const = 0;                                                                  //!< Make a deep copy
         virtual double                                          doProposal(void) = 0;                                                                   //!< Actually do the proposal.
         virtual const std::string&                              getProposalName(void) const = 0;                                                        //!< Get the name of this proposal used for printing out info.
+        virtual std::string                                     getLongProposalName(void) const;                                                        //!< Get the name of this proposal used for printing out info.
         virtual double                                          getProposalTuningParameter(void) const = 0;
         virtual std::vector<DagNode*>                           identifyNodesToTouch(void);
         virtual void                                            prepareProposal(void) = 0;                                                              //!< Propose a new state

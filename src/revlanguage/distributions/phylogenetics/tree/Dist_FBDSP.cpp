@@ -68,6 +68,7 @@ Dist_FBDSP* Dist_FBDSP::clone( void ) const
  */
 RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribution( void ) const
 {
+    throw RbException("FBD range process currently disabled due to invalid calculations.");
     
     // get the parameters
     

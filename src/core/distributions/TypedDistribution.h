@@ -1,6 +1,6 @@
 /**
  * @file
- * This file contains the declaration of the interface for all distribution.
+ * This file contains the declaration of the interface for all distributions.
  *
  * Distributions are either values inside DAG nodes, i.e. a constant node used as input for the DPP,
  * or be associated with a stochastic node.
@@ -61,6 +61,7 @@ namespace RevBayesCore {
         
         // virtual methods
         virtual void                                                setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
+        virtual bool                                                allowsSA(void) { return false; }                                            //!< Checks if distribution is compatible with sampled ancestors
         
         // pure virtual public methods
         virtual TypedDistribution*                                  clone(void) const = 0;                                                      //!< Clone the distribution

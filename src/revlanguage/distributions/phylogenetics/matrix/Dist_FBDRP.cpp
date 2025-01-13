@@ -1,6 +1,6 @@
 #include "Dist_FBDRP.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -82,7 +82,8 @@ Dist_FBDRP* Dist_FBDRP::clone( void ) const
  */
 RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( void ) const
 {
-    
+    throw RbException("FBD range process currently disabled due to invalid calculations.");
+
     // get the parameters
     
     // sampling condition

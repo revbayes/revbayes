@@ -12,6 +12,7 @@ class RbException {
         enum                        ExceptionType { DEFAULT,
                                                     BUG,
                                                     MATH_ERROR,
+                                                    SKIP_PROPOSAL,
                                                     MISSING_VARIABLE,
                                                     QUIT };         //!< Exception types
 

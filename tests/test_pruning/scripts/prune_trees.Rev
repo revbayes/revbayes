@@ -1,0 +1,25 @@
+trace_all = readTreeTrace("data/unpruned.trees", treetype = "non-clock", burnin=0)
+trace_all.setOutgroup(clade(v("Bernissartia_fagesii")))
+trees_all = trace_all.getTrees()
+num_trees = trees_all.size()
+
+# Monitor the tree, pruning fossil taxa for which we do not have morphological or molecular data #
+extinct_sp = v("Bernissartia_fagesii", "Isisfordia_duncani", "Acynodon_iberoccitanus", "Agaresuchus_fontisensis", "Allodaposuchus_precedens", "Glen_Rose_form", "Hylaeochampsa_vectiana", "Iharkutosuchus_makadii","Lohuecosuchus_megadontos", "Portugalosuchus_azenhae", "Shamosuchus_djadochtaensis", "Wannchampsus_kirpachi", "Acresuchus_pachytemporalis", "Aktiogavialis_caribesi", "Alligator_mcgrewi", "Alligator_mefferdi", "Alligator_olseni", "Alligator_prenasalis", "Hassiacosuchus_haupti", "Navajosuchus_mooki", "Allognathosuchus_polyodon", "Allognathosuchus_wartheni", "Arambourgia_gaudryi", "Argochampsa_krebsi", "Asiatosuchus_germanicus", "Asiatosuchus_nanlingensis", "Australosuchus_clarkae", "Baru_darrowi", "Baru_huberi", "Baru_wickeni", "Borealosuchus_acutidentatus", "Borealosuchus_formidabilis", "Borealosuchus_sternbergii", "Borealosuchus_threensis", "Borealosuchus_wilsoni", "Bottosaurus_harlani", "Boverisuchus_magnifrons", "Boverisuchus_vorax", "Brachychampsa_montana", "Brochuchus_pigotti", "Caiman_brevirostris", "Caiman_gasparinae", "Caiman_lutescens_MACN", "UCMP_39978", "Caiman_wannlangstoni", "Ceratosuchus_burdoschi", "Crocodylus_affinis", "Crocodylus_anthropophagus", "Asiatosuchus_depressifrons", "Crocodylus_megarhinus", "Crocodylus_thorbjarnarsoni", "Crocodylus_palaeindicus", "Dadagavialis_gunai", "Diplocynodon_darwini", "Diplocynodon_deponiae", "Diplocynodon_hantoniensis", "Diplocynodon_muelleri", "Diplocynodon_ratelii", "Diplocynodon_remensis", "Diplocynodon_tormis", "Dollosuchoides_densmorei", "Eocaiman_cavernensis", "Eocaiman_palaeocenicus", "Eogavialis_africanum", "Eosuchus_lerichei", "Eosuchus_minor", "Eothoracosaurus_mississippiensi", "Euthecodon_arambourgi", "Gavialis_browni", "Gavialis_lewisi", "Gavialosuchus_eggenburgensis", "Globidentosuchus_brachyrostris", "Gnatusuchus_pebasensis", "Gryposuchus_colombianus", "Gryposuchus_croizati", "Gryposuchus_neogaeus", "Gryposuchus_pachakamue", "Ikanogavialis_gameroi", "Jiangxisuchus_nankangensis", "Kambara_implexidens", "Kambara_murgonensis", "Kambara_taraina", "Kentisuchus_spenceri", "Kuttanacaiman_iquitosensis", "Leidyosuchus_canadensis", "Mekosuchus_inexpectatus", "Mekosuchus_sanderi", "Mekosuchus_whitehunterensis", "Moroccosuchus_zennaroi", "Mourasuchus_amazonensis", "Mourasuchus_arendsi", "Mourasuchus_atopus", "Necrosuchus_ionensis", "Paratomistoma_courti", "Penghusuchus_pani", "Piscogavialis_jugaliperforatus", "Planocrania_datangensis", "Planocrania_hengdongensis", "Procaimanoidea_utahensis", "Protocaiman_peligrensis", "Purussaurus_barasiliensis", "Purussaurus_mirandai", "Purussaurus_neivensis", "Quinkana", "Siquisiquesuchus_venezuelensis", "Stangerochampsa_mccabei", "Thecachampsa_antiquus", "Thecachampsa_sericodon", "Thoracosaurus_isorhynchus", "Thoracosaurus_neocesariensis", "Tomistoma_cairense", "Tomistoma_dowsoni", "Tomistoma_lusitanica", "Maomingosuchus_petrolica", "Toyotamaphimeia_machikanensis", "Trilophosuchus_rackhami", "Tsoabichi_greenriverensis", "Ultrastenos_willisi", "Voay_robustus", "Wannaganosuchus_brachymanus", "Theriosuchus_pusillus")
+
+for ( i in 1:num_trees ) {
+    print(filename = "output/test_pruning.txt", append = (i>1), "Creating pruned tree number "+i+"\n")
+    print(filename = "output/test_pruning.txt", append = TRUE, "# of tips in the complete tree: "+trees_all[i].ntips()+"\n")
+    print(filename = "output/test_pruning.txt", append = TRUE, "# of tips to prune: "+extinct_sp.size()+"\n")
+    
+    tmp[i] = fnPruneTree(trees_all[i], prune=extinct_sp)
+    
+    print(filename = "output/test_pruning.txt", append = TRUE, "# of tips in the pruned tree according to .ntips(): "+tmp[i].ntips()+"\n")
+    print(filename = "output/test_pruning.txt", append = TRUE, "# of taxa in the pruned tree according to .taxa().size(): "+tmp[i].taxa().size()+"\n")
+    print(filename = "output/test_pruning.txt", append = TRUE, "# of tips to prune + # of tips in the pruned tree = # of tips in the complete tree?"+" ")
+    print(filename = "output/test_pruning.txt", append = TRUE, extinct_sp.size() + tmp[i].ntips() == trees_all[i].ntips())
+    print(filename = "output/test_pruning.txt", append = TRUE, "\n")
+    
+    write( i, TAB, tmp[i], "\n", sep="", append=(i>1), file="output/new_pruned.trees" )
+}
+
+q()

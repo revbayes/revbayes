@@ -183,5 +183,7 @@ void ScaleProposal::tune( double rate )
         lambda /= (2.0 - rate/p);
     }
     
+    if(lambda > 1) lambda = fmin(1000, lambda);
+    else lambda = fmax(0.001, lambda);
 }
 

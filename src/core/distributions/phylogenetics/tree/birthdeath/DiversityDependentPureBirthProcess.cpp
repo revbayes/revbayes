@@ -42,7 +42,7 @@ DiversityDependentPureBirthProcess::DiversityDependentPureBirthProcess(const Typ
     addParameter( initialSpeciation );
     addParameter( capacity );
     
-    simulateTree();
+    simulateTree(true);
 }
 
 

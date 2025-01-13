@@ -24,8 +24,6 @@ namespace RevBayesCore {
         // overloaded operators
         RateMatrix_revPoMoKN&             operator=(const RateMatrix_revPoMoKN& r);
         
-        // RateMatrix functions
-        virtual RateMatrix_revPoMoKN&     assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_revPoMoKN*                           clone(void) const;
 

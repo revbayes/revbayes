@@ -12,7 +12,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "AminoAcidState.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "DiscreteCharacterState.h"
 #include "RbVector.h"
@@ -80,23 +79,6 @@ RateMatrix_CodonSynonymousNonsynonymousHKY& RateMatrix_CodonSynonymousNonsynonym
     
     return *this;
 }
-
-
-RateMatrix_CodonSynonymousNonsynonymousHKY& RateMatrix_CodonSynonymousNonsynonymousHKY::assign(const Assignable &m)
-{
-    
-    const RateMatrix_CodonSynonymousNonsynonymousHKY *rm = dynamic_cast<const RateMatrix_CodonSynonymousNonsynonymousHKY*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */
