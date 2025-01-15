@@ -1,6 +1,6 @@
 #include "Dist_FBDRP.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <iosfwd>
 #include <string>

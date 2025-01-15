@@ -1,5 +1,5 @@
-#ifndef Transform_Scale_H
-#define Transform_Scale_H
+#ifndef Transform_Sub2_H
+#define Transform_Sub2_H
 
 #include "ModelVector.h"
 #include "RealPos.h"
@@ -9,14 +9,24 @@
 
 namespace RevLanguage {
 
-    class Transform_Scale : public TypedDistribution<Real> {
+    /* This class creates a distribution that implements
+     *
+     *    value - distribution
+     *
+     * This is equivalent to distribution |> tnScale(-1) |> tnShift(value).
+     *
+     * Note that Transform_Sub1 and Transform_Sub2 implement different argument
+     * orders and therefore different transformations.
+     */
+
+    class Transform_Sub2 : public TypedDistribution<Real> {
 
     public:
-        Transform_Scale( void );
-        virtual ~Transform_Scale();
+        Transform_Sub2( void );
+        virtual ~Transform_Sub2();
 
         // Basic utility functions
-        Transform_Scale*                                clone(void) const;                                                                      //!< Clone the object
+        Transform_Sub2*                                 clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
@@ -33,10 +43,10 @@ namespace RevLanguage {
 
 
     private:
-        RevPtr<const RevVariable>                       base_distribution;
-	RevPtr<const RevVariable>                       lambda;
+	RevPtr<const RevVariable>                       first = nullptr;
+        RevPtr<const RevVariable>                       second_distribution = nullptr;
     };
 
 }
 
-#endif // Transform_Scale_H
+#endif // Transform_Sub2_H

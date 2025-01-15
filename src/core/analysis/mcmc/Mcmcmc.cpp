@@ -451,7 +451,7 @@ void Mcmcmc::initializeChains(void)
 }
 
 
-void Mcmcmc::initializeSampler( bool priorOnly )
+void Mcmcmc::initializeSampler()
 {
     
     // initialize each chain
@@ -460,7 +460,7 @@ void Mcmcmc::initializeSampler( bool priorOnly )
         
         if ( chains[i] != NULL )
         {
-            chains[i]->initializeSampler( priorOnly );
+            chains[i]->initializeSampler();
         }
     }
     

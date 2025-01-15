@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>

@@ -1,6 +1,6 @@
 #include "ContinuousCharacterData.h"
 
-#include <math.h>
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <map>

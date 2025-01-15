@@ -1,7 +1,7 @@
 #ifndef Dist_phyloCTMCDASiteIID_H
 #define Dist_phyloCTMCDASiteIID_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>
