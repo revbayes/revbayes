@@ -97,6 +97,7 @@
 #include "Func_formatDiscreteCharacterData.h"
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
+#include "Func_MinBLTimeScaling.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
 #include "Func_phyloDiversity.h"
@@ -448,6 +449,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_extantTree()                                      );
         addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
+        addFunction( new Func_MinBLTimeScaling()                                );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
         addFunction( new Func_phyloDiversity()                                  );

@@ -1973,6 +1973,29 @@ void Tree::resetTaxonBitSetMap( void )
 }
 
 
+void Tree::resolveMultifurcations( bool resolve_root )
+{
+    bool does_use_ages = isTimeTree();
+    
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        if ( nodes[i]->getNumberOfChildren() > 2 )
+        {
+            // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
+            nodes[i]->setUseAges( does_use_ages, true );
+            // resolve the multifurcation
+            nodes[i]->resolveMultifurcation( resolve_root );
+            // we need to reindex nodes because we added new ones
+            reindexNodes();
+        }
+    }
+    
+    // Remove the outdegree-1 nodes ("knuckles") introduced by the above process of resolving multifurcations.
+    // NOTE: This only works if we assume that trees can contain multifurcations or knuckles, but not both.
+    suppressOutdegreeOneNodes( false );
+}
+
+
 TopologyNode& Tree::reverseParentChild(TopologyNode &n)
 {
     // This routine makes n the new root by
