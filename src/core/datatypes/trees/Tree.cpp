@@ -289,42 +289,51 @@ void Tree::dropTipNodeWithName( const std::string &n )
 void Tree::dropTipNode( size_t index )
 {
     // get the index of this name
-    TopologyNode &node          = getTipNode( index );
+    TopologyNode &node = getTipNode( index );
     if (node.isRoot() == true && nodes.size() == 1)
     {
         // there is nothing left to prune
         node.setName("");
         return;
     }
+    
     TopologyNode &parent        = node.getParent();
     TopologyNode &grand_parent  = parent.getParent();
-    if (parent.isRoot() == false)
+    
+    /* If the parent of the current node has more than two children, we can just delete this child without affecting
+     * the rest of the tree (i.e., we do not have to remove any internal nodes, nor adjust character history).
+     */
+    if (parent.getNumberOfChildren() > 2)
     {
-        TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == &node )
-        {
-            sibling = &parent.getChild( 1 );
-        }
-        grand_parent.removeChild( &parent );
-        parent.removeChild( sibling );
-        grand_parent.addChild( sibling );
-        sibling->setParent( &grand_parent );
-
-        // update character history
-        if (parent.getTimeInStates().size() > 0 && sibling->getTimeInStates().size() > 0)
-        {
-            std::vector<double> sibling_state_times = sibling->getTimeInStates();
-            for (size_t i = 0; i < parent.getTimeInStates().size(); i++)
-            {
-                sibling_state_times[i] += parent.getTimeInStates()[i];
-            }
-            sibling->setTimeInStates(sibling_state_times);
-            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
-        }
+        parent.removeChild( &node );
     }
     else
     {
-        if (root->getNumberOfChildren() > 1)
+        if (parent.isRoot() == false)
+        {
+            TopologyNode *sibling = &parent.getChild( 0 );
+            if ( sibling == &node )
+            {
+                sibling = &parent.getChild( 1 );
+            }
+            grand_parent.removeChild( &parent );
+            parent.removeChild( sibling );
+            grand_parent.addChild( sibling );
+            sibling->setParent( &grand_parent );
+
+            // update character history
+            if (parent.getTimeInStates().size() > 0 && sibling->getTimeInStates().size() > 0)
+            {
+                std::vector<double> sibling_state_times = sibling->getTimeInStates();
+                for (size_t i = 0; i < parent.getTimeInStates().size(); i++)
+                {
+                    sibling_state_times[i] += parent.getTimeInStates()[i];
+                }
+                sibling->setTimeInStates(sibling_state_times);
+                sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
+            }
+        }
+        else
         {
             TopologyNode *sibling = &root->getChild( 0 );
             if ( sibling == &node )
@@ -339,10 +348,6 @@ void Tree::dropTipNode( size_t index )
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
                 root->setNumberOfShiftEvents( 0 );
             }
-        }
-        else
-        {
-            root->removeChild(&node);
         }
     }
 
