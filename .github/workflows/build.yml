@@ -274,7 +274,7 @@ jobs:
            rm -f test_FBD/output_expected/test1.*
         fi
 
-        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+        if [ ${{ matrix.arch }} == "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] ; then
            rm -rf test_FBD/output_expected/
            rm -rf test_BDSTP/output_expected/
         fi
