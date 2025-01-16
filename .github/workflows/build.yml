@@ -204,7 +204,7 @@ jobs:
         echo ::endgroup::
 
         cd projects/cmake
-        ./build.sh -travis true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+        ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
         cmake --install build
 
         ccache -s

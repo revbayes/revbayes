@@ -17,7 +17,6 @@ This will clone the RevBayes website as a submodule directory. In order to test 
 Updating the test output or adding new tests requires both changes to this repository, as well as a change to the main RevBayes repository to update the version of the tests used by the main repository. Step-by-step instructions:
 
  * Make changes to the tests.
- * You need to add -DCONTINUOUS_INTEGRATION=TRUE to the arguments when compiling with cmake. This turns on using openlibm instead of the regular math library, and also adds the flag -mfpmath=sse . ./build.sh can also take -travis true which is a hold-over from when we used travis to do the tests.
  * Make sure you are on a branch of the `tests` repository that is separate from `development`. If necessary, checkout a new branch `git checkout -b <branch>`.
  * Add and commit changes to the tests repository using `git add` and `git commit` from within the `tests` folder.
  * Push the changes to the revbayes repository (using `git push`).

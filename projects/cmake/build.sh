@@ -31,7 +31,6 @@ all_args="$@"
 # command line options
 # set default values
 debug="false"
-travis="false"
 mpi="false"
 cmd="false"
 help2yml="false"
@@ -106,14 +105,6 @@ if [ -z "${exec_name}" ] ; then
     fi
 fi
 
-if [ "$travis" = "true" ]; then
-    BUILD_DIR="build"
-    export CC=${C_COMPILER}
-    export CXX=${CXX_COMPILER}
-    exec_name=rb
-    help2yml=true
-fi
-
 if [ "$debug" = "true" ] ; then
     cmake_args="-DCMAKE_BUILD_TYPE=DEBUG $cmake_args"
 fi
@@ -128,10 +119,6 @@ fi
 
 if [ "$cmd" = "true" ] ; then
     cmake_args="-DCMD_GTK=ON $cmake_args"
-fi
-
-if [ "$travis" = "true" ] ; then
-    cmake_args="-DCONTINUOUS_INTEGRATION=TRUE $cmake_args"
 fi
 
 if [ -n "$jupyter" ] ; then
