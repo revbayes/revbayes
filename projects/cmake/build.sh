@@ -91,10 +91,12 @@ Examples:
     shift
 done
 
-if [ "$mpi" = "true" ] ; then
-    BUILD_DIR="build-mpi"
-else
-    BUILD_DIR="build"
+if [ -z "BUILD_DIR" ] ; then
+    if [ "$mpi" = "true" ] ; then
+        BUILD_DIR="build-mpi"
+    else
+        BUILD_DIR="build"
+    fi
 fi
 
 if [ -z "${exec_name}" ] ; then
