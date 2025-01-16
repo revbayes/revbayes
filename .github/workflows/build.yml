@@ -26,7 +26,7 @@ jobs:
 
         include:
 
-          - name: ubuntu-gcc-10-ubuntu-22.04
+          - name: ubuntu-22.04-gcc-10
             os: ubuntu-22.04
             compiler: gcc
             version: "10"
@@ -47,7 +47,7 @@ jobs:
             mpi: true
             arch: linux64
 
-          - name: ubuntu-gcc-12-ubuntu-22.04
+          - name: ubuntu-22.04-gcc-12
             os: ubuntu-22.04
             compiler: gcc
             version: "12"
