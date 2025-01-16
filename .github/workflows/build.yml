@@ -17,7 +17,7 @@ jobs:
                ubuntu-gcc-10,
                ubuntu-gcc-11,
                ubuntu-gcc-12,
-               ubuntu-clang-13,
+               ubuntu-clang-14,
                macos-xcode-15-intel,
                macos-xcode-15-arm,
                windows
@@ -60,10 +60,10 @@ jobs:
             mpi: false
             arch: linux64
 
-          - name: ubuntu-clang-13
+          - name: ubuntu-clang-14
             os: ubuntu-latest
             compiler: clang
-            version: "13"
+            version: "14"
             mpi: false
             arch: linux64
 
