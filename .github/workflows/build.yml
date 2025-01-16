@@ -17,6 +17,7 @@ jobs:
                ubuntu-gcc-10,
                ubuntu-gcc-11,
                ubuntu-gcc-12,
+               ubuntu-gcc-13,
                ubuntu-clang-14,
                macos-xcode-15-intel,
                macos-xcode-15-arm,
@@ -57,6 +58,13 @@ jobs:
             os: ubuntu-22.04
             compiler: gcc
             version: "12"
+            mpi: false
+            arch: linux64
+
+          - name: ubuntu-gcc-13
+            os: ubuntu-latest
+            compiler: gcc
+            version: "13"
             mpi: false
             arch: linux64
 
