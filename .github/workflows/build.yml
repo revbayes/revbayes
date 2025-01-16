@@ -281,14 +281,14 @@ jobs:
         echo ::endgroup::
 
     - name: Upload test files if they failed
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: test-results-${{ matrix.name }}
         path: tests/test_*
 
     - name: Upload testiphy files if they failed
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: testiphy-results-${{ matrix.name }}
