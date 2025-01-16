@@ -253,28 +253,25 @@ jobs:
       run: |
         export PATH=${HOME}/wrapper:${HOME}/local/bin:$PATH
 
+        echo "\"Hello World\"" | rb
+        echo ::group::Test suite
+        cd tests
+
         # Temporary hack to make Mac/ARM work: remove the expected JSON output.
         # On Mac/ARM, the JSON output disagrees in the 16th and 17th digit
         #  with the JSON output on Linux/Intel and Mac/Intel.
-        if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] ; then
-           find tests -name '*.json' | xargs rm
+        if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
+           find . -name '*.json' | xargs rm
         fi
 
         # Another ugly hack: remove the *.errout file generated for the CBDSP
         # test on macOS and Windows. Apparently, NaN log likelihoods are positive
         # on these platforms but negative on Linux. This might be a bug.
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
-           rm -f tests/test_CBDSP/output_expected/mcmc_CBDSP.errout
+           rm -f test_CBDSP/output_expected/mcmc_CBDSP.errout
         fi
 
-        echo "\"Hello World\"" | rb
-        echo ::group::Test suite
-        cd tests
-        if [ ${{ matrix.arch }} == "win64" ] ; then
-           rm -f test_FBD/output_expected/test1.*
-        fi
-
-        if [ ${{ matrix.arch }} == "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] ; then
+        if [ ${{ matrix.arch }} == "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} == "win64" ] ; then
            rm -rf test_FBD/output_expected/
            rm -rf test_BDSTP/output_expected/
         fi
