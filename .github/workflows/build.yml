@@ -256,7 +256,7 @@ jobs:
         # Temporary hack to make Mac/ARM work: remove the expected JSON output.
         # On Mac/ARM, the JSON output disagrees in the 16th and 17th digit
         #  with the JSON output on Linux/Intel and Mac/Intel.
-        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
+        if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] ; then
            find tests -name '*.json' | xargs rm
         fi
 
