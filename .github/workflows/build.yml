@@ -204,7 +204,7 @@ jobs:
         echo ::endgroup::
 
         cd projects/cmake
-        BUILD_DIR=build ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+        BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
         cmake --install build
 
         ccache -s

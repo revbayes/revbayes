@@ -91,7 +91,7 @@ Examples:
     shift
 done
 
-if [ -z "BUILD_DIR" ] ; then
+if [ -z "${BUILD_DIR}" ] ; then
     if [ "$mpi" = "true" ] ; then
         BUILD_DIR="build-mpi"
     else
