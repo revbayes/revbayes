@@ -9,8 +9,8 @@
 
 namespace RevBayesCore {
 
-TopologyConstrainedSSEDistribution::TopologyConstrainedSSEDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t) :
-		TopologyConstrainedTreeDistribution(base_dist, c, t)
+    TopologyConstrainedSSEDistribution::TopologyConstrainedSSEDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t, long age_check_precision) :
+        TopologyConstrainedTreeDistribution(base_dist, c, t, age_check_precision)
 {
 }
 
