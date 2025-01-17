@@ -235,7 +235,8 @@ jobs:
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
         # Copy all DLLs to get the graphics DLLs.
-        cp $WINROOT/mingw64/bin/*.dll            $PREFIX/bin
+        cp $WINROOT/mingw64/bin/*.dll                     $PREFIX/bin
+
         # Don't put the wrapper in the same dir as rb.exe so we don't ship it
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'
