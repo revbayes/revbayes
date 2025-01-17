@@ -49,7 +49,7 @@ namespace RevBayesCore {
         double                                  getModelLnProbability(bool likelihood_only);
         RbVector<Monitor>&                      getMonitors( void );
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
-        void                                    initializeSampler(bool priorOnly=false);                                        //!< Initialize objects for mcmc sampling
+        void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling
         void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(unsigned long g);
         void                                    nextCycle(bool advanceCycle);

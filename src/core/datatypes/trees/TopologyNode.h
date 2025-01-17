@@ -113,7 +113,7 @@ namespace RevBayesCore {
         bool                                        hasIndex(void) const;                                                               //!< Does the node have an index
         size_t                                      getIndex(void) const;                                                               //!< Get index of node
         void                                        getIndicesOfNodesInSubtree(bool countTips, std::vector<size_t>* indices) const;                                                               //!< Get index of node
-        std::string                                 getIndividualName() const;                                                             //!< Get the species name for the node
+        std::string                                 getIndividualName() const;                                                          //!< Get the species name for the node
         double                                      getMaxDepth(void) const;                                                            //!< Get the maximum depth from this node (time between this node and most recent tip)
         const std::string&                          getName() const;                                                                    //!< Get name of node
         TopologyNode*                               getMrca(const Clade &c);
@@ -152,7 +152,6 @@ namespace RevBayesCore {
         bool                                        isSampledAncestorTipOrParent() const;                                               //!< Is node or child node a tip a sampled ancestor?
         bool                                        isSampledAncestorKnuckle() const;                                                   //!< Does this one have only one child?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
@@ -172,6 +171,7 @@ namespace RevBayesCore {
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
+        void                                        suppressOutdegreeOneNodes(bool replace);                                            //!< If this node's outdegree = 1, turn it and its descendants into bifurcations, or remove it.
 
         // internal helper functions
         bool getBurstSpeciation(void) const { return burst_speciation; }

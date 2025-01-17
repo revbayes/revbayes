@@ -136,7 +136,7 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
-          brew install pkg-config boost ccache coreutils meson openlibm
+          brew install boost ccache coreutils meson openlibm
 
     - name: Install meson
       run: |
@@ -218,7 +218,7 @@ jobs:
         BOOST_ROOT: /home/runner/win_root/mingw64/
       run: |
         PREFIX=${HOME}/local
-        meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dopenlibm=true -Dstudio=true
+        meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dstudio=true -Dopenlibm=true
         CXX=x86_64-w64-mingw32-g++-posix
         WINROOT=/home/runner/win_root
         ccache -p
@@ -229,8 +229,8 @@ jobs:
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
-        cp $WINROOT/mingw64/bin/libboost_*.dll            $PREFIX/bin
-        cp $WINROOT/mingw64/bin/libopenlibm.dll           $PREFIX/bin
+        # Copy all DLLs to get the graphics DLLs.
+        cp $WINROOT/mingw64/bin/*.dll            $PREFIX/bin
         # Don't put the wrapper in the same dir as rb.exe so we don't ship it
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'

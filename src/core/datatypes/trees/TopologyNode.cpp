@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
-#include <math.h>
+#include <cmath>
 #include <set>
 #include <string>
 #include <sstream>
@@ -582,10 +582,10 @@ std::string TopologyNode::computePlainNewick( void ) const
 {
     /* NOTE: Representing a topology as with WITH NO ANNOTATIONS
      * means that we have to represent sampled ancestors as
-     * out-degree-1 nodes.
+     * outdegree-1 nodes.
      *
      * If you want to build a tree object from that, you may
-     * need to call tree->makeInternalNodesBifurcating(true,true).
+     * need to call tree->suppressOutdegreeOneNodes(true, true).
      */
 
     // test whether this is a internal or external node
@@ -1642,84 +1642,6 @@ bool TopologyNode::isTip( void ) const
 }
 
 
-/**
- * Make this node an all its children bifurcating.
- * The root will not be changed. We throw an error if this node
- * has more than 2 children. If this node has only one child,
- * then we insert a dummy child.
- * This function is called recursively.
- */
-void TopologyNode::makeBifurcating( bool as_fossils )
-{
-
-    if ( isTip() == false )
-    {
-
-        // we need to be able to bifurcate sampled ancestor root nodes
-        //if ( isRoot() == false )
-        //{
-
-            if ( getNumberOfChildren() == 1 )
-            {
-
-                // should we remove the node or add it as a fossil?
-                if ( as_fossils == true )
-                {
-                    TopologyNode *new_fossil = new TopologyNode( getTaxon() );
-                    taxon = Taxon("");
-
-                    // connect to the old fossil
-                    addChild( new_fossil );
-                    new_fossil->setParent( this );
-
-                    // set the fossil flags
-                    setSampledAncestor( false );
-                    new_fossil->setSampledAncestor( true );
-
-                    // set the age and branch-length of the fossil
-                    new_fossil->setAge( age );
-                    new_fossil->setBranchLength( 0.0 );
-                }
-                else
-                {
-                    // we are going to delete myself by connect my parent and my child
-                    TopologyNode& parent = getParent();
-                    TopologyNode& child = getChild(0);
-                    
-                    // the new branch length needs to be the branch length of the parent and child
-                    double summ = getBranchLength() + child.getBranchLength();
-                    
-                    // now remove myself from the parent
-                    parent.removeChild( this );
-                    
-                    // and my child from me
-                    removeChild( &child );
-                    
-                    // and stich my parent and my child together
-                    parent.addChild( &child );
-                    child.setParent( &parent );
-                    
-                    // finally, adapt the branch lengths
-                    child.setBranchLength(summ);
-                    
-                }
-
-
-            }
-
-        //}
-
-        // call this function recursively for all its children
-        for (size_t i=0; i<getNumberOfChildren(); ++i)
-        {
-            getChild( i ).makeBifurcating( as_fossils );
-        }
-
-    }
-
-}
-
-
 void TopologyNode::recomputeAge( bool recursive )
 {
 
@@ -1980,37 +1902,6 @@ void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
     }
 }
 
-void TopologyNode::setUseAges(bool tf, bool recursive)
-{
-
-    // if this node did use ages before but not we do not anymore
-    if ( use_ages == true && tf == false )
-    {
-
-        // check if we need to call the recursion
-        if ( recursive == true )
-        {
-
-            // call all our children
-            for (size_t i=0; i<children.size(); ++i)
-            {
-                children[i]->setUseAges(tf, recursive);
-            }
-
-        }
-
-        // now we need to compute the branch lengths
-        recomputeBranchLength();
-
-        // make the age not usable to be safe
-        age = RbConstants::Double::nan;
-
-    }
-    // finally set our internal flag
-    use_ages = tf;
-
-}
-
 
 void TopologyNode::setSampledAncestor(bool tf)
 {
@@ -2053,6 +1944,116 @@ void TopologyNode::setTree(Tree *t)
     }
 
 }
+
+
+void TopologyNode::setUseAges(bool tf, bool recursive)
+{
+
+    // if this node did use ages before but not we do not anymore
+    if ( use_ages == true && tf == false )
+    {
+
+        // check if we need to call the recursion
+        if ( recursive == true )
+        {
+
+            // call all our children
+            for (size_t i=0; i<children.size(); ++i)
+            {
+                children[i]->setUseAges(tf, recursive);
+            }
+
+        }
+
+        // now we need to compute the branch lengths
+        recomputeBranchLength();
+
+        // make the age not usable to be safe
+        age = RbConstants::Double::nan;
+
+    }
+    // finally set our internal flag
+    use_ages = tf;
+
+}
+
+
+/**
+ * If this node has an outdegree of 1 (i.e., only one descendant), either replace it
+ * by a bifurcation where one child is subtended by a zero-length branch, and do
+ * the same for all its children by calling this function recursively, or remove the
+ * node entirely.
+ */
+void TopologyNode::suppressOutdegreeOneNodes( bool replace )
+{
+    
+    if ( getNumberOfChildren() == 1 )
+    {
+
+        /* Should we remove the node or replace it by a bifurcation with a zero-length branch instead?
+         * I.e.,
+         *
+         *    A                   A                 A
+         *    |                   |                 |
+         *    B      -->      B --+--\      or      |
+         *    |                      |              |
+         *    C                      C              C
+         *
+         *                 (replace = true)  (replace = false)
+         */
+        if (replace) // this solution is general enough to handle sampled ancestor root nodes
+        {
+            TopologyNode *new_fossil = new TopologyNode( getTaxon() );
+            taxon = Taxon("");
+
+            // connect to the old sampled ancestor
+            addChild( new_fossil );
+            new_fossil->setParent( this );
+
+            // set the sampled ancestor flags
+            setSampledAncestor( false );
+            new_fossil->setSampledAncestor( true );
+
+            // set the age and branch length of the newly added tip
+            new_fossil->setAge( age );
+            new_fossil->setBranchLength( 0.0 );
+        }
+        else // this only works for non-root nodes; the root is handled at the Tree level instead
+        {
+            // we are going to delete myself by connecting my parent and my child
+            TopologyNode& parent = getParent();
+            TopologyNode& child = getChild(0);
+                    
+            // the new branch length needs to be the branch length of the parent and child
+            double summ = getBranchLength() + child.getBranchLength();
+                    
+            // now remove myself from the parent
+            parent.removeChild( this );
+                    
+            // and my child from me
+            removeChild( &child );
+                    
+            // and stich my parent and my child together
+            parent.addChild( &child );
+            child.setParent( &parent );
+                    
+            // finally, adapt the branch lengths
+            child.setBranchLength(summ);
+        }
+
+    }
+    
+    if (replace)
+    {
+        // call this function recursively for all children of this node
+        for (size_t i = 0; i < getNumberOfChildren(); ++i)
+        {
+            getChild( i ).suppressOutdegreeOneNodes( true );
+        }
+    }
+
+}
+
 
 std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
 {

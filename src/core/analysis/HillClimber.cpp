@@ -349,14 +349,10 @@ void HillClimber::initializeSampler( void )
     // Get initial lnProbability of model
 
     // first we touch all nodes so that the likelihood is dirty
-    for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
+    for (auto the_node: dagNodes)
     {
-
-        DagNode *the_node = *i;
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( false );
         the_node->touch();
-
     }
 
 
