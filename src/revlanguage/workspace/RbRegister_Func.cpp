@@ -155,7 +155,7 @@
 #include "Func_MutSelAARateMatrix.h"
 
 #include "Func_X2RateMatrix.h"
-
+#include "Func_compositeRateMatrix.h"
 #include "Func_covarionRateMatrix.h"
 #include "Func_covarion.h"
 #include "Func_cpRev.h"
@@ -220,6 +220,7 @@
 
 /* Cladogeneic state prob function */
 #include "Func_biogeographyCladoEventsBD.h"
+#include "Func_traitBiogeographyCladoEventsBD.h"
 #include "Func_DECCladoProbs.h"
 #include "Func_DECRates.h"
 #include "Func_DECRoot.h"
@@ -270,6 +271,10 @@
 #include "Func_posteriorPredictiveProbability.h"
 //#include "Func_power.h"
 //#include "Func_powerVector.h"
+#include "Func_product.h"
+#include "Func_productPositive.h"
+#include "Func_productInteger.h"
+#include "Func_productNatural.h"
 #include "Func_round.h"
 #include "Func_shortestDistance.h"
 #include "Func_sigmoid.h"
@@ -357,7 +362,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_MutSelAARateMatrix()                          );
 
         addFunction( new Func_X2RateMatrix()                                );
-
+        addFunction( new Func_compositeRateMatrix()                          );
         addFunction( new Func_covarionRateMatrix()                          );
         addFunction( new Func_covarion()                                    );
         addFunction( new Func_cpRev()                                       );
@@ -423,6 +428,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_DECRoot() );
         addFunction( new Func_EpochCladoProbs() );
         addFunction( new Func_biogeographyCladoEventsBD() );
+        addFunction( new Func_traitBiogeographyCladoEventsBD() );
         addFunction( new Func_chromosomesCladoProbs() );
         addFunction( new Func_chromosomesCladoEventsBD() );
         addFunction( new Func_chromosomesPloidyCladoEventsBD() );
@@ -551,6 +557,12 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // normalize vector function
 		addFunction( new Func_normalize()  );
 
+        // product function
+        addFunction( new Func_product()  );
+        addFunction( new Func_productPositive()  );
+        addFunction( new Func_productInteger()  );
+        addFunction( new Func_productNatural()  );
+        
         // round function
         addFunction( new Func_round<Real,Integer>()  );
         addFunction( new Func_round<RealPos,Natural>()  );

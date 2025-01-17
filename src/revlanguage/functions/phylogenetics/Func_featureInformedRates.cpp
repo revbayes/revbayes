@@ -23,6 +23,7 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RevVariable.h"
+#include "RealPos.h"
 #include "RlFunction.h"
 #include "Simplex.h"
 #include "StringUtilities.h"
@@ -52,15 +53,16 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<doubl
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > > >* cf = static_cast<const ModelVector<ModelVector<ModelVector<Natural> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > > >* cf = static_cast<const ModelVector<ModelVector<ModelVector<Integer> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = static_cast<const ModelVector<ModelVector<ModelVector<Real> > >&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* null_rate = static_cast<const RealPos&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
     
     // add error checking
     
     // create P matrix
-    RevBayesCore::FeatureInformedRateFunction* f = new RevBayesCore::FeatureInformedRateFunction( cf, qf, sigma, phi );
+    RevBayesCore::FeatureInformedRateFunction* f = new RevBayesCore::FeatureInformedRateFunction( cf, qf, sigma, phi, null_rate );
     
     return f;
 }
@@ -77,7 +79,7 @@ const ArgumentRules& Func_featureInformedRates::getArgumentRules( void ) const
     {
         
         argumentRules.push_back( new ArgumentRule( "categoricalFeatures",
-                                                  ModelVector<ModelVector<ModelVector<Natural> > >::getClassTypeSpec(),
+                                                  ModelVector<ModelVector<ModelVector<Integer> > >::getClassTypeSpec(),
                                                   "Vector of layers for categorical regional features.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
@@ -96,6 +98,12 @@ const ArgumentRules& Func_featureInformedRates::getArgumentRules( void ) const
                                                   "Vector of effect parameters for each quantitative feature layer.",
                                                   ArgumentRule::BY_CONSTANT_REFERENCE,
                                                   ArgumentRule::ANY ));
+        argumentRules.push_back( new ArgumentRule( "null_rate",
+                                                  RealPos::getClassTypeSpec(),
+                                                  "The rate assigned when a feature equals the null value (e.g. nan).",
+                                                  ArgumentRule::BY_CONSTANT_REFERENCE,
+                                                  ArgumentRule::ANY,
+                                                  new RealPos(0.0) ) );
         
         rules_set = true;
     }

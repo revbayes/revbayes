@@ -78,6 +78,9 @@ void RlRegionalFeatures::initMethods(void) {
     normalizeArgRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
     methods.addFunction( new MemberProcedure( "normalize", RlUtils::Void, normalizeArgRules ) );
     
+    ArgumentRules* standardizeArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "standardize", RlUtils::Void, standardizeArgRules ) );
+    
     ArgumentRules* getArgRules = new ArgumentRules();
     getArgRules->push_back( new OptionRule( "relationship", new RlString("within"), relationshipOptions, "" ) );
     getArgRules->push_back( new OptionRule( "type", new RlString("categorical"), typeOptions, "" ) );
@@ -115,15 +118,21 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
     }
     if (name == "normalize") {
         found = true;
-        
+        std::cout << "Warning: RegionalFeatures .normalize() will soon be removed. Use .standardize() instead.\n";
         std::string relationship = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-
         if (relationship == "within") {
-            this->dag_node->getValue().normalizeWithinQuantitative();
+            this->dag_node->getValue().standardizeWithinQuantitative();
         } else if (relationship == "between") {
-            this->dag_node->getValue().normalizeBetweenQuantitative();
+            this->dag_node->getValue().standardizeBetweenQuantitative();
         }
-
+        return NULL;
+    }
+    if (name == "standardize") {
+        found = true;
+        
+        this->dag_node->getValue().standardizeWithinQuantitative();
+        this->dag_node->getValue().standardizeBetweenQuantitative();
+    
         return NULL;
     }
     if (name == "get")
@@ -134,6 +143,10 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
         size_t time_index = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue() - 1;
 
         // get relevant layer
+        if (relationship == "within" && type == "categorical") {
+            
+            ;
+        }
         const std::vector<RevBayesCore::RegionalFeatureLayer>& y = this->dag_node->getValue().getLayers(relationship, type, time_index);
         return new RevVariable( new ModelVector<RlRegionalFeatureLayer>( y ) );
         
