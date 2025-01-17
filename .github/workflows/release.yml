@@ -49,7 +49,7 @@ jobs:
       matrix:
         name: [ubuntu-22.04-gcc-12,
                macos-xcode-15-intel,
-               macos-xcode-16-arm,
+               macos-xcode-15-arm,
                windows
                ]
 
@@ -68,10 +68,10 @@ jobs:
             mpi: false
             arch: mac-intel64
 
-          - name: macos-xcode-16-arm
+          - name: macos-xcode-15-arm
             os: macos-14
             compiler: xcode
-            version: "16"
+            version: "15"
             mpi: false
             arch: mac-arm64
 
