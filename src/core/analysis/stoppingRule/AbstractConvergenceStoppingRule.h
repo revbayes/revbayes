@@ -13,7 +13,7 @@ namespace RevBayesCore {
      * @brief Abstract base class for convergence stopping rules.
      *
      * This class provides the abstract base class for (all) convergence stopping rules.
-     * This is, we provide some common member variables and some common virtual function.
+     * This is, we provide some common member variables and some common virtual functions.
      *
      *
      * @copyright Copyright 2009-
@@ -37,6 +37,8 @@ namespace RevBayesCore {
         virtual void                                        setNumberOfRuns(size_t n);                                  //!< Set how many runs/replicates there are.
 
         virtual AbstractConvergenceStoppingRule*            clone(void) const = 0;                                      //!< Clone function. This is similar to the copy constructor but useful in inheritance.
+        virtual double                                      getStatistic(size_t g) = 0;                                 //!< Compute the value of the rule's test statistic / criterion at generation g.
+        virtual std::string                                 printAsStatement(size_t g) = 0;                             //!< Print a statement about the current value of the rule's test statistic / criterion.
         virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop at generation g?
         
     protected:
