@@ -772,12 +772,25 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         {         
             if ( rules[i].isConvergenceRule() )
             {
-                converged &= rules[i].checkAtIteration(gen) && rules[i].stop( gen );
+                converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
+                
+                // Prettify: insert blank lines before printing out the first stopping rule statement
+                // and after printing out the last one
+                if (numConvergenceRules == 0)
+                {
+                    ss << "\n";
+                }
+                ss << rules[i].printAsStatement(gen) << "\n";
+                if (numConvergenceRules == rules.size() - 1)
+                {
+                    ss << "\n";
+                }
+                
                 ++numConvergenceRules;
             }
             else
             {
-                if ( rules[i].checkAtIteration(gen) && rules[i].stop( gen ) )
+                if ( rules[i].checkAtIteration(gen) && rules[i].stop(gen) )
                 {
                     finished = true;
                     break;
