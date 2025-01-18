@@ -65,7 +65,7 @@ void GelmanRubinStoppingRule::setNumberOfRuns(size_t n)
  * Compute the current value of the rule's test statistic:
  * Here, this is the variance of samples between chains over the variance of samples within chains
  */
-double GelmanRubinStoppingRule::getStatistic()
+double GelmanRubinStoppingRule::getStatistic( size_t g )
 {
     GelmanRubinTest grTest = GelmanRubinTest( R );
     
@@ -131,9 +131,9 @@ double GelmanRubinStoppingRule::getStatistic()
 }
 
 
-std::string GelmanRubinStoppingRule::printAsStatement()
+std::string GelmanRubinStoppingRule::printAsStatement( size_t g )
 {
-    double val = getStatistic();
+    double val = getStatistic(g);
     std::string preamble = "Maximum value of the Gelman-Rubin statistic (PSRF): ";
     std::string statement = preamble + std::to_string(val);
     return statement;
@@ -147,6 +147,6 @@ std::string GelmanRubinStoppingRule::printAsStatement()
  */
 bool GelmanRubinStoppingRule::stop( size_t g )
 {
-    double max_psrf = getStatistic();
+    double max_psrf = getStatistic(g);
     return max_psrf < R;
 }

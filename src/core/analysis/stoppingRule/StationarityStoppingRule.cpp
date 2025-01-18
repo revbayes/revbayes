@@ -66,7 +66,7 @@ void StationarityStoppingRule::setNumberOfRuns(size_t n)
  * Here, this is the number of cases in which the pooled sample mean lies outside the confidence
  * interval of a single-chain mean (with confidence level equal to 1 - prob)
  */
-double StationarityStoppingRule::getStatistic()
+double StationarityStoppingRule::getStatistic( size_t g )
 {
     // record the number of such cases
     size_t outsideConfInt = 0;
@@ -130,7 +130,7 @@ double StationarityStoppingRule::getStatistic()
 }
 
 
-std::string StationarityStoppingRule::printAsStatement()
+std::string StationarityStoppingRule::printAsStatement( size_t g )
 {
     // Note that # of comparisons = (# of replicates) * (# of parameters)
     // If there are multiple runs, we will grab the # of parameters from the 1st run
@@ -139,7 +139,7 @@ std::string StationarityStoppingRule::printAsStatement()
     std::vector<TraceNumeric> &data = reader.getTraces();
     size_t nComp = numReplicates * data.size();
     
-    size_t val = (size_t)getStatistic();
+    size_t val = (size_t)getStatistic(g);
     std::string preamble = "The CI of a single-chain mean excludes the overall mean in ";
     std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " comparisons";
     return statement;
@@ -153,6 +153,6 @@ std::string StationarityStoppingRule::printAsStatement()
  */
 bool StationarityStoppingRule::stop( size_t g )
 {
-    size_t outsideConfInt = (size_t)getStatistic();
+    size_t outsideConfInt = (size_t)getStatistic(g);
     return outsideConfInt == 0;
 }

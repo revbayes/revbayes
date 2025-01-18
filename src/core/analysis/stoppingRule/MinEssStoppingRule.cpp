@@ -48,7 +48,7 @@ MinEssStoppingRule* MinEssStoppingRule::clone( void ) const
  * Compute the current val ue of the rule's test statistic:
  * Here, this is the minimum effective sample size
  */
-double MinEssStoppingRule::getStatistic()
+double MinEssStoppingRule::getStatistic( size_t g )
 {
     // record ESS values for every variable in every replicate
     std::vector<double> ess;
@@ -91,9 +91,9 @@ double MinEssStoppingRule::getStatistic()
 }
 
 
-std::string MinEssStoppingRule::printAsStatement()
+std::string MinEssStoppingRule::printAsStatement( size_t g )
 {
-    double val = getStatistic();
+    double val = getStatistic(g);
     std::string preamble = "Minimum effective sample size (ESS): ";
     std::string statement = preamble + std::to_string(val);
     return statement;
@@ -106,6 +106,6 @@ std::string MinEssStoppingRule::printAsStatement()
  */
 bool MinEssStoppingRule::stop( size_t g )
 {
-    double min_ess = getStatistic();
+    double min_ess = getStatistic(g);
     return min_ess > minEss;
 }

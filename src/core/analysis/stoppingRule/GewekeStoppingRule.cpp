@@ -51,7 +51,7 @@ GewekeStoppingRule* GewekeStoppingRule::clone( void ) const
  * Here, this is the normal cumulative distribution function of the standardized difference of means
  * between two fractions of a chain
  */
-double GewekeStoppingRule::getStatistic()
+double GewekeStoppingRule::getStatistic( size_t g )
 {
     // record the number of variables for which the Geweke statistic is significant (indicating non-convergence),
     // across all replicates
@@ -97,7 +97,7 @@ double GewekeStoppingRule::getStatistic()
 }
 
 
-std::string GewekeStoppingRule::printAsStatement()
+std::string GewekeStoppingRule::printAsStatement( size_t g )
 {
     // Note that # of comparisons = (# of replicates) * (# of parameters)
     // If there are multiple runs, we will grab the # of parameters from the 1st run
@@ -115,7 +115,7 @@ std::string GewekeStoppingRule::printAsStatement()
     uss << std::setprecision(5) << std::noshowpoint << 1 - alpha/2;
     std::string ubound = uss.str();
     
-    size_t val = (size_t)getStatistic();
+    size_t val = (size_t)getStatistic(g);
     std::string pt1 = "The Geweke test statistic is < " + lbound + " or > " + ubound + " in " + std::to_string(val);
     std::string statement = pt1 + "/" + std::to_string(nComp) + " comparisons";
     return statement;
@@ -129,6 +129,6 @@ std::string GewekeStoppingRule::printAsStatement()
  */
 bool GewekeStoppingRule::stop( size_t g )
 {
-    size_t nSignif = (size_t)getStatistic();
+    size_t nSignif = (size_t)getStatistic(g);
     return nSignif == 0;
 }
