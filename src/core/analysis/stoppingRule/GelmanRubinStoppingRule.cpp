@@ -122,7 +122,7 @@ double GelmanRubinStoppingRule::getStatistic( size_t g )
         }
         
         // get the value
-        psrf[i] = grTest.assessConvergence( data_exp[i] );
+        psrf[i] = grTest.getStatistic( data_exp[i] );
     }
     
     // get the largest psrf value

@@ -19,7 +19,7 @@ GewekeTest::GewekeTest(double f, double f1, double f2) : ConvergenceDiagnosticCo
     
 }
 
-double GewekeTest::assessConvergence(const TraceNumeric& trace)
+double GewekeTest::getStatistic(const TraceNumeric& trace)
 {
     // get the sample size
     size_t sampleSize = trace.size(true);
@@ -58,4 +58,10 @@ double GewekeTest::assessConvergence(const TraceNumeric& trace)
     double cdf          = RbStatistics::Normal::cdf(z);
     
     return cdf;
+}
+
+bool GewekeTest::assessConvergence(const TraceNumeric& trace)
+{
+    double cdf = getStatistic(trace);
+    return cdf > p/2.0 && cdf < (1.0 - p/2.0);
 }

@@ -25,7 +25,8 @@ class TraceNumeric;
         EssTest(double k=200);
         
         // implement functions from convergence diagnostic
-        double      assessConvergence(const TraceNumeric& trace);
+        double      getStatistic(const TraceNumeric& trace);
+        bool        assessConvergence(const TraceNumeric& trace);
         
     private:
         

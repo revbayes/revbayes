@@ -25,7 +25,8 @@ class TraceNumeric;
         GewekeTest(double p=0.01, double f1=0.1, double f2=0.5);
     
         // implement functions from convergence diagnostic
-        double      assessConvergence(const TraceNumeric& trace);
+        double      getStatistic(const TraceNumeric& trace);
+        bool        assessConvergence(const TraceNumeric& trace);
     
         // setters
         void        setFraction1(double f1) { frac1 = f1; }

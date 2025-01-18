@@ -123,7 +123,7 @@ double StationarityStoppingRule::getStatistic( size_t g )
         }
 
         // get the value and increment the counter
-        outsideConfInt += (size_t)sTest.assessConvergence( data_exp[i] );
+        outsideConfInt += (size_t)sTest.getStatistic( data_exp[i] );
     }
     
     return (double)outsideConfInt;

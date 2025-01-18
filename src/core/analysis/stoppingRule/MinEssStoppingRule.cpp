@@ -81,7 +81,7 @@ double MinEssStoppingRule::getStatistic( size_t g )
         for ( size_t j = 0; j < data.size(); ++j)
         {
             data[j].setBurnin( maxBurnin );
-            ess.push_back( essTest.assessConvergence( data[j] ) );
+            ess.push_back( essTest.getStatistic( data[j] ) );
         }
     }
     

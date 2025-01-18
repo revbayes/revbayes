@@ -21,8 +21,10 @@ namespace RevBayesCore {
         //ConvergenceDiagnosticContinuous();
         virtual                    ~ConvergenceDiagnosticContinuous(void) {}
     
-        virtual double              assessConvergence(const TraceNumeric& trace) { return 0.0; }
-        virtual double              assessConvergence(const std::vector<TraceNumeric>& traces) { return 0.0; }
+        virtual double              getStatistic(const TraceNumeric& trace) { return 0.0; }
+        virtual double              getStatistic(const std::vector<TraceNumeric>& traces) { return 0.0; }
+        virtual bool                assessConvergence(const TraceNumeric& trace) { return false; }
+        virtual bool                assessConvergence(const std::vector<TraceNumeric>& traces) { return false; }
 
     };
 

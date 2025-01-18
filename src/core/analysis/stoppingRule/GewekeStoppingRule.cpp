@@ -85,7 +85,7 @@ double GewekeStoppingRule::getStatistic( size_t g )
         for ( size_t j = 0; j < data.size(); ++j)
         {
             data[j].setBurnin( maxBurnin );
-            double cdf = gTest.assessConvergence( data[j] );
+            double cdf = gTest.getStatistic( data[j] );
             if ( cdf < alpha/2.0 || cdf > (1.0 - alpha/2.0) )
             {
                 gSignif++;

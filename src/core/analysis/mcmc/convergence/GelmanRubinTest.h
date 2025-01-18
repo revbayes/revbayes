@@ -30,8 +30,10 @@ class TraceNumeric;
       GelmanRubinTest(double R=1.001, std::size_t n=10);
     
         // implement functions from convergence diagnostic
-        double              assessConvergence(const TraceNumeric& trace);
-        double              assessConvergence(const std::vector<TraceNumeric>& traces);
+        double              getStatistic(const TraceNumeric& trace);
+        double              getStatistic(const std::vector<TraceNumeric>& traces);
+        bool                assessConvergence(const TraceNumeric& trace);
+        bool                assessConvergence(const std::vector<TraceNumeric>& traces);
     
     private:
     

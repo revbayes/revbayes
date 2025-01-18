@@ -14,9 +14,12 @@ EssTest::EssTest(double t) : ConvergenceDiagnosticContinuous(),
     
 }
 
-
-double EssTest::assessConvergence(const TraceNumeric& trace)
+double EssTest::getStatistic(const TraceNumeric& trace)
 {
     return trace.getESS();
 }
 
+bool EssTest::assessConvergence(const TraceNumeric& trace)
+{
+    return trace.getESS() > k;
+}

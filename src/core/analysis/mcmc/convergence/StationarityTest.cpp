@@ -17,7 +17,7 @@ StationarityTest::StationarityTest(size_t b, double f) : ConvergenceDiagnosticCo
 
 }
 
-double StationarityTest::assessConvergence(const TraceNumeric& trace)
+double StationarityTest::getStatistic(const TraceNumeric& trace)
 {
     // record the results
     size_t nSignif = 0;
@@ -56,7 +56,7 @@ double StationarityTest::assessConvergence(const TraceNumeric& trace)
     return (double)nSignif;
 }
 
-double StationarityTest::assessConvergence(const std::vector<TraceNumeric>& traces)
+double StationarityTest::getStatistic(const std::vector<TraceNumeric>& traces)
 {
     // record the results
     size_t nSignif = 0;
@@ -99,4 +99,16 @@ double StationarityTest::assessConvergence(const std::vector<TraceNumeric>& trac
     }
     
     return (double)nSignif;
+}
+
+bool StationarityTest::assessConvergence(const TraceNumeric& trace)
+{
+    size_t nSignif = (size_t)getStatistic(trace);
+    return nSignif == 0;
+}
+
+bool StationarityTest::assessConvergence(const std::vector<TraceNumeric>& traces)
+{
+    size_t nSignif = (size_t)getStatistic(traces);
+    return nSignif == 0;
 }

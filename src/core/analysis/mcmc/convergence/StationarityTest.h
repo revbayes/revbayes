@@ -29,8 +29,10 @@ class TraceNumeric;
         StationarityTest(std::size_t nBlocks=10, double p=0.01);
     
         // implement functions from convergence diagnostic
-        double          assessConvergence(const TraceNumeric& trace);
-        double          assessConvergence(const std::vector<TraceNumeric>& traces);
+        double          getStatistic(const TraceNumeric& trace);
+        double          getStatistic(const std::vector<TraceNumeric>& traces);
+        bool            assessConvergence(const TraceNumeric& trace);
+        bool            assessConvergence(const std::vector<TraceNumeric>& traces);
     
         // setters
         void            setNBlocks(std::size_t n) { nBlocks = n; }
