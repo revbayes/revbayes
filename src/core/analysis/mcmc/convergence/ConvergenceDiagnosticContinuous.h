@@ -1,10 +1,11 @@
-//
-//  ConvergenceDiagnostic.h
-//  RevBayesGui
-//
-//  Created by Sebastian Hoehna on 4/11/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
-//
+/**
+ * Diagnosing MCMC convergence
+ *
+ * @copyright Copyright 2011-
+ * @author The RevBayes Development Core Team (Sebastian Hoehna)
+ * @since Version 1.0, 2011-04-11
+ */
+
 #ifndef ConvergenceDiagnosticContinuous_H
 #define ConvergenceDiagnosticContinuous_H
 
@@ -20,8 +21,8 @@ namespace RevBayesCore {
         //ConvergenceDiagnosticContinuous();
         virtual                    ~ConvergenceDiagnosticContinuous(void) {}
     
-        virtual bool                assessConvergence(const TraceNumeric& trace) { return false; }
-        virtual bool                assessConvergence(const std::vector<TraceNumeric>& traces) { return false; }
+        virtual double              assessConvergence(const TraceNumeric& trace) { return 0.0; }
+        virtual double              assessConvergence(const std::vector<TraceNumeric>& traces) { return 0.0; }
 
     };
 

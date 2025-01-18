@@ -25,21 +25,23 @@ namespace RevBayesCore {
         
     public:
         GelmanRubinStoppingRule(double m, const std::string &fn, size_t fq, BurninEstimatorContinuous *be);
-        virtual                                            ~GelmanRubinStoppingRule(void);                                   //!< Virtual destructor
+        virtual                                            ~GelmanRubinStoppingRule(void);                              //!< Virtual destructor
         
         // public methods
         GelmanRubinStoppingRule*                            clone(void) const;                                          //!< Clone function. This is similar to the copy constructor but useful in inheritance.
         void                                                setNumberOfRuns(size_t n);                                  //!< Set how many runs/replicates there are.
+        double                                              getStatistic();                                             //!< Compute the current value of the rule's test statistic / criterion.
+        std::string                                         printAsStatement();                                         //!< Print a statement about the current value of the rule's test statistic / criterion.
         bool                                                stop(size_t g);                                             //!< Should we stop now?
         
     private:
         
-        double                                              R;                                                     //!< The minimum ESS threshold
+        double                                              R;                                                          //!< The minimum ESS threshold
         
     };
     
     // Global functions using the class
-    std::ostream&                               operator<<(std::ostream& o, const GelmanRubinStoppingRule& x);               //!< Overloaded output operator
+    std::ostream&                               operator<<(std::ostream& o, const GelmanRubinStoppingRule& x);          //!< Overloaded output operator
     
 }
 

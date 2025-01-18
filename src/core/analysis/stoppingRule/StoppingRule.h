@@ -32,7 +32,7 @@ namespace RevBayesCore {
         virtual bool                                        isConvergenceRule(void) const = 0;                          //!< Is this a convergence rule or a theshold rule?
         virtual void                                        runStarted(void) = 0;                                       //!< The run just started. Here we can set any flags like the timer.
         virtual void                                        setNumberOfRuns(size_t n) = 0;                              //!< Set how many runs/replicates there are.
-        virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop now?
+        virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop at generation g?
         
     protected:
         StoppingRule() {}

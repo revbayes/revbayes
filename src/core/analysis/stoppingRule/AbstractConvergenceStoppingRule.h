@@ -26,7 +26,7 @@ namespace RevBayesCore {
     public:
         AbstractConvergenceStoppingRule(const path &fn, size_t fq, BurninEstimatorContinuous *be);
         AbstractConvergenceStoppingRule(const AbstractConvergenceStoppingRule &sr);
-        virtual                                            ~AbstractConvergenceStoppingRule(void);                                   //!< Virtual destructor
+        virtual                                            ~AbstractConvergenceStoppingRule(void);                      //!< Virtual destructor
         
         AbstractConvergenceStoppingRule&                    operator=(const AbstractConvergenceStoppingRule &st);
         
@@ -36,8 +36,8 @@ namespace RevBayesCore {
         virtual void                                        runStarted(void);                                           //!< The run just started. Here we do not need to do anything.
         virtual void                                        setNumberOfRuns(size_t n);                                  //!< Set how many runs/replicates there are.
 
-        virtual AbstractConvergenceStoppingRule*            clone(void) const = 0;                                          //!< Clone function. This is similar to the copy constructor but useful in inheritance.
-        virtual bool                                        stop(size_t g) = 0;                                             //!< Should we stop now?
+        virtual AbstractConvergenceStoppingRule*            clone(void) const = 0;                                      //!< Clone function. This is similar to the copy constructor but useful in inheritance.
+        virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop at generation g?
         
     protected:
         

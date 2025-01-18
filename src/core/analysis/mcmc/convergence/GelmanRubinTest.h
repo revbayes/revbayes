@@ -12,12 +12,12 @@ class TraceNumeric;
     /**
      * @brief Gelman-Rubin test statistic for assessing convergence.
      *
-     * The Gelman-Rubin test statistic computes the withing chain variance compared with the
-     * between chain variance. The ratio of the two variances is computed and only if
-     * this ratio R converges to 1.0 then we can assume convergence.
-     * Alternatively, if R is much different from 1.0, then we can detect non convergence.
+     * The Gelman-Rubin test statistic compares the within-chain variance with the
+     * between-chain variance. The ratio of the two variances is computed and only if
+     * this ratio R converges to 1.0 can we assume convergence.
+     * Alternatively, if R is very different from 1.0, then we can detect non-convergence.
      * The convergence of a chain is computed by splitting the chain into n batches and
-     * apply the multiple chain statistic.
+     * applying the multiple chain statistic.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -29,9 +29,9 @@ class TraceNumeric;
     public:
       GelmanRubinTest(double R=1.001, std::size_t n=10);
     
-        // implementen functions from convergence diagnostic
-        bool                assessConvergence(const TraceNumeric& trace);
-        bool                assessConvergence(const std::vector<TraceNumeric>& traces);
+        // implement functions from convergence diagnostic
+        double              assessConvergence(const TraceNumeric& trace);
+        double              assessConvergence(const std::vector<TraceNumeric>& traces);
     
     private:
     

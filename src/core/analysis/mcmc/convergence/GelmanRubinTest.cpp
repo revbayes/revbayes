@@ -14,7 +14,7 @@ GelmanRubinTest::GelmanRubinTest(double r, size_t n) : ConvergenceDiagnosticCont
     
 }
 
-bool GelmanRubinTest::assessConvergence(const TraceNumeric& trace)
+double GelmanRubinTest::assessConvergence(const TraceNumeric& trace)
 {
     
     double withinBatchVariance  = 0;
@@ -43,10 +43,10 @@ bool GelmanRubinTest::assessConvergence(const TraceNumeric& trace)
     
     double psrf = ((totalSampleSize-nBatches) / (totalSampleSize-1.0)) * (betweenBatchVariance/withinBatchVariance);
     
-    return psrf < R;
+    return psrf;
 }
 
-bool GelmanRubinTest::assessConvergence(const std::vector<TraceNumeric>& traces)
+double GelmanRubinTest::assessConvergence(const std::vector<TraceNumeric>& traces)
 {
     
     double within_chain_variance     = 0;
@@ -84,5 +84,5 @@ bool GelmanRubinTest::assessConvergence(const std::vector<TraceNumeric>& traces)
     
     double psrf = ((total_sample_size-nChains) / (total_sample_size-1.0)) * (between_chain_variance/within_chain_variance);
     
-    return psrf < R;
+    return psrf;
 }
