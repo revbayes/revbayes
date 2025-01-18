@@ -1,6 +1,9 @@
-#include "MaxTimeStoppingRule.h"
+#include <iomanip>
+#include <string>
 
 #include "Cloneable.h"
+#include "MaxTimeStoppingRule.h"
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
 
@@ -74,15 +77,53 @@ void MaxTimeStoppingRule::setNumberOfRuns(size_t n)
 
 
 /**
+ * Compute the current value of the rule's test statistic:
+ * Here, this is the time elapsed since the start of the analysis
+ */
+double MaxTimeStoppingRule::getStatistic( size_t g )
+{
+    double timeUsed = time(NULL) - startTime;
+    return timeUsed;
+}
+
+
+std::string MaxTimeStoppingRule::printAsStatement( size_t g )
+{
+    double timeUsed = getStatistic(g);
+    double ETA = maxTime - timeUsed;
+    
+    std::stringstream ess;
+    size_t elapsed_hours   = timeUsed / 3600;
+    size_t elapsed_minutes = timeUsed / 60 - elapsed_hours * 60;
+    size_t elapsed_seconds = timeUsed - elapsed_minutes * 60 - elapsed_hours * 3600;
+    
+    ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_hours << ":";
+    ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_minutes << ":";
+    ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_seconds;
+    
+    std::stringstream rss;
+    size_t remaining_hours   = ETA / 3600;
+    size_t remaining_minutes = ETA / 60 - remaining_hours * 60;
+    size_t remaining_seconds = ETA - remaining_minutes * 60 - remaining_hours * 3600;
+    
+    rss << std::setw( 2 ) << std::setfill( '0' ) << remaining_hours << ":";
+    rss << std::setw( 2 ) << std::setfill( '0' ) << remaining_minutes << ":";
+    rss << std::setw( 2 ) << std::setfill( '0' ) << remaining_seconds;
+    
+    std::string elapsed = ess.str();
+    std::string remaining = rss.str();
+    
+    std::string statement = "Analysis running for " + elapsed + " (ETA: " + remaining + ")";
+    return statement;
+}
+
+
+/**
  * Should we stop now?
- * Yes, if the current time is larger or equal to the maximum allowed time.
+ * Yes, if the elapsed time has reached the maximum allowed time.
  */
 bool MaxTimeStoppingRule::stop( size_t g )
 {
-    // compute the used time
-    double timeUsed = time(NULL) - startTime;
-    
-    bool passed = timeUsed >= maxTime;
-    
-    return passed;
+    double timeUsed = getStatistic(g);
+    return timeUsed >= maxTime;
 }
