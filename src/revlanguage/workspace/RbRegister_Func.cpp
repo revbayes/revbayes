@@ -320,7 +320,9 @@
 #include "Func_decomposedVarianceCovarianceMatrix.h"
 #include "Func_partialToCorrelationMatrix.h"
 
+/* PseudoData */
 #include "Func_PseudoObservation.h"
+#include "Func_PseudoDataBetween.h"
 /* Type conversions */
 #include "Proc_StringToInt.h"
 
@@ -694,7 +696,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         
         addFunction( new Func_BSPInterval<RealPos>()          );
 
+        // Pseudo-data
         addFunction( new Func_PseudoObservation()                   );
+        addFunction( new Func_PseudoDataLikelihoodBetween()         );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
