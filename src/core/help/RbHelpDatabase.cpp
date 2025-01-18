@@ -1629,7 +1629,7 @@ constant. This has the effect of shifting node ages deeper into the past.
 
 Conceptually, the undated tree would usually correspond either to a bare
 topology (a tree without branch lengths) or a tree with branch lengths in units
-of expected change; in practice, both `BrachLengthTree` and `TimeTree` arguments
+of expected change; in practice, both `BranchLengthTree` and `TimeTree` arguments
 are accepted. In this implementation of the MBL approach, both terminal and
 internal branches are required to be greater than or equal to the specified
 minimum. If there is uncertainty associated with the age of a given tip,
