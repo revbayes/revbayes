@@ -45,11 +45,14 @@ MinEssStoppingRule* MinEssStoppingRule::clone( void ) const
 
 
 /**
- * Should we stop now?
- * Yes, if the minimum ESS is larger than the provided threshold.
+ * Compute the current val ue of the rule's test statistic:
+ * Here, this is the minimum effective sample size
  */
-bool MinEssStoppingRule::stop( size_t g )
+double MinEssStoppingRule::getStatistic()
 {
+    // record ESS values for every variable in every replicate
+    std::vector<double> ess;
+    
     for ( size_t i = 0; i < numReplicates; ++i)
     {
         path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
@@ -74,14 +77,35 @@ bool MinEssStoppingRule::stop( size_t g )
     
         EssTest essTest = EssTest( minEss );
         
-        // set the burnins and conduct the tests
+        // set the burnins and get the values
         for ( size_t j = 0; j < data.size(); ++j)
         {
             data[j].setBurnin( maxBurnin );
-            if ( !essTest.assessConvergence( data[j] ) ) return false;
+            ess.push_back( essTest.assessConvergence( data[j] ) );
         }
-        
     }
     
-    return true;
+    // get the smallest ESS value
+    double min_ess = *std::min_element( ess.begin(), ess.end() );
+    return min_ess;
+}
+
+
+std::string MinEssStoppingRule::printAsStatement()
+{
+    double val = getStatistic();
+    std::string preamble = "Minimum effective sample size (ESS): ";
+    std::string statement = preamble + std::to_string(val);
+    return statement;
+}
+
+
+/**
+ * Should we stop now?
+ * Yes, if the minimum ESS is larger than the provided threshold.
+ */
+bool MinEssStoppingRule::stop( size_t g )
+{
+    double min_ess = getStatistic();
+    return min_ess > minEss;
 }

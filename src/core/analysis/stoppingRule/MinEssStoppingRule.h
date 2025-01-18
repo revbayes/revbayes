@@ -27,7 +27,9 @@ namespace RevBayesCore {
         
         // public methods
         MinEssStoppingRule*                                 clone(void) const;                                          //!< Clone function. This is similar to the copy constructor but useful in inheritance.
-        bool                                                stop(size_t g);                                             //!< Should we stop now?
+        double                                              getStatistic();                                             //!< Compute the current value of the rule's test statistic / criterion.
+        std::string                                         printAsStatement();                                         //!< Print a statement about the current value of the rule's test statistic / criterion.
+        bool                                                stop(size_t g);                                             //!< Should we stop at generation g?
         
     private:
         
