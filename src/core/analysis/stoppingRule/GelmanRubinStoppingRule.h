@@ -32,7 +32,7 @@ namespace RevBayesCore {
         void                                                setNumberOfRuns(size_t n);                                  //!< Set how many runs/replicates there are.
         double                                              getStatistic();                                             //!< Compute the current value of the rule's test statistic / criterion.
         std::string                                         printAsStatement();                                         //!< Print a statement about the current value of the rule's test statistic / criterion.
-        bool                                                stop(size_t g);                                             //!< Should we stop now?
+        bool                                                stop(size_t g);                                             //!< Should we stop at generation g?
         
     private:
         
