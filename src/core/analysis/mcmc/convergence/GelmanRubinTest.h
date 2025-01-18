@@ -16,8 +16,8 @@ class TraceNumeric;
      * between-chain variance. The ratio of the two variances is computed and only if
      * this ratio R converges to 1.0 can we assume convergence.
      * Alternatively, if R is very different from 1.0, then we can detect non-convergence.
-     * The convergence of a chain is computed by splitting the chain into n batches and
-     * applying the multiple chain statistic.
+     * The convergence of a single chain is computed by splitting the chain into n batches
+     * and applying the multiple chain statistic.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)

@@ -10,10 +10,12 @@ namespace RevBayesCore {
     /**
      * @brief The Gelman-Rubin stopping rule for convergence between multiple runs.
      *
-     * This stopping rule returns true when the the variance of samples between runs 
+     * This stopping rule returns true when the variance of samples between runs 
      * is approximately as large as the variance within runs has been reached.
-     * This rule is most useful if you want to check for convergence of continuous parameter
-     * between runs.
+     * This rule is most useful if you want to check for convergence of continuous parameters
+     * between runs. Although GelmanRubinTest.cpp contains a function for applying
+     * this test to a single chain (by splitting it into batches, and pretending that these
+     * represent different chains), we do not allow this here and require at least 2 chains.
      *
      *
      * @copyright Copyright 2009-

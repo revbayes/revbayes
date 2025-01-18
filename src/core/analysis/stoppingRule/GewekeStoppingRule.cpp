@@ -116,8 +116,8 @@ std::string GewekeStoppingRule::printAsStatement()
     std::string ubound = uss.str();
     
     size_t val = (size_t)getStatistic();
-    std::string pt1 = "The Geweke test statistic is < " + lbound + " or > " + ubound + " for " + std::to_string(val);
-    std::string statement = pt1 + " out of " + std::to_string(nComp) + " comparisons";
+    std::string pt1 = "The Geweke test statistic is < " + lbound + " or > " + ubound + " in " + std::to_string(val);
+    std::string statement = pt1 + "/" + std::to_string(nComp) + " comparisons";
     return statement;
 }
 
