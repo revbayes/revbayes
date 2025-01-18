@@ -1921,6 +1921,48 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
 }
 
 
+void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
+{
+    //    1. get all my children
+    //    2. if (a child is a tip)
+    //           set its age based on the taxon it contains
+    //       else
+    //           call myself on the child
+    //    3. collect the ages of all my children
+    //    4. set my age to the age of the oldest of my children + min br. len.
+    //    5. recompute the branch lengths of all my children
+    
+    const std::vector<TopologyNode*>& children = getChildren();
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        if ( children[i]->isTip() )
+        {
+            double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;
+            children[i]->setAge( tip_age );
+        }
+        else
+        {
+            children[i]->scaleAgesFromTaxonAgesMBL(minbl);
+        }
+    }
+    
+    std::vector<double> ages;
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        ages.push_back( children[i]->getAge() );
+    }
+    
+    double max_age = *std::max_element(ages.begin(), ages.end());
+    setAge(max_age + minbl);
+    
+    // now we need to recompute the branch lengths of my children
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        children[i]->recomputeBranchLength();
+    }
+}
+
+
 void TopologyNode::setAge(double a, bool propagate)
 {
     if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
@@ -2059,48 +2101,6 @@ void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
             }
         }
 
-    }
-}
-
-
-void TopologyNode::setParentAge(double minbl)
-{
-    //    1. get all my children
-    //    2. if (a child is a tip)
-    //           set its age based on the taxon it contains
-    //       else
-    //           call myself on the child
-    //    3. collect the ages of all my children
-    //    4. set my age to the age of the oldest of my children + min br. len.
-    //    5. recompute the branch lengths of all my children
-    
-    const std::vector<TopologyNode*>& children = getChildren();
-    for (size_t i = 0; i < children.size(); i++)
-    {
-        if ( children[i]->isTip() )
-        {
-            double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;
-            children[i]->setAge( tip_age );
-        }
-        else
-        {
-            children[i]->setParentAge(minbl);
-        }
-    }
-    
-    std::vector<double> ages;
-    for (size_t i = 0; i < children.size(); i++)
-    {
-        ages.push_back( children[i]->getAge() );
-    }
-    
-    double max_age = *std::max_element(ages.begin(), ages.end());
-    setAge(max_age + minbl);
-    
-    // now we need to recompute the branch lengths of my children
-    for (size_t i = 0; i < children.size(); i++)
-    {
-        children[i]->recomputeBranchLength();
     }
 }
 

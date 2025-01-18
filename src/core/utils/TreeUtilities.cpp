@@ -1299,7 +1299,7 @@ Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std
     
     // The algorithm starts at the root
     TopologyNode& root_node = treeToScale.getRoot();
-    root_node.setParentAge( minBrLen );
+    root_node.scaleAgesFromTaxonAgesMBL( minBrLen );
     
     RevBayesCore::Tree *p = &treeToScale;
     return p;
