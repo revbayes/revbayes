@@ -323,6 +323,8 @@
 /* PseudoData */
 #include "Func_PseudoObservation.h"
 #include "Func_PseudoDataBetween.h"
+#include "Func_PseudoDataAbove.h"
+
 /* Type conversions */
 #include "Proc_StringToInt.h"
 
@@ -699,6 +701,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // Pseudo-data
         addFunction( new Func_PseudoObservation()                   );
         addFunction( new Func_PseudoDataLikelihoodBetween()         );
+        addFunction( new Func_PseudoDataLikelihoodAbove()           );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
