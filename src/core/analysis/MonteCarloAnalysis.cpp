@@ -767,6 +767,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
         converged = true;
         size_t numConvergenceRules = 0;
+        std::stringstream ssConv;
         // do the stopping test
         for (size_t i=0; i<rules.size(); ++i)
         {         
@@ -778,12 +779,12 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 // and after printing out the last one
                 if (numConvergenceRules == 0)
                 {
-                    ss << "\n";
+                    ssConv << "\n";
                 }
-                ss << rules[i].printAsStatement(gen) << "\n";
+                ssConv << rules[i].printAsStatement(gen) << "\n";
                 if (numConvergenceRules == rules.size() - 1)
                 {
-                    ss << "\n";
+                    ssConv << "\n";
                 }
                 
                 ++numConvergenceRules;
@@ -798,6 +799,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
             }          
         }
         converged &= numConvergenceRules > 0;
+        RBOUT( ssConv.str() );
         
     } while ( finished == false && converged == false);
     
