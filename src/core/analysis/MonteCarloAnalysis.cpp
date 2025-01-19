@@ -766,27 +766,16 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         
         converged = true;
+        bool checkNow = true;
         size_t numConvergenceRules = 0;
-        std::stringstream ssConv;
-        // do the stopping test
+        
+        // run the stopping test
         for (size_t i=0; i<rules.size(); ++i)
-        {         
+        {
+            checkNow &= rules[i].checkAtIteration(gen);
             if ( rules[i].isConvergenceRule() )
             {
                 converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
-                
-                // Prettify: insert blank lines before printing out the first stopping rule statement
-                // and after printing out the last one
-                if (numConvergenceRules == 0)
-                {
-                    ssConv << "\n";
-                }
-                ssConv << rules[i].printAsStatement(gen) << "\n";
-                if (numConvergenceRules == rules.size() - 1)
-                {
-                    ssConv << "\n";
-                }
-                
                 ++numConvergenceRules;
             }
             else
@@ -796,10 +785,25 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     finished = true;
                     break;
                 }
-            }          
+            }
         }
+        
+        if (checkNow)
+        {
+            std::stringstream ssConv;
+            for (size_t i=0; i<rules.size(); ++i)
+            {
+                // Prettify: insert a blank line before printing out the first stopping rule statement
+                if (i == 0)
+                {
+                    ssConv << "\n";
+                }
+                ssConv << rules[i].printAsStatement(gen) << "\n";
+            }
+            RBOUT( ssConv.str() );
+        }
+        
         converged &= numConvergenceRules > 0;
-        RBOUT( ssConv.str() );
         
     } while ( finished == false && converged == false);
     
