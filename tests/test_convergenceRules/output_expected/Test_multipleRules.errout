@@ -3,3 +3,75 @@
    This simulation runs 4 independent replicates.
    The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
    
+   
+   Minimum effective sample size (ESS): 9.636138
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.013099
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 15/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 5/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 13.770305
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.013139
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 3/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 7/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 14.286880
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.006976
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 7/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 19.676148
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.014090
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 5/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 29.356134
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.013666
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 6/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 24.523228
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.013653
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 5/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 32.597776
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.004308
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 4/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 40.646903
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.002138
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 3/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 48.629452
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.006583
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 5/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 55.356270
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.001576
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 3/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 63.362058
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.001853
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 3/20 comparisons
+   
+   
+   Minimum effective sample size (ESS): 72.441830
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.000044
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The CI of a single-chain mean excludes the overall mean in 0/20 comparisons
+   
