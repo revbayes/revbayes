@@ -84,9 +84,7 @@ double MaxIterationStoppingRule::getStatistic( size_t g )
 
 std::string MaxIterationStoppingRule::printAsStatement( size_t g )
 {
-    std::string preamble = "Reached generation ";
-    // No need to call getStatistic() and go size_t -> double -> size_t
-    std::string statement = preamble + std::to_string(g) + "/" + std::to_string(maxGenerations);
+    std::string statement = "";
     return statement;
 }
 

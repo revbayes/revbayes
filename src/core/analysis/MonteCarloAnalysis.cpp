@@ -790,17 +790,21 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
         if (checkNow)
         {
-            std::stringstream ssConv;
-            for (size_t i=0; i<rules.size(); ++i)
+            // Do not print anything if the only rule we have is MaxIter
+            if (rules.size() != 1 or rules[0].printAsStatement(gen) != "")
             {
-                // Prettify: insert a blank line before printing out the first stopping rule statement
-                if (i == 0)
+                std::stringstream ssConv;
+                for (size_t i=0; i<rules.size(); ++i)
                 {
-                    ssConv << "\n";
+                    // Prettify: insert a blank line before printing out the first stopping rule statement
+                    if (i == 0)
+                    {
+                        ssConv << "\n";
+                    }
+                    ssConv << rules[i].printAsStatement(gen) << "\n";
                 }
-                ssConv << rules[i].printAsStatement(gen) << "\n";
+                RBOUT( ssConv.str() );
             }
-            RBOUT( ssConv.str() );
         }
         
         converged &= numConvergenceRules > 0;
