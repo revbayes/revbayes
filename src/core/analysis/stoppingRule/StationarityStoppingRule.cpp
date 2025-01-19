@@ -141,7 +141,7 @@ std::string StationarityStoppingRule::printAsStatement( size_t g )
     
     size_t val = (size_t)getStatistic(g);
     std::string preamble = "The CI of a single-chain mean excludes the overall mean in ";
-    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " comparisons";
+    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " comparisons\n";
     return statement;
 }
 

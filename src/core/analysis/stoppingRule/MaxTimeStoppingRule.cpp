@@ -113,7 +113,7 @@ std::string MaxTimeStoppingRule::printAsStatement( size_t g )
     std::string elapsed = ess.str();
     std::string remaining = rss.str();
     
-    std::string statement = "Elapsed time: " + elapsed + "; remaining time: " + remaining;
+    std::string statement = "Elapsed time: " + elapsed + "; remaining time: " + remaining + "\n";
     return statement;
 }
 

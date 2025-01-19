@@ -135,7 +135,7 @@ std::string GelmanRubinStoppingRule::printAsStatement( size_t g )
 {
     double val = getStatistic(g);
     std::string preamble = "Maximum value of the Gelman-Rubin statistic (PSRF): ";
-    std::string statement = preamble + std::to_string(val);
+    std::string statement = preamble + std::to_string(val) + "\n";
     return statement;
 }
 

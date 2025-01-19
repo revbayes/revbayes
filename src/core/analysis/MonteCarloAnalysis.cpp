@@ -801,7 +801,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     {
                         ssConv << "\n";
                     }
-                    ssConv << rules[i].printAsStatement(gen) << "\n";
+                    ssConv << rules[i].printAsStatement(gen);
                 }
                 RBOUT( ssConv.str() );
             }
