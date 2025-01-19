@@ -121,8 +121,6 @@ RevPtr<RevVariable> Trace::executeMethod(std::string const &name, const std::vec
         ss << "Burnin:                               " << value->getBurnin() << std::endl;
         ss << "Mean:                                 " << value->getMean() << std::endl;
         ss << "SEM:                                  " << value->getSEM() << std::endl;
-        ss << "ESS > 625:                            " << (value->hasPassedEssThreshold() ? "TRUE" : "FALSE") << std::endl;
-        ss << "PSRF < 1.01 (n = 10):                 " << (value->hasPassedGelmanRubinTest() ? "TRUE" : "FALSE") << std::endl;
         ss << "Geweke test (p = 0.01):               " << (value->hasPassedGewekeTest() ? "TRUE" : "FALSE") << std::endl;
         ss << "Stationarity test (p = 0.01, n = 10): " << (value->hasPassedStationarityTest() ? "TRUE" : "FALSE") << std::endl;
 

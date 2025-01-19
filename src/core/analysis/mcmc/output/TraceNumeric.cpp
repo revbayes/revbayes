@@ -60,7 +60,7 @@ void TraceNumeric::computeStatistics( void )
     
     // Gelman-Rubin statistic (= potential scale reduction factor) for convergence within a chain
     // This statistic is normally used for convergence between multiple chains; here, we will
-    // break the chain into 10 blocks/windows and use these in place of separate chains.
+    // break the trace into 10 blocks/windows and use these in place of separate chains.
     GelmanRubinTest testGR = GelmanRubinTest(1.01, nBlocks);
     passedGelmanRubinTest = testGR.assessConvergence(*this);
     converged &= passedGelmanRubinTest;
@@ -72,7 +72,7 @@ void TraceNumeric::computeStatistics( void )
     
     // Stationarity test for convergence within a chain
     // This statistic is normally used for convergence between multiple chains; here, we will
-    // break the chain into 10 blocks/windows and use these in place of separate chains.
+    // break the trace into 10 blocks/windows and use these in place of separate chains.
     StationarityTest testS = StationarityTest(nBlocks, 0.01);
     passedStationarityTest = testS.assessConvergence(*this);
     converged &= passedStationarityTest;
