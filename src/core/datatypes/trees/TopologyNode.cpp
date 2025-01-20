@@ -1903,6 +1903,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     
                     // create a parent for the two
                     TopologyNode* prnt = new TopologyNode(); // leave the new node without index
+                    prnt->setBranchLength(0.0);              // set the length of the branch subtending it to zero
                     prnt->addChild( leftChild );
                     prnt->addChild( rightChild );
                     leftChild->setParent( prnt );
