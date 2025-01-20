@@ -1875,6 +1875,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             }
             else
             {
+                double brlen = getBranchLength();
+                
                 // The following is adapted from UniformTopologyDistribution::simulateClade()
                 
                 while ( children.size() >= 2 )
@@ -1912,6 +1914,10 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     prnt->setParent( this );
                 }
                 
+                // Give my only child my old branch length, and set my new branch length to 0
+                // This is to make sure everything is handled properly when we call suppressOutdegreeOneNodes() on myself
+                children[0]->setBranchLength(brlen);
+                setBranchLength(0.0);
             }
             
         }
