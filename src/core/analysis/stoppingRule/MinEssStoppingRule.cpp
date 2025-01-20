@@ -93,9 +93,14 @@ double MinEssStoppingRule::getStatistic( size_t g )
 
 std::string MinEssStoppingRule::printAsStatement( size_t g )
 {
+    // Nicely format the target value
+    std::stringstream tss;
+    tss << std::setprecision(5) << std::noshowpoint << minEss;
+    std::string target = tss.str();
+    
     double val = getStatistic(g);
     std::string preamble = "Minimum effective sample size (ESS): ";
-    std::string statement = preamble + std::to_string(val) + "\n";
+    std::string statement = preamble + std::to_string(val) + " (target: > " + target + ")\n";
     return statement;
 }
 
