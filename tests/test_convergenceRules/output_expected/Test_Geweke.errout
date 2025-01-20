@@ -4,11 +4,11 @@
    The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
    
    
-   The Geweke test statistic is < 0.0005 or > 0.9995 in 15/20 comparisons
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 15/20 comparisons (target: 0)
    
    
-   The Geweke test statistic is < 0.0005 or > 0.9995 in 3/20 comparisons
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 3/20 comparisons (target: 0)
    
    
-   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons
+   The Geweke test statistic is < 0.0005 or > 0.9995 in 0/20 comparisons (target: 0)
    
