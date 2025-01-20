@@ -139,9 +139,14 @@ std::string StationarityStoppingRule::printAsStatement( size_t g )
     std::vector<TraceNumeric> &data = reader.getTraces();
     size_t nComp = numReplicates * data.size();
     
+    // Nicely format the target value
+    std::stringstream tss;
+    tss << std::setprecision(5) << std::noshowpoint << prob;
+    std::string target = tss.str();
+    
     size_t val = (size_t)getStatistic(g);
-    std::string preamble = "The CI of a single-chain mean excludes the overall mean in ";
-    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " comparisons\n";
+    std::string preamble = "The CI of a single-chain mean excludes the overall mean at p = " + target + " in ";
+    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " comparisons (target: 0)\n";
     return statement;
 }
 
