@@ -766,17 +766,21 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         
         converged = true;
-        bool checkNow = true;
+        bool checkNow = false;
         size_t numConvergenceRules = 0;
         
         // run the stopping test
         for (size_t i=0; i<rules.size(); ++i)
         {
-            checkNow &= rules[i].checkAtIteration(gen);
             if ( rules[i].isConvergenceRule() )
             {
                 converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
                 ++numConvergenceRules;
+                
+                // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
+                // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
+                // we will only print when at least one convergence rule wants us to.
+                checkNow |= rules[i].checkAtIteration(gen);
             }
             else
             {
@@ -790,21 +794,17 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
         if (checkNow)
         {
-            // Do not print anything if the only rule we have is MaxIter
-            if (rules.size() != 1 or rules[0].printAsStatement(gen) != "")
+            std::stringstream ssConv;
+            for (size_t i=0; i<rules.size(); ++i)
             {
-                std::stringstream ssConv;
-                for (size_t i=0; i<rules.size(); ++i)
+                // Prettify: insert a blank line before printing out the first stopping rule statement
+                if (i == 0)
                 {
-                    // Prettify: insert a blank line before printing out the first stopping rule statement
-                    if (i == 0)
-                    {
-                        ssConv << "\n";
-                    }
-                    ssConv << rules[i].printAsStatement(gen);
+                    ssConv << "\n";
                 }
-                RBOUT( ssConv.str() );
+                ssConv << rules[i].printAsStatement(gen);
             }
+            RBOUT( ssConv.str() );
         }
         
         converged &= numConvergenceRules > 0;
