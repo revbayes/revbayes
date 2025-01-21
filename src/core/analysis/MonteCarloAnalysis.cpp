@@ -766,24 +766,47 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         
         converged = true;
+        bool checkNow = false;
         size_t numConvergenceRules = 0;
-        // do the stopping test
+        
+        // run the stopping test
         for (size_t i=0; i<rules.size(); ++i)
-        {         
+        {
             if ( rules[i].isConvergenceRule() )
             {
-                converged &= rules[i].checkAtIteration(gen) && rules[i].stop( gen );
+                converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
                 ++numConvergenceRules;
+                
+                // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
+                // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
+                // we will only print when at least one convergence rule wants us to.
+                checkNow |= rules[i].checkAtIteration(gen);
             }
             else
             {
-                if ( rules[i].checkAtIteration(gen) && rules[i].stop( gen ) )
+                if ( rules[i].checkAtIteration(gen) && rules[i].stop(gen) )
                 {
                     finished = true;
                     break;
                 }
-            }          
+            }
         }
+        
+        if (checkNow)
+        {
+            std::stringstream ssConv;
+            for (size_t i=0; i<rules.size(); ++i)
+            {
+                // Prettify: insert a blank line before printing out the first stopping rule statement
+                if (i == 0)
+                {
+                    ssConv << "\n";
+                }
+                ssConv << rules[i].printAsStatement(gen);
+            }
+            RBOUT( ssConv.str() );
+        }
+        
         converged &= numConvergenceRules > 0;
         
     } while ( finished == false && converged == false);
