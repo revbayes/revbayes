@@ -146,8 +146,8 @@ std::string StationarityStoppingRule::printAsStatement( size_t g )
     std::string target = tss.str();
     
     size_t val = (size_t)getStatistic(g);
-    std::string preamble = "The CI of a single-chain mean excludes the overall mean at p = " + target + " in ";
-    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " comparisons (target: 0)\n";
+    std::string preamble = "Comparisons in which the CI of a single-chain mean excludes the overall mean at p = " + target + ": ";
+    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
     return statement;
 }
 
