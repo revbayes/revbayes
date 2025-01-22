@@ -145,6 +145,7 @@ namespace RevBayesCore {
         bool                                                removeRootIfDegree2();
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                                resetTaxonBitSetMap(void);                                                                          //!< Resets the map that holds the BitSet index for each taxon
+        void                                                resolveMultifurcations(bool resolve_root);                                                           //!< Make sure the tree is fully bifurcating
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.
         void                                                setNegativeConstraint(bool);
         void                                                setRoot(TopologyNode* r, bool reindex);                                                             //!< Set the root and bootstrap the Tree from it

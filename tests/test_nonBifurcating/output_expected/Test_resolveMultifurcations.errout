@@ -1,0 +1,41 @@
+========================================
+Resolving multifurcations in a time tree
+========================================
+
+   Attempting to read the contents of file "multifurcating_time_tree.tre"
+   Successfully read file
+
+   Tree type: TimeTree
+   The tree has 10 tips and 5 internal nodes.
+   Is the tree binary? FALSE
+
+Resolving all multifurcations...
+
+   The modified tree has 10 tips and 9 internal nodes.
+   Is the modified tree binary? TRUE
+
+Resolving multifurcations except at the root...
+
+   The modified tree has 10 tips and 8 internal nodes.
+   Is the modified tree binary? TRUE
+
+=================================================
+Resolving multifurcations in a branch length tree
+=================================================
+
+   Attempting to read the contents of file "multifurcating_branch_length_tree.tre"
+   Successfully read file
+
+   Tree type: BranchLengthTree
+   The tree has 10 tips and 5 internal nodes.
+   Is the tree binary? FALSE
+
+Resolving all multifurcations...
+
+   The modified tree has 10 tips and 9 internal nodes.
+   Is the modified tree binary? TRUE
+
+Resolving multifurcations except at the root...
+
+   The modified tree has 10 tips and 8 internal nodes.
+   Is the modified tree binary? FALSE
