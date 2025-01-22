@@ -448,11 +448,13 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
     sample_character_history = true;
     computeLnProbability();
 
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
     size_t attempts = 0;
     bool success = false;
     while (!success)
     {
-        if (attempts == 100000)
+        if (attempts > 100000)
         {
             throw RbException("After 100000 attempts a character history could not be sampled with a non-zero probability. Try increasing nTimeSlices.");
         }
@@ -477,51 +479,50 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
         // get root frequencies
         const RbVector<double> &freqs = getRootFrequencies();
         
-        std::map<std::vector<unsigned>, double> sample_probs;
+        //std::map<std::vector<unsigned>, double> sample_probs;
+        std::vector<double> sample_probs;
         double sample_probs_sum = 0.0;
+
+        size_t left_category;
+        size_t right_category;
+
         std::map<std::vector<unsigned>, double>::iterator it;
         
         // calculate probabilities for each state
         for (size_t i = 0; i < num_states; i++)
         {
-            double likelihood = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * lambda[i];
-            std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-            sample_probs[ states ] = likelihood * freqs[i];
-            sample_probs_sum += likelihood * freqs[i];
+            double p = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * lambda[i];
+            sample_probs[i] = p * freqs[i];
+            sample_probs_sum += p * freqs[i];
         }
 
-        
-        // sample ancestor, left, and right character states from probs
-        size_t a = 0, l = 0, r = 0;
-        
-        if (sample_probs_sum != 0)
-        {
-            RandomNumberGenerator* rng = GLOBAL_RNG;
-            double u = rng->uniform01() * sample_probs_sum;
-            
-            for (it = sample_probs.begin(); it != sample_probs.end(); it++)
-            {
-                u -= it->second;
-                if (u < 0.0)
-                {
-                    const std::vector<unsigned>& states = it->first;
-                    a = states[0];
-                    l = states[1];
-                    r = states[2];
-                    break;
-                }
-            }
-        
-            // save the character history for the root
-            std::string simmap_string = "{" + StringUtilities::toString(a) + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
-            character_histories[node_index] = simmap_string;
-            
-            // recurse towards tips
-            bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
-            bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data);
-            success = success_l && success_r;
+        // normalize so that they sum to one
+        for (size_t i = 0; i < num_states; i++){
+            sample_probs[i] = sample_probs[i] / sample_probs_sum;
         }
+
+        // sample the initial rate category from probs
+        double u = rng->uniform01(); 
+        for (size_t i = 0; i < num_states; i++)
+        {
+            u -= sample_probs[i];
+            if (u <= 0.0)
+            {
+                left_category = i;
+                right_category = i;
+                break;
+            }
+        }
+    
+        // save the character history for the root
+        std::string simmap_string = "{" + StringUtilities::toString(left_category) + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
+        character_histories[node_index] = simmap_string;
         
+        // recurse towards tips
+        bool success_l = recursivelyDrawStochasticCharacterMap(left, left_category, character_histories, set_amb_char_data);
+        bool success_r = recursivelyDrawStochasticCharacterMap(right, right_category, character_histories, set_amb_char_data);
+        success = success_l && success_r;
+    
         ++attempts;
     }
 
@@ -532,34 +533,49 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
     
     // turn off sampling until we need it again
     sample_character_history = false;
-
 }
 
 
-bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data)
+bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
+            const TopologyNode &node,
+            size_t start_state,
+            std::vector<std::string>& character_histories,
+            bool set_amb_char_data
+        )
 {
     size_t node_index = node.getIndex();
-    //std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState();
-    //std::vector<double> extinction_rates = mu->getValue();
+
+    double start_time = node.getParent().getAge();
+    double branch_length = node.getParent().getAge() - node.getAge();
+
     
     // reset the number of rate-shift events
     num_shift_events[node_index] = 0;
     
-    // sample characters by their probability conditioned on the branch's start state going to end states
-    
-    // initialize the conditional likelihoods for this branch
-    std::vector< double > branch_conditional_probs = std::vector<double>(2 * num_states, 0);
-    branch_conditional_probs[ num_states + start_state ] = 1.0;
-    
-    // first calculate extinction likelihoods via a backward time pass
-    double start_time = node.getParent().getAge();
-    numericallyIntegrateProcess(branch_conditional_probs, 0, start_time, true, true);
-    
-    // now calculate conditional likelihoods along branch in forward time
-    double branch_length = node.getParent().getAge() - node.getAge();
-    size_t current_dt = 0;
-    double current_dt_start = 0;
-    double current_dt_end = 0;
+    // initialize the probabiltiies for this branch. 
+    std::vector< double > u = std::vector<double>(3 * num_states, 0);
+
+    // The first `num_states` entries correspond to the extinction probabilities, and
+    // the second third of the vector represents the
+    // probability of observing the tree descended from this node,
+    // conditional on the the rate category was j at this time
+    //  
+    //      P(\Psi (downstream) | Z_M(t) = j, \boldsymbol{\lambda}, \boldsymbol{\mu}, \eta, \rho)
+    //
+    // which we already calculated in the postorder tree iteration
+    std::vector<double> &node_likelihood = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+    for (size_t i = num_states; i < num_states; i++){
+        u[i] = node_likelihood[i]; // E
+        u[i + num_states] = node_likelihood[i + num_states]; // D
+    }
+
+    // The final third of the vector represents the
+    // posterior probability of rate category j given the upstream tree
+    //  
+    //      P(Z_M(t) = j | \Psi (upstream), \boldsymbol{\lambda}, \boldsymbol{\mu}, \eta, \rho)
+    //
+    // which we have sampled numerically, therefore we set it to 1.0 in `start_state`
+    u[ 2 * num_states + start_state ] = 1.0;
     
     size_t current_state = start_state;
     
@@ -567,29 +583,55 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;
     transition_states.push_back(current_state);
+
+    size_t episode_index = 0;
+    double episode_start = 0;
+    double episode_end = 0;
     
     int downpass_dt = int( branch_partial_likelihoods[node_index].size() ) - 1;
    
     // keep track of rates in each time interval so we can calculate per branch averages of each rate
     double total_speciation_rate = 0.0;
     double total_extinction_rate = 0.0;
-    double num_dts = 0.0;
+
+    // hard-code number of episodes per branch
+    size_t num_episodes = 5;
+    double dt = -branch_length / num_episodes; // note dt is a negative number
+    double t = start_time;
 
     // loop over every time slice, stopping before the last time slice
-    while ( downpass_dt >= 0 && ((current_dt + 1) * dt) < branch_length)
-    {
-        current_dt_start = (current_dt * dt);
-        current_dt_end = ((current_dt + 1) * dt);
+    for (size_t episode = 0; episode < num_episodes; episode++){
         
-        numericallyIntegrateProcess(branch_conditional_probs, current_dt_start, current_dt_end, false, false);
+        numericallyIntegrateProcess(u, t, t + dt, false, false);
 
         // draw state for this time slice
         size_t new_state = current_state;
+
+        // calculate 
+        //
+        // Sj = \alpha * Dj * Fj, 
+        //
+        // or 
+        //
+        // P(Z_M(t) = j | \Psi, \theta ) = \alpha * P(Z_M(t) = j | \Psi(upstream), \theta) * P(\Psi(downstream)|Z_M(t) = j, \theta)
+        //
         double probs_sum = 0.0;
-        for (size_t i = 0; i < num_states; i++)
+        std::vector<double> probs(num_states, 0);
+        for (size_t j = 0; j < num_states; j++)
         {
-            probs_sum += branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
+            double Dj = u[j + num_states];
+            double Fj = u[j + 2*num_states];
+            double p = Fj * Dj;
+
+            probs[j] = p; 
+            probs_sum += p;
         }
+
+        // normalize
+        for (size_t j = 0; j < num_states; j++){
+            probs[j] = probs[j] / probs_sum; 
+        }
+
         if ( probs_sum == 0.0 )
         {
             return false;
@@ -597,14 +639,14 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
         else
         {
             RandomNumberGenerator* rng = GLOBAL_RNG;
-            double u = rng->uniform01() * probs_sum;
+            double r = rng->uniform01();
 
-            for (size_t i = 0; i < num_states; i++)
+            for (size_t j = 0; j < num_states; j++)
             {
-                u -= branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
-                if (u < 0.0)
+                r -= probs[j];
+                if (r < 0.0)
                 {
-                    new_state = i;
+                    new_state = j;
                     break;
                 }
             }
@@ -619,7 +661,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
             {
                 transition_times_sum += transition_times[j];
             }
-            time_since_last_transition = current_dt_end - transition_times_sum;
+            time_since_last_transition = (t + dt) - transition_times_sum;
 
             transition_times.push_back(time_since_last_transition);
             transition_states.push_back(new_state);
@@ -633,24 +675,50 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
         {
             if (i == current_state)
             {
-                branch_conditional_probs[ num_states + i ] = 1.0;
+                u[ 2*num_states + i ] = 1.0;
             }
             else
             {
-                branch_conditional_probs[ num_states + i ] = 0.0;
+                u[ 2*num_states + i ] = 0.0;
             }
         }
-        
-        current_dt++;
-        downpass_dt--;
+
+        t += dt;
         
         // keep track of rates in this interal so we can calculate per branch averages of each rate
         total_speciation_rate += lambda[current_state];
         total_extinction_rate +=     mu[current_state];
         time_in_states[current_state] += dt;
-        num_dts += 1;
+        num_episodes += 1;
     }
+
+    // keep track of rates in this interval so we can calculate per branch averages of each rate
+    total_speciation_rate += lambda[current_state];
+    total_extinction_rate +=     mu[current_state];
+    time_in_states[current_state] += dt;
+    num_episodes += 1;
     
+    // make SIMMAP string
+    std::string simmap_string = "{";
+    for (size_t i = transition_times.size(); i > 0; i--)
+    {
+        simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
+        if (i != 1)
+        {
+            simmap_string = simmap_string + ":";
+        }
+    }
+    simmap_string = simmap_string + "}";
+    
+    // calculate average diversification rates on this branch
+    average_speciation[node_index] = total_speciation_rate / num_episodes;
+    average_extinction[node_index] = total_extinction_rate / num_episodes;
+
+    // save the character history for this branch
+    character_histories[node_index] = simmap_string;
+    
+    bool success;
+
     if ( node.isTip() == true )
     {
         // the last time slice of the branch will be the observed state
@@ -675,171 +743,29 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(const Top
                 char_state.setStateByIndex(new_state);
             }
         }
-        
-        // keep track of rates in this interval so we can calculate per branch averages of each rate
-        total_speciation_rate += lambda[new_state];
-        total_extinction_rate +=     mu[new_state];
-        time_in_states[new_state] += dt;
-        num_dts += 1;
-        
-        // check if there was a character state transition
-        if (new_state != current_state)
-        {
-            double time_since_last_transition = 0.0;
-            double transition_times_sum = 0.0;
-            for (size_t j = 0; j < transition_times.size(); j++)
-            {
-                transition_times_sum += transition_times[j];
-            }
-            time_since_last_transition = current_dt_end - transition_times_sum;
-            
-            transition_times.push_back(time_since_last_transition);
-            transition_states.push_back(new_state);
-            ++num_shift_events[node_index];
-        }
-        
-        // add the length of the final character state
-        double time_since_last_transition = 0.0;
-        double transition_times_sum = 0.0;
-        for (size_t j = 0; j < transition_times.size(); j++)
-        {
-            transition_times_sum += transition_times[j];
-        }
-        time_since_last_transition = branch_length - transition_times_sum;
-        transition_times.push_back(time_since_last_transition);
-        
-        // make SIMMAP string
-        std::string simmap_string = "{";
-        for (size_t i = transition_times.size(); i > 0; i--)
-        {
-            simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
-            if (i != 1)
-            {
-                simmap_string = simmap_string + ":";
-            }
-        }
-        simmap_string = simmap_string + "}";
-        
-        // calculate average diversification rates on this branch
-        average_speciation[node_index] = total_speciation_rate / num_dts;
-        average_extinction[node_index] = total_extinction_rate / num_dts;
-
-        // save the character history for this branch
-        character_histories[node_index] = simmap_string;
-        
+       
+        success = true;
     }
     else
     {
         // the last time slice of the branch will be the state of the node before any cladogenetic events
+        //
+        size_t left_category = current_state;
+        size_t right_category = current_state;
        
         // get likelihoods of descendant nodes
         const TopologyNode     &left                = node.getChild(0);
         size_t                  left_index          = left.getIndex();
-        std::vector< double >   left_likelihoods    = node_partial_likelihoods[left_index][active_likelihood[left_index]];
         const TopologyNode     &right               = node.getChild(1);
         size_t                  right_index         = right.getIndex();
-        std::vector< double >   right_likelihoods   = node_partial_likelihoods[right_index][active_likelihood[right_index]];
-        
-        std::map<std::vector<unsigned>, double> sample_probs;
-        double sample_probs_sum = 0.0;
-        std::map<std::vector<unsigned>, double>::iterator it;
-        
-        // calculate probabilities for each state
-        for (size_t i = 0; i < num_states; i++)
-        {
-            double prob = left_likelihoods[num_states + i] * right_likelihoods[num_states + i] * lambda[i];
-            prob *= branch_conditional_probs[num_states + i];
-            std::vector<unsigned> states = boost::assign::list_of(i)(i)(i);
-            sample_probs[ states ] = prob;
-            sample_probs_sum += prob;
-        }
-    
-        // finally, sample ancestor, left, and right character states from probs
-        size_t a = 0;
-        size_t l = 0;
-        size_t r = 0;
-        
-        if (sample_probs_sum == 0)
-        {
-            return false;
-        }
-        else
-        {
-            RandomNumberGenerator* rng = GLOBAL_RNG;
-            double u = rng->uniform01() * sample_probs_sum;
-            
-            for (it = sample_probs.begin(); it != sample_probs.end(); it++)
-            {
-                u -= it->second;
-                if (u < 0.0)
-                {
-                    const std::vector<unsigned>& states = it->first;
-                    a = states[0];
-                    l = states[1];
-                    r = states[2];
-                    break;
-                }
-            }
-        }
-        
-        // keep track of rates in this interval so we can calculate per branch averages of each rate
-        total_speciation_rate += lambda[a];
-        total_extinction_rate += mu[a];
-        time_in_states[a] += dt;
-        num_dts += 1;
-        
-        // check if there was a character state transition
-        if (a != current_state)
-        {
-            double time_since_last_transition = 0.0;
-            double transition_times_sum = 0.0;
-            for (size_t j = 0; j < transition_times.size(); j++)
-            {
-                transition_times_sum += transition_times[j];
-            }
-            time_since_last_transition = current_dt_end - transition_times_sum;
-
-            transition_times.push_back(time_since_last_transition);
-            transition_states.push_back(a);
-            ++num_shift_events[node_index];
-        }
-        
-        // add the length of the final character state
-        double time_since_last_transition = 0.0;
-        double transition_times_sum = 0.0;
-        for (size_t j = 0; j < transition_times.size(); j++)
-        {
-            transition_times_sum += transition_times[j];
-        }
-        time_since_last_transition = branch_length - transition_times_sum;
-
-        transition_times.push_back(time_since_last_transition);
-        
-        // make SIMMAP string
-        std::string simmap_string = "{";
-        for (size_t i = transition_times.size(); i > 0; i--)
-        {
-            simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
-            if (i != 1)
-            {
-                simmap_string = simmap_string + ":";
-            }
-        }
-        simmap_string = simmap_string + "}";
-        
-        // save the character history for this branch
-        character_histories[node_index] = simmap_string;
-        
-        // calculate average diversification rates on this branch
-        average_speciation[node_index] = total_speciation_rate / num_dts;
-        average_extinction[node_index] = total_extinction_rate / num_dts;
         
         // recurse towards tips
-        bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
-        bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data);
-        return success_l && success_r;
+        bool success_l = recursivelyDrawStochasticCharacterMap(left, left_category, character_histories, set_amb_char_data);
+        bool success_r = recursivelyDrawStochasticCharacterMap(right, right_category, character_histories, set_amb_char_data);
+        success = success_l && success_r;
     }
-    return true;
+
+    return success;
 }
 
 
@@ -2626,15 +2552,8 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     const double &alpha_ref = alpha->getValue();
     const double &beta_ref = beta->getValue();
 
-
-    // construct the Q matrix
-    //updateQmatrix();
-
     boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
-    //const size_t num_classes = sqrt(speciation_rates.size());
 
-
-    //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, &getEventRateMatrix());
     BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
@@ -2646,10 +2565,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     // rounding errors in the ODE stepper
     for (size_t i = 0; i < 2 * num_states; ++i)
     {
-        // Sebastian: The likelihoods here are probability densities (not log-transformed).
-        // These are densities because they are multiplied by the probability density of the speciation event happening.
         likelihoods[i] = ( likelihoods[i] < 0.0 ? 0.0 : likelihoods[i] );
-        
     }
     
     // catch too large extinction probabilities that can result from
@@ -2658,7 +2574,6 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     bool rounding_error = false;
     for (size_t i = 0; i < num_states; ++i)
     {
-        
         // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
         // So they must be between 0 and 1.
         rounding_error |= ( likelihoods[i] > 1.0 );
@@ -2669,13 +2584,10 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     {
         for (size_t i = 0; i < (2*num_states); ++i)
         {
-            
             // invalidate likelihoods
             likelihoods[i] = RbConstants::Double::nan;
-            
         }
     }
-    
 }
 
 void FastBirthDeathShiftProcess::update_rates(){
