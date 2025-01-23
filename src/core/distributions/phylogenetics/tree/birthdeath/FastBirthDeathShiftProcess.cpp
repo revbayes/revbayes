@@ -2612,12 +2612,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
-    double dtx;
-    if (forward){
-        dtx = -dt;
-    }
-
-    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-6, 1E-3, stepper_type() ) , ode , likelihoods , begin_age , end_age , dtx );
+    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-6, 1E-3, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
     //boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
     
     // catch negative extinction probabilities that can result from
