@@ -127,8 +127,9 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
         throw RbException("minNumLineages cannot be greater than maxNumLineages.");
     }
     
-    // set the length of the time slices used by the ODE for numerical integration
-    dt = process_age->getValue() / 500 * 10.0;
+    // set the length of the time slices used by the ODE solver for numerical integration
+    //dt = process_age->getValue() / (500 * 10.0);
+    dt = process_age->getValue() / 100;
 
     value->getTreeChangeEventHandler().addListener( this );
 
@@ -386,7 +387,7 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
         }
         
         // numerically integrate over the branch 
-        numericallyIntegrateProcess(node_likelihood, begin_age, end_age, true, false);
+        numericallyIntegrateProcess(node_likelihood, begin_age, end_age, false);
         
         // rescale the probability densities at the "end" of the branch
         if ( RbSettings::userSettings().getUseScaling() == true ) 
@@ -449,6 +450,7 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
     computeLnProbability();
 
     RandomNumberGenerator* rng = GLOBAL_RNG;
+    
 
     size_t attempts = 0;
     bool success = false;
@@ -480,8 +482,9 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
         const RbVector<double> &freqs = getRootFrequencies();
         
         //std::map<std::vector<unsigned>, double> sample_probs;
-        std::vector<double> sample_probs;
+        std::vector<double> sample_probs(num_states, 0);
         double sample_probs_sum = 0.0;
+
 
         size_t left_category;
         size_t right_category;
@@ -501,6 +504,8 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
             sample_probs[i] = sample_probs[i] / sample_probs_sum;
         }
 
+
+
         // sample the initial rate category from probs
         double u = rng->uniform01(); 
         for (size_t i = 0; i < num_states; i++)
@@ -513,11 +518,15 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
                 break;
             }
         }
+
+
     
         // save the character history for the root
         std::string simmap_string = "{" + StringUtilities::toString(left_category) + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
         character_histories[node_index] = simmap_string;
         
+
+
         // recurse towards tips
         bool success_l = recursivelyDrawStochasticCharacterMap(left, left_category, character_histories, set_amb_char_data);
         bool success_r = recursivelyDrawStochasticCharacterMap(right, right_category, character_histories, set_amb_char_data);
@@ -552,7 +561,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
     // reset the number of rate-shift events
     num_shift_events[node_index] = 0;
     
-    // initialize the probabiltiies for this branch. 
+    // initialize the probabilities for this branch. 
     std::vector< double > u = std::vector<double>(3 * num_states, 0);
 
     // The first `num_states` entries correspond to the extinction probabilities, and
@@ -564,10 +573,28 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
     //
     // which we already calculated in the postorder tree iteration
     std::vector<double> &node_likelihood = node_partial_likelihoods[node_index][active_likelihood[node_index]];
-    for (size_t i = num_states; i < num_states; i++){
+    for (size_t i = 0; i < num_states; i++){
         u[i] = node_likelihood[i]; // E
         u[i + num_states] = node_likelihood[i + num_states]; // D
     }
+
+    /*
+    std::cout << "E_old: [";
+    std::cout << u[0];
+    for (size_t i = 1; i < num_states; i++){
+        std::cout << "," << u[i];
+    }
+    std::cout << "]" << std::endl;
+
+    std::cout << "D_old: [";
+    std::cout << u[num_states];
+    for (size_t i = 1; i < num_states; i++){
+        std::cout << "," << u[i+num_states];
+    }
+    std::cout << "]" << std::endl;
+    */
+
+    //throw std::invalid_argument( "received negative value" );
 
     // The final third of the vector represents the
     // posterior probability of rate category j given the upstream tree
@@ -595,19 +622,43 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
     double total_extinction_rate = 0.0;
 
     // hard-code number of episodes per branch
-    size_t num_episodes = 5;
-    double dt = -branch_length / num_episodes; // note dt is a negative number
+    size_t num_episodes = 10;
+    double delta_t = -branch_length / num_episodes; // note dt is a negative number
     double t = start_time;
+
 
     // loop over every time slice, stopping before the last time slice
     for (size_t episode = 0; episode < num_episodes; episode++){
-        
-        numericallyIntegrateProcess(u, t, t + dt, false, false);
+
+        numericallyIntegrateProcess(u, t, t + delta_t, true);
+
+        /*
+        std::cout << "E_young: [";
+        std::cout << u[0];
+        for (size_t i = 1; i < num_states; i++){
+            std::cout << "," << u[i];
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "D_young: [";
+        std::cout << u[num_states];
+        for (size_t i = 1; i < num_states; i++){
+            std::cout << "," << u[i+num_states];
+        }
+        std::cout << "]" << std::endl;
+
+        std::cout << "F_young: [";
+        std::cout << u[2*num_states];
+        for (size_t i = 1; i < num_states; i++){
+            std::cout << "," << u[i+2*num_states];
+        }
+        std::cout << "]" << std::endl;
+        */
+        //throw std::invalid_argument( "received negative value" );
 
         // draw state for this time slice
         size_t new_state = current_state;
 
-        // calculate 
         //
         // Sj = \alpha * Dj * Fj, 
         //
@@ -631,6 +682,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
         for (size_t j = 0; j < num_states; j++){
             probs[j] = probs[j] / probs_sum; 
         }
+
 
         if ( probs_sum == 0.0 )
         {
@@ -661,7 +713,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             {
                 transition_times_sum += transition_times[j];
             }
-            time_since_last_transition = (t + dt) - transition_times_sum;
+            time_since_last_transition = (t + delta_t) - transition_times_sum;
 
             transition_times.push_back(time_since_last_transition);
             transition_states.push_back(new_state);
@@ -683,20 +735,20 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             }
         }
 
-        t += dt;
+        t += delta_t;
         
         // keep track of rates in this interal so we can calculate per branch averages of each rate
         total_speciation_rate += lambda[current_state];
         total_extinction_rate +=     mu[current_state];
-        time_in_states[current_state] += dt;
-        num_episodes += 1;
+        time_in_states[current_state] += delta_t;
+        //num_episodes += 1;
     }
 
     // keep track of rates in this interval so we can calculate per branch averages of each rate
     total_speciation_rate += lambda[current_state];
     total_extinction_rate +=     mu[current_state];
-    time_in_states[current_state] += dt;
-    num_episodes += 1;
+    time_in_states[current_state] += delta_t;
+    //num_episodes += 1;
     
     // make SIMMAP string
     std::string simmap_string = "{";
@@ -894,11 +946,11 @@ void FastBirthDeathShiftProcess::recursivelyDrawJointConditionalAncestralStates(
             
             // first calculate extinction likelihoods via a backward time pass
             double end_age = node.getParent().getAge();
-            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true, true);
+            //numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true); // todo: need fix
             
             // now calculate conditional likelihoods along branch in forward time
             end_age        = node.getParent().getAge() - node.getAge();
-            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
+            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true);
             
             double total_prob = 0.0;
             for (size_t i = 0; i < num_states; ++i)
@@ -941,11 +993,11 @@ void FastBirthDeathShiftProcess::recursivelyDrawJointConditionalAncestralStates(
 
         // first calculate extinction likelihoods via a backward time pass
         double end_age = node.getParent().getAge();
-        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true, true);
+        //numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true); // todo: need fix
         
         // now calculate conditional likelihoods along branch in forward time
         end_age        = node.getParent().getAge() - node.getAge();
-        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
+        numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, true);
         
         std::map<std::vector<unsigned>, double> event_map;
         
@@ -1287,7 +1339,7 @@ std::vector<double> FastBirthDeathShiftProcess::pExtinction(double start, double
         initial_state[num_states + i] = sampling_probability[i];
     }
     
-    numericallyIntegrateProcess(initial_state, start, end, true, false);
+    numericallyIntegrateProcess(initial_state, start, end, false);
     
     return initial_state;
 }
@@ -2545,50 +2597,56 @@ void FastBirthDeathShiftProcess::touchSpecialization(const DagNode *affecter, bo
 /**
  * Wrapper function for the ODE time stepper function.
  */
-void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
+void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool forward) const
 {
+    /*
     const std::vector<double> &speciation_rates = lambda;
     const std::vector<double> &extinction_rates = mu;
     const double &alpha_ref = alpha->getValue();
     const double &beta_ref = beta->getValue();
+    */
 
-    boost::numeric::ublas::matrix<double> &Qref = Qmatrix;
-
-    BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref);
+    //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref);
+    BDS_ODE ode = BDS_ODE(lambda, mu, num_rate_classes, alpha->getValue(), beta->getValue(), forward);
+    //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref, forward);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
-    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-6, 1E-3, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
+    double dtx;
+    if (forward){
+        dtx = -dt;
+    }
+
+    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-6, 1E-3, stepper_type() ) , ode , likelihoods , begin_age , end_age , dtx );
     //boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
     
     // catch negative extinction probabilities that can result from
-    // rounding errors in the ODE stepper
-    for (size_t i = 0; i < 2 * num_states; ++i)
+    // too large step size in the ODE stepper
+    for (size_t i = 0; i < likelihoods.size(); ++i)
     {
         likelihoods[i] = ( likelihoods[i] < 0.0 ? 0.0 : likelihoods[i] );
     }
     
     // catch too large extinction probabilities that can result from
-    // rounding errors in the ODE stepper
     // for safety we set all likelihoods to nan if rounding errors happened
     bool rounding_error = false;
     for (size_t i = 0; i < num_states; ++i)
     {
-        // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
-        // So they must be between 0 and 1.
         rounding_error |= ( likelihoods[i] > 1.0 );
         
     }
     
     if ( rounding_error == true )
     {
-        for (size_t i = 0; i < (2*num_states); ++i)
+        for (size_t i = 0; i < likelihoods.size(); ++i)
         {
             // invalidate likelihoods
             likelihoods[i] = RbConstants::Double::nan;
         }
     }
 }
+
+
 
 void FastBirthDeathShiftProcess::update_rates(){
     size_t num_categories = num_rate_classes * num_rate_classes;

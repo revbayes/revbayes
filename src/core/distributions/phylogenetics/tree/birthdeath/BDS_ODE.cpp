@@ -49,7 +49,9 @@ void dmv_special(
         const std::vector<double> &x,
         const size_t &n,
         const double &alpha,
-        const double &beta){
+        const double &beta,
+        const bool forward
+        ){
 
     // __n__ is
     // number of rate classes
@@ -58,13 +60,30 @@ void dmv_special(
     const double alpha_small = alpha / (n-1);
     const double beta_small  = beta  / (n-1);
 
-    // offset because we do it for E and D
-    for (size_t offset_index = 0; offset_index < 2; offset_index++){
+    size_t offsets = 2;
+    /*
+    if (forward){
+        offsets += 1;
+    }*/
+
+    // offset because we do it for E(t) and D(t)
+    // if forward also for F(t)
+    for (size_t offset_index = 0; offset_index < offsets; offset_index++){
         size_t offset = 0;
+        /*
         if (offset_index == 0){
             offset = 0;
-        }else{
+        }
+        else{
+            offset = 1;
+        }
+        */
+        if (offset_index == 0){
+            offset = 0;
+        }else if(offset_index == 1){
             offset = n*n;
+        }else if(offset_index == 2){
+            offset = 2*n*n;
         }
 
         // [
@@ -116,13 +135,15 @@ BDS_ODE::BDS_ODE(
         const std::vector<double> &m,
         const size_t &n, // number of rate classes
         const double &a,
-        const double &b
+        const double &b,
+        const bool &f
         ) :
     mu( m ),
     lambda( l ),
     num_classes( n ),
     alpha( a ),
-    beta( b )
+    beta( b ),
+    forward( f )
 {
 
 }
@@ -135,14 +156,20 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
     // catch negative probabilities that can result from
     // rounding errors in the ODE stepper
     std::vector< double > safe_x = x; 
-    for (size_t i = 0; i < num_categories * 2; ++i)
+
+    size_t offsets = 2;
+    if (forward){
+        offsets += 1;
+    }
+
+    for (size_t i = 0; i < num_categories * offsets; ++i)
     {
         safe_x[i] = ( x[i] < 0.0 ? 0.0 : x[i] );
         dxdt[i] = 0.0;
     }
 
     // the matrix-vector product
-    dmv_special(dxdt, safe_x, num_classes, alpha, beta);
+    dmv_special(dxdt, safe_x, num_classes, alpha, beta, forward);
 
     // do the diagonal elements
     for (size_t i = 0; i < num_categories; ++i)
@@ -155,7 +182,22 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         // for D(t)
         dxdt[i + num_categories] += -no_event_rate * safe_x[i + num_categories] + 2 * lambda[i] * safe_x[i] * safe_x[i + num_categories];
     }
-   
+
+    // for F(t)
+    if (forward){
+        for (size_t i = 0; i < num_categories; i++){
+            // no event
+            double no_event_rate = mu[i] + lambda[i];
+
+            dxdt[i + 2*num_categories] += -no_event_rate * safe_x[i + 2*num_categories] + 2 * lambda[i] * safe_x[i] * safe_x[i + 2*num_categories];
+        }
+    }
+
+    if (forward){
+        for (size_t i = 0; i < (num_categories*3); i++){
+            dxdt[i] = -dxdt[i];
+        }
+    }
 }
 
 

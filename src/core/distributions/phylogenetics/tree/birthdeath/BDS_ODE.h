@@ -18,7 +18,8 @@ namespace RevBayesCore {
                 const std::vector<double> &m, 
                 const size_t &n,
                 const double &a,
-                const double &b
+                const double &b,
+                const bool &f
                 );
         
         void operator() ( const std::vector< double > &x, std::vector< double > &dxdt , const double t );
@@ -29,6 +30,7 @@ namespace RevBayesCore {
         const size_t num_classes; //number of rate classes (not rate categories)
         const double alpha;
         const double beta;
+        const bool forward;
     };
     
 }

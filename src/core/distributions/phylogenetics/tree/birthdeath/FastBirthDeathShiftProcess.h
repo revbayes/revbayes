@@ -75,7 +75,7 @@ namespace RevBayesCore {
         bool                                                            recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data);
         void                                                            drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates);
         void                                                            recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<size_t>& startStates, std::vector<size_t>& endStates);
-        void                                                            numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool use_backward, bool extinction_only) const; //!< Wrapper function for the ODE time stepper function.
+        void                                                            numericallyIntegrateProcess(std::vector< double > &u, double begin_age, double end_age, bool forward) const; //!< Wrapper function for the ODE time stepper function.
         void                                                            resizeVectors(size_t num_nodes);
         void                                                            updateQmatrix();
         void                                                            update_rates();
@@ -114,7 +114,7 @@ namespace RevBayesCore {
         
         // members
         std::string                                                     condition;                                                                                          //!< The condition of the process (none/survival/#taxa).
-        double                                                          dt;                                                                                                 //!< The size of the time slices used by the ODE for numerical integration.
+        double                                                          dt;  //!< The size of the time slices used by the ODE for numerical integration.
         std::vector<bool>                                               active_likelihood;
         mutable std::vector<bool>                                       changed_nodes;
         mutable std::vector<bool>                                       dirty_nodes;
