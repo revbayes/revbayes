@@ -187,22 +187,6 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         
         return NULL;
     }
-    else if ( name == "initializeFromTrace")
-    {
-        found = true;
-        
-        RevBayesCore::RbVector<RevBayesCore::ModelTrace> traces;
-        const WorkspaceVector<ModelTrace> & trace_vector = static_cast<const WorkspaceVector<ModelTrace> &>( args[0].getVariable()->getRevObject() );
-        for ( size_t i = 0; i < trace_vector.size(); ++i)
-        {
-            const RevBayesCore::ModelTrace &trace = trace_vector.getElement( i )->getValue();
-            traces.push_back( trace );
-        }
-        
-        value->initializeFromTrace( traces );
-        
-        return NULL;
-    }
     else if ( name == "initializeFromCheckpoint")
     {
         found = true;
@@ -309,10 +293,6 @@ void MonteCarloAnalysis::initializeMethods()
     ArgumentRules* operatorSummaryArgRules = new ArgumentRules();
     operatorSummaryArgRules->push_back( new ArgumentRule( "currentPeriod" , RlBoolean::getClassTypeSpec(), "Should the operator summary (number of tries and acceptance, and the acceptance ratio) of only the current period (i.e., after the last tuning) be printed?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     methods.addFunction( new MemberProcedure( "operatorSummary", RlUtils::Void, operatorSummaryArgRules) );
-    
-    ArgumentRules* initialize_trace_arg_rules = new ArgumentRules();
-    initialize_trace_arg_rules->push_back( new ArgumentRule("trace", WorkspaceVector<ModelTrace>::getClassTypeSpec(), "The sample trace object.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "initializeFromTrace", RlUtils::Void, initialize_trace_arg_rules) );
     
     ArgumentRules* initialize_checkpoint_arg_rules = new ArgumentRules();
     initialize_checkpoint_arg_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The checkpoint filename.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
