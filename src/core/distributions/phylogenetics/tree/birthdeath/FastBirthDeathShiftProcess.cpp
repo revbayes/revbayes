@@ -623,38 +623,55 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
 
     // hard-code number of episodes per branch
     size_t num_episodes = 10;
-    double delta_t = -branch_length / num_episodes; // note dt is a negative number
+    double delta_t = branch_length / num_episodes; // note dt is a negative number
     double t = start_time;
 
 
     // loop over every time slice, stopping before the last time slice
     for (size_t episode = 0; episode < num_episodes; episode++){
 
-        numericallyIntegrateProcess(u, t, t + delta_t, true);
+        if(false){
+            std::cout << "E_old: [";
+            std::cout << u[0];
+            for (size_t i = 1; i < num_states; i++){
+                std::cout << "," << u[i];
+            }
+            std::cout << "]" << std::endl;
 
-        /*
-        std::cout << "E_young: [";
-        std::cout << u[0];
-        for (size_t i = 1; i < num_states; i++){
-            std::cout << "," << u[i];
+            std::cout << "D_old: [";
+            std::cout << u[num_states];
+            for (size_t i = 1; i < num_states; i++){
+                std::cout << "," << u[i+num_states];
+            }
+            std::cout << "]" << std::endl;
         }
-        std::cout << "]" << std::endl;
 
-        std::cout << "D_young: [";
-        std::cout << u[num_states];
-        for (size_t i = 1; i < num_states; i++){
-            std::cout << "," << u[i+num_states];
-        }
-        std::cout << "]" << std::endl;
+        numericallyIntegrateProcess(u, 0, delta_t, true);
+       
+        if (false){
+            std::cout << "E_young: [";
+            std::cout << u[0];
+            for (size_t i = 1; i < num_states; i++){
+                std::cout << "," << u[i];
+            }
+            std::cout << "]" << std::endl;
 
-        std::cout << "F_young: [";
-        std::cout << u[2*num_states];
-        for (size_t i = 1; i < num_states; i++){
-            std::cout << "," << u[i+2*num_states];
-        }
-        std::cout << "]" << std::endl;
-        */
-        //throw std::invalid_argument( "received negative value" );
+            std::cout << "D_young: [";
+            std::cout << u[num_states];
+            for (size_t i = 1; i < num_states; i++){
+                std::cout << "," << u[i+num_states];
+            }
+            std::cout << "]" << std::endl;
+
+            std::cout << "F_young: [";
+            std::cout << u[2*num_states];
+            for (size_t i = 1; i < num_states; i++){
+                std::cout << "," << u[i+2*num_states];
+            }
+            std::cout << "]" << std::endl;
+
+            throw std::invalid_argument( "debug" );
+        } 
 
         // draw state for this time slice
         size_t new_state = current_state;
@@ -696,7 +713,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             for (size_t j = 0; j < num_states; j++)
             {
                 r -= probs[j];
-                if (r < 0.0)
+                if (r <= 0.0)
                 {
                     new_state = j;
                     break;
@@ -707,6 +724,14 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
         // check if there was a character state transition
         if (new_state != current_state)
         {
+            int baz = abs((int)new_state - (int)current_state);
+            if (baz < num_rate_classes){
+                std::cout << "simulated rate shift event (speciation)" << std::endl;
+            }else{
+                std::cout << "simulated rate shift event (extinction)" << std::endl;
+            }
+            //std::cout << "simulated rate shift event" << std::endl;
+
             double time_since_last_transition = 0.0;
             double transition_times_sum = 0.0;
             for (size_t j = 0; j < transition_times.size(); j++)
@@ -735,7 +760,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             }
         }
 
-        t += delta_t;
+        t -= delta_t;
         
         // keep track of rates in this interal so we can calculate per branch averages of each rate
         total_speciation_rate += lambda[current_state];

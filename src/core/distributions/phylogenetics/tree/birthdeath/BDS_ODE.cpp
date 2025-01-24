@@ -1,7 +1,9 @@
 #include <cstddef>
 #include <vector>
+#include <iostream>
 
 #include "BDS_ODE.h"
+#include "RbException.h"
 
 using namespace RevBayesCore;
 
@@ -61,10 +63,9 @@ void dmv_special(
     const double beta_small  = beta  / (n-1);
 
     size_t offsets = 2;
-    /*
     if (forward){
         offsets += 1;
-    }*/
+    }
 
     // offset because we do it for E(t) and D(t)
     // if forward also for F(t)
@@ -152,6 +153,7 @@ BDS_ODE::BDS_ODE(
 void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
     const size_t num_categories = num_classes * num_classes; 
+
                       
     // catch negative probabilities that can result from
     // rounding errors in the ODE stepper
@@ -184,7 +186,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
     }
 
     // for F(t)
-    if (forward){
+    if (forward == true ){
         for (size_t i = 0; i < num_categories; i++){
             // no event
             double no_event_rate = mu[i] + lambda[i];
@@ -194,7 +196,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
     }
 
     if (forward){
-        for (size_t i = 0; i < (num_categories*3); i++){
+        for (size_t i = 0; i < (num_categories*2); i++){
             dxdt[i] = -dxdt[i];
         }
     }
