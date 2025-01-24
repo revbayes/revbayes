@@ -729,10 +729,10 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             int baz = abs((int)new_state - (int)current_state);
             if (baz < num_rate_classes){
                 //std::cout << "simulated rate shift event (speciation)" << std::endl;
-                ++num_speciation_shift_events[node_index];
+                ++num_extinction_shift_events[node_index];
             }else{
                 //std::cout << "simulated rate shift event (extinction)" << std::endl;
-                ++num_extinction_shift_events[node_index];
+                ++num_speciation_shift_events[node_index];
             }
 
             double time_since_last_transition = 0.0;
@@ -746,7 +746,6 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             transition_times.push_back(time_since_last_transition);
             transition_states.push_back(new_state);
             current_state = new_state;
-           
 
         }
         
@@ -2706,8 +2705,8 @@ void FastBirthDeathShiftProcess::update_rates(){
     size_t q = 0;
     for (size_t i = 0; i < num_rate_classes; i++){
         for (size_t j = 0; j < num_rate_classes; j++){
-            lambda[q] = v_lambda[i]; 
-            mu[q] = v_mu[j]; 
+            lambda[q] = v_lambda[j]; 
+            mu[q] = v_mu[i]; 
             q++;
         }
     }
