@@ -61,7 +61,8 @@ namespace RevBayesCore {
         double                                                          getOriginAge(void) const;
         std::vector<double>                                             getAverageExtinctionRatePerBranch(void) const;
         std::vector<double>                                             getAverageSpeciationRatePerBranch(void) const;
-        std::vector<long>                                               getNumberOfShiftEventsPerBranch(void) const;
+        std::vector<long>                                               getNumberOfSpeciationShiftEventsPerBranch(void) const;
+        std::vector<long>                                               getNumberOfExtinctionShiftEventsPerBranch(void) const;
         std::vector<double>                                             getTimeInStates(void) const;
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
@@ -128,7 +129,8 @@ namespace RevBayesCore {
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
         std::vector<double>                                             average_speciation;
         std::vector<double>                                             average_extinction;
-        std::vector<long>                                               num_shift_events;
+        std::vector<long>                                               num_speciation_shift_events;
+        std::vector<long>                                               num_extinction_shift_events;
         std::vector<double>                                             time_in_states;
         std::string                                                     simmap;
         

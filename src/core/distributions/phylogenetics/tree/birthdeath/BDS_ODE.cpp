@@ -70,15 +70,7 @@ void dmv_special(
     // offset because we do it for E(t) and D(t)
     // if forward also for F(t)
     for (size_t offset_index = 0; offset_index < offsets; offset_index++){
-        size_t offset = 0;
-        /*
-        if (offset_index == 0){
-            offset = 0;
-        }
-        else{
-            offset = 1;
-        }
-        */
+        size_t offset;
         if (offset_index == 0){
             offset = 0;
         }else if(offset_index == 1){

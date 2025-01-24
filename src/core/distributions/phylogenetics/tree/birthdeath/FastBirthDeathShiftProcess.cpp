@@ -83,7 +83,8 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
     average_extinction( std::vector<double>(5, 0.0) ),
-    num_shift_events( std::vector<long>(5, 0.0) ),
+    num_speciation_shift_events( std::vector<long>(5, 0.0) ),
+    num_extinction_shift_events( std::vector<long>(5, 0.0) ),
     time_in_states( std::vector<double>(num_classes*num_classes, 0.0) ),    
     simmap( "" ),
     process_age( age ),
@@ -559,7 +560,8 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
 
     
     // reset the number of rate-shift events
-    num_shift_events[node_index] = 0;
+    num_speciation_shift_events[node_index] = 0;
+    num_extinction_shift_events[node_index] = 0;
     
     // initialize the probabilities for this branch. 
     std::vector< double > u = std::vector<double>(3 * num_states, 0);
@@ -726,11 +728,12 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
         {
             int baz = abs((int)new_state - (int)current_state);
             if (baz < num_rate_classes){
-                std::cout << "simulated rate shift event (speciation)" << std::endl;
+                //std::cout << "simulated rate shift event (speciation)" << std::endl;
+                ++num_speciation_shift_events[node_index];
             }else{
-                std::cout << "simulated rate shift event (extinction)" << std::endl;
+                //std::cout << "simulated rate shift event (extinction)" << std::endl;
+                ++num_extinction_shift_events[node_index];
             }
-            //std::cout << "simulated rate shift event" << std::endl;
 
             double time_since_last_transition = 0.0;
             double transition_times_sum = 0.0;
@@ -743,8 +746,8 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             transition_times.push_back(time_since_last_transition);
             transition_states.push_back(new_state);
             current_state = new_state;
-            
-            ++num_shift_events[node_index];
+           
+
         }
         
         // condition branch_conditional_probs on the sampled state
@@ -1190,9 +1193,13 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> FastBirthDeathShiftProcess::execut
 void FastBirthDeathShiftProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
 {
    
-    if ( name == "numberEvents" )
+    if ( name == "numberSpeciationShiftEvents" )
     {
-        rv = num_shift_events;
+        rv = num_speciation_shift_events;
+    }
+    else if ( name == "numberExtinctionShiftEvents" )
+    {
+        rv = num_extinction_shift_events;
     }
     else
     {
@@ -1260,9 +1267,14 @@ std::vector<double> FastBirthDeathShiftProcess::getAverageSpeciationRatePerBranc
 }
 
 
-std::vector<long> FastBirthDeathShiftProcess::getNumberOfShiftEventsPerBranch( void ) const
+std::vector<long> FastBirthDeathShiftProcess::getNumberOfExtinctionShiftEventsPerBranch( void ) const
 {
-    return num_shift_events;
+    return num_extinction_shift_events;
+}
+
+std::vector<long> FastBirthDeathShiftProcess::getNumberOfSpeciationShiftEventsPerBranch( void ) const
+{
+    return num_speciation_shift_events;
 }
 
 
@@ -1996,7 +2008,8 @@ bool FastBirthDeathShiftProcess::simulateTreeConditionedOnTips( size_t attempts 
         {
             average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
             average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
-            num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
+            num_speciation_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
+            // num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents(); // this need to befixed
         }
     }    
     
@@ -2508,7 +2521,7 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
         {
             average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
             average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
-            num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
+            // num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents(); // this needs to be fixed
         }
     }    
     
@@ -2759,6 +2772,7 @@ void FastBirthDeathShiftProcess::resizeVectors(size_t num_nodes)
     scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);
-    num_shift_events = std::vector<long>(num_nodes, 0.0);
+    num_speciation_shift_events = std::vector<long>(num_nodes, 0.0);
+    num_extinction_shift_events = std::vector<long>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);    
 }

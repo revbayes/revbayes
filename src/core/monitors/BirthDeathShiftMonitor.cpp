@@ -72,7 +72,8 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
 	std::vector<double> extinction;
 	std::vector<double> sampling;
 	std::vector<double> destructive_sampling;
-    std::vector<long>   n_shifts;
+    std::vector<long>   n_speciation_shifts;
+    std::vector<long>   n_extinction_shifts;
 
     size_t num_nodes = bdsp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
@@ -86,8 +87,8 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
     // get the variables we are interested in
     speciation = bds->getAverageSpeciationRatePerBranch();
     extinction = bds->getAverageExtinctionRatePerBranch();
-    n_shifts   = bds->getNumberOfShiftEventsPerBranch();
-
+    n_speciation_shifts   = bds->getNumberOfSpeciationShiftEventsPerBranch();
+    n_extinction_shifts   = bds->getNumberOfExtinctionShiftEventsPerBranch();
     
     // print to monitor file
     for (int i = 0; i < speciation.size(); i++)
@@ -103,18 +104,21 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
     {
         // add a separator before every new element
         out_stream << separator;
-        
         out_stream << extinction[i];
-        
     }
     
-    for (int i = 0; i < n_shifts.size(); i++)
+    for (int i = 0; i < n_speciation_shifts.size(); i++)
     {
         // add a separator before every new element
         out_stream << separator;
-        
-        out_stream << n_shifts[i];
-        
+        out_stream << n_speciation_shifts[i];
+    }
+
+    for (int i = 0; i < n_extinction_shifts.size(); i++)
+    {
+        // add a separator before every new element
+        out_stream << separator;
+        out_stream << n_extinction_shifts[i];
     }
     
 }
@@ -131,36 +135,20 @@ void BirthDeathShiftMonitor::printFileHeader()
     std::vector<double> extinction;
     std::vector<double> sampling;
     std::vector<double> destructive_sampling;
-    std::vector<long>   n_shifts;
+    std::vector<long>   n_speciation_shifts;
+    std::vector<long>   n_extinction_shifts;
 
     size_t num_nodes = bdsp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
 
-    StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &bdsp->getDistribution() );
-    if ( sse != NULL )
-    {
-        // draw stochastic character map
-        sse->drawStochasticCharacterMap( character_histories );
-        speciation = sse->getAverageSpeciationRatePerBranch();
-        extinction = sse->getAverageExtinctionRatePerBranch();
-        n_shifts   = sse->getNumberOfShiftEventsPerBranch();
-    }
-    else
-    {
-    	GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &bdsp->getDistribution() );
-    	if ( glhbdsp != NULL )
-    	{
-    		glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
-    	}
-
-    }
-    
-//    for (int i = 0; i < time_in_states.size(); i++)
-//    {
-//        out_stream << separator;
-//        out_stream << i + 1;
-//    }
-    
+    FastBirthDeathShiftProcess *bds = dynamic_cast<FastBirthDeathShiftProcess*>( &bdsp->getDistribution() );
+    // draw stochastic character map
+    bds->drawStochasticCharacterMap( character_histories );
+    speciation = bds->getAverageSpeciationRatePerBranch();
+    extinction = bds->getAverageExtinctionRatePerBranch();
+    n_speciation_shifts   = bds->getNumberOfSpeciationShiftEventsPerBranch();
+    n_extinction_shifts   = bds->getNumberOfExtinctionShiftEventsPerBranch();
+        
     for (int i = 0; i < speciation.size(); i++)
     {
         out_stream << separator;
@@ -177,10 +165,18 @@ void BirthDeathShiftMonitor::printFileHeader()
         out_stream << "]";
     }
     
-    for (int i = 0; i < n_shifts.size(); i++)
+    for (int i = 0; i < n_speciation_shifts.size(); i++)
     {
         out_stream << separator;
-        out_stream << "num_shifts[";
+        out_stream << "num_speciation_shifts[";
+        out_stream << i + 1;
+        out_stream << "]";
+    }
+ 
+    for (int i = 0; i < n_extinction_shifts.size(); i++)
+    {
+        out_stream << separator;
+        out_stream << "num_extinction_shifts[";
         out_stream << i + 1;
         out_stream << "]";
     }
