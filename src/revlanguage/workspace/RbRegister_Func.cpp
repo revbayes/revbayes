@@ -254,6 +254,7 @@
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
 #include "Func_geometricMean.h"
+#include "Func_cos.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
@@ -584,7 +585,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_geographicalDistance() );
         addFunction( new Func_shortestDistance() );
 
-                // hyperbolic tangent function
+        // trigonometric functions
+        addFunction( new Func_cos()  );
+
+        // hyperbolic tangent function
         addFunction( new Func_hyperbolicTangent() );
 
         // hyperbolic sine function
