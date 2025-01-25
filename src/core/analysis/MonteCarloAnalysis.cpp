@@ -317,75 +317,30 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
     
     for (size_t i = 0; i < replicates; ++i)
     {
-        // first, set the checkpoint filename for the run
-        if ( replicates > 1 && checkpoint_file != "" )
+        if ( runs[i] != NULL )
         {
-            
-            // create the run specific appendix
-            std::stringstream ss;
-            ss << "_run_" << (i+1);
-            
-            // assemble the new filename
-            path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
-            
-            // set the filename for the MCMC object
-            runs[i]->setCheckpointFile( run_checkpoint_file );
-        }
-        else if ( not checkpoint_file.empty() )
-        {
-            // set the filename for the MCMC object
-            runs[i]->setCheckpointFile( checkpoint_file );
-        }
-        
-        // then, initialize the sample for that replicate
-        runs[i]->initializeSamplerFromCheckpoint();
-    }
-}
-
-
-void MonteCarloAnalysis::initializeFromTrace( RbVector<ModelTrace> traces )
-{
-    size_t n_samples = traces[0].size();
-    size_t last_generation = 0;
-    size_t n_traces = traces.size();
-    
-    std::vector<DagNode*> nodes = getModel().getDagNodes();
-    
-    for ( size_t i = 0; i < n_traces; ++i )
-    {
-        std::string parameter_name = traces[i].getParameterName();
-        
-        if (parameter_name == "Iteration")
-        {
-            last_generation = std::atoi( traces[i].objectAt( n_samples - 1 ).c_str() );
-        }
-        
-        // iterate over all DAG nodes (variables)
-        for ( size_t j = 0; j < nodes.size(); ++j )
-        {
-            if ( nodes[j]->getName() == parameter_name )
+            // first, set the checkpoint filename for the run
+            if ( replicates > 1 && checkpoint_file != "" )
             {
-                // set the value for the variable with the last sample in the trace
-                nodes[j]->setValueFromString( traces[i].objectAt( n_samples - 1 ) );
-                break;
+                
+                // create the run specific appendix
+                std::stringstream ss;
+                ss << "_run_" << (i+1);
+                
+                // assemble the new filename
+                path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
+                
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( run_checkpoint_file );
             }
-        }
-    }
-    
-    for (size_t i = 0; i < replicates; ++i)
-    {
-        // set iteration num for all runs
-        runs[i]->setCurrentGeneration( last_generation );
-        
-        RbVector<Monitor>& monitors = runs[i]->getMonitors();
-        for (size_t j = 0; j < monitors.size(); ++j)
-        {
-            if ( monitors[j].isFileMonitor() )
+            else if ( not checkpoint_file.empty() )
             {
-                // set file monitors to append
-                AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
-                m->setAppend(true);
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( checkpoint_file );
             }
+            
+            // then, initialize the sample for that replicate
+            runs[i]->initializeSamplerFromCheckpoint();
         }
     }
 }

@@ -56,7 +56,6 @@ namespace RevBayesCore {
         size_t                                              getCurrentGeneration(void) const;                               //!< Get the current generations number
         const Model&                                        getModel(void) const;
         void                                                initializeFromCheckpoint( const path &f );
-        void                                                initializeFromTrace( RbVector<ModelTrace> traces );
         void                                                printPerformanceSummary(bool current_period = false) const;
         void                                                removeMonitors(void);                                           //!< Remove all monitors
 #ifdef RB_MPI
