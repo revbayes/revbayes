@@ -23,8 +23,7 @@ for(i in 1:n) {
 my_model = model(x)
 
 # make the monitors
-monitors[1] = mnScreen(printgen = 100)
-monitors[2] = mnModel(printgen = 10, filename = "output/large_normal_model.log")
+monitors[1] = mnModel(printgen = 10, filename = "output/large_normal_model.log")
 
 my_mcmc = mcmc(my_model, monitors, moves, moveschedule = "single")
 

@@ -36,7 +36,7 @@ IntegerPos::IntegerPos( long x ) : Natural( x )
 
     if ( x < 1 )
     {
-        throw RbException( "Negative or zero value for " + getClassType() );
+        throw RbException() << "Negative or zero value for " << getClassType() ; 
     }
     
 }

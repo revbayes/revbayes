@@ -305,7 +305,7 @@ void DnaState::addState(const std::string &symbol)
         }
         else
         {
-            throw RbException("Cannot add state '" + symbol + "' to a DNA character with value '" + state + "'!");
+            throw RbException() << "Cannot add state '" << symbol << "' to a DNA character with value '" << state << "'!";
         }
     }
     else if ( s == 'C' )
@@ -340,7 +340,7 @@ void DnaState::addState(const std::string &symbol)
         }
         else
         {
-            throw RbException("Cannot add state '" + symbol + "' to a DNA character with value '" + state + "'!");
+            throw RbException() << "Cannot add state '" << symbol << "' to a DNA character with value '" << state << "'!";
         }
     }
     else if ( s == 'G' )
@@ -375,7 +375,7 @@ void DnaState::addState(const std::string &symbol)
         }
         else
         {
-            throw RbException("Cannot add state '" + symbol + "' to a DNA character with value '" + state + "'!");
+            throw RbException() << "Cannot add state '" << symbol << "' to a DNA character with value '" << state << "'!";
         }
     }
     else if ( s == 'T' )
@@ -410,12 +410,12 @@ void DnaState::addState(const std::string &symbol)
         }
         else
         {
-            throw RbException("Cannot add state '" + symbol + "' to a DNA character with value '" + state + "'!");
+            throw RbException() << "Cannot add state '" << symbol << "' to a DNA character with value '" << state << "'!";
         }
     }
     else
     {
-        throw RbException("Cannot add state '" + symbol + "' to a DNA character with value '" + state + "'!");
+        throw RbException() << "Cannot add state '" << symbol << "' to a DNA character with value '" << state << "'!";
     }
     
 }

@@ -210,7 +210,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
     }
     else
     {
-        throw RbException("A Analytical-mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A Analytical-mixture distribution does not have a member method called '" << n << "'.";
     }
     
 }
@@ -296,7 +296,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::swapParameterInte
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + old_p->getName() + " to " + new_p->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << old_p->getName() << " to " << new_p->getName(); 
     }
 }
 

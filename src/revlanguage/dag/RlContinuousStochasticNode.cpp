@@ -1,6 +1,6 @@
 #include "RlContinuousStochasticNode.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>

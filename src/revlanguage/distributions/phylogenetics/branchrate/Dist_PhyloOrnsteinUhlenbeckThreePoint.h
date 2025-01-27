@@ -1,7 +1,7 @@
 #ifndef Dist_PhyloOrnsteinUhlenbeckThreePoint_H
 #define Dist_PhyloOrnsteinUhlenbeckThreePoint_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

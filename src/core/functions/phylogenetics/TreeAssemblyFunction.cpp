@@ -37,7 +37,7 @@ TreeAssemblyFunction::TreeAssemblyFunction(const TypedDagNode<Tree> *t, const Ty
 
     if (tau->getValue().getNumberOfNodes() - 1 != brlen->getValue().size())
     {
-        throw(RbException("Number of branches does not match the number of branch lengths"));
+        throw RbException() << "Number of branches (" << (tau->getValue().getNumberOfNodes() - 1) << ") does not match the number of branch lengths (" << brlen->getValue().size() << ")";
     }
 
     // add the lambda parameter as a parent

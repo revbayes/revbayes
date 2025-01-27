@@ -97,7 +97,6 @@ cd ${SYSROOT}
 # We can use the libwinpthread-1 from the cross-compiler instead of download it.
 
 PKGS="boost-1.83.0-2
-openlibm-0.8.1-1
 dlfcn-1.4.1-1
 "
 

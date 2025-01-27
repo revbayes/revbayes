@@ -1,6 +1,6 @@
 #include "PhyloCTMCSiteHomogeneousBinary.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <utility>
 
