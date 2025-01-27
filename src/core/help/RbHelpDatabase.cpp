@@ -1270,7 +1270,17 @@ exists(x))");
 	help_strings[string("exists")][string("name")] = string(R"(exists)");
 	help_arrays[string("exists")][string("see_also")].push_back(string(R"(clear)"));
 	help_strings[string("exists")][string("title")] = string(R"(Check whether a variable exists)");
+	help_strings[string("exp")][string("description")] = string(R"(Maps the value of a number x to e^x, where e is the number such that `ln(e) = 1`.)");
+	help_strings[string("exp")][string("example")] = string(R"(# checking that ln(e) = 1
+x <- exp(1)
+ln_of_x <- ln(x)
+if (ln_of_ex != 1) {
+        print("Problem when computing an exponential value.")
+} else {
+        print("Correct computation of an exponential value.")
+})");
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
+	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
