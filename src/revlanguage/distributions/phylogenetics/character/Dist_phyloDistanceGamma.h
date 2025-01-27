@@ -1,7 +1,7 @@
 #ifndef Dist_phyloDistanceGamma_H
 #define Dist_phyloDistanceGamma_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

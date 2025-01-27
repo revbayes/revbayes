@@ -264,6 +264,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
     bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
     bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
+    bool invert = static_cast<const RlBoolean &>( invertProbability->getRevObject() ).getValue();
 
     if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
     {
@@ -272,31 +273,31 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
     if ( dt == "DNA" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::DnaState>(tau, true, n, ambig, internal, gapmatch, invert);
 
 	return setDistParameters(dist);
     }
     else if ( dt == "RNA" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::RnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::RnaState>(tau, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::RnaState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<RevBayesCore::RnaState>(tau, true, n, ambig, internal, gapmatch, invert);
 
         return setDistParameters(dist);
     }
     else if ( dt == "AA" || dt == "Protein" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::AminoAcidState>(tau, 20, true, n, ambig, internal, gapmatch, invert);
 
         return setDistParameters(dist);
     }
     else if ( dt == "Codon" )
     {
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::CodonState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::CodonState>(tau, 61, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::CodonState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::CodonState>(tau, 61, true, n, ambig, internal, gapmatch, invert);
         
         return setDistParameters(dist);
     }
     else if ( dt == "Doublet" )
     {
-        auto dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::DoubletState>(tau, 16, true, n, ambig, internal, gapmatch);
+        auto dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::DoubletState>(tau, 16, true, n, ambig, internal, gapmatch, invert);
 
         return setDistParameters(dist);
     }
@@ -305,7 +306,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         // we get the number of states from the rate matrix (we don't know, because PoMo is flexible about its rates)
 	    int nChars = computeNumberOfStates();
 
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::PoMoState>(tau, nChars, !true, n, ambig, internal, gapmatch, invert);
 
         return setDistParameters(dist);
     }
@@ -340,11 +341,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState> *dist;
         if (cd == RevBayesCore::AscertainmentBias::ALL)
         {
-            dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, internal, gapmatch, invert);
         }
         else
         {
-            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousConditional<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, RevBayesCore::AscertainmentBias::Coding(cd), internal, gapmatch);
+            dist = new RevBayesCore::PhyloCTMCSiteHomogeneousConditional<RevBayesCore::StandardState>(tau, nChars, true, n, ambig, RevBayesCore::AscertainmentBias::Coding(cd), internal, gapmatch, invert);
         }
 
         return setDistParameters(dist);
@@ -354,7 +355,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         // we get the number of states from the rates matrix
 	    int nChars = computeNumberOfStates();
 
-        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, nChars, true, n, ambig, internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState> *dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::NaturalNumbersState>(tau, nChars, true, n, ambig, internal, gapmatch, invert);
 
 	return setDistParameters(dist);
     }
@@ -427,7 +428,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             }
         }
 
-        RevBayesCore::PhyloCTMCSiteHomogeneousBinary *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBinary(tau, true, (size_t)n, ambig, RevBayesCore::BinaryAscertainmentBias::Coding(cd), internal, gapmatch);
+        RevBayesCore::PhyloCTMCSiteHomogeneousBinary *dist = new RevBayesCore::PhyloCTMCSiteHomogeneousBinary(tau, true, (size_t)n, ambig, RevBayesCore::BinaryAscertainmentBias::Coding(cd), internal, gapmatch, invert);
 
         return setDistParameters(dist);
     }
@@ -560,6 +561,8 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "storeInternalNodes", RlBoolean::getClassTypeSpec(), "Should we store internal node states in the character matrix?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         
         dist_member_rules.push_back( new ArgumentRule( "gapMatchClamped", RlBoolean::getClassTypeSpec(), "Should we set the simulated character to be gap or missing if the corresponding character in the clamped matrix is gap or missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+
+        dist_member_rules.push_back( new ArgumentRule("invertProbability", RlBoolean::getClassTypeSpec(), "Should we return the reciprocal of the probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }
@@ -717,6 +720,10 @@ void Dist_phyloCTMC::setConstParameter(const std::string& name, const RevPtr<con
     else if ( name == "coding" )
     {
         coding = var;
+    }
+    else if ( name == "invertProbability" )
+    {
+        invertProbability = var;
     }
     else
     {

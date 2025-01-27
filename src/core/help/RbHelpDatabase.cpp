@@ -192,6 +192,43 @@ clade_67_or_68 = clade( clade_67, clade_68, optional_match=true ))");
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(tmrca)"));
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(mrcaIndex)"));
 	help_strings[string("clade")][string("title")] = string(R"(Clade)");
+	help_strings[string("clamp")][string("description")] = string(R"(`x.clamp(data)` fixes the value of the stochastic variable `x` to the observation `data`, and marks the variable as corresponding to an observation.)");
+	help_strings[string("clamp")][string("details")] = string(R"(Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped – either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
+
+`x.setValue()` evaluates probabilities at a specific value of `x` without fixing the value.)");
+	help_strings[string("clamp")][string("example")] = string(R"(x ~ dnNormal(1, 1)
+y ~ dnNormal(2, 2)
+
+# Set the observed value of x
+x.clamp(1)
+# Compute the probability of the observation
+x.probability()
+
+# Modify the observed value of x
+x.clamp(2) # equivalent to x.unclamp(); x.clamp(2)
+x.probability()
+
+# Evaluate P(y = 1)
+y.setValue(1)
+y.probability()
+
+# Select another value of y
+y.redraw()
+print(y)
+
+# Evaluate P(y) at this new value
+y.probability()
+
+# Define a model involving x and y
+z := x * y
+
+# Because x is clamped, it is invalid to call x.redraw() or mvSlide(x)
+# x will remain constant during MCMC, whereas y will be inferred.
+mcmc(model(z), [mnScreen(x, y)], [mvSlide(y)]).run(generations = 5))");
+	help_strings[string("clamp")][string("name")] = string(R"(Clamp)");
+	help_arrays[string("clamp")][string("see_also")].push_back(string(R"(setValue)"));
+	help_arrays[string("clamp")][string("see_also")].push_back(string(R"(unclamp)"));
+	help_strings[string("clamp")][string("title")] = string(R"(Clamp a stochastic variable to a fixed/observed value)");
 	help_arrays[string("clear")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("clear")][string("description")] = string(R"(Clear (e.g., remove) variables and functions from the workspace.)");
 	help_strings[string("clear")][string("details")] = string(R"(The clear function removes either a given variable or all variables from the workspace. Clearing the workspace is very useful between analysis if you do not want to have old connections between variables hanging around.)");
@@ -700,74 +737,6 @@ sd(x))");
 	help_strings[string("dnHalfNormal")][string("title")] = string(R"(half-Normal Distribution)");
 	help_strings[string("dnHeterochronousCoalescent")][string("name")] = string(R"(dnHeterochronousCoalescent)");
 	help_strings[string("dnHeterochronousCoalescentSkyline")][string("name")] = string(R"(dnHeterochronousCoalescentSkyline)");
-	help_arrays[string("dnInverse")][string("authors")].push_back(string(R"(Martin R. Smith)"));
-	help_strings[string("dnInverse")][string("description")] = string(R"(`dnInverse()` inverts a probability distribution.
-
-`dnInverse(x).probability()` returns `1 / x.probability()`; 
-`dnInverse(x).lnProbability()` returns `-x.lnProbability()`.
-
-This provides a way to perform inference using conditional probabilities,
-for example where 
-Pr(x | Model, Condition) = Pr(x | Model) / Pr(Condition is satisfied)
-
-In general, there may be cases where it is desirable to sample from or 
-observe a distribution subject to some form of ascertainment condition.
-For example, one may wish to sample from a normal distribution 
-`X ~ dnNormal(0, 1)` subject to some constraint _C(x)_ on _x_ – such
-as a condition that _x_ > 0.
-
-In order to compute the probability of an observed value of _x_ given
-the constraint, we need to divide Pr(x) by Pr(_C(x)_) – in this example,
-Pr(_x_ > 0).  This probability is difficult to calculate in general.
-But in specific cases, Pr(C(x)) corresponds to the probability of observing
-a specific value _y_ from some other distribution _dist_.
-
-In this case, our likelihood could be computed by 
-`dist.clamp(y); conditioned_probability = x.probability() / dist.probability()`.
-
-`dnInverse` allows such likelihoods to be computed during inference under MCMC(MC),
-where the overall probability is obtained by multiplies the probabilities of each
-indepedent component of the model.
-Hence, `Y ~ dnInverse(dist); Y.clamp(y)` gives a model element whose probability
-corresponds to `1 / dist.probability()`.)");
-	help_strings[string("dnInverse")][string("example")] = string(R"(```
-# Compute Pr(x = 1 | x ~ exp(y), y = 1)
-
-# First we define the distributions from which x and y are drawn
-
-# y may take the values 1 or 2 with probabilities 0.4, 0.6
-p_y := simplex(0.4, 0.6)
-y ~ dnCategorical( p_y )
-inv_y ~ dnInverse(dnCategorical( p_y ))
-
-y.clamp(1)
-inv_y.clamp(1)
-
-y.probability()      # 0.4 = 2 / 5
-inv_y.probability()  # 2.5 = 5 / 2
-
-# Compute the joint probability Pr(x, y)
-function PrXandY (x_value, y_value) {
-    x_given_y ~ dnExponential( y_value )
-    x_given_y.clamp(x_value) # To calculate Pr(x | y)
-
-    y.clamp(y_value) # To calculate Pr(y)
-
-    return(x_given_y.probability() * y.probability())
-}
-
-PrXandY(1, 1) # Pr(x = 1, y = 1)
-
-# If we wish to calculate likelihood conditioned on y = 1, we need to compute
-# Pr(x = 1 | y = 1)
-
-# Here it is trivial to compute this directly, as in PrXandY, but in more complex
-# cases it may be easier to use Pr(x = 1 | y = 1) := Pr(x = 1, y = 1) / Pr(y = 1)
-
-PrXandY(1, 1) * inv_y.probability()
-```)");
-	help_strings[string("dnInverse")][string("name")] = string(R"(dnInverse)");
-	help_strings[string("dnInverse")][string("title")] = string(R"(Inverse distribution)");
 	help_arrays[string("dnInverseGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnInverseGamma")][string("description")] = string(R"(inverse-gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnInverseGamma")][string("details")] = string(R"(The inverse Gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
@@ -1406,7 +1375,29 @@ Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_strings[string("fnDECRoot")][string("name")] = string(R"(fnDECRoot)");
 	help_strings[string("fnDayhoff")][string("name")] = string(R"(fnDayhoff)");
 	help_strings[string("fnDecompVarCovar")][string("name")] = string(R"(fnDecompVarCovar)");
+	help_strings[string("fnDiscretizeBeta")][string("description")] = string(R"(Select representative values from `num_cats` discrete subdivisions of a beta distribution.)");
+	help_strings[string("fnDiscretizeBeta")][string("details")] = string(R"(
+A beta distribution is defined by two shape parameters, alpha and beta.
+
+Where a parameter or prior is defined based on the beta distribution, it may be more tractable to evaluate likelihoods at a fixed number of points from the distribution.  These representative points can be computed using `dnDiscretizeBeta`.
+
+In practice, these values are computed as follows:
+
+Let _n_ be the number of categories.
+If `median = TRUE`, the quantile function is performed at the midpoint of each category.  Call this vector _q_.
+_q_ is then normalized by dividing against its sum, so its elements sum to one; then multiplied by a factor _n_ * _alpha) / (_alpha_ + _beta_).
+
+The computation to obtain the mean for each category, when `median = FALSE`, is more complex, making use of the incomplete beta function ( Majumder & Bhattacharjee 1973).
+
+A real-world use case is available in Wright et al. (2016), with discussion of the properties of the beta distribution. Corresponding tutorials are available at https://www.palass.org/sites/default/files/media/publications/newsletters/number_106/number_106_0.pdf and https://revbayes.github.io/tutorials/morph_tree/V2.html.)");
+	help_strings[string("fnDiscretizeBeta")][string("example")] = string(R"(# Values to represent four quadrants of a symmetric beta distribution
+categories := fnDiscretizeBeta(0.2, 0.2, 4)
+print(categories))");
 	help_strings[string("fnDiscretizeBeta")][string("name")] = string(R"(fnDiscretizeBeta)");
+	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(Majumder & Bhattacharjee. 1973. Algorithm AS63. Applied Statistics, 22.)",R"(NULL)",R"(NULL )"));
+	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(WRIGHT, A. M., LLOYD, G. T. and HILLIS, D. H. 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. _Systematic Biology_, 65, 602–11.)",R"(10.1093/sysbio/syv122)",R"(https://doi.org/10.1093/sysbio/syv122 )"));
+	help_arrays[string("fnDiscretizeBeta")][string("see_also")].push_back(string(R"(A translation of `fnDiscretizeBeta` into R is available at https://gist.github.com/ms609/883632d10d4d80ea5391cee9c47071fc.)"));
+	help_strings[string("fnDiscretizeBeta")][string("title")] = string(R"(Disctetize a beta distribution)");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
 	help_strings[string("fnDiscretizeDistribution")][string("name")] = string(R"(fnDiscretizeDistribution)");
 	help_strings[string("fnDiscretizeGamma")][string("name")] = string(R"(fnDiscretizeGamma)");
@@ -1625,6 +1616,43 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_strings[string("fnK81")][string("name")] = string(R"(fnK81)");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
+	help_strings[string("fnMinBLTimeScaling")][string("description")] = string(R"(Time-scales an undated tree based on a vector of tip ages using the minimum
+branch length ("MBL") approach (Laurin 2004; Bapst 2014).)");
+	help_strings[string("fnMinBLTimeScaling")][string("details")] = string(R"(The age of each internal node is based on the age of the oldest tip descended
+from it. However, if t0 is the oldest tip descended from a given node (denoted
+x) and also the oldest tip descended from that node's parent (denoted y), then
+setting t(x) = t(y) = t(t0) would produce zero-length branches y->x and x->t0.
+We avoid this by requiring every branch to be no shorter than some user-supplied
+constant. This has the effect of shifting node ages deeper into the past.
+
+Conceptually, the undated tree would usually correspond either to a bare
+topology (a tree without branch lengths) or a tree with branch lengths in units
+of expected change; in practice, both `BranchLengthTree` and `TimeTree` arguments
+are accepted. In this implementation of the MBL approach, both terminal and
+internal branches are required to be greater than or equal to the specified
+minimum. If there is uncertainty associated with the age of a given tip,
+the midpoint of the uncertainty range is used for time-scaling.
+
+The algorithm is not stochastic (i.e., it always returns the same time-scaled
+tree for a given input), and is primarily intended to generate a plausible
+starting tree for MCMC analyses.)");
+	help_strings[string("fnMinBLTimeScaling")][string("example")] = string(R"(# Read in an undated tree
+undated_tree <- readTrees("undated.nex")[1]
+
+# Read tip age data from a file
+taxa <- readTaxonData("tipages.tsv")
+
+# Time-scale using a minimum branch length of 3 Myr
+dated_tree <- fnMinBLTimeScaling(undated_tree, taxa, 3.0)
+
+print(undated_tree) # The original tree remains unchanged
+print(dated_tree)   # A new, dated tree has been returned)");
+	help_strings[string("fnMinBLTimeScaling")][string("name")] = string(R"(fnMinBLTimeScaling)");
+	help_references[string("fnMinBLTimeScaling")].push_back(RbHelpReference(R"(Bapst DW (2014). Assessing the effect of time-scaling methods on phylogeny-based analyses in the fossil record. Paleobiology, 40(3):331-351.)",R"(10.1666/13033)",R"()"));
+	help_references[string("fnMinBLTimeScaling")].push_back(RbHelpReference(R"(Laurin M (2004). The evolution of body size, Cope's rule and the origin of amniotes. Systematic Biology, 53(4):594-622.)",R"(10.1080/10635150490445706)",R"()"));
+	help_arrays[string("fnMinBLTimeScaling")][string("see_also")].push_back(string(R"(simStartingTree)"));
 	help_arrays[string("fnMixtureASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of site models.)");
 	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the input site models, which may also
@@ -2200,7 +2228,18 @@ parameters that influence or are influenced by the likelihood of `x`.
 
 Because `model` works with copies of objects, conducting an mcmc(mc) analysis
 on a model object will not change the values of the objects in the RevBayes
-workspace.)");
+workspace.
+
+The model object can be modified to ignore specific data elements using the
+method `ignoreData`.  Thus to run without the sequence data `phySeq` you
+might specify:
+
+   mymodel.ignoreData(phySeq)
+
+Only clamped nodes can be ignored. To ignore all clamped nodes you can use
+the method `ignoreAllData`:
+
+   mymodel.ignoreAllData())");
 	help_strings[string("model")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
 b ~ dnExponential(a)
@@ -2569,7 +2608,12 @@ moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
 	help_strings[string("mvScaleBactrianCauchy")][string("name")] = string(R"(mvScaleBactrianCauchy)");
 	help_strings[string("mvShrinkExpand")][string("name")] = string(R"(mvShrinkExpand)");
 	help_strings[string("mvShrinkExpandScale")][string("name")] = string(R"(mvShrinkExpandScale)");
-	help_strings[string("mvSlice")][string("name")] = string(R"(mvSlice)");
+	help_strings[string("mvSlice")][string("description")] = string(R"(Instead of using a fixed move size, `mvSlice` determines the size of a move proposal based on the current shape of the likelihood function.
+This allows small moves to be proposed in certain parts of parameter space,
+and large moves in other parts of the space, as appropriate.)");
+	help_strings[string("mvSlice")][string("name")] = string(R"(Slice move)");
+	help_arrays[string("mvSlice")][string("see_also")].push_back(string(R"(`mvSlide` and `mvScale` are possible alternatives where a fixed move size is desired.)"));
+	help_strings[string("mvSlice")][string("title")] = string(R"(Propose a slice move)");
 	help_strings[string("mvSlide")][string("name")] = string(R"(mvSlide)");
 	help_strings[string("mvSlideBactrian")][string("name")] = string(R"(mvSlideBactrian)");
 	help_arrays[string("mvSpeciesNarrow")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
@@ -3084,6 +3128,30 @@ getOption("linewidth"))");
 	help_strings[string("setOption")][string("name")] = string(R"(setOption)");
 	help_arrays[string("setOption")][string("see_also")].push_back(string(R"(getOption)"));
 	help_strings[string("setOption")][string("title")] = string(R"(Set a global RevBayes option)");
+	help_strings[string("setValue")][string("description")] = string(R"(`x.setValue(value)` sets the value of the stochastic variable `x` to `value`.)");
+	help_strings[string("setValue")][string("details")] = string(R"(`x.setValue()` allows calculations to be evaluated at a given value of `x`, whilst allowing the value
+of `x` to be redrawn, or to vary during MCMC.
+
+`.setValue()` allows an MCMC run to be initialized with plausible values,
+which can expedite convergence when priors are broad
+([example](https://revbayes.github.io/tutorials/divrate/branch_specific.html#specifying-the-model)),
+and can be useful when [debugging MCMC runs](https://revbayes.github.io/tutorials/mcmc_troubleshooting/#starting-values).)");
+	help_strings[string("setValue")][string("example")] = string(R"(x ~ dnNormal(1, 1)
+
+# Evaluate P(x) at x = 1
+x.setValue(1)
+x.probability()
+
+# Modify the observed value of x
+x.redraw()
+x.probability()
+
+# Initialize an MCMC run with a specific value
+x.setValue(40000)
+mcmc(model(x), [mnScreen(x)], [mvScale(x)]).run(generations = 5))");
+	help_strings[string("setValue")][string("name")] = string(R"(Set value)");
+	help_arrays[string("setValue")][string("see_also")].push_back(string(R"(clamp)"));
+	help_strings[string("setValue")][string("title")] = string(R"(Set the value of a stochastic variable)");
 	help_arrays[string("setwd")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("setwd")][string("description")] = string(R"(Set the current working directory which RevBayes uses.)");
 	help_strings[string("setwd")][string("example")] = string(R"(# get the current working directory

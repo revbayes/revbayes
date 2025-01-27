@@ -87,7 +87,7 @@ namespace RevBayesCore {
 	virtual void                                                       checkInvariants() const;
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true );
+        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true, bool invert = false );
         AbstractPhyloCTMCSiteHomogeneous(const AbstractPhyloCTMCSiteHomogeneous &n);                                                                                    //!< Copy constructor
         virtual                                                            ~AbstractPhyloCTMCSiteHomogeneous(void);                                                     //!< Virtual destructor
 
@@ -252,6 +252,7 @@ namespace RevBayesCore {
         bool                                                                branch_heterogeneous_clock_rates = false;
         bool                                                                branch_heterogeneous_substitution_matrices = true;
         bool                                                                rate_variation_across_sites = false;
+        bool                                                                invert_likelihood;
 
         // MPI variables
         size_t                                                              pattern_block_start;
@@ -303,7 +304,7 @@ namespace RevBayesCore {
 
 
 template<class charType>
-RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool wd) :
+RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool invert, bool wd) :
 TypedDistribution< AbstractHomologousDiscreteCharacterData >(  NULL ),
 num_nodes( t->getValue().getNumberOfNodes() ),
 num_sites( nSites ),
@@ -330,7 +331,8 @@ pattern_block_start( 0 ),
 pattern_block_end( num_patterns ),
 pattern_block_size( num_patterns ),
 store_internal_nodes( internal ),
-gap_match_clamped( gapmatch )
+gap_match_clamped( gapmatch ),
+invert_likelihood( invert )
 {
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
@@ -412,6 +414,7 @@ pattern_block_end( n.pattern_block_end ),
 pattern_block_size( n.pattern_block_size ),
 store_internal_nodes( n.store_internal_nodes ),
 gap_match_clamped( n.gap_match_clamped ),
+invert_likelihood( n.invert_likelihood ),
 template_state( n.template_state ),
 has_ancestral_states( n.has_ancestral_states ),
 sampled_site_rate_component( n.sampled_site_rate_component ),
@@ -961,7 +964,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     }
 
     // sum the partials up
-    this->lnProb = sumRootLikelihood();
+    this->lnProb = invert_likelihood ? - sumRootLikelihood() : sumRootLikelihood();
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( in_mcmc_mode == false )
@@ -1521,6 +1524,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     // NOTE: ambiguous tip states are sampled along with internal node states
     end_state = end_states[node_index][site].getStateIndex();
 
+
     // set up vectors to hold the character transition events
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;
@@ -2053,14 +2057,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
     // for now, always sample the clamped character
+    
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> site_indices = getIncludedSiteIndices();
 
     // sample characters conditioned on start states, going to end states
     std::vector<double> p(this->num_chars, 0.0);
     for (size_t i = 0; i < this->num_sites; i++)
     {
-
-        charType c = td.getCharacter(i);
-
+        charType c = td.getCharacter(site_indices[i]);
 
         if ( c.isAmbiguous() == false )
         {

@@ -1,6 +1,6 @@
 #include "VectorSingleElementScaleProposal.h"
 
-#include <math.h>
+#include <cmath>
 #include <ostream>
 #include <vector>
 

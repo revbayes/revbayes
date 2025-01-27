@@ -8,7 +8,7 @@
 
 #include "BitsetCharacterDataConverter.h"
 
-#include <math.h>
+#include <cmath>
 #include <sstream>
 #include <string>
 

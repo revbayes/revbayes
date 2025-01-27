@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -92,6 +92,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
     bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
     bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
+    bool invert = static_cast<const RlBoolean &>( invertProbability->getRevObject() ).getValue();
 
     size_t nNodes = tau->getValue().getNumberOfNodes();
 
@@ -159,7 +160,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         throw RbException("The cladogenetic probabilities and rate matrix do not have the same number of states.\n");
     }
 
-    RevBayesCore::PhyloCTMCClado<State> *dist = new RevBayesCore::PhyloCTMCClado<State>(tau, nChars, true, n, ambig, internal, gapmatch);
+    RevBayesCore::PhyloCTMCClado<State> *dist = new RevBayesCore::PhyloCTMCClado<State>(tau, nChars, true, n, ambig, internal, gapmatch, invert);
 
     // set the root frequencies (by default these are NULL so this is OK)
     dist->setRootFrequencies( rf );
@@ -362,6 +363,8 @@ const MemberRules& Dist_phyloCTMCClado::getParameterRules(void) const
         
         dist_member_rules.push_back( new ArgumentRule( "gapMatchClamped", RlBoolean::getClassTypeSpec(), "Should we set the simulated character to gap or missing if the corresponding character in the clamped matrix is gap or missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         
+        dist_member_rules.push_back( new ArgumentRule("invertProbability", RlBoolean::getClassTypeSpec(), "Should we return the reciprocal of the probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        
         rules_set = true;
     }
     
@@ -470,6 +473,10 @@ void Dist_phyloCTMCClado::setConstParameter(const std::string& name, const RevPt
     else if ( name == "gapMatchClamped" )
     {
         gapMatchClamped = var;
+    }
+    else if ( name == "invertProbability" )
+    {
+        invertProbability = var;
     }
     else if ( name == "type" )
     {

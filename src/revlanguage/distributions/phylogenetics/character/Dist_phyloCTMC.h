@@ -1,7 +1,7 @@
 #ifndef Dist_phyloCTMC_H
 #define Dist_phyloCTMC_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -74,6 +74,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       storeInternalNodes;
         RevPtr<const RevVariable>                       gapMatchClamped;
         RevPtr<const RevVariable>                       coding;
+        RevPtr<const RevVariable>                       invertProbability;
 
     };
 

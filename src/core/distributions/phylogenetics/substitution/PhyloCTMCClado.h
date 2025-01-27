@@ -28,7 +28,7 @@ namespace RevBayesCore {
 
     public:
 //        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true );
-        PhyloCTMCClado(const TypedDagNode< Tree > *t, size_t nChars, bool c, size_t nSites, bool amb, bool internal, bool gapmatch);
+        PhyloCTMCClado(const TypedDagNode< Tree > *t, size_t nChars, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool invert);
         PhyloCTMCClado(const PhyloCTMCClado &n);
         virtual                                            ~PhyloCTMCClado(void);                                                                   //!< Virtual destructor
 
@@ -86,6 +86,7 @@ namespace RevBayesCore {
         bool branchHeterogeneousCladogenesis;
         bool store_internal_nodes;
         bool gap_match_clamped;
+        bool invert_likelihood;
     };
 
 }
@@ -108,7 +109,7 @@ namespace RevBayesCore {
 //        AbstractPhyloCTMCSiteHomogeneous(const TypedDagNode<Tree> *t, size_t nChars, size_t nMix, bool c, size_t nSites, bool amb, bool wd = false, bool internal = false, bool gapmatch = true );
 
 template<class charType>
-RevBayesCore::PhyloCTMCClado<charType>::PhyloCTMCClado(const TypedDagNode<Tree> *t, size_t nChars, bool c, size_t nSites, bool amb, bool internal, bool gapmatch) : AbstractPhyloCTMCSiteHomogeneous<charType>(  t, nChars, 1, c, nSites, amb, false, false, true ),
+RevBayesCore::PhyloCTMCClado<charType>::PhyloCTMCClado(const TypedDagNode<Tree> *t, size_t nChars, bool c, size_t nSites, bool amb, bool internal, bool gapmatch, bool invert) : AbstractPhyloCTMCSiteHomogeneous<charType>(  t, nChars, 1, c, nSites, amb, false, false, true, false),
 
     cladoPartialLikelihoods(NULL),
     cladoMarginalLikelihoods(NULL),
@@ -117,7 +118,8 @@ RevBayesCore::PhyloCTMCClado<charType>::PhyloCTMCClado(const TypedDagNode<Tree> 
     useSampledCladogenesis(false),
     branchHeterogeneousCladogenesis(false),
     store_internal_nodes(internal),
-    gap_match_clamped(gapmatch)
+    gap_match_clamped(gapmatch),
+    invert_likelihood(invert)
 {
 //    unsigned numReducedChar = (unsigned)( log( nChars ) / log( 2 ) );
 //    std::vector<std::string> et;

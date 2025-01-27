@@ -3,3 +3,39 @@
    This simulation runs 4 independent replicates.
    The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
    
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 5/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 7/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 7/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 5/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 6/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 5/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 4/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 3/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 5/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 3/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 3/20 (target: 0/20)
+   
+   
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 0/20 (target: 0/20)
+   
