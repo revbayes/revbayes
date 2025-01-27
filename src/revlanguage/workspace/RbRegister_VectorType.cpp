@@ -126,7 +126,6 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
     
     try
     {
-        
         AddWorkspaceVectorType<Taxon,4>::addTypeToWorkspace( *this, new Taxon() );
         AddWorkspaceVectorType<RateGenerator,3>::addTypeToWorkspace( *this, new RateGenerator() );
         AddWorkspaceVectorType<CladogeneticProbabilityMatrix,3>::addTypeToWorkspace( *this, new CladogeneticProbabilityMatrix() );
@@ -153,15 +152,15 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
 
 //        AddWorkspaceVectorType<Dist_unif,1>::addTypeToWorkspace( *this, new Dist_unif() );
 //        this->addFunction(new Func_workspaceVector<Dist_unif>() );
-        addFunction(new Func_workspaceVector<Distribution>() );
+        addFunction( new Func_workspaceVector<Distribution>() );
         addFunction( new Func_workspaceVector<TypedDistribution<Natural> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<Real> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<RealPos> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<Probability> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Natural> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Real> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<RealPos> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Probability> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<Real> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<RealPos> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<Probability> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Natural> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Real> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<RealPos> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Probability> > >() );
         addFunction( new Func_workspaceVector<TypedDistribution<TimeTree> >() );
 //        this->addFunction(new Func_workspaceVector<ContinuousDistribution>() );
 //        AddWorkspaceVectorType<Distribution,1>::addTypeToWorkspace( *this, new Distribution() );

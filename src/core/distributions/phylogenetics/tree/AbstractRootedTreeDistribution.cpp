@@ -58,7 +58,9 @@ AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNod
             found.insert(taxa[i].getName());
         }
         else
+        {
             throw RbException() << "Duplicate taxon name '" << taxa[i].getName() << "' encountered when building tree distribution";
+        }
     }
     
     // if we got a starting tree, then we should also use it.
@@ -67,6 +69,7 @@ AbstractRootedTreeDistribution::AbstractRootedTreeDistribution(const TypedDagNod
         delete value;
         value = starting_tree->clone();
     }
+    
 }
 
 

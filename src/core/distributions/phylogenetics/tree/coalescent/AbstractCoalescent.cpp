@@ -298,6 +298,7 @@ bool AbstractCoalescent::matchesConstraints( void )
  */
 void AbstractCoalescent::redrawValue( void )
 {
+
     simulateTree();
 
 }
@@ -414,7 +415,7 @@ void AbstractCoalescent::simulateHomochronousTree( void )
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        
+
     }
     
     // initialize the topology by setting the root
@@ -459,3 +460,4 @@ void AbstractCoalescent::simulateHomochronousTree( void )
     value = psi;
     
 }
+
