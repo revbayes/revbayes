@@ -38,7 +38,7 @@ namespace RevBayesCore {
 
         virtual AbstractConvergenceStoppingRule*            clone(void) const = 0;                                      //!< Clone function. This is similar to the copy constructor but useful in inheritance.
         virtual double                                      getStatistic(size_t g) = 0;                                 //!< Compute the value of the rule's test statistic / criterion at generation g.
-        virtual std::string                                 printAsStatement(size_t g) = 0;                             //!< Print a statement about the current value of the rule's test statistic / criterion.
+        virtual std::string                                 printAsStatement(size_t g, bool target_only) = 0;           //!< Print a statement about the current value of the rule's test statistic / criterion, or just the target value.
         virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop at generation g?
         
     protected:
