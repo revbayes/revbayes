@@ -3,7 +3,7 @@
 
 #include <bitset>
 #include <climits>
-#include <math.h>
+#include <cmath>
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "DistributionBinomial.h"
 #include "DistributionNegativeBinomial.h"

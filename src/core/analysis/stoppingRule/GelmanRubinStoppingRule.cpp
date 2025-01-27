@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <iosfwd>
+#include <iomanip>
 #include <string>
 #include <vector>
 
@@ -62,11 +63,10 @@ void GelmanRubinStoppingRule::setNumberOfRuns(size_t n)
 
 
 /**
- * Should we stop now?
- * Yes, if the ratio of the variance of samples between chains over the variance of samples within chains
- * is smaller than the provided threshold.
+ * Compute the current value of the rule's test statistic:
+ * Here, this is the variance of samples between chains over the variance of samples within chains
  */
-bool GelmanRubinStoppingRule::stop( size_t g )
+double GelmanRubinStoppingRule::getStatistic( size_t g )
 {
     GelmanRubinTest grTest = GelmanRubinTest( R );
     
@@ -110,6 +110,9 @@ bool GelmanRubinStoppingRule::stop( size_t g )
         num_variables_in_rep = data[i].size();
     }
     
+    // record the variable-specific Gelman-Rubin statistic values
+    std::vector<double> psrf(num_variables_in_rep);
+    
     // invert the hierarchy
     std::vector< std::vector<TraceNumeric> > data_exp( num_variables_in_rep );
     for (size_t i = 0; i < num_variables_in_rep; i++)
@@ -119,9 +122,37 @@ bool GelmanRubinStoppingRule::stop( size_t g )
             data_exp[i].push_back( data[j][i] );
         }
         
-        // conduct the test
-        if ( !grTest.assessConvergence( data_exp[i] ) ) return false;
+        // get the value
+        psrf[i] = grTest.getStatistic( data_exp[i] );
     }
+    
+    // get the largest psrf value
+    double max_psrf = *std::max_element( psrf.begin(), psrf.end() );
+    return max_psrf;
+}
 
-    return true;
+
+std::string GelmanRubinStoppingRule::printAsStatement( size_t g )
+{
+    // Nicely format the target value
+    std::stringstream tss;
+    tss << std::setprecision(5) << std::noshowpoint << R;
+    std::string target = tss.str();
+    
+    double val = getStatistic(g);
+    std::string preamble = "Maximum value of the Gelman-Rubin statistic (PSRF): ";
+    std::string statement = preamble + std::to_string(val) + " (target: < " + target + ")\n";
+    return statement;
+}
+
+
+/**
+ * Should we stop now?
+ * Yes, if the ratio of the variance of samples between chains over the variance of samples within chains
+ * is smaller than the provided threshold for all monitored variables.
+ */
+bool GelmanRubinStoppingRule::stop( size_t g )
+{
+    double max_psrf = getStatistic(g);
+    return max_psrf < R;
 }

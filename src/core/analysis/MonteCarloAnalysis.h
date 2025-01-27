@@ -48,15 +48,14 @@ namespace RevBayesCore {
         void                                                addMonitor(const Monitor &m);
         MonteCarloAnalysis*                                 clone(void) const;                                              //!< Clone function. This is similar to the copy constructor but useful in inheritance.
 #ifdef RB_MPI
-        void                                                burnin(size_t g, const MPI_Comm &c, size_t ti, bool underPrior=false, bool verbose=true);
+        void                                                burnin(size_t g, const MPI_Comm &c, size_t ti, bool verbose=true);
 #else
-        void                                                burnin(size_t g, size_t ti, bool underPrior=false, bool verbose=true);
+        void                                                burnin(size_t g, size_t ti, bool verbose=true);
 #endif
         void                                                disableScreenMonitors(bool all);
         size_t                                              getCurrentGeneration(void) const;                               //!< Get the current generations number
         const Model&                                        getModel(void) const;
         void                                                initializeFromCheckpoint( const path &f );
-        void                                                initializeFromTrace( RbVector<ModelTrace> traces );
         void                                                printPerformanceSummary(bool current_period = false) const;
         void                                                removeMonitors(void);                                           //!< Remove all monitors
 #ifdef RB_MPI
@@ -64,7 +63,6 @@ namespace RevBayesCore {
 #else
         void                                                run(size_t k, RbVector<StoppingRule> r, size_t ti, const path &cp_file, size_t ci=0, bool verbose=true);
 #endif
-        void                                                runPriorSampler(size_t k, RbVector<StoppingRule> r, size_t ti);
 #ifdef RB_MPI
         void                                                setModel(Model *m, bool redraw, const MPI_Comm &c);
 #else

@@ -1,6 +1,6 @@
 #include "Func_readTreeTrace.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <map>
 #include <set>
