@@ -3,7 +3,7 @@ exp
 ## title
 Exponential of a number
 ## description
-Maps the value of a number x to e^x, where e is the number such that `ln(e) = 1`.
+Maps the value of a number x to e^x, where e is the number such that ln(e) = 1.
 ## details
 ## authors
 ## see_also
