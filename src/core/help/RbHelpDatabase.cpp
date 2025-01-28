@@ -1280,6 +1280,7 @@ if (ln_of_ex != 1) {
         print("Correct computation of an exponential value.")
 })");
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(ln)"));
 	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
