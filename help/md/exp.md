@@ -7,6 +7,7 @@ Maps the value of a number x to e^x, where e is the number such that `ln(e) = 1`
 ## details
 ## authors
 ## see_also
+ln
 ## example
 	# checking that ln(e) = 1
 	x <- exp(1)
