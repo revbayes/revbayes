@@ -1456,23 +1456,7 @@ Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnF3x4")][string("name")] = string(R"(fnF3x4)");
 	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
 	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
-	help_strings[string("fnF81")][string("description")] = string(R"(DNA evolution model proposed in Felsenstein (1981).)");
-	help_strings[string("fnF81")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and transition rates between states are equal. Its only argument, baseFrequencies, codes for said stationary frequencies. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).)");
-	help_strings[string("fnF81")][string("example")] = string(R"(# stationary base frequencies
-baseFrequencies ~ dnDirichlet(v(1,1,1,1))
-
-# create an F81 rate matrix
-Q := fnF81(baseFrequencies))");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
-	help_references[string("fnF81")].push_back(RbHelpReference(R"()",R"()",R"()"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnGTR)"));
-	help_strings[string("fnF81")][string("title")] = string(R"(The Felsenstein (1981) nucleotide rate matrix)");
 	help_strings[string("fnFMutSel")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
 a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
 the nucleotide mutation rate matrix is a GTR rate matrix.
@@ -1545,28 +1529,16 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
-	help_strings[string("fnGTR")][string("description")] = string(R"(DNA evolution model proposed in Tavare (1986).)");
-	help_strings[string("fnGTR")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and transition rates between states are allowed to be different. Its first argument, exchangeRates, codes for the transition rates between states (as in other models, transition rates are assumed to be symmetric). Its second argument, baseFrequencies, codes for the stationary frequencies of these states. Note that for n states, exchangeRates should have length n*(n-1)/2, and baseFrequencies should have length n. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
-
-The general time-reversible rate matrix elements will be of the form:
-  Q(i,j) = exchangeRates(i,j) * baseFrequencies[j])");
-	help_strings[string("fnGTR")][string("example")] = string(R"(# exchange rates
-er ~ dnDirichlet( v(1,1,1,1,1,1) )
-
-# base frequencies
+	help_strings[string("fnGTR")][string("description")] = string(R"(The GTR rate matrix.)");
+	help_strings[string("fnGTR")][string("details")] = string(R"(The general time-reversible rate matrix:
+  Q(i,j) = exchangeRates(i,j) * baseFrequencies[j]
+The exchangeRates are symmetric.)");
+	help_strings[string("fnGTR")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
 pi ~ dnDirichlet( v(1,1,1,1) )
-
-# create a GTR rate matrix
 Q := fnGTR(er,pi))");
 	help_strings[string("fnGTR")][string("name")] = string(R"(fnGTR)");
-	help_references[string("fnGTR")].push_back(RbHelpReference(R"()",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
-	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible nucleotide rate matrix)");
+	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S. Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences.  Lectures on Mathematics in the Life Sciences (1986). 17: 57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
+	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible rate matrix)");
 	help_arrays[string("fnGammaASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnGammaASRV")][string("description")] = string(R"(Add Gamma-distributed across-site rate variation (ASRV) to a site model.)");
 	help_strings[string("fnGammaASRV")][string("details")] = string(R"(Each site evolves according to the specified site model, but at an unknown rate
@@ -1613,25 +1585,12 @@ M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) 
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
 	help_strings[string("fnGammaASRV")][string("title")] = string(R"(fnGammaASRV)");
 	help_strings[string("fnGeographicalDistance")][string("name")] = string(R"(fnGeographicalDistance)");
-	help_strings[string("fnHKY")][string("description")] = string(R"(DNA evolution model proposed in Hasegawa, Kishino, and Yano (1985).)");
-	help_strings[string("fnHKY")][string("details")] = string(R"(In this model, nucleotides have different stationary frequencies, and transition and transversion rates are assumed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, baseFrequencies, codes for the frequencies of each nucleotide.)");
-	help_strings[string("fnHKY")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
-kappa ~ dnLognormal(0,1)
-
-# the base frequencies
+	help_strings[string("fnHKY")][string("description")] = string(R"(The HKY85 model.)");
+	help_strings[string("fnHKY")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
 pi ~ dnDirichlet( v(1,1,1,1) )
-
-# create an HKY rate matrix
 Q := fnHKY(kappa,pi))");
 	help_strings[string("fnHKY")][string("name")] = string(R"(fnHKY)");
-	help_references[string("fnHKY")].push_back(RbHelpReference(R"()",R"(https://doi.org/10.1007/BF02101694)",R"(https://link.springer.com/article/10.1007%2FBF02101694 )"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnF81)"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_references[string("fnHKY")].push_back(RbHelpReference(R"(Hasegawa, M. et al. Dating of the human-ape splitting by a molecular clock of mitochondrial DNA. Journal of molecular evolution (1985) 22 (2): 160-174.)",R"(https://doi.org/10.1007/BF02101694)",R"(https://link.springer.com/article/10.1007%2FBF02101694 )"));
 	help_strings[string("fnHKY")][string("title")] = string(R"(The Hasegawa-Kishino-Yano (1985) nucleotide rate matrix)");
 	help_strings[string("fnHiddenStateRateMatrix")][string("name")] = string(R"(fnHiddenStateRateMatrix)");
 	help_strings[string("fnHostSwitchRateModifier")][string("name")] = string(R"(fnHostSwitchRateModifier)");
@@ -1662,67 +1621,10 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
-	help_strings[string("fnJC")][string("description")] = string(R"(DNA evolution model proposed in Jukes & Cantor (1969).)");
-	help_strings[string("fnJC")][string("details")] = string(R"(In this model, all states have an equal stationary frequency, and transition rates between states are equal. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).)");
-	help_strings[string("fnJC")][string("example")] = string(R"(# create a JC rate matrix with four states
-Q := fnJC(4)
-
-# create a JC matrix with two states (for, e.g., an Mk2 model)
-Q := fnJC(2))");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
-	help_references[string("fnJC")].push_back(RbHelpReference(R"()",R"()",R"()"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnF81)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnGTR)"));
-	help_strings[string("fnJC")][string("title")] = string(R"(The Jukes-Cantor (1969) nucleotide rate matrix)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
-	help_strings[string("fnK80")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1980).)");
-	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.)");
-	help_strings[string("fnK80")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
-kappa ~ dnExp(0.5)
-
-# create a K80 rate matrix
-Q := fnK80(kappa))");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
-	help_references[string("fnK80")].push_back(RbHelpReference(R"()",R"()",R"()"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnF8)"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnGTR)"));
-	help_strings[string("fnK80")][string("title")] = string(R"(The Kimura (1980) nucleotide rate matrix)");
-	help_strings[string("fnK81")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1981).)");
-	help_strings[string("fnK81")][string("details")] = string(R"(In this model, transition and transversion rates are allowed to be different, and transversion rates for A <-> C, G <-> T and A <-> T, C <-> G transversions are different as well. The first argument, kappa1, defines the ratio between the rate of transitions and the rate of A <-> C, G <-> T transversions. The second argument, kappa2, defines the ratio between the rate of A <-> T, C <-> G transversions and the rate of A <-> C, G <-> T transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. Note that the original Kimura (1981) model assumed equal base frequencies, so this function is more general (if ran without a baseFrequencies argument, however, this is equivalent to K81, since the default is all frequencies equal).)");
-	help_strings[string("fnK81")][string("example")] = string(R"(# the ratio between rates of transitions and A<->C/G<->T transversions
-kappa1 ~ dnExp(0.5)
-
-# the ratio between rates of A<->T/C<->G and A<->C/G<->T transversions
-kappa2 ~ dnExp(0.5)
-
-# create a K81 rate matrix
-Q := fnK81(kappa1, kappa2)
-
-# base frequencies
-baseFrequencies ~ dnDirichlet(v(1,1,1,1))
-
-# K81 rate matrix with non-equal base frequencies
-Q := fnK81(kappa1, kappa2, baseFrequencies))");
-	help_strings[string("fnK81")][string("name")] = string(R"(fnK81
-# title
-The Kimura (1981) nucleotide rate matrix)");
-	help_references[string("fnK81")].push_back(RbHelpReference(R"()",R"()",R"()"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnF80)"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_strings[string("fnK81")][string("name")] = string(R"(fnK81)");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
@@ -1917,51 +1819,19 @@ M := fnScale(MM, 1/MM.rate()))");
 	help_strings[string("fnStateCountRateModifier")][string("name")] = string(R"(fnStateCountRateModifier)");
 	help_strings[string("fnStirling")][string("name")] = string(R"(fnStirling)");
 	help_strings[string("fnStitchTree")][string("name")] = string(R"(fnStitchTree)");
-	help_strings[string("fnT92")][string("description")] = string(R"(DNA evolution model proposed in Tamura (1992).)");
-	help_strings[string("fnT92")][string("details")] = string(R"(In this model, A and T have an equal stationary frequency, with G and C frequencies distinct, and transition and transversion rates are assumed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, gc, codes for the compound frequency of G and C nucleotides.)");
-	help_strings[string("fnT92")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
-kappa ~ dnExp(0.5)
-
-# the frequency of G and C nucleotides
-gc ~ dnUnif(0, 1)
-
-# create a T92 rate matrix
-Q := fnT92(kappa, gc))");
 	help_strings[string("fnT92")][string("name")] = string(R"(fnT92)");
-	help_references[string("fnT92")].push_back(RbHelpReference(R"()",R"()",R"()"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnF81)"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnGTR)"));
-	help_strings[string("fnT92")][string("title")] = string(R"(The Tamura (1992) nucleotide rate matrix)");
 	help_strings[string("fnTIM")][string("name")] = string(R"(fnTIM)");
 	help_strings[string("fnTVM")][string("name")] = string(R"(fnTVM)");
 	help_strings[string("fnTajimasD")][string("name")] = string(R"(fnTajimasD)");
 	help_strings[string("fnTajimasPi")][string("name")] = string(R"(fnTajimasPi)");
-	help_strings[string("fnTrN")][string("description")] = string(R"(DNA evolution model proposed in Tamura & Nei (1993).)");
-	help_strings[string("fnTrN")][string("details")] = string(R"(In this model, nucleotide base frequencies are different, and the two transition rates (A <-> G and C<->T) can be different to each other, and to the transversion rate. The first argument, kappa1, defines the ratio between the rate of A <-> G (i.e. purine) transitions to transversions. The second argument, kappa2, defines the ratio between the rate of C <-> T (i.e. pyrimidine) transitions to transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases.)");
-	help_strings[string("fnTrN")][string("example")] = string(R"(# A <-> G transition rate
-kappaAG ~ dnLognormal(0,1)
-
-# C <-> T transition rate
-kappaCT ~ dnLognormal(0,1)
-
-# nucleotide base frequencies
+	help_strings[string("fnTrN")][string("description")] = string(R"(The Tamura-Nei nucleotide rate matrix.)");
+	help_strings[string("fnTrN")][string("example")] = string(R"(kappaAG ~ dnLognormal(0,1)    # The purine transition rate
+kappaCT ~ dnLognormal(0,1)    # The pyrimindine transition rate
 pi ~ dnDirichlet( v(1,1,1,1) )
-
-# create a TrN rate matrix
 Q := fnTrN(kappaAT, kappaCT, ,pi))");
 	help_strings[string("fnTrN")][string("name")] = string(R"(fnTrN)");
-	help_references[string("fnTrN")].push_back(RbHelpReference(R"()",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
-	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_references[string("fnTrN")].push_back(RbHelpReference(R"(Tamura, K. and M. Nei. Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees. Molecular biology and evolution (1993) 10(3):512-526.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
 	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnGTR)"));
 	help_strings[string("fnTrN")][string("title")] = string(R"(The Tamura-Nei (1993) nucleotide rate matrix)");
 	help_strings[string("fnTreeAssembly")][string("name")] = string(R"(fnTreeAssembly)");
 	help_strings[string("fnTreePairwiseDistances")][string("name")] = string(R"(fnTreePairwiseDistances)");
