@@ -162,9 +162,9 @@ void MonteCarloAnalysis::addMonitor(const Monitor &m)
 
 /** Run burnin and auto-tune */
 #ifdef RB_MPI
-void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, int verbose)
 #else
-void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, int verbose)
 #endif
 {
     
@@ -194,7 +194,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     // start the progress bar
     ProgressBar progress = ProgressBar(generations, 0);
 
-    if ( verbose == true && runs[0] != NULL && process_active == true )
+    if ( verbose >= 1 && runs[0] != NULL && process_active == true )
     {
         // Let user know what we are doing
         std::stringstream ss;
@@ -213,7 +213,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     for (size_t k=1; k<=generations; ++k)
     {
         
-        if ( verbose == true && process_active == true)
+        if ( verbose >= 1 && process_active == true)
         {
             progress.update(k);
         }
@@ -241,7 +241,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
     
-    if ( verbose == true && process_active == true )
+    if ( verbose >= 1 && process_active == true )
     {
         progress.finish();
     }
@@ -562,9 +562,9 @@ void MonteCarloAnalysis::resetReplicates( void )
 
 
 #ifdef RB_MPI
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, int verbose )
 #else
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, int verbose )
 #endif
 {
     
@@ -604,7 +604,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
     
     // Let user know what we are doing
     std::stringstream ss;
-    if ( process_active == true && runs[0] != NULL && verbose == true )
+    if ( process_active == true && runs[0] != NULL && verbose >= 1 )
     {
         
         if ( runs[0]->getCurrentGeneration() == 0 )
