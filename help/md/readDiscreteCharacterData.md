@@ -7,5 +7,14 @@ Reads discrete (e.g. morphological) character data from one or more matrices int
 ## details
 ## authors
 ## see_also
+write
+readBranchLengthTrees
+readCharacterData
+readCharacterDataDelimited
+readContinuousCharacterData
+readDiscreteCharacterData
+readDataDelimitedFile
+readCharacterData
+readTrees
 ## example
 ## references
