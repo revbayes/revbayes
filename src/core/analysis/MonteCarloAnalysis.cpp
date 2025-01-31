@@ -721,7 +721,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         
         converged = true;
-        bool checkNow = false;
         size_t numConvergenceRules = 0;
         
         // run the stopping test
@@ -731,11 +730,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
             {
                 converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
                 ++numConvergenceRules;
-                
-                // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
-                // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
-                // we will only print when at least one convergence rule wants us to.
-                checkNow |= rules[i].checkAtIteration(gen);
             }
             else
             {
@@ -747,19 +741,35 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
             }
         }
         
-        if (checkNow)
+        if (verbose > 1)
         {
-            std::stringstream ssConv;
+            bool checkNow = false;
+            
             for (size_t i=0; i<rules.size(); ++i)
             {
-                // Prettify: insert a blank line before printing out the first stopping rule statement
-                if (i == 0)
+                if ( rules[i].isConvergenceRule() )
                 {
-                    ssConv << "\n";
+                    // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
+                    // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
+                    // we will only print when at least one convergence rule wants us to.
+                    checkNow |= rules[i].checkAtIteration(gen);
                 }
-                ssConv << rules[i].printAsStatement(gen);
             }
-            RBOUT( ssConv.str() );
+            
+            if (checkNow)
+            {
+                std::stringstream ssConv;
+                for (size_t i=0; i<rules.size(); ++i)
+                {
+                    // Prettify: insert a blank line before printing out the first stopping rule statement
+                    if (i == 0)
+                    {
+                        ssConv << "\n";
+                    }
+                    ssConv << rules[i].printAsStatement(gen);
+                }
+                RBOUT( ssConv.str() );
+            }
         }
         
         converged &= numConvergenceRules > 0;
