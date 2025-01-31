@@ -11,7 +11,6 @@ A simplex is a vector of elements that sum to 1.
 Moves that operate on Simplexes:
 - mvBetaSimplex
 - mvDirichletSimplex
-- mvDPPValueBetaSimplex
 - mvElementSwapSimplex
 
 ## example

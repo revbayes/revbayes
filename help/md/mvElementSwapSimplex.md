@@ -9,6 +9,5 @@ An Element Swap Simplex move selects two elements of a vector and exchanges thei
 ## see_also
 mvBetaSimplex
 mvDirichletSimplex
-mvDPPValueBetaSimplex
 ## example
 ## references

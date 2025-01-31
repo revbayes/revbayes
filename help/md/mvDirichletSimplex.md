@@ -15,7 +15,6 @@ The simplex is then renormalized.
 ## authors
 ## see_also
 - mvBetaSimplex
-- mvDPPValueBetaSimplex
 - mvElementSwapSimplex
 
 ## example

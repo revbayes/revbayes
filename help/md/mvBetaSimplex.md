@@ -8,7 +8,6 @@ The Beta Simplex move selects one element of the a vector and proposes a new val
 ## authors
 ## see_also
 - mvDirichletSimplex
-- mvDPPValueBetaSimplex
 - mvElementSwapSimplex
 
 ## example
