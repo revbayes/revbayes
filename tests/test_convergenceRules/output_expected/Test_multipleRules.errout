@@ -3,6 +3,12 @@
    This simulation runs 4 independent replicates.
    The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
    
+   Stopping rules:
+       Target value for effective sample size (ESS): > 50
+       Target value for the Gelman-Rubin statistic (PSRF): < 1.01
+       Target value of the Geweke test statistic: > 0.0005 and < 0.9995
+       P-value used to test the inclusion of the overall mean in the CI of a single-chain mean: 0.25
+   
    
    Minimum effective sample size (ESS): 9.636138 (target: > 50)
    Maximum value of the Gelman-Rubin statistic (PSRF): 1.013099 (target: < 1.01)
