@@ -18,7 +18,12 @@ where c is a constant needed to normalize the average rate to 1.
 
 ## authors
 ## see_also
-fnJC, fnF81, fnK81, fnT92, fnHKY, fnGTR
+fnJC
+fnF81
+fnK81
+fnT92
+fnHKY
+fnGTR
 
 ## example
     # the ratio between rates of transitions and transversions

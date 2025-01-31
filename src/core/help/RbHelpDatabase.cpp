@@ -1692,7 +1692,12 @@ kappa ~ dnExp(0.5)
 Q := fnK80(kappa))");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
 	help_references[string("fnK80")].push_back(RbHelpReference(R"(Kimura M (1980). "A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences". Journal of Molecular Evolution. 16:111–20.)",R"(https://doi.org/10.1007/BF01731581)",R"(https://link.springer.com/article/10.1007/BF01731581 )"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnJC, fnF81, fnK81, fnT92, fnHKY, fnGTR)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnGTR)"));
 	help_strings[string("fnK80")][string("title")] = string(R"(The Kimura (1980) nucleotide rate matrix)");
 	help_strings[string("fnK81")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1981).)");
 	help_strings[string("fnK81")][string("details")] = string(R"(In this model, transition and transversion rates are allowed to be different, and transversion rates for A <-> C, G <-> T and A <-> T, C <-> G transversions are different as well. The first argument, kappa1, defines the ratio between the rate of transitions and the rate of A <-> C, G <-> T transversions. The second argument, kappa2, defines the ratio between the rate of A <-> T, C <-> G transversions and the rate of A <-> C, G <-> T transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. Note that the original Kimura (1981) model assumed equal base frequencies, so this function is more general (if ran without a baseFrequencies argument, however, this is equivalent to K81, since the default is all frequencies equal). 
