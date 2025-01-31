@@ -1460,7 +1460,7 @@ Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnF81")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are equal. Its only argument, baseFrequencies, codes for said stationary frequencies. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
 
 The F81 rate matrix elements will be of the form:
-        Q[i, j] = c * baseFrequencies[j]
+    Q[i, j] = c * baseFrequencies[j]
 
 where c is a constant needed to normalize the average rate to 1)");
 	help_strings[string("fnF81")][string("example")] = string(R"(# stationary base frequencies
@@ -1554,7 +1554,7 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnGTR")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are allowed to be different. Its first argument, exchangeRates, codes for the transition rates between states (as in other models, transition rates are assumed to be symmetric). Its second argument, baseFrequencies, codes for the stationary frequencies of these states. Note that for n states, exchangeRates should have length n*(n-1)/2, and baseFrequencies should have length n. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
 
 The general time-reversible rate matrix elements will be of the form:
-        Q[i, j] = c * exchangeRates[i, j] * baseFrequencies[j]
+     Q[i, j] = c * exchangeRates[i, j] * baseFrequencies[j]
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnGTR")][string("example")] = string(R"(# exchange rates
@@ -1624,8 +1624,8 @@ M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) 
 	help_strings[string("fnHKY")][string("details")] = string(R"(In this model, nucleotides have different stationary frequencies, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, baseFrequencies, codes for the frequencies of each nucleotide.
 
 The HKY rate matrix elements will be of the form:
-        Q[i, j] = c * kappa * baseFrequencies[j], if i<->j is a transition 
-                        = c * baseFrequencies[j], if i<->j is a transversion
+    Q[i, j] = c * kappa * baseFrequencies[j], if i<->j is a transition 
+            = c * baseFrequencies[j], if i<->j is a transversion
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnHKY")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
@@ -1681,8 +1681,8 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.
 
 The K80 rate matrix elements will be of the form:
-        Q[i, j] = c * kappa, if i<->j is a transition
-                        = c, if i<-> is a transversion
+    Q[i, j] = c * kappa, if i<->j is a transition
+            = c, if i<->j is a transversion
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnK80")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
@@ -1703,9 +1703,9 @@ Q := fnK80(kappa))");
 	help_strings[string("fnK81")][string("details")] = string(R"(In this model, transition and transversion rates are allowed to be different, and transversion rates for A <-> C, G <-> T and A <-> T, C <-> G transversions are different as well. The first argument, kappa1, defines the ratio between the rate of transitions and the rate of A <-> C, G <-> T transversions. The second argument, kappa2, defines the ratio between the rate of A <-> T, C <-> G transversions and the rate of A <-> C, G <-> T transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. Note that the original Kimura (1981) model assumed equal base frequencies, so this function is more general (if ran without a baseFrequencies argument, however, this is equivalent to K81, since the default is all frequencies equal). 
 
 The K81 rate matrix elements will be of the form:
-Q[i, j] = c, if i<->j is an A<->C/G<->T transversion
-                = c * kappa1, if i<->j is a transition
-                = c * kappa2, if i<->j is an A<->T/C<->G transversion
+    Q[i, j] = c, if i<->j is an A<->C/G<->T transversion
+            = c * kappa1, if i<->j is a transition
+            = c * kappa2, if i<->j is an A<->T/C<->G transversion
 
 where c is a constant needed to normalize the average rate to 1. If using the baseFrequencies parameter, those elements are multiplied by baseFrequencies[j].)");
 	help_strings[string("fnK81")][string("example")] = string(R"(# the ratio between rates of transitions and A<->C/G<->T transversions
@@ -1932,10 +1932,10 @@ M := fnScale(MM, 1/MM.rate()))");
 	help_strings[string("fnT92")][string("details")] = string(R"(In this model, A and T have an equal stationary frequency, with G and C frequencies distinct, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, gc, codes for the compound frequency of G and C nucleotides.
 
 The T92 rate matrix elements will be of the form:
-        Q[i, j] = c * kappa * gc / 2, if i<->j is a transition and j is C or G
-                        = c * gc / 2, if i<->j is a transversion and j is C or G
-                        = c * kappa * (1 - gc) / 2, if i<->j is a transition and j is A or T
-                        = c * (1 - gc) / 2, if i<->j is a transversion and j is A or T
+    Q[i, j] = c * kappa * gc / 2, if i<->j is a transition and j is C or G
+            = c * gc / 2, if i<->j is a transversion and j is C or G
+            = c * kappa * (1 - gc) / 2, if i<->j is a transition and j is A or T
+            = c * (1 - gc) / 2, if i<->j is a transversion and j is A or T
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnT92")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
@@ -1964,9 +1964,9 @@ Q := fnT92(kappa, gc))");
 	help_strings[string("fnTrN")][string("details")] = string(R"(In this model, nucleotide base frequencies are different, and the two transition rates (A <-> G and C<->T) can be different to each other, and to the transversion rate. The first argument, kappa1, defines the ratio between the rate of A <-> G (i.e. purine) transitions to transversions. The second argument, kappa2, defines the ratio between the rate of C <-> T (i.e. pyrimidine) transitions to transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. 
 
 The TrN rate matrix elements are of the form:
-        Q[i, j] = c * kappa1 * baseFrequencies[j], if i<->j is A<->G
-                        = c * kappa2 * baseFrequencies[j], if i<->j is C<->T
-                        = c * baseFrequencies[j], otherwise
+    Q[i, j] = c * kappa1 * baseFrequencies[j], if i<->j is A<->G
+            = c * kappa2 * baseFrequencies[j], if i<->j is C<->T
+            = c * baseFrequencies[j], otherwise
 
 where c is a constant needed to normalize the average rate to 1)");
 	help_strings[string("fnTrN")][string("example")] = string(R"(# A <-> G transition rate
@@ -1979,7 +1979,7 @@ kappaCT ~ dnLognormal(0,1)
 pi ~ dnDirichlet( v(1,1,1,1) )
 
 # create a TrN rate matrix
-Q := fnTrN(kappaAT, kappaCT, ,pi))");
+Q := fnTrN(kappaAG, kappaCT, ,pi))");
 	help_strings[string("fnTrN")][string("name")] = string(R"(fnTrN)");
 	help_references[string("fnTrN")].push_back(RbHelpReference(R"(Tamura, K. and M. Nei (1993). "Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees". Molecular biology and evolution. 10(3):512-526.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
 	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnJC)"));
