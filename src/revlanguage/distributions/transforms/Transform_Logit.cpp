@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 using namespace RevLanguage;
 
@@ -24,45 +25,9 @@ Transform_Logit* Transform_Logit::clone( void ) const
     return new Transform_Logit(*this);
 }
 
-// This can handle x=exp(-1000), but not x=1 - exp(-1000)
-
-std::optional<double> logit_transform(double x)
-{
-    if (x > 0 and x < 1)
-    {
-	// log( x / (1-x) )
-	return log(x) - log1p(-x);
-    }
-    else
-        return {}; // out of range
-}
-
-std::optional<double> logit_inverse(double x)
-{
-    // Two forms of the same expression to avoid overflow with exp(larg number)
-    if (x < 0)
-	return exp(x)/(1+exp(x));
-    else
-	return 1/(exp(-x)+1);
-}
-
-std::optional<double> log_logit_prime(double x)
-{
-    // y = log(x/(1-x))
-    // dy/dx = 1/(x/(1-x)) * ((1-x)(1) - x(-1))/((1-x)**2)
-    //       = (1-x)/x     * 1/((1-x)**2)
-    //       = 1/(x * (1-x) )
-    // logit(dy/dx) = -log(x) - log(1-x)
-
-    if (x > 0 and x < 1)
-        return -log(x) - log1p(-x);
-    else
-        return {}; // out of range
-}
-
-
 RevBayesCore::TransformedDistribution* Transform_Logit::createDistribution( void ) const
 {
+    using namespace Transforms;
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );

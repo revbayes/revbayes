@@ -366,7 +366,7 @@ const RevVariable& ArgumentRule::getDefaultVariable( void ) const
     
     if ( defaultVar == NULL ) 
     {
-        throw RbException("Cannot get default variable \"" + label + "\"");
+        throw RbException() << "Cannot get default variable \"" << label << "\"";
     }
     
     return *defaultVar;

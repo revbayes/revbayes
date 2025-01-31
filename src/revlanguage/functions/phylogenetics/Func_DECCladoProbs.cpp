@@ -107,7 +107,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
             et.push_back( it->second );
         }
         else {
-            throw RbException( "\"" + s + "\" is not a valid element for eventTypes." );
+            throw RbException() << "\"" << s << "\" is not a valid element for eventTypes." ; 
         }
     }
     

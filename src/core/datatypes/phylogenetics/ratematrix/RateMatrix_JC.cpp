@@ -1,6 +1,6 @@
 #include "RateMatrix_JC.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "TransitionProbabilityMatrix.h"
 #include "RbException.h"

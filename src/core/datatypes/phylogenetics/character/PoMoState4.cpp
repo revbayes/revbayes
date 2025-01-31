@@ -1,7 +1,7 @@
 #include "PoMoState4.h"
 
 #include <boost/lexical_cast.hpp>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <cstddef>
 #include <string>
@@ -210,7 +210,7 @@ void PoMoState4::populateWeightedStatesForMonoallelicState(int id1, int sum) {
     }
   }
   else  {
-    throw RbException( "PoMo string state not correct. We found "+ StringUtilities::to_string(id1)  );
+    throw RbException() << "PoMo string state not correct. We found " << id1;
   }
 
   for (size_t i =0; i < weights.size(); ++i) {
@@ -247,7 +247,7 @@ void PoMoState4::setState(const std::string &symbol)
                 ss.ignore();
         }
         if (vect.size() != 4)
-            throw RbException( "PoMo string state not correctly formatted. We found "+ symbol +", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." );
+            throw RbException() << "PoMo string state not correctly formatted. We found " << symbol << ", but the preferred format is that of counts, e.g. 0,1,4,0 meaning 0 A, 1 C, 4 G, 0 T were sampled at that position." ; 
         //We have the counts, now we create the state.
         //code borrowed in part from IQ-Tree
         int sum = 0;
@@ -294,7 +294,7 @@ void PoMoState4::setState(const std::string &symbol)
               basicIndex = 4 + 2*(virtMinus1);
             }
             else  {
-              throw RbException( "PoMo string state not correct. We found "+ symbol  );
+              throw RbException() << "PoMo string state not correct. We found " << symbol  ; 
             }
           }
           else if (id1==1) {
@@ -305,7 +305,7 @@ void PoMoState4::setState(const std::string &symbol)
               basicIndex = 4 + 4*(virtMinus1);
             }
             else  {
-              throw RbException( "PoMo string state not correct. We found "+ symbol  );
+              throw RbException() << "PoMo string state not correct. We found " << symbol  ; 
             }
           }
           else if (id1==2) {
@@ -313,11 +313,11 @@ void PoMoState4::setState(const std::string &symbol)
               basicIndex = 4 + 5*(virtMinus1);
             }
             else  {
-              throw RbException( "PoMo string state not correct. We found "+ symbol  );
+              throw RbException() << "PoMo string state not correct. We found " << symbol  ; 
             }
           }
           else  {
-            throw RbException( "PoMo string state not correct. We found "+ symbol  );
+            throw RbException() << "PoMo string state not correct. We found " << symbol  ; 
           }
 
           std::cout << "basicIndex: "<<basicIndex <<std::endl;
@@ -405,7 +405,7 @@ void PoMoState4::setState(const std::string &symbol)
             }
           }
           else {
-            throw RbException( "PoMo string state not correct. We found "+ symbol  );
+            throw RbException() << "PoMo string state not correct. We found " << symbol  ; 
           }
         }
         else if ( count == 0 )
@@ -414,7 +414,7 @@ void PoMoState4::setState(const std::string &symbol)
         }
         else
         {
-            throw RbException( "PoMo string state not correct. We found "+ symbol +", but only 2 states can be non-0." );
+            throw RbException() << "PoMo string state not correct. We found " << symbol << ", but only 2 states can be non-0." ; 
         }
       }
     index_single_state = index;

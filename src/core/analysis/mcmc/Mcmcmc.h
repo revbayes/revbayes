@@ -49,7 +49,7 @@ namespace RevBayesCore {
         double                                  getModelLnProbability(bool likelihood_only);
         RbVector<Monitor>&                      getMonitors( void );
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
-        void                                    initializeSampler(bool priorOnly=false);                                        //!< Initialize objects for mcmc sampling
+        void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling
         void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(unsigned long g);
         void                                    nextCycle(bool advanceCycle);
@@ -83,18 +83,18 @@ namespace RevBayesCore {
         void                                    swapMovesTuningInfo(RbVector<Move> &mvsj, RbVector<Move> &mvsk);
         void                                    swapNeighborChains(void);
         void                                    swapRandomChains(void);
-        void                                    swapGivenChains(int j, int k, double lnProposalRatio = 0.0);
-        void                                    updateTrips(int j);
+        void                                    swapGivenChains(size_t j, size_t k, double lnProposalRatio = 0.0);
+        void                                    updateTrips(size_t j);
         void                                    synchronizeValues(bool likelihood_only);
         void                                    synchronizeHeats(void);
         void                                    synchronizeTuningInfo(void);
         void                                    updateChainState(size_t j);
         double                                  computeBeta(double d, size_t i);                                                // incremental temperature schedule
-        double                                  heatForChain(int i) const;
-        bool                                    isColdChain(int i) const;
-        int                                     heatIndexForChain(int i) const;
-        int                                     chainForHeatIndex(int i) const;
-        double                                  heatForIndex(int i) const;
+        double                                  heatForChain(size_t i) const;
+        bool                                    isColdChain(size_t i) const;
+        size_t                                  heatIndexForChain(size_t i) const;
+        size_t                                  chainForHeatIndex(size_t i) const;
+        double                                  heatForIndex(size_t i) const;
 
         size_t                                  num_chains;
         std::vector<size_t>                     heat_ranks;
@@ -104,8 +104,8 @@ namespace RevBayesCore {
         std::vector<double>                     chain_heats;
 
         std::vector<boundary>                   chain_prev_boundary;                                // has the chain most recently visited the hottest or coldest temperature
-        std::vector<int>                        chain_half_trips;                                   // how many trips has the chain made from hottest -> coldest or coldest to hottest
-        std::vector<std::pair<int,int>>         heat_visitors;                                      // how many times is the chain at this temperator most recently hottest (first) or coldest (second)
+        std::vector<size_t>                     chain_half_trips;                                   // how many trips has the chain made from hottest -> coldest or coldest to hottest
+        std::vector<std::pair<size_t, size_t>>  heat_visitors;                                      // how many times is the chain at this temperator most recently hottest (first) or coldest (second)
 
         std::string                             schedule_type;
         size_t                                  current_generation;
@@ -124,9 +124,9 @@ namespace RevBayesCore {
         
         Mcmc*                                   base_chain;
         
-        unsigned long                           generation;
-        std::vector< std::vector<unsigned long> > num_attempted_swaps;
-        std::vector< std::vector<unsigned long> > num_accepted_swaps;
+        size_t                                  generation;
+        std::vector< std::vector<size_t> >      num_attempted_swaps;
+        std::vector< std::vector<size_t> >      num_accepted_swaps;
         
         std::vector< std::vector<Mcmc::tuningInfo> >  chain_moves_tuningInfo;
     };
