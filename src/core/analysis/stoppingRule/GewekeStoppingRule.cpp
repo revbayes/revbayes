@@ -113,7 +113,7 @@ std::string GewekeStoppingRule::printAsStatement( size_t g, bool target_only )
     
     if (target_only)
     {
-        statement = "Target value of the Geweke test statistic: > " + lbound + "and < " + ubound;
+        statement = "Target value of the Geweke test statistic: > " + lbound + " and < " + ubound + "\n";
     }
     else
     {
