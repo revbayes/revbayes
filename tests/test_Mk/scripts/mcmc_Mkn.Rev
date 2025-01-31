@@ -14,6 +14,7 @@ n_taxa <- taxa.size()
 relabelled <- data.relabelStates()
 # TODO non-ambiguous data not printed
 write(relabelled[3])
+relabelled[3].show()
 
 # vector for the moves and monitors
 moves    = VectorMoves()
@@ -38,6 +39,7 @@ TL := sum(br_lens)
 phylogeny := treeAssembly(topology, br_lens)
 
 partition_vector <- relabelled.getObsStatesVector()
+partition_vector[1].show()
 
 # loop over the characters by num observed states #
 for (pv in 3:6) {
