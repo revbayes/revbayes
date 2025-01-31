@@ -83,7 +83,19 @@ c = a + b
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
+	help_strings[string("Simplex")][string("description")] = string(R"(A simplex is a vector of elements that sum to 1.)");
+	help_strings[string("Simplex")][string("example")] = string(R"(```rb
+x <- simplex([2, 2, 6])
+x # = [ 0.2, 0.2, 0.6]
+sum(x) # 1, by definition
+```)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(Moves that operate on Simplexes:)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("Simplex")][string("title")] = string(R"(Simplex)");
 	help_arrays[string("SiteMixtureModel")][string("authors")].push_back(string(R"(Ben Redelings)"));
 	help_strings[string("SiteMixtureModel")][string("description")] = string(R"(A weighted collection of discrete character evolution models.)");
 	help_strings[string("SiteMixtureModel")][string("details")] = string(R"(The SiteMixtureModel datatype is a mixture distribution where each
@@ -1270,7 +1282,18 @@ exists(x))");
 	help_strings[string("exists")][string("name")] = string(R"(exists)");
 	help_arrays[string("exists")][string("see_also")].push_back(string(R"(clear)"));
 	help_strings[string("exists")][string("title")] = string(R"(Check whether a variable exists)");
+	help_strings[string("exp")][string("description")] = string(R"(Maps the value of a number x to e^x, where e is the number such that ln(e) = 1.)");
+	help_strings[string("exp")][string("example")] = string(R"(# checking that ln(e) = 1
+x <- exp(1)
+ln_of_x <- ln(x)
+if (ln_of_ex != 1) {
+        print("Problem when computing an exponential value.")
+} else {
+        print("Correct computation of an exponential value.")
+})");
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(ln)"));
+	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
@@ -2278,7 +2301,12 @@ Add random variables to the move directly (e.g. branch_rates[1], not branch_rate
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
 	help_strings[string("mvAddRemoveTip")][string("name")] = string(R"(mvAddRemoveTip)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
+	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution.)");
+	help_strings[string("mvBetaSimplex")][string("example")] = string(R"(A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
 	help_strings[string("mvBetaSimplex")][string("name")] = string(R"(mvBetaSimplex)");
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("mvBetaSimplex")][string("title")] = string(R"(Beta Simplex move)");
 	help_strings[string("mvBinarySwitch")][string("name")] = string(R"(mvBinarySwitch)");
 	help_strings[string("mvBirthDeathEvent")][string("name")] = string(R"(mvBirthDeathEvent)");
 	help_strings[string("mvBirthDeathEventContinuous")][string("name")] = string(R"(mvBirthDeathEventContinuous)");
@@ -2318,11 +2346,25 @@ moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0))");
 	help_strings[string("mvCorrelationMatrixUpdate")][string("name")] = string(R"(mvCorrelationMatrixUpdate)");
 	help_strings[string("mvDPPAllocateAuxGibbs")][string("name")] = string(R"(mvDPPAllocateAuxGibbs)");
 	help_strings[string("mvDPPGibbsConcentration")][string("name")] = string(R"(mvDPPGibbsConcentration)");
-	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
+	help_strings[string("mvDirichletSimplex")][string("description")] = string(R"(A Dirichlet-simplex proposal randomly changes some values of a [Simplex](https://revbayes.github.io/documentation/Simplex.html)
+(a vector whose elements sum to 1). The other values change too because of renormalization.
+ 
+First, some random indices are drawn.
+Then, the proposal draws a new simplex `u ~ Dirichlet(val[index] * alpha)`, where alpha is the tuning parameter.
+The new value is set to `u`.
+The simplex is then renormalized.)");
+	help_strings[string("mvDirichletSimplex")][string("example")] = string(R"(Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html)");
 	help_strings[string("mvDirichletSimplex")][string("name")] = string(R"(mvDirichletSimplex)");
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("mvDirichletSimplex")][string("title")] = string(R"(Dirichlet Simplex move)");
 	help_strings[string("mvDiscreteEventCategoryRandomWalk")][string("name")] = string(R"(mvDiscreteEventCategoryRandomWalk)");
+	help_strings[string("mvElementSwapSimplex")][string("description")] = string(R"(An Element Swap Simplex move selects two elements of a vector and exchanges their values.)");
 	help_strings[string("mvElementSwapSimplex")][string("name")] = string(R"(mvElementSwapSimplex)");
+	help_arrays[string("mvElementSwapSimplex")][string("see_also")].push_back(string(R"(mvBetaSimplex)"));
+	help_arrays[string("mvElementSwapSimplex")][string("see_also")].push_back(string(R"(mvDirichletSimplex)"));
+	help_strings[string("mvElementSwapSimplex")][string("title")] = string(R"(Element Swap Simplex move)");
 	help_strings[string("mvEllipticalSliceSamplingSimple")][string("name")] = string(R"(mvEllipticalSliceSamplingSimple)");
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
