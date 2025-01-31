@@ -551,7 +551,7 @@ void MonteCarloAnalysis::resetReplicates( void )
     
     // to be safe, we should synchronize the random number generators
     // Sebastian: We cannot re-synchronize the RNG after we just shifted it.
-    // If an anlysis has all values preset, then each replicate would be identical!!!
+    // If an analysis had all values preset, then each replicate would be identical!!!
 //#ifdef RB_MPI
 //    MpiUtilities::synchronizeRNG( analysis_comm );
 //#else
@@ -620,7 +620,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         ss << runs[0]->getStrategyDescription();
         
         // Print stopping rule targets only if have more than one or if the only one we have is not MaxIteration
-        if (rules.size() > 1 || rules[0].printAsStatement(0) != "")
+        if (rules.size() > 1 || rules[0].printAsStatement(0, true) != "")
         {
             ss << "\n";
             ss << "Stopping rule" << (rules.size() > 1 ? "s" : "") << ":\n";
