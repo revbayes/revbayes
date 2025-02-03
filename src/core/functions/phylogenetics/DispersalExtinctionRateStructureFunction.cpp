@@ -56,13 +56,6 @@ DispersalExtinctionRateStructureFunction* DispersalExtinctionRateStructureFuncti
 }
 
 
-void DispersalExtinctionRateStructureFunction::keep( const DagNode *affecter)
-{
-    //delegate to base class
-    TypedFunction< RbVector<double> >::keep( affecter );
-    
-}
-
 void DispersalExtinctionRateStructureFunction::makeBits(void)
 {
     bits = std::vector<std::vector<unsigned> >(num_states, std::vector<unsigned>(numCharacters, 0));
@@ -135,22 +128,6 @@ void DispersalExtinctionRateStructureFunction::makeTransitions(void)
 void DispersalExtinctionRateStructureFunction::reInitialized( void )
 {
     ;//    *value = tau->getValue();
-}
-
-
-void DispersalExtinctionRateStructureFunction::restore( const DagNode *restorer)
-{
-    //delegate to base class
-    TypedFunction< RbVector<double> >::restore( restorer );
-}
-
-
-void DispersalExtinctionRateStructureFunction::touch(const DagNode *toucher)
-{
-    
-    //delegate to base class
-    TypedFunction< RbVector<double> >::touch( toucher );
-    
 }
 
 

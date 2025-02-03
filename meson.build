@@ -163,7 +163,7 @@ subdir('tests')
 
 if get_option('help2yml')
 
-  executable(rb_name+'help2yml',
+  executable(rb_name+'-help2yml',
              ['src/help2yml/main.cpp'],
              link_with: [core, revlanguage, libs, help2yml],
              include_directories: [src_inc],
