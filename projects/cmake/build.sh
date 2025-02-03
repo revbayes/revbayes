@@ -186,10 +186,8 @@ mv GitVersion.cpp ../../src/revlanguage/utils/
 
 
 ######### Generate help database
-(
-cd ../
-./generate_help.sh
-)
+../generate_help.sh
+
 
 ######## Generate some files for cmake
 echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
