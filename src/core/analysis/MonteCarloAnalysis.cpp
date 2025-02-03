@@ -619,7 +619,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         ss << "This simulation runs " << replicates << " independent replicate" << (replicates > 1 ? "s" : "") << ".\n";
         ss << runs[0]->getStrategyDescription();
         
-        // Print stopping rule targets only if have more than one or if the only one we have is not MaxIteration
+        // Print the target values of stopping rules only if we have more than one or if the only one we have is not MaxIteration
         if (rules.size() > 1 || rules[0].printAsStatement(0, true) != "")
         {
             ss << "\n";
