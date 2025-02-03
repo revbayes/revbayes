@@ -61,8 +61,8 @@ const ArgumentRules& Func_Kimura81::getArgumentRules( void ) const
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "kappa1" , RealPos::getClassTypeSpec(), "The ratio of transitions (A<->G, C<->T) to A<->C, G<->T transversions.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "kappa2" , RealPos::getClassTypeSpec(), "The ratio of A<->T, C<->G transversions to A<->C, G<->T transversions.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "kappa1" , RealPos::getClassTypeSpec(), "The transversion rate from purine to pyrimidine.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "kappa2" , RealPos::getClassTypeSpec(), "The transversion rate from pyrimidine to purine.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "baseFrequencies", Simplex::getClassTypeSpec(), "The stationary frequencies of the states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Simplex( RevBayesCore::RbVector<double>(4,0.25) ) ) );
         
         rules_set = true;
