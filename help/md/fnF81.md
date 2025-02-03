@@ -11,7 +11,7 @@ DNA evolution model proposed in Felsenstein (1981).
 In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are equal. Its only argument, baseFrequencies, codes for said stationary frequencies. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
 
 The F81 rate matrix elements will be of the form:
-	Q[i, j] = c * baseFrequencies[j]
+    Q[i, j] = c * baseFrequencies[j]
 
 where c is a constant needed to normalize the average rate to 1
 
@@ -26,11 +26,11 @@ fnTrN
 fnGTR
 
 ## example
-	# stationary base frequencies
-	baseFrequencies ~ dnDirichlet(v(1,1,1,1))
+    # stationary base frequencies
+    baseFrequencies ~ dnDirichlet(v(1,1,1,1))
 
-	# create an F81 rate matrix
-	Q := fnF81(baseFrequencies)
+    # create an F81 rate matrix
+    Q := fnF81(baseFrequencies)
 
 ## references
 - citation: Felsenstein J (1981). "Evolutionary trees from DNA sequences: a maximum likelihood approach". Journal of Molecular Evolution. 17:368–76.

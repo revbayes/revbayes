@@ -83,7 +83,19 @@ c = a + b
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
+	help_strings[string("Simplex")][string("description")] = string(R"(A simplex is a vector of elements that sum to 1.)");
+	help_strings[string("Simplex")][string("example")] = string(R"(```rb
+x <- simplex([2, 2, 6])
+x # = [ 0.2, 0.2, 0.6]
+sum(x) # 1, by definition
+```)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(Moves that operate on Simplexes:)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("Simplex")][string("title")] = string(R"(Simplex)");
 	help_arrays[string("SiteMixtureModel")][string("authors")].push_back(string(R"(Ben Redelings)"));
 	help_strings[string("SiteMixtureModel")][string("description")] = string(R"(A weighted collection of discrete character evolution models.)");
 	help_strings[string("SiteMixtureModel")][string("details")] = string(R"(The SiteMixtureModel datatype is a mixture distribution where each
@@ -1460,7 +1472,7 @@ Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnF81")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are equal. Its only argument, baseFrequencies, codes for said stationary frequencies. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
 
 The F81 rate matrix elements will be of the form:
-        Q[i, j] = c * baseFrequencies[j]
+    Q[i, j] = c * baseFrequencies[j]
 
 where c is a constant needed to normalize the average rate to 1)");
 	help_strings[string("fnF81")][string("example")] = string(R"(# stationary base frequencies
@@ -1554,7 +1566,7 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnGTR")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are allowed to be different. Its first argument, exchangeRates, codes for the transition rates between states (as in other models, transition rates are assumed to be symmetric). Its second argument, baseFrequencies, codes for the stationary frequencies of these states. Note that for n states, exchangeRates should have length n*(n-1)/2, and baseFrequencies should have length n. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
 
 The general time-reversible rate matrix elements will be of the form:
-        Q[i, j] = c * exchangeRates[i, j] * baseFrequencies[j]
+     Q[i, j] = c * exchangeRates[i, j] * baseFrequencies[j]
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnGTR")][string("example")] = string(R"(# exchange rates
@@ -1624,8 +1636,8 @@ M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) 
 	help_strings[string("fnHKY")][string("details")] = string(R"(In this model, nucleotides have different stationary frequencies, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, baseFrequencies, codes for the frequencies of each nucleotide.
 
 The HKY rate matrix elements will be of the form:
-        Q[i, j] = c * kappa * baseFrequencies[j], if i<->j is a transition 
-                        = c * baseFrequencies[j], if i<->j is a transversion
+    Q[i, j] = c * kappa * baseFrequencies[j], if i<->j is a transition 
+            = c * baseFrequencies[j], if i<->j is a transversion
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnHKY")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
@@ -1675,30 +1687,14 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
-	help_strings[string("fnJC")][string("description")] = string(R"(DNA evolution model proposed in Jukes & Cantor (1969).)");
-	help_strings[string("fnJC")][string("details")] = string(R"(In this model, all states have an equal stationary frequency, and exchangeability rates between states are equal. Its only argument, numStates, is the number of states in the model. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).)");
-	help_strings[string("fnJC")][string("example")] = string(R"(# create a JC rate matrix with four states
-Q := fnJC(4)
-
-# create a JC matrix with two states (for, e.g., an Mk2 model)
-Q := fnJC(2))");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
-	help_references[string("fnJC")].push_back(RbHelpReference(R"(Jukes TH, Cantor CR (1969). "Evolution of Protein Molecules". New York: Academic Press. pp. 21–132.)",R"(http://dx.doi.org/10.1016/B978-1-4832-3211-9.50009-7)",R"(https://garfield.library.upenn.edu/classics1990/A1990CZ67100002.pdf )"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnK80)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnK81)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnF81)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnT92)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnHKY)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnTrN)"));
-	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnGTR)"));
-	help_strings[string("fnJC")][string("title")] = string(R"(The Jukes-Cantor (1969) rate matrix)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
 	help_strings[string("fnK80")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1980).)");
 	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.
 
 The K80 rate matrix elements will be of the form:
-        Q[i, j] = c * kappa, if i<->j is a transition
-                        = c, if i<-> is a transversion
+    Q[i, j] = c * kappa, if i<->j is a transition
+            = c, if i<->j is a transversion
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnK80")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
@@ -1709,7 +1705,7 @@ Q := fnK80(kappa))");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
 	help_references[string("fnK80")].push_back(RbHelpReference(R"(Kimura M (1980). "A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences". Journal of Molecular Evolution. 16:111–20.)",R"(https://doi.org/10.1007/BF01731581)",R"(https://link.springer.com/article/10.1007/BF01731581 )"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnJC)"));
-	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnF8)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnF81)"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnK81)"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnT92)"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnHKY)"));
@@ -1719,9 +1715,9 @@ Q := fnK80(kappa))");
 	help_strings[string("fnK81")][string("details")] = string(R"(In this model, transition and transversion rates are allowed to be different, and transversion rates for A <-> C, G <-> T and A <-> T, C <-> G transversions are different as well. The first argument, kappa1, defines the ratio between the rate of transitions and the rate of A <-> C, G <-> T transversions. The second argument, kappa2, defines the ratio between the rate of A <-> T, C <-> G transversions and the rate of A <-> C, G <-> T transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. Note that the original Kimura (1981) model assumed equal base frequencies, so this function is more general (if ran without a baseFrequencies argument, however, this is equivalent to K81, since the default is all frequencies equal). 
 
 The K81 rate matrix elements will be of the form:
-Q[i, j] = c, if i<->j is an A<->C/G<->T transversion
-                = c * kappa1, if i<->j is a transition
-                = c * kappa2, if i<->j is an A<->T/C<->G transversion
+    Q[i, j] = c, if i<->j is an A<->C/G<->T transversion
+            = c * kappa1, if i<->j is a transition
+            = c * kappa2, if i<->j is an A<->T/C<->G transversion
 
 where c is a constant needed to normalize the average rate to 1. If using the baseFrequencies parameter, those elements are multiplied by baseFrequencies[j].)");
 	help_strings[string("fnK81")][string("example")] = string(R"(# the ratio between rates of transitions and A<->C/G<->T transversions
@@ -1948,10 +1944,10 @@ M := fnScale(MM, 1/MM.rate()))");
 	help_strings[string("fnT92")][string("details")] = string(R"(In this model, A and T have an equal stationary frequency, with G and C frequencies distinct, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, gc, codes for the compound frequency of G and C nucleotides.
 
 The T92 rate matrix elements will be of the form:
-        Q[i, j] = c * kappa * gc / 2, if i<->j is a transition and j is C or G
-                        = c * gc / 2, if i<->j is a transversion and j is C or G
-                        = c * kappa * (1 - gc) / 2, if i<->j is a transition and j is A or T
-                        = c * (1 - gc) / 2, if i<->j is a transversion and j is A or T
+    Q[i, j] = c * kappa * gc / 2, if i<->j is a transition and j is C or G
+            = c * gc / 2, if i<->j is a transversion and j is C or G
+            = c * kappa * (1 - gc) / 2, if i<->j is a transition and j is A or T
+            = c * (1 - gc) / 2, if i<->j is a transversion and j is A or T
 
 where c is a constant needed to normalize the average rate to 1.)");
 	help_strings[string("fnT92")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
@@ -1980,9 +1976,9 @@ Q := fnT92(kappa, gc))");
 	help_strings[string("fnTrN")][string("details")] = string(R"(In this model, nucleotide base frequencies are different, and the two transition rates (A <-> G and C<->T) can be different to each other, and to the transversion rate. The first argument, kappa1, defines the ratio between the rate of A <-> G (i.e. purine) transitions to transversions. The second argument, kappa2, defines the ratio between the rate of C <-> T (i.e. pyrimidine) transitions to transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. 
 
 The TrN rate matrix elements are of the form:
-        Q[i, j] = c * kappa1 * baseFrequencies[j], if i<->j is A<->G
-                        = c * kappa2 * baseFrequencies[j], if i<->j is C<->T
-                        = c * baseFrequencies[j], otherwise
+    Q[i, j] = c * kappa1 * baseFrequencies[j], if i<->j is A<->G
+            = c * kappa2 * baseFrequencies[j], if i<->j is C<->T
+            = c * baseFrequencies[j], otherwise
 
 where c is a constant needed to normalize the average rate to 1)");
 	help_strings[string("fnTrN")][string("example")] = string(R"(# A <-> G transition rate
@@ -1995,7 +1991,7 @@ kappaCT ~ dnLognormal(0,1)
 pi ~ dnDirichlet( v(1,1,1,1) )
 
 # create a TrN rate matrix
-Q := fnTrN(kappaAT, kappaCT, ,pi))");
+Q := fnTrN(kappaAG, kappaCT, ,pi))");
 	help_strings[string("fnTrN")][string("name")] = string(R"(fnTrN)");
 	help_references[string("fnTrN")].push_back(RbHelpReference(R"(Tamura, K. and M. Nei (1993). "Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees". Molecular biology and evolution. 10(3):512-526.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
 	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnJC)"));
@@ -2461,7 +2457,12 @@ Add random variables to the move directly (e.g. branch_rates[1], not branch_rate
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
 	help_strings[string("mvAddRemoveTip")][string("name")] = string(R"(mvAddRemoveTip)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
+	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution.)");
+	help_strings[string("mvBetaSimplex")][string("example")] = string(R"(A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
 	help_strings[string("mvBetaSimplex")][string("name")] = string(R"(mvBetaSimplex)");
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("mvBetaSimplex")][string("title")] = string(R"(Beta Simplex move)");
 	help_strings[string("mvBinarySwitch")][string("name")] = string(R"(mvBinarySwitch)");
 	help_strings[string("mvBirthDeathEvent")][string("name")] = string(R"(mvBirthDeathEvent)");
 	help_strings[string("mvBirthDeathEventContinuous")][string("name")] = string(R"(mvBirthDeathEventContinuous)");
@@ -2501,11 +2502,25 @@ moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0))");
 	help_strings[string("mvCorrelationMatrixUpdate")][string("name")] = string(R"(mvCorrelationMatrixUpdate)");
 	help_strings[string("mvDPPAllocateAuxGibbs")][string("name")] = string(R"(mvDPPAllocateAuxGibbs)");
 	help_strings[string("mvDPPGibbsConcentration")][string("name")] = string(R"(mvDPPGibbsConcentration)");
-	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
+	help_strings[string("mvDirichletSimplex")][string("description")] = string(R"(A Dirichlet-simplex proposal randomly changes some values of a [Simplex](https://revbayes.github.io/documentation/Simplex.html)
+(a vector whose elements sum to 1). The other values change too because of renormalization.
+ 
+First, some random indices are drawn.
+Then, the proposal draws a new simplex `u ~ Dirichlet(val[index] * alpha)`, where alpha is the tuning parameter.
+The new value is set to `u`.
+The simplex is then renormalized.)");
+	help_strings[string("mvDirichletSimplex")][string("example")] = string(R"(Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html)");
 	help_strings[string("mvDirichletSimplex")][string("name")] = string(R"(mvDirichletSimplex)");
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("mvDirichletSimplex")][string("title")] = string(R"(Dirichlet Simplex move)");
 	help_strings[string("mvDiscreteEventCategoryRandomWalk")][string("name")] = string(R"(mvDiscreteEventCategoryRandomWalk)");
+	help_strings[string("mvElementSwapSimplex")][string("description")] = string(R"(An Element Swap Simplex move selects two elements of a vector and exchanges their values.)");
 	help_strings[string("mvElementSwapSimplex")][string("name")] = string(R"(mvElementSwapSimplex)");
+	help_arrays[string("mvElementSwapSimplex")][string("see_also")].push_back(string(R"(mvBetaSimplex)"));
+	help_arrays[string("mvElementSwapSimplex")][string("see_also")].push_back(string(R"(mvDirichletSimplex)"));
+	help_strings[string("mvElementSwapSimplex")][string("title")] = string(R"(Element Swap Simplex move)");
 	help_strings[string("mvEllipticalSliceSamplingSimple")][string("name")] = string(R"(mvEllipticalSliceSamplingSimple)");
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
