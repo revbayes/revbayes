@@ -14,7 +14,7 @@
 # 2. Generate cmake variables from command-line flags.
 # 3. Create the build/ directory (if missing).
 # 4. Update the version number            --> src/revlanguage/utils/GitVersion.cpp
-# 5. Update the help database (if asked)  --> src/core/help/RbHelpDatabase.cpp
+# 5. Update the help database --> src/core/help/RbHelpDatabase.cpp
 # 6. Run ./regenerate.sh
 # 7. Run cmake <--- This is where the configuration actually happens
 # 8. Run make or ninja to do the build.
@@ -33,7 +33,6 @@ all_args="$@"
 debug="false"
 mpi="false"
 cmd="false"
-help2yml="false"
 boost_root=""
 boost_lib=""
 boost_include=""
@@ -54,7 +53,6 @@ while echo $1 | grep ^- > /dev/null; do
 -ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 -boost_include  string          : specify directory containing Boost libraries. (e.g. `/usr/include`). Defaults to unset.
@@ -70,7 +68,7 @@ Examples:
   ./build.sh -boost_root /home/santa/installed-boost-1.72
   ./build.sh -boost_include /home/santa/boost_1_72_0/ -boost_lib /home/santa/boost_1_72_0/stage/lib
   ./build.sh -DBOOST_ROOT=/home/santa/installed-boost_1.72
-  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/installed-boost_1.72'
+  ./build.sh -mpi true -DBOOST_ROOT=/home/santa/installed-boost_1.72'
         exit
     fi
 
@@ -160,10 +158,6 @@ if [ "$static_boost" = "true" ] ; then
     cmake_args="-DSTATIC_BOOST=ON $cmake_args"
 fi
 
-if [ "$help2yml" = "true" ] ; then
-    cmake_args="-DHELP=ON $cmake_args"
-fi
-
 echo "RevBayes executable is '${exec_name}'"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
 
@@ -188,14 +182,11 @@ mv GitVersion.cpp ../../src/revlanguage/utils/
 
 
 ######### Generate help database
-if [ "$help2yml" = "true" ]
-then
-    (
-        cd ../../src
-        echo "Generating help database"
-        perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-    )
-fi
+(
+cd ../../src
+echo "Generating help database"
+perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
+)
 
 ######## Generate some files for cmake
 echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
