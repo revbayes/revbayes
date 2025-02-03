@@ -6,7 +6,7 @@ PROJDIR=$(dirname $0)
 
 SRC="$PROJDIR/../../src"
 
-"$PROJDIR"/generate_help.sh
+../"$PROJDIR"/generate_help.sh
 
 "$PROJDIR"/generate_includes.sh
 
