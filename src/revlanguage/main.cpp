@@ -28,14 +28,39 @@ using po::variables_map;
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]\n";
-    // Other usages not mentioned
+    std::string usage =
+        "Usage: rb [options]\n"
+        "   or: rb [options] file1 [file2 ...] [--args arg1 arg2 ...] [--file file3 ...]\n"
+        "   or: rb [options] --cmd file1 [arg1 arg2 ...] [--file file2 ...]";
+
+    return usage;
+}
+
+
+std::string usage_examples()
+{
+    std::string usage_examples =
+        "Usage examples:\n"
+        "   1. rb\n"
+        "   2. rb --args 1 2\n"
+        "   3. rb script.Rev\n"
+        "   4. rb script.Rev --args 1 2\n"
+        "   5. rb --args 1 2 --file script.Rev              # equivalent to 4\n"
+        "   6. rb script.Rev script2.Rev\n"
+        "   7. rb script.Rev --args 1 2 --file script2.Rev\n"
+        "   8. rb script.Rev script2.Rev --args 1 2         # equivalent to 7\n"
+        "   9. rb --cmd script.Rev                          # equivalent to 3 but runs in batch mode\n"
+        "  10. rb --cmd script.Rev 1 2                      # equivalent to 4 and 5 but runs in batch mode\n"
+        "  11. rb --cmd script.Rev 1 2 --file script2.Rev\n"
+        "  12. rb --setOption outputPrecision=8\n";
+    
+    return usage_examples;
 }
 
 
 std::string short_description()
 {
-    return "Bayesian phylogenetic inference using probabilistic graphical models and an interpreted language";
+    return "Bayesian phylogenetic inference using probabilistic graphical models and an interpreted language\n";
 }
 
 //
@@ -53,14 +78,14 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // RevBayes doesn't use a global verbose_logging flag.
     // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
-	("batch,b","Run in batch mode.")
+	("batch,b","Run in batch mode (i.e. RevBayes will exit if it encounters an error).")
     ("jupyter,j","Run in jupyter mode.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+    ("args",value<std::vector<std::string> >()->multitoken(),"Supply command-line arguments to RevBayes. These can be accessed from within the program using the 'args' vector. See ?args for details.")
+    // composing means that --file can occur multiple times
+    ("file",value<std::vector<std::string> >()->composing(),"Source one or more files.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
-	// composing means that --file can occur multiple times
-    ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Source a file and supply command-line arguments in batch mode. Cannot be combined with the --args flag.")
     ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 	;
 
@@ -85,10 +110,11 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout << usage() << std::endl;
             std::cout << short_description() << std::endl;
+            std::cout << usage() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
+            std::cout << usage_examples() << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
@@ -110,10 +136,11 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout << usage() << std::endl;
             std::cout << short_description() << std::endl;
+            std::cout << usage() << std::endl;
             std::cout << std::endl;
             std::cout << general << std::endl;
+            std::cout << usage_examples() << std::endl;
             std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
@@ -199,7 +226,9 @@ int main(int argc, char* argv[]) {
     
     if ( args.count("args") && args.count("cmd"))
     {
-        throw RbException("command line: received both --args and --cmd");
+        std::cerr << usage_examples() << "\n";
+        std::cerr << "Error: received both --args and --cmd, but only one is allowed.\n";
+        exit(1);
     }
     
     std::vector<std::string> rb_args;
@@ -210,7 +239,11 @@ int main(int argc, char* argv[]) {
     else if ( args.count("cmd") > 0)
     {
         rb_args = args["cmd"].as<std::vector<std::string> >();
-        source_files.push_back(rb_args[0]);
+
+        // Insert the file from "cmd" at the begining of source_files, before the files from "file"
+        source_files.insert(source_files.begin(), rb_args[0]);
+
+        // Remove the script file from the argument list.
         rb_args.erase(rb_args.begin());
 
         // Let's make batch mode default to true for scripts.

@@ -11,6 +11,7 @@
 #include "RbException.h"
 #include "RbHelpRenderer.h"
 #include "RbHelpSystem.h"
+#include "RbHelpDatabase.h"
 #include "RbSettings.h"
 #include "RbUtil.h"
 #include "RevNullObject.h"
@@ -287,11 +288,22 @@ int RevLanguage::Parser::help(const std::string& symbol) const
     
     // Get some help
     RevBayesCore::RbHelpSystem& hs = RevBayesCore::RbHelpSystem::getHelpSystem();
+    RevBayesCore::RbHelpDatabase& hd = RevBayesCore::RbHelpDatabase::getHelpDatabase();
+    const std::string& help_title = hd.getHelpString(symbol, "name");
+    
     if ( hs.isHelpAvailableForQuery(symbol) )
     {
         const RevBayesCore::RbHelpEntry& h = hs.getHelp( symbol );
         RevBayesCore::HelpRenderer hRenderer;
         std::string hStr = hRenderer.renderHelp(h, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
+        UserInterface::userInterface().output("\n", true);
+        UserInterface::userInterface().output("\n", true);
+        UserInterface::userInterface().output(hStr, true);
+    }
+    else if ( not hs.isHelpAvailableForQuery(symbol) and help_title.size() > 0 )
+    {
+        RevBayesCore::HelpRenderer hRenderer;
+        std::string hStr = hRenderer.renderHelp(hd, symbol, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
         UserInterface::userInterface().output("\n", true);
         UserInterface::userInterface().output("\n", true);
         UserInterface::userInterface().output(hStr, true);
