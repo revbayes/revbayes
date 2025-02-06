@@ -1,10 +1,11 @@
 ## name
 dnBimodalNormal
 ## title
-Bernoulli Distribution
+Bimodal Normal dsitribution
 ## description
-A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.
+The Bimodal Normal distribution unites two separate normal distributions.
 ## details
+The bimodal normal distribution takes on five parameters: mean1 and mean2 (the means of two normal distributions), sd1 and sd2 (the standard deviations of two normal distributions), and p (between 0 and 1). The value will be distributed according to the first normal distribution with probability p, and distributed according to the second normal distribution with probability (1 - p).
 ## authors
 Sebastian Hoehna
 ## see_also
