@@ -83,6 +83,9 @@ c = a + b
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
+	help_strings[string("Reverse")][string("description")] = string(R"(Reverse function changes the order of elements or to flip something aroun)");
+	help_strings[string("Reverse")][string("name")] = string(R"(Reverse)");
+	help_strings[string("Reverse")][string("title")] = string(R"(Reverse function)");
 	help_strings[string("Simplex")][string("description")] = string(R"(A simplex is a vector of elements that sum to 1.)");
 	help_strings[string("Simplex")][string("example")] = string(R"(```rb
 x <- simplex([2, 2, 6])
@@ -3380,7 +3383,13 @@ getwd())");
 	help_strings[string("simCompleteTree")][string("name")] = string(R"(simCompleteTree)");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
+	help_strings[string("sinh")][string("description")] = string(R"(Hyperbolic functions are analogues of the ordinary trigonometric functions)");
+	help_strings[string("sinh")][string("details")] = string(R"(The Hyperbolic functions are defined using the hyperbola rather than the circle it take a real argument called a hyperbolic angle. Insted of using angles unlike in circle, it measures the distances along the curve and grows exponentially. The function would need prior belief based on new observations)");
+	help_strings[string("sinh")][string("example")] = string(R"(Hyperbolic_update <- function(prior, observation){
+    prior + sinh(observation - prior)
+})");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
+	help_strings[string("sinh")][string("title")] = string(R"(Hyperbolic functions)");
 	help_strings[string("sort")][string("description")] = string(R"(Function for sorting the members of a vector in either ascending or descending order.)");
 	help_strings[string("sort")][string("details")] = string(R"(The vector to be sorted can be of any numeric type. Ascending or descending is specified via the `ascending` argument)");
 	help_strings[string("sort")][string("example")] = string(R"(nums = v(1,3,5,7,2,4,6,8)
