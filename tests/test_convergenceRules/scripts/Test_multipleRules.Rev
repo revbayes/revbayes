@@ -44,7 +44,7 @@ stopping_rules[3] = srGeweke(0.001, file = "output/multipleRules_test.log", freq
 stopping_rules[4] = srStationarity(0.25, file = "output/multipleRules_test.log", freq = 1000)
 
 # Start the MCMC run
-mymcmc.run(rules = stopping_rules)
+mymcmc.run(rules = stopping_rules, verbose = 2)
 
 clear()
 q()

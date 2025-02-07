@@ -82,8 +82,9 @@ double MaxIterationStoppingRule::getStatistic( size_t g )
 }
 
 
-std::string MaxIterationStoppingRule::printAsStatement( size_t g )
+std::string MaxIterationStoppingRule::printAsStatement( size_t g, bool target_only )
 {
+    // We always return an empty string regardless of the arguments
     std::string statement = "";
     return statement;
 }
