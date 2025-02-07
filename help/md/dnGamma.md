@@ -3,9 +3,11 @@ dnGamma
 ## title
 Gamma Distribution
 ## description
-Gamma probability distribution for positive real numbers.
+The Gamma probability distribution describes the probability of the sum of exponentially distributed variables. 
 ## details
-The gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.
+The gamma distribution takes on two parameters, shape and rate. Similar to how 1/rate gives the mean of the exponential, shape/rate gives the mean of the gamma. It provides a natural prior distribution for parameters that could be considered as sums of exponential variables.
+
+The probability density function is f(x) = rate^shape * x^(shape - 1) * e^(-rate * x) / Gamma(shape), where Gamma is the gamma function.
 ## authors
 Sebastian Hoehna
 ## see_also
