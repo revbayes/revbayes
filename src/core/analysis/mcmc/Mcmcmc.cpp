@@ -1143,7 +1143,7 @@ void Mcmcmc::setHeatsInitial(const std::vector<double>& ht)
     }
 
     // 3. Check that the heats are sorted with the largest heat first (== smallest temperature first).
-    for(size_t i=0;i<ht.size()-1;i++)
+    for(size_t i=0; i+1 < ht.size(); i++)
         if (ht[i] < ht[i+1])
             throw RbException()<<"Heat "<<i+1<<" ("<<ht[i]<<") should be greater than heat "<<i+2<<" ("<<ht[i+1]<<")";
 
