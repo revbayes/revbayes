@@ -162,9 +162,9 @@ void MonteCarloAnalysis::addMonitor(const Monitor &m)
 
 /** Run burnin and auto-tune */
 #ifdef RB_MPI
-void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, int verbose)
 #else
-void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, int verbose)
 #endif
 {
     
@@ -194,7 +194,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     // start the progress bar
     ProgressBar progress = ProgressBar(generations, 0);
 
-    if ( verbose == true && runs[0] != NULL && process_active == true )
+    if ( verbose >= 1 && runs[0] != NULL && process_active == true )
     {
         // Let user know what we are doing
         std::stringstream ss;
@@ -213,7 +213,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     for (size_t k=1; k<=generations; ++k)
     {
         
-        if ( verbose == true && process_active == true)
+        if ( verbose >= 1 && process_active == true)
         {
             progress.update(k);
         }
@@ -241,7 +241,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
     
-    if ( verbose == true && process_active == true )
+    if ( verbose >= 1 && process_active == true )
     {
         progress.finish();
     }
@@ -551,7 +551,7 @@ void MonteCarloAnalysis::resetReplicates( void )
     
     // to be safe, we should synchronize the random number generators
     // Sebastian: We cannot re-synchronize the RNG after we just shifted it.
-    // If an anlysis has all values preset, then each replicate would be identical!!!
+    // If an analysis had all values preset, then each replicate would be identical!!!
 //#ifdef RB_MPI
 //    MpiUtilities::synchronizeRNG( analysis_comm );
 //#else
@@ -562,9 +562,9 @@ void MonteCarloAnalysis::resetReplicates( void )
 
 
 #ifdef RB_MPI
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, int verbose )
 #else
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, int verbose )
 #endif
 {
     
@@ -604,7 +604,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
     
     // Let user know what we are doing
     std::stringstream ss;
-    if ( process_active == true && runs[0] != NULL && verbose == true )
+    if ( process_active == true && runs[0] != NULL && verbose >= 1 )
     {
         
         if ( runs[0]->getCurrentGeneration() == 0 )
@@ -618,6 +618,18 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         ss << "This simulation runs " << replicates << " independent replicate" << (replicates > 1 ? "s" : "") << ".\n";
         ss << runs[0]->getStrategyDescription();
+        
+        // Print the target values of stopping rules only if we have more than one or if the only one we have is not MaxIteration
+        if (rules.size() > 1 || rules[0].printAsStatement(0, true) != "")
+        {
+            ss << "\n";
+            ss << "Stopping rule" << (rules.size() > 1 ? "s" : "") << ":\n";
+            for (size_t i=0; i<rules.size(); ++i)
+            {
+                ss << "    " << rules[i].printAsStatement(0, true);
+            }
+        }
+        
         RBOUT( ss.str() );
     }
     
@@ -721,7 +733,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         
         converged = true;
-        bool checkNow = false;
         size_t numConvergenceRules = 0;
         
         // run the stopping test
@@ -731,11 +742,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
             {
                 converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
                 ++numConvergenceRules;
-                
-                // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
-                // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
-                // we will only print when at least one convergence rule wants us to.
-                checkNow |= rules[i].checkAtIteration(gen);
             }
             else
             {
@@ -747,19 +753,35 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
             }
         }
         
-        if (checkNow)
+        if (verbose > 1)
         {
-            std::stringstream ssConv;
+            bool checkNow = false;
+            
             for (size_t i=0; i<rules.size(); ++i)
             {
-                // Prettify: insert a blank line before printing out the first stopping rule statement
-                if (i == 0)
+                if ( rules[i].isConvergenceRule() )
                 {
-                    ssConv << "\n";
+                    // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
+                    // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
+                    // we will only print when at least one convergence rule wants us to.
+                    checkNow |= rules[i].checkAtIteration(gen);
                 }
-                ssConv << rules[i].printAsStatement(gen);
             }
-            RBOUT( ssConv.str() );
+            
+            if (checkNow)
+            {
+                std::stringstream ssConv;
+                for (size_t i=0; i<rules.size(); ++i)
+                {
+                    // Prettify: insert a blank line before printing out the first stopping rule statement
+                    if (i == 0)
+                    {
+                        ssConv << "\n";
+                    }
+                    ssConv << rules[i].printAsStatement(gen);
+                }
+                RBOUT( ssConv.str() );
+            }
         }
         
         converged &= numConvergenceRules > 0;
