@@ -1,0 +1,52 @@
+################################################################################
+#
+# RevBayes Validation Test: AbstractPhyloCTMCSiteHomogeneous
+#
+# These tests validate the behaviour of dnPhyloCTMC()
+#
+#
+# Authors: Martin R. Smith
+#
+################################################################################
+
+seed(42)
+outFile = "output/Test_dnPhyloCTMC.txt"
+
+chars <- readDiscreteCharacterData("data/bears_morphology.nex")
+
+taxa <- chars.names()
+n_taxa <- chars.size()
+n_edge <- 2 * n_taxa - 3
+
+topology ~ dnUniformTopology(taxa)
+br_lengths ~ dnDirichlet( rep(1.0, n_edge) )
+phylogeny := treeAssembly(topology, br_lengths)
+
+k ~ dnUniform(1, 10)
+kRates := [ [ 0, k],
+            [ 1, 0] ]
+qK := fnFreeK(kRates)
+phy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard")
+phy.clamp(chars)
+
+invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
+                     invertProbability = TRUE)
+invPhy.clamp(chars)
+
+# Validate printing of dataset information
+print(filename = outFile, append = FALSE, invPhy, "\n")
+
+k.clamp(1)
+print(filename = outFile, append = TRUE,
+      "Expect equal:", -phy.lnProbability(), invPhy.lnProbability(), "\n")
+
+# Validate that distribution is touched and likelihoods udpated
+k.clamp(5)
+print(filename = outFile, append = TRUE,
+      "Expect equal:", -phy.lnProbability(), invPhy.lnProbability(), "\n")
+
+# Validate that the function can be destroyed / reset without error
+invPhy ~ dnPhyloCTMC(tree = phylogeny, Q = qK, type = "Standard",
+                     invertProbability = FALSE)
+
+q()
