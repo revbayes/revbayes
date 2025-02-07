@@ -1878,9 +1878,9 @@ void Mcmcmc::tune( void )
          *
          * Let us further denote heat(k-1) as "lowestGreaterThanMin", and k-1 as "m". Then,
          *
-         * log(heat(k)) = log(heatMinBound) + [ log(lowestGreaterThanMin) - log(heatMinBound) ]*[ 1 / (num_chains - m) ]
+         * log(heat(k)) = log(lowestGreaterThanMin) - [ log(lowestGreaterThanMin) - log(heatMinBound) ]*[ 1 / (num_chains - m) ]
          *
-         * Finally, let us denote the second addend on the right-hand side of the equation above by log(rho). Then,
+         * Finally, let us denote the subtrahend on the right-hand side of the equation above by log(rho). Then,
          *
          *       rho = (lowestGreaterThanMin / heatMinBound)^[ 1 / (num_chains - m) ],
          *   heat(k) = lowestGreaterThanMin / rho
