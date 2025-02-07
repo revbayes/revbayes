@@ -1872,10 +1872,10 @@ void Mcmcmc::tune( void )
         std::vector<double> greaterThanMin;
         std::vector<size_t> badChainIdx;
         
-        std::cout << "The following should be sorted from largest to smallest:" << std::endl;
+        // std::cout << "The following should be sorted from largest to smallest:" << std::endl;
         for (size_t l = 0; l < num_chains; ++l)
         {
-            std::cout << chain_heats[ chainForHeatIndex(l) ] << std::endl;
+            // std::cout << chain_heats[ chainForHeatIndex(l) ] << std::endl;
             if ( chain_heats[ chainForHeatIndex(l) ] > heatMinBound )
             {
                 greaterThanMin.push_back( chain_heats[ chainForHeatIndex(l) ] );
@@ -1886,7 +1886,7 @@ void Mcmcmc::tune( void )
             }
         }
         
-        std::cout << "We have " << badChainIdx.size() << " bad chain(s)" << std::endl;
+        // std::cout << "We have " << badChainIdx.size() << " bad chain(s)" << std::endl;
         if ( badChainIdx.size() != 0 )
         {
             double lowestGreaterThanMin = *std::min_element( greaterThanMin.begin(), greaterThanMin.end() );
@@ -1894,15 +1894,13 @@ void Mcmcmc::tune( void )
             size_t m = k - 1;
             
             double rho = pow(lowestGreaterThanMin / heatMinBound, 1.0 / (num_chains - m));
-            std::cout << "Current rho is: " << rho << std::endl;
+            // std::cout << "Current rho is: " << rho << std::endl;
             
             for (; k < num_chains; ++k)
             {
-                std::cout << "Attempting to set the heat of chain " << k << " to " << (lowestGreaterThanMin / pow(rho, k - m)) << std::endl;
+                // std::cout << "Attempting to set the heat of chain " << k << " to " << (lowestGreaterThanMin / pow(rho, k - m)) << std::endl;
                 chain_heats[ chainForHeatIndex(k) ] = lowestGreaterThanMin / pow(rho, k - m);
             }
-            
-            std::cout << "" << std::endl;
         }
         
         resetCounters();
