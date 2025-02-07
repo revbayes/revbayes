@@ -163,11 +163,6 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
 
-    if ( args.count("verbose") > 0 )
-    {
-        int verbosity = args["verbose"].as<int>();
-    }
-
     if ( args.count("setOption") > 0 )
     {
         std::vector<std::string> options = args["setOption"].as<std::vector<std::string> >();
