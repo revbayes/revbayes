@@ -1865,9 +1865,27 @@ void Mcmcmc::tune( void )
 //            std::cout << "chain_heats[" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
         }
         
-        // if the heat of a given hot chain is smaller than the minimum bound
-        // interpolate this heat and the heats of all the hotter chains
-        // to fall between the lowest heat that is greater than the minimum bound and the minimum bound
+        /* If the heat of a given hot chain is smaller than the minimum bound, we want to linearly interpolate
+         * this heat and the heats of all the hotter chains to fall between the lowest heat that is greater
+         * than the minimum bound and the minimum bound.
+         * The formula for linearly interpolating between (x1,y1) and (x2,y2) is y(x) = y2 - (y2-y1)*[ (x-x1)/(x2-x1) ].
+         *
+         * Let "heat(i)" be a notational shortcut for chain_heats[ chainForHeatIndex(i) ], and let k be the heat
+         * index of the coldest of such "bad" chains. Then, its heat can be calculated as
+         *
+         * log(heat(k)) = log(heat(k-1)) - [ log(heat(k-1)) - log(heatMinBound) ]*[ (k - (k-1)) / (num_chains - (k-1)) ]
+         *              = log(heat(k-1)) - [ log(heat(k-1)) - log(heatMinBound) ]*[ 1 / (num_chains - (k-1)) ]
+         *
+         * Let us further denote heat(k-1) as "lowestGreaterThanMin", and k-1 as "m". Then,
+         *
+         * log(heat(k)) = log(heatMinBound) + [ log(lowestGreaterThanMin) - log(heatMinBound) ]*[ 1 / (num_chains - m) ]
+         *
+         * Finally, let us denote the second addend on the right-hand side of the equation above by log(rho). Then,
+         *
+         *       rho = (lowestGreaterThanMin / heatMinBound)^[ 1 / (num_chains - m) ],
+         *   heat(k) = lowestGreaterThanMin / rho
+         * heat(k+1) = lowestGreaterThanMin / rho^2, etc.
+         */
         
         std::vector<double> greaterThanMin;
         std::vector<size_t> badChainIdx;
