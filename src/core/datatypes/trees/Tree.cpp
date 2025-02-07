@@ -227,6 +227,11 @@ Tree* Tree::clone(void) const
 
 double Tree::getBranchLengthForNode(const TopologyNode& node) const
 {
+    const TopologyNode* r = &node;
+    while(not r->isRoot())
+        r = &(r->getParent());
+    assert(root == r);
+
     return node.getBranchLength();
 }
 
@@ -398,7 +403,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     else if ( n == "branchLength" )
     {
         int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
-        rv = getNode( index ).getBranchLength();
+        rv = getBranchLengthForNode(index);
     }
     else if ( n == "nodeAge" )
     {
@@ -638,14 +643,14 @@ const std::vector<std::vector<double> > Tree::getAdjacencyMatrix(void) const
     {
         const TopologyNode* nd = nodes[i];
         std::vector<TopologyNode*> children = nd->getChildren();
-        for (std::vector<TopologyNode*>::iterator ch = children.begin(); ch != children.end(); ch++)
+        for (auto& child: children)
         {
-            adjacency[nd->getIndex()][(*ch)->getIndex()] = (*ch)->getBranchLength();
+            adjacency[nd->getIndex()][child->getIndex()] = getBranchLengthForNode(*child);
         }
         if (!nd->isRoot())
         {
             const TopologyNode* pa = &nd->getParent();
-            adjacency[nd->getIndex()][pa->getIndex()] = pa->getBranchLength();
+            adjacency[nd->getIndex()][pa->getIndex()] = getBranchLengthForNode(*pa);
         }
     }
 
@@ -1181,7 +1186,7 @@ double Tree::getTreeLength( void ) const
         if ( n.isRoot() == false )
         {
             // add the branch length
-            tl += n.getBranchLength();
+            tl += getBranchLengthForNode(n);
         }
 
     }
@@ -1271,7 +1276,7 @@ bool Tree::isBroken( void ) const
         {
             const TopologyNode &child = n.getChild( j );
 
-            double est_age = child.getAge() + child.getBranchLength();
+            double est_age = child.getAge() + getBranchLengthForNode(child);
 
             if ( std::fabs(age-est_age) > 1E-4 )
             {
@@ -1292,7 +1297,7 @@ bool Tree::isBroken( void ) const
             double my_age = n.getAge();
             double my_parents_age = n.getParent().getAge();
 
-            if ( std::fabs( my_parents_age - my_age - n.getBranchLength() ) > 1E-4 )
+            if ( std::fabs( my_parents_age - my_age - getBranchLengthForNode(n) ) > 1E-4 )
             {
                 return true;
             }
@@ -1352,7 +1357,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup)
             if ( root->getChild(i).getClade() == outgroup )
             {
                 good_outgroup = i;
-                good_bl = root->getChild(i).getBranchLength();
+                good_bl = getBranchLengthForNode(root->getChild(i));
                 half_bl = good_bl / 2.0;
                 root->getChild(i).setBranchLength(half_bl);
                 //  root->getChild(i).setAge(root->getChild(i).getAge() + half_bl);
@@ -1369,7 +1374,7 @@ void Tree::makeRootBifurcating(const Clade& outgroup)
         for (size_t i = 0; i < nodes_to_move.size(); ++i)
         {
             TopologyNode* tmp = nodes_to_move[i];
-            //  double newBl = tmp->getBranchLength() - halfMini;
+            //  double newBl = getBranchLengthForNode(*tmp) - halfMini;
             root->removeChild(tmp);
             new_child->addChild(tmp);
             tmp->setParent (new_child);
@@ -1779,7 +1784,7 @@ void Tree::removeDegree2Node(TopologyNode* n)
     assert(not n->isRoot());
     auto& p = n->getParent();
     auto& c = n->getChild(0);
-    double combined_branch_length = n->getBranchLength() + c.getBranchLength();
+    double combined_branch_length = getBranchLengthForNode(*n) + getBranchLengthForNode(c);
 
     // 4. Remove references from n
     n->setParent(nullptr);
@@ -2033,7 +2038,7 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         // we need to re-orient the branches/indices so that
         // nodes remain associated with the same parameters
         p.setIndex(n.getIndex());
-        p.setBranchLength(n.getBranchLength());
+        p.setBranchLength(getBranchLengthForNode(n));
 
         p.removeChild( &n );
         n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n
@@ -2226,7 +2231,7 @@ void Tree::suppressOutdegreeOneNodes(bool replace)
             if (nodes[i]->isRoot() and nodes[i]->getNumberOfChildren() == 1)
             {
                 TopologyNode* new_root = &nodes[i]->getChild(0);
-                double new_bl = nodes[i]->getBranchLength() + new_root->getBranchLength();
+                double new_bl = getBranchLengthForNode(*nodes[i]) + getBranchLengthForNode(*new_root);
                 nodes[i]->removeChild( new_root );
                 new_root->setParent( NULL );
                 new_root->setBranchLength( new_bl );
@@ -2290,8 +2295,8 @@ void Tree::unroot( void )
         TopologyNode *new_root = &old_root->getChild( child_index );
         TopologyNode *second_child = &old_root->getChild( (child_index == 0 ? 1 : 0) );
 
-        double bl_first = new_root->getBranchLength();
-        double bl_second = second_child->getBranchLength();
+        double bl_first = getBranchLengthForNode(*new_root);
+        double bl_second = getBranchLengthForNode(*second_child);
 
         old_root->removeChild( new_root );
         old_root->removeChild( second_child );
