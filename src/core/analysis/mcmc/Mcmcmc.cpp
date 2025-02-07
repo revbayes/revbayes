@@ -1870,14 +1870,31 @@ void Mcmcmc::tune( void )
         // to fall between the lowest heat that is greater than the minimum bound and the minimum bound
         if (j < num_chains)
         {
-            double rho = pow(chain_heats[colderChainIdx] / heatMinBound, 1.0 / (num_chains - j));
-            size_t k = j;
+            std::cout << "The following should be sorted from largest to smallest:" << std::endl;
+            for (size_t l = 0; l < chain_heats.size(); ++l)
+            {
+                if (l == j)
+                {
+                    std::cout << chain_heats[ chainForHeatIndex(l) ] << " <--- You are here" << std::endl;
+                }
+                else
+                {
+                    std::cout << chain_heats[ chainForHeatIndex(l) ] << std::endl;
+                }
+            }
+            
+            double rho = pow(chain_heats[ chainForHeatIndex(j) ] / heatMinBound, 1.0 / (num_chains - j + 1));
+            std::cout << "Current rho is: " << rho << std::endl;
+            size_t k = j + 1;
             
             for (; k < num_chains; ++k)
             {
-                chain_heats[hotterChainIdx] = chain_heats[colderChainIdx] / pow(rho, k + 1 - j);
+                std::cout << "Attempting to set the heat of chain " << k << " to " << (chain_heats[ chainForHeatIndex(j) ] / pow(rho, k + 1 - j)) << std::endl;
+                chain_heats[ chainForHeatIndex(k) ] = chain_heats[ chainForHeatIndex(j) ] / pow(rho, k + 1 - j);
 //                std::cout << "chain_heats[k" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
             }
+            
+            std::cout << "" << std::endl;
         }
         
         resetCounters();
