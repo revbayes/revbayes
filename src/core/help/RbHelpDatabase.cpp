@@ -3632,8 +3632,7 @@ str(b))");
 	help_strings[string("structure")][string("name")] = string(R"(structure)");
 	help_arrays[string("structure")][string("see_also")].push_back(string(R"(type)"));
 	help_strings[string("structure")][string("title")] = string(R"(The structure of a variable)");
-	help_strings[string("sum")][string("description")] = string(R"(Sums all members of a vector of type `Real`, `RealPos`, `Integer`,
-or `Natural`)");
+	help_strings[string("sum")][string("description")] = string(R"(Sums all members of a vector of type `Real`, `RealPos`, `Integer`, or `Natural`)");
 	help_strings[string("sum")][string("example")] = string(R"(a = v(1,2,3,4,5,6,7,8)
 sum(a)
 # returns 36)");
