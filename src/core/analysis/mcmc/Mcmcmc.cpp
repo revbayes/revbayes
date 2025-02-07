@@ -1868,30 +1868,38 @@ void Mcmcmc::tune( void )
         // if the heat of a given hot chain is smaller than the minimum bound
         // interpolate this heat and the heats of all the hotter chains
         // to fall between the lowest heat that is greater than the minimum bound and the minimum bound
-        if (j < num_chains)
+        
+        std::vector<double> greaterThanMin;
+        std::vector<size_t> badChainIdx;
+        
+        std::cout << "The following should be sorted from largest to smallest:" << std::endl;
+        for (size_t l = 0; l < num_chains; ++l)
         {
-            std::cout << "The following should be sorted from largest to smallest:" << std::endl;
-            for (size_t l = 0; l < chain_heats.size(); ++l)
+            std::cout << chain_heats[ chainForHeatIndex(l) ] << std::endl;
+            if ( chain_heats[ chainForHeatIndex(l) ] > heatMinBound )
             {
-                if (l == j)
-                {
-                    std::cout << chain_heats[ chainForHeatIndex(l) ] << " <--- You are here" << std::endl;
-                }
-                else
-                {
-                    std::cout << chain_heats[ chainForHeatIndex(l) ] << std::endl;
-                }
+                greaterThanMin.push_back( chain_heats[ chainForHeatIndex(l) ] );
             }
+            else
+            {
+                badChainIdx.push_back(l);
+            }
+        }
+        
+        std::cout << "We have " << badChainIdx.size() << " bad chain(s)" << std::endl;
+        if ( badChainIdx.size() != 0 )
+        {
+            double lowestGreaterThanMin = *std::min_element( greaterThanMin.begin(), greaterThanMin.end() );
+            size_t k = *std::min_element( badChainIdx.begin(), badChainIdx.end() );
+            size_t m = k - 1;
             
-            double rho = pow(chain_heats[ chainForHeatIndex(j) ] / heatMinBound, 1.0 / (num_chains - j + 1));
+            double rho = pow(lowestGreaterThanMin / heatMinBound, 1.0 / (num_chains - m));
             std::cout << "Current rho is: " << rho << std::endl;
-            size_t k = j + 1;
             
             for (; k < num_chains; ++k)
             {
-                std::cout << "Attempting to set the heat of chain " << k << " to " << (chain_heats[ chainForHeatIndex(j) ] / pow(rho, k + 1 - j)) << std::endl;
-                chain_heats[ chainForHeatIndex(k) ] = chain_heats[ chainForHeatIndex(j) ] / pow(rho, k + 1 - j);
-//                std::cout << "chain_heats[k" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
+                std::cout << "Attempting to set the heat of chain " << k << " to " << (lowestGreaterThanMin / pow(rho, k - m)) << std::endl;
+                chain_heats[ chainForHeatIndex(k) ] = lowestGreaterThanMin / pow(rho, k - m);
             }
             
             std::cout << "" << std::endl;
