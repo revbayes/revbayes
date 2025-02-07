@@ -192,7 +192,7 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
     BranchHistory* bh = this->histories[node_index];
 
     // check that node ages are consistent with character event ages
-    if ( bh->areEventTimesValid(node) == false )
+    if ( bh->areEventTimesValid(this->tau->getValue(), node) == false )
     {
         return RbConstants::Double::neginf;
     }
@@ -667,7 +667,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::simulateHistory(cons
     const RateGenerator& rm = homogeneousRateGenerator->getValue();
 
     // get the start and end times
-    double branch_length = node.getBranchLength();
+    double branch_length = this->tau->getValue().getBranchLengthForNode(node);
     double end_age = node.getAge();
     double start_age = end_age + branch_length;
     

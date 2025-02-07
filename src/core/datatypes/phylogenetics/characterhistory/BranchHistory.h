@@ -9,6 +9,7 @@
 #include "CharacterEventCompare.h"
 #include "Cloneable.h"
 #include "TopologyNode.h"
+#include "Tree.h"
 
 namespace RevBayesCore {
 class CharacterEvent;
@@ -28,7 +29,7 @@ class CharacterEvent;
         virtual BranchHistory*                                          clone(void) const = 0;
 
         // public methods
-        bool                                                            areEventTimesValid(const TopologyNode &node) const;
+        bool                                                            areEventTimesValid(const Tree& tree, const TopologyNode &node) const;
         void                                                            addEvent(CharacterEvent* evt);
         void                                                            clearEvents(void);
         void                                                            clearEvents(const std::set<size_t>& clearSet);

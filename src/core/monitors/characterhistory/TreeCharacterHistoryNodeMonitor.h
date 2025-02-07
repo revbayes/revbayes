@@ -268,7 +268,7 @@ std::string RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::buildCharac
             ndAge = n->getAge() * 5;
         else
             ndAge = n->getParent().getAge();
-        double brLen = n->getBranchLength();
+        double brLen = tree->getValue().getBranchLengthForNode(*n);
 
         std::stringstream index_ss;
         std::stringstream state_ss;
@@ -355,7 +355,7 @@ std::string RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::buildExtend
     // test whether this is a internal or external node
     if (n->isTip()) {
         // this is a tip so we just return the name of the node
-        o << n->getName() << additionalInfo << ":" << n->getBranchLength();
+        o << n->getName() << additionalInfo << ":" << tree->getValue().getBranchLengthForNode(*n);
     }
 
     else {
@@ -363,7 +363,7 @@ std::string RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::buildExtend
         for (size_t i=0; i<(n->getNumberOfChildren()-1); i++) {
             o << buildExtendedNewick( &n->getChild(i) ) << ",";
         }
-        o << buildExtendedNewick( &n->getChild(n->getNumberOfChildren()-1) ) << ")" << additionalInfo << ":" << n->getBranchLength() * br;
+        o << buildExtendedNewick( &n->getChild(n->getNumberOfChildren()-1) ) << ")" << additionalInfo << ":" << tree->getValue().getBranchLengthForNode(*n) * br;
     }
 
     return o.str();

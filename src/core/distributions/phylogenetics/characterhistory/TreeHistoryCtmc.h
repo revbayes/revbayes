@@ -363,7 +363,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[node_index]->getParentCharacters();
 
-        double branch_length = tau->getBranchLengthForNode(node_index);
+        double branch_length = tau->getValue().getBranchLengthForNode(node_index);
 
         size_t current_state = static_cast<CharacterEventDiscrete*>(states[site_index])->getState();
         double previous_age = tau->getValue().getNode(node_index).getParent().getAge();
@@ -513,7 +513,7 @@ size_t RevBayesCore::TreeHistoryCtmc<charType>::getNumberOfSites( void ) const
 template<class charType>
 const double RevBayesCore::TreeHistoryCtmc<charType>::getRootBranchLength(void) const
 {
-    double root_branch_length = tau->getValue().getRoot().getBranchLength();
+    double root_branch_length = tau->getValue().getBranchLengthForNode(tau->getValue().getRoot());
     
     // NOTE: we may remove this is if we want to require users to supply a root branch length
     // if the root node is not assigned a branch length, assign a branch length

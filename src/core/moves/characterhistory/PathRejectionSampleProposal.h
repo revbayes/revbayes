@@ -302,7 +302,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     }
 
     // get model parameters
-    double branch_length = node->getBranchLength();
+    double branch_length = p->getTree().getBranchLengthForNode(*node);
     if ( node->isRoot() )
     {
         branch_length = p->getRootBranchLength();

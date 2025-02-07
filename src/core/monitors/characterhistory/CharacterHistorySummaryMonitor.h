@@ -235,7 +235,7 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
     
     // get branch lengths
     double branch_end_time = n->getAge();
-    double branch_start_time = branch_end_time + n->getBranchLength();
+    double branch_start_time = branch_end_time + tree->getValue().getBranchLengthForNode(*n);
     
     std::stringstream branch_end_time_ss;
     branch_end_time_ss << branch_end_time;

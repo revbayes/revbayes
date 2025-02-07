@@ -115,12 +115,12 @@ void BranchHistory::addEvent(CharacterEvent* evt)
     history.insert(evt);
 }
 
-bool BranchHistory::areEventTimesValid(const TopologyNode &node) const
+bool BranchHistory::areEventTimesValid(const Tree& tree, const TopologyNode &node) const
 {
     // MJL: This causes a problem for branches subtending the root node
     //      if the Newick string does not define a root node branch!
     double lower_boundary = node.getAge();
-    double upper_boundary = lower_boundary + node.getBranchLength();
+    double upper_boundary = lower_boundary + tree.getBranchLengthForNode(node);
     double event_age;
     std::multiset<CharacterEvent*,CharacterEventCompare>::iterator it;
     for (it = history.begin(); it != history.end(); it++)

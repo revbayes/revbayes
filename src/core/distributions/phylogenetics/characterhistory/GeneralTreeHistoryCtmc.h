@@ -238,7 +238,7 @@ double RevBayesCore::GeneralTreeHistoryCtmc<charType>::computeInternalNodeLikeli
     std::vector<CharacterEvent*> end_state  = bh->getChildCharacters();
 
     // check that node ages are consistent with character event ages
-    if ( bh->areEventTimesValid(node) == false )
+    if ( bh->areEventTimesValid(this->tau->getValue(), node) == false )
     {
         return RbConstants::Double::neginf;
     }
