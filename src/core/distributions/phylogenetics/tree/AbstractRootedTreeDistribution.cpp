@@ -198,9 +198,9 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                     {
                         return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" is not a fossil";
                     }
-                    else if ( the_node.getBranchLength() != 0 )
+                    else if ( value->getBranchLengthForNode(the_node) != 0 )
                     {
-                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" has non-zero branch length "<<the_node.getBranchLength();
+                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" has non-zero branch length "<<value->getBranchLengthForNode(the_node);
                     }
 
                 }
@@ -226,9 +226,9 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
             return withReason(Double::neginf)<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than origin age "<<getOriginAge();
         }
         
-        if ( the_node.getBranchLength() < 0 )
+        if ( value->getBranchLengthForNode(the_node) < 0 )
         {
-	    return withReason(Double::neginf)<<"Pr(tree)=0: branch length "<<the_node.getBranchLength()<<" < 0";
+	    return withReason(Double::neginf)<<"Pr(tree)=0: branch length "<<value->getBranchLengthForNode(the_node)<<" < 0";
         }
 
     }

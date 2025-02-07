@@ -54,7 +54,7 @@ double PhyloWhiteNoiseProcess::recursiveLnProb(const TopologyNode &from)
     {
         // compute the variance
         double mean = 1.0;
-        double stdev = sigma->getValue() / sqrt(from.getBranchLength());
+        double stdev = sigma->getValue() / sqrt(tau->getValue().getBranchLengthForNode(from));
         double alpha = mean * mean / (stdev * stdev);
         double beta = mean / (stdev * stdev);
         double v = (*value)[from.getIndex()];
@@ -113,7 +113,7 @@ void PhyloWhiteNoiseProcess::recursiveSimulate(const TopologyNode& from)
     
         // compute the variance along the branch
         double mean = 1.0;
-        double stdev = sigma->getValue() / sqrt(from.getBranchLength());
+        double stdev = sigma->getValue() / sqrt(tau->getValue().getBranchLengthForNode(from));
         double alpha = mean * mean / (stdev * stdev);
         double beta = mean / (stdev * stdev);
     

@@ -124,7 +124,7 @@ double EventBirthDeathProposal::doBirthProposal( void )
     double branch_length = 0.0;
     if ( node.isRoot() == false )
     {
-        branch_length = node.getBranchLength();
+        branch_length = distribution->getValue().getBranchLengthForNode(node);
     }
     else
     {
@@ -173,7 +173,7 @@ double EventBirthDeathProposal::doDeathProposal( void )
     double branch_length = 0.0;
     if ( node.isRoot() == false )
     {
-        branch_length = node.getBranchLength();
+        branch_length = distribution->getValue().getBranchLengthForNode(node);
     }
     else
     {

@@ -234,7 +234,7 @@ double HeterogeneousRateBirthDeath::computeLnProbability( void )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( the_node.getBranchLength() > 1E-6 )
+            else if ( value->getBranchLengthForNode(the_node) > 1E-6 )
             {
                 return RbConstants::Double::neginf;
             }
@@ -316,7 +316,7 @@ void HeterogeneousRateBirthDeath::computeNodeProbability(const RevBayesCore::Top
         
         // remember that we go back in time (rootwards)
         double begin_time = node.getAge();
-        double branch_length = node.getBranchLength();
+        double branch_length = value->getBranchLengthForNode(node);
         double end_time = begin_time + branch_length;
         
         // set the previous state to an impossible state
@@ -517,7 +517,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
             
             double rate = 0;
             double begin_time = 0.0;
-            double branch_length = node.getBranchLength();
+            double branch_length = value->getBranchLengthForNode(node);
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
                 CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
@@ -554,7 +554,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
             
             double rate = 0;
             double begin_time = 0.0;
-            double branch_length = node.getBranchLength();
+            double branch_length = value->getBranchLengthForNode(node);
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
                 CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);

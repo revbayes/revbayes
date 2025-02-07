@@ -155,7 +155,7 @@ std::string PhylowoodNhxMonitor::buildExtendedNewick( TopologyNode* n ) {
     // test whether this is a internal or external node
     if (n->isTip()) {
         // this is a tip so we just return the name of the node
-        o << n->getIndex() << additionalInfo << ":" << n->getBranchLength();
+        o << n->getIndex() << additionalInfo << ":" << tree->getValue().getBranchLengthForNode(*n);
     }
     
     else {
@@ -163,7 +163,7 @@ std::string PhylowoodNhxMonitor::buildExtendedNewick( TopologyNode* n ) {
         for (size_t i=0; i<(n->getNumberOfChildren()-1); i++) {
             o << buildExtendedNewick( &n->getChild(i) ) << ",";
         }
-        o << buildExtendedNewick( &n->getChild(n->getNumberOfChildren()-1) ) << ")" << additionalInfo << ":" << n->getBranchLength() * br;
+        o << buildExtendedNewick( &n->getChild(n->getNumberOfChildren()-1) ) << ")" << additionalInfo << ":" << tree->getValue().getBranchLengthForNode(*n) * br;
     }
     
     return o.str();

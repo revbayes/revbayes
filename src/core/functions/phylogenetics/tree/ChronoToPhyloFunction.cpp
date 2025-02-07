@@ -53,7 +53,7 @@ void ChronoToPhyloFunction::update( void )
     size_t num_rates = this_rates.size();
     for (size_t i=0; i<num_rates; ++i)
     {
-        double old_branch_length = chrono->getValue().getNode( i ).getBranchLength();
+        double old_branch_length = chrono->getValue().getBranchLengthForNode(i);
         double new_branch_length = old_branch_length * this_rates[i];
         value->getNode( i ).setBranchLength( new_branch_length );
     }

@@ -96,7 +96,7 @@ double BranchLengthScaleProposal::doProposal( void )
     } while ( node->isRoot() == true );
 
     // we need to work with the times
-    double my_branch_length = node->getBranchLength();
+    double my_branch_length = tau.getBranchLengthForNode(*node);
 
     // now we store all necessary values
     stored_value = my_branch_length;

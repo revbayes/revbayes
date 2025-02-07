@@ -258,7 +258,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             
             // calculate the variance accounting for the branch
             double v_left  = 0.0;
-            double bl_left = left->getBranchLength();
+            double bl_left = tau->getValue().getBranchLengthForNode(*left);
             double sigma_left = computeBranchSigma(left_index);
             double alpha_left = computeBranchAlpha(left_index);
             if ( alpha_left > 1E-20 )
@@ -271,7 +271,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             }
         
             double v_right = 0.0;
-            double bl_right = right.getBranchLength();
+            double bl_right = tau->getValue().getBranchLengthForNode(right);
             double sigma_right = computeBranchSigma(right_index);
             double alpha_right = computeBranchAlpha(right_index);
             if ( alpha_right > 1E-20 )
@@ -655,7 +655,7 @@ void PhyloOrnsteinUhlenbeckPruning::simulateRecursively( const TopologyNode &nod
         const TopologyNode &child = *(*it);
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tau->getValue().getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_time = computeBranchTime( child.getIndex(), branch_length );

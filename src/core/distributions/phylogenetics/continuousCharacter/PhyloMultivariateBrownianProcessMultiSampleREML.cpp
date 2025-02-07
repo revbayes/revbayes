@@ -229,7 +229,8 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::keepSpecialization( const 
 
 void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
-    
+    const Tree& tree = tau->getValue();
+
     // check for recomputation
     if ( node.isTip() == true && dirty_nodes[node_index] == true )
     {
@@ -328,9 +329,9 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::recursiveComputeLnProbabil
             double v_left  = 0;
             if ( j == 1 )
             {
-                v_left = this->computeBranchTime(left_index, left->getBranchLength());
+                v_left = this->computeBranchTime(left_index, tree.getBranchLengthForNode(*left));
             }
-            double v_right = this->computeBranchTime(right_index, right.getBranchLength());
+            double v_right = this->computeBranchTime(right_index, tree.getBranchLengthForNode(right));
             
             std::vector<double> these_contrasts(num_sites, 0.0);
             std::vector<double> means(num_sites, 0.0);
@@ -584,7 +585,8 @@ std::vector<double> PhyloMultivariateBrownianProcessMultiSampleREML::simulateRoo
 
 void PhyloMultivariateBrownianProcessMultiSampleREML::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
-    
+    const Tree& tree = tau->getValue();
+
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
     
@@ -606,7 +608,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::simulateRecursively( const
         
         // get the branch length for this child
         size_t child_index   = child.getIndex();
-        double branch_length = this->computeBranchTime(child_index, child.getBranchLength());
+        double branch_length = this->computeBranchTime(child_index, tree.getBranchLengthForNode(child));
         
         ContinuousTaxonData &taxon = taxa[ child.getIndex() ];
         std::vector<double> c = RbStatistics::MultivariateNormal::rvCovariance(parent_state, rate_matrix->getValue(), *rng, branch_length);

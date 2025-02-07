@@ -130,11 +130,11 @@ double PhyloDiversityFunction::sumPDforNode(size_t j, std::vector<size_t>* nodes
         const TopologyNode& n = tau->getValue().getNode( j );
         if (weightedPD)
         {
-            pd += n.getBranchLength() * branchWeights[j];
+            pd += tau->getValue().getBranchLengthForNode(n) * branchWeights[j];
         }
         else
         {
-            pd += n.getBranchLength();
+            pd += tau->getValue().getBranchLengthForNode(n);
         }
         nodesVisited->push_back( j );
         if (includeRoot)

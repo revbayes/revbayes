@@ -214,7 +214,7 @@ double SampledSpeciationBirthDeathProcess::computeLnProbability( void )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( the_node.getBranchLength() > 1E-6 )
+            else if ( value->getBranchLengthForNode(the_node) > 1E-6 )
             {
                 return RbConstants::Double::neginf;
             }
@@ -290,7 +290,7 @@ void SampledSpeciationBirthDeathProcess::computeNodeProbability(const RevBayesCo
             prev_age = 2 * node.getAge();
         }
         else {
-            branch_length = node.getBranchLength();
+            branch_length = value->getBranchLengthForNode(node);
             prev_age = node.getParent().getAge();
         }
         
@@ -808,7 +808,7 @@ void SampledSpeciationBirthDeathProcess::simulateUnsampledLineages(Tree* t, std:
         // sample a random lineage
         size_t u = (size_t)(GLOBAL_RNG->uniform01() * nodes.size());
         size_t node_index = nodes[u]->getIndex();
-        double time = nodes[u]->getAge() + nodes[u]->getBranchLength() - ages[i];
+        double time = nodes[u]->getAge() + t->getBranchLengthForNode(*nodes[u]) - ages[i];
 //        std::cout << nodes[u]->getIndex() << " " <<  nodes[u]->getBranchLength() << " " << nodes[u]->getAge() << " " << time << "\n";
 //        std::cout << nodes[u]->getParent().getIndex() << " " << nodes[u]->getParent().getAge() <<  " -> " << nodes[u]->getIndex() << " " << nodes[u]->getAge() <<"\n";
 //        std::cout << "\n";

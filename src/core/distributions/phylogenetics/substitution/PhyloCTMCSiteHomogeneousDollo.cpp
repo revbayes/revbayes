@@ -136,7 +136,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
         // we assume by default that the end is at time 0
         endAge = 0.0;
     }
-    double startAge = endAge + node->getBranchLength();
+    double startAge = endAge + tau->getValue().getBranchLengthForNode(*node);
 
     double mu = death * rate;
     double beta = rate;

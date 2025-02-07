@@ -137,6 +137,7 @@ void PhyloBrownianProcessREML::keepSpecialization( const DagNode* affecter )
 
 void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
+    const Tree& tree = tau->getValue();
 
     // check for recomputation
     if ( node.isTip() == false && (dirty_nodes[node_index] == true || use_missing_data) )
@@ -179,9 +180,9 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             double v_left  = 0;
             if ( j == 1 )
             {
-                v_left = this->computeBranchTime(left_index, left->getBranchLength());
+                v_left = this->computeBranchTime(left_index, tree.getBranchLengthForNode(*left));
             }
-            double v_right = this->computeBranchTime(right_index, right.getBranchLength());
+            double v_right = this->computeBranchTime(right_index, tree.getBranchLengthForNode(right));
             
             // get the propagated uncertainties
             double delta_left   = 0.0;

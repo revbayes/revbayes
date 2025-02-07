@@ -2264,7 +2264,7 @@ void TopologyNode::suppressOutdegreeOneNodes( bool replace )
 }
 
 
-std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
+std::pair<double,double> getStartEndAge(const Tree& tree, const RevBayesCore::TopologyNode& node)
 {
     double end_age = node.getAge();
 
@@ -2274,7 +2274,7 @@ std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
         end_age = 0;
     }
 
-    double branch_length = node.getBranchLength();
+    double branch_length = tree.getBranchLengthForNode(node);
 
     // From recursivelyDrawStochasticCharacterMap
     if (branch_length < 0.0)

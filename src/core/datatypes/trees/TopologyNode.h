@@ -53,7 +53,7 @@ namespace RevBayesCore {
     class Tree;
     
     class TopologyNode  {
-        
+        friend class Tree;
     public:
         TopologyNode();                                                                                                                 //!< Default constructor with no index
         TopologyNode(size_t indx);                                                                                                      //!< Default constructor with index
@@ -103,7 +103,9 @@ namespace RevBayesCore {
         double                                      getAge(void) const;                                                                 //!< Get the age (time ago from present) for this node
         RbBitSet                                    getAllClades(std::vector<RbBitSet> &taxa, size_t n, bool io) const;                 //!< Fill all the taxon bitset
         const std::vector<std::string>&             getBranchParameters(void) const;                                                    //!< Get the branch length leading towards this node
+    private:
         double                                      getBranchLength(void) const;                                                        //!< Get the branch length leading towards this node
+    public:
         size_t                                      getCladeIndex(const TopologyNode* c) const;
         const TopologyNode&                         getChild(size_t i) const;                                                           //!< Returns the i-th child
         TopologyNode&                               getChild(size_t i);                                                                 //!< Returns the i-th child (non-const to return non-const node)
@@ -223,6 +225,6 @@ namespace RevBayesCore {
     };
 }
 
-std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node);
+std::pair<double,double> getStartEndAge(const RevBayesCore::Tree& tree, const RevBayesCore::TopologyNode& node);
 
 #endif

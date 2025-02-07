@@ -107,7 +107,7 @@ double EmpiricalTreeTopologyProposal::doProposal( void )
     old_root.setParent( new_root );
     og.setParent( new_root );
     
-    double midpoint = og.getBranchLength() / 2.0;
+    double midpoint = proposed_tree->getBranchLengthForNode(og) / 2.0;
     old_root.setBranchLength( midpoint );
     og.setBranchLength( midpoint );
     

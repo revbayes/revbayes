@@ -1058,7 +1058,7 @@ void JointAncestralStateTrace::recursivelyCollectCharacterMapSamples(size_t node
     
     // now summarize maximum a posteriori states in each time slice along the branch
     
-    double branch_len = summary_nodes[node_index]->getBranchLength();
+    double branch_len = final_summary_tree.getBranchLengthForNode(*summary_nodes[node_index]);
     
     // strings to hold the SIMMAP strings for the summarized character history
     std::string branch_map_history = "}";
@@ -1503,8 +1503,8 @@ void JointAncestralStateTrace::summarizeCharacterMaps(Tree input_tree, const pat
             // parse sampled SIMMAP string
             std::vector< std::pair<size_t, double> > this_branch_map = parseSIMMAPForNode(character_history);
             
-            double start_time = sample_tree.getNode( sample_clade_index ).getAge() + sample_tree.getNode( sample_clade_index ).getBranchLength();
-            double end_time = sample_tree.getNode( sample_clade_index ).getAge();
+            double start_time = sample_tree.getNodeAge( sample_clade_index ) + sample_tree.getBranchLengthForNode( sample_clade_index );
+            double end_time = sample_tree.getNodeAge( sample_clade_index );
             
             double current_time = start_time;
             size_t current_state;

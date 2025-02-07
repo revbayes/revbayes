@@ -457,7 +457,7 @@ double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const std::vect
  * @param ages current vector of ages of the time tree
  * @param depth depth of the current node
  */
-void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn, const TopologyNode& n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth)
+void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn, const Tree& tree1, const TopologyNode& n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth)
 {
 
     // set the name
@@ -500,7 +500,7 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
     nodes.push_back( &tn );
 
     // set the age
-    double a = depth - n.getBranchLength();
+    double a = depth - tree1.getBranchLengthForNode(n);
     if ( a < 1E-5 )
     {
         a = 0.0;
@@ -518,7 +518,7 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
         tn.addChild( new_child );
 
         // start recursive call
-        constructTimeTreeRecursively(*new_child, child, nodes, ages, a);
+        constructTimeTreeRecursively(*new_child, tree1, child, nodes, ages, a);
     }
 
     // Mark tip nodes on a 0-length branch as sampled ancestors
@@ -530,12 +530,12 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
         auto& bl_c1 = n.getChild(0);
         auto& bl_c2 = n.getChild(1);
 
-        if (bl_c1.isTip() and bl_c1.getBranchLength() == 0 and bl_c2.getBranchLength() > 0)
+        if (bl_c1.isTip() and tree1.getBranchLengthForNode(bl_c1) == 0 and tree1.getBranchLengthForNode(bl_c2) > 0)
         {
             tn.getChild(0).setSampledAncestor( true );
         }
 
-        if (bl_c2.isTip() and bl_c2.getBranchLength() == 0 and bl_c1.getBranchLength() > 0)
+        if (bl_c2.isTip() and tree1.getBranchLengthForNode(bl_c2) == 0 and tree1.getBranchLengthForNode(bl_c1) > 0)
         {
             tn.getChild(1).setSampledAncestor( true );
         }
@@ -567,10 +567,10 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool
     std::vector<double> ages;
     std::vector<TopologyNode*> nodes;
 
-    double max_depth = bln.getMaxDepth() + bln.getBranchLength();
+    double max_depth = bln.getMaxDepth() + t.getBranchLengthForNode(bln);
 
     // recursive creation of the tree
-    constructTimeTreeRecursively(*root, bln, nodes, ages, max_depth);
+    constructTimeTreeRecursively(*root, t, bln, nodes, ages, max_depth);
 
     // add the root which creates the topology
     tt->setRoot( root, reset_index );
@@ -582,7 +582,7 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool
     }
 
     // copy the root edge
-    root->setBranchLength( bln.getBranchLength() );
+    root->setBranchLength( t.getBranchLengthForNode(bln) );
 
     return tt;
 }
@@ -837,7 +837,7 @@ RevBayesCore::DistanceMatrix* RevBayesCore::TreeUtilities::getDistanceMatrix(con
 
     std::vector< std::pair<std::string, double> > distsToRoot;
 
-    processDistsInSubtree( tree.getRoot() , *matrix, distsToRoot, namesToId);
+    processDistsInSubtree(tree, tree.getRoot() , *matrix, distsToRoot, namesToId);
 
     DistanceMatrix* distMat = new DistanceMatrix(*matrix, names);
 
@@ -954,7 +954,7 @@ std::vector<double> RevBayesCore::TreeUtilities::getInverseES(const Tree& tree)
             {
                 break;
             }
-            tip_es += tree.getNode(node_index).getBranchLength() * (1 / pow(2, depth - 1));
+            tip_es += tree.getBranchLengthForNode(node_index) * (1 / pow(2, depth - 1));
             node_index = tree.getNode(node_index).getParent().getIndex();
             depth++;
         }
@@ -1018,7 +1018,7 @@ double RevBayesCore::TreeUtilities::getMeanInverseES(const Tree& tree, const Abs
                         {
                             break;
                         }
-                        tip_es += tree.getNode(node_index).getBranchLength() * (1 / pow(2, depth - 1));
+                        tip_es += tree.getBranchLengthForNode(node_index) * (1 / pow(2, depth - 1));
                         node_index = tree.getNode(node_index).getParent().getIndex();
                         depth++;
                     }
@@ -1162,7 +1162,7 @@ std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree& tree, const
     {
         throw RbException("getPSSP is only implemented for character alignments with a single site.");
     }
-    recursivelyGetPSSP(tree.getRoot(), c, branch_lengths, state_index);
+    recursivelyGetPSSP(tree, tree.getRoot(), c, branch_lengths, state_index);
     
     return branch_lengths;
 }
@@ -1229,12 +1229,12 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
     for (size_t i = 0; i < tree.getNumberOfTips(); ++i)
     {
         TopologyNode* node = &(tree.getTipNode( i ) );
-        double age = node->getBranchLength();
+        double age = tree.getBranchLengthForNode(*node);
         node = &(node->getParent());
 
         while ( node->isRoot() == false )
         {
-            age += node->getBranchLength();
+            age += tree.getBranchLengthForNode(i);
             node = &(node->getParent());
         }
         if (age > max)
@@ -1248,7 +1248,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
     // We extend terminal branches
     for (size_t i = 0; i < tree.getNumberOfTips(); ++i)
     {
-        tree.getTipNode( i ).setBranchLength(tree.getTipNode( i ).getBranchLength() + max - ages[i]);
+        tree.getTipNode( i ).setBranchLength(tree.getBranchLengthForNode(tree.getTipNode( i )) + max - ages[i]);
     }
     
     // finally, make sure that all the internal nodes have the ages properly set
@@ -1335,14 +1335,14 @@ void RevBayesCore::TreeUtilities::offsetTree(TopologyNode& node, double factor)
  * @param[out] distsToNodeFather vector to store distance between leaves and node parent
  * @param[in] namesToId map of node names to their index
  */
-void RevBayesCore::TreeUtilities::processDistsInSubtree(const TopologyNode& node, MatrixReal& matrix, std::vector< std::pair<std::string, double> >& distsToNodeFather, const std::map< std::string, int >& namesToId)
+void RevBayesCore::TreeUtilities::processDistsInSubtree(const Tree& tree, const TopologyNode& node, MatrixReal& matrix, std::vector< std::pair<std::string, double> >& distsToNodeFather, const std::map< std::string, int >& namesToId)
 {
     distsToNodeFather.clear();
 
     // node-is-leaf case
     if ( node.isTip() == true )
     {
-        distsToNodeFather.push_back(make_pair ( node.getName(), node.getBranchLength() ) );
+        distsToNodeFather.push_back(make_pair ( node.getName(), tree.getBranchLengthForNode(node) ) );
         return;
     }
 
@@ -1352,7 +1352,7 @@ void RevBayesCore::TreeUtilities::processDistsInSubtree(const TopologyNode& node
     for (size_t i = 0; i < node.getNumberOfChildren(); ++i)
     {
         const TopologyNode* child = &( node.getChild(i) );
-        processDistsInSubtree(*child, matrix, leavesDists[child->getIndex()], namesToId); // recursivity
+        processDistsInSubtree(tree, *child, matrix, leavesDists[child->getIndex()], namesToId); // recursivity
     }
 
     // Write leaf-leaf distances to the distance matrix.
@@ -1404,7 +1404,7 @@ void RevBayesCore::TreeUtilities::processDistsInSubtree(const TopologyNode& node
 
     // Get distances from node's parent to considered leaves
     distsToNodeFather.clear();
-    double nodeToFather = node.getBranchLength();
+    double nodeToFather = tree.getBranchLengthForNode(node);
 
     for (std::map<size_t, std::vector<std::pair<std::string, double> > >::iterator son = leavesDists.begin(); son != leavesDists.end(); ++son)
     {
@@ -1466,7 +1466,7 @@ std::set<size_t> TreeUtilities::recursivelyComputeFitch(const TopologyNode& node
  * @param state_index index of the specific state
  * @return set of branches in state given by state_index
  */
-std::set<size_t> TreeUtilities::recursivelyGetPSSP(const TopologyNode& node, const AbstractHomologousDiscreteCharacterData& c, std::vector<double> &branch_lengths, size_t state_index)
+std::set<size_t> TreeUtilities::recursivelyGetPSSP(const Tree& tree, const TopologyNode& node, const AbstractHomologousDiscreteCharacterData& c, std::vector<double> &branch_lengths, size_t state_index)
 {
     if ( node.isTip() == true )
     {
@@ -1482,8 +1482,8 @@ std::set<size_t> TreeUtilities::recursivelyGetPSSP(const TopologyNode& node, con
         {
             throw RbException("getPSSP is only implemented for binary trees.");
         }
-        std::set<size_t> l = recursivelyGetPSSP(node.getChild(0), c, branch_lengths, state_index);
-        std::set<size_t> r = recursivelyGetPSSP(node.getChild(1), c, branch_lengths, state_index);
+        std::set<size_t> l = recursivelyGetPSSP(tree, node.getChild(0), c, branch_lengths, state_index);
+        std::set<size_t> r = recursivelyGetPSSP(tree, node.getChild(1), c, branch_lengths, state_index);
 
         std::set<size_t> intersect;
         set_intersection(l.begin(), l.end(), r.begin(), r.end(), std::inserter(intersect, intersect.begin()));
@@ -1498,8 +1498,8 @@ std::set<size_t> TreeUtilities::recursivelyGetPSSP(const TopologyNode& node, con
         {
             if (intersect.find(state_index) != intersect.end())
             {
-                branch_lengths.push_back(node.getChild(0).getBranchLength());
-                branch_lengths.push_back(node.getChild(1).getBranchLength());
+                branch_lengths.push_back(tree.getBranchLengthForNode(node.getChild(0)));
+                branch_lengths.push_back(tree.getBranchLengthForNode(node.getChild(1)));
             }
         }
         return intersect;
@@ -1606,7 +1606,7 @@ void RevBayesCore::TreeUtilities::setAges(TopologyNode& node, const std::vector<
  * @param n node whose age is set
  * @param age new node age
  */
-void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double age)
+void RevBayesCore::TreeUtilities::setAgesRecursively(Tree& tree, TopologyNode& node, double age)
 {
     // first, we set the age of this node
     node.setAge( age );
@@ -1619,7 +1619,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
         const std::vector<TopologyNode*>& children = node.getChildren();
         for (size_t i = 0; i < children.size(); ++i)
         {
-            setAgesRecursively( *(children[i]), age-children[i]->getBranchLength());
+            setAgesRecursively(tree, *(children[i]), age - tree.getBranchLengthForNode(*children[i]));
         }
 
     }

@@ -76,8 +76,8 @@ double PhyloBranchRatesBM::recursiveLnProb( const TopologyNode& node, std::vecto
             return RbConstants::Double::neginf;
         }
         double node_value = log(ln_node_value);
-        double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
-        double mean = parent_value + drift->getValue() * node.getBranchLength();
+        double stand_dev = sigma->getValue() * sqrt(tau->getValue().getBranchLengthForNode(node));
+        double mean = parent_value + drift->getValue() * tau->getValue().getBranchLengthForNode(node);
         ln_prob += RbStatistics::Normal::lnPdf(node_value, stand_dev, mean) - std::log(ln_node_value);
         
         parent_values[index] = node_value;
@@ -122,8 +122,8 @@ void PhyloBranchRatesBM::recursiveSimulate(const TopologyNode& node, std::vector
         // x ~ normal(x_up, sigma^2 * branchLength)
         
         size_t parent_index = node.getParent().getIndex();
-        double stand_dev = sigma->getValue() * sqrt(node.getBranchLength());
-        double mean = log(parent_values[parent_index]) + drift->getValue() * node.getBranchLength();
+        double stand_dev = sigma->getValue() * sqrt(tau->getValue().getBranchLengthForNode(node));
+        double mean = log(parent_values[parent_index]) + drift->getValue() * tau->getValue().getBranchLengthForNode(node);
         
         // simulate the new Val
         RandomNumberGenerator* rng = GLOBAL_RNG;

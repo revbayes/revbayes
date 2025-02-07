@@ -37,7 +37,7 @@ void TreeLengthStatistic::update( void )
     double treeLength = 0.0;
     for ( ; it != it_end; it++)
     {
-        treeLength += (*it)->getBranchLength();
+        treeLength += tree->getValue().getBranchLengthForNode(*(*it));
     }
     
     *value = treeLength;

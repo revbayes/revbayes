@@ -97,7 +97,7 @@ namespace RevBayesCore {
 
     protected:
 
-        Split                                      collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<Split, long>&);
+        Split                                      collectTreeSample(const Tree& tree, const TopologyNode&, RbBitSet&, std::string, std::map<Split, long>&);
         void                                       enforceNonnegativeBranchLengths(TopologyNode& tree) const;
         TopologyNode*                              findParentNode(TopologyNode&, const Split &, std::vector<TopologyNode*>&, RbBitSet& ) const;
         double                                     jointSplitFrequency(const std::vector<Split>& s) const;

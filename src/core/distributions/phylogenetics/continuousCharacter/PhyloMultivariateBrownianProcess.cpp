@@ -88,8 +88,8 @@ double PhyloMultivariateBrownianProcess::recursiveLnProb( const TopologyNode& fr
             }
 
             double logprob = 0;
-            logprob -= 0.5 * s2 / from.getBranchLength();
-            logprob -= 0.5 * (sigma->getValue().getLogDet() + sigma->getValue().getDim() * log(from.getBranchLength()));
+            logprob -= 0.5 * s2 / tau->getValue().getBranchLengthForNode(from);
+            logprob -= 0.5 * (sigma->getValue().getLogDet() + sigma->getValue().getDim() * log(tau->getValue().getBranchLengthForNode(from)));
             nodeLogProbs[index] = logprob;
             dirty_nodes[index] = false;
         }

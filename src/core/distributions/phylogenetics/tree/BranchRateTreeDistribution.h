@@ -39,7 +39,7 @@ class DagNode;
     private:
 
         // helper functions
-        RbBitSet                                            collectTreeSample(const TopologyNode& n, RbBitSet& in, std::map<RbBitSet, double>& bl);
+        RbBitSet                                            collectTreeSample(const Tree& t, const TopologyNode& n, RbBitSet& in, std::map<RbBitSet, double>& bl);
         RbBitSet                                            collectSplits(const TopologyNode& n, RbBitSet& in, std::vector<RbBitSet>& s) const;
         void                                                simulateTree(void);
         void                                                simulateClade(std::vector<TopologyNode*> &n);                           //!< Simulate n speciation events.

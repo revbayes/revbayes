@@ -39,7 +39,7 @@ GeneratorToSiteModel::calculateTransitionProbabilities(const Tree& tau, int node
         throw RbException("GeneratorToSiteModel called updateTransitionProbabilities for the root node\n");
     }
 
-    auto [start_age, end_age] = getStartEndAge(*node);
+    auto [start_age, end_age] = getStartEndAge(tau, *node);
     
     TransitionProbabilityMatrix P(getNumberOfStates());
     generator->calculateTransitionProbabilities( start_age, end_age, _scale * rate, P);
@@ -50,7 +50,7 @@ bool GeneratorToSiteModel::simulateStochasticMapping(const Tree& tau, int node_i
 {
     const TopologyNode* node = tau.getNodes()[node_index];
 
-    auto [start_age, end_age] = getStartEndAge(*node);
+    auto [start_age, end_age] = getStartEndAge(tau, *node);
 
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;

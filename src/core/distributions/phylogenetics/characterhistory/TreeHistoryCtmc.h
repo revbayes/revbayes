@@ -363,7 +363,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[node_index]->getParentCharacters();
 
-        double branch_length = tau->getValue().getNode(node_index).getBranchLength();
+        double branch_length = tau->getBranchLengthForNode(node_index);
 
         size_t current_state = static_cast<CharacterEventDiscrete*>(states[site_index])->getState();
         double previous_age = tau->getValue().getNode(node_index).getParent().getAge();

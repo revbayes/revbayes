@@ -1054,8 +1054,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
                 child->setParent( tmp_node );
                 tmp_node->addChild( child );
                 
-                tmp_node->setBranchLength( child->getBranchLength() * 0.5 );
-                child->setBranchLength( child->getBranchLength() * 0.5 );
+                tmp_node->setBranchLength( psi->getBranchLengthForNode(*child) * 0.5 );
+                child->setBranchLength( psi->getBranchLengthForNode(*child) * 0.5 );
                 new_node->setBranchLength( RbStatistics::Exponential::rv(10.0, *GLOBAL_RNG) );
                 
                 inserted_nodes.push_back( tmp_node );

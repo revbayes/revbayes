@@ -225,6 +225,26 @@ Tree* Tree::clone(void) const
     return new Tree(*this);
 }
 
+double Tree::getBranchLengthForNode(const TopologyNode& node) const
+{
+    return node.getBranchLength();
+}
+
+double Tree::getBranchLengthForNode(int node) const
+{
+    return getBranchLengthForNode(getNode(node));
+}
+
+double Tree::getNodeAge(const TopologyNode& node) const
+{
+    return node.getAge();
+}
+
+double Tree::getNodeAge(int node) const
+{
+    return getNodeAge(getNode(node));
+}
+
 
 void Tree::collapseNegativeBranchLengths(double l)
 {

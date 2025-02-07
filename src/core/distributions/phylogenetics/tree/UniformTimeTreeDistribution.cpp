@@ -179,7 +179,7 @@ double UniformTimeTreeDistribution::computeLnProbability( void )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( the_node.getBranchLength() > 1E-6 )
+            else if ( value->getBranchLengthForNode(the_node) > 1E-6 )
             {
                 return RbConstants::Double::neginf;
             }

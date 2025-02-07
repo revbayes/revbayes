@@ -408,7 +408,7 @@ void PhyloBrownianCharacterHistoryProcess::simulateRecursively( const TopologyNo
         }
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tau->getValue().getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_sigma = sqrt( computeBranchTime( child.getIndex(), branch_length ) );
@@ -459,7 +459,7 @@ void PhyloBrownianCharacterHistoryProcess::simulateRecursivelyInternal( const To
         {
 
             // get the branch length for this child
-            double branch_length = child.getBranchLength();
+            double branch_length = tau->getValue().getBranchLengthForNode(child);
             
             // get the branch specific rate
             double branch_sigma = sqrt( computeBranchTime( child.getIndex(), branch_length ) );

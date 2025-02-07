@@ -219,7 +219,7 @@ double UniformTopologyBranchLengthDistribution::computeLnProbability( void )
         const TopologyNode *node = nodes[i];
         if ( node->isRoot() == false )
         {
-            double *bl = new double( node->getBranchLength() );
+            double *bl = new double( value->getBranchLengthForNode(*node) );
             branch_length_prior->setValue( bl );
             ln_branch_length_prob += branch_length_prior->computeLnProbability();
         }

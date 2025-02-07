@@ -62,7 +62,7 @@ class TopologyNode;
         void                                                                                    addAllTripletsOneWay( std::vector< size_t >& leftTips, std::vector< size_t >& rightTips, size_t leftSize,size_t rightSize ); //!< Get rooted triplets given vectors of left and right tips, one way only
 
         
-        void                                                                                    populateTripletDistribution ( const TopologyNode* node, std::vector< size_t >& allTips, std::vector< double >& distancesToTips, std::map < std::pair < size_t, size_t >, double >& distancesToAncestors ) ;
+        void                                                                                    populateTripletDistribution ( const Tree& tree, const TopologyNode* node, std::vector< size_t >& allTips, std::vector< double >& distancesToTips, std::map < std::pair < size_t, size_t >, double >& distancesToAncestors ) ;
         void                                                                                    addAllTriplets(std::vector< size_t >& leftTips, std::vector< size_t >& rightTips, std::vector< double >& leftDistancesToTips, std::vector< double >& rightDistancesToTips, std::map < std::pair < size_t, size_t >, double >& distancesToAncestors ) ; //!< Get all rooted triplets given vectors of left and right tips, and keep distances
         void                                                                                    addAllTripletsOneWay( std::vector< size_t >& leftTips, std::vector< size_t >& rightTips, size_t leftSize, size_t rightSize,
                                                                                                                      std::vector<double>& leftDistancesToTips,

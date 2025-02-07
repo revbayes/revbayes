@@ -64,8 +64,8 @@ double PhyloBrownianProcess::recursiveLnProb( const TopologyNode& from )
         // x ~ normal(x_up, sigma^2 * branchLength)
         
         size_t upindex = from.getParent().getIndex();
-        double standDev = sigma->getValue() * sqrt(from.getBranchLength());
-        double mean = (*value)[upindex] + drift->getValue() * from.getBranchLength();
+        double standDev = sigma->getValue() * sqrt(tau->getValue().getBranchLengthForNode(from));
+        double mean = (*value)[upindex] + drift->getValue() * tau->getValue().getBranchLengthForNode(from);
         lnProb += RbStatistics::Normal::lnPdf(val, standDev, mean);
     }
     
@@ -105,8 +105,8 @@ void PhyloBrownianProcess::recursiveSimulate(const TopologyNode& from)
         // x ~ normal(x_up, sigma^2 * branchLength)
         
         size_t upindex = from.getParent().getIndex();
-        double standDev = sigma->getValue() * sqrt(from.getBranchLength());
-        double mean = (*value)[upindex] + drift->getValue() * from.getBranchLength();
+        double standDev = sigma->getValue() * sqrt(tau->getValue().getBranchLengthForNode(from));
+        double mean = (*value)[upindex] + drift->getValue() * tau->getValue().getBranchLengthForNode(from);
 
         // simulate the new Val
         RandomNumberGenerator* rng = GLOBAL_RNG;

@@ -175,7 +175,7 @@ double EventTimeSlideProposal::doProposal( void )
                 }
                 
                 // the new remaining branch length
-                remaining_branch_length = tree.getNode( branch_index ).getBranchLength();
+                remaining_branch_length = tree.getBranchLengthForNode( branch_index );
                 
             }
             else
@@ -198,7 +198,7 @@ double EventTimeSlideProposal::doProposal( void )
                 }
                 
                 // the new remaining branch length
-                remaining_branch_length = tree.getNode( branch_index ).getBranchLength();
+                remaining_branch_length = tree.getBranchLengthForNode( branch_index );
             }
             
         }

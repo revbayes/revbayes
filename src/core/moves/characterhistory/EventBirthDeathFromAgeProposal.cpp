@@ -144,7 +144,7 @@ double EventBirthDeathFromAgeProposal::doBirthProposal( void )
     
     // randomly pick a branch
     size_t branch_index = size_t( std::floor(num_branches * rng->uniform01()) );
-    double branch_length = distribution->getValue().getNode(branch_index).getBranchLength();
+    double branch_length = distribution->getValue().getBranchLengthForNode(branch_index);
 
     // draw a new state
     size_t new_state = size_t( std::floor(num_states * rng->uniform01()) );
@@ -187,7 +187,7 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     stored_value = event;
     stored_branch_index = branch_index;
     
-    double branch_length = distribution->getValue().getNode(branch_index).getBranchLength();
+    double branch_length = distribution->getValue().getBranchLengthForNode(branch_index);
 //    double age = distribution->getValue().getNode(branch_index).getParent().getAge() - event->getTime();
     
     double log_death_move_prob = log(0.5);

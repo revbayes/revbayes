@@ -64,7 +64,7 @@ double PhyloOrnsteinUhlenbeckProcess::computeLnProbability(void)
 
 double PhyloOrnsteinUhlenbeckProcess::recursiveLnProb( const TopologyNode& from )
 {
-    
+    auto& tree = tau->getValue();
     double lnProb = 0.0;
     size_t index = from.getIndex();
     double val = (*value)[index];
@@ -84,7 +84,7 @@ double PhyloOrnsteinUhlenbeckProcess::recursiveLnProb( const TopologyNode& from 
         
         // x ~ normal(x_up, sigma^2 * branchLength)
         double upval = (*value)[from.getParent().getIndex()];
-        double t = from.getBranchLength();
+        double t = tree.getBranchLengthForNode(from);
         if ( homogeneousPhi != NULL ) // homogeneous
         {
             double e = exp(-homogeneousPhi->getValue() * t);
@@ -149,7 +149,7 @@ void PhyloOrnsteinUhlenbeckProcess::recursiveSimulate(const TopologyNode& from)
         // x ~ normal(x_up, sigma^2 * branchLength)
         
         double upval = (*value)[from.getParent().getIndex()];
-        double t = from.getBranchLength();
+        double t = tau->getValue().getBranchLengthForNode(from);
         double m = 0.0;
         double standDev = 1.0;
         if ( homogeneousPhi != NULL ) // homogeneous

@@ -188,7 +188,7 @@ void RootedTripletDistribution::extractTriplets( const Tree& t )
     {
         std::vector< double > distancesToTips;
         std::map < std::pair < size_t, size_t >, double > distancesToAncestors; // contains distances between most ancient ancestor and most recent ancestor of a given pair of leaves
-        populateTripletDistribution ( &(t.getRoot()), allTips, distancesToTips, distancesToAncestors );
+        populateTripletDistribution ( t, &(t.getRoot()), allTips, distancesToTips, distancesToAncestors );
     }
     
 }
@@ -319,7 +319,7 @@ void RootedTripletDistribution::addAllTripletsOneWay( std::vector< size_t >& lef
 
 
 
-void RootedTripletDistribution::populateTripletDistribution ( const TopologyNode* node, std::vector< size_t >& allTips, std::vector< double >& distancesToTips, std::map < std::pair < size_t, size_t >, double >& distancesToAncestors ) {
+void RootedTripletDistribution::populateTripletDistribution ( const Tree& tree, const TopologyNode* node, std::vector< size_t >& allTips, std::vector< double >& distancesToTips, std::map < std::pair < size_t, size_t >, double >& distancesToAncestors ) {
     std::vector< size_t > leftTips;
     std::vector< size_t > rightTips;
     std::vector< double > leftDistancesToTips;
@@ -330,11 +330,11 @@ void RootedTripletDistribution::populateTripletDistribution ( const TopologyNode
     if ( node->getNumberOfChildren() > 0 )
     {
         //Assuming binary trees
-        populateTripletDistribution( &( node->getChild(0) ), leftTips, leftDistancesToTips, leftDistancesToAncestors);
-        populateTripletDistribution( &( node->getChild(1) ), rightTips, rightDistancesToTips, rightDistancesToAncestors);
+        populateTripletDistribution( tree, &( node->getChild(0) ), leftTips, leftDistancesToTips, leftDistancesToAncestors);
+        populateTripletDistribution( tree, &( node->getChild(1) ), rightTips, rightDistancesToTips, rightDistancesToAncestors);
         
-        double leftDist = node->getChild(0).getBranchLength();
-        double rightDist = node->getChild(1).getBranchLength();
+        double leftDist = tree.getBranchLengthForNode(node->getChild(0));
+        double rightDist = tree.getBranchLengthForNode(node->getChild(1));
         for ( std::map < std::pair < size_t, size_t >, double >::iterator it = rightDistancesToAncestors.begin(); it != rightDistancesToAncestors.end(); ++it ) {
             it->second += rightDist;
             distancesToAncestors[it->first] = it->second;

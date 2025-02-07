@@ -148,7 +148,7 @@ double IndependentTopologyProposal::doProposal( void )
         node->setParent(root);
 
         // randomly split the branch length descending from the root
-        double brlen = node->getBranchLength();
+        double brlen = proposal_tree.getBranchLengthForNode(*node);
         double u = rng->uniform01();
 
         node->setBranchLength( brlen * u );
@@ -176,7 +176,7 @@ double IndependentTopologyProposal::doProposal( void )
     {
         if( proposal_nodes[i]->isRoot() == false )
         {
-            branch_lengths.push_back( proposal_nodes[i]->getBranchLength() );
+            branch_lengths.push_back( proposal_tree.getBranchLengthForNode(*proposal_nodes[i]) );
         }
     }
 
@@ -230,7 +230,7 @@ double IndependentTopologyProposal::doProposal( void )
 
         for(size_t i = 0; i < stored_rates.size(); i++)
         {
-            rates[i] = branch_lengths[i] / proposal_tree.getNode(i).getBranchLength();
+            rates[i] = branch_lengths[i] / proposal_tree.getBranchLengthForNode(i);
         }
 
         rates_node->getValue() = rates;
@@ -243,7 +243,7 @@ double IndependentTopologyProposal::doProposal( void )
         {
             stored_rates.push_back(rates_vector[i]->getValue());
 
-            rates_vector[i]->getValue() = branch_lengths[i] / proposal_tree.getNode(i).getBranchLength();
+            rates_vector[i]->getValue() = branch_lengths[i] / proposal_tree.getBranchLengthForNode(i);
         }
     }
 

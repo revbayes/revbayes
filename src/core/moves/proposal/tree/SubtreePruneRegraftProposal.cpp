@@ -168,7 +168,7 @@ double SubtreePruneRegraftProposal::doProposal( void )
         for (size_t i = 0 ; i < storedchildren.size(); i++)
         {
             storedindices.push_back(storedchildren[i]->getIndex());
-            storedbrlens.push_back(storedchildren[i]->getBranchLength());
+            storedbrlens.push_back( tau.getBranchLengthForNode(*storedchildren[i]) );
             storedChoosenNode->removeChild(storedchildren[i]);
             storedchildren[i]->setParent(NULL, false);
         }
@@ -285,7 +285,7 @@ void SubtreePruneRegraftProposal::undoProposal( void )
         for (size_t i = 0 ; i < storedchildren.size(); i++)
         {
             storedindices.push_back(storedchildren[i]->getIndex());
-            storedbrlens.push_back(storedchildren[i]->getBranchLength());
+            storedbrlens.push_back( tau.getBranchLengthForNode(*storedchildren[i]) );
             storedChoosenNode->removeChild(storedchildren[i]);
             storedchildren[i]->setParent(NULL, false);
         }

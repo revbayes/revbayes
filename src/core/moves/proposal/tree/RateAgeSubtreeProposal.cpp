@@ -132,7 +132,7 @@ double RateAgeSubtreeProposal::doProposal( void )
     stored_branch_lengths.resize(num_nodes);
     for(size_t i = 0; i < num_nodes; ++i)
     {
-        stored_branch_lengths[i] = nodes[i]->getBranchLength();
+        stored_branch_lengths[i] = tau.getBranchLengthForNode(*nodes[i]);
     }
     
     // lower bound
@@ -161,7 +161,7 @@ double RateAgeSubtreeProposal::doProposal( void )
     for(size_t j = 0; j < num_nodes; ++j)
     {
         double old_length = stored_branch_lengths[j];
-        double new_length = nodes[j]->getBranchLength();
+        double new_length = tau.getBranchLengthForNode(*nodes[j]);
         double factor     = old_length / new_length;
         
         if ( new_length != old_length )
@@ -228,7 +228,7 @@ void RateAgeSubtreeProposal::undoProposal( void )
     for(size_t j = 0; j < num_nodes; ++j)
     {
         double old_length = stored_branch_lengths[j];
-        double new_length = nodes[j]->getBranchLength();
+        double new_length = tree->getValue().getBranchLengthForNode(*nodes[j]);
         double factor     = old_length / new_length;
         
         if ( new_length != old_length )

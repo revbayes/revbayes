@@ -336,7 +336,7 @@ void PhylowoodConverter::makeBits(void)
     }
 }
 
-std::string PhylowoodConverter::buildCharacterHistoryString(TopologyNode* n, unsigned end)
+std::string PhylowoodConverter::buildCharacterHistoryString(const TopologyNode* n, unsigned end)
 {
     std::stringstream ss;
     
@@ -354,7 +354,7 @@ std::string PhylowoodConverter::buildCharacterHistoryString(TopologyNode* n, uns
 
 
 /* Build newick string */
-std::string PhylowoodConverter::buildExtendedNewick( TopologyNode* n ) {
+std::string PhylowoodConverter::buildExtendedNewick(const TopologyNode* n ) {
     // create the newick string
     std::stringstream o;
     
@@ -380,7 +380,7 @@ std::string PhylowoodConverter::buildExtendedNewick( TopologyNode* n ) {
     // test whether this is a internal or external node
     if (n->isTip()) {
         // this is a tip so we just return the name of the node
-        o << n->getIndex() << additionalInfo << ":" << n->getBranchLength();
+        o << n->getIndex() << additionalInfo << ":" << tree->getBranchLengthForNode(*n);
     }
     
     else {
@@ -388,7 +388,7 @@ std::string PhylowoodConverter::buildExtendedNewick( TopologyNode* n ) {
         for (size_t i=0; i<(n->getNumberOfChildren()-1); i++) {
             o << buildExtendedNewick( &n->getChild(i) ) << ",";
         }
-        o << buildExtendedNewick( &n->getChild(n->getNumberOfChildren()-1) ) << ")" << additionalInfo << ":" << n->getBranchLength() * br;
+        o << buildExtendedNewick( &n->getChild(n->getNumberOfChildren()-1) ) << ")" << additionalInfo << ":" << tree->getBranchLengthForNode(*n) * br;
     }
     
     return o.str();

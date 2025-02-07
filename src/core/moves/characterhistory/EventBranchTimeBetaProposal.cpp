@@ -110,8 +110,8 @@ double EventBranchTimeBetaProposal::doProposal( void )
         
         // we need to remove and add the event so that the events are back in time order
         history.removeEvent(event, branch_index);
-        double branch_length = distribution->getValue().getNode(branch_index).getBranchLength();
-        double my_age = distribution->getValue().getNode(branch_index).getAge();
+        double branch_length = distribution->getValue().getBranchLengthForNode(branch_index);
+        double my_age = distribution->getValue().getNodeAge(branch_index);
 
         // store the event
         stored_value = event;

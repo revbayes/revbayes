@@ -551,7 +551,7 @@ void PhyloOrnsteinUhlenbeckThreePoint::simulateRecursively( const TopologyNode &
         const TopologyNode &child = *(*it);
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tau->getValue().getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_time = computeBranchTime( child.getIndex(), branch_length );

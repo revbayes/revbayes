@@ -5,6 +5,8 @@
 #include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
 #include "TopologyNode.h"
+#include "Tree.h"
+#include "TypedDagNode.h"
 #include "Cloneable.h"
 #include "ContinuousTaxonData.h"
 
@@ -52,7 +54,7 @@ void AbstractPhyloBrownianProcess::simulateRecursively( const TopologyNode &node
         const TopologyNode &child = *(*it);
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tau->getValue().getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_sigma = sqrt( computeBranchTime( child.getIndex(), branch_length ) );

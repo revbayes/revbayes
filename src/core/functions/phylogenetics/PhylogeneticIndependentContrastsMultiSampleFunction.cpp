@@ -198,9 +198,9 @@ void PhylogeneticIndependentContrastsMultiSampleFunction::recursiveComputeLnProb
             double v_left  = 0;
             if ( j == 1 )
             {
-                v_left = left->getBranchLength();
+                v_left = tau->getValue().getBranchLengthForNode(*left);
             }
-            double v_right = right.getBranchLength();
+            double v_right = tau->getValue().getBranchLengthForNode(right);
             
             // add the propagated uncertainty to the branch lengths
             double t_left  = v_left  + delta_left;

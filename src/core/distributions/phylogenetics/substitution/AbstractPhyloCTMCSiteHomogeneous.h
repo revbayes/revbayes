@@ -1439,9 +1439,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
         this->drawJointConditionalAncestralStates( start_states, end_states );
 
         // save the character history for the root
-        const TopologyNode &root = this->tau->getValue().getRoot();
+        auto& tree = tau->getValue();
+        const TopologyNode &root = tree.getRoot();
         size_t root_index = root.getIndex();
-        std::string simmap_string = "{" + end_states[root_index][site].getStringValue() + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
+        std::string simmap_string = "{" + end_states[root_index][site].getStringValue() + "," + StringUtilities::toString( tree.getBranchLengthForNode(root) ) + "}";
         character_histories[root_index] = simmap_string;
 
         // get the sampled site-matrix and site-rate indexes
@@ -1580,7 +1581,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     }
     else
     {
-        auto [start_age, end_age] = getStartEndAge(node);
+        auto [start_age, end_age] = getStartEndAge(tau->getValue(), node);
 
         // multiply by the clock-rate for the site
         if (this->site_rates != NULL)
@@ -4245,7 +4246,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         return;
     }
 
-    auto [start_age, end_age] = getStartEndAge(*node);
+    auto [start_age, end_age] = getStartEndAge(tau->getValue(), *node);
 
     // we rescale the rate by the inverse of the proportion of invariant sites
     rate /= ( 1.0 - getPInv() );
@@ -4359,7 +4360,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     }
 
     // 3. Handle non-mixture-models.
-    auto [start_age, end_age] = getStartEndAge(*node);
+    auto [start_age, end_age] = getStartEndAge(tau->getValue(), *node);
 
     // first, get the rate matrix for this branch
     RateMatrix_JC jc(this->num_chars); // BAD!!!

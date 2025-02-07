@@ -153,6 +153,8 @@ PhyloMultiSampleOrnsteinUhlenbeckProcess* PhyloMultiSampleOrnsteinUhlenbeckProce
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeCovariance(MatrixReal &individual_covariance)
 {
+    const Tree& tree = tau->getValue();
+
     // create a temporary matrix for the species covariances
     MatrixReal species_covariance = MatrixReal(num_species,num_species);
     
@@ -199,7 +201,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeCovariance(MatrixReal &ind
             const TopologyNode *current_node = left_tip_node;
             while (current_index != mrca_index)
             {
-                sum_AT += computeBranchAlpha(current_index) * current_node->getBranchLength();
+                sum_AT += computeBranchAlpha(current_index) * tree.getBranchLengthForNode(*current_node);
                 current_node = &current_node->getParent();
                 current_index = current_node->getIndex();
             }
@@ -209,7 +211,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeCovariance(MatrixReal &ind
             current_node = right_tip_node;
             while (current_index != mrca_index)
             {
-                sum_AT += computeBranchAlpha(current_index) * current_node->getBranchLength();
+                sum_AT += computeBranchAlpha(current_index) * tree.getBranchLengthForNode(*current_node);
                 current_node = &current_node->getParent();
                 current_index = current_node->getIndex();
             }
@@ -264,12 +266,11 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeExpectation(std::vector<do
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeExpectationRecursive(const TopologyNode &node, double parent_expectation, std::vector<double> &expectations)
 {
-    
     // get parameters for this branch
     size_t node_index       = node.getIndex();
     double alpha            = computeBranchAlpha(node_index);
     double theta            = computeBranchTheta(node_index);
-    double bl               = node.getBranchLength();
+    double bl               = tau->getValue().getBranchLengthForNode(node);
     
     double eAT = exp(-1.0 * alpha * bl);
     double my_expectation = 0.0;
@@ -301,13 +302,15 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeExpectationRecursive(const
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeVarianceRecursive(const TopologyNode &node, std::vector<double> &variance)
 {
+    const Tree& tree = tau->getValue();
+
     // get parameters for this branch
     size_t node_index       = node.getIndex();
     size_t parent_index     = node.getParent().getIndex();
     double alpha            = computeBranchAlpha(node_index);
     double sigma            = computeBranchSigma(node_index);
     double sigma_square     = sigma * sigma;
-    double bl               = node.getBranchLength();
+    double bl               = tree.getBranchLengthForNode(node);
     
     if ( alpha > 1E-10 )
     {
@@ -627,11 +630,12 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::resetValue( void )
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcess::recursiveComputeRootToTipDistance(std::vector<double> &distances, double distance_from_root, const RevBayesCore::TopologyNode &node, size_t node_index)
 {
-    
+    const Tree& tree = tau->getValue();
+
     if ( node.isRoot() == false )
     {
         // get my scaled branch length
-        double v = this->computeBranchTime(node_index, node.getBranchLength() );
+        double v = this->computeBranchTime(node_index, tree.getBranchLengthForNode(node) );
         
         if ( node.isTip() )
         {
@@ -667,14 +671,15 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::recursiveComputeRootToTipDistance
 
 std::set<size_t> PhyloMultiSampleOrnsteinUhlenbeckProcess::recursiveComputeDistanceMatrix(MatrixReal &m, const TopologyNode &node, size_t node_index)
 {
-    
+    const Tree& tree = tau->getValue();
+
     // I need to know all my children
     std::set<size_t> children;
     
     if ( node.isRoot() == false )
     {
         // get my scaled branch length
-        double v = this->computeBranchTime(node_index, node.getBranchLength() );
+        double v = this->computeBranchTime(node_index, tree.getBranchLengthForNode(node) );
         
         if ( node.isTip() )
         {
@@ -908,7 +913,8 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::setTheta(const TypedDagNode<RbVec
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcess::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
-    
+    const Tree& tree = tau->getValue();
+
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
     
@@ -923,7 +929,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::simulateRecursively( const Topolo
         const TopologyNode &child = *(*it);
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tree.getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_time = computeBranchTime( child.getIndex(), branch_length );

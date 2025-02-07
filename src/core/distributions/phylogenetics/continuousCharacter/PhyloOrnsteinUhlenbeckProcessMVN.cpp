@@ -287,7 +287,7 @@ void PhyloOrnsteinUhlenbeckProcessMVN::recursiveComputeRootToTipDistance(std::ve
     if ( node.isRoot() == false )
     {
         // get my scaled branch length
-        double v = this->computeBranchTime(node_index, node.getBranchLength() );
+        double v = this->computeBranchTime(node_index, tau->getValue().getBranchLengthForNode(node));
         
         if ( node.isTip() )
         {
@@ -330,7 +330,7 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessMVN::recursiveComputeDistanceMatri
     if ( node.isRoot() == false )
     {
         // get my scaled branch length
-        double v = this->computeBranchTime(node_index, node.getBranchLength() );
+        double v = this->computeBranchTime(node_index, tau->getValue().getBranchLengthForNode(node));
         
         if ( node.isTip() )
         {
@@ -614,7 +614,7 @@ void PhyloOrnsteinUhlenbeckProcessMVN::simulateRecursively( const TopologyNode &
         const TopologyNode &child = *(*it);
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tau->getValue().getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_time = sqrt( computeBranchTime( child.getIndex(), branch_length ) );

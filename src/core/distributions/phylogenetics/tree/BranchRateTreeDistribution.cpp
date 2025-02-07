@@ -205,9 +205,9 @@ RbBitSet BranchRateTreeDistribution::collectSplits(const TopologyNode& node, RbB
 }
 
 
-RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::map<RbBitSet, double>& split_branch_lengths)
+RbBitSet BranchRateTreeDistribution::collectTreeSample(const Tree& tree, const TopologyNode& n, RbBitSet& intaxa, std::map<RbBitSet, double>& split_branch_lengths)
 {
-    double bl = n.getBranchLength();
+    double bl = tree.getBranchLengthForNode(n);
 
     std::vector<RbBitSet> child_splits;
 
@@ -223,7 +223,7 @@ RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, Rb
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_splits.push_back( collectTreeSample(child_node, taxa, split_branch_lengths) );
+            child_splits.push_back( collectTreeSample(tree, child_node, taxa, split_branch_lengths) );
         }
     }
 
@@ -308,7 +308,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         // get the clades for this tree
         RbBitSet b( branch_length_tree.getNumberOfTips(), false );
         split_to_branch_lengths.clear();
-        collectTreeSample(branch_length_tree.getRoot(), b, split_to_branch_lengths);
+        collectTreeSample(branch_length_tree, branch_length_tree.getRoot(), b, split_to_branch_lengths);
     }
     if ( touched_time_tree == true )
     {
@@ -350,7 +350,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         // get branch length
         double branch_exp_num_events = it_branch_length->second;
         // get branch time
-        double branch_time = the_time_node->getBranchLength();
+        double branch_time = time_tree_copy.getBranchLengthForNode(*the_time_node);
 
         // check if the node is a descendant of the root
         if ( the_time_node->getParent().isRoot() == true )
@@ -376,7 +376,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
             }
             else
             {
-                double sum = the_time_node->getParent().getChild(0).getBranchLength() + the_time_node->getParent().getChild(1).getBranchLength();
+                double sum = time_tree_copy.getBranchLengthForNode(the_time_node->getParent().getChild(0)) + time_tree_copy.getBranchLengthForNode(the_time_node->getParent().getChild(1));
                 frac = branch_time / sum;
             }
             branch_exp_num_events *= frac;
@@ -475,7 +475,7 @@ void BranchRateTreeDistribution::simulateTree( void )
         TopologyNode* the_node = time_tree_nodes[i];
 
         // get the branch time
-        double branch_time = the_node->getBranchLength();
+        double branch_time = value->getBranchLengthForNode(*the_node);
 
         // draw new branch rate
         branch_rate_prior->redrawValue();

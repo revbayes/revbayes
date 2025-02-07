@@ -225,9 +225,9 @@ void PhyloMultivariateBrownianProcessREML::recursiveComputeLnProbability( const 
             double v_left  = 0;
             if ( j == 1 )
             {
-                v_left = this->computeBranchTime(left_index, left->getBranchLength());
+                v_left = this->computeBranchTime(left_index, tau->getValue().getBranchLengthForNode(*left));
             }
-            double v_right = this->computeBranchTime(right_index, right.getBranchLength());
+            double v_right = this->computeBranchTime(right_index, tau->getValue().getBranchLengthForNode(right));
 
             // add the propagated uncertainty to the branch lengths
             double t_left  = v_left  + delta_left;
@@ -300,9 +300,9 @@ void PhyloMultivariateBrownianProcessREML::recursiveComputeContrasts( const Topo
             double v_left  = 0;
             if ( j == 1 )
             {
-                v_left = this->computeBranchTime(left_index, left->getBranchLength());
+                v_left = this->computeBranchTime(left_index, tau->getValue().getBranchLengthForNode(*left));
             }
-            double v_right = this->computeBranchTime(right_index, right.getBranchLength());
+            double v_right = this->computeBranchTime(right_index, tau->getValue().getBranchLengthForNode(right));
             
             // add the propagated uncertainty to the branch lengths
             double t_left        = v_left  + delta_left;
@@ -470,7 +470,7 @@ void PhyloMultivariateBrownianProcessREML::simulateRecursively( const TopologyNo
         
         // get the branch length for this child
         size_t child_index   = child.getIndex();
-        double branch_length = this->computeBranchTime(child_index, child.getBranchLength());
+        double branch_length = this->computeBranchTime(child_index, tau->getValue().getBranchLengthForNode(child));
         
         ContinuousTaxonData &taxon = taxa[ child.getIndex() ];
 //        std::vector<double> c = RbStatistics::MultivariateNormal::rvPrecision(parent_state, precision_matrices[active_matrix], *rng, branch_length);

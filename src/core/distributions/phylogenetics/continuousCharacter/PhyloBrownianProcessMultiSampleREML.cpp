@@ -303,9 +303,9 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             double v_left  = 0;
             if ( j == 1 )
             {
-                v_left = this->computeBranchTime(left_index, left->getBranchLength());
+                v_left = this->computeBranchTime(left_index, tau->getValue().getBranchLengthForNode(*left));
             }
-            double v_right = this->computeBranchTime(right_index, right.getBranchLength());
+            double v_right = this->computeBranchTime(right_index, tau->getValue().getBranchLengthForNode(right));
             
             // add the propagated uncertainty to the branch lengths
             double t_left  = v_left  + delta_left;

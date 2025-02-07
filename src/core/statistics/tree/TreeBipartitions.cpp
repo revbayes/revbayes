@@ -125,7 +125,7 @@ void TreeBipartitions::computeBipartitions(const TopologyNode* node, std::map <c
             boost::dynamic_bitset<> bitVector = (*value)[ nodeToBitVectorIndex[children[ 0 ] ] ] | (*value)[ nodeToBitVectorIndex[children[ 1 ] ] ] ;
             value->push_back(bitVector);
             bipartitionMap[ bitVector ] = node;
-            bipartitionAges.push_back( node->getBranchLength() );
+            bipartitionAges.push_back( tree->getValue().getBranchLengthForNode(*node) );
             nodeToBitVectorIndex[ node ] = value->size() - 1;
         }
         
@@ -140,7 +140,7 @@ void TreeBipartitions::computeBipartitions(const TopologyNode* node, std::map <c
         bitVector[nameToIndex.at( node->getName() ) ] = 1;
         value->push_back(bitVector);
         bipartitionMap[ bitVector ] = node;
-        bipartitionAges.push_back( node->getBranchLength() );
+        bipartitionAges.push_back( tree->getValue().getBranchLengthForNode(*node) );
         nodeToBitVectorIndex[ node ] = value->size() - 1;
     }
     

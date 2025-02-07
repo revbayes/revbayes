@@ -252,7 +252,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( the_node.getBranchLength() > 0 )
+            else if ( value->getBranchLengthForNode(the_node) > 0 )
             {
                 return RbConstants::Double::neginf;
             }
@@ -1124,7 +1124,7 @@ void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::
             }
         
             // save the character history for the root
-            std::string simmap_string = "{" + StringUtilities::toString(a) + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
+            std::string simmap_string = "{" + StringUtilities::toString(a) + "," + StringUtilities::toString( value->getBranchLengthForNode(root) ) + "}";
             character_histories[node_index] = simmap_string;
             
             // recurse towards tips
@@ -2516,10 +2516,10 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
             branch_total_speciation += sim_tree->getNodes()[i]->getTimeInStates()[j] * total_speciation_rates[j];
             branch_total_extinction += sim_tree->getNodes()[i]->getTimeInStates()[j] * extinction_rates[j];
         }
-        if (sim_tree->getNodes()[i]->getBranchLength() > 0)
+        if (sim_tree->getBranchLengthForNode(i) > 0)
         {
-            average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
-            average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
+            average_speciation[i] = branch_total_speciation/sim_tree->getBranchLengthForNode(i);
+            average_extinction[i] = branch_total_extinction/sim_tree->getBranchLengthForNode(i);
             num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
         }
     }    
@@ -3079,10 +3079,10 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
             branch_total_speciation += sim_tree->getNodes()[i]->getTimeInStates()[j] * total_speciation_rates[j];
             branch_total_extinction += sim_tree->getNodes()[i]->getTimeInStates()[j] * extinction_rates[j];
         }
-        if (sim_tree->getNodes()[i]->getBranchLength() > 0)
+        if (sim_tree->getBranchLengthForNode(i) > 0)
         {
-            average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
-            average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
+            average_speciation[i] = branch_total_speciation/sim_tree->getBranchLengthForNode(i);
+            average_extinction[i] = branch_total_extinction/sim_tree->getBranchLengthForNode(i);
             num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents();
         }
     }    

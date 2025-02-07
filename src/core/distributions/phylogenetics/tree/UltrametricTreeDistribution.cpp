@@ -242,9 +242,9 @@ Split UltrametricTreeDistribution::collectSplits(const TopologyNode& node, RbBit
 }
 
 
-Split UltrametricTreeDistribution::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::map<Split, double>& split_branch_lengths)
+Split UltrametricTreeDistribution::collectTreeSample(const Tree& tree, const TopologyNode& n, RbBitSet& intaxa, std::map<Split, double>& split_branch_lengths)
 {
-    double bl = n.getBranchLength();
+    double bl = tree.getBranchLengthForNode(n);
 
     std::vector<Split> child_splits;
 
@@ -260,7 +260,7 @@ Split UltrametricTreeDistribution::collectTreeSample(const TopologyNode& n, RbBi
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_splits.push_back( collectTreeSample(child_node, taxa, split_branch_lengths) );
+            child_splits.push_back( collectTreeSample(tree, child_node, taxa, split_branch_lengths) );
         }
     }
 
@@ -293,7 +293,7 @@ void UltrametricTreeDistribution::computeBranchRates(const Tree &my_time_tree, c
         if ( the_time_node->isRoot() == false )
         {
 
-            double branch_time = the_time_node->getBranchLength();
+            double branch_time = my_time_tree.getBranchLengthForNode(*the_time_node);
 
             const std::map<Split, double> &s = tree_branch_lengths[index];
             if ( s.find(splits[i]) == s.end() )
@@ -325,7 +325,7 @@ void UltrametricTreeDistribution::computeBranchRates(const Tree &my_time_tree, c
                 }
                 else
                 {
-                    double sum = the_time_node->getParent().getChild(0).getBranchLength() + the_time_node->getParent().getChild(1).getBranchLength();
+                    double sum = my_time_tree.getBranchLengthForNode( the_time_node->getParent().getChild(0) ) + my_time_tree.getBranchLengthForNode( the_time_node->getParent().getChild(1) );
                     frac = branch_time / sum;
                 }
                 branch_exp_num_events *= frac;
@@ -647,7 +647,7 @@ void UltrametricTreeDistribution::simulateTree( void )
     old_root.setParent( new_root );
     og.setParent( new_root );
 
-    double midpoint = og.getBranchLength() / 2.0;
+    double midpoint = value->getBranchLengthForNode(og) / 2.0;
     old_root.setBranchLength( midpoint );
     og.setBranchLength( midpoint );
 
@@ -722,7 +722,7 @@ void UltrametricTreeDistribution::prepareTreeSamples(const std::vector<Tree> &tr
 
         // get the clades for this tree
         RbBitSet b( tree.getNumberOfTips(), false );
-        collectTreeSample(tree.getRoot(), b, tree_branch_lengths[i]);
+        collectTreeSample(tree, tree.getRoot(), b, tree_branch_lengths[i]);
     }
 
 }

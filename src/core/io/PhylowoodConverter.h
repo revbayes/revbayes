@@ -25,8 +25,8 @@ namespace RevBayesCore {
         void                                        convert(void);
         
     private: 
-        std::string                                 buildCharacterHistoryString(TopologyNode* n, unsigned end);
-        std::string                                 buildExtendedNewick(TopologyNode* n);
+        std::string                                 buildCharacterHistoryString(const TopologyNode* n, unsigned end);
+        std::string                                 buildExtendedNewick(const TopologyNode* n);
         std::string                                 buildPhylowoodString(void);
         void                                        makeMarginalAreaProbs(void);
         void                                        makeBits(void);

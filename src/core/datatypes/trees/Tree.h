@@ -71,6 +71,12 @@ namespace RevBayesCore {
         bool                                                tryReadIndicesFromParameters(bool remove=false);
         void                                                writeIndicesToParameters();
 
+        // Node properties
+        double                                              getBranchLengthForNode(const TopologyNode& node) const;
+        double                                              getBranchLengthForNode(int) const;
+        double                                              getNodeAge(const TopologyNode& node) const;
+        double                                              getNodeAge(int) const;
+
         void                                                collapseNegativeBranchLengths(double length);                                                       //!< Don't allow parents to be younger than their children (TimeTrees only)
         bool                                                containsClade(const TopologyNode &n, bool unrooted) const;
         void                                                dropTipNode(size_t i);                                                          //!< Get a pointer to tip node i

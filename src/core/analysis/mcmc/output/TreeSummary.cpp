@@ -876,9 +876,9 @@ double TreeSummary::cladeProbability(const Clade &c, bool verbose )
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, long>& cladeCountMap)
+TreeSummary::Split TreeSummary::collectTreeSample(const Tree& tree, const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, long>& cladeCountMap)
 {
-    double age = (clock ? n.getAge() : n.getBranchLength() );
+    double age = (clock ? n.getAge() : tree.getBranchLengthForNode(n) );
 
     std::vector<Split> child_splits;
 
@@ -902,7 +902,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
+            child_splits.push_back( collectTreeSample(tree, child_node, taxa, newick, cladeCountMap) );
 
             if ( rooted && child_node.isSampledAncestorTip() )
             {
@@ -2024,7 +2024,7 @@ void TreeSummary::summarize( bool verbose )
 
             // get the clades for this tree
             RbBitSet b( tree.getNumberOfTips(), false );
-            collectTreeSample(tree.getRoot(), b, newick, clade_counts);
+            collectTreeSample(tree, tree.getRoot(), b, newick, clade_counts);
         }
     }
 

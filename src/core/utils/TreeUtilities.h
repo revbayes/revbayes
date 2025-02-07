@@ -62,14 +62,14 @@ namespace RevBayesCore {
         void                    rescaleSubtree(TopologyNode& n, double factor, bool v=false);                                           //!< rescale tree ages below a node by a factor, except tips
         void                    rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor
         void                    setAges(TopologyNode& n, const std::vector<double>& ages);                                              //!< set ages of a node and children from a vector
-        void                    setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children
+        void                    setAgesRecursively(Tree& tree, TopologyNode& n, double age);                                            //!< set age of a node and rescale its children
         Tree*                   startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, long agePrecision);         //!< make sure starting tree satisfies age constraints, and assign min/max ages to its tips
         
         // internal helper functions
-        void                    constructTimeTreeRecursively(TopologyNode& tn, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth); //!< helper function for time tree conversion
-        void                    processDistsInSubtree(const TopologyNode& node, MatrixReal& matrix, std::vector< std::pair<std::string, double> >& distsToNodeFather, const std::map< std::string, int >& namesToId); //!< helper function for distance matrix calculation
+        void                    constructTimeTreeRecursively(TopologyNode& tn, const Tree& tree1, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth); //!< helper function for time tree conversion
+        void                    processDistsInSubtree(const Tree& tree, const TopologyNode& node, MatrixReal& matrix, std::vector< std::pair<std::string, double> >& distsToNodeFather, const std::map< std::string, int >& namesToId); //!< helper function for distance matrix calculation
         double                  getAgeOfMRCARecursive(const TopologyNode& node, boost::unordered_set <const TopologyNode* >& pathFromOtherNodeToRoot) ; //!< helper for MRCA age
-        std::set<size_t>        recursivelyGetPSSP(const TopologyNode &node, const AbstractHomologousDiscreteCharacterData &c, std::vector<double> &branch_lengths, size_t state_index); //!< helper for PSSP calculation
+        std::set<size_t>        recursivelyGetPSSP(const Tree& tree, const TopologyNode &node, const AbstractHomologousDiscreteCharacterData &c, std::vector<double> &branch_lengths, size_t state_index); //!< helper for PSSP calculation
         std::set<size_t>        recursivelyComputeFitch(const TopologyNode &node, const AbstractHomologousDiscreteCharacterData &c, size_t site, int &score); //!< helper for parsimony score
 
     }

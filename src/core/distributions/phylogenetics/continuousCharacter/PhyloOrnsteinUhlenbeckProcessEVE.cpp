@@ -180,7 +180,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeCovariance(MatrixReal &covariance)
             const TopologyNode *current_node = &left_tip_node;
             while (current_index != mrca_index)
             {
-                sum_AT += computeBranchAlpha(current_index) * current_node->getBranchLength();
+                sum_AT += computeBranchAlpha(current_index) * tau->getValue().getBranchLengthForNode(*current_node);
                 current_node = &current_node->getParent();
                 current_index = current_node->getIndex();
             }
@@ -190,7 +190,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeCovariance(MatrixReal &covariance)
             current_node = &right_tip_node;
             while (current_index != mrca_index)
             {
-                sum_AT += computeBranchAlpha(current_index) * current_node->getBranchLength();
+                sum_AT += computeBranchAlpha(current_index) * tau->getValue().getBranchLengthForNode(*current_node);
                 current_node = &current_node->getParent();
                 current_index = current_node->getIndex();
             }
@@ -241,7 +241,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeExpectationRecursive(const Topolog
     size_t node_index       = node.getIndex();
     double alpha            = computeBranchAlpha(node_index);
     double theta            = computeBranchTheta(node_index);
-    double bl               = node.getBranchLength();
+    double bl               = tau->getValue().getBranchLengthForNode(node);
     
     double eAT = exp(-1.0 * alpha * bl);
     double my_expectation = 0.0;
@@ -279,7 +279,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeVarianceRecursive(const TopologyNo
     double alpha            = computeBranchAlpha(node_index);
     double sigma            = computeBranchSigma(node_index);
     double sigma_square     = sigma * sigma;
-    double bl               = node.getBranchLength();
+    double bl               = tau->getValue().getBranchLengthForNode(node);
 
     if ( alpha > 1E-10 )
     {
@@ -451,7 +451,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::recursiveComputeRootToTipDistance(std::ve
     if ( node.isRoot() == false )
     {
         // get my scaled branch length
-        double v = this->computeBranchTime(node_index, node.getBranchLength() );
+        double v = this->computeBranchTime(node_index, tau->getValue().getBranchLengthForNode(node) );
         
         if ( node.isTip() )
         {
@@ -494,7 +494,7 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessEVE::recursiveComputeDistanceMatri
     if ( node.isRoot() == false )
     {
         // get my scaled branch length
-        double v = this->computeBranchTime(node_index, node.getBranchLength() );
+        double v = this->computeBranchTime(node_index, tau->getValue().getBranchLengthForNode(node) );
         
         if ( node.isTip() )
         {
@@ -728,7 +728,8 @@ void PhyloOrnsteinUhlenbeckProcessEVE::setTheta(const TypedDagNode<RbVector<doub
 
 void PhyloOrnsteinUhlenbeckProcessEVE::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
-    
+    auto& tree = tau->getValue();
+
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
     
@@ -743,7 +744,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::simulateRecursively( const TopologyNode &
         const TopologyNode &child = *(*it);
         
         // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        double branch_length = tree.getBranchLengthForNode(child);
         
         // get the branch specific rate
         double branch_time = computeBranchTime( child.getIndex(), branch_length );
