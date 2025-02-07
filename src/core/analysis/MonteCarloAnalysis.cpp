@@ -517,7 +517,7 @@ void MonteCarloAnalysis::resetReplicates( void )
     size_t replicate_start = size_t(floor( (double(pid-active_PID) / num_processes ) * replicates ) ) + active_PID;
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
-    rng->setSeed(rng->getSeed() + 2*replicate_start);    
+    if(replicate_start > 0) rng->setSeed(rng->getSeed() + 2*replicate_start);    
     
     // redraw initial states for replicates
     for (size_t i = 0; i < replicates; ++i)
