@@ -938,7 +938,7 @@ void JointAncestralStateTrace::computeMarginalCladogeneticStateProbs(std::vector
 void JointAncestralStateTrace::recursivelyCollectCharacterMapSamples(size_t node_index, size_t map_parent_state, bool root, bool conditional, Tree &final_summary_tree, const std::vector<TopologyNode*> &summary_nodes, std::vector<std::string> &map_character_history, std::vector<std::string> &map_character_history_posteriors, std::vector<std::string> &map_character_history_shift_prob, ProgressBar &progress, size_t &num_finished_nodes, int NUM_TIME_SLICES, bool verbose)
 {
     
-    double dt = final_summary_tree.getRoot().getMaxDepth() / double(NUM_TIME_SLICES);
+    double dt = final_summary_tree.getRoot().getMaxDepth(final_summary_tree) / double(NUM_TIME_SLICES);
     
     size_t sample_clade_index;
     bool trace_found = false;

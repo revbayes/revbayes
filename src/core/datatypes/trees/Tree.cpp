@@ -227,10 +227,7 @@ Tree* Tree::clone(void) const
 
 double Tree::getBranchLengthForNode(const TopologyNode& node) const
 {
-    const TopologyNode* r = &node;
-    while(not r->isRoot())
-        r = &(r->getParent());
-    assert(root == r);
+    assert(node.tree == this);
 
     return node.getBranchLength();
 }
@@ -726,7 +723,7 @@ std::string Tree::getNewickRepresentation(bool round ) const
     }
     else
     {
-        return root->computeNewick( round );
+        return root->computeNewick( *this, round );
     }
 
 }
@@ -924,7 +921,7 @@ const TopologyNode& Tree::getRoot(void) const
  */
 std::string Tree::getSimmapNewickRepresentation(bool round) const
 {
-    return root->computeSimmapNewick(round);
+    return root->computeSimmapNewick(*this, round);
 }
 
 
@@ -2009,7 +2006,7 @@ void Tree::resolveMultifurcations( bool resolve_root )
             // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
             nodes[i]->setUseAges( does_use_ages, true );
             // resolve the multifurcation
-            nodes[i]->resolveMultifurcation( resolve_root );
+            nodes[i]->resolveMultifurcation( *this, resolve_root );
             // we need to reindex nodes because we added new ones
             reindexNodes();
         }
@@ -2221,7 +2218,7 @@ void Tree::suppressOutdegreeOneNodes(bool replace)
     // entire tree
     if (replace)
     {
-        getRoot().suppressOutdegreeOneNodes( true );
+        getRoot().suppressOutdegreeOneNodes( *this, true );
     }
     // if we want them removed, we need to iterate over all nodes (potentially multiple times)
     else
@@ -2242,7 +2239,7 @@ void Tree::suppressOutdegreeOneNodes(bool replace)
             else
             {
                 // this will only have effect if nodes[i]->getNumberOfChildren() == 1
-                nodes[i]->suppressOutdegreeOneNodes( false );
+                nodes[i]->suppressOutdegreeOneNodes( *this, false );
                 // we need to reindex nodes because we removed an index
                 reindexNodes();
             }

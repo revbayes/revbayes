@@ -567,7 +567,7 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool
     std::vector<double> ages;
     std::vector<TopologyNode*> nodes;
 
-    double max_depth = bln.getMaxDepth() + t.getBranchLengthForNode(bln);
+    double max_depth = bln.getMaxDepth(t) + t.getBranchLengthForNode(bln);
 
     // recursive creation of the tree
     constructTimeTreeRecursively(*root, t, bln, nodes, ages, max_depth);
@@ -1252,7 +1252,7 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
     }
     
     // finally, make sure that all the internal nodes have the ages properly set
-    tree.getRoot().recomputeAge(true);
+    tree.getRoot().recomputeAge(tree, true);
 
 
 }

@@ -52,7 +52,7 @@ namespace RevBayesCore {
     
     class Tree;
     
-    class TopologyNode  {
+    class TopologyNode final {
         friend class Tree;
     public:
         TopologyNode();                                                                                                                 //!< Default constructor with no index
@@ -60,7 +60,7 @@ namespace RevBayesCore {
         TopologyNode(const std::string& n, const boost::optional<size_t>& indx = {});                                                   //!< Constructor with name and optional index
         TopologyNode(const Taxon& t, const boost::optional<size_t>& indx = {});                                                         //!< Constructor with taxon and optional index
         TopologyNode(const TopologyNode &n);                                                                                            //!< Copy constructor
-        virtual                                    ~TopologyNode(void);                                                                 //!< Destructor
+        ~TopologyNode(void);                                                                                                            //!< Destructor
         TopologyNode&                               operator=(const TopologyNode& n);
 
 
@@ -91,9 +91,9 @@ namespace RevBayesCore {
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
         void                                        clearNodeParameters(void);
-        virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
+        std::string                                 computeNewick(const Tree& tree, bool round = true);                                 //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
-        std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(const Tree& tree, bool round = true);                           //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
@@ -116,7 +116,7 @@ namespace RevBayesCore {
         size_t                                      getIndex(void) const;                                                               //!< Get index of node
         void                                        getIndicesOfNodesInSubtree(bool countTips, std::vector<size_t>* indices) const;                                                               //!< Get index of node
         std::string                                 getIndividualName() const;                                                          //!< Get the species name for the node
-        double                                      getMaxDepth(void) const;                                                            //!< Get the maximum depth from this node (time between this node and most recent tip)
+        double                                      getMaxDepth(const Tree&) const;                                                     //!< Get the maximum depth from this node (time between this node and most recent tip)
         const std::string&                          getName() const;                                                                    //!< Get name of node
         TopologyNode*                               getMrca(const Clade &c);
         const TopologyNode*                         getMrca(const Clade &c) const;
@@ -154,13 +154,13 @@ namespace RevBayesCore {
         bool                                        isSampledAncestorTipOrParent() const;                                               //!< Is node or child node a tip a sampled ancestor?
         bool                                        isSampledAncestorKnuckle() const;                                                   //!< Does this one have only one child?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
+        void                                        recomputeAge(Tree& tree, bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
         void                                        removeTree(Tree *t);                                                                //!< Removes the tree pointer
-        void                                        resolveMultifurcation(bool resolve_root = true);                                    //!< If node has more than 2 children, randomly resolve them into a bifurcating subtree
+        void                                        resolveMultifurcation(Tree& tree, bool resolve_root = true);                                    //!< If node has more than 2 children, randomly resolve them into a bifurcating subtree
         void                                        scaleAgesFromTaxonAgesMBL(double minbl);                                            //!< Sets the age of the parent to the age of the oldest of its children + minbl
         void                                        setAge(double a, bool propagate = true );                                           //!< Set the age of this node (should only be done for tips).
         void                                        setBranchLength(double b, bool flag_dirty=true);                                    //!< Set the length of the branch leading to this node.
@@ -175,7 +175,7 @@ namespace RevBayesCore {
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
-        void                                        suppressOutdegreeOneNodes(bool replace);                                            //!< If this node's outdegree = 1, turn it and its descendants into bifurcations, or remove it.
+        void                                        suppressOutdegreeOneNodes(Tree& tree, bool replace);                                            //!< If this node's outdegree = 1, turn it and its descendants into bifurcations, or remove it.
 
         // internal helper functions
         bool getBurstSpeciation(void) const { return burst_speciation; }
@@ -195,8 +195,8 @@ namespace RevBayesCore {
         bool serial_speciation = false;
 
         // helper methods
-        std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
-        std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
+        std::ostream&                               buildNewick(const Tree&, std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::string                                 buildNewickString(const Tree&, bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
 
         // protected members
         bool                                        use_ages = true;

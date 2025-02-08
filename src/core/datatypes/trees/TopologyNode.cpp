@@ -307,10 +307,14 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     // add the child at pos offset from the end
     children.insert((children.rbegin() + pos).base(), c);
 
-    // fire tree change event
     if ( tree != NULL )
     {
+        // fire tree change event
         tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+
+        // if the new node doesn't have a matching tree pointer, then set the tree pointer for the whole subtree.
+        if (c->tree != tree)
+            c->setTree(tree);
     }
 }
 
@@ -396,7 +400,7 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
 }
 
 
-std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
+std::ostream& TopologyNode::buildNewick( const Tree& tree, std::ostream& o, bool simmap = false)
 {
     // ensure we have an updated copy of branch_length variables
     if ( not isRoot() )
@@ -414,7 +418,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
             {
                 o << ",";
             }
-            children[i]->buildNewick(o, simmap);
+            children[i]->buildNewick(tree, o, simmap);
         }
         o << ")";
     }
@@ -444,7 +448,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
     // 4a. Write ":" + branch length + branch_comments if (simmap == false)
     if ( simmap == false )
     {
-        double br = getBranchLength();
+        double br = tree.getBranchLengthForNode(*this);
 
         if( RevBayesCore::RbMath::isNan(br) == false )
         {
@@ -503,7 +507,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
  * Build newick string.
  * If simmap = true build a newick string compatible with SIMMAP and phytools.
  */
-std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
+std::string TopologyNode::buildNewickString( const Tree& tree, bool simmap = false, bool round = true )
 {
     // create the newick string
     std::stringstream o;
@@ -519,7 +523,7 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
         o.precision( std::numeric_limits<double>::digits10 );
     }
 
-    buildNewick(o, simmap);
+    buildNewick(tree, o, simmap);
 
     return o.str();
 }
@@ -572,10 +576,10 @@ TopologyNode* TopologyNode::clone(void) const
 
 
 
-std::string TopologyNode::computeNewick( bool round )
+std::string TopologyNode::computeNewick( const Tree& tree, bool round )
 {
 
-    return buildNewickString(false, round);
+    return buildNewickString(tree, false, round);
 }
 
 
@@ -620,9 +624,9 @@ std::string TopologyNode::computePlainNewick( void ) const
 }
 
 
-std::string TopologyNode::computeSimmapNewick( bool round )
+std::string TopologyNode::computeSimmapNewick( const Tree& tree, bool round )
 {
-    return buildNewickString( true, round );
+    return buildNewickString( tree, true, round );
 }
 
 
@@ -1085,7 +1089,7 @@ void TopologyNode::getIndicesOfNodesInSubtree( bool countTips, std::vector<size_
  *
  * \return    The maximal depth (path length) from this node to the most recent tip.
  */
-double TopologyNode::getMaxDepth( void ) const
+double TopologyNode::getMaxDepth( const Tree& tree ) const
 {
 
     // iterate over the childen
@@ -1096,11 +1100,11 @@ double TopologyNode::getMaxDepth( void ) const
         TopologyNode& node = *(*it);
         if ( node.isTip() )
         {
-            m = node.getBranchLength();
+            m = tree.getBranchLengthForNode(node);
         }
         else
         {
-            m = node.getBranchLength() + node.getMaxDepth();
+            m = tree.getBranchLengthForNode(node) + node.getMaxDepth(tree);
         }
 
         if ( m > max )
@@ -1644,7 +1648,7 @@ bool TopologyNode::isTip( void ) const
 }
 
 
-void TopologyNode::recomputeAge( bool recursive )
+void TopologyNode::recomputeAge( Tree& tree, bool recursive )
 {
 
     if ( children.size() == 0 )
@@ -1657,10 +1661,10 @@ void TopologyNode::recomputeAge( bool recursive )
         {
             for (size_t i=0; i<children.size(); ++i)
             {
-                children[i]->recomputeAge(recursive);
+                children[i]->recomputeAge(tree, recursive);
             }
         }
-        age = children[0]->getBranchLength() + children[0]->getAge();
+        age = tree.getBranchLengthForNode(*children[0]) + children[0]->getAge();
     }
 
 }
@@ -1764,7 +1768,7 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 }
 
 
-void TopologyNode::resolveMultifurcation(bool resolve_root)
+void TopologyNode::resolveMultifurcation(Tree& t, bool resolve_root)
 {
 
     if ( isTip() == false )
@@ -1875,7 +1879,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             }
             else
             {
-                double brlen = getBranchLength();
+                double brlen = t.getBranchLengthForNode(*this);
                 
                 // The following is adapted from UniformTopologyDistribution::simulateClade()
                 
@@ -2193,7 +2197,7 @@ void TopologyNode::setUseAges(bool tf, bool recursive)
  * the same for all its children by calling this function recursively, or remove the
  * node entirely.
  */
-void TopologyNode::suppressOutdegreeOneNodes( bool replace )
+void TopologyNode::suppressOutdegreeOneNodes( Tree& tree, bool replace )
 {
     
     if ( getNumberOfChildren() == 1 )
@@ -2234,7 +2238,7 @@ void TopologyNode::suppressOutdegreeOneNodes( bool replace )
             TopologyNode& child = getChild(0);
                     
             // the new branch length needs to be the branch length of the parent and child
-            double summ = getBranchLength() + child.getBranchLength();
+            double summ = tree.getBranchLengthForNode(*this) + tree.getBranchLengthForNode(child);
                     
             // now remove myself from the parent
             parent.removeChild( this );
@@ -2257,7 +2261,7 @@ void TopologyNode::suppressOutdegreeOneNodes( bool replace )
         // call this function recursively for all children of this node
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
         {
-            getChild( i ).suppressOutdegreeOneNodes( true );
+            getChild( i ).suppressOutdegreeOneNodes( tree, true );
         }
     }
 
