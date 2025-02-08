@@ -238,9 +238,9 @@ void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
         if ( runs[i] == NULL ) std::cerr << "Runing bad burnin (pid=" << pid <<", run="<< i << ") of runs.size()=" << runs.size() << "." << std::endl;
         // run the i-th analyses
 #ifdef RB_MPI
-        runs[i]->burnin(generations, MPI_COMM_WORLD, tuningInterval, false);
+        runs[i]->burnin(generations, MPI_COMM_WORLD, tuningInterval, 0);
 #else
-        runs[i]->burnin(generations, tuningInterval, false);
+        runs[i]->burnin(generations, tuningInterval, 0);
 #endif
         if ( process_active == true )
         {
@@ -329,9 +329,9 @@ void ValidationAnalysis::runSim(size_t idx, size_t gen)
     
     
 #ifdef RB_MPI
-    analysis->run(gen, rules, MPI_COMM_WORLD, 100, "", 0, false);
+    analysis->run(gen, rules, MPI_COMM_WORLD, 100, "", 0, 0);
 #else
-    analysis->run(gen, rules, 100, "", 0, false);
+    analysis->run(gen, rules, 100, "", 0, 0);
 #endif
 
 }

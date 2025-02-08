@@ -25,6 +25,8 @@
 #include "TreeChangeEventHandler.h"
 #include "RbConstants.h" // IWYU pragma: keep
 #include "StringUtilities.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 
 using namespace RevBayesCore;
 
@@ -1048,7 +1050,7 @@ size_t TopologyNode::getIndex( void ) const
 
 /**
  * Get the indices of nodes contained in the subtree starting with this node as the root.
- * This either returns 1 if this is a tip node (or 0 if we do not count tipes)
+ * This either returns 1 if this is a tip node (or 0 if we do not count tips)
  * or computes recursively the number of nodes in both children plus one for this node.
  *
  * \param[in]   countTips   Shall we count tips?
@@ -1762,6 +1764,212 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 }
 
 
+void TopologyNode::resolveMultifurcation(bool resolve_root)
+{
+
+    if ( isTip() == false )
+    {
+
+        if ( (not isRoot()) or resolve_root )
+        {
+            
+            RandomNumberGenerator* rng = GLOBAL_RNG;
+            // "active" children are those that are younger than the child currently under consideration
+            std::vector<TopologyNode*> active_children;
+            
+            if (use_ages)
+            {
+                
+                // The following is adapted from UniformSerialSampledTimeTreeDistribution::simulateCoalescentAges()
+                std::vector<double> ages;
+
+                // for each tip, simulate an age between max age and tip age
+                double max_age = getAge();
+                ages.push_back(max_age);
+                size_t num_ages = children.size() - 1;
+
+                for(size_t i = 0; i < num_ages; ++i)
+                {
+                    // get the age of the tip
+                    double a = children[i + 1]->getAge();
+
+                    // simulate the age of a node
+                    double new_age = a + rng->uniform01() * (max_age - a);
+
+                    // add the age to the vector of ages
+                    ages.push_back(new_age);
+                }
+
+                // sort the ages (from youngest to oldest)
+                std::sort(ages.begin(), ages.end(), std::greater<double>());
+                
+                // The following is adapted from UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree()
+                std::vector<TopologyNode*> extinct_children;
+                
+                for (size_t i = 0; i < children.size(); ++i)
+                {
+                    
+                    // we initialize active_children with extant children (if there are any), but will subsequently expand it
+                    if ( children.at(i)->getAge() == 0.0 )
+                    {
+                        active_children.push_back( children.at(i) );
+                    }
+                    else
+                    {
+                        extinct_children.push_back( children.at(i) );
+                    }
+                }
+                
+                // loop backward through ages
+                double current_time = 0.0;
+                
+                for (int i = num_ages - 1; i >= 0; i--)        // you actually need int here, not size_t!
+                {
+                    // get the age of the current child
+                    current_time = ages[i];
+                    
+                    // check if any extinct children become active
+                    size_t num_extinct = extinct_children.size();
+                    for (int j = num_extinct - 1; j >= 0; --j) // ditto
+                    {
+                        if ( extinct_children.at(j)->getAge() < current_time )
+                        {
+                            // add the extinct child to the active children list, remove it from the extinct children list
+                            active_children.push_back( extinct_children.at(j) );
+                            extinct_children.erase( extinct_children.begin() + long(j) );
+                        }
+                    }
+                    
+                    // randomly draw one child (arbitrarily called left) node from the list of active children
+                    size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+                    TopologyNode* leftChild = active_children.at(left);
+                    
+                    // remove the randomly drawn node from the list
+                    active_children.erase( active_children.begin() + long(left) );
+                    
+                    // randomly draw one child (arbitrarily called right) node from the list of active children
+                    size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+                    TopologyNode* rightChild = active_children.at(right);
+                    
+                    // remove the randomly drawn node from the list
+                    active_children.erase( active_children.begin() + long(right) );
+                    
+                    // remove the two also from the list of the children of the current node
+                    children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
+                    children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
+                    
+                    // create a parent for the two
+                    TopologyNode* prnt = new TopologyNode(); // leave the new node without index
+                    prnt->addChild( leftChild );
+                    prnt->addChild( rightChild );
+                    leftChild->setParent( prnt );
+                    rightChild->setParent( prnt );
+                    prnt->setAge( current_time );
+                    active_children.push_back( prnt );
+                    
+                    // add the newly created parent to the list of the children of the current node
+                    addChild( prnt );
+                    prnt->setParent( this );
+                }
+                
+            }
+            else
+            {
+                double brlen = getBranchLength();
+                
+                // The following is adapted from UniformTopologyDistribution::simulateClade()
+                
+                while ( children.size() >= 2 )
+                {
+                    active_children = children;
+                    
+                    // randomly draw one child (arbitrarily called left) node from the list of active children
+                    size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+                    TopologyNode* leftChild = active_children.at(left);
+                    
+                    // remove the randomly drawn node from the list
+                    active_children.erase( active_children.begin() + long(left) );
+                    
+                    // randomly draw one child (arbitrarily called left) node from the list of active children
+                    size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+                    TopologyNode* rightChild = active_children.at(right);
+                    
+                    // remove the randomly drawn node from the list
+                    active_children.erase( active_children.begin() + long(right) );
+                    
+                    // remove the two also from the list of the children of the current node
+                    children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
+                    children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
+                    
+                    // create a parent for the two
+                    TopologyNode* prnt = new TopologyNode(); // leave the new node without index
+                    prnt->setBranchLength(0.0);              // set the length of the branch subtending it to zero
+                    prnt->addChild( leftChild );
+                    prnt->addChild( rightChild );
+                    leftChild->setParent( prnt );
+                    rightChild->setParent( prnt );
+                    // we don't need active_children.push_back( prnt ) here because of the first line inside of this loop
+                    
+                    // add the newly created parent to the list of the children of the current node
+                    addChild( prnt );
+                    prnt->setParent( this );
+                }
+                
+                // Give my only child my old branch length, and set my new branch length to 0
+                // This is to make sure everything is handled properly when we call suppressOutdegreeOneNodes() on myself
+                children[0]->setBranchLength(brlen);
+                setBranchLength(0.0);
+            }
+            
+        }
+
+    }
+
+}
+
+
+void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
+{
+    //    1. get all my children
+    //    2. if (a child is a tip)
+    //           set its age based on the taxon it contains
+    //       else
+    //           call myself on the child
+    //    3. collect the ages of all my children
+    //    4. set my age to the age of the oldest of my children + min br. len.
+    //    5. recompute the branch lengths of all my children
+    
+    const std::vector<TopologyNode*>& children = getChildren();
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        if ( children[i]->isTip() )
+        {
+            double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;
+            children[i]->setAge( tip_age );
+        }
+        else
+        {
+            children[i]->scaleAgesFromTaxonAgesMBL(minbl);
+        }
+    }
+    
+    std::vector<double> ages;
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        ages.push_back( children[i]->getAge() );
+    }
+    
+    double max_age = *std::max_element(ages.begin(), ages.end());
+    setAge(max_age + minbl);
+    
+    // now we need to recompute the branch lengths of my children
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        children[i]->recomputeBranchLength();
+    }
+}
+
+
 void TopologyNode::setAge(double a, bool propagate)
 {
     if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
@@ -1869,6 +2077,7 @@ void TopologyNode::setNumberOfShiftEvents(size_t n)
 {
     num_shift_events = n;
 }
+
 
 void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
 {

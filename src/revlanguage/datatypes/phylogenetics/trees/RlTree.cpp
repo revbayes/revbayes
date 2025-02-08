@@ -319,6 +319,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
 
         return NULL;
     }
+    else if (name == "resolveMultifurcations")
+    {
+        found = true;
+        
+        bool resolve_root = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.resolveMultifurcations( resolve_root );
+        
+        return NULL;
+    }
     else if (name == "setBranchLength")
     {
         found = true;
@@ -348,7 +358,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         double tf = static_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.setNegativeConstraint(tf);
-//        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
+        // RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
 
         return NULL;
     }
@@ -574,6 +584,10 @@ void Tree::initMethods( void )
     rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     rerootArgRules->push_back( new ArgumentRule( "makeBifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
+    
+    ArgumentRules* resolveMultiArgRules = new ArgumentRules();
+    resolveMultiArgRules->push_back( new ArgumentRule( "resolveRoot", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "resolveMultifurcations", RlUtils::Void, resolveMultiArgRules ) );
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
     getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );

@@ -41,7 +41,7 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns = 4)
 stopping_rules[1] = srMinESS(50, file = "output/ESS_test.log", freq = 1000)
 
 # Start the MCMC run
-mymcmc.run(rules = stopping_rules)
+mymcmc.run(rules = stopping_rules, verbose = 2)
 
 clear()
 q()
