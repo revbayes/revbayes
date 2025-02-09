@@ -199,7 +199,7 @@ Mcmc* Mcmc::clone( void ) const
 }
 
 
-void Mcmc::checkpoint( void ) const
+void Mcmc::checkpoint( void )
 {
 
     if ( process_active == true )
@@ -209,6 +209,7 @@ void Mcmc::checkpoint( void ) const
         bool flatten = false;
         
         createDirectoryForFile( checkpoint_file_name );
+        std::cout << "Printing file " << checkpoint_file_name << std::endl;
         
         // open the stream to the file
         std::ofstream out_stream( checkpoint_file_name.string() );
