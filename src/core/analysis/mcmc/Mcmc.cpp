@@ -394,6 +394,12 @@ size_t Mcmc::getChainIndex(void) const
 }
 
 
+path Mcmc::getCheckpointFile(void) const
+{
+    return checkpoint_file_name;
+}
+
+
 /**
  * Is the current chain active?
  */
