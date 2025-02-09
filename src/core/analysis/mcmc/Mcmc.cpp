@@ -199,7 +199,7 @@ Mcmc* Mcmc::clone( void ) const
 }
 
 
-void Mcmc::checkpoint( void )
+void Mcmc::checkpoint( void ) const
 {
 
     if ( process_active == true )

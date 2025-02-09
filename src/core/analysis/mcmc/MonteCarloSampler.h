@@ -45,7 +45,7 @@ namespace RevBayesCore {
         virtual void                            addMonitor(const Monitor &m) = 0;
         virtual void                            disableScreenMonitor(bool all, size_t rep) = 0;             //!< Disable/remove all screen monitors
         virtual MonteCarloSampler*              clone(void) const = 0;
-        virtual void                            checkpoint(void) = 0;                                       //!< Perform checkpointing by writing the current values to a file.
+        virtual void                            checkpoint(void) const = 0;                                 //!< Perform checkpointing by writing the current values to a file.
 //        virtual void                            run(size_t g) = 0;
         virtual void                            finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct) = 0; //!< Finish the monitors
         virtual const Model&                    getModel(void) const = 0;

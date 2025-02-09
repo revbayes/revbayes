@@ -233,14 +233,8 @@ size_t Mcmcmc::chainForHeatIndex(size_t i) const
 */
 }
 
-void Mcmcmc::checkpoint( void )
+void Mcmcmc::checkpoint( void ) const
 {
-    
-    // send all chain heats to pid 0
-    synchronizeHeats();
-    
-    // send all chain moves tuning information to pid 0
-    synchronizeTuningInfo();
     
     for (size_t i = 0; i < num_chains; ++i)
     {

@@ -43,7 +43,7 @@ namespace RevBayesCore {
         void                                    addMonitor(const Monitor &m);
         void                                    disableScreenMonitor(bool all, size_t rep);                                     //!< Disable/remove all screen monitors
         Mcmcmc*                                 clone(void) const;
-        void                                    checkpoint(void);
+        void                                    checkpoint(void) const;
         void                                    finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct);  //!< Finish the monitors
         const Model&                            getModel(void) const;
         double                                  getModelLnProbability(bool likelihood_only);
