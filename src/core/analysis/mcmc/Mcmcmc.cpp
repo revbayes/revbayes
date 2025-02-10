@@ -270,7 +270,6 @@ void Mcmcmc::checkpoint( void ) const
             }
             
             chains[ chainForHeatIndex(i) ]->setCheckpointFile( chain_file_name );
-            // std::cout << "Current heat: " << chain_heats[  chainForHeatIndex(i) ] << std::endl;
             chains[ chainForHeatIndex(i) ]->checkpoint();
         }
         
