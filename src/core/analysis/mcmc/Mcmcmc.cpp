@@ -505,6 +505,9 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             
         if ( chains[i] != NULL )
         {
+            path f = chains[i]->getCheckpointFile();
+            path chain_file_name = appendToStem(f, "_chain_" + std::to_string(i) );
+            chains[i]->setCheckpointFile( chain_file_name );
             chains[i]->initializeSamplerFromCheckpoint();
             setCurrentGeneration(chains[i]->getCurrentGeneration());
         }
