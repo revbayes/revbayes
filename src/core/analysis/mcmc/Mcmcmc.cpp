@@ -271,6 +271,16 @@ void Mcmcmc::checkpoint( void ) const
             
             chains[ chainForHeatIndex(i) ]->setCheckpointFile( chain_file_name );
             chains[ chainForHeatIndex(i) ]->checkpoint();
+            
+            // assemble the new filename
+            path heat_checkpoint_file_name = appendToStem(chain_file_name, "_heat");
+            
+            // open the stream to the file
+            std::ofstream out_stream_mcmc( heat_checkpoint_file_name.string() );
+            out_stream_mcmc << "heat = " << chains[ chainForHeatIndex(i) ]->getChainPosteriorHeat() << std::endl;
+            
+            // clean up
+            out_stream_mcmc.close();
         }
         
     }
@@ -505,11 +515,46 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             
         if ( chains[i] != NULL )
         {
+            // get the full name of the checkpoint file for this chain
             path f = chains[i]->getCheckpointFile();
             path chain_file_name = appendToStem(f, "_chain_" + std::to_string(i) );
             chains[i]->setCheckpointFile( chain_file_name );
+            
+            // restore from checkpoint
             chains[i]->initializeSamplerFromCheckpoint();
             setCurrentGeneration(chains[i]->getCurrentGeneration());
+            
+            // give the chain back its correct heat
+            double chain_heat;
+            
+            // assemble the new filename
+            path heat_checkpoint_file_name = appendToStem( chain_file_name, "_heat");
+
+            // open file and initialize variables for parsing
+            std::ifstream in_file_heat( heat_checkpoint_file_name.string() );
+            std::string line_heat;
+            std::map<std::string, std::string> heat_pars;
+            
+            // command-processing loop
+            while ( in_file_heat.good() )
+            {
+                // read a line
+                safeGetline( in_file_heat, line_heat );
+                
+                if ( line_heat != "" )
+                {
+                    std::vector<std::string> key_value;
+                    StringUtilities::stringSplit(line_heat, " = ", key_value);
+                    heat_pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
+                }
+                
+            }
+            
+            chain_heat = StringUtilities::asDoubleNumber( heat_pars["heat"] );
+            chains[i]->setChainPosteriorHeat(chain_heat);
+            
+            // make sure it worked
+            // std::cout << "Chain initialized from file " << chains[i]->getCheckpointFile() << " has a posterior heat of " << chains[i]->getChainPosteriorHeat() << std::endl;
         }
         
     }

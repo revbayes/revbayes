@@ -209,7 +209,7 @@ void Mcmc::checkpoint( void ) const
         bool flatten = false;
         
         createDirectoryForFile( checkpoint_file_name );
-        // The following is useful for ensuring that in MCMCMC analyses, the chain indices in the checkpoint file names are ordered by heat:
+        // the following is useful for ensuring that in MCMCMC analyses, the chain indices in the checkpoint file names are ordered by heat:
         // std::cout << "Printing file " << checkpoint_file_name << " for chain with a posterior heat of " << getChainPosteriorHeat() << std::endl;
         
         // open the stream to the file
@@ -906,9 +906,6 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
         moves[i].setMoveTuningParameter( atof(key_value[1].c_str()) );
         
     }
-    
-    // The following is useful for ensuring that in MCMCMC analyses, the chain heats are ordered by checkpoint file name index:
-    // std::cout << "Chain with a posterior heat of " << getChainPosteriorHeat() << " has been initialized from file " << checkpoint_file_name << std::endl;
 
     // clean up
     in_file_moves.close();
