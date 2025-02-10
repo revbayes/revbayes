@@ -1,0 +1,111 @@
+################################################################################
+#
+# RevBayes Test-Script: Manipulating character matrices
+#
+#
+# authors: Martin R. Smith, David Cerny
+#
+################################################################################
+
+seed(0)
+
+
+# the following datasets of discrete morphological data were made available by
+# Martin R. Smith in issue #609 (https://github.com/revbayes/revbayes/issues/609);
+# see also https://github.com/mk-nt/950_ns_ki.
+
+neo <- readDiscreteCharacterData("data/project950.neo.nex")
+trans <- readDiscreteCharacterData("data/project950.trans.nex")
+
+partitioned[1] <- neo
+partitioned[2] <- trans
+
+# Dataset properties
+taxa <- neo.names()
+outgroup <- clade(taxa[1])
+nTaxa <- neo.size()
+nEdge <- 2 * nTaxa - 3
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+# Uniform prior on tree topologies
+topology ~ dnUniformTopology(taxa)
+moves.append( mvNNI(topology, weight = nEdge / 8.0) )
+moves.append( mvSPR(topology, weight = nEdge / 30.0) )
+
+# Compound Dirichlet prior on branch lengths
+gamma_shape <- 2
+exp_steps <- 1 # expected changes per site across the tree
+tree_length ~ dnGamma(shape = gamma_shape, rate = gamma_shape / exp_steps)
+moves.append( mvScale(tree_length, weight = 1.0) )
+
+rel_br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+moves.append( mvBetaSimplex(rel_br_lengths, weight = nEdge / 3.0) )
+moves.append( mvDirichletSimplex(rel_br_lengths, weight = nEdge / 20.0) )
+br_lengths := rel_br_lengths * tree_length
+
+# Combine topology and branch lengths
+phylogeny := treeAssembly(topology, br_lengths)
+
+# Lognormally distributed among-character rate variation
+rate_log_sd ~ dnGamma( 1, 1 )
+moves.append( mvScale(rate_log_sd, weight = 1.0) )
+rate_categories := fnDiscretizeDistribution( dnLognormal( 0, rate_log_sd ), 6)
+
+root_freqs ~ dnDirichlet([1, 1])
+moves.append( mvBetaSimplex(root_freqs, weight = 1.0) )
+rtfq1 := root_freqs[1]
+
+neoQ := fnJC(2)
+
+m_morph[1] ~ dnPhyloCTMC(tree = phylogeny,
+                         siteRates = rate_categories,
+                         Q = neoQ,
+                         rootFrequencies = root_freqs,
+                         type = "Standard",
+                         coding = "informative")
+m_morph[1].clamp(neo)
+
+# Partition transformational characters by number of states (k)
+maxK = 10
+idx = 1
+for (k in 2:maxK) {
+    transByState[k - 1] <- partitioned[2]
+    transByState[k - 1].setNumStatesPartition(k)
+    nc = transByState[k - 1].nchar()
+    if (nc > 0) {
+        print("   There are " + nc + " characters in partition with " + k + " states")
+        q[idx] := fnJC(k) 
+        m_morph[idx + 1] ~ dnPhyloCTMC(tree = phylogeny,
+                                       siteRates = rate_categories,
+                                       Q = q[idx],
+                                       type = "Standard",
+                                       coding = "informative")
+        m_morph[idx + 1].clamp(transByState[k - 1])
+        idx = idx + 1
+    }
+}
+
+# Conduct MCMC analysis
+mymodel = model(phylogeny)
+
+monitors.append( mnModel(filename = "output/heat_tuning_and_checkpointing.log", printgen = 25) )
+monitors.append( mnFile(filename = "output/heat_tuning_and_checkpointing.trees", printgen = 25, phylogeny) )
+
+mymc3 = mcmcmc(mymodel, monitors, moves,
+               nruns = 2,
+               nchains = 8,
+               tuneHeat = TRUE,
+               swapMethod = "both",
+               swapMode = "multiple",
+               combine = "none")
+
+mymc3.burnin(generations = 1000, tuningInterval = 200)
+mymc3.run(generations = 1000, checkpointFile = "output/heat_tuning_and_checkpointing.ckp",
+          checkpointInterval = 1000)
+
+mymc3.initializeFromCheckpoint("output/heat_tuning_and_checkpointing.ckp")
+mymc3.run(generations = 1000)
+
+q()
