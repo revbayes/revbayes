@@ -5,9 +5,9 @@ Binomial Distribution
 ## description
 The Binomial probability distribution describes the probability of a number of successes for an experiment with a certain number of trials and probability of success per trial.
 ## details
-The binomial probability distribution takes on two parameters, p and size. It defines the number of successes in size trials, where each trial has the same success probability p. 
+The binomial distribution takes two parameters, p and size. It defines the number of successes in size trials, where each trial has the same success probability p. 
 
-The probability density function is f(x) = (size choose x) p^(x) * (1-p)^(size-p).
+The probability density function is f(x) =  choose(size,x) * p^(x) * (1-p)^(size-p).
 ## authors
 Sebastian Hoehna
 ## see_also

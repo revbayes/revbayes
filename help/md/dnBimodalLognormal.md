@@ -5,7 +5,7 @@ Bimodal Lognormal Distribution
 ## description
 The Bimodal Lognormal distribution unites two separate lognormal distributions.
 ## details
-The bimodal lognormal distribution takes on five parameters: mean1 and mean2 (the means of two lognormal distributions), sd1 and sd2 (the standard deviations of two lognormal distributions), and p (between 0 and 1). The value will be distributed according to the first lognormal distribution with probability p, and distributed according to the second lognormal distribution with probability (1 - p).
+The bimodal lognormal distribution takes five parameters: mean1 and mean2 (the means (in log-space) of the two lognormal distributions), sd1 and sd2 (the standard deviations (in log-space) of the two lognormal distributions), and p (between 0 and 1). The value will be distributed according to the first lognormal distribution with probability p, and distributed according to the second lognormal distribution with probability (1 - p).
 ## authors
 Sebastian Hoehna
 ## see_also

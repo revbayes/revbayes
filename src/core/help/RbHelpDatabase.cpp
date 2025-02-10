@@ -302,8 +302,8 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 	help_strings[string("diagonalMatrix")][string("description")] = string(R"(Building a identity/diagonal matrix with 'n' columns and rows.)");
 	help_strings[string("diagonalMatrix")][string("name")] = string(R"(diagonalMatrix)");
 	help_arrays[string("dnBernoulli")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
-	help_strings[string("dnBernoulli")][string("description")] = string(R"(The Bernoulli probability distribution represents a weighted coin toss.)");
-	help_strings[string("dnBernoulli")][string("details")] = string(R"(The Bernoulli distribution takes on a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).)");
+	help_strings[string("dnBernoulli")][string("description")] = string(R"(The Bernoulli distribution represents a weighted coin toss.)");
+	help_strings[string("dnBernoulli")][string("details")] = string(R"(The Bernoulli distribution takes a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).)");
 	help_strings[string("dnBernoulli")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
@@ -317,8 +317,8 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBernoulli")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnBernoulli")][string("title")] = string(R"(Bernoulli Distribution)");
 	help_arrays[string("dnBeta")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBeta")][string("description")] = string(R"(The Beta probability distribution is a flexible distribution that returns a number between 0 and 1, so it is often used as a distribution for probabilities themselves.)");
-	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution takes on two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
+	help_strings[string("dnBeta")][string("description")] = string(R"(The Beta distribution is a flexible distribution that returns a number between 0 and 1, so it is often used as a distribution for probabilities themselves.)");
+	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution takes two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
 
 The probability density function is f(x) = x^(alpha - 1) * (1 - x)^(beta - 1) * Gamma(alpha + beta) / (Gamma(alpha) * Gamma(beta)), where Gamma is the gamma function.)");
 	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
@@ -336,7 +336,7 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("title")] = string(R"(Beta Distribution)");
 	help_arrays[string("dnBimodalLognormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(The Bimodal Lognormal distribution unites two separate lognormal distributions.)");
-	help_strings[string("dnBimodalLognormal")][string("details")] = string(R"(The bimodal lognormal distribution takes on five parameters: mean1 and mean2 (the means of two lognormal distributions), sd1 and sd2 (the standard deviations of two lognormal distributions), and p (between 0 and 1). The value will be distributed according to the first lognormal distribution with probability p, and distributed according to the second lognormal distribution with probability (1 - p).)");
+	help_strings[string("dnBimodalLognormal")][string("details")] = string(R"(The bimodal lognormal distribution takes five parameters: mean1 and mean2 (the means (in log-space) of the two lognormal distributions), sd1 and sd2 (the standard deviations (in log-space) of the two lognormal distributions), and p (between 0 and 1). The value will be distributed according to the first lognormal distribution with probability p, and distributed according to the second lognormal distribution with probability (1 - p).)");
 	help_strings[string("dnBimodalLognormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBimodalLognormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( exp(1) )
@@ -352,7 +352,7 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBimodalLognormal")][string("title")] = string(R"(Bimodal Lognormal Distribution)");
 	help_arrays[string("dnBimodalNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBimodalNormal")][string("description")] = string(R"(The Bimodal Normal distribution unites two separate normal distributions.)");
-	help_strings[string("dnBimodalNormal")][string("details")] = string(R"(The bimodal normal distribution takes on five parameters: mean1 and mean2 (the means of two normal distributions), sd1 and sd2 (the standard deviations of two normal distributions), and p (between 0 and 1). The value will be distributed according to the first normal distribution with probability p, and distributed according to the second normal distribution with probability (1 - p).)");
+	help_strings[string("dnBimodalNormal")][string("details")] = string(R"(The bimodal normal distribution takes five parameters: mean1 and mean2 (the means of two normal distributions), sd1 and sd2 (the standard deviations of two normal distributions), and p (between 0 and 1). The value will be distributed according to the first normal distribution with probability p, and distributed according to the second normal distribution with probability (1 - p).)");
 	help_strings[string("dnBimodalNormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBimodalNormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( 1 )
@@ -368,9 +368,9 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBimodalNormal")][string("title")] = string(R"(Bimodal Normal dsitribution)");
 	help_arrays[string("dnBinomial")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBinomial")][string("description")] = string(R"(The Binomial probability distribution describes the probability of a number of successes for an experiment with a certain number of trials and probability of success per trial.)");
-	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial probability distribution takes on two parameters, p and size. It defines the number of successes in size trials, where each trial has the same success probability p. 
+	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial distribution takes two parameters, p and size. It defines the number of successes in size trials, where each trial has the same success probability p. 
 
-The probability density function is f(x) = (size choose x) p^(x) * (1-p)^(size-p).)");
+The probability density function is f(x) =  choose(size,x) * p^(x) * (1-p)^(size-p).)");
 	help_strings[string("dnBinomial")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBinomial(size=10,p)
 x.clamp(8)
@@ -410,7 +410,7 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
 	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
-	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes on a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
+	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
 
 A typical scenario where a categorical variable is used is in the definition of a variable drawn from a mixture. A vector of mixture components is set up first, and then a stochastic variable drawn from a categorical distribution is used as an index in a deterministic assignment that points to a component in the mixture. See example below.)");
 	help_strings[string("dnCategorical")][string("example")] = string(R"(# Define a stochastic variable x that is drawn from
@@ -439,8 +439,8 @@ y := rates[x])");
 	help_arrays[string("dnCategorical")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnCategorical")][string("title")] = string(R"(The Categorical Distribution)");
 	help_arrays[string("dnCauchy")][string("authors")].push_back(string(R"(Andrew Magee)"));
-	help_strings[string("dnCauchy")][string("description")] = string(R"(The Cauchy probability distribution describes the distribution of the ratio of two independent normal variables with mean 0 and variance 1.)");
-	help_strings[string("dnCauchy")][string("details")] = string(R"(The Cauchy distribution takes on two parameters, location and scale. The probability density function is f(x) = 1/(pi * scale) * 1 / (1 + x-(location/scale)^2))");
+	help_strings[string("dnCauchy")][string("description")] = string(R"(The Cauchy distribution describes the distribution of the ratio of two independent normal variables with mean 0 and variance 1.)");
+	help_strings[string("dnCauchy")][string("details")] = string(R"(The Cauchy distribution takes two parameters, location and scale. It is a symmetric distribution, but its tails are broad enough that it has no defined mean or variance. The probability density function is f(x) = 1/(pi * scale) * 1 / (1 + x - (location/scale)^2))");
 	help_strings[string("dnCauchy")][string("example")] = string(R"(# we simulate some obversations
 x <- rCauchy(n=10,location=0,scale=1)
 # let's see what the mean and the variance are.
@@ -453,8 +453,8 @@ sd(x))");
 	help_arrays[string("dnCauchy")][string("see_also")].push_back(string(R"(dnChisq)"));
 	help_strings[string("dnCauchy")][string("title")] = string(R"(Cauchy Distribution)");
 	help_arrays[string("dnChisq")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnChisq")][string("description")] = string(R"(The chi-square probability distribution with k degrees of freedom describes the distribution of the sum of the squares of k independent normal variables with mean 0 and variance 1.)");
-	help_strings[string("dnChisq")][string("details")] = string(R"(The chi-square distribution takes on one parameter, df, the number of degrees of freedom. The probability density function is f(x) = x^(df/2 - 1) * e^(-x/2) / (2^(df/2) * Gamma(df/2)), where Gamma is the gamma function.)");
+	help_strings[string("dnChisq")][string("description")] = string(R"(The chi-square distribution with df degrees of freedom describes the distribution of the sum of the squares of df independent normal variables with mean 0 and variance 1.)");
+	help_strings[string("dnChisq")][string("details")] = string(R"(The chi-square distribution takes one parameter, df, the number of degrees of freedom. The probability density function is f(x) = x^(df/2 - 1) * e^(-x/2) / (2^(df/2) * Gamma(df/2)), where Gamma is the gamma function.)");
 	help_strings[string("dnChisq")][string("example")] = string(R"(# The most important use of the chi-square distribution
 # is arguable the quantile function.
 # You can access it the following way:
@@ -555,8 +555,8 @@ root_height := psi.rootAge()
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnDirichlet")][string("description")] = string(R"(The Dirichlet probability distribution is a generalization of the Beta distribution for multiple variables.)");
-	help_strings[string("dnDirichlet")][string("details")] = string(R"(The Dirichlet distribution takes one parameter, alpha, a vector of numbers representing the concentration of the distribution on each variable. It then returns a simplex (i.e. a vector whose elements sum to 1) representing the relative probability of each variable.)");
+	help_strings[string("dnDirichlet")][string("description")] = string(R"(The Dirichlet distribution is a generalization of the Beta distribution for multiple variables.)");
+	help_strings[string("dnDirichlet")][string("details")] = string(R"(The Dirichlet distribution takes one parameter, alpha, a vector of numbers representing the concentration of the distribution on each variable. It then returns a simplex (i.e. a vector whose elements sum to 1) representing the relative probability of each variable. Note that when every element of alpha is 1, the distribution is equivalent to a uniform on each element.)");
 	help_strings[string("dnDirichlet")][string("example")] = string(R"(# lets get a draw from a Dirichlet distribution
 a <- [1,1,1,1]   # we could also use rep(1,4)
 b ~ dnDirichlet(a)
@@ -628,8 +628,8 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("dnEpisodicBirthDeath")][string("name")] = string(R"(dnEpisodicBirthDeath)");
 	help_strings[string("dnEvent")][string("name")] = string(R"(dnEvent)");
 	help_arrays[string("dnExponential")][string("authors")].push_back(string(R"(Michael Landis)"));
-	help_strings[string("dnExponential")][string("description")] = string(R"(The Exponential probability distribution describes the distribution of the times between events in a Poisson point process.)");
-	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution takes on one parameter, lambda, describing the rate (i.e. 1/mean). The probability density function is f(x) = lambda * exp(-lambda*x).)");
+	help_strings[string("dnExponential")][string("description")] = string(R"(The Exponential distribution describes the distribution of the times between events in a Poisson point process.)");
+	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution takes one parameter, lambda, describing the rate (i.e. 1/mean). The probability density function is f(x) = lambda * exp(-lambda*x).)");
 	help_strings[string("dnExponential")][string("example")] = string(R"(# we set a rate parameter
 rate <- 10.0
 # we create an exponentially distributed random variable

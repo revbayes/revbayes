@@ -3,9 +3,9 @@ dnChisq
 ## title
 Chi-Square Distribution
 ## description
-The chi-square probability distribution with k degrees of freedom describes the distribution of the sum of the squares of k independent normal variables with mean 0 and variance 1. 
+The chi-square distribution with df degrees of freedom describes the distribution of the sum of the squares of df independent normal variables with mean 0 and variance 1. 
 ## details
-The chi-square distribution takes on one parameter, df, the number of degrees of freedom. The probability density function is f(x) = x^(df/2 - 1) * e^(-x/2) / (2^(df/2) * Gamma(df/2)), where Gamma is the gamma function.
+The chi-square distribution takes one parameter, df, the number of degrees of freedom. The probability density function is f(x) = x^(df/2 - 1) * e^(-x/2) / (2^(df/2) * Gamma(df/2)), where Gamma is the gamma function.
 ## authors
 Sebastian Hoehna
 ## see_also

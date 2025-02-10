@@ -3,9 +3,9 @@ dnBernoulli
 ## title
 Bernoulli Distribution
 ## description
-The Bernoulli probability distribution represents a weighted coin toss.
+The Bernoulli distribution represents a weighted coin toss.
 ## details
-The Bernoulli distribution takes on a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).
+The Bernoulli distribution takes a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).
 ## authors
 John Huelsenbeck
 ## see_also

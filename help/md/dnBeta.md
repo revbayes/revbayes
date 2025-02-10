@@ -3,9 +3,9 @@ dnBeta
 ## title
 Beta Distribution
 ## description
-The Beta probability distribution is a flexible distribution that returns a number between 0 and 1, so it is often used as a distribution for probabilities themselves.
+The Beta distribution is a flexible distribution that returns a number between 0 and 1, so it is often used as a distribution for probabilities themselves.
 ## details
-The Beta distribution takes on two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
+The Beta distribution takes two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
 
 The probability density function is f(x) = x^(alpha - 1) * (1 - x)^(beta - 1) * Gamma(alpha + beta) / (Gamma(alpha) * Gamma(beta)), where Gamma is the gamma function.
 ## authors
