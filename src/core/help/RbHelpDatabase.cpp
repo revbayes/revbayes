@@ -2502,7 +2502,75 @@ moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0))");
 	help_strings[string("mvCorrelationMatrixUpdate")][string("name")] = string(R"(mvCorrelationMatrixUpdate)");
 	help_strings[string("mvDPPAllocateAuxGibbs")][string("name")] = string(R"(mvDPPAllocateAuxGibbs)");
 	help_strings[string("mvDPPGibbsConcentration")][string("name")] = string(R"(mvDPPGibbsConcentration)");
+	help_arrays[string("mvDPPValueBetaSimplex")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvDPPValueBetaSimplex")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [Simplex](https://revbayes.github.io/documentation/Simplex.html) distributions, i.e., distributions defined over vectors whose elements are positive and sum to 1.)");
+	help_strings[string("mvDPPValueBetaSimplex")][string("details")] = string(R"(In Dirichlet process mixtures, the number of categories (= clusters) is not specified beforehand but inferred from the data, and can range anywhere from 1 to the total number of elements (= observations). The move takes the current number of categories and simultaneously updates the value of every category using the beta simplex move with a concentration parameter (alpha) of 10.)");
+	help_strings[string("mvDPPValueBetaSimplex")][string("example")] = string(R"(# Here, we draw from a DP mixture for 3 elements, where every element
+# is itself a 2-element simplex drawn from a flat Dirichlet distribution
+x ~ dnDPP(1, dnDirichlet( [1, 1] ), 3)
+
+# Next, we add the move. Note that without moves other than
+# mvDPPValueBetaSimplex, only the values of the categories will be
+# updated: the total number of categories and the assignment of elements
+# to categories will be determined by the initial draw.
+moves[1] = mvDPPValueBetaSimplex(x, weight=1)
+
+monitors[1] = mnScreen(x, printgen=1)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50))");
+	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- dnDPP)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvDPPValueScaling)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvDPPValueSliding)"));
+	help_strings[string("mvDPPValueBetaSimplex")][string("title")] = string(R"(Beta simplex move applied to individual categories of a Dirichlet process mixture)");
+	help_arrays[string("mvDPPValueScaling")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvDPPValueScaling")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [RealPos](https://revbayes.github.io/documentation/RealPos.html) distributions, i.e., distributions defined over non-negative real numbers.)");
+	help_strings[string("mvDPPValueScaling")][string("details")] = string(R"(In Dirichlet process mixtures, the number of categories (= clusters) is not specified beforehand but inferred from the data, and can range anywhere from 1 to the total number of elements (= observations). The move takes the current number of categories and simultaneously updates the value of every category using the scaling move with a scaling factor (lambda) of 1.)");
+	help_strings[string("mvDPPValueScaling")][string("example")] = string(R"(# Here, we draw from a DP mixture for 3 elements, where every element
+# is a non-negative real number drawn from an exponential distribution
+x ~ dnDPP(1, dnExp(1), 3)
+
+# Next, we add the move. Note that without moves other than
+# mvDPPValueScaling, only the values of the categories will be updated:
+# the total number of categories and the assignment of elements to
+# categories will be determined by the initial draw.
+moves[1] = mvDPPValueScaling(x, weight=1)
+
+monitors[1] = mnScreen(x, printgen=1)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50))");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- dnDPP)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvScale)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvDPPValueBetaSimplex)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvDPPValueSliding)"));
+	help_strings[string("mvDPPValueScaling")][string("title")] = string(R"(Scaling move applied to individual categories of a Dirichlet process mixture)");
+	help_arrays[string("mvDPPValueSliding")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvDPPValueSliding")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [Real](https://revbayes.github.io/documentation/Real.html) distributions, i.e., distributions defined over all real numbers.)");
+	help_strings[string("mvDPPValueSliding")][string("details")] = string(R"(In Dirichlet process mixtures, the number of categories (= clusters) is not specified beforehand but inferred from the data, and can range anywhere from 1 to the total number of elements (= observations). The move takes the current number of categories and simultaneously updates the value of every category using the sliding move with a window size (delta) of 1.)");
+	help_strings[string("mvDPPValueSliding")][string("example")] = string(R"(# Here, we draw from a DP mixture for 3 elements, where every element
+# is a real number drawn from the standard normal distribution
+x ~ dnDPP(1, dnNormal(0, 1), 3)
+
+# Next, we add the move. Note that without moves other than
+# mvDPPValueSliding, only the values of the categories will be updated:
+# the total number of categories and the assignment of elements to
+# categories will be determined by the initial draw.
+moves[1] = mvDPPValueSliding(x, weight=1)
+
+monitors[1] = mnScreen(x, printgen=1)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50))");
+	help_strings[string("mvDPPValueSliding")][string("name")] = string(R"(mvDPPValueSliding)");
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- dnDPP)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvSlide)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvDPPValueBetaSimplex)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvDPPValueScaling)"));
+	help_strings[string("mvDPPValueSliding")][string("title")] = string(R"(Sliding move applied to individual categories of a Dirichlet process mixture)");
 	help_strings[string("mvDirichletSimplex")][string("description")] = string(R"(A Dirichlet-simplex proposal randomly changes some values of a [Simplex](https://revbayes.github.io/documentation/Simplex.html)
 (a vector whose elements sum to 1). The other values change too because of renormalization.
  
