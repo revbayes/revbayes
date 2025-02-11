@@ -61,7 +61,8 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
                                                        const TypedDagNode<double> *ext_sd,
                                                        const TypedDagNode<double> *r_sp,
                                                        const TypedDagNode<double> *r_ext,
-                                                       size_t num_classes, 
+                                                       size_t num_speciation_classes, 
+                                                       size_t num_extinction_classes, 
                                                        const std::string &cdt,
                                                        bool uo,
                                                        size_t min_num_lineages,
@@ -76,8 +77,8 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     active_likelihood( std::vector<bool>(5, 0) ),
     changed_nodes( std::vector<bool>(5, false) ),
     dirty_nodes( std::vector<bool>(5, true) ),
-    node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*num_classes*num_classes,0))) ),
-    num_states( num_classes*num_classes ),
+    node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*num_speciation_classes*num_extinction_classes,0))) ),
+    num_states( num_speciation_classes*num_extinction_classes ),
     scaling_factors( std::vector<std::vector<double> >(5, std::vector<double>(2,0.0) ) ),
     use_origin( uo ),
     sample_character_history( false ),
@@ -85,18 +86,19 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     average_extinction( std::vector<double>(5, 0.0) ),
     num_speciation_shift_events( std::vector<long>(5, 0.0) ),
     num_extinction_shift_events( std::vector<long>(5, 0.0) ),
-    time_in_states( std::vector<double>(num_classes*num_classes, 0.0) ),    
+    time_in_states( std::vector<double>(num_speciation_classes*num_extinction_classes, 0.0) ),    
     simmap( "" ),
     process_age( age ),
-    num_rate_classes ( num_classes ),
+    num_speciation_classes ( num_speciation_classes ),
+    num_extinction_classes ( num_extinction_classes ),
     speciation_scale( sp ),
     extinction_scale( ext ),
     speciation_sd( sp_sd ),
     extinction_sd( ext_sd ),
     alpha( r_sp ),
     beta( r_ext ),
-    lambda( std::vector<double>(num_classes * num_classes, 0.0) ),
-    mu( std::vector<double>(num_classes * num_classes, 0.0) ),
+    lambda( std::vector<double>(num_speciation_classes * num_extinction_classes, 0.0) ),
+    mu( std::vector<double>(num_speciation_classes * num_extinction_classes, 0.0) ),
     rho( new ConstantNode<double>("", new double(1.0)) ),
     min_num_lineages( min_num_lineages ),
     max_num_lineages( max_num_lineages ),
@@ -723,11 +725,14 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             }
         }
         
-        // check if there was a character state transition
+        // check if there was a diversification rate shift event 
         if (new_state != current_state)
         {
-            int baz = abs((int)new_state - (int)current_state);
-            if (baz < num_rate_classes){
+            // if so, figure out what kind of rate shift event it was
+            //
+            //int baz = abs((int)new_state - (int)current_state);
+            if (abs(mu[new_state] - mu[current_state]) > 0){
+            //if (baz < num_rate_classes){
                 //std::cout << "simulated rate shift event (speciation)" << std::endl;
                 ++num_extinction_shift_events[node_index];
             }else{
@@ -2644,7 +2649,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
     */
 
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref);
-    BDS_ODE ode = BDS_ODE(lambda, mu, num_rate_classes, alpha->getValue(), beta->getValue(), forward);
+    BDS_ODE ode = BDS_ODE(lambda, mu, num_speciation_classes, num_extinction_classes, alpha->getValue(), beta->getValue(), forward);
     //BDS_ODE ode = BDS_ODE(speciation_rates, extinction_rates, num_rate_classes, alpha_ref, beta_ref, forward);
    
     typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
@@ -2681,7 +2686,7 @@ void FastBirthDeathShiftProcess::numericallyIntegrateProcess(std::vector< double
 
 
 void FastBirthDeathShiftProcess::update_rates(){
-    size_t num_categories = num_rate_classes * num_rate_classes;
+    size_t num_categories = num_speciation_classes * num_extinction_classes;
 
     double lambda_scale = speciation_scale->getValue();
     double lambda_sd    = speciation_sd   ->getValue();
@@ -2689,22 +2694,26 @@ void FastBirthDeathShiftProcess::update_rates(){
     double mu_scale = extinction_scale->getValue();
     double mu_sd    = extinction_sd   ->getValue();
 
-    std::vector<double> v_lambda;
-    std::vector<double> v_mu;
+    std::vector<double> v_lambda(num_speciation_classes, 0);
+    std::vector<double> v_mu(num_extinction_classes, 0);
 
-    for (size_t i=0; i < num_rate_classes; ++i){
-        double p = (i+0.5)/num_rate_classes;
-
+    // compute quantiles
+    for (size_t i=0; i < num_speciation_classes; ++i){
+        double p = (i+0.5)/num_speciation_classes;
         double lambda_quantile = RbStatistics::Lognormal::quantile(log(lambda_scale), lambda_sd, p);
-        double mu_quantile     = RbStatistics::Lognormal::quantile(log(mu_scale),     mu_sd,     p);
-
-        v_lambda.push_back(lambda_quantile);
-        v_mu.push_back(mu_quantile);
+        v_lambda[i] = lambda_quantile;
     }
 
+    for (size_t i=0; i < num_extinction_classes; ++i){
+        double p = (i+0.5)/num_extinction_classes;
+        double mu_quantile     = RbStatistics::Lognormal::quantile(log(mu_scale), mu_sd, p);
+        v_mu[i] = mu_quantile;
+    }
+
+    // make the pairwise combinations
     size_t q = 0;
-    for (size_t i = 0; i < num_rate_classes; i++){
-        for (size_t j = 0; j < num_rate_classes; j++){
+    for (size_t i = 0; i < num_extinction_classes; i++){
+        for (size_t j = 0; j < num_speciation_classes; j++){
             lambda[q] = v_lambda[j]; 
             mu[q] = v_mu[i]; 
             q++;

@@ -39,7 +39,8 @@ namespace RevBayesCore {
                                   const TypedDagNode<double>* msd,
                                   const TypedDagNode<double> * rsp,
                                   const TypedDagNode<double> * rext,
-                                  size_t num_cls,
+                                  size_t num_sp_cls,
+                                  size_t num_ex_cls,
                                   const std::string &cdt,
                                   bool uo,
                                   size_t min_num_lineages,
@@ -123,7 +124,8 @@ namespace RevBayesCore {
         mutable std::map<size_t, std::vector<std::vector<double> > >    branch_partial_likelihoods;
         mutable boost::numeric::ublas::matrix<double>                   Qmatrix;
         size_t                                                          num_states;
-        size_t                                                          num_rate_classes;
+        size_t                                                          num_speciation_classes;
+        size_t                                                          num_extinction_classes;
         mutable std::vector<std::vector<double> >                       scaling_factors;
         bool                                                            use_origin;
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?

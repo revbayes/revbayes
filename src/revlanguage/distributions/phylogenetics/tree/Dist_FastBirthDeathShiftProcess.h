@@ -46,7 +46,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                                   extinction_sd;
         RevPtr<const RevVariable>                                   alpha;
         RevPtr<const RevVariable>                                   beta;
-        RevPtr<const RevVariable>                                   num_rate_classes;
+        RevPtr<const RevVariable>                                   num_sp_classes;
+        RevPtr<const RevVariable>                                   num_ex_classes;
         RevPtr<const RevVariable>                                   rho;
         RevPtr<const RevVariable>                                   condition;                                                                              //!< The condition of the process (none/survival/#Taxa)
         RevPtr<const RevVariable>                                   num_time_slices;

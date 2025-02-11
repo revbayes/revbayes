@@ -49,7 +49,8 @@ using namespace RevBayesCore;
 void dmv_special(
         std::vector<double> &y,
         const std::vector<double> &x,
-        const size_t &n,
+        const size_t &n_speciation_classes,
+        const size_t &n_extinction_classes,
         const double &alpha,
         const double &beta,
         const bool forward
@@ -59,13 +60,17 @@ void dmv_special(
     // number of rate classes
     // (NOT) rate categories
 
-    const double alpha_small = alpha / (n-1);
-    const double beta_small  = beta  / (n-1);
+    const double alpha_small = alpha / (n_speciation_classes-1);
+    const double beta_small  = beta  / (n_extinction_classes-1);
 
     size_t offsets = 2;
     if (forward){
         offsets += 1;
     }
+
+    size_t n_categories = n_speciation_classes * n_extinction_classes;
+
+    //size_t offset = offset_index * n_categories;
 
     // offset because we do it for E(t) and D(t)
     // if forward also for F(t)
@@ -74,9 +79,9 @@ void dmv_special(
         if (offset_index == 0){
             offset = 0;
         }else if(offset_index == 1){
-            offset = n*n;
+            offset = n_categories;
         }else if(offset_index == 2){
-            offset = 2*n*n;
+            offset = 2*n_categories;
         }
 
         // [
@@ -84,11 +89,12 @@ void dmv_special(
         //   Cu + Cv + Cw
         //   Cu + Cv + Cw
         // ]
-        for (size_t i = 0; i < n; i++){
-            size_t a = n*i;
-            for (size_t k=0; k < n; k++){
-                for (size_t j = 0; j < n; j++){
-                    size_t b = n*j;
+        for (size_t i = 0; i < n_extinction_classes; i++){
+            size_t a = n_speciation_classes * i;
+
+            for (size_t k=0; k < n_speciation_classes; k++){
+                for (size_t j = 0; j < n_extinction_classes; j++){
+                    size_t b = n_speciation_classes * j;
                     y[k+a+offset] += x[k+b+offset] * beta_small;
                     // there should be an if k+a+offset != k+b+offset here
                     // but we subtract it later instead
@@ -102,18 +108,22 @@ void dmv_special(
         //    0  + Bv  +  0
         //    0  +  0  + Bw
         // ]
-        for (size_t i = 0; i < n; i++){
-            for (size_t k = 0; k < n; k++){
-                for (size_t j = 0; j < n; j++){
-                    size_t a = k*n;
-                    y[i+a+offset] += x[j+a+offset] * alpha_small;
+        for (size_t i = 0; i < n_extinction_classes; i++){
+            size_t a = n_speciation_classes * i;
+
+            for (size_t j = 0; j < n_speciation_classes; j++){
+                for (size_t k = 0; k < n_speciation_classes; k++){
+
+                    y[j+a+offset] += x[k+a+offset] * alpha_small;
                     // there should be an if i+a+offset != j+a+offset here
                     // but we subtract it later instead
                 }
             }
         }
 
-        for (size_t i = 0; i < n*n; i++){
+        size_t n_categories = n_speciation_classes * n_extinction_classes;
+
+        for (size_t i = 0; i < n_categories; i++){
             // we didnt actually want to add the diagonal in previous loops
             double c1 = alpha_small + beta_small; 
             double c2 = alpha + beta; // also subtract (alpha+beta)*x_i
@@ -126,14 +136,16 @@ void dmv_special(
 BDS_ODE::BDS_ODE( 
         const std::vector<double> &l,
         const std::vector<double> &m,
-        const size_t &n, // number of rate classes
+        const size_t &n_sp, // number of speciation rate classes
+        const size_t &n_ex, // number of extinction rate classes
         const double &a,
         const double &b,
         const bool &f
         ) :
     mu( m ),
     lambda( l ),
-    num_classes( n ),
+    num_speciation_classes( n_sp ),
+    num_extinction_classes( n_ex ),
     alpha( a ),
     beta( b ),
     forward( f )
@@ -144,7 +156,7 @@ BDS_ODE::BDS_ODE(
 
 void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &dxdt, const double t)
 {
-    const size_t num_categories = num_classes * num_classes; 
+    const size_t num_categories = num_speciation_classes * num_extinction_classes; 
 
                       
     // catch negative probabilities that can result from
@@ -163,7 +175,7 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
     }
 
     // the matrix-vector product
-    dmv_special(dxdt, safe_x, num_classes, alpha, beta, forward);
+    dmv_special(dxdt, safe_x, num_speciation_classes, num_extinction_classes, alpha, beta, forward);
 
     // do the diagonal elements
     for (size_t i = 0; i < num_categories; ++i)

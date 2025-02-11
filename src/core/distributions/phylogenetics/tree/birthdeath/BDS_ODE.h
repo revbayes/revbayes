@@ -16,7 +16,8 @@ namespace RevBayesCore {
         BDS_ODE( 
                 const std::vector<double> &l, 
                 const std::vector<double> &m, 
-                const size_t &n,
+                const size_t &n_sp,
+                const size_t &n_ex,
                 const double &a,
                 const double &b,
                 const bool &f
@@ -27,7 +28,8 @@ namespace RevBayesCore {
     private:
         const std::vector<double> mu;      //!< vector of extinction rate categories
         const std::vector<double> lambda;  //!< vector of speciation rate categories
-        const size_t num_classes; //number of rate classes (not rate categories)
+        const size_t num_speciation_classes; //number of speciation rate classes (not rate categories)
+        const size_t num_extinction_classes; //number of extinction rate classes (not rate categories)
         const double alpha;
         const double beta;
         const bool forward;

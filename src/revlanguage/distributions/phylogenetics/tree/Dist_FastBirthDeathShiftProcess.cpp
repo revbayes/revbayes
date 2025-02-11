@@ -88,7 +88,9 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
     RevBayesCore::TypedDagNode<double>* r_ext = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
 
     // get number of rate classes
-    size_t num_classes = static_cast<const Integer &>( num_rate_classes->getRevObject() ).getValue();
+    //size_t num_classes = static_cast<const Integer &>( num_rate_classes->getRevObject() ).getValue();
+    size_t num_speciation_classes = static_cast<const Integer &>( num_sp_classes->getRevObject() ).getValue();
+    size_t num_extinction_classes = static_cast<const Integer &>( num_ex_classes->getRevObject() ).getValue();
         
     // condition
     const std::string& cond                  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
@@ -128,7 +130,8 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_FastBirthDeathShiftPro
             ex_sd, 
             r_sp, 
             r_ext, 
-            num_classes, 
+            num_speciation_classes, 
+            num_extinction_classes, 
             cond, 
             uo, 
             min_l,
@@ -262,7 +265,8 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
 
         memberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()        , "the rate of shifts in speciation rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "beta", RealPos::getClassTypeSpec()        , "the rate of shifts in extinction rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
-        memberRules.push_back( new ArgumentRule( "numClasses", Natural::getClassTypeSpec(), "The number of rate classes (the number of rate categories will be n^2).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(6) ) );
+        memberRules.push_back( new ArgumentRule( "numSpeciationClasses", Natural::getClassTypeSpec(), "The number of speciation rate classes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(6) ) );
+        memberRules.push_back( new ArgumentRule( "numExtinctionClasses", Natural::getClassTypeSpec(), "The number of extinction rate classes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(6) ) );
         
         std::vector<TypeSpec> sampling_fraction_types;
         sampling_fraction_types.push_back( Probability::getClassTypeSpec() );
@@ -334,9 +338,13 @@ void Dist_FastBirthDeathShiftProcess::setConstParameter(const std::string& name,
     {
         beta = var;
     }
-    else if ( name == "numClasses" )
+    else if ( name == "numSpeciationClasses" )
     {
-        num_rate_classes = var;
+        num_sp_classes = var;
+    }
+    else if ( name == "numExtinctionClasses" )
+    {
+        num_ex_classes = var;
     }
     else if ( name == "rho" )
     {
