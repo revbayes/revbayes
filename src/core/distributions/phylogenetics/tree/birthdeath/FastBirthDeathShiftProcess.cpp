@@ -734,10 +734,10 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             if (abs(mu[new_state] - mu[current_state]) > 0){
             //if (baz < num_rate_classes){
                 //std::cout << "simulated rate shift event (speciation)" << std::endl;
-                ++num_extinction_shift_events[node_index];
+                ++num_speciation_shift_events[node_index];
             }else{
                 //std::cout << "simulated rate shift event (extinction)" << std::endl;
-                ++num_speciation_shift_events[node_index];
+                ++num_extinction_shift_events[node_index];
             }
 
             double time_since_last_transition = 0.0;
