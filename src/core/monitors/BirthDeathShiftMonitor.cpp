@@ -70,6 +70,8 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
     
 	std::vector<double> speciation;
 	std::vector<double> extinction;
+	std::vector<double> delta_speciation;
+	std::vector<double> delta_extinction;
 	std::vector<double> sampling;
 	std::vector<double> destructive_sampling;
     std::vector<long>   n_speciation_shifts;
@@ -87,6 +89,8 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
     // get the variables we are interested in
     speciation = bds->getAverageSpeciationRatePerBranch();
     extinction = bds->getAverageExtinctionRatePerBranch();
+    delta_speciation = bds->getDeltaSpeciationPerBranch();
+    delta_extinction = bds->getDeltaExtinctionPerBranch();
     n_speciation_shifts   = bds->getNumberOfSpeciationShiftEventsPerBranch();
     n_extinction_shifts   = bds->getNumberOfExtinctionShiftEventsPerBranch();
     
@@ -95,9 +99,7 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
     {
         // add a separator before every new element
         out_stream << separator;
-        
         out_stream << speciation[i];
-        
     }
     
     for (int i = 0; i < extinction.size(); i++)
@@ -106,6 +108,22 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
         out_stream << separator;
         out_stream << extinction[i];
     }
+
+
+    for (int i = 0; i < delta_speciation.size(); i++)
+    {
+        // add a separator before every new element
+        out_stream << separator;
+        out_stream << delta_speciation[i];
+    }
+
+    for (int i = 0; i < delta_extinction.size(); i++)
+    {
+        // add a separator before every new element
+        out_stream << separator;
+        out_stream << delta_extinction[i];
+    }
+
     
     for (int i = 0; i < n_speciation_shifts.size(); i++)
     {
@@ -133,6 +151,8 @@ void BirthDeathShiftMonitor::printFileHeader()
     
     std::vector<double> speciation;
     std::vector<double> extinction;
+    std::vector<double> delta_speciation;
+    std::vector<double> delta_extinction;
     std::vector<double> sampling;
     std::vector<double> destructive_sampling;
     std::vector<long>   n_speciation_shifts;
@@ -146,6 +166,8 @@ void BirthDeathShiftMonitor::printFileHeader()
     bds->drawStochasticCharacterMap( character_histories );
     speciation = bds->getAverageSpeciationRatePerBranch();
     extinction = bds->getAverageExtinctionRatePerBranch();
+    delta_speciation = bds->getDeltaSpeciationPerBranch();
+    delta_extinction = bds->getDeltaExtinctionPerBranch();
     n_speciation_shifts   = bds->getNumberOfSpeciationShiftEventsPerBranch();
     n_extinction_shifts   = bds->getNumberOfExtinctionShiftEventsPerBranch();
         
@@ -164,6 +186,23 @@ void BirthDeathShiftMonitor::printFileHeader()
         out_stream << i + 1;
         out_stream << "]";
     }
+
+    for (int i = 0; i < delta_speciation.size(); i++)
+    {
+        out_stream << separator;
+        out_stream << "delta_lambda[";
+        out_stream << i + 1;
+        out_stream << "]";
+    }
+
+    for (int i = 0; i < delta_extinction.size(); i++)
+    {
+        out_stream << separator;
+        out_stream << "delta_mu[";
+        out_stream << i + 1;
+        out_stream << "]";
+    }
+
     
     for (int i = 0; i < n_speciation_shifts.size(); i++)
     {

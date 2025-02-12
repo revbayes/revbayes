@@ -559,7 +559,6 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
 
     double start_time = node.getParent().getAge();
     double branch_length = node.getParent().getAge() - node.getAge();
-
     
     // reset the number of rate-shift events
     num_speciation_shift_events[node_index] = 0;
@@ -729,13 +728,16 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
         if (new_state != current_state)
         {
             // if so, figure out what kind of rate shift event it was
-            //
-            //int baz = abs((int)new_state - (int)current_state);
+            // note there could actually have been more than one
+            // rate shift in the delta_t (however unlikely), therefore
+            // check change in mu and lambda independently
+
             if (abs(mu[new_state] - mu[current_state]) > 0){
-            //if (baz < num_rate_classes){
                 //std::cout << "simulated rate shift event (speciation)" << std::endl;
                 ++num_extinction_shift_events[node_index];
-            }else{
+            }
+
+            if (abs(lambda[new_state] - lambda[current_state]) > 0){
                 //std::cout << "simulated rate shift event (extinction)" << std::endl;
                 ++num_speciation_shift_events[node_index];
             }
@@ -769,18 +771,16 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
 
         t -= delta_t;
         
-        // keep track of rates in this interal so we can calculate per branch averages of each rate
+        // keep track of rates in this interval so we can calculate per branch averages of each rate
         total_speciation_rate += lambda[current_state];
         total_extinction_rate +=     mu[current_state];
         time_in_states[current_state] += delta_t;
-        //num_episodes += 1;
     }
 
     // keep track of rates in this interval so we can calculate per branch averages of each rate
     total_speciation_rate += lambda[current_state];
     total_extinction_rate +=     mu[current_state];
     time_in_states[current_state] += delta_t;
-    //num_episodes += 1;
     
     // make SIMMAP string
     std::string simmap_string = "{";
@@ -797,6 +797,10 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
     // calculate average diversification rates on this branch
     average_speciation[node_index] = total_speciation_rate / num_episodes;
     average_extinction[node_index] = total_extinction_rate / num_episodes;
+
+    // calculate the difference between the youngest and the oldest rates
+    delta_speciation[node_index] = lambda[current_state] - lambda[start_state];
+    delta_extinction[node_index] = mu[current_state] - mu[start_state];
 
     // save the character history for this branch
     character_histories[node_index] = simmap_string;
@@ -1224,6 +1228,14 @@ void FastBirthDeathShiftProcess::executeMethod(const std::string &name, const st
     {
         rv = average_extinction;        
     }
+    else if ( name == "deltaSpeciationRate" )
+    {
+        rv = delta_speciation;
+    }
+    else if ( name == "deltaExtinctionRate" )
+    {
+        rv = delta_extinction; 
+    }
     else if ( name == "getTimeInStates" )
     {
         rv = time_in_states;        
@@ -1268,6 +1280,18 @@ std::vector<double> FastBirthDeathShiftProcess::getAverageExtinctionRatePerBranc
 std::vector<double> FastBirthDeathShiftProcess::getAverageSpeciationRatePerBranch( void ) const
 {
     return average_speciation;
+}
+
+
+std::vector<double> FastBirthDeathShiftProcess::getDeltaSpeciationPerBranch( void ) const
+{
+    return delta_speciation;
+}
+
+
+std::vector<double> FastBirthDeathShiftProcess::getDeltaExtinctionPerBranch( void ) const
+{
+    return delta_extinction;
 }
 
 
@@ -2780,6 +2804,8 @@ void FastBirthDeathShiftProcess::resizeVectors(size_t num_nodes)
     scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);
+    delta_speciation = std::vector<double>(num_nodes, 0.0);
+    delta_extinction = std::vector<double>(num_nodes, 0.0);
     num_speciation_shift_events = std::vector<long>(num_nodes, 0.0);
     num_extinction_shift_events = std::vector<long>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);    
