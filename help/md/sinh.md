@@ -9,7 +9,5 @@ The Hyperbolic functions are defined using the hyperbola rather than the circle 
 ## authors
 ## see_also
 ## example
-Hyperbolic_update <- function(prior, observation){
-    prior + sinh(observation - prior)
-}
+x = sinh1
 ## references
