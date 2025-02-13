@@ -23,9 +23,10 @@ namespace RevBayesCore {
     class EventTimeSlideProposal : public Proposal {
         
     public:
-        EventTimeSlideProposal( StochasticNode<Tree> *n, double d);                                                                //!<  constructor
+        EventTimeSlideProposal( StochasticNode<Tree> *n, double d);                                                                         //!<  constructor
         
         // Basic utility functions
+        bool                                            allowClamped() const override { return true; }                                      //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                            cleanProposal(void);                                                                //!< Clean up proposal
         EventTimeSlideProposal*                         clone(void) const;                                                                  //!< Clone object
         double                                          doProposal(void);                                                                   //!< Perform proposal
@@ -49,7 +50,7 @@ namespace RevBayesCore {
         double                                          delta;
         
         CharacterEvent*                                 stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
-        double                                          stored_age;                                                                              //!< The value we propose.
+        double                                          stored_age;                                                                          //!< The value we propose.
         size_t                                          stored_branch_index;
         size_t                                          proposed_branch_index;
         bool                                            failed;
