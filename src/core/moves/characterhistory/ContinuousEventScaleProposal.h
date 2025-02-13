@@ -25,6 +25,7 @@ namespace RevBayesCore {
         ContinuousEventScaleProposal( StochasticNode<Tree> *n, double l );                                                                //!<  constructor
         
         // Basic utility functions
+        bool                                            allowClamped() const override { return true; }                                                 //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                            cleanProposal(void);                                                                //!< Clean up proposal
         ContinuousEventScaleProposal*                   clone(void) const;                                                                  //!< Clone object
         double                                          doProposal(void);                                                                   //!< Perform proposal

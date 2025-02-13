@@ -30,6 +30,7 @@ template <class variableType> class StochasticNode;
         MultiValueEventScaleProposal( StochasticNode<MultiValueEvent> *n, const std::string &vn, double l );                                                       //!<  constructor
         
         // Basic utility functions
+        bool                                    allowClamped() const override { return true; }              //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                    cleanProposal(void);                                        //!< Clean up proposal
         MultiValueEventScaleProposal*           clone(void) const;                                          //!< Clone object
         double                                  doProposal(void);                                           //!< Perform proposal

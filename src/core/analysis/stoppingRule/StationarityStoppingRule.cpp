@@ -131,23 +131,32 @@ double StationarityStoppingRule::getStatistic( size_t g )
 }
 
 
-std::string StationarityStoppingRule::printAsStatement( size_t g )
+std::string StationarityStoppingRule::printAsStatement( size_t g, bool target_only )
 {
-    // Note that # of comparisons = (# of replicates) * (# of parameters)
-    // If there are multiple runs, we will grab the # of parameters from the 1st run
-    path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(1)) : filename;
-    TraceContinuousReader reader = TraceContinuousReader( fn );
-    std::vector<TraceNumeric> &data = reader.getTraces();
-    size_t nComp = numReplicates * data.size();
-    
     // Nicely format the target value
     std::stringstream tss;
     tss << std::setprecision(5) << std::noshowpoint << prob;
     std::string target = tss.str();
     
-    size_t val = (size_t)getStatistic(g);
-    std::string preamble = "Comparisons in which the CI of a single-chain mean excludes the overall mean at p = " + target + ": ";
-    std::string statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
+    std::string statement;
+    
+    if (target_only)
+    {
+        statement = "P-value used to test the inclusion of the overall mean in the CI of a single-chain mean: " + target + "\n";
+    }
+    else {
+        // Note that # of comparisons = (# of replicates) * (# of parameters)
+        // If there are multiple runs, we will grab the # of parameters from the 1st run
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(1)) : filename;
+        TraceContinuousReader reader = TraceContinuousReader( fn );
+        std::vector<TraceNumeric> &data = reader.getTraces();
+        size_t nComp = numReplicates * data.size();
+        
+        size_t val = (size_t)getStatistic(g);
+        std::string preamble = "Comparisons in which the CI of a single-chain mean excludes the overall mean at p = " + target + ": ";
+        statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
+    }
+    
     return statement;
 }
 
