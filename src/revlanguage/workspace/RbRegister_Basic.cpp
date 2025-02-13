@@ -222,6 +222,7 @@
 #include "Func_readDelimitedDataFile.h"
 #include "Func_readDiscreteCharacterData.h"
 #include "Func_readDistanceMatrix.h"
+#include "Func_readFossilCountsFile.h"
 #include "Func_readMatrix.h"
 #include "Func_readRelativeNodeAgeConstraints.h"
 #include "Func_readRelativeNodeAgeWeightedConstraints.h"
@@ -556,7 +557,8 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_readDelimitedDataFile()                   );
         addFunction( new Func_readDiscreteCharacterData()               );
 		addFunction( new Func_readDistanceMatrix()                      );
-        addFunction( new Func_readCharacterData()              );
+        addFunction( new Func_readFossilCountsFile()                    );
+        addFunction( new Func_readCharacterData()                       );
         addFunction( new Func_readMatrix()                              );
         addFunction( new Func_readRelativeNodeAgeConstraints()          );
         addFunction( new Func_readRelativeNodeAgeWeightedConstraints()  );
