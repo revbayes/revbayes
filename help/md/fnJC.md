@@ -3,15 +3,15 @@ fnJC
 ## title
 fnJC
 ## description
-Jukes cantor transition matrix
+Jukes Cantor rate matrix
 ## details
-Transition matrix with n amount of states in which each state has an equal
-probability of to change to any other state. The only parameter in this model
-is mu with the rate of change from any given state being mu / number of states.
+Rate matrix with n states in which each state has an equal probability of to change 
+to any other state. The rate of transition from one state to another is equal to 
+n / n-1.
 ## authors
 Jukes & Cantor 
 ## see_also
-tbd ~ other mutation models?
+fnGTR, F81
 ## example
     # Rate Matrix for DNA
     q := fnJC(4)
@@ -20,4 +20,4 @@ tbd ~ other mutation models?
     # Binary Character Matrix
     q := fnJC(2)
 ## references
-Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132.
+- citation: Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132.
