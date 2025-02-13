@@ -21,15 +21,13 @@ namespace RevBayesCore {
         double                  getESS(long begin, long end) const;             //!< compute the effective sample size with begin and end indices of the values
         double                  getSEM(long begin, long end) const;             //!< compute the effective sample size with begin and end indices of the values
 
-        void                    computeStatistics(void);
+        void                    computeStatistics();
 
-        //int                     hasConverged() const                            { return converged; }
-        int                     hasPassedGewekeTest() const                     { return passedGewekeTest; }
-        int                     hasPassedStationarityTest() const               { return passedStationarityTest; }
-        //int                     hasPassedEssThreshold() const                   { return passedEssThreshold; }
-        //int                     hasPassedSemThreshold() const                   { return passedSemThreshold; }
-        //int                     hasPassedIidBetweenChainsStatistic() const      { return passedIidBetweenChainsStatistic; }
-        //int                     hasPassedGelmanRubinTest() const                { return passedGelmanRubinTest; }
+        bool                    hasConverged() const                            { return converged; }
+        bool                    hasPassedEssThreshold() const                   { return passedEssThreshold; }
+        bool                    hasPassedGelmanRubinTest() const                { return passedGelmanRubinTest; }
+        bool                    hasPassedGewekeTest() const                     { return passedGewekeTest; }
+        bool                    hasPassedStationarityTest() const               { return passedStationarityTest; }
 
     protected:
 
@@ -49,13 +47,11 @@ namespace RevBayesCore {
         mutable double          meanw;                                           //!< mean of trace
         mutable double          semw;                                            //!< standard error of mean
 
-        //int                     converged;                                      //!< Whether this parameter in itself has converged.
-        int                     passedStationarityTest;                         //!< Whether this parameter passed the stationarity test.
-        int                     passedGewekeTest;                               //!< Whether this parameter passed the Geweke statistic.
-        //int                     passedEssThreshold;                             //!< Whether this parameter passed the threshold for the ESS.
-        //int                     passedSemThreshold;                             //!< Whether this parameter passed the threshold for the SEM.
-        //int                     passedIidBetweenChainsStatistic;                //!< Whether this parameter passed the iid test of chains.
-        //int                     passedGelmanRubinTest;                          //!< Whether this parameter passed the Gelman-Rubin statistic.
+        bool                    converged;                                       //!< Whether this parameter has converged based on the 4 criteria below.
+        bool                    passedEssThreshold;                              //!< Whether this parameter passed the threshold for the ESS.
+        bool                    passedGelmanRubinTest;                           //!< Whether this parameter passed the Gelman-Rubin statistic.
+        bool                    passedGewekeTest;                                //!< Whether this parameter passed the Geweke statistic.
+        bool                    passedStationarityTest;                          //!< Whether this parameter passed the stationarity test.
 
         mutable bool            stats_dirty;
         mutable bool            statsw_dirty;

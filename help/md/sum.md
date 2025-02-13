@@ -3,8 +3,7 @@ sum
 ## title
 Sum function
 ## description
-Sums all members of a vector of type `Real`, `RealPos`, `Integer`,
-or `Natural`
+Sums all members of a vector of type `Real`, `RealPos`, `Integer`, or `Natural`
 ## details
 ## authors
 ## see_also

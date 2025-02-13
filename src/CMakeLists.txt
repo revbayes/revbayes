@@ -60,13 +60,11 @@ if (BUILD_TYPE_UPPER STREQUAL "DEBUG")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
    # Not necessarily a bug:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
-elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(OPT_FLAGS "${OPT_FLAGS} -O2 -ffp-contract=off")
-   if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|x64|i686|x32|AMD64")
-     set(OPT_FLAGS "${OPT_FLAGS} -mfpmath=sse")
-   endif()
-   find_library(OPENLIBM openlibm)
-   message("openlibm: ${OPENLIBM}")
+# elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
+#    set(OPT_FLAGS "${OPT_FLAGS} -O2 -ffp-contract=off")
+#    if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|x64|i686|x32|AMD64")
+#      set(OPT_FLAGS "${OPT_FLAGS} -mfpmath=sse")
+#   endif()
 else()
    set(OPT_FLAGS "${OPT_FLAGS} -O3 -DNDEBUG")
 endif()
@@ -258,7 +256,6 @@ target_link_libraries(${RB_EXEC_NAME}
   rb-core
   rb-libs
   ${Boost_LIBRARIES}
-  ${OPENLIBM}
   ${CMAKE_DL_LIBS}
   ${GTK_LIBRARIES}
   ${MPI_LIBRARIES}

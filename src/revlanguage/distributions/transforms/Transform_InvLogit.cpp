@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 using namespace RevLanguage;
 
@@ -24,50 +25,9 @@ Transform_InvLogit* Transform_InvLogit::clone( void ) const
     return new Transform_InvLogit(*this);
 }
 
-std::optional<double> invlogit_transform(double x)
-{
-    // Two forms of the same expression to avoid overflow with exp(larg number)
-    if (x < 0)
-	return exp(x)/(1+exp(x));
-    else
-	return 1/(exp(-x)+1);
-}
-
-std::optional<double> invlogit_inverse(double x)
-{
-    if (x > 0 and x < 1)
-    {
-	// log( x / (1-x) )
-	return log(x) - log1p(-x);
-    }
-    else
-        return {}; // out of range
-}
-
-std::optional<double> log_invlogit_prime(double x)
-{
-    if (x > 0)
-    {
-	// y = 1/(exp(-x) + 1)
-	// dy/dx = -1/((exp(-x)+1)^2) * exp(-x) * -1
-	//       = exp(-x) / (1 + exp(-x))^2
-	// log(dy/dx) = -x - 2*log(1+exp(-x))
-
-        return - x - 2*log1p(exp(-x));
-    }
-    else
-    {
-	// y = exp(x)/(exp(x) + 1)
-	// dy/dx = exp(x) / (1+exp(x))^2
-	// log(dy/dx) = x  - 2log1p(exp(x))
-    
-	return   x - 2*log1p(exp(x));
-    }
-}
-
-
 RevBayesCore::TransformedDistribution* Transform_InvLogit::createDistribution( void ) const
 {
+    using namespace Transforms;
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );

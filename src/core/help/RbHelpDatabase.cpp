@@ -83,7 +83,19 @@ c = a + b
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
+	help_strings[string("Simplex")][string("description")] = string(R"(A simplex is a vector of elements that sum to 1.)");
+	help_strings[string("Simplex")][string("example")] = string(R"(```rb
+x <- simplex([2, 2, 6])
+x # = [ 0.2, 0.2, 0.6]
+sum(x) # 1, by definition
+```)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(Moves that operate on Simplexes:)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("Simplex")][string("title")] = string(R"(Simplex)");
 	help_arrays[string("SiteMixtureModel")][string("authors")].push_back(string(R"(Ben Redelings)"));
 	help_strings[string("SiteMixtureModel")][string("description")] = string(R"(A weighted collection of discrete character evolution models.)");
 	help_strings[string("SiteMixtureModel")][string("details")] = string(R"(The SiteMixtureModel datatype is a mixture distribution where each
@@ -290,7 +302,8 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 	help_strings[string("diagonalMatrix")][string("description")] = string(R"(Building a identity/diagonal matrix with 'n' columns and rows.)");
 	help_strings[string("diagonalMatrix")][string("name")] = string(R"(diagonalMatrix)");
 	help_arrays[string("dnBernoulli")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
-	help_strings[string("dnBernoulli")][string("description")] = string(R"(A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.)");
+	help_strings[string("dnBernoulli")][string("description")] = string(R"(The Bernoulli distribution represents a weighted coin toss.)");
+	help_strings[string("dnBernoulli")][string("details")] = string(R"(The Bernoulli distribution takes a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).)");
 	help_strings[string("dnBernoulli")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
@@ -304,8 +317,10 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBernoulli")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnBernoulli")][string("title")] = string(R"(Bernoulli Distribution)");
 	help_arrays[string("dnBeta")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBeta")][string("description")] = string(R"(The Beta probability distribution.)");
-	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution is a probability distribution defined on 0 to 1.)");
+	help_strings[string("dnBeta")][string("description")] = string(R"(The Beta distribution is a flexible distribution that returns a number between 0 and 1, so it is often used as a distribution for probabilities themselves.)");
+	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution takes two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
+
+The probability density function is f(x) = x^(alpha - 1) * (1 - x)^(beta - 1) * Gamma(alpha + beta) / (Gamma(alpha) * Gamma(beta)), where Gamma is the gamma function.)");
 	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
@@ -317,9 +332,11 @@ mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("name")] = string(R"(dnBeta)");
 	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(dnDirichlet)"));
+	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(gamma)"));
 	help_strings[string("dnBeta")][string("title")] = string(R"(Beta Distribution)");
 	help_arrays[string("dnBimodalLognormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(A bimodal lognormal distribution, that is, with probability p a value is distributed according to the first lognormal distribution and with probability 1-p from the second lognormal distribution.)");
+	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(The Bimodal Lognormal distribution unites two separate lognormal distributions.)");
+	help_strings[string("dnBimodalLognormal")][string("details")] = string(R"(The bimodal lognormal distribution takes five parameters: mean1 and mean2 (the means (in log-space) of the two lognormal distributions), sd1 and sd2 (the standard deviations (in log-space) of the two lognormal distributions), and p (between 0 and 1). The value will be distributed according to the first lognormal distribution with probability p, and distributed according to the second lognormal distribution with probability (1 - p).)");
 	help_strings[string("dnBimodalLognormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBimodalLognormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( exp(1) )
@@ -334,7 +351,8 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBimodalLognormal")][string("see_also")].push_back(string(R"(dnLognormal)"));
 	help_strings[string("dnBimodalLognormal")][string("title")] = string(R"(Bimodal Lognormal Distribution)");
 	help_arrays[string("dnBimodalNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBimodalNormal")][string("description")] = string(R"(A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.)");
+	help_strings[string("dnBimodalNormal")][string("description")] = string(R"(The Bimodal Normal distribution unites two separate normal distributions.)");
+	help_strings[string("dnBimodalNormal")][string("details")] = string(R"(The bimodal normal distribution takes five parameters: mean1 and mean2 (the means of two normal distributions), sd1 and sd2 (the standard deviations of two normal distributions), and p (between 0 and 1). The value will be distributed according to the first normal distribution with probability p, and distributed according to the second normal distribution with probability (1 - p).)");
 	help_strings[string("dnBimodalNormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBimodalNormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( 1 )
@@ -347,10 +365,12 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBimodalNormal")][string("name")] = string(R"(dnBimodalNormal)");
 	help_arrays[string("dnBimodalNormal")][string("see_also")].push_back(string(R"(dnBimodalLognormal)"));
 	help_arrays[string("dnBimodalNormal")][string("see_also")].push_back(string(R"(dnNormal)"));
-	help_strings[string("dnBimodalNormal")][string("title")] = string(R"(Bernoulli Distribution)");
+	help_strings[string("dnBimodalNormal")][string("title")] = string(R"(Bimodal Normal dsitribution)");
 	help_arrays[string("dnBinomial")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBinomial")][string("description")] = string(R"(Binomial probability distribution of x successes in size trials.)");
-	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial probability distribution defines the number of success in size trials, where each trial has the same success probability p. The probability is given by (size choose x) p^(x) * (1-p)^(size-p))");
+	help_strings[string("dnBinomial")][string("description")] = string(R"(The Binomial probability distribution describes the probability of a number of successes for an experiment with a certain number of trials and probability of success per trial.)");
+	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial distribution takes two parameters, p and size. It defines the number of successes in size trials, where each trial has the same success probability p. 
+
+The probability density function is f(x) =  choose(size,x) * p^(x) * (1-p)^(size-p).)");
 	help_strings[string("dnBinomial")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBinomial(size=10,p)
 x.clamp(8)
@@ -389,8 +409,8 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
-	help_strings[string("dnCategorical")][string("description")] = string(R"(The categorical distribution, sometimes referred to as the generalized Bernoulli distribution. It describes the probability of one of K different outcomes, labeled from 1 to K, with each outcome probability separately specified.)");
-	help_strings[string("dnCategorical")][string("details")] = string(R"(The argument to the constructor is a simplex containing the probabilities of the outcomes. The outcomes are labeled from 1 to K, where K is the number of elements in the simplex. Outcome i has probability specified by component i in the simplex.
+	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
+	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
 
 A typical scenario where a categorical variable is used is in the definition of a variable drawn from a mixture. A vector of mixture components is set up first, and then a stochastic variable drawn from a categorical distribution is used as an index in a deterministic assignment that points to a component in the mixture. See example below.)");
 	help_strings[string("dnCategorical")][string("example")] = string(R"(# Define a stochastic variable x that is drawn from
@@ -419,10 +439,8 @@ y := rates[x])");
 	help_arrays[string("dnCategorical")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnCategorical")][string("title")] = string(R"(The Categorical Distribution)");
 	help_arrays[string("dnCauchy")][string("authors")].push_back(string(R"(Andrew Magee)"));
-	help_strings[string("dnCauchy")][string("description")] = string(R"(Cauchy distribution with location equal to ‘location’ and scale equal to ‘scale’.)");
-	help_strings[string("dnCauchy")][string("details")] = string(R"(The Cauchy distribution has density:
-
-f(x) = 1/(pi * scale) * 1/(1 + x-(location/scale)^2))");
+	help_strings[string("dnCauchy")][string("description")] = string(R"(The Cauchy distribution describes the distribution of the ratio of two independent normal variables with mean 0 and variance 1.)");
+	help_strings[string("dnCauchy")][string("details")] = string(R"(The Cauchy distribution takes two parameters, location and scale. It is a symmetric distribution, but its tails are broad enough that it has no defined mean or variance. The probability density function is f(x) = 1/(pi * scale) * 1 / (1 + x - (location/scale)^2))");
 	help_strings[string("dnCauchy")][string("example")] = string(R"(# we simulate some obversations
 x <- rCauchy(n=10,location=0,scale=1)
 # let's see what the mean and the variance are.
@@ -431,9 +449,12 @@ mean(x)
 var(x)
 sd(x))");
 	help_strings[string("dnCauchy")][string("name")] = string(R"(dnCauchy)");
+	help_arrays[string("dnCauchy")][string("see_also")].push_back(string(R"(dnNormal)"));
+	help_arrays[string("dnCauchy")][string("see_also")].push_back(string(R"(dnChisq)"));
 	help_strings[string("dnCauchy")][string("title")] = string(R"(Cauchy Distribution)");
 	help_arrays[string("dnChisq")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnChisq")][string("description")] = string(R"(The chi-square probability distribution.)");
+	help_strings[string("dnChisq")][string("description")] = string(R"(The chi-square distribution with df degrees of freedom describes the distribution of the sum of the squares of df independent normal variables with mean 0 and variance 1.)");
+	help_strings[string("dnChisq")][string("details")] = string(R"(The chi-square distribution takes one parameter, df, the number of degrees of freedom. The probability density function is f(x) = x^(df/2 - 1) * e^(-x/2) / (2^(df/2) * Gamma(df/2)), where Gamma is the gamma function.)");
 	help_strings[string("dnChisq")][string("example")] = string(R"(# The most important use of the chi-square distribution
 # is arguable the quantile function.
 # You can access it the following way:
@@ -534,8 +555,8 @@ root_height := psi.rootAge()
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnDirichlet")][string("description")] = string(R"(Dirichlet probability distribution on a simplex.)");
-	help_strings[string("dnDirichlet")][string("details")] = string(R"(The Dirichlet probability distribution is the generalization of the Beta distribution. A random variable from a Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1.)");
+	help_strings[string("dnDirichlet")][string("description")] = string(R"(The Dirichlet distribution is a generalization of the Beta distribution for multiple variables.)");
+	help_strings[string("dnDirichlet")][string("details")] = string(R"(The Dirichlet distribution takes one parameter, alpha, a vector of numbers representing the concentration of the distribution on each variable. It then returns a simplex (i.e. a vector whose elements sum to 1) representing the relative probability of each variable. Note that when every element of alpha is 1, the distribution is equivalent to a uniform on each element.)");
 	help_strings[string("dnDirichlet")][string("example")] = string(R"(# lets get a draw from a Dirichlet distribution
 a <- [1,1,1,1]   # we could also use rep(1,4)
 b ~ dnDirichlet(a)
@@ -607,12 +628,8 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("dnEpisodicBirthDeath")][string("name")] = string(R"(dnEpisodicBirthDeath)");
 	help_strings[string("dnEvent")][string("name")] = string(R"(dnEvent)");
 	help_arrays[string("dnExponential")][string("authors")].push_back(string(R"(Michael Landis)"));
-	help_strings[string("dnExponential")][string("description")] = string(R"(Exponential distribution with rate equal to ‘lambda’.)");
-	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution has density:
-
-f(x) = lambda * exp(-lambda*x)
-
-where lambda is the rate parameter.)");
+	help_strings[string("dnExponential")][string("description")] = string(R"(The Exponential distribution describes the distribution of the times between events in a Poisson point process.)");
+	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution takes one parameter, lambda, describing the rate (i.e. 1/mean). The probability density function is f(x) = lambda * exp(-lambda*x).)");
 	help_strings[string("dnExponential")][string("example")] = string(R"(# we set a rate parameter
 rate <- 10.0
 # we create an exponentially distributed random variable
@@ -667,8 +684,10 @@ moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnGamma")][string("description")] = string(R"(Gamma probability distribution for positive real numbers.)");
-	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
+	help_strings[string("dnGamma")][string("description")] = string(R"(The Gamma distribution describes the probability of the sum of exponentially distributed variables.)");
+	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution takes two parameters, shape and rate. Similar to how 1/rate gives the mean of the exponential, shape/rate gives the mean of the gamma. It provides a natural prior distribution for parameters that could be considered as sums of exponential variables.
+
+The probability density function is f(x) = rate^shape * x^(shape - 1) * e^(-rate * x) / Gamma(shape), where Gamma is the gamma function. Note that for shape = 1, the gamma distribution reduces to an exponential distribution.)");
 	help_strings[string("dnGamma")][string("example")] = string(R"(# lets simulate
 a <- rgamma(1000,shape=4,rate=4)
 # we expect a mean of 1
@@ -737,74 +756,6 @@ sd(x))");
 	help_strings[string("dnHalfNormal")][string("title")] = string(R"(half-Normal Distribution)");
 	help_strings[string("dnHeterochronousCoalescent")][string("name")] = string(R"(dnHeterochronousCoalescent)");
 	help_strings[string("dnHeterochronousCoalescentSkyline")][string("name")] = string(R"(dnHeterochronousCoalescentSkyline)");
-	help_arrays[string("dnInverse")][string("authors")].push_back(string(R"(Martin R. Smith)"));
-	help_strings[string("dnInverse")][string("description")] = string(R"(`dnInverse()` inverts a probability distribution.
-
-`dnInverse(x).probability()` returns `1 / x.probability()`; 
-`dnInverse(x).lnProbability()` returns `-x.lnProbability()`.
-
-This provides a way to perform inference using conditional probabilities,
-for example where 
-Pr(x | Model, Condition) = Pr(x | Model) / Pr(Condition is satisfied)
-
-In general, there may be cases where it is desirable to sample from or 
-observe a distribution subject to some form of ascertainment condition.
-For example, one may wish to sample from a normal distribution 
-`X ~ dnNormal(0, 1)` subject to some constraint _C(x)_ on _x_ – such
-as a condition that _x_ > 0.
-
-In order to compute the probability of an observed value of _x_ given
-the constraint, we need to divide Pr(x) by Pr(_C(x)_) – in this example,
-Pr(_x_ > 0).  This probability is difficult to calculate in general.
-But in specific cases, Pr(C(x)) corresponds to the probability of observing
-a specific value _y_ from some other distribution _dist_.
-
-In this case, our likelihood could be computed by 
-`dist.clamp(y); conditioned_probability = x.probability() / dist.probability()`.
-
-`dnInverse` allows such likelihoods to be computed during inference under MCMC(MC),
-where the overall probability is obtained by multiplies the probabilities of each
-indepedent component of the model.
-Hence, `Y ~ dnInverse(dist); Y.clamp(y)` gives a model element whose probability
-corresponds to `1 / dist.probability()`.)");
-	help_strings[string("dnInverse")][string("example")] = string(R"(```
-# Compute Pr(x = 1 | x ~ exp(y), y = 1)
-
-# First we define the distributions from which x and y are drawn
-
-# y may take the values 1 or 2 with probabilities 0.4, 0.6
-p_y := simplex(0.4, 0.6)
-y ~ dnCategorical( p_y )
-inv_y ~ dnInverse(dnCategorical( p_y ))
-
-y.clamp(1)
-inv_y.clamp(1)
-
-y.probability()      # 0.4 = 2 / 5
-inv_y.probability()  # 2.5 = 5 / 2
-
-# Compute the joint probability Pr(x, y)
-function PrXandY (x_value, y_value) {
-    x_given_y ~ dnExponential( y_value )
-    x_given_y.clamp(x_value) # To calculate Pr(x | y)
-
-    y.clamp(y_value) # To calculate Pr(y)
-
-    return(x_given_y.probability() * y.probability())
-}
-
-PrXandY(1, 1) # Pr(x = 1, y = 1)
-
-# If we wish to calculate likelihood conditioned on y = 1, we need to compute
-# Pr(x = 1 | y = 1)
-
-# Here it is trivial to compute this directly, as in PrXandY, but in more complex
-# cases it may be easier to use Pr(x = 1 | y = 1) := Pr(x = 1, y = 1) / Pr(y = 1)
-
-PrXandY(1, 1) * inv_y.probability()
-```)");
-	help_strings[string("dnInverse")][string("name")] = string(R"(dnInverse)");
-	help_strings[string("dnInverse")][string("title")] = string(R"(Inverse distribution)");
 	help_arrays[string("dnInverseGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnInverseGamma")][string("description")] = string(R"(inverse-gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnInverseGamma")][string("details")] = string(R"(The inverse Gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
@@ -1338,7 +1289,18 @@ exists(x))");
 	help_strings[string("exists")][string("name")] = string(R"(exists)");
 	help_arrays[string("exists")][string("see_also")].push_back(string(R"(clear)"));
 	help_strings[string("exists")][string("title")] = string(R"(Check whether a variable exists)");
+	help_strings[string("exp")][string("description")] = string(R"(Maps the value of a number x to e^x, where e is the number such that ln(e) = 1.)");
+	help_strings[string("exp")][string("example")] = string(R"(# checking that ln(e) = 1
+x <- exp(1)
+ln_of_x <- ln(x)
+if (ln_of_ex != 1) {
+        print("Problem when computing an exponential value.")
+} else {
+        print("Correct computation of an exponential value.")
+})");
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
+	help_arrays[string("exp")][string("see_also")].push_back(string(R"(ln)"));
+	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
@@ -1443,7 +1405,29 @@ Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_strings[string("fnDECRoot")][string("name")] = string(R"(fnDECRoot)");
 	help_strings[string("fnDayhoff")][string("name")] = string(R"(fnDayhoff)");
 	help_strings[string("fnDecompVarCovar")][string("name")] = string(R"(fnDecompVarCovar)");
+	help_strings[string("fnDiscretizeBeta")][string("description")] = string(R"(Select representative values from `num_cats` discrete subdivisions of a beta distribution.)");
+	help_strings[string("fnDiscretizeBeta")][string("details")] = string(R"(
+A beta distribution is defined by two shape parameters, alpha and beta.
+
+Where a parameter or prior is defined based on the beta distribution, it may be more tractable to evaluate likelihoods at a fixed number of points from the distribution.  These representative points can be computed using `dnDiscretizeBeta`.
+
+In practice, these values are computed as follows:
+
+Let _n_ be the number of categories.
+If `median = TRUE`, the quantile function is performed at the midpoint of each category.  Call this vector _q_.
+_q_ is then normalized by dividing against its sum, so its elements sum to one; then multiplied by a factor _n_ * _alpha) / (_alpha_ + _beta_).
+
+The computation to obtain the mean for each category, when `median = FALSE`, is more complex, making use of the incomplete beta function ( Majumder & Bhattacharjee 1973).
+
+A real-world use case is available in Wright et al. (2016), with discussion of the properties of the beta distribution. Corresponding tutorials are available at https://www.palass.org/sites/default/files/media/publications/newsletters/number_106/number_106_0.pdf and https://revbayes.github.io/tutorials/morph_tree/V2.html.)");
+	help_strings[string("fnDiscretizeBeta")][string("example")] = string(R"(# Values to represent four quadrants of a symmetric beta distribution
+categories := fnDiscretizeBeta(0.2, 0.2, 4)
+print(categories))");
 	help_strings[string("fnDiscretizeBeta")][string("name")] = string(R"(fnDiscretizeBeta)");
+	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(Majumder & Bhattacharjee. 1973. Algorithm AS63. Applied Statistics, 22.)",R"(NULL)",R"(NULL )"));
+	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(WRIGHT, A. M., LLOYD, G. T. and HILLIS, D. H. 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. _Systematic Biology_, 65, 602–11.)",R"(10.1093/sysbio/syv122)",R"(https://doi.org/10.1093/sysbio/syv122 )"));
+	help_arrays[string("fnDiscretizeBeta")][string("see_also")].push_back(string(R"(A translation of `fnDiscretizeBeta` into R is available at https://gist.github.com/ms609/883632d10d4d80ea5391cee9c47071fc.)"));
+	help_strings[string("fnDiscretizeBeta")][string("title")] = string(R"(Disctetize a beta distribution)");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
 	help_strings[string("fnDiscretizeDistribution")][string("name")] = string(R"(fnDiscretizeDistribution)");
 	help_strings[string("fnDiscretizeGamma")][string("name")] = string(R"(fnDiscretizeGamma)");
@@ -1491,7 +1475,28 @@ Q := fnCodonGY94( kappa, omega, fnF3x4(pi1, pi2, pi3) ))");
 	help_strings[string("fnF3x4")][string("name")] = string(R"(fnF3x4)");
 	help_arrays[string("fnF3x4")][string("see_also")].push_back(string(R"(fnGY94, fnF1x4)"));
 	help_strings[string("fnF3x4")][string("title")] = string(R"(The F3x4 codon frequency model)");
+	help_strings[string("fnF81")][string("description")] = string(R"(DNA evolution model proposed in Felsenstein (1981).)");
+	help_strings[string("fnF81")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are equal. Its only argument, baseFrequencies, codes for said stationary frequencies. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
+
+The F81 rate matrix elements will be of the form:
+    Q[i, j] = c * baseFrequencies[j]
+
+where c is a constant needed to normalize the average rate to 1)");
+	help_strings[string("fnF81")][string("example")] = string(R"(# stationary base frequencies
+baseFrequencies ~ dnDirichlet(v(1,1,1,1))
+
+# create an F81 rate matrix
+Q := fnF81(baseFrequencies))");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
+	help_references[string("fnF81")].push_back(RbHelpReference(R"(Felsenstein J (1981). "Evolutionary trees from DNA sequences: a maximum likelihood approach". Journal of Molecular Evolution. 17:368–76.)",R"(https://doi.org/10.1007/BF01734359)",R"(https://link.springer.com/article/10.1007/BF01734359 )"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnK80)"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnTrN)"));
+	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_strings[string("fnF81")][string("title")] = string(R"(The Felsenstein (1981) rate matrix)");
 	help_strings[string("fnFMutSel")][string("description")] = string(R"(Constructs a rate matrix from 61 scaled selection coefficients w[i] and
 a 4x4 nucleotide mutation rate matrix mu(i,j).  In the original paper
 the nucleotide mutation rate matrix is a GTR rate matrix.
@@ -1564,15 +1569,29 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
-	help_strings[string("fnGTR")][string("description")] = string(R"(The GTR rate matrix.)");
-	help_strings[string("fnGTR")][string("details")] = string(R"(The general time-reversible rate matrix:
-  Q(i,j) = exchangeRates(i,j) * baseFrequencies[j]
-The exchangeRates are symmetric.)");
-	help_strings[string("fnGTR")][string("example")] = string(R"(er ~ dnDirichlet( v(1,1,1,1,1,1) )
+	help_strings[string("fnGTR")][string("description")] = string(R"(DNA evolution model proposed in Tavare (1986).)");
+	help_strings[string("fnGTR")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are allowed to be different. Its first argument, exchangeRates, codes for the transition rates between states (as in other models, transition rates are assumed to be symmetric). Its second argument, baseFrequencies, codes for the stationary frequencies of these states. Note that for n states, exchangeRates should have length n*(n-1)/2, and baseFrequencies should have length n. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
+
+The general time-reversible rate matrix elements will be of the form:
+     Q[i, j] = c * exchangeRates[i, j] * baseFrequencies[j]
+
+where c is a constant needed to normalize the average rate to 1.)");
+	help_strings[string("fnGTR")][string("example")] = string(R"(# exchange rates
+er ~ dnDirichlet( v(1,1,1,1,1,1) )
+
+# base frequencies
 pi ~ dnDirichlet( v(1,1,1,1) )
+
+# create a GTR rate matrix
 Q := fnGTR(er,pi))");
 	help_strings[string("fnGTR")][string("name")] = string(R"(fnGTR)");
-	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S. Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences.  Lectures on Mathematics in the Life Sciences (1986). 17: 57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
+	help_references[string("fnGTR")].push_back(RbHelpReference(R"(Tavare, S (1986). "Some Probabilistic and Statistical Problems in the Analysis of DNA Sequences".  Lectures on Mathematics in the Life Sciences. 17:57-86)",R"()",R"(http://www.damtp.cam.ac.uk/user/st321/CV_&_Publications_files/STpapers-pdf/T86.pdf)"));
+	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnK80)"));
+	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnGTR")][string("see_also")].push_back(string(R"(fnTrN)"));
 	help_strings[string("fnGTR")][string("title")] = string(R"(The General Time-Reversible rate matrix)");
 	help_arrays[string("fnGammaASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnGammaASRV")][string("description")] = string(R"(Add Gamma-distributed across-site rate variation (ASRV) to a site model.)");
@@ -1620,12 +1639,31 @@ M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) 
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
 	help_strings[string("fnGammaASRV")][string("title")] = string(R"(fnGammaASRV)");
 	help_strings[string("fnGeographicalDistance")][string("name")] = string(R"(fnGeographicalDistance)");
-	help_strings[string("fnHKY")][string("description")] = string(R"(The HKY85 model.)");
-	help_strings[string("fnHKY")][string("example")] = string(R"(kappa ~ dnLognormal(0,1)
+	help_strings[string("fnHKY")][string("description")] = string(R"(DNA evolution model proposed in Hasegawa, Kishino, and Yano (1985).)");
+	help_strings[string("fnHKY")][string("details")] = string(R"(In this model, nucleotides have different stationary frequencies, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, baseFrequencies, codes for the frequencies of each nucleotide.
+
+The HKY rate matrix elements will be of the form:
+    Q[i, j] = c * kappa * baseFrequencies[j], if i<->j is a transition 
+            = c * baseFrequencies[j], if i<->j is a transversion
+
+where c is a constant needed to normalize the average rate to 1.)");
+	help_strings[string("fnHKY")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
+kappa ~ dnLognormal(0,1)
+
+# the base frequencies
 pi ~ dnDirichlet( v(1,1,1,1) )
+
+# create an HKY rate matrix
 Q := fnHKY(kappa,pi))");
 	help_strings[string("fnHKY")][string("name")] = string(R"(fnHKY)");
-	help_references[string("fnHKY")].push_back(RbHelpReference(R"(Hasegawa, M. et al. Dating of the human-ape splitting by a molecular clock of mitochondrial DNA. Journal of molecular evolution (1985) 22 (2): 160-174.)",R"(https://doi.org/10.1007/BF02101694)",R"(https://link.springer.com/article/10.1007%2FBF02101694 )"));
+	help_references[string("fnHKY")].push_back(RbHelpReference(R"(Hasegawa, M. et al. (1985). "Dating of the human-ape splitting by a molecular clock of mitochondrial DNA". Journal of molecular evolution. 22(2):160-174.)",R"(https://doi.org/10.1007/BF02101694)",R"(https://link.springer.com/article/10.1007%2FBF02101694 )"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnK80)"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnTrN)"));
+	help_arrays[string("fnHKY")][string("see_also")].push_back(string(R"(fnGTR)"));
 	help_strings[string("fnHKY")][string("title")] = string(R"(The Hasegawa-Kishino-Yano (1985) nucleotide rate matrix)");
 	help_strings[string("fnHiddenStateRateMatrix")][string("name")] = string(R"(fnHiddenStateRateMatrix)");
 	help_strings[string("fnHostSwitchRateModifier")][string("name")] = string(R"(fnHostSwitchRateModifier)");
@@ -1658,10 +1696,102 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
+	help_strings[string("fnK80")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1980).)");
+	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.
+
+The K80 rate matrix elements will be of the form:
+    Q[i, j] = c * kappa, if i<->j is a transition
+            = c, if i<->j is a transversion
+
+where c is a constant needed to normalize the average rate to 1.)");
+	help_strings[string("fnK80")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
+kappa ~ dnExp(0.5)
+
+# create a K80 rate matrix
+Q := fnK80(kappa))");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
-	help_strings[string("fnK81")][string("name")] = string(R"(fnK81)");
+	help_references[string("fnK80")].push_back(RbHelpReference(R"(Kimura M (1980). "A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences". Journal of Molecular Evolution. 16:111–20.)",R"(https://doi.org/10.1007/BF01731581)",R"(https://link.springer.com/article/10.1007/BF01731581 )"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_strings[string("fnK80")][string("title")] = string(R"(The Kimura (1980) nucleotide rate matrix)");
+	help_strings[string("fnK81")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1981).)");
+	help_strings[string("fnK81")][string("details")] = string(R"(In this model, transition and transversion rates are allowed to be different, and transversion rates for A <-> C, G <-> T and A <-> T, C <-> G transversions are different as well. The first argument, kappa1, defines the ratio between the rate of transitions and the rate of A <-> C, G <-> T transversions. The second argument, kappa2, defines the ratio between the rate of A <-> T, C <-> G transversions and the rate of A <-> C, G <-> T transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. Note that the original Kimura (1981) model assumed equal base frequencies, so this function is more general (if ran without a baseFrequencies argument, however, this is equivalent to K81, since the default is all frequencies equal). 
+
+The K81 rate matrix elements will be of the form:
+    Q[i, j] = c, if i<->j is an A<->C/G<->T transversion
+            = c * kappa1, if i<->j is a transition
+            = c * kappa2, if i<->j is an A<->T/C<->G transversion
+
+where c is a constant needed to normalize the average rate to 1. If using the baseFrequencies parameter, those elements are multiplied by baseFrequencies[j].)");
+	help_strings[string("fnK81")][string("example")] = string(R"(# the ratio between rates of transitions and A<->C/G<->T transversions
+kappa1 ~ dnExp(0.5)
+
+# the ratio between rates of A<->T/C<->G and A<->C/G<->T transversions
+kappa2 ~ dnExp(0.5)
+
+# create a K81 rate matrix
+Q := fnK81(kappa1, kappa2)
+
+# base frequencies
+baseFrequencies ~ dnDirichlet(v(1,1,1,1))
+
+# K81 rate matrix with non-equal base frequencies
+Q := fnK81(kappa1, kappa2, baseFrequencies))");
+	help_strings[string("fnK81")][string("name")] = string(R"(fnK81
+
+# title
+The Kimura (1981) nucleotide rate matrix)");
+	help_references[string("fnK81")].push_back(RbHelpReference(R"(Kimura M (1981). "Estimation of evolutionary distances between homologous nucleotide sequences". Proceedings of the National Academy of Sciences of the United States of America. 78:454–8.)",R"(https://doi.org/10.1073/pnas.78.1.454)",R"(https://www.pnas.org/doi/abs/10.1073/pnas.78.1.454 )"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnK80)"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnF80)"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnT92)"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnTrN)"));
+	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnGTR)"));
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
+	help_strings[string("fnMinBLTimeScaling")][string("description")] = string(R"(Time-scales an undated tree based on a vector of tip ages using the minimum
+branch length ("MBL") approach (Laurin 2004; Bapst 2014).)");
+	help_strings[string("fnMinBLTimeScaling")][string("details")] = string(R"(The age of each internal node is based on the age of the oldest tip descended
+from it. However, if t0 is the oldest tip descended from a given node (denoted
+x) and also the oldest tip descended from that node's parent (denoted y), then
+setting t(x) = t(y) = t(t0) would produce zero-length branches y->x and x->t0.
+We avoid this by requiring every branch to be no shorter than some user-supplied
+constant. This has the effect of shifting node ages deeper into the past.
+
+Conceptually, the undated tree would usually correspond either to a bare
+topology (a tree without branch lengths) or a tree with branch lengths in units
+of expected change; in practice, both `BranchLengthTree` and `TimeTree` arguments
+are accepted. In this implementation of the MBL approach, both terminal and
+internal branches are required to be greater than or equal to the specified
+minimum. If there is uncertainty associated with the age of a given tip,
+the midpoint of the uncertainty range is used for time-scaling.
+
+The algorithm is not stochastic (i.e., it always returns the same time-scaled
+tree for a given input), and is primarily intended to generate a plausible
+starting tree for MCMC analyses.)");
+	help_strings[string("fnMinBLTimeScaling")][string("example")] = string(R"(# Read in an undated tree
+undated_tree <- readTrees("undated.nex")[1]
+
+# Read tip age data from a file
+taxa <- readTaxonData("tipages.tsv")
+
+# Time-scale using a minimum branch length of 3 Myr
+dated_tree <- fnMinBLTimeScaling(undated_tree, taxa, 3.0)
+
+print(undated_tree) # The original tree remains unchanged
+print(dated_tree)   # A new, dated tree has been returned)");
+	help_strings[string("fnMinBLTimeScaling")][string("name")] = string(R"(fnMinBLTimeScaling)");
+	help_references[string("fnMinBLTimeScaling")].push_back(RbHelpReference(R"(Bapst DW (2014). Assessing the effect of time-scaling methods on phylogeny-based analyses in the fossil record. Paleobiology, 40(3):331-351.)",R"(10.1666/13033)",R"()"));
+	help_references[string("fnMinBLTimeScaling")].push_back(RbHelpReference(R"(Laurin M (2004). The evolution of body size, Cope's rule and the origin of amniotes. Systematic Biology, 53(4):594-622.)",R"(10.1080/10635150490445706)",R"()"));
+	help_arrays[string("fnMinBLTimeScaling")][string("see_also")].push_back(string(R"(simStartingTree)"));
 	help_arrays[string("fnMixtureASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnMixtureASRV")][string("description")] = string(R"(Constructs a mixture model from a collection of site models.)");
 	help_strings[string("fnMixtureASRV")][string("details")] = string(R"(Each site will evolve according to one of the input site models, which may also
@@ -1817,19 +1947,66 @@ M := fnScale(MM, 1/MM.rate()))");
 	help_strings[string("fnStateCountRateModifier")][string("name")] = string(R"(fnStateCountRateModifier)");
 	help_strings[string("fnStirling")][string("name")] = string(R"(fnStirling)");
 	help_strings[string("fnStitchTree")][string("name")] = string(R"(fnStitchTree)");
+	help_strings[string("fnT92")][string("description")] = string(R"(DNA evolution model proposed in Tamura (1992).)");
+	help_strings[string("fnT92")][string("details")] = string(R"(In this model, A and T have an equal stationary frequency, with G and C frequencies distinct, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, gc, codes for the compound frequency of G and C nucleotides.
+
+The T92 rate matrix elements will be of the form:
+    Q[i, j] = c * kappa * gc / 2, if i<->j is a transition and j is C or G
+            = c * gc / 2, if i<->j is a transversion and j is C or G
+            = c * kappa * (1 - gc) / 2, if i<->j is a transition and j is A or T
+            = c * (1 - gc) / 2, if i<->j is a transversion and j is A or T
+
+where c is a constant needed to normalize the average rate to 1.)");
+	help_strings[string("fnT92")][string("example")] = string(R"(# the ratio between rates of transitions and transversions
+kappa ~ dnExp(0.5)
+
+# the frequency of G and C nucleotides
+gc ~ dnUnif(0, 1)
+
+# create a T92 rate matrix
+Q := fnT92(kappa, gc))");
 	help_strings[string("fnT92")][string("name")] = string(R"(fnT92)");
+	help_references[string("fnT92")].push_back(RbHelpReference(R"(Tamura K (1992). "Estimation of the number of nucleotide substitutions when there are strong transition-transversion and G+C-content biases". Molecular Biology and Evolution. 9:678–87.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040752)",R"(https://academic.oup.com/mbe/article/9/4/678/1254082 )"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnK80)"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnTrN)"));
+	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_strings[string("fnT92")][string("title")] = string(R"(The Tamura (1992) nucleotide rate matrix)");
 	help_strings[string("fnTIM")][string("name")] = string(R"(fnTIM)");
 	help_strings[string("fnTVM")][string("name")] = string(R"(fnTVM)");
 	help_strings[string("fnTajimasD")][string("name")] = string(R"(fnTajimasD)");
 	help_strings[string("fnTajimasPi")][string("name")] = string(R"(fnTajimasPi)");
-	help_strings[string("fnTrN")][string("description")] = string(R"(The Tamura-Nei nucleotide rate matrix.)");
-	help_strings[string("fnTrN")][string("example")] = string(R"(kappaAG ~ dnLognormal(0,1)    # The purine transition rate
-kappaCT ~ dnLognormal(0,1)    # The pyrimindine transition rate
+	help_strings[string("fnTrN")][string("description")] = string(R"(DNA evolution model proposed in Tamura & Nei (1993).)");
+	help_strings[string("fnTrN")][string("details")] = string(R"(In this model, nucleotide base frequencies are different, and the two transition rates (A <-> G and C<->T) can be different to each other, and to the transversion rate. The first argument, kappa1, defines the ratio between the rate of A <-> G (i.e. purine) transitions to transversions. The second argument, kappa2, defines the ratio between the rate of C <-> T (i.e. pyrimidine) transitions to transversions. The third argument, baseFrequencies, defines the stationary frequencies of nucleotide bases. 
+
+The TrN rate matrix elements are of the form:
+    Q[i, j] = c * kappa1 * baseFrequencies[j], if i<->j is A<->G
+            = c * kappa2 * baseFrequencies[j], if i<->j is C<->T
+            = c * baseFrequencies[j], otherwise
+
+where c is a constant needed to normalize the average rate to 1)");
+	help_strings[string("fnTrN")][string("example")] = string(R"(# A <-> G transition rate
+kappaAG ~ dnLognormal(0,1)
+
+# C <-> T transition rate
+kappaCT ~ dnLognormal(0,1)
+
+# nucleotide base frequencies
 pi ~ dnDirichlet( v(1,1,1,1) )
-Q := fnTrN(kappaAT, kappaCT, ,pi))");
+
+# create a TrN rate matrix
+Q := fnTrN(kappaAG, kappaCT, ,pi))");
 	help_strings[string("fnTrN")][string("name")] = string(R"(fnTrN)");
-	help_references[string("fnTrN")].push_back(RbHelpReference(R"(Tamura, K. and M. Nei. Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees. Molecular biology and evolution (1993) 10(3):512-526.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
+	help_references[string("fnTrN")].push_back(RbHelpReference(R"(Tamura, K. and M. Nei (1993). "Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees". Molecular biology and evolution. 10(3):512-526.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040023)",R"(https://academic.oup.com/mbe/article/10/3/512/1016366 )"));
+	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnK80)"));
+	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnK81)"));
+	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnT92)"));
 	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnHKY)"));
+	help_arrays[string("fnTrN")][string("see_also")].push_back(string(R"(fnGTR)"));
 	help_strings[string("fnTrN")][string("title")] = string(R"(The Tamura-Nei (1993) nucleotide rate matrix)");
 	help_strings[string("fnTreeAssembly")][string("name")] = string(R"(fnTreeAssembly)");
 	help_strings[string("fnTreePairwiseDistances")][string("name")] = string(R"(fnTreePairwiseDistances)");
@@ -2287,7 +2464,12 @@ Add random variables to the move directly (e.g. branch_rates[1], not branch_rate
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
 	help_strings[string("mvAddRemoveTip")][string("name")] = string(R"(mvAddRemoveTip)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
+	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution.)");
+	help_strings[string("mvBetaSimplex")][string("example")] = string(R"(A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
 	help_strings[string("mvBetaSimplex")][string("name")] = string(R"(mvBetaSimplex)");
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("mvBetaSimplex")][string("title")] = string(R"(Beta Simplex move)");
 	help_strings[string("mvBinarySwitch")][string("name")] = string(R"(mvBinarySwitch)");
 	help_strings[string("mvBirthDeathEvent")][string("name")] = string(R"(mvBirthDeathEvent)");
 	help_strings[string("mvBirthDeathEventContinuous")][string("name")] = string(R"(mvBirthDeathEventContinuous)");
@@ -2327,11 +2509,25 @@ moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0))");
 	help_strings[string("mvCorrelationMatrixUpdate")][string("name")] = string(R"(mvCorrelationMatrixUpdate)");
 	help_strings[string("mvDPPAllocateAuxGibbs")][string("name")] = string(R"(mvDPPAllocateAuxGibbs)");
 	help_strings[string("mvDPPGibbsConcentration")][string("name")] = string(R"(mvDPPGibbsConcentration)");
-	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
+	help_strings[string("mvDirichletSimplex")][string("description")] = string(R"(A Dirichlet-simplex proposal randomly changes some values of a [Simplex](https://revbayes.github.io/documentation/Simplex.html)
+(a vector whose elements sum to 1). The other values change too because of renormalization.
+ 
+First, some random indices are drawn.
+Then, the proposal draws a new simplex `u ~ Dirichlet(val[index] * alpha)`, where alpha is the tuning parameter.
+The new value is set to `u`.
+The simplex is then renormalized.)");
+	help_strings[string("mvDirichletSimplex")][string("example")] = string(R"(Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html)");
 	help_strings[string("mvDirichletSimplex")][string("name")] = string(R"(mvDirichletSimplex)");
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_strings[string("mvDirichletSimplex")][string("title")] = string(R"(Dirichlet Simplex move)");
 	help_strings[string("mvDiscreteEventCategoryRandomWalk")][string("name")] = string(R"(mvDiscreteEventCategoryRandomWalk)");
+	help_strings[string("mvElementSwapSimplex")][string("description")] = string(R"(An Element Swap Simplex move selects two elements of a vector and exchanges their values.)");
 	help_strings[string("mvElementSwapSimplex")][string("name")] = string(R"(mvElementSwapSimplex)");
+	help_arrays[string("mvElementSwapSimplex")][string("see_also")].push_back(string(R"(mvBetaSimplex)"));
+	help_arrays[string("mvElementSwapSimplex")][string("see_also")].push_back(string(R"(mvDirichletSimplex)"));
+	help_strings[string("mvElementSwapSimplex")][string("title")] = string(R"(Element Swap Simplex move)");
 	help_strings[string("mvEllipticalSliceSamplingSimple")][string("name")] = string(R"(mvEllipticalSliceSamplingSimple)");
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -3443,8 +3639,7 @@ str(b))");
 	help_strings[string("structure")][string("name")] = string(R"(structure)");
 	help_arrays[string("structure")][string("see_also")].push_back(string(R"(type)"));
 	help_strings[string("structure")][string("title")] = string(R"(The structure of a variable)");
-	help_strings[string("sum")][string("description")] = string(R"(Sums all members of a vector of type `Real`, `RealPos`, `Integer`,
-or `Natural`)");
+	help_strings[string("sum")][string("description")] = string(R"(Sums all members of a vector of type `Real`, `RealPos`, `Integer`, or `Natural`)");
 	help_strings[string("sum")][string("example")] = string(R"(a = v(1,2,3,4,5,6,7,8)
 sum(a)
 # returns 36)");
