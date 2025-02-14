@@ -8,9 +8,11 @@ Finds the standard deviation of a vector of real numbers.
 Accepts one argument, a vector of real numbers, and returns the standard deviation
 as a real number.
 ## authors
-Raymond Castillo
+Sebastian Hoehna
 ## see_also
-v, Real, mean
+v
+Real
+mean
 ## example
      x <- v(4, 3, 2, 1)
      s := stdev(x)

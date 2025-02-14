@@ -5,13 +5,14 @@ fnJC
 ## description
 Jukes Cantor rate matrix
 ## details
-Rate matrix with n states in which each state has an equal probability of to change 
+Rate matrix with n states in which each state has an equal probability to change 
 to any other state. The rate of transition from one state to another is equal to 
 n / n-1.
 ## authors
-Jukes & Cantor 
+Sebastian Hoehna 
 ## see_also
-fnGTR, F81
+fnGTR
+fnF81
 ## example
     # Rate Matrix for DNA
     q := fnJC(4)
