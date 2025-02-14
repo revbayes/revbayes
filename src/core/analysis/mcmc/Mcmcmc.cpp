@@ -1894,11 +1894,11 @@ void Mcmcmc::tune( void )
          */
 
         // Make a lambda function to access the kth chain heat as heat(k).
-        auto heat = [&](int k) -> auto& { return chain_heats[ chainForHeatIndex(k) ]; };
+        auto heat = [&](size_t k) -> auto& { return chain_heats[ chainForHeatIndex(k) ]; };
         assert(heat(0) == 1.0);
 
         // Find the largest heat index m such that heat(m) > heatMinBound.
-        int m = 0;
+        size_t m = 0;
         for (size_t k = 1; k < num_chains; ++k)
         {
             // Check that heat(k) is non-increasing in k.
@@ -1914,7 +1914,7 @@ void Mcmcmc::tune( void )
         assert(0 < phi and phi < 1);
 
         // If there are any chain heats that are below heatMinBound, then redefine them by linear interpolation on the log scale.
-        for (int k = m + 1; k < num_chains; ++k)
+        for (size_t k = m + 1; k < num_chains; ++k)
         {
             // std::cout << "Attempting to set the heat of chain " << k << " to " << heat(m) * pow(phi, double(k - m)/(num_chains-m)) << std::endl;
             heat(k) = heat(m) * pow(phi, double(k - m)/(num_chains-m));
