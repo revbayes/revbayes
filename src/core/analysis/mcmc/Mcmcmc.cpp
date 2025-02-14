@@ -1864,63 +1864,62 @@ void Mcmcmc::tune( void )
             }
 //            std::cout << "chain_heats[" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
         }
-        
-        /* If the heat of a given hot chain is smaller than the minimum bound, we want to linearly interpolate
-         * this heat and the heats of all the hotter chains to fall between the lowest heat that is greater
-         * than the minimum bound and the minimum bound.
-         * The formula for linearly interpolating between (x1,y1) and (x2,y2) is y(x) = y2 - (y2-y1)*[ (x-x1)/(x2-x1) ].
+
+
+        /* NOTE: Some of the hot chains may be assigned a heat that is below heatMinBound!
+         *       Let's handle this via linear interpolation of the chain heats on the log scale.
          *
-         * Let "heat(i)" be a notational shortcut for chain_heats[ chainForHeatIndex(i) ], and let k be the heat
-         * index of the coldest of such "bad" chains. Then, its heat can be calculated as
+         * We define heat(k) as a notational shortcut for chain_heats[ chainForHeatIndex(k) ].
+         * We define m to the largest index where heat(m) < heatMinBound.
          *
-         * log(heat(k)) = log(heat(k-1)) - [ log(heat(k-1)) - log(heatMinBound) ]*[ (k - (k-1)) / (num_chains - (k-1)) ]
-         *              = log(heat(k-1)) - [ log(heat(k-1)) - log(heatMinBound) ]*[ 1 / (num_chains - (k-1)) ]
+         * We then want to interpolate the log heat between the two points:
+         *  ( k=m,          log(heat(m)) )
+         *  ( k=num_chains, log(heatMinBound) )
+         * This way the heat will not get all the way down to heatMinBound, since the highest chain
+         * index is actually (num_chains-1).
          *
-         * Let us further denote heat(k-1) as "lowestGreaterThanMin", and k-1 as "m". Then,
+         * The formula for linearly interpolating between (k1,y1) and (k2,y2) is
          *
-         * log(heat(k)) = log(lowestGreaterThanMin) - [ log(lowestGreaterThanMin) - log(heatMinBound) ]*[ 1 / (num_chains - m) ]
+         *     y(x) = y1 + (y2 - y1)*[ (k-k1)/(k2-k1) ].
          *
-         * Finally, let us denote the subtrahend on the right-hand side of the equation above by log(rho). Then,
+         * Thus we want:
          *
-         *       rho = (lowestGreaterThanMin / heatMinBound)^[ 1 / (num_chains - m) ],
-         *   heat(k) = lowestGreaterThanMin / rho
-         * heat(k+1) = lowestGreaterThanMin / rho^2, etc.
+         *   log(heat(k)) = log(heat(m)) + (log(heatMinBound) - log(heat(m))) * [(k - m) / (num_chains - m)]
+         *   log(heat(k)) = log(heat(m)) + (log(heatMinBound/heat(m))) * [(k - m) / (num_chains - m)]
+         *
+         * And so (by exponentiating) we get:
+         *
+         *   heat(k) = heat(m) * pow(heatMinBound/heat(m), (k - m)/(num_chains - m) )
+         *
          */
-        
-        std::vector<double> greaterThanMin;
-        std::vector<size_t> badChainIdx;
-        
-        // std::cout << "The following should be sorted from largest to smallest:" << std::endl;
-        for (size_t l = 0; l < num_chains; ++l)
+
+        // Make a lambda function to access the kth chain heat as heat(k).
+        auto heat = [&](int k) -> auto& { return chain_heats[ chainForHeatIndex(k) ]; };
+        assert(heat(0) == 1.0);
+
+        // Find the largest heat index m such that heat(m) > heatMinBound.
+        int m = 0;
+        for (size_t k = 1; k < num_chains; ++k)
         {
-            // std::cout << chain_heats[ chainForHeatIndex(l) ] << std::endl;
-            if ( chain_heats[ chainForHeatIndex(l) ] > heatMinBound )
-            {
-                greaterThanMin.push_back( chain_heats[ chainForHeatIndex(l) ] );
-            }
-            else
-            {
-                badChainIdx.push_back(l);
-            }
+            // Check that heat(k) is non-increasing in k.
+            assert( heat(k-1) >= heat(k) );
+
+            // Record the last good heat index.
+            if ( heat(k) > heatMinBound)
+                m = k;
         }
-        
-        // std::cout << "We have " << badChainIdx.size() << " bad chain(s)" << std::endl;
-        if ( badChainIdx.size() != 0 )
+
+        // Define the ratio phi so we can check it before (possible) use.
+        double phi = heatMinBound/heat(m);
+        assert(0 < phi and phi < 1);
+
+        // If there are any chain heats that are below heatMinBound, then redefine them by linear interpolation on the log scale.
+        for (int k = m + 1; k < num_chains; ++k)
         {
-            double lowestGreaterThanMin = *std::min_element( greaterThanMin.begin(), greaterThanMin.end() );
-            size_t k = *std::min_element( badChainIdx.begin(), badChainIdx.end() );
-            size_t m = k - 1;
-            
-            double rho = pow(lowestGreaterThanMin / heatMinBound, 1.0 / (num_chains - m));
-            // std::cout << "Current rho is: " << rho << std::endl;
-            
-            for (; k < num_chains; ++k)
-            {
-                // std::cout << "Attempting to set the heat of chain " << k << " to " << (lowestGreaterThanMin / pow(rho, k - m)) << std::endl;
-                chain_heats[ chainForHeatIndex(k) ] = lowestGreaterThanMin / pow(rho, k - m);
-            }
+            // std::cout << "Attempting to set the heat of chain " << k << " to " << heat(m) * pow(phi, double(k - m)/(num_chains-m)) << std::endl;
+            heat(k) = heat(m) * pow(phi, double(k - m)/(num_chains-m));
         }
-        
+
         resetCounters();
     }
 
