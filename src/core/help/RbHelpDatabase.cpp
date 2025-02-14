@@ -302,7 +302,8 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 	help_strings[string("diagonalMatrix")][string("description")] = string(R"(Building a identity/diagonal matrix with 'n' columns and rows.)");
 	help_strings[string("diagonalMatrix")][string("name")] = string(R"(diagonalMatrix)");
 	help_arrays[string("dnBernoulli")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
-	help_strings[string("dnBernoulli")][string("description")] = string(R"(A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.)");
+	help_strings[string("dnBernoulli")][string("description")] = string(R"(The Bernoulli distribution represents a weighted coin toss.)");
+	help_strings[string("dnBernoulli")][string("details")] = string(R"(The Bernoulli distribution takes a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).)");
 	help_strings[string("dnBernoulli")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
@@ -316,8 +317,10 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBernoulli")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnBernoulli")][string("title")] = string(R"(Bernoulli Distribution)");
 	help_arrays[string("dnBeta")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBeta")][string("description")] = string(R"(The Beta probability distribution.)");
-	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution is a probability distribution defined on 0 to 1.)");
+	help_strings[string("dnBeta")][string("description")] = string(R"(The Beta distribution is a flexible distribution that returns a number between 0 and 1, so it is often used as a distribution for probabilities themselves.)");
+	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution takes two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
+
+The probability density function is f(x) = x^(alpha - 1) * (1 - x)^(beta - 1) * Gamma(alpha + beta) / (Gamma(alpha) * Gamma(beta)), where Gamma is the gamma function.)");
 	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
@@ -329,9 +332,11 @@ mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("name")] = string(R"(dnBeta)");
 	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(dnDirichlet)"));
+	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(gamma)"));
 	help_strings[string("dnBeta")][string("title")] = string(R"(Beta Distribution)");
 	help_arrays[string("dnBimodalLognormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(A bimodal lognormal distribution, that is, with probability p a value is distributed according to the first lognormal distribution and with probability 1-p from the second lognormal distribution.)");
+	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(The Bimodal Lognormal distribution unites two separate lognormal distributions.)");
+	help_strings[string("dnBimodalLognormal")][string("details")] = string(R"(The bimodal lognormal distribution takes five parameters: mean1 and mean2 (the means (in log-space) of the two lognormal distributions), sd1 and sd2 (the standard deviations (in log-space) of the two lognormal distributions), and p (between 0 and 1). The value will be distributed according to the first lognormal distribution with probability p, and distributed according to the second lognormal distribution with probability (1 - p).)");
 	help_strings[string("dnBimodalLognormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBimodalLognormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( exp(1) )
@@ -346,7 +351,8 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBimodalLognormal")][string("see_also")].push_back(string(R"(dnLognormal)"));
 	help_strings[string("dnBimodalLognormal")][string("title")] = string(R"(Bimodal Lognormal Distribution)");
 	help_arrays[string("dnBimodalNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBimodalNormal")][string("description")] = string(R"(A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.)");
+	help_strings[string("dnBimodalNormal")][string("description")] = string(R"(The Bimodal Normal distribution unites two separate normal distributions.)");
+	help_strings[string("dnBimodalNormal")][string("details")] = string(R"(The bimodal normal distribution takes five parameters: mean1 and mean2 (the means of two normal distributions), sd1 and sd2 (the standard deviations of two normal distributions), and p (between 0 and 1). The value will be distributed according to the first normal distribution with probability p, and distributed according to the second normal distribution with probability (1 - p).)");
 	help_strings[string("dnBimodalNormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBimodalNormal(mean1=-1,mean2=1,sd1=0.1,sd2=0.1,p=p)
 x.clamp( 1 )
@@ -359,10 +365,12 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBimodalNormal")][string("name")] = string(R"(dnBimodalNormal)");
 	help_arrays[string("dnBimodalNormal")][string("see_also")].push_back(string(R"(dnBimodalLognormal)"));
 	help_arrays[string("dnBimodalNormal")][string("see_also")].push_back(string(R"(dnNormal)"));
-	help_strings[string("dnBimodalNormal")][string("title")] = string(R"(Bernoulli Distribution)");
+	help_strings[string("dnBimodalNormal")][string("title")] = string(R"(Bimodal Normal dsitribution)");
 	help_arrays[string("dnBinomial")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnBinomial")][string("description")] = string(R"(Binomial probability distribution of x successes in size trials.)");
-	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial probability distribution defines the number of success in size trials, where each trial has the same success probability p. The probability is given by (size choose x) p^(x) * (1-p)^(size-p))");
+	help_strings[string("dnBinomial")][string("description")] = string(R"(The Binomial probability distribution describes the probability of a number of successes for an experiment with a certain number of trials and probability of success per trial.)");
+	help_strings[string("dnBinomial")][string("details")] = string(R"(The binomial distribution takes two parameters, p and size. It defines the number of successes in size trials, where each trial has the same success probability p. 
+
+The probability density function is f(x) =  choose(size,x) * p^(x) * (1-p)^(size-p).)");
 	help_strings[string("dnBinomial")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
 x ~ dnBinomial(size=10,p)
 x.clamp(8)
@@ -401,8 +409,8 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
-	help_strings[string("dnCategorical")][string("description")] = string(R"(The categorical distribution, sometimes referred to as the generalized Bernoulli distribution. It describes the probability of one of K different outcomes, labeled from 1 to K, with each outcome probability separately specified.)");
-	help_strings[string("dnCategorical")][string("details")] = string(R"(The argument to the constructor is a simplex containing the probabilities of the outcomes. The outcomes are labeled from 1 to K, where K is the number of elements in the simplex. Outcome i has probability specified by component i in the simplex.
+	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
+	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
 
 A typical scenario where a categorical variable is used is in the definition of a variable drawn from a mixture. A vector of mixture components is set up first, and then a stochastic variable drawn from a categorical distribution is used as an index in a deterministic assignment that points to a component in the mixture. See example below.)");
 	help_strings[string("dnCategorical")][string("example")] = string(R"(# Define a stochastic variable x that is drawn from
@@ -431,10 +439,8 @@ y := rates[x])");
 	help_arrays[string("dnCategorical")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnCategorical")][string("title")] = string(R"(The Categorical Distribution)");
 	help_arrays[string("dnCauchy")][string("authors")].push_back(string(R"(Andrew Magee)"));
-	help_strings[string("dnCauchy")][string("description")] = string(R"(Cauchy distribution with location equal to ‘location’ and scale equal to ‘scale’.)");
-	help_strings[string("dnCauchy")][string("details")] = string(R"(The Cauchy distribution has density:
-
-f(x) = 1/(pi * scale) * 1/(1 + x-(location/scale)^2))");
+	help_strings[string("dnCauchy")][string("description")] = string(R"(The Cauchy distribution describes the distribution of the ratio of two independent normal variables with mean 0 and variance 1.)");
+	help_strings[string("dnCauchy")][string("details")] = string(R"(The Cauchy distribution takes two parameters, location and scale. It is a symmetric distribution, but its tails are broad enough that it has no defined mean or variance. The probability density function is f(x) = 1/(pi * scale) * 1 / (1 + x - (location/scale)^2))");
 	help_strings[string("dnCauchy")][string("example")] = string(R"(# we simulate some obversations
 x <- rCauchy(n=10,location=0,scale=1)
 # let's see what the mean and the variance are.
@@ -443,9 +449,12 @@ mean(x)
 var(x)
 sd(x))");
 	help_strings[string("dnCauchy")][string("name")] = string(R"(dnCauchy)");
+	help_arrays[string("dnCauchy")][string("see_also")].push_back(string(R"(dnNormal)"));
+	help_arrays[string("dnCauchy")][string("see_also")].push_back(string(R"(dnChisq)"));
 	help_strings[string("dnCauchy")][string("title")] = string(R"(Cauchy Distribution)");
 	help_arrays[string("dnChisq")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnChisq")][string("description")] = string(R"(The chi-square probability distribution.)");
+	help_strings[string("dnChisq")][string("description")] = string(R"(The chi-square distribution with df degrees of freedom describes the distribution of the sum of the squares of df independent normal variables with mean 0 and variance 1.)");
+	help_strings[string("dnChisq")][string("details")] = string(R"(The chi-square distribution takes one parameter, df, the number of degrees of freedom. The probability density function is f(x) = x^(df/2 - 1) * e^(-x/2) / (2^(df/2) * Gamma(df/2)), where Gamma is the gamma function.)");
 	help_strings[string("dnChisq")][string("example")] = string(R"(# The most important use of the chi-square distribution
 # is arguable the quantile function.
 # You can access it the following way:
@@ -546,8 +555,8 @@ root_height := psi.rootAge()
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
 	help_arrays[string("dnDirichlet")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnDirichlet")][string("description")] = string(R"(Dirichlet probability distribution on a simplex.)");
-	help_strings[string("dnDirichlet")][string("details")] = string(R"(The Dirichlet probability distribution is the generalization of the Beta distribution. A random variable from a Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1.)");
+	help_strings[string("dnDirichlet")][string("description")] = string(R"(The Dirichlet distribution is a generalization of the Beta distribution for multiple variables.)");
+	help_strings[string("dnDirichlet")][string("details")] = string(R"(The Dirichlet distribution takes one parameter, alpha, a vector of numbers representing the concentration of the distribution on each variable. It then returns a simplex (i.e. a vector whose elements sum to 1) representing the relative probability of each variable. Note that when every element of alpha is 1, the distribution is equivalent to a uniform on each element.)");
 	help_strings[string("dnDirichlet")][string("example")] = string(R"(# lets get a draw from a Dirichlet distribution
 a <- [1,1,1,1]   # we could also use rep(1,4)
 b ~ dnDirichlet(a)
@@ -619,12 +628,8 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("dnEpisodicBirthDeath")][string("name")] = string(R"(dnEpisodicBirthDeath)");
 	help_strings[string("dnEvent")][string("name")] = string(R"(dnEvent)");
 	help_arrays[string("dnExponential")][string("authors")].push_back(string(R"(Michael Landis)"));
-	help_strings[string("dnExponential")][string("description")] = string(R"(Exponential distribution with rate equal to ‘lambda’.)");
-	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution has density:
-
-f(x) = lambda * exp(-lambda*x)
-
-where lambda is the rate parameter.)");
+	help_strings[string("dnExponential")][string("description")] = string(R"(The Exponential distribution describes the distribution of the times between events in a Poisson point process.)");
+	help_strings[string("dnExponential")][string("details")] = string(R"(The exponential distribution takes one parameter, lambda, describing the rate (i.e. 1/mean). The probability density function is f(x) = lambda * exp(-lambda*x).)");
 	help_strings[string("dnExponential")][string("example")] = string(R"(# we set a rate parameter
 rate <- 10.0
 # we create an exponentially distributed random variable
@@ -679,8 +684,10 @@ moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnGamma")][string("description")] = string(R"(Gamma probability distribution for positive real numbers.)");
-	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
+	help_strings[string("dnGamma")][string("description")] = string(R"(The Gamma distribution describes the probability of the sum of exponentially distributed variables.)");
+	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution takes two parameters, shape and rate. Similar to how 1/rate gives the mean of the exponential, shape/rate gives the mean of the gamma. It provides a natural prior distribution for parameters that could be considered as sums of exponential variables.
+
+The probability density function is f(x) = rate^shape * x^(shape - 1) * e^(-rate * x) / Gamma(shape), where Gamma is the gamma function. Note that for shape = 1, the gamma distribution reduces to an exponential distribution.)");
 	help_strings[string("dnGamma")][string("example")] = string(R"(# lets simulate
 a <- rgamma(1000,shape=4,rate=4)
 # we expect a mean of 1
@@ -2502,7 +2509,75 @@ moves[1] = mvCorrelationMatrixSingleElementBeta(R, alpha=10.0))");
 	help_strings[string("mvCorrelationMatrixUpdate")][string("name")] = string(R"(mvCorrelationMatrixUpdate)");
 	help_strings[string("mvDPPAllocateAuxGibbs")][string("name")] = string(R"(mvDPPAllocateAuxGibbs)");
 	help_strings[string("mvDPPGibbsConcentration")][string("name")] = string(R"(mvDPPGibbsConcentration)");
+	help_arrays[string("mvDPPValueBetaSimplex")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvDPPValueBetaSimplex")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [Simplex](https://revbayes.github.io/documentation/Simplex.html) distributions, i.e., distributions defined over vectors whose elements are positive and sum to 1.)");
+	help_strings[string("mvDPPValueBetaSimplex")][string("details")] = string(R"(In Dirichlet process mixtures, the number of categories (= clusters) is not specified beforehand but inferred from the data, and can range anywhere from 1 to the total number of elements (= observations). The move takes the current number of categories and simultaneously updates the value of every category using the beta simplex move with a concentration parameter (alpha) of 10.)");
+	help_strings[string("mvDPPValueBetaSimplex")][string("example")] = string(R"(# Here, we draw from a DP mixture for 3 elements, where every element
+# is itself a 2-element simplex drawn from a flat Dirichlet distribution
+x ~ dnDPP(1, dnDirichlet( [1, 1] ), 3)
+
+# Next, we add the move. Note that without moves other than
+# mvDPPValueBetaSimplex, only the values of the categories will be
+# updated: the total number of categories and the assignment of elements
+# to categories will be determined by the initial draw.
+moves[1] = mvDPPValueBetaSimplex(x, weight=1)
+
+monitors[1] = mnScreen(x, printgen=1)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50))");
+	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- dnDPP)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvDPPValueScaling)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvDPPValueSliding)"));
+	help_strings[string("mvDPPValueBetaSimplex")][string("title")] = string(R"(Beta simplex move applied to individual categories of a Dirichlet process mixture)");
+	help_arrays[string("mvDPPValueScaling")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvDPPValueScaling")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [RealPos](https://revbayes.github.io/documentation/RealPos.html) distributions, i.e., distributions defined over non-negative real numbers.)");
+	help_strings[string("mvDPPValueScaling")][string("details")] = string(R"(In Dirichlet process mixtures, the number of categories (= clusters) is not specified beforehand but inferred from the data, and can range anywhere from 1 to the total number of elements (= observations). The move takes the current number of categories and simultaneously updates the value of every category using the scaling move with a scaling factor (lambda) of 1.)");
+	help_strings[string("mvDPPValueScaling")][string("example")] = string(R"(# Here, we draw from a DP mixture for 3 elements, where every element
+# is a non-negative real number drawn from an exponential distribution
+x ~ dnDPP(1, dnExp(1), 3)
+
+# Next, we add the move. Note that without moves other than
+# mvDPPValueScaling, only the values of the categories will be updated:
+# the total number of categories and the assignment of elements to
+# categories will be determined by the initial draw.
+moves[1] = mvDPPValueScaling(x, weight=1)
+
+monitors[1] = mnScreen(x, printgen=1)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50))");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- dnDPP)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvScale)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvDPPValueBetaSimplex)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvDPPValueSliding)"));
+	help_strings[string("mvDPPValueScaling")][string("title")] = string(R"(Scaling move applied to individual categories of a Dirichlet process mixture)");
+	help_arrays[string("mvDPPValueSliding")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("mvDPPValueSliding")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [Real](https://revbayes.github.io/documentation/Real.html) distributions, i.e., distributions defined over all real numbers.)");
+	help_strings[string("mvDPPValueSliding")][string("details")] = string(R"(In Dirichlet process mixtures, the number of categories (= clusters) is not specified beforehand but inferred from the data, and can range anywhere from 1 to the total number of elements (= observations). The move takes the current number of categories and simultaneously updates the value of every category using the sliding move with a window size (delta) of 1.)");
+	help_strings[string("mvDPPValueSliding")][string("example")] = string(R"(# Here, we draw from a DP mixture for 3 elements, where every element
+# is a real number drawn from the standard normal distribution
+x ~ dnDPP(1, dnNormal(0, 1), 3)
+
+# Next, we add the move. Note that without moves other than
+# mvDPPValueSliding, only the values of the categories will be updated:
+# the total number of categories and the assignment of elements to
+# categories will be determined by the initial draw.
+moves[1] = mvDPPValueSliding(x, weight=1)
+
+monitors[1] = mnScreen(x, printgen=1)
+mymodel = model(x)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50))");
+	help_strings[string("mvDPPValueSliding")][string("name")] = string(R"(mvDPPValueSliding)");
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- dnDPP)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvSlide)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvDPPValueBetaSimplex)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvDPPValueScaling)"));
+	help_strings[string("mvDPPValueSliding")][string("title")] = string(R"(Sliding move applied to individual categories of a Dirichlet process mixture)");
 	help_strings[string("mvDirichletSimplex")][string("description")] = string(R"(A Dirichlet-simplex proposal randomly changes some values of a [Simplex](https://revbayes.github.io/documentation/Simplex.html)
 (a vector whose elements sum to 1). The other values change too because of renormalization.
  
