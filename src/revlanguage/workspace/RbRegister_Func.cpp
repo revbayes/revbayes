@@ -284,6 +284,7 @@
 #include "Func_sumNatural.h"
 #include "Func_standardDeviation.h"
 #include "Func_sqrt.h"
+#include "Func_sin.h"
 #include "Func_trunc.h"
 #include "Func_upperTriangle.h"
 #include "Func_variance.h"
@@ -586,6 +587,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_shortestDistance() );
 
         // trigonometric functions
+        addFunction( new Func_sin());
         addFunction( new Func_cos()  );
 
         // hyperbolic tangent function
