@@ -187,6 +187,11 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     size_t stone_block_start =  floor( ( floor( pid   /double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
     size_t stone_block_end   =  floor( ( ceil( (pid+1)/double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
     
+#ifdef RB_MPI
+    // Wait until all processes are complete: this is to make sure we do not print step 1 before the message above
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+    
     // Run the chain
     for (size_t i = stone_block_start; i < stone_block_end; ++i)
     {
