@@ -239,9 +239,48 @@ void Mcmcmc::checkpoint( void ) const
     for (size_t i = 0; i < num_chains; ++i)
     {
         
-        if ( chains[i] != NULL )
+        if ( chains[ chainForHeatIndex(i) ] != NULL )
         {
-            chains[i]->checkpoint();
+            // get the preliminary checkpoint file
+            path f = chains[ chainForHeatIndex(i) ]->getCheckpointFile();
+            
+            std::string path_string = f.string();
+            std::string test_string = "_chain_";
+            path chain_file_name;
+            
+            // if the preliminary name does not contain "_chain_", append:
+            size_t pos = path_string.find(test_string);
+            if (pos == std::string::npos)
+            {
+                chain_file_name = appendToStem(f, test_string + std::to_string(i) );
+            }
+            // if it does contain it, replace the index:
+            else
+            {
+                // if we have more than 9 chains, the number of characters in the index will be variable,
+                // so we have to determine it first
+                std::string expr = "_chain_*.";
+                size_t idx_pos = expr.find("*");
+                size_t tmp0 = path_string.find( expr.substr(0, idx_pos) );
+                size_t tmp1 = path_string.find( expr.substr(idx_pos + 1) );
+                size_t idx_length = tmp1 - tmp0 - idx_pos;
+                
+                path_string.replace(pos + test_string.length(), idx_length, std::to_string(i));
+                chain_file_name = path_string;
+            }
+            
+            chains[ chainForHeatIndex(i) ]->setCheckpointFile( chain_file_name );
+            chains[ chainForHeatIndex(i) ]->checkpoint();
+            
+            // assemble the new filename
+            path heat_checkpoint_file_name = appendToStem(chain_file_name, "_heat");
+            
+            // open the stream to the file
+            std::ofstream out_stream_mcmc( heat_checkpoint_file_name.string() );
+            out_stream_mcmc << "heat = " << chains[ chainForHeatIndex(i) ]->getChainPosteriorHeat() << std::endl;
+            
+            // clean up
+            out_stream_mcmc.close();
         }
         
     }
@@ -476,8 +515,46 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             
         if ( chains[i] != NULL )
         {
+            // get the full name of the checkpoint file for this chain
+            path f = chains[i]->getCheckpointFile();
+            path chain_file_name = appendToStem(f, "_chain_" + std::to_string(i) );
+            chains[i]->setCheckpointFile( chain_file_name );
+            
+            // restore from checkpoint
             chains[i]->initializeSamplerFromCheckpoint();
             setCurrentGeneration(chains[i]->getCurrentGeneration());
+            
+            // give the chain back its correct heat
+            double chain_heat;
+            
+            // assemble the new filename
+            path heat_checkpoint_file_name = appendToStem( chain_file_name, "_heat");
+
+            // open file and initialize variables for parsing
+            std::ifstream in_file_heat( heat_checkpoint_file_name.string() );
+            std::string line_heat;
+            std::map<std::string, std::string> heat_pars;
+            
+            // command-processing loop
+            while ( in_file_heat.good() )
+            {
+                // read a line
+                safeGetline( in_file_heat, line_heat );
+                
+                if ( line_heat != "" )
+                {
+                    std::vector<std::string> key_value;
+                    StringUtilities::stringSplit(line_heat, " = ", key_value);
+                    heat_pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
+                }
+                
+            }
+            
+            chain_heat = StringUtilities::asDoubleNumber( heat_pars["heat"] );
+            chains[i]->setChainPosteriorHeat(chain_heat);
+            
+            // make sure it worked
+            // std::cout << "Chain initialized from file " << chains[i]->getCheckpointFile() << " has a posterior heat of " << chains[i]->getChainPosteriorHeat() << std::endl;
         }
         
     }
@@ -1270,13 +1347,13 @@ void Mcmcmc::startMonitors(size_t num_cycles, bool reopen)
 
 void Mcmcmc::setCheckpointFile(const path &f)
 {
+    
     for (size_t j = 0; j < num_chains; ++j)
     {
-        
+
         if ( chains[j] != NULL )
         {
-            path chain_file_name = appendToStem(f, "_chain_" + std::to_string(j) );
-            chains[j]->setCheckpointFile( chain_file_name );
+            chains[j]->setCheckpointFile(f);
         }
         
     }
