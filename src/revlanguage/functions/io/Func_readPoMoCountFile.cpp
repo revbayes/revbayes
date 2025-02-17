@@ -87,6 +87,7 @@ const ArgumentRules& Func_readPoMoCountFile::getArgumentRules( void ) const
         weighting_options.push_back( "Binomial" );
         weighting_options.push_back( "Sampled" );
         weighting_options.push_back( "Hypergeometric" );
+        weighting_options.push_back( "None" );
         argument_rules.push_back( new OptionRule( "samplingCorrection", new RlString("Fixed"), weighting_options, "The sampling correction to map the observed counts to PoMo states." ) );
         
         argument_rules.push_back( new ArgumentRule( "effectivePopulationSize", Natural::getClassTypeSpec(), "A tentative population size used by the hypergeometric method to correct the counts.", ArgumentRule::BY_VALUE, ArgumentRule::ANY,  new Natural(10000) ) );

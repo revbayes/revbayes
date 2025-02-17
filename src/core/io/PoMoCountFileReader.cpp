@@ -49,6 +49,9 @@ PoMoCountFileReader::PoMoCountFileReader(   const path &fn,
     } else if ( weighting_method == "Hypergeometric" )
     {
         weighting  = RevBayesCore::PoMoState::HYPERGEOMETRIC;
+    } else if ( weighting_method == "None" )
+    {
+        weighting  = RevBayesCore::PoMoState::NONE;
     }
     
 	// chars is a matrix containing all the lines of the file fn.

@@ -13,7 +13,7 @@ namespace RevBayesCore {
     class PoMoState : public DiscreteCharacterState {
         
     public:
-        enum WEIGHTING { FIXED, BINOMIAL, SAMPLED, HYPERGEOMETRIC };
+        enum WEIGHTING { FIXED, BINOMIAL, SAMPLED, HYPERGEOMETRIC, NONE };
 
         PoMoState(size_t n=4, size_t vps = 10, const std::string &s = "", const std::string &chromosome = "",
                   size_t position = 0, WEIGHTING w = WEIGHTING::FIXED, const long eps = 10000);                                                   //!< Constructor that sets all fields
@@ -55,6 +55,7 @@ namespace RevBayesCore {
         void                            setStateBinomialForPolymorphic(size_t t, size_t c, size_t b);     //!< Compute the internal state value as weights from a binomial distribution.
         void                            setStateBinomialForMonomorphic(size_t t, size_t f); //!< Compute the internal state value as weights from a binomial distribution.
         void                            setStateSampled(size_t t, size_t c, size_t b);      //!< Compute the internal state value by sampling from a binomial distribution.
+        void                            setStateNone(size_t t, size_t c, size_t b, size_t f, size_t s);        //!< Index corresponds to the closest place as in old PoMo (adding for test reasons)
 
         void                            setStateHypergeometricForMonomorphic(size_t t, size_t f); //!< Compute the internal state value as weights from a binomial distribution.
         void                            setStateHypergeometricForPolymorphic(size_t t, size_t c, size_t b); //!< Compute the internal state value as weights from a binomial distribution.

@@ -497,6 +497,13 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             weights.assign( n_pomo_states , 0.0);
             setStateHypergeometricForMonomorphic(total_count, index_first_allele);
         }
+        else if ( weighting == NONE )
+        {
+            state.reset();
+            state_index = index_first_allele;
+            state.set(state_index);
+            std::cout << "  Index: " << state_index << "\n";
+        }
         else
         {
             throw RbException() << "Unknown weighting method in PoMo state.";
@@ -550,6 +557,11 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             setWeighted(true);
             weights.assign( n_pomo_states , 0.0);
             setStateHypergeometricForPolymorphic(total_count, count_first_allele, edge_first_state);
+        }
+        else if ( weighting == NONE )
+        {
+            state.reset();
+            setStateNone(total_count, count_first_allele, edge_first_state, index_first_allele, index_second_allele);
         }
         else
         {
@@ -674,6 +686,35 @@ void PoMoState::setStateBinomialForMonomorphic(size_t total_samples, size_t inde
 }
 
 
+void PoMoState::setStateNone(size_t total_count, size_t count_first_allele, size_t edge_first_state, size_t index_first_allele, size_t index_second_allele)
+{
+    size_t state_index = 0;
+
+    if (total_count != virtual_population_size)
+    {
+        double obs_proportion_second_allele = (double) (total_count - count_first_allele) / (double)total_count ;
+        size_t virtual_pop_sample_count = (size_t)round((1.0-obs_proportion_second_allele)*virtual_population_size);
+        if ( virtual_pop_sample_count == virtual_population_size )
+        {
+            state_index = index_first_allele;
+        }
+        else if ( virtual_pop_sample_count == 0 )
+        {
+            state_index = index_second_allele;
+        }
+        else
+        {
+            state_index = edge_first_state + virtual_population_size - virtual_pop_sample_count - 1;
+        }
+    }
+    else
+    {
+        state_index = edge_first_state + virtual_population_size - count_first_allele - 1;
+    }
+    state.set(state_index);
+    std::cout << "  Index: " << state_index << "\n";
+
+}
 
 /**
  * Setting the PoMo state from counts as the most closely matching frequency.
