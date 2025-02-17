@@ -1,7 +1,7 @@
 ################################################################################
 #
-# RevBayes Test-Script: Manipulating character matrices
-#
+# RevBayes Test-Script: Tuning the chain heats in MCMCMC analyses and resuming
+#                       them from a checkpoint
 #
 # authors: Martin R. Smith, David Cerny
 #
