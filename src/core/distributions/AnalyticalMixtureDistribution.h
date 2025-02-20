@@ -37,12 +37,6 @@ namespace RevBayesCore {
         void                                                    redrawValue(void);
         //        void                                                    setValue(RbAnalytical<mixtureType> *v, bool f=false);
         
-        // special handling of state changes
-        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
-        void                                                    keepSpecialization(const DagNode* affecter);
-        void                                                    restoreSpecialization(const DagNode *restorer);
-        void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
-        
     protected:
         // Parameter management functions
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -217,26 +211,6 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
 
 
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
-{
-    
-    
-}
-
-
-template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
-{
-    // only do this when the toucher was our parameters
-    //    if ( affecter == parameterValues && this->dag_node != NULL )
-    //    {
-    //        this->dag_node->keepAffected();
-    //    }
-    
-}
-
-
-template <class mixtureType>
 void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void )
 {
     
@@ -298,26 +272,6 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::swapParameterInte
     {
         throw RbException() << "Could not find the distribution parameter to be swapped: " << old_p->getName() << " to " << new_p->getName(); 
     }
-}
-
-
-template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
-{
-    
-    // only do this when the toucher was our parameters
-    dirty = true;
-    
-    
-}
-
-
-template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
-{
-    // only do this when the toucher was our parameters
-    dirty = true;
-    
 }
 
 #endif

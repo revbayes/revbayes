@@ -71,29 +71,6 @@ PhyloDistanceGamma* PhyloDistanceGamma::clone( void ) const
 }
 
 
-void PhyloDistanceGamma::keepSpecialization(const DagNode* affecter)
-{
-    
-    
-}
-
-
-void PhyloDistanceGamma::touchSpecialization(const DagNode *toucher, bool touchAll)
-{
-    
-    
-}
-
-
-void PhyloDistanceGamma::reInitialized(void)
-{
-    
-    
-}
-
-
-
-
 double PhyloDistanceGamma::computeLogLikelihood( void )
 {
     

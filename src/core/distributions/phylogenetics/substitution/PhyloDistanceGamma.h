@@ -18,11 +18,10 @@ namespace RevBayesCore {
         virtual                                            ~PhyloDistanceGamma(void);                                                                   //!< Virtual destructor
         
         // public member functions
-        PhyloDistanceGamma*                                                 clone(void) const;                                                                          //!< Create an independent clone
+                PhyloDistanceGamma*                                                 clone(void) const;                                                                          //!< Create an independent clone
 		double                                                              computeLnProbability(void);
 		//void                                                                fireTreeChangeEvent(const TopologyNode &n);                                                 //!< The tree has changed and we want to know which part.
 		void                                                                redrawValue(void);
-		void                                                                reInitialized(void);
 		void                                                                setDistanceMatrix(const TypedDagNode< DistanceMatrix > *dm);
 		void                                                                setVarianceMatrix(const TypedDagNode< DistanceMatrix > *dm);
 		void                                                                setNames(const std::vector< std::string >& n);
@@ -35,11 +34,6 @@ namespace RevBayesCore {
 		
 		// Parameter management functions.
 		virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
-		
-		
-		// virtual methods that may be overwritten, but then the derived class should call this methods
-		virtual void                                                        keepSpecialization(const DagNode* affecter);
-		virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 		
 		void 																updateAlphaAndBetaMatrices();
 		

@@ -54,10 +54,7 @@ namespace RevBayesCore {
         virtual std::vector<double>                                         getMixtureProbs( void ) const;
         virtual std::vector<double>                                         getRootFrequencies( size_t mixture = 0 ) const;
         virtual void                                                        getRootFrequencies( std::vector<std::vector<double> >& ) const;
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
         virtual void                                                        setActivePIDSpecialized(size_t i, size_t n);                                                 //!< Set the number of processes for this distribution.
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                                        updateTransitionProbabilities( void ) const;
 
 
@@ -915,14 +912,6 @@ std::vector<double> RevBayesCore::CTMCProcess<charType>::getMixtureProbs( void )
 
 
 template<class charType>
-void RevBayesCore::CTMCProcess<charType>::keepSpecialization( const DagNode* affecter )
-{
-
-}
-
-
-
-template<class charType>
 void RevBayesCore::CTMCProcess<charType>::redrawValue( void )
 {
     
@@ -1064,15 +1053,6 @@ void RevBayesCore::CTMCProcess<charType>::reInitialized( void )
 
     // we need to recompress because the tree may have changed
     compress();
-}
-
-
-template<class charType>
-void RevBayesCore::CTMCProcess<charType>::restoreSpecialization( const DagNode* affecter )
-{
-
-
-
 }
 
 
@@ -1353,17 +1333,6 @@ void RevBayesCore::CTMCProcess<charType>::swapParameterInternal(const DagNode *o
     }
 
 }
-
-template<class charType>
-void RevBayesCore::CTMCProcess<charType>::touchSpecialization( const DagNode* affecter, bool touch_all )
-{
-
-
-}
-
-
-
-
 
 
 /*
