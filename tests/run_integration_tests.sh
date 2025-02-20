@@ -62,30 +62,30 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
 
     printf "\n\n#### Running test: $testname\n\n"
     
-	for script in $(cat tests.txt); 
-	do
-		(
-		cd scripts
-		sed 's/generations=[0-9]*/generations=1/g' "$script" > "cp_$script"
-		)
+    for script in $(cat tests.txt); 
+    do
+        (
+        cd scripts
+        sed 's/generations=[0-9]*/generations=1/g' "$script" > "cp_$script"
+        )
         ${rb_exec} -b scripts/cp_$script
-    	res="$?"
-    	if [ $res = 1 ]; then
-        	res="error: $f"
-        	break
-    	elif [ $res = 139 ]; then
-        	res="segfault: $f"
-        	break
-    	elif [ $res != 0 ]; then
-        	res="error $res: $f"
-        	break
-    	fi
-    	if [ $res != 0 ] ; then
-        	echo "${dirname}/test.sh ==> error $res"
-    	fi
-		rm scripts/cp_$script
-		rm -rf output
-	done
+        res="$?"
+        if [ $res = 1 ]; then
+            res="error: $f"
+            break
+        elif [ $res = 139 ]; then
+            res="segfault: $f"
+            break
+        elif [ $res != 0 ]; then
+            res="error $res: $f"
+            break
+        fi
+        if [ $res != 0 ] ; then
+            echo "${dirname}/test.sh ==> error $res"
+        fi
+        rm scripts/cp_$script
+        rm -rf output
+    done
 
     status+=("$res")
 
