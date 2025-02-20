@@ -242,7 +242,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     size_t burnin = size_t( ceil( burnin_fraction*gen ) );
     
     size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
-    size_t digits = size_t( ceil( log10( powers.size() ) ) );
+    size_t digits = size_t( ceil( log10( powers.size() + 0.1 ) ) );
     
     /* Print output for users.
      * First, we will find the smallest PID such that the number of stones assigned to the corresponding process is equal to
@@ -283,15 +283,28 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
             size_t step = idx + 1 - start[pid_to_print]; // make sure step counter starts from 1
             size_t lower_bound = (step - 1) * num_processes + 1;
             size_t upper_bound = std::min( step * num_processes, powers.size() );
-            std::cout << "Steps ";
-            for (size_t d = size_t( ceil( log10(lower_bound + 0.1) ) ); d < digits; d++)
+            size_t offset = *std::max_element(start.begin(), start.end());
+            if (lower_bound != upper_bound)
             {
-                std::cout << " ";
+                std::cout << "Steps ";
+                for (size_t d = size_t( ceil( log10(lower_bound + 0.1) ) ); d < size_t( ceil( log10(offset + 0.1) ) ); d++)
+                {
+                    std::cout << " ";
+                }
+                std::cout << lower_bound << "--" << upper_bound;
+                for (size_t d = size_t( ceil( log10(upper_bound + 0.1) ) ); d < digits; d++)
+                {
+                    std::cout << " ";
+                }
             }
-            std::cout << lower_bound << "--" << upper_bound;
-            for (size_t d = size_t( ceil( log10(upper_bound + 0.1) ) ); d < digits; d++)
+            else
             {
-                std::cout << " ";
+                std::cout << "Step ";
+                for (size_t d = 0; d < size_t( ceil( log10(offset + 0.1) ) ) + 3; d++)
+                {
+                    std::cout << " ";
+                }
+                std::cout << lower_bound;
             }
         }
     
