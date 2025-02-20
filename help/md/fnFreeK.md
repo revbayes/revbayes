@@ -8,7 +8,7 @@ This function generates and returns a free rates matrix.
 This function accepts both RealPos[] or RealPos[][] as the first argument to automatically
 generate a rate matrix with corresponding substitution rates, returning a rate matrix object.
 Users can specify if matrix should be normalized in the second argument using a boolean 
-variable (default TRUE). Lastly users can specify what the matrix exponential method to
+variable (default TRUE). Lastly users can specify what matrix exponential method to
 use (default eigen) with a string. Possible options include:
 scalingAndSquaring
 scalingAndSquaringPade

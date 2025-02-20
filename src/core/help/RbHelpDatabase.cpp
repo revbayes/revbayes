@@ -1238,7 +1238,21 @@ b <- -3.9
 u ~ dnUniform(a, b))");
 	help_strings[string("dnUniform")][string("name")] = string(R"(dnUniform)");
 	help_strings[string("dnUniform")][string("title")] = string(R"(Uniform Distribution)");
+	help_arrays[string("dnUniformInteger")][string("authors")].push_back(string(R"(Sebastion Hoehna)"));
+	help_strings[string("dnUniformInteger")][string("description")] = string(R"(This function creates a stochastic node drawing a random integer from a uniform distribution.)");
+	help_strings[string("dnUniformInteger")][string("details")] = string(R"(This function will randomly draw an integer from a uniform distribution
+from a minimum and maximum integer set in the first and second arguments.
+dnUniformInteger must be defined as a stochastic node. This function can also
+be called using the alias 'dnUnifInt'.)");
+	help_strings[string("dnUniformInteger")][string("example")] = string(R"(# Create stochastic node
+x ~ dnUniformInteger(1, 10)
+# See what x was assigned
+x
+5)");
 	help_strings[string("dnUniformInteger")][string("name")] = string(R"(dnUniformInteger)");
+	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnNormal)"));
+	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnExponential)"));
+	help_strings[string("dnUniformInteger")][string("title")] = string(R"(Uniform Integer Distribution)");
 	help_strings[string("dnUniformNatural")][string("name")] = string(R"(dnUniformNatural)");
 	help_strings[string("dnUniformTimeTree")][string("name")] = string(R"(dnUniformTimeTree)");
 	help_strings[string("dnUniformTopology")][string("name")] = string(R"(dnUniformTopology)");
@@ -1567,7 +1581,29 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
 	help_strings[string("fnFMutSel0")][string("title")] = string(R"(The FMutSel0 model)");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
+	help_arrays[string("fnFreeK")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("fnFreeK")][string("description")] = string(R"(This function generates and returns a free rates matrix.)");
+	help_strings[string("fnFreeK")][string("details")] = string(R"(This function accepts both RealPos[] or RealPos[][] as the first argument to automatically
+generate a rate matrix with corresponding substitution rates, returning a rate matrix object.
+Users can specify if matrix should be normalized in the second argument using a boolean 
+variable (default TRUE). Lastly users can specify what matrix exponential method to
+use (default eigen) with a string. Possible options include:
+scalingAndSquaring
+scalingAndSquaringPade
+scalingAndSquaringTaylor
+uniformization
+eigen)");
+	help_strings[string("fnFreeK")][string("example")] = string(R"(# Define vector to pass
+x <- [1, 1, 1, 1]
+# Use fnFreeK to create rate matrix
+fnFreeK(x)
+[ [ -1.0000, 1.0000 ] ,
+  [ 1.0000, -1.0000 ] ])");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
+	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(RateMatrix)"));
+	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeBinary)"));
+	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeSymmetricRateMatrix)"));
+	help_strings[string("fnFreeK")][string("title")] = string(R"(Free K Rate Matrix)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
 	help_strings[string("fnGTR")][string("description")] = string(R"(DNA evolution model proposed in Tavare (1986).)");
 	help_strings[string("fnGTR")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are allowed to be different. Its first argument, exchangeRates, codes for the transition rates between states (as in other models, transition rates are assumed to be symmetric). Its second argument, baseFrequencies, codes for the stationary frequencies of these states. Note that for n states, exchangeRates should have length n*(n-1)/2, and baseFrequencies should have length n. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
@@ -3314,7 +3350,14 @@ print(trees))");
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readDataDelimitedFile)"));
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readCharacterData)"));
 	help_strings[string("readTrees")][string("title")] = string(R"(Function to read in trees.)");
+	help_strings[string("readVCF")][string("description")] = string(R"(Read VCF file into revbayes)");
+	help_strings[string("readVCF")][string("details")] = string(R"(readVCF accepts two arguments to read in a VCF file. The first argument
+specifies the relative or absolute file path to desired VCF file. The second
+specifies type of data to be constructed (default binary). This function
+only allows for 0, 1, and . characters in the VCF file.)");
+	help_strings[string("readVCF")][string("example")] = string(R"(x <- readVCF("path/to/VCF/file", "DNA"))");
 	help_strings[string("readVCF")][string("name")] = string(R"(readVCF)");
+	help_strings[string("readVCF")][string("title")] = string(R"(Read VCF)");
 	help_arrays[string("rep")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("rep")][string("description")] = string(R"('rep' creates a vector of 'n' copies of the value 'x'.)");
 	help_strings[string("rep")][string("details")] = string(R"('rep' creates a vector of 'n' elements, each with value 'x', preserving the type of 'x' in the returned vector.)");
@@ -3917,7 +3960,20 @@ z[0])");
 	help_strings[string("v")][string("title")] = string(R"(Create a vector)");
 	help_strings[string("validationAnalysis")][string("name")] = string(R"(validationAnalysis)");
 	help_strings[string("var")][string("name")] = string(R"(var)");
+	help_arrays[string("vectorFlatten")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("vectorFlatten")][string("description")] = string(R"(Flatten a vector to one dimension.)");
+	help_strings[string("vectorFlatten")][string("details")] = string(R"(This function accepts a two-dimensional vector as an argument and flattens it
+to one dimension.)");
+	help_strings[string("vectorFlatten")][string("example")] = string(R"(# Define Vector
+x <- v([1, 2], [3, 4])
+# Flatten
+x_flat <- vectorFlatten(x)
+x_flat
+[1, 2, 3, 4])");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
+	help_arrays[string("vectorFlatten")][string("see_also")].push_back(string(R"(v)"));
+	help_arrays[string("vectorFlatten")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("vectorFlatten")][string("title")] = string(R"(Vector Flatten)");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
