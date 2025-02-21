@@ -265,7 +265,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
     bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
 
-    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
+    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard" || dt == "PoMo") && code != "all")
     {
         throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
     }

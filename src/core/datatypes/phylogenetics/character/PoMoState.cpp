@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <string>
 #include <algorithm>
+#include <numeric>
 
 #include "RbException.h"
 #include "RbMathCombinatorialFunctions.h"
@@ -480,6 +481,8 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             This is how we recue variation that is not observed due to the sampling process.
             This should be simply sampling a state from the binomial weights directly.
             */
+           // WENJIE'S COMMENT:
+           // THIS SEEMS TO BE WRONG TO ME
             state.reset();
             state_index = index_first_allele;
             state.set(state_index);
@@ -513,7 +516,8 @@ void PoMoState::setState(const std::vector<size_t> &counts)
     // The observed count is polymorphic and biallelic 
     else if ( n_observed_alleles == 2 ) 
     {
-        
+        // WENJIE'S COMMENT:
+        // check if the following if-statement will be used
         if ( index_second_allele >= n_alleles )
         {
             throw RbException( "PoMo string state not correct. The second allele could not be determined." );
@@ -779,23 +783,38 @@ void PoMoState::setStateSampled(size_t total_count, size_t count_first_allele, s
     // Basically all cells in the weight matrix that contain only id1, only id2, or a combination of both should have a non-zero weight.
     double n = (double)total_count;
 
+    // // RUI's version
+    // std::vector<double> prob (virtual_population_size );
+    // double max_prob = 0;
+    // for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
+    // {
+    //     prob[j] = RbStatistics::Binomial::pdf(n, (double)j/double(virtual_population_size), (double)(count_first_allele));
+    //     if ( prob[j] > max_prob )
+    //     {
+    //         max_prob = prob[j];
+    //     }
+    // }
+    
+    // // normalize the probabilities
+    // for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
+    // {
+    //     prob[j] /= max_prob;
+    // }
+    
+    // WENJIE's version
     std::vector<double> prob (virtual_population_size );
-    double max_prob = 0;
     for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
     {
         prob[j] = RbStatistics::Binomial::pdf(n, (double)j/double(virtual_population_size), (double)(count_first_allele));
-        if ( prob[j] > max_prob )
-        {
-            max_prob = prob[j];
-        }
     }
     
+    double sum_probs = std::accumulate(prob.begin(), prob.end(), 0.0);
     // normalize the probabilities
     for (size_t j=1; j <= virt_pop_size_minus_1; ++j)
     {
-        prob[j] /= max_prob;
+        prob[j] /= sum_probs;
     }
-    
+
     // sample the index
     size_t sample_index = 1;
     double u = GLOBAL_RNG->uniform01();
@@ -1046,7 +1065,7 @@ void PoMoState::setToFirstState(void)
 {
     num_observed_states = 1;
     index_single_state = 0;
-    state.clear();
+    state.reset();
     state.set( 0 );
 }
 
