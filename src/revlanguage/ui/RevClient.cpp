@@ -324,6 +324,18 @@ int interpret(const std::string& command)
     return RevLanguage::Parser::getParser().processCommand(tmp, RevLanguage::Workspace::userWorkspacePtr());
 }
 
+void shutdown()
+{
+    Workspace::userWorkspace().clear();
+    Workspace::globalWorkspace().clear();
+
+#ifdef RB_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();
+#endif
+}
+
+
 void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
 {
     std::stringstream inFile = RevBayesCore::readFileAsStringStream(filename);
@@ -434,11 +446,9 @@ void startInterpreter( void )
                 // [JS, 2015-11-03]
                 // Null input, e.g. if the user entered CTRL-D or CTRL-C.
                 // If not handled here, segmentation fault results. Not a dealbreaker, but annoying.
-                // There might be a more elegant way to do this, but right now, until I get
-                // more familiar with the codebase or somebody else cares to improve it, we are
-                // just going to replace the input with the intention, i.e. to quit, and let
-                // the existing logic handle it.
-                commandLine = "q();";
+                shutdown();
+
+                exit(0);
             }
             else
             {
