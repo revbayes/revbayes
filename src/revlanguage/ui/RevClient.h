@@ -20,6 +20,7 @@ namespace RevClient
     int   interpret(const std::string& command);
 
     void  execute_file(const boost::filesystem::path& filename, bool echo_on, bool error_exit);
+    void  shutdown();
     void  startInterpreter(void);
     void  startJupyterInterpreter(void);
 }

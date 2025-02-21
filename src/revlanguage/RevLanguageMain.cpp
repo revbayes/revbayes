@@ -12,6 +12,7 @@
 #include "RlUserInterface.h"
 #include "RbVersion.h"
 #include "StringUtilities.h"
+#include "RevClient.h"        // for RevClient::shutdown()
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -77,12 +78,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
             
             if( batch_mode == true )
             {
-                RevLanguage::Workspace::userWorkspace().clear();
-                RevLanguage::Workspace::globalWorkspace().clear();
-                
-#ifdef RB_MPI
-                MPI_Finalize();
-#endif
+                RevClient::shutdown();
                 
                 exit(1);
             }
@@ -118,12 +114,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
 
             if( batch_mode == true )
             {
-                RevLanguage::Workspace::userWorkspace().clear();
-                RevLanguage::Workspace::globalWorkspace().clear();
-                
-#ifdef RB_MPI
-                MPI_Finalize();
-#endif
+                RevClient::shutdown();
 
                 exit(1);
             }
