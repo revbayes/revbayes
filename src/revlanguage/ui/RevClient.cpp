@@ -22,7 +22,6 @@ extern "C" {
 #include "linenoise.h"
 }
 
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -32,6 +31,7 @@ extern "C" {
 #include <string>
 #include <utility>
 #include <vector>
+#include "RbException.h"
 //#define ctrl(C) ((C) - '@')
 
 const char* default_prompt = (char*) "> ";
@@ -176,7 +176,7 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
 
         // find position of right most expression separator in cmd
 
-        BOOST_FOREACH(std::string s, expressionSeparator)
+        for(const std::string& s: expressionSeparator)
         {
             if (debug) { std::cout << "linenoise-debug: rfind(\"" << s << "\",\"" << cmd << "\")=" << cmd.rfind(s) << "\n"; }
             size_t find_idx = cmd.rfind(s);
@@ -251,7 +251,7 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
 
     // populate linenoise completions
     
-    BOOST_FOREACH(std::string m, completions)
+    for(const std::string& m: completions)
     {
         if (boost::starts_with(m, compMatch))
         {
@@ -323,6 +323,55 @@ int interpret(const std::string& command)
     std::string tmp = std::string( buffer );
 
     return RevLanguage::Parser::getParser().processCommand(tmp, RevLanguage::Workspace::userWorkspacePtr());
+}
+
+void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
+{
+    std::stringstream inFile = RevBayesCore::readFileAsStringStream(filename);
+
+    // Command-processing loop
+    std::string commandLine;
+    int lineNumber = 0;
+    int result = 0;     // result from processing of last command
+    while ( inFile.good() )
+    {
+        // Read a line
+        std::string line;
+        RevBayesCore::safeGetline(inFile, line);
+        lineNumber++;
+        
+        if ( echo_on )
+        {
+            if ( result == 1 )
+            {
+                std::cout << "+ " << line << std:: endl;
+            }
+            else
+            {
+                std::cout << "> " << line << std::endl;
+            }
+        }
+        
+        // If previous result was 1 (append to command), we do this
+        if ( result == 1 )
+        {
+            commandLine += line;
+        }
+        else
+        {
+            commandLine = line;
+        }
+
+        // Process the line and record result
+        result = Parser::getParser().processCommand( commandLine, &Workspace::userWorkspace() );
+        if ( result == 2 )
+        {
+            if (error_exit)
+                throw RbException() << "Problem processing line " << lineNumber << " in file " << filename;
+            else
+                std::cerr<< "Error: Problem processing line " << lineNumber << " in file " << filename;
+        }
+    }
 }
 
 /**
