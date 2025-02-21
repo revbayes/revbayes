@@ -22,6 +22,7 @@
 #include "RevVariable.h"
 #include "RlBoolean.h"
 #include "RlFunction.h"
+#include "RevClient.h"
 
 using namespace RevLanguage;
 
@@ -49,61 +50,16 @@ Func_source* Func_source::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_source::execute( void )
 {
-    
+
     /* Open file */
     fs::path fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-
-    std::stringstream inFile = RevBayesCore::readFileAsStringStream(fname);
 
     bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
     
     // Initialize
-    std::string commandLine;
-    int lineNumber = 0;
-    int result = 0;     // result from processing of last command
     RBOUT("Processing file \"" + fname.string() + "\"");
-    
-    // Command-processing loop
-    while ( inFile.good() )
-    {
-        
-        // Read a line
-        std::string line;
-        RevBayesCore::safeGetline(inFile, line);
-        lineNumber++;
-        
-        if ( echo_on == true )
-        {
-            
-            if ( result == 1 )
-            {
-                std::cout << "+ " << line << std:: endl;
-            }
-            else
-            {
-                std::cout << "> " << line << std::endl;
-            }
-            
-        }
-        
-        // If previous result was 1 (append to command), we do this
-        if ( result == 1 )
-        {
-            commandLine += line;
-        }
-        else
-        {
-            commandLine = line;
-        }
-            
-        // Process the line and record result
-        result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
-        if ( result == 2 )
-        {
-            throw RbException() << "Problem processing line " << lineNumber << " in file " << fname;
-        }
-        
-    }
+
+    RevClient::execute_file(fname, echo_on, true);
     
     // Return control 
     RBOUT("Processing of file \"" + fname.string() + "\" completed");
