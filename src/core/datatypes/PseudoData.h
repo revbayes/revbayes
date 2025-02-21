@@ -32,7 +32,7 @@ namespace RevBayesCore
     template <typename T>
     struct PseudoData: public Cloneable
     {
-        virtual double operator()(const T&) = 0;
+        virtual double operator()(const T&) const = 0;
         virtual ~PseudoData() {};
 
         PseudoData* clone() const = 0;
@@ -50,7 +50,7 @@ namespace RevBayesCore
     struct PseudoDataNothing: public PseudoData<T>
     {
         PseudoDataNothing* clone() const {return new PseudoDataNothing(*this);}
-        double operator()(const T&) {return 0;}
+        double operator()(const T&) const {return 0;}
     };
 
     // Whatever we observed, the data has decreasing probability outside [a,b]
@@ -59,7 +59,7 @@ namespace RevBayesCore
         double a;
         double b;
         double lambda;
-        double operator()(const double& x)
+        double operator()(const double& x) const
         {
             if (x > a and x < b)
                 return 0;
