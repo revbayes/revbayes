@@ -240,9 +240,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     sampler->reset();
 
     size_t burnin = size_t( ceil( burnin_fraction*gen ) );
-    
     size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
-    size_t digits = size_t( ceil( log10( powers.size() + 0.1 ) ) );
     
     /* Print output for users.
      * First, we will find the smallest PID such that the number of stones assigned to the corresponding process is equal to
@@ -269,10 +267,16 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     if (pid == pid_to_print)
     {
+        // Get the width of a given number in characters
+        auto width = [&](size_t x) { return size_t( ceil( log10(x + 0.1) ) ); };
+        
         if (num_processes == 1)
         {
+            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
+            size_t digits = width( powers.size() );
+            
             std::cout << "Step ";
-            for (size_t d = size_t( ceil( log10(idx + 1.1) ) ); d < digits; d++)
+            for (size_t d = width(idx + 1); d < digits; d++)
             {
                 std::cout << " ";
             }
@@ -280,27 +284,30 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         }
         else
         {
+            // Get the values to print
             size_t step = idx + 1 - start[pid_to_print]; // make sure step counter starts from 1
             size_t lower_bound = (step - 1) * num_processes + 1;
             size_t upper_bound = std::min( step * num_processes, powers.size() );
-            size_t offset = *std::max_element(start.begin(), start.end());
+            
+            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
+            size_t tmp = powers.size() - ceil((double)powers.size() / num_processes) + floor((double)powers.size() / num_processes);
+            size_t max_upper_bound = (powers.size() % num_processes == 1) ? end[ end.size() - 2 ] : end[ end.size() - 1 ];
+            size_t max_lower_bound = (powers.size() <= num_processes) ? 1 : ((powers.size() % num_processes > 1) ? tmp : start[ start.size() - 1 ]);
+            size_t offset = width(max_lower_bound) + width(max_upper_bound) + 2; // add 2 for the "--"
+            
             if (lower_bound != upper_bound)
             {
                 std::cout << "Steps ";
-                for (size_t d = size_t( ceil( log10(lower_bound + 0.1) ) ); d < size_t( ceil( log10(offset + 0.1) ) ); d++)
+                for (size_t d = width(lower_bound) + width(upper_bound) + 2; d < offset; d++)
                 {
                     std::cout << " ";
                 }
                 std::cout << lower_bound << "--" << upper_bound;
-                for (size_t d = size_t( ceil( log10(upper_bound + 0.1) ) ); d < digits; d++)
-                {
-                    std::cout << " ";
-                }
             }
             else
             {
                 std::cout << "Step ";
-                for (size_t d = 0; d < size_t( ceil( log10(offset + 0.1) ) ) + 3; d++)
+                for (size_t d = width(lower_bound); d < offset + 1; d++) // add 1 to account for "Step" vs "Steps"
                 {
                     std::cout << " ";
                 }
