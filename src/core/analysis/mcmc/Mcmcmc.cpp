@@ -524,6 +524,10 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             }
             
             chain_heat = StringUtilities::asDoubleNumber( heat_pars["heat"] );
+            
+            // clean up
+            in_file_heat.close();
+            
             chains[i]->setChainPosteriorHeat(chain_heat);
             
             // make sure it worked
