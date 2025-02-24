@@ -241,33 +241,8 @@ void Mcmcmc::checkpoint( void ) const
         
         if ( chains[ chainForHeatIndex(i) ] != NULL )
         {
-            // get the preliminary checkpoint file
-            path f = chains[ chainForHeatIndex(i) ]->getCheckpointFile();
-            
-            std::string path_string = f.string();
-            std::string test_string = "_chain_";
-            path chain_file_name;
-            
-            // if the preliminary name does not contain "_chain_", append:
-            size_t pos = path_string.find(test_string);
-            if (pos == std::string::npos)
-            {
-                chain_file_name = appendToStem(f, test_string + std::to_string(i) );
-            }
-            // if it does contain it, replace the index:
-            else
-            {
-                // if we have more than 9 chains, the number of characters in the index will be variable,
-                // so we have to determine it first
-                std::string expr = "_chain_*.";
-                size_t idx_pos = expr.find("*");
-                size_t tmp0 = path_string.find( expr.substr(0, idx_pos) );
-                size_t tmp1 = path_string.find( expr.substr(idx_pos + 1) );
-                size_t idx_length = tmp1 - tmp0 - idx_pos;
-                
-                path_string.replace(pos + test_string.length(), idx_length, std::to_string(i));
-                chain_file_name = path_string;
-            }
+            // get the checkpoint file name for the current chain by appending to the base checkpoint file name
+            path chain_file_name = appendToStem( base_checkpoint_file_name, "_chain_" + std::to_string(i) );
             
             chains[ chainForHeatIndex(i) ]->setCheckpointFile( chain_file_name );
             chains[ chainForHeatIndex(i) ]->checkpoint();
@@ -335,7 +310,6 @@ void Mcmcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceComb
     }
     
 }
-
 
 
 /**
@@ -516,8 +490,7 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
         if ( chains[i] != NULL )
         {
             // get the full name of the checkpoint file for this chain
-            path f = chains[i]->getCheckpointFile();
-            path chain_file_name = appendToStem(f, "_chain_" + std::to_string(i) );
+            path chain_file_name = appendToStem( base_checkpoint_file_name, "_chain_" + std::to_string(i) );
             chains[i]->setCheckpointFile( chain_file_name );
             
             // restore from checkpoint
@@ -1347,17 +1320,7 @@ void Mcmcmc::startMonitors(size_t num_cycles, bool reopen)
 
 void Mcmcmc::setCheckpointFile(const path &f)
 {
-    
-    for (size_t j = 0; j < num_chains; ++j)
-    {
-
-        if ( chains[j] != NULL )
-        {
-            chains[j]->setCheckpointFile(f);
-        }
-        
-    }
-    
+    base_checkpoint_file_name = f;
 }
 
 

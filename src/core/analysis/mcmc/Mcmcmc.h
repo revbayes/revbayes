@@ -123,6 +123,7 @@ namespace RevBayesCore {
         std::string                             swap_mode;                                          // whether making a single attempt per swap interval or attempt multiple (= nchains or nchains^2 for neighbor or random swaps, respectively) times.
         
         Mcmc*                                   base_chain;
+        path                                    base_checkpoint_file_name;
         
         size_t                                  generation;
         std::vector< std::vector<size_t> >      num_attempted_swaps;
