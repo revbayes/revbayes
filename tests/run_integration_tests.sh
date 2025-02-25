@@ -66,8 +66,7 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
     do
         (
         cd scripts
-        sed 's/generations=[0-9]*/generations=1/g' "$script" > "cp_$script"
-        sed -i '' 's/checkpointInterval=[0-9]*/checkpointInterval=1/g' "cp_$script"
+        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
         )
         ${rb_exec} -b scripts/cp_$script
         res="$?"
