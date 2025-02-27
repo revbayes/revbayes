@@ -301,9 +301,9 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 
             Environment& env = Workspace::globalWorkspace();
             
-            try
+            if (auto orig_func = env.findFunction(function_name, args, once))
             {
-                Function* func = env.getFunction(function_name, args, once).clone();
+                Function* func = orig_func->clone();
 
                 // Allow the function to process the arguments
                 func->processArguments( args, once );
@@ -321,11 +321,6 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 conversionVar->setRequiredTypeSpec( argTypeSpec );
                 
                 return Argument( conversionVar, arg.getLabel(), evalType == BY_CONSTANT_REFERENCE );
-                
-            }
-            catch (RbException& e)
-            {
-                // we do nothing here
             }
         } 
     }
