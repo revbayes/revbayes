@@ -224,7 +224,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
     // free the memory of our copy
     delete func;
     
-    if ( dynamic == false || isConstExpression() == true )
+    if ( isConstExpression() == true )
     {
         // Return the value, which is typically a deterministic variable with the function
         // inside it, although many functions return constant values or NULL (void).
