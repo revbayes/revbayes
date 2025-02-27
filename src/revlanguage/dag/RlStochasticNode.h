@@ -4,6 +4,7 @@
 #include "StochasticNode.h"
 #include "RevMemberObject.h"
 #include "RlDistribution.h"
+#include "PseudoDist.h"
 
 namespace RevLanguage {
     
@@ -177,6 +178,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         // we found the corresponding member method
         found = true;
         
+        // Handle the special case of clamping pseudoData objects, which
+        //   need to be set as parameters of the PseudoDist distribution.
+        if (auto pseudo_dist = dynamic_cast<RevBayesCore::PseudoDistBase*>(this->distribution))
+        {
+            if (auto pseudo_data = args[0].getVariable()->getRevObject().getDagNode())
+                pseudo_dist->setPseudoData(pseudo_data);
+            else
+                throw RbException()<<"clamp: no dag node, so no effect!";
+        }
+
         // get the observation
 //        const RevObject &tmp_obj = args[0].getVariable()->getRevObject();
 //        const ModelObject<valueType> *tmp_ptr = dynamic_cast<const ModelObject<valueType> *>( &tmp_obj );

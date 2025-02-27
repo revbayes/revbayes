@@ -25,12 +25,17 @@
 
 namespace RevBayesCore
 {
+    struct PseudoDistBase
+    {
+        virtual void setPseudoData(const DagNode*) = 0;
+    };
 
     template <typename T>
-    class PseudoDist : public TypedDistribution< PseudoData<T>>
+    class PseudoDist : public TypedDistribution< PseudoData<T>>, public PseudoDistBase
     {
         // the base distribution
         const TypedDagNode<T>*                              parameter = nullptr;
+        const TypedDagNode<PseudoData<T>>*                  pseudo_data = nullptr;
 
     protected:
         // Parameter management functions
@@ -39,6 +44,10 @@ namespace RevBayesCore
             if (oldP == parameter)
             {
                 this->parameter = static_cast<const TypedDagNode<T>*>(newP);
+            }
+            else if (oldP == pseudo_data)
+            {
+                this->pseudo_data = static_cast<const TypedDagNode<PseudoData<T>>*>(newP);
             }
         }
 
@@ -56,12 +65,32 @@ namespace RevBayesCore
 
         PseudoDist*                                         clone(void) const override {return new PseudoDist(*this);}
 
+        void setPseudoData(const DagNode* node) override
+        {
+            auto pd = dynamic_cast<const TypedDagNode<PseudoData<T>>*>(node);
+            if (not pd)
+                throw RbException()<<"setPseudoData: node isn't of type TypedDagNode<PseudoData<T>>!";
+
+            if (pseudo_data) this->removeParameter(pseudo_data);
+
+            pseudo_data = pd;
+            this->addParameter(pd);
+        }
+
         double                                              computeLnProbability(void) override
         {
-            // We return the likelihood Pr(unspecified data | x)
-            auto& pseudo_data = this->getValue();
-            auto& x = parameter->getValue();
-            return pseudo_data(x);
+            if (pseudo_data)
+            {
+                // We return the likelihood Pr(unspecified data | x)
+                auto& f = pseudo_data->getValue();
+                auto& x = parameter->getValue();
+                return f(x);
+            }
+            else
+            {
+                // Not yet clamped to pseudodata.
+                return 0.0;
+            }
         }
 
         void                                                redrawValue(void) override
