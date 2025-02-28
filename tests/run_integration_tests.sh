@@ -52,30 +52,40 @@ fi
 tests=()
 status=()
 
-for t in revbayes.github.io/tutorials/*/test.sh; do
-    testname=`echo $t | cut -d '/' -f 2-3`
-    dirname=`echo $t | cut -d '/' -f 1-3`
-    
-    cd $dirname
+for t in revbayes.github.io/tutorials/*/tests.txt; do
+    testname=`echo $t | cut -d '/' -f 2-3`;
+    dirname=`echo $t | cut -d '/' -f 1-3`; 
+	
 
+    cd $dirname
     tests+=($testname)
 
     printf "\n\n#### Running test: $testname\n\n"
-    sh test.sh
-    res="$?"
-    if [ $res = 1 ]; then
-        res="error: $f"
-        break
-    elif [ $res = 139 ]; then
-        res="segfault: $f"
-        break
-    elif [ $res != 0 ]; then
-        res="error $res: $f"
-        break
-    fi
-    if [ $res != 0 ] ; then
-        echo "${dirname}/test.sh ==> error $res"
-    fi
+    
+    for script in $(cat tests.txt); 
+    do
+        (
+        cd scripts
+        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
+        )
+        ${rb_exec} -b scripts/cp_$script
+        res="$?"
+        if [ $res = 1 ]; then
+            res="error: $f"
+            break
+        elif [ $res = 139 ]; then
+            res="segfault: $f"
+            break
+        elif [ $res != 0 ]; then
+            res="error $res: $f"
+            break
+        fi
+        if [ $res != 0 ] ; then
+            echo "${dirname}/test.sh ==> error $res"
+        fi
+        rm scripts/cp_$script
+        rm -rf output
+    done
 
     status+=("$res")
 
