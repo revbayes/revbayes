@@ -1239,16 +1239,13 @@ u ~ dnUniform(a, b))");
 	help_strings[string("dnUniform")][string("name")] = string(R"(dnUniform)");
 	help_strings[string("dnUniform")][string("title")] = string(R"(Uniform Distribution)");
 	help_arrays[string("dnUniformInteger")][string("authors")].push_back(string(R"(Sebastion Hoehna)"));
-	help_strings[string("dnUniformInteger")][string("description")] = string(R"(This function creates a stochastic node drawing a random integer from a uniform distribution.)");
-	help_strings[string("dnUniformInteger")][string("details")] = string(R"(This function will randomly draw an integer from a uniform distribution
-from a minimum and maximum integer set in the first and second arguments.
-dnUniformInteger must be defined as a stochastic node. This function can also
-be called using the alias 'dnUnifInt'.)");
-	help_strings[string("dnUniformInteger")][string("example")] = string(R"(# Create stochastic node
-x ~ dnUniformInteger(1, 10)
-# See what x was assigned
-x
-5)");
+	help_strings[string("dnUniformInteger")][string("description")] = string(R"(This distribution creates a stochastic node drawing a random integer from a uniform distribution.)");
+	help_strings[string("dnUniformInteger")][string("details")] = string(R"(This distribution will randomly draw an integer using uniform distribution
+from a minimum to maximum integer set in the first and second arguments.
+This function can alsonbe called using the alias 'dnUnifInt'.)");
+	help_strings[string("dnUniformInteger")][string("example")] = string(R"(# Create and assign stochastic node
+# To obtain a new value for x the distribution will need to be called again
+x ~ dnUniformInteger(1, 10))");
 	help_strings[string("dnUniformInteger")][string("name")] = string(R"(dnUniformInteger)");
 	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnExponential)"));
@@ -1583,8 +1580,14 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_arrays[string("fnFreeK")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("fnFreeK")][string("description")] = string(R"(This function generates and returns a free rates matrix.)");
-	help_strings[string("fnFreeK")][string("details")] = string(R"(This function accepts both RealPos[] or RealPos[][] as the first argument to automatically
-generate a rate matrix with corresponding substitution rates, returning a rate matrix object.
+	help_strings[string("fnFreeK")][string("details")] = string(R"(This function accepts both a vector or a matrix of non-negative, real numbers in the 
+first argument to automatically generate a rate matrix with corresponding substitution 
+rates, returning a rate matrix object. The function will fill rates in the matrix from
+left to right as provided in the first argument, skipping the diagonal when using a vector
+as input. For this reason,using a vector of lengths 2 to 5 will create a 2-by-2 rate
+matrix but a vector of length 6 will create a 3-by-3 rate matrix as fnFreeK will have 
+enough values to fill the matrix. Using a matrix to create in fnFreeK will create a 
+rate matrix object with rates filled in their respective position in the provided matrix.
 Users can specify if matrix should be normalized in the second argument using a boolean 
 variable (default TRUE). Lastly users can specify what matrix exponential method to
 use (default eigen) with a string. Possible options include:
@@ -1593,12 +1596,27 @@ scalingAndSquaringPade
 scalingAndSquaringTaylor
 uniformization
 eigen)");
-	help_strings[string("fnFreeK")][string("example")] = string(R"(# Define vector to pass
-x <- [1, 1, 1, 1]
+	help_strings[string("fnFreeK")][string("example")] = string(R"(# Define vector to pass, this will create a 2-by-2 matrix
+x <- v(0.5, 0,5)
 # Use fnFreeK to create rate matrix
+# Note the second argument is true in this case so rates will be normalized
 fnFreeK(x)
 [ [ -1.0000, 1.0000 ] ,
-  [ 1.0000, -1.0000 ] ])");
+  [ 1.0000, -1.0000 ] ]
+
+# Case where rates are not normalized
+x <- v(0.5, 0.5)
+fnFreeK(x, false)
+[ [ -0.5000, 0.5000 ] ,
+  [ 0.5000, -0.5000 ] ]
+
+# Define matrix for 3-by-3 rate matrix object
+x <- v([0, .6, .4], [.2, 0, .4], [.3, .3, 0])
+# Create rate matrix object
+fnFreeK(x)
+[ [ -1.0000, 0.6000, 0.4000 ] ,
+  [ 0.2000, -0.6000, 0.4000 ] ,
+  [ 0.3000, 0.3000, -0.6000 ] ])");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(RateMatrix)"));
 	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeBinary)"));
@@ -3350,12 +3368,13 @@ print(trees))");
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readDataDelimitedFile)"));
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readCharacterData)"));
 	help_strings[string("readTrees")][string("title")] = string(R"(Function to read in trees.)");
-	help_strings[string("readVCF")][string("description")] = string(R"(Read VCF file into revbayes)");
-	help_strings[string("readVCF")][string("details")] = string(R"(readVCF accepts two arguments to read in a VCF file. The first argument
-specifies the relative or absolute file path to desired VCF file. The second
-specifies type of data to be constructed (default binary). This function
+	help_strings[string("readVCF")][string("description")] = string(R"(Read VCF file into RevBayes)");
+	help_strings[string("readVCF")][string("details")] = string(R"(readVCF reads in a file that is in Variant Call Formati (VCF), accepting two
+ arguments. The first argument specifies the relative or absolute 
+file path to desired VCF file. The second specifies type of data
+to be constructed (default binary). This function
 only allows for 0, 1, and . characters in the VCF file.)");
-	help_strings[string("readVCF")][string("example")] = string(R"(x <- readVCF("path/to/VCF/file", "DNA"))");
+	help_strings[string("readVCF")][string("example")] = string(R"(x <- readVCF("path/to/VCF/file", "binary"))");
 	help_strings[string("readVCF")][string("name")] = string(R"(readVCF)");
 	help_strings[string("readVCF")][string("title")] = string(R"(Read VCF)");
 	help_arrays[string("rep")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
