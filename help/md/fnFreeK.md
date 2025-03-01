@@ -9,10 +9,10 @@ This function accepts both a vector or a matrix of non-negative, real numbers in
 first argument to automatically generate a rate matrix with corresponding substitution 
 rates, returning a rate matrix object. The function will fill rates in the matrix from
 left to right as provided in the first argument, skipping the diagonal when using a vector
-as input. For this reason,using a vector of lengths 2 to 5 will create a 2-by-2 rate
+as input. For this reason, using a vector of lengths 2 to 5 will create a 2-by-2 rate
 matrix but a vector of length 6 will create a 3-by-3 rate matrix as fnFreeK will have 
 enough values to fill the matrix. Using a matrix to create in fnFreeK will create a 
-rate matrix object with rates filled in their respective position in the provided matrix.
+rate matrix object with rates assigned using  their respective position in the provided matrix.
 Users can specify if matrix should be normalized in the second argument using a boolean 
 variable (default TRUE). Lastly users can specify what matrix exponential method to
 use (default eigen) with a string. Possible options include:

@@ -1244,11 +1244,10 @@ u ~ dnUniform(a, b))");
 from a minimum to maximum integer set in the first and second arguments.
 This function can alsonbe called using the alias 'dnUnifInt'.)");
 	help_strings[string("dnUniformInteger")][string("example")] = string(R"(# Create and assign stochastic node
-# To obtain a new value for x the distribution will need to be called again
 x ~ dnUniformInteger(1, 10))");
 	help_strings[string("dnUniformInteger")][string("name")] = string(R"(dnUniformInteger)");
+	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnUniform)"));
 	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnNormal)"));
-	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnExponential)"));
 	help_strings[string("dnUniformInteger")][string("title")] = string(R"(Uniform Integer Distribution)");
 	help_strings[string("dnUniformNatural")][string("name")] = string(R"(dnUniformNatural)");
 	help_strings[string("dnUniformTimeTree")][string("name")] = string(R"(dnUniformTimeTree)");
@@ -1584,10 +1583,10 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 first argument to automatically generate a rate matrix with corresponding substitution 
 rates, returning a rate matrix object. The function will fill rates in the matrix from
 left to right as provided in the first argument, skipping the diagonal when using a vector
-as input. For this reason,using a vector of lengths 2 to 5 will create a 2-by-2 rate
+as input. For this reason, using a vector of lengths 2 to 5 will create a 2-by-2 rate
 matrix but a vector of length 6 will create a 3-by-3 rate matrix as fnFreeK will have 
 enough values to fill the matrix. Using a matrix to create in fnFreeK will create a 
-rate matrix object with rates filled in their respective position in the provided matrix.
+rate matrix object with rates assigned using  their respective position in the provided matrix.
 Users can specify if matrix should be normalized in the second argument using a boolean 
 variable (default TRUE). Lastly users can specify what matrix exponential method to
 use (default eigen) with a string. Possible options include:
@@ -3369,13 +3368,14 @@ print(trees))");
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readCharacterData)"));
 	help_strings[string("readTrees")][string("title")] = string(R"(Function to read in trees.)");
 	help_strings[string("readVCF")][string("description")] = string(R"(Read VCF file into RevBayes)");
-	help_strings[string("readVCF")][string("details")] = string(R"(readVCF reads in a file that is in Variant Call Formati (VCF), accepting two
+	help_strings[string("readVCF")][string("details")] = string(R"(readVCF reads in a file that is in Variant Call Format (VCF), accepting two
  arguments. The first argument specifies the relative or absolute 
 file path to desired VCF file. The second specifies type of data
 to be constructed (default binary). This function
 only allows for 0, 1, and . characters in the VCF file.)");
 	help_strings[string("readVCF")][string("example")] = string(R"(x <- readVCF("path/to/VCF/file", "binary"))");
 	help_strings[string("readVCF")][string("name")] = string(R"(readVCF)");
+	help_references[string("readVCF")].push_back(RbHelpReference(R"()",R"()",R"()"));
 	help_strings[string("readVCF")][string("title")] = string(R"(Read VCF)");
 	help_arrays[string("rep")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("rep")][string("description")] = string(R"('rep' creates a vector of 'n' copies of the value 'x'.)");

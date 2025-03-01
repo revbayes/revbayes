@@ -11,10 +11,9 @@ This function can alsonbe called using the alias 'dnUnifInt'.
 ## authors
 Sebastion Hoehna
 ## see_also
+dnUniform
 dnNormal
-dnExponential
 ## example
     # Create and assign stochastic node
-    # To obtain a new value for x the distribution will need to be called again
     x ~ dnUniformInteger(1, 10)
 ## references
