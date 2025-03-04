@@ -135,7 +135,7 @@ RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( const std::shared_ptr<Env
     // Free the memory of our copy
     delete the_function;
     
-    if ( dynamic == false || isConstExpression() == true )
+    if ( isConstExpression() == true )
     {
         // Return the return value of the function after making it constant
         if ( the_return_value != NULL )
