@@ -142,7 +142,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     
     Tree& tau = tree->getValue();
 
-    // pick a random node which is not the root and neithor the direct descendant of the root
+    // 1. pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
     size_t node_idx = 0;
     do {
@@ -152,8 +152,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     } while ( node->isRoot() || node->isTip() ); 
     
     TopologyNode& parent = node->getParent();
-    
-    // we need to work with the times
+
+    // 2. we need to work with the times
     double parent_age  = parent.getAge();
     double my_age      = node->getAge();
     double child_Age   = node->getChild( 0 ).getAge();
@@ -161,12 +161,11 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     {
         child_Age = node->getChild( 1 ).getAge();
     }
-    
+
     // now we store all necessary values
     stored_node = node;
     stored_age = my_age;
-    
-    
+
     stored_rates[node_idx] = (rates == NULL ? rates_vec[node_idx]->getValue() : rates->getValue()[node_idx]);
     for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
     {
@@ -174,8 +173,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         stored_rates[child_idx] = (rates == NULL ? rates_vec[child_idx]->getValue() : rates->getValue()[child_idx]);
     }
 
-
-    // draw new ages and compute the hastings ratio at the same time
+    // 3. draw new ages and compute the hastings ratio at the same time
     double m = (my_age-child_Age) / (parent_age-child_Age);
     double a = delta * m + 1.0;
     double b = delta * (1.0-m) + 1.0;
@@ -188,24 +186,24 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double new_a = delta * new_m + 1.0;
     double new_b = delta * (1.0-new_m) + 1.0;
     double backward = RbStatistics::Beta::lnPdf(new_a, new_b, m);
-    
-    // set the age
+
+    // 4. set the age
     tau.getNode(node_idx).setAge( my_new_age );
-    
+
     // touch the tree so that the likelihoods are getting stored
     tree->touch();
-    
+
     // get the probability ratio of the tree
     double tree_prob_ratio = tree->getLnProbabilityRatio();
-    
-    
-    // set the rates
+
+
+    // 5. set the rates
     double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
-    
-    // now we set the new value
-    // this will automatically call a touch
+
+    // Set the rate for the PARENT branch.
     if ( rates == NULL )
     {
+        // this will automatically call a touch
         rates_vec[node_idx]->setValue( new double( my_new_rate ) );
     }
     else
@@ -215,8 +213,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
     // get the probability ratio of the new rate
     double rates_prob_ratio = ( rates == NULL ? rates_vec[node_idx]->getLnProbabilityRatio() : 0.0 );
-    double jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
-    
+
+    // Set the rate for CHILD branches..
     for (size_t i = 0; i < node->getNumberOfChildren(); i++)
     {
         size_t child_idx = node->getChild(i).getIndex();
@@ -233,24 +231,23 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         {
             rates->getValue()[child_idx] = child_new_rate;
         }
+    }
 
-        // get the probability ratio of the new rate
-        if ( rates == NULL )
-        {
-            rates_prob_ratio += rates_vec[child_idx]->getLnProbabilityRatio();
-        }
-        jacobian += log((my_age - a) / (my_new_age - a));
-        
-    }
-    if ( rates != NULL )
+    // 6. get the jacobian and the hastings ratio
+    double jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
+
+    for (size_t i = 0; i < node->getNumberOfChildren(); i++)
     {
-        rates_prob_ratio = rates->getLnProbabilityRatio();
+        size_t child_idx = node->getChild(i).getIndex();
+        double a = node->getChild(i).getAge();
+        jacobian += log((my_age - a) / (my_new_age - a));
     }
-    
-    
-    // we also need to get the prob ratio of all descendants of the tree
+    double ln_hastings_ratio = backward - forward + jacobian;
+
+    // 7. we also need to get the prob ratio of all descendants of the tree
     double tree_like_ratio = 0.0;
-    const std::vector<DagNode*>& tree_desc = tree->getChildren();
+    RbOrderedSet<DagNode*> tree_desc;
+    tree->getAffectedNodes(tree_desc);
     for (size_t i=0; i<tree_desc.size(); ++i)
     {
         DagNode* the_node = tree_desc[i];
@@ -282,8 +279,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             }
         }
     }
-    
-    // we also need to get the prob ratio of all descendants of the rates
+
+    // 8. we also need to get the prob ratio of all descendants of the rates
     double rates_like_ratio = 0.0;
     if ( rates == NULL )
     {
@@ -361,9 +358,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         }
     }
     
-    double hastings_ratio = backward - forward + jacobian;
     double ln_posterior_ratio = pHeat * (lHeat * (tree_like_ratio + rates_like_ratio) + prHeat * (tree_prob_ratio + rates_prob_ratio));
-    double ln_acceptance_ratio = ln_posterior_ratio + hastings_ratio;
+    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
     bool rejected = false;
 
     if (ln_acceptance_ratio >= 0.0)
@@ -456,7 +452,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     if (logMCMC >= 2)
     {
 //        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
-//        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+//        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(ln_hastings_ratio) = "<<ln_hastings_ratio<<"\n";
         std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
     }
 }
