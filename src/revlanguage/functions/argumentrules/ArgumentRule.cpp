@@ -366,7 +366,7 @@ const RevVariable& ArgumentRule::getDefaultVariable( void ) const
     
     if ( defaultVar == NULL ) 
     {
-        throw RbException("Cannot get default variable \"" + label + "\"");
+        throw RbException() << "Cannot get default variable \"" << label << "\"";
     }
     
     return *defaultVar;
@@ -477,17 +477,8 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             args.push_back( the_var );
                 
             Environment& env = Workspace::globalWorkspace();
-            try
-            {
-                // we just want to check if the function exists and can be found
-                env.getFunction(function_name, args, once);
-                return 0.1;
-            }
-            catch (RbException& e)
-            {
-                // we do nothing here
-            }
-
+	    if (env.findFunction(function_name, args, once) != nullptr)
+		return 0.1;
         }
             
     }

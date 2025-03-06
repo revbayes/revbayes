@@ -1,6 +1,6 @@
 #include "PointMassDistribution.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "Cloneable.h"
 #include "RbException.h"

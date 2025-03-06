@@ -263,11 +263,7 @@ std::string RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::buildCharac
         std::vector<CharacterEvent*> characters = bh.getParentCharacters();
         
         std::vector<unsigned> v(num_states*num_states,0);
-        double ndAge;
-        if (n->isRoot())
-            ndAge = n->getAge() * 5;
-        else
-            ndAge = n->getParent().getAge();
+        // double ndAge = n->isRoot() ? n->getAge() * 5 : n->getParent().getAge();
         double brLen = n->getBranchLength();
 
         std::stringstream index_ss;

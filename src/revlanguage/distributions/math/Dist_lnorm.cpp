@@ -9,7 +9,6 @@
 #include "LognormalDistribution.h"
 #include "Real.h"
 #include "RealPos.h"
-#include "RbHelpReference.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -26,6 +25,7 @@ Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution()
 }
 
 
+
 Dist_lnorm* Dist_lnorm::clone( void ) const
 {
     return new Dist_lnorm(*this);
@@ -34,11 +34,11 @@ Dist_lnorm* Dist_lnorm::clone( void ) const
 
 RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) const
 {
-
     // get the parameters
     RevBayesCore::TypedDagNode<double>* m   = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* s   = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-    RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s);
+    RevBayesCore::TypedDagNode<double>* o   = static_cast<const RealPos &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s, o);
     
     return d;
 }
@@ -94,27 +94,29 @@ std::string Dist_lnorm::getDistributionFunctionName( void ) const
     return d_name;
 }
 
+
 /** Return member rules (no members) */
 const MemberRules& Dist_lnorm::getParameterRules(void) const
 {
     
-    static MemberRules member_rules;
+    static MemberRules memberRules;
     static bool rules_set = false;
     
-    if ( rules_set == false )
+    if ( !rules_set )
     {
+        memberRules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m)).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule( "offset", RealPos::getClassTypeSpec(), "The offset in real-space."                        , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
         
-        member_rules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m))." , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        member_rules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
         rules_set = true;
     }
     
-    return member_rules;
+    return memberRules;
 }
 
 
-const TypeSpec& Dist_lnorm::getTypeSpec( void ) const {
+const TypeSpec& Dist_lnorm::getTypeSpec( void ) const
+{
     
     static TypeSpec ts = getClassTypeSpec();
     
@@ -123,18 +125,34 @@ const TypeSpec& Dist_lnorm::getTypeSpec( void ) const {
 
 
 /** Print value for user */
-void Dist_lnorm::printValue(std::ostream& o) const {
+void Dist_lnorm::printValue(std::ostream& o) const
+{
     
     o << "lognormal(mean=";
-    if ( mean != NULL ) {
+    if ( mean != NULL )
+    {
         o << mean->getName();
-    } else {
+    }
+    else
+    {
         o << "?";
     }
     o << ", sd=";
-    if ( sd != NULL ) {
+    if ( sd != NULL )
+    {
         o << sd->getName();
-    } else {
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", offset=";
+    if ( offset != NULL )
+    {
+        o << offset->getName();
+    }
+    else
+    {
         o << "?";
     }
     o << ")";
@@ -151,6 +169,10 @@ void Dist_lnorm::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "sd" )
     {
         sd = var;
+    }
+    else if ( name == "offset" )
+    {
+        offset = var;
     }
     else
     {

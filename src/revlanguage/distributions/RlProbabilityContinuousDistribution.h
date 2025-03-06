@@ -1,7 +1,7 @@
 #ifndef RlProbabilityContinuousDistribution_H
 #define RlProbabilityContinuousDistribution_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

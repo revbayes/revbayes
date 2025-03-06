@@ -5,7 +5,7 @@
 //  Created by David Cerny on 2019-10-15.
 //
 
-#include <math.h>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <ostream>
@@ -167,7 +167,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     }
     else
     {
-        throw RbException("A matrix object does not have a member method called '" + n + "'.");
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -182,7 +182,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     }
     else
     {
-        throw RbException("A matrix object does not have a member method called '" + n + "'.");
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }

@@ -11,7 +11,7 @@ namespace RevBayesCore {
     /**
      * @brief The stopping rule interface for the MonteCarloAnalysis.
      *
-     * A stopping rule checks whether to stop or to continue a MonteCarloAnalysis.
+     * A stopping rule checks whether to stop or continue a MonteCarloAnalysis.
      * This interface specifies the pure virtual functions for stopping rules.
      *
      *
@@ -32,7 +32,9 @@ namespace RevBayesCore {
         virtual bool                                        isConvergenceRule(void) const = 0;                          //!< Is this a convergence rule or a theshold rule?
         virtual void                                        runStarted(void) = 0;                                       //!< The run just started. Here we can set any flags like the timer.
         virtual void                                        setNumberOfRuns(size_t n) = 0;                              //!< Set how many runs/replicates there are.
-        virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop now?
+        virtual double                                      getStatistic(size_t g) = 0;                                 //!< Compute the value of the rule's test statistic / criterion at generation g.
+        virtual std::string                                 printAsStatement(size_t g, bool target_only = false) = 0;   //!< Print a statement about the current value of the rule's test statistic / criterion, or just the target value.
+        virtual bool                                        stop(size_t g) = 0;                                         //!< Should we stop at generation g?
         
     protected:
         StoppingRule() {}

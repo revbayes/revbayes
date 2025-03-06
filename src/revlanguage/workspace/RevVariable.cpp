@@ -244,6 +244,11 @@ const TypeSpec& RevVariable::getRequiredTypeSpec(void) const
     return required_type_spec;
 }
 
+RevPtr<RevVariable> RevVariable::getElementVariable(int i) const
+{
+    assert(isVectorVariable());
+    return (*vector_var_elements)[i];
+}
 
 /* Increment the reference count for this instance. */
 void RevVariable::incrementReferenceCount( void ) const

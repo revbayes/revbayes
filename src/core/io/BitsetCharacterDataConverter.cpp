@@ -1,6 +1,6 @@
 #include "BitsetCharacterDataConverter.h"
 
-#include <math.h>
+#include <cmath>
 #include <sstream>
 #include <string>
 
@@ -80,7 +80,7 @@ HomologousDiscreteCharacterData<NaturalNumbersState>* BitsetCharacterDataConvert
             }
             ss << "->" << numberState;
             ss << ", max=" << numStates;
-            throw RbException("Converted state value for " + taxon.getTaxonName() + " exceeds number of states: " + ss.str());
+            throw RbException() << "Converted state value for " << taxon.getTaxonName() << " exceeds number of states: " << ss.str();
         }
         
         // create NaturalNumberState character

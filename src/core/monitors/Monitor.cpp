@@ -402,7 +402,7 @@ void Monitor::swapNode(DagNode *oldN, DagNode *newN)
 
     if (it == nodes.end())
     {
-        throw RbException("Cannot replace DAG node with name\"" + oldN->getName() + "\" in this monitor because the monitor doesn't hold this DAG node.");
+        throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this monitor because the monitor doesn't hold this DAG node.";
     }
     
     // remove myself from the old node and add myself to the new node
