@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <ostream>
 #include <vector>
+#include <range/v3/all.hpp> // for ranges::views
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "AbstractMove.h"
@@ -18,6 +19,8 @@
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+
+namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
@@ -357,9 +360,15 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             }
         }
     }
-    
-    double ln_posterior_ratio = pHeat * (lHeat * (tree_like_ratio + rates_like_ratio) + prHeat * (tree_prob_ratio + rates_prob_ratio));
+
+    double ln_prior_ratio = tree_prob_ratio + rates_prob_ratio;
+
+    double ln_likelihood_ratio = tree_like_ratio + rates_like_ratio;
+
+    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+
     double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+
     bool rejected = false;
 
     if (ln_acceptance_ratio >= 0.0)
@@ -451,8 +460,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     if (logMCMC >= 2)
     {
-//        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
-//        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(ln_hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(ln_hastings_ratio) = "<<ln_hastings_ratio<<"\n";
         std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
     }
 }
