@@ -364,8 +364,51 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double hastings_ratio = backward - forward + jacobian;
     double ln_posterior_ratio = pHeat * (lHeat * (tree_like_ratio + rates_like_ratio) + prHeat * (tree_prob_ratio + rates_prob_ratio));
     double ln_acceptance_ratio = ln_posterior_ratio + hastings_ratio;
+    bool rejected = false;
 
     if (ln_acceptance_ratio >= 0.0)
+    {
+    }
+    else if (ln_acceptance_ratio < -300.0)
+    {
+        rejected = true;
+    }
+    else
+    {
+        double r = exp(ln_acceptance_ratio);
+        // Accept or reject the move
+        double u = GLOBAL_RNG->uniform01();
+        if (u < r)
+        {
+        }
+        else
+        {
+            rejected = true;
+        }
+    }
+
+    if (rejected)
+    {
+        reject();
+        tree->restore();
+        if ( rates == NULL )
+        {
+            rates_vec[node_idx]->restore();
+        }
+        else
+        {
+            rates->restore();
+        }
+        for (size_t i = 0; i < node->getNumberOfChildren(); i++)
+        {
+            size_t childIdx = node->getChild(i).getIndex();
+            if ( rates == NULL )
+            {
+                rates_vec[childIdx]->restore();
+            }
+        }
+    }
+    else
     {
         num_accepted_total++;
         num_accepted_current_period++;
@@ -392,83 +435,30 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             }
         }
     }
-    else if (ln_acceptance_ratio < -300.0)
+
+    
+    std::map<const DagNode*, double> finalPdfs;
+    if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
+	finalPdfs = getNodePrs(nodes, affected_nodes);
+
+    if (logMCMC >= 3)
     {
-        reject();
-        tree->restore();
-        if ( rates == NULL )
-        {
-            rates_vec[node_idx]->restore();
-        }
-        else
-        {
-            rates->restore();
-        }
-        for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-        {
-            size_t childIdx = node->getChild(i).getIndex();
-            if ( rates == NULL )
-            {
-                rates_vec[childIdx]->restore();
-            }
-        }
-    }
-    else
-    {
-        double r = exp(ln_acceptance_ratio);
-        // Accept or reject the move
-        double u = GLOBAL_RNG->uniform01();
-        if (u < r)
-        {
-            num_accepted_total++;
-            num_accepted_current_period++;
-            
-            //keep
-            tree->touch();
-            tree->keep();
-            if ( rates == NULL )
-            {
-                rates_vec[node_idx]->touch();
-                rates_vec[node_idx]->keep();
-            }
-            else
-            {
-                rates->touch();
-                rates->keep();
-            }
-            for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-            {
-                size_t childIdx = node->getChild(i).getIndex();
-                if ( rates == NULL )
-                {
-                    rates_vec[childIdx]->touch();
-                    rates_vec[childIdx]->keep();
-                }
-            }
-        }
-        else
-        {
-            reject();
-            tree->restore();
-            if ( rates == NULL )
-            {
-                rates_vec[node_idx]->restore();
-            }
-            else
-            {
-                rates->restore();
-            }
-            for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-            {
-                size_t childIdx = node->getChild(i).getIndex();
-                if ( rates == NULL )
-                {
-                    rates_vec[childIdx]->restore();
-                }
-            }
-        }
+        for(auto& [node,pr]: finalPdfs)
+            std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
     }
 
+    if (debugMCMC >=1 and rejected)
+    {
+        compareNodePrs("RateAgeBetaShift", initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
+    }
+
+    if (logMCMC >= 2)
+    {
+//        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+//        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+        std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+    }
 }
 
 
