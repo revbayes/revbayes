@@ -269,10 +269,10 @@ std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, 
 constexpr double rel_err_threshhold = 1.0e-11;
 constexpr int err_precision = 11;
 
-void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& pdfs1, const std::map<const DagNode*, double>& pdfs2, const std::string& msg)
+void compareNodePrs(const std::string& name, const std::map<const DagNode*, double>& pdfs1, const std::map<const DagNode*, double>& pdfs2, const std::string& msg)
 {
     RbException E;
-    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": "<<msg<<"!\n";
+    E<<std::setprecision(err_precision)<<"Executing "<<name<<": "<<msg<<"!\n";
     bool err = false;
     bool weird = false;
     for(auto& [node,pr1]: pdfs1)
@@ -359,7 +359,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             node->keep();
 
         // 5. Compare pdfs for each node
-        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
+        compareNodePrs(proposal->getLongProposalName(), untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
     }
 
     // Propose a new value
@@ -505,7 +505,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if (debugMCMC >=1 and rejected)
     {
-        compareNodePrs(proposal, initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
+        compareNodePrs(proposal->getLongProposalName(), initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
     }
 
     if (logMCMC >= 2)
