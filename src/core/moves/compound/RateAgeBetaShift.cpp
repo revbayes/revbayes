@@ -7,12 +7,14 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "AbstractMove.h"
 #include "DagNode.h"
+#include "DebugMove.h"
 #include "DistributionBeta.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RateAgeBetaShift.h"
 #include "RbException.h"
 #include "RbOrderedSet.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
@@ -30,7 +32,6 @@ RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<Stochas
     num_accepted_current_period( 0 ),
     num_accepted_total( 0 )
 {
-    
     addNode( tree );
     addNode( rates );
     for (std::vector<StochasticNode<double>* >::iterator it = rates_vec.begin(); it != rates_vec.end(); ++it)
@@ -40,8 +41,6 @@ RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<Stochas
         
         addNode( the_node );
     }
-
-    
 }
 
 
@@ -97,14 +96,52 @@ size_t RateAgeBetaShift::getNumberAcceptedTotal( void ) const
 /** Perform the move */
 void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    
+    // These are the nodes we are (directly) modifying.
+    const std::vector<DagNode*> nodes = getDagNodes();
+    // These are the nodes that are (indirectly) affected.
+    const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
+
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    // Compute PDFs for nodes and affected nodes if we are going to use them.
+    std::map<const DagNode*, double> initialPdfs;
+    if (logMCMC >= 3 or debugMCMC >= 1)
+	initialPdfs = getNodePrs(nodes, affected_nodes);
+
+    if (logMCMC >= 3)
+    {
+        std::cerr<<std::setprecision(11);
+        for(auto& [node,pr]: initialPdfs)
+            std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
+    }
+
+    if (debugMCMC >= 1)
+    {
+        // 1. Compute PDFs before move, before touch
+        auto& untouched_before_move = initialPdfs;
+
+        // 2. Touch nodes.
+        for (auto node: nodes)
+            node->touch();
+
+        // 3. Compute PDFs before move, after touch
+        auto touched_before_move = getNodePrs(nodes, affected_nodes);
+
+        // 4. Keep nodes
+        for (auto node: nodes)
+            node->keep();
+
+        // 5. Compare pdfs for each node
+        compareNodePrs("RateAgeBetaShift", untouched_before_move, touched_before_move, "PDFs not up-to-date before move");
+    }
+
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
-    RbOrderedSet<DagNode*> affected;
-    tree->initiateGetAffectedNodes( affected );
-    
+
     // pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
     size_t node_idx = 0;
@@ -136,14 +173,14 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         size_t child_idx = node->getChild(i).getIndex();
         stored_rates[child_idx] = (rates == NULL ? rates_vec[child_idx]->getValue() : rates->getValue()[child_idx]);
     }
-    
-    
+
+
     // draw new ages and compute the hastings ratio at the same time
     double m = (my_age-child_Age) / (parent_age-child_Age);
     double a = delta * m + 1.0;
     double b = delta * (1.0-m) + 1.0;
     double new_m = RbStatistics::Beta::rv(a, b, *rng);
-        
+
     double my_new_age = (parent_age-child_Age) * new_m + child_Age;
     
     // compute the Hastings ratio
