@@ -99,7 +99,7 @@ namespace RevBayesCore
 
             // Supply a PseudoData object with no observations, leading to Pr(unspecified data|parameter) = 1.
             // This will be overridden only if the variable simulated from this distribution is clamped.
-            this->value = new PseudoDataNothing<T>();
+            this->value = new PseudoData<T>();
         }
 
     };

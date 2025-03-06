@@ -30,49 +30,31 @@ namespace RevBayesCore
 {
 
     template <typename T>
-    struct PseudoData: public Cloneable
+    class PseudoData: public Cloneable
     {
-        virtual double operator()(const T&) const = 0;
-        virtual ~PseudoData() {};
+    public:
+        typedef std::function<double (const T&)> func_t;
 
-        PseudoData* clone() const = 0;
+    private:
+        func_t log_likelihood;
+
+    public:
+        PseudoData(const PseudoData<T>&) = default;
+        PseudoData(func_t f):log_likelihood(f) {}
+        PseudoData(): PseudoData( [](const T&) { return 0.0; }) {}
+
+        virtual ~PseudoData() override {};
+
+        PseudoData<T>* clone() const override { return new PseudoData<T>(*this);}
+
+        // Call this on the parameter to get the log-likelihood of the unspecified data.
+        double operator()(const T& x) const { return log_likelihood(x); }
 
         // ModelVector< > somehow requires this.
         bool operator==(const PseudoData&) const { return false; }
         bool operator!=(const PseudoData&) const { return true; }
         bool operator<(const PseudoData&) const { return false; }
         bool operator<=(const PseudoData&) const { return false; }
-    };
-
-
-    // We observed nothing.
-    template <typename T>
-    struct PseudoDataNothing: public PseudoData<T>
-    {
-        PseudoDataNothing* clone() const {return new PseudoDataNothing(*this);}
-        double operator()(const T&) const {return 0;}
-    };
-
-    // Whatever we observed, the data has decreasing probability outside [a,b]
-    struct PseudoDataInterval: public PseudoData<double>
-    {
-        double a;
-        double b;
-        double lambda;
-        double operator()(const double& x) const
-        {
-            if (x > a and x < b)
-                return 0;
-            else
-            {
-                double d = std::min(std::abs(x-a), std::abs(x-b));
-                return -lambda * d;
-            }
-        }
-
-        PseudoDataInterval* clone() const {return new PseudoDataInterval(*this);}
-
-        PseudoDataInterval(double A, double B, double L):a(A), b(B), lambda(L) {assert(lambda >= 0);}
     };
 
     // We need this for TypedDagNode<SiteMixtureModel> for some reason...

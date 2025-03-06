@@ -21,9 +21,19 @@ using std::unique_ptr;
 
 namespace Core = RevBayesCore;
 
-Core::PseudoData<double>* PseudoDataIntervalFunc(double lower, double upper, double decayRate)
+Core::PseudoData<double>* PseudoDataIntervalFunc(double a, double b, double lambda)
 {
-    return new Core::PseudoDataInterval(lower, upper, decayRate);
+    Core::PseudoData<double>::func_t interval_func = [a,b,lambda](const double& x)
+        {
+            if (x > a and x < b)
+                return 0.0;
+            else
+            {
+                double d = std::min(std::abs(x-a), std::abs(x-b));
+                return -lambda * d;
+            }
+        };
+    return new Core::PseudoData<double>(interval_func);
 }
 
 using namespace RevLanguage;

@@ -63,25 +63,23 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
     cd $dirname
     tests+=($testname)
 
-    printf "\n\n#### Running test: $testname\n\n"
+    printf "\n#### Running test: $testname\n\n"
 
     for script in $(cat tests.txt);
     do
+        printf "  $script\n"
         (
-        cd scripts
-        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
+            cd scripts
+            sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
         )
         ${rb_exec} -b scripts/cp_$script
         res="$?"
         if [ $res = 1 ]; then
             res="error: $f"
-            break
         elif [ $res = 139 ]; then
             res="segfault: $f"
-            break
         elif [ $res != 0 ]; then
             res="error $res: $f"
-            break
         fi
         if [ $res != 0 ] ; then
             echo "${dirname}/test.sh ==> error $res"
@@ -113,6 +111,7 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
+        printf "  $f\n"
         mkdir -p output
         tmp0=${f#scripts/}
         tmp1=${tmp0%.[Rr]ev}
