@@ -274,12 +274,24 @@ void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, dou
     RbException E;
     E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": "<<msg<<"!\n";
     bool err = false;
+    bool weird = false;
     for(auto& [node,pr1]: pdfs1)
     {
 	auto pr2 = pdfs2.at(node);
 
-	// If they are both NaNs then they that is not a problem.
-	if (std::isnan(pr1) and std::isnan(pr2)) continue;
+	// If they are equal then there is no difference.
+	if (pr1 == pr2 or (std::isnan(pr1) and std::isnan(pr2)))
+        {
+            // But if both are NaN or -Inf then its kind of weird!
+            // This could indicate that a previous move created a -Inf situation.
+            // In the future it could indicate that we haven't yet moved from Pr=0 to Pr>0.
+            if (not std::isfinite(pr1))
+            {
+                std::cerr<<"    WEIRD: "<<node->getName()<<": "<<pr1<<"\n";
+                weird = true;
+            }
+            continue;
+        }
 
 	// Be a bit careful about computing a relative error.
 	double abs_err = std::abs(pr1 - pr2);
@@ -295,6 +307,8 @@ void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, dou
 	    err = true;
 	}
     }
+
+    if (weird) std::cerr<<std::endl;
 
     if (err) throw E;
 }
