@@ -11,8 +11,8 @@
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 10000
-NUM_MCMC_ITERATIONS       = 20000
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
 
 # create the monitor and moves vectors
 moves     = VectorMoves()
