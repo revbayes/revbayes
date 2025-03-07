@@ -427,7 +427,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         return -1;
     }
-   
+    
     // we need to store and check all arg types
     std::vector<double> penalties;
     for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
@@ -444,7 +444,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         {
             penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
         }
-            
+        
         if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
             penalties.push_back( penalty );
@@ -495,6 +495,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             }
         }
     }
+    
     
     return best_penalty;
 }

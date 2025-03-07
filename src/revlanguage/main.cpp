@@ -191,7 +191,8 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-    
+
+
     if ( args.count("args") && args.count("cmd"))
     {
         throw RbException("command line: received both --args and --cmd");

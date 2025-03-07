@@ -1143,7 +1143,7 @@ void Mcmcmc::setHeatsInitial(const std::vector<double>& ht)
     }
 
     // 3. Check that the heats are sorted with the largest heat first (== smallest temperature first).
-    for(size_t i=0;i<ht.size()-1;i++)
+    for(size_t i=0; i+1 < ht.size(); i++)
         if (ht[i] < ht[i+1])
             throw RbException()<<"Heat "<<i+1<<" ("<<ht[i]<<") should be greater than heat "<<i+2<<" ("<<ht[i+1]<<")";
 
@@ -1864,22 +1864,62 @@ void Mcmcmc::tune( void )
             }
 //            std::cout << "chain_heats[" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
         }
-        
-        // if the heat of a given hot chain is smaller than the minimum bound
-        // interpolate this heat and the heats of all the hotter chains
-        // to fall between the lowest heat that is greater than the minimum bound and the minimum bound
-        if (j < num_chains)
+
+
+        /* NOTE: Some of the hot chains may be assigned a heat that is below heatMinBound!
+         *       Let's handle this via linear interpolation of the chain heats on the log scale.
+         *
+         * We define heat(k) as a notational shortcut for chain_heats[ chainForHeatIndex(k) ].
+         * We define m to the largest index where heat(m) < heatMinBound.
+         *
+         * We then want to interpolate the log heat between the two points:
+         *  ( k=m,          log(heat(m)) )
+         *  ( k=num_chains, log(heatMinBound) )
+         * This way the heat will not get all the way down to heatMinBound, since the highest chain
+         * index is actually (num_chains-1).
+         *
+         * The formula for linearly interpolating between (k1,y1) and (k2,y2) is
+         *
+         *     y(x) = y1 + (y2 - y1)*[ (k-k1)/(k2-k1) ].
+         *
+         * Thus we want:
+         *
+         *   log(heat(k)) = log(heat(m)) + (log(heatMinBound) - log(heat(m))) * [(k - m) / (num_chains - m)]
+         *   log(heat(k)) = log(heat(m)) + (log(heatMinBound/heat(m))) * [(k - m) / (num_chains - m)]
+         *
+         * And so (by exponentiating) we get:
+         *
+         *   heat(k) = heat(m) * pow(heatMinBound/heat(m), (k - m)/(num_chains - m) )
+         *
+         */
+
+        // Make a lambda function to access the kth chain heat as heat(k).
+        auto heat = [&](size_t k) -> auto& { return chain_heats[ chainForHeatIndex(k) ]; };
+        assert(heat(0) == 1.0);
+
+        // Find the largest heat index m such that heat(m) > heatMinBound.
+        size_t m = 0;
+        for (size_t k = 1; k < num_chains; ++k)
         {
-            double rho = pow(chain_heats[colderChainIdx] / heatMinBound, 1.0 / (num_chains - j));
-            size_t k = j;
-            
-            for (; k < num_chains; ++k)
-            {
-                chain_heats[hotterChainIdx] = chain_heats[colderChainIdx] / pow(rho, k + 1 - j);
-//                std::cout << "chain_heats[k" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
-            }
+            // Check that heat(k) is non-increasing in k.
+            assert( heat(k-1) >= heat(k) );
+
+            // Record the last good heat index.
+            if ( heat(k) > heatMinBound)
+                m = k;
         }
-        
+
+        // Define the ratio phi so we can check it before (possible) use.
+        double phi = heatMinBound/heat(m);
+        assert(0 < phi and phi < 1);
+
+        // If there are any chain heats that are below heatMinBound, then redefine them by linear interpolation on the log scale.
+        for (size_t k = m + 1; k < num_chains; ++k)
+        {
+            // std::cout << "Attempting to set the heat of chain " << k << " to " << heat(m) * pow(phi, double(k - m)/(num_chains-m)) << std::endl;
+            heat(k) = heat(m) * pow(phi, double(k - m)/(num_chains-m));
+        }
+
         resetCounters();
     }
 

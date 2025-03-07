@@ -50,7 +50,7 @@ Tree::Tree(const Tree& t) :
         // do not reorder node indices when copying (WP)
         setRoot(newRoot, false);
     }
-
+    
 }
 
 
@@ -64,7 +64,7 @@ Tree::Tree(Tree&& t)
 /* Destructor */
 Tree::~Tree(void)
 {
-
+    
     nodes.clear();
     std::set<TreeChangeEventListener*> l = changeEventHandler.getListeners();
     for ( std::set<TreeChangeEventListener*>::iterator it = l.begin(); it != l.end(); ++it )

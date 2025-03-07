@@ -1236,6 +1236,7 @@ void Mcmc::setChainActive(bool tf)
  */
 void Mcmc::setChainLikelihoodHeat(double h)
 {
+    assert(0 <= h);
     chain_likelihood_heat = h;
 }
 
@@ -1254,6 +1255,7 @@ void Mcmc::setCheckpointFile(const path &f)
  */
 void Mcmc::setLikelihoodHeat(double h)
 {
+    assert(0 <= h);
     chain_likelihood_heat = h;
 }
 
@@ -1265,12 +1267,14 @@ void Mcmc::setLikelihoodHeat(double h)
  */
 void Mcmc::setChainPosteriorHeat(double h)
 {
+    assert(0 <= h);
     chain_posterior_heat = h;
 }
 
 
 void Mcmc::setChainPriorHeat(double h)
 {
+    assert(0 <= h);
     chain_prior_heat = h;
 }
 
