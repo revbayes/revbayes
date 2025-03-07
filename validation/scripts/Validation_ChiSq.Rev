@@ -30,7 +30,6 @@ NUM_OBS = 10
 for ( j in 1:NUM_VARS ) {
 
   mean[j] ~ dnChisq(df)
-#  mean[j] ~ dnExp(1.0/df)
   moves.append( mvScale(mean[j],weight=2) )
 
   for ( i in 1:NUM_OBS){
