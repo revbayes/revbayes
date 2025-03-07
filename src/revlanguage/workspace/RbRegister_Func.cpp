@@ -642,7 +642,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // return a distcretized (by quantile) and normalized vector from a continuous distribution
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
         addFunction( new Func_fnNormalizedQuantile<RealPos>()    );
-        
         addFunction( new Func_discretizeDistribution( )            );
         addFunction( new Func_discretizePositiveDistribution( )    );
         addFunction( new Func_discretizeProbabilityDistribution( ) );

@@ -132,16 +132,26 @@ double GelmanRubinStoppingRule::getStatistic( size_t g )
 }
 
 
-std::string GelmanRubinStoppingRule::printAsStatement( size_t g )
+std::string GelmanRubinStoppingRule::printAsStatement( size_t g, bool target_only )
 {
     // Nicely format the target value
     std::stringstream tss;
     tss << std::setprecision(5) << std::noshowpoint << R;
     std::string target = tss.str();
     
-    double val = getStatistic(g);
-    std::string preamble = "Maximum value of the Gelman-Rubin statistic (PSRF): ";
-    std::string statement = preamble + std::to_string(val) + " (target: < " + target + ")\n";
+    std::string statement;
+    
+    if (target_only)
+    {
+        statement = "Target value for the Gelman-Rubin statistic (PSRF): < " + target + "\n";
+    }
+    else
+    {
+        double val = getStatistic(g);
+        std::string preamble = "Maximum value of the Gelman-Rubin statistic (PSRF): ";
+        statement = preamble + std::to_string(val) + " (target: < " + target + ")\n";
+    }
+    
     return statement;
 }
 

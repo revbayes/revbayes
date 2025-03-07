@@ -87,19 +87,8 @@ double MaxTimeStoppingRule::getStatistic( size_t g )
 }
 
 
-std::string MaxTimeStoppingRule::printAsStatement( size_t g )
+std::string MaxTimeStoppingRule::printAsStatement( size_t g, bool target_only )
 {
-    double timeUsed = getStatistic(g);
-    
-    std::stringstream ess;
-    size_t elapsed_hours   = timeUsed / 3600;
-    size_t elapsed_minutes = timeUsed / 60 - elapsed_hours * 60;
-    size_t elapsed_seconds = timeUsed - elapsed_minutes * 60 - elapsed_hours * 3600;
-    
-    ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_hours << ":";
-    ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_minutes << ":";
-    ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_seconds;
-    
     std::stringstream mss;
     size_t max_hours   = maxTime / 3600;
     size_t max_minutes = maxTime / 60 - max_hours * 60;
@@ -109,10 +98,29 @@ std::string MaxTimeStoppingRule::printAsStatement( size_t g )
     mss << std::setw( 2 ) << std::setfill( '0' ) << max_minutes << ":";
     mss << std::setw( 2 ) << std::setfill( '0' ) << max_seconds;
     
-    std::string elapsed = ess.str();
     std::string allowed = mss.str();
+    std::string statement;
     
-    std::string statement = "Elapsed time: " + elapsed + " (target: " + allowed + ")\n";
+    if (target_only)
+    {
+        statement = "Maximum allowed time: " + allowed + "\n";
+    }
+    else
+    {
+        double timeUsed = getStatistic(g);
+        
+        std::stringstream ess;
+        size_t elapsed_hours   = timeUsed / 3600;
+        size_t elapsed_minutes = timeUsed / 60 - elapsed_hours * 60;
+        size_t elapsed_seconds = timeUsed - elapsed_minutes * 60 - elapsed_hours * 3600;
+        
+        ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_hours << ":";
+        ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_minutes << ":";
+        ess << std::setw( 2 ) << std::setfill( '0' ) << elapsed_seconds;
+        
+        statement = "Elapsed time: " + ess.str() + " (target: " + allowed + ")\n";
+    }
+    
     return statement;
 }
 
