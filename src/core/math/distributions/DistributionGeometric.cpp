@@ -188,14 +188,5 @@ long RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &
         throw RbException("NaN produced in rgeom");
     
     return RbStatistics::Poisson::rv(exp(rng.uniform01()) * ((1 - p) / p),rng)+1;
-
-//    double u = 0.5;
-//    int tries = 0;
-//    do {
-//        ++tries;
-//        u = rng.uniform01();
-//    } while (u > p);
-//
-//    return tries;
 }
 
