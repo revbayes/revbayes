@@ -45,15 +45,8 @@ for (i in 1:NUM_INTERVALS) {
 
 }
 
-#for (i in 1:(NUM_INTERVALS-1)) {
-#
-#    changePoints[i] <- i * 10
-#
-#}
-
 
 ### the time tree is a stochastic node modeled by the heterochronous skyline coalescent process (dnHeterochronousCoalescentSkyline)
-#psi ~ dnCoalescentSkyline(theta=pop_size, times=changePoints, method="specified", model="linear", taxa=taxa)
 psi ~ dnCoalescentSkyline(theta=pop_size, method="events", model="linear", taxa=taxa)
 psi.clamp( psi )
 
