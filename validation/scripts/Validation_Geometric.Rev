@@ -30,7 +30,6 @@ NUM_OBS = 10
 
 
 gm_p ~ dnBeta(4,4)
-#gm_p <- 0.5
 p ~ dnBeta(4,2)
 moves.append( mvBetaProbability(gm_p, weight=5) )
 moves.append( mvBetaProbability(p, weight=5) )
