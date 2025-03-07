@@ -96,7 +96,20 @@ size_t RateAgeBetaShift::getNumberAcceptedTotal( void ) const
 }
 
 
-/** Perform the move */
+/* Perform the move
+ *
+ * The move:
+ * - chooses a node that is not a tip or the root.
+ * - modifies the time for the node
+ * - modifies the rate for the three adjacent branches so that rate*time remains unchanged
+ *   on each branch.
+ *
+ * The rates are either:
+ * (a) A vector of stochastic nodes (rates == NULL):
+ *     In this case pointers to the stochastic nodes are in held in `rates_vec`.
+ * (b) A single stochastic node of type RbVector<double> (rates !=NULL)
+ *     In this case a pointer to the single stochastic node is held in `rates`.
+ */
 void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
     // These are the nodes we are (directly) modifying.
@@ -142,7 +155,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
+
     Tree& tau = tree->getValue();
 
     // 1. pick a random node which is not the root and neithor the direct descendant of the root
@@ -247,123 +260,33 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
     double ln_hastings_ratio = backward - forward + jacobian;
 
-    // 7. we also need to get the prob ratio of all descendants of the tree
-    double tree_like_ratio = 0.0;
-    RbOrderedSet<DagNode*> tree_desc;
-    tree->getAffectedNodes(tree_desc);
-    for (size_t i=0; i<tree_desc.size(); ++i)
+    // 7. we also need to get the prob ratios of all descendants of the tree
+    double ln_likelihood_ratio = 0;
+    double ln_prior_ratio = 0;
+    std::vector<std::pair<std::string, double>> Prs2;
+    for(auto node: views::concat(nodes, affected_nodes))
     {
-        DagNode* the_node = tree_desc[i];
-        StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
-        if ( test_stoch != NULL )
+        if (auto test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(node))
         {
-            TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
-            if ( test_dist == NULL )
+            if (dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution()))
             {
-                if ( the_node->isClamped() == true )
-                {
-                    tree_like_ratio += the_node->getLnProbabilityRatio();
-                }
-                else
-                {
-                    tree_prob_ratio += the_node->getLnProbabilityRatio();
-                }
+                // In theory the rate*time tree and its branch lengths should be unchanged.
+                // Therefore the substitution likelihood for a data set downstream from the tree should be unchanged.
+                assert( std::abs(node->getLnProbabilityRatio()) < 1.0e-9 );
+                continue;
             }
+        }
+
+        Prs2.push_back({node->getName(), node->getLnProbabilityRatio()});
+        if ( node->isClamped() == true )
+        {
+            ln_likelihood_ratio += node->getLnProbabilityRatio();
         }
         else
         {
-            if ( the_node->isClamped() == true )
-            {
-                tree_like_ratio += the_node->getLnProbabilityRatio();
-            }
-            else
-            {
-                tree_prob_ratio += the_node->getLnProbabilityRatio();
-            }
+            ln_prior_ratio += node->getLnProbabilityRatio();
         }
     }
-
-    // 8. we also need to get the prob ratio of all descendants of the rates
-    double rates_like_ratio = 0.0;
-    if ( rates == NULL )
-    {
-        for (size_t j = 0; j < node->getNumberOfChildren(); ++j)
-        {
-            size_t child_idx = node->getChild(j).getIndex();
-            const std::vector<DagNode*>& rates_desc = rates_vec[child_idx]->getChildren();
-            for (size_t i=0; i<rates_desc.size(); ++i)
-            {
-                DagNode* the_node = rates_desc[i];
-                StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
-                if ( test_stoch != NULL )
-                {
-                    TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
-                    if ( test_dist == NULL )
-                    {
-                        if ( the_node->isClamped() == true )
-                        {
-                            rates_like_ratio += the_node->getLnProbabilityRatio();
-                        }
-                        else
-                        {
-                            rates_prob_ratio += the_node->getLnProbabilityRatio();
-                        }
-                        
-                    }
-                }
-                else
-                {
-                    if ( the_node->isClamped() == true )
-                    {
-                        rates_like_ratio += the_node->getLnProbabilityRatio();
-                    }
-                    else
-                    {
-                        rates_prob_ratio += the_node->getLnProbabilityRatio();
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        const std::vector<DagNode*>& rates_desc = rates->getChildren();
-        for (size_t i=0; i<rates_desc.size(); ++i)
-        {
-            DagNode* the_node = rates_desc[i];
-            StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
-            if ( test_stoch != NULL )
-            {
-                TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
-                if ( test_dist == NULL )
-                {
-                    if ( the_node->isClamped() == true )
-                    {
-                        rates_like_ratio += the_node->getLnProbabilityRatio();
-                    }
-                    else
-                    {
-                        rates_prob_ratio += the_node->getLnProbabilityRatio();
-                    }
-                }
-            }
-            else
-            {
-                if ( the_node->isClamped() == true )
-                {
-                    rates_like_ratio += the_node->getLnProbabilityRatio();
-                }
-                else
-                {
-                    rates_prob_ratio += the_node->getLnProbabilityRatio();
-                }
-            }
-        }
-    }
-
-    double ln_prior_ratio = tree_prob_ratio + rates_prob_ratio;
-
-    double ln_likelihood_ratio = tree_like_ratio + rates_like_ratio;
 
     double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
