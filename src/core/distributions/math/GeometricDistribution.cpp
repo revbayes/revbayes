@@ -48,7 +48,7 @@ double GeometricDistribution::computeLnProbability( void )
     long v = *value;
     
     // check that the value is inside the boundaries
-    if ( v < 0.0 )
+    if ( v < 0 )
     {
         return RbConstants::Double::neginf;
     }
