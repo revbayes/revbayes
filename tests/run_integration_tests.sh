@@ -52,27 +52,40 @@ fi
 tests=()
 status=()
 
-for t in revbayes.github.io/tutorials/*/test.sh; do
-    testname=`echo $t | cut -d '/' -f 2-3`
-    dirname=`echo $t | cut -d '/' -f 1-3`
-    
-    cd $dirname
+for t in revbayes.github.io/tutorials/*/tests.txt; do
+    testname=`echo $t | cut -d '/' -f 2-3`;
+    dirname=`echo $t | cut -d '/' -f 1-3`; 
+	
 
+    cd $dirname
     tests+=($testname)
 
     printf "\n\n#### Running test: $testname\n\n"
-    sh test.sh
-    res="$?"
-    if [ $res = 1 ]; then
-        res="error: $f"
-        break
-    elif [ $res = 139 ]; then
-        res="segfault: $f"
-        break
-    elif [ $res != 0 ]; then
-        res="error $res: $f"
-        break
-    fi
+    
+    for script in $(cat tests.txt); 
+    do
+        (
+        cd scripts
+        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
+        )
+        ${rb_exec} -b scripts/cp_$script
+        res="$?"
+        if [ $res = 1 ]; then
+            res="error: $f"
+            break
+        elif [ $res = 139 ]; then
+            res="segfault: $f"
+            break
+        elif [ $res != 0 ]; then
+            res="error $res: $f"
+            break
+        fi
+        if [ $res != 0 ] ; then
+            echo "${dirname}/test.sh ==> error $res"
+        fi
+        rm scripts/cp_$script
+        rm -rf output
+    done
 
     status+=("$res")
 
@@ -97,17 +110,19 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
-        ${rb_exec} -b $f # print output so we can see any error messages
+        mkdir -p output
+        tmp0=${f#scripts/}
+        tmp1=${tmp0%.[Rr]ev}
+        ${rb_exec} -b $f &> output/${tmp1}.errout # print output so we can see any error messages
         res="$?"
-        if [ $res = 1 ]; then
-            res="error: $f"
-            break
-        elif [ $res = 139 ]; then
+        if [ $res = 139 ]; then
             res="segfault: $f"
             break
-        elif [ $res != 0 ]; then
-            res="error $res: $f"
-            break
+        elif [ $res != 139 ] && [ $res != 0 ]; then
+            res=0 # pretend everything is okay for now; we will instead catch errors as mismatches
+        fi
+        if [ $res != 0 ] ; then
+            echo ${t}/${rb_exec} -b $f "==> error $res"
         fi
     done
 
@@ -144,6 +159,29 @@ while [  $i -lt ${#tests[@]} ]; do
             find output -type f -exec sed -i 's/e-00/e-0/g' {} \;
             find output -type f -exec sed -i 's/e+00/e+0/g' {} \;
         fi
+        
+        # some special handling for the *.errout files
+        for f in scripts/*.[Rr]ev ; do
+            tmp0=${f#scripts/}
+            tmp1=${tmp0%.[Rr]ev}
+            
+            # Delete all before the 1st occurrence of the string '   Processing file' (inclusive)
+            # Use a temporary intermediate file to make this work w/ both GNU and BSD sed
+            sed '1,/   Processing file/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
+            mv output/${tmp1}.errout.tmp output/${tmp1}.errout
+            
+            # Also delete the final line of failing tests, which reprints the path to the script
+            # that differs between Windows and Unix (has no effect if the line is absent)
+            sed '/   Error:\tProblem processing/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
+            mv output/${tmp1}.errout.tmp output/${tmp1}.errout
+            
+            # Account for OS-specific differences in path separators
+            if [ "$windows" = "true" ]; then
+                sed 's/\\/\//g' output/${tmp1}.errout > output/${tmp1}.errout.tmp
+                mv output/${tmp1}.errout.tmp output/${tmp1}.errout
+            fi
+        done
+        
         for f in $(ls ${exp_out_dir}); do
             if [ ! -e output/$f ]; then
                 errs+=("missing:  $f")

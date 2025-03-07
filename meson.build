@@ -1,5 +1,5 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.2.3',
+        version: '1.2.6-preview',
         default_options: [
           'buildtype=release',
           'cpp_std=c++17',
@@ -60,12 +60,6 @@ if get_option('static_boost')
   boost = dependency('boost', modules : boost_modules, version: '>=1.71', static: true)
 else
   boost = dependency('boost', modules : boost_modules, version: '>=1.71')
-endif
-
-if get_option('openlibm')
-  openlibm = dependency('openlibm')
-else
-  openlibm = dependency('', required: false)
 endif
 
 rb_name = 'rb'
@@ -142,7 +136,7 @@ rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi, openlibm],
+                dependencies: [boost, mpi],
                 install_rpath: extra_rpath,
                 install: true)
 
@@ -159,7 +153,7 @@ if get_option('studio')
                          ['src/cmd/main.cpp'],
                          link_with: [core, revlanguage, libs, cmd],
                          include_directories: [src_inc],
-                         dependencies: [boost, mpi, gtk2, openlibm],
+                         dependencies: [boost, mpi, gtk2],
                          install_rpath: extra_rpath,
                          install: true)
 
@@ -169,7 +163,7 @@ subdir('tests')
 
 if get_option('help2yml')
 
-  executable(rb_name+'help2yml',
+  executable(rb_name+'-help2yml',
              ['src/help2yml/main.cpp'],
              link_with: [core, revlanguage, libs, help2yml],
              include_directories: [src_inc],
@@ -203,6 +197,5 @@ endif
 
 summary({'optimization': get_option('optimization'),
          'debug': get_option('debug'),
-         'assertions': assertions_enabled,
-         'openlibm': get_option('openlibm')
+         'assertions': assertions_enabled
         },section: 'Configuration')

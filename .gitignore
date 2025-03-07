@@ -3,6 +3,7 @@ src/generated_include_dirs.cmake
 src/*/CMakeLists.txt
 
 # ----------------------------------------------
+/build
 projects/cmake/*
 !projects/cmake/README.txt
 !projects/cmake/*.sh
@@ -38,10 +39,19 @@ doxygen/DoxygenWarningLog.txt
 .project
 .settings/
 .vscode
+*.tlog
+*.filters
+*.vcxproj
+*.stamp
+*.depend
+*.obj
+*.sln
+*.recipe
 revbayes.code-workspace
 
 #--------- Backups -----------
 *.orig
+*.bak
 *GitVersion_backup.cpp
 *~
 *#

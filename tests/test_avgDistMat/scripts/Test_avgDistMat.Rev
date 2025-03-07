@@ -27,7 +27,10 @@ tree2 ~ dnBDP(lambda=speciation, mu=extinction, rootAge=tree_height, condition="
 distMatrices[1] := fnTreePairwiseDistances(tree1)
 distMatrices[2] := fnTreePairwiseDistances(tree2)
 
-ADM := fnAverageDistanceMatrix(distMatrices)
+# Important: make this a constant rather than deterministic node if you want to
+# run .ultrametricImputation()
+
+ADM <- fnAverageDistanceMatrix(distMatrices)
 
 print(filename = "output/Test_avgDistMat.txt", append = FALSE,
       "Print the average distance matrix:\n")
@@ -48,12 +51,28 @@ print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Print the Boolean
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, msk)
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, "\n\n")
 
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Calculate matrix completeness as the proportion of non-missing ('T' or diagonal) entries:\n")
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, ADM.completeness())
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "\n\n")
+
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Extract the 1st column of the underlying distance matrix:\n")
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, dm[1])
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, "\n\n")
 
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Extract the 1st column of the Boolean mask:\n")
 print(filename = "output/Test_avgDistMat.txt", append = TRUE, msk[1])
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "\n\n")
+
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Impute missing entries using the 3-point condition satisfied by ultrametric distances.")
+
+ADM.ultrametricImputation()
+
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Print the new matrix:\n")
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, ADM)
+
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, "Recalculate matrix completeness:\n")
+print(filename = "output/Test_avgDistMat.txt", append = TRUE, ADM.completeness())
 clear()
 
 q()

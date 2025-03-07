@@ -15,16 +15,16 @@ namespace RevLanguage {
     public:
 
         // Basic utility functions
-        Dist_FBDP*                                              clone(void) const;                                                                      //!< Clone the object
+        Dist_FBDP*                                              clone(void) const override;                                                             //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
-        std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
-        std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
-        const TypeSpec&                                         getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
-        const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)
+        std::vector<std::string>                                getDistributionFunctionAliases(void) const override;                                    //!< Get the alternative names used for the constructor function in Rev.
+        std::string                                             getDistributionFunctionName(void) const override;                                       //!< Get the Rev-name for this distribution.
+        const TypeSpec&                                         getTypeSpec(void) const override;                                                       //!< Get the type spec of the instance
+        const MemberRules&                                      getParameterRules(void) const override;                                                 //!< Get member rules (const)
 
     protected:
 
-        virtual void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
+        virtual void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) override; //!< Set member variable
         virtual RevBayesCore::DagNode*                          getRemovalProbability( void ) const override;
     };
 

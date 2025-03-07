@@ -114,15 +114,15 @@ RevPtr<RevVariable> Trace::executeMethod(std::string const &name, const std::vec
         ss << "Trace (";
         ss << getValue().getParameterName();
         ss << ")" << std::endl;
-        ss << "Filename:                  " << value->getFileName() << std::endl;
-        ss << "Parameter:                 " << value->getParameterName() << std::endl;
-        ss << "Samples:                   " << value->size() << std::endl;
-        ss << "ESS:                       " << value->getESS() << std::endl;
-        ss << "Burnin:                    " << value->getBurnin() << std::endl;
-        ss << "Mean:                      " << value->getMean() << std::endl;
-        ss << "SEM:                       " << value->getSEM() << std::endl;
-        ss << "Geweke test:               " << (value->hasPassedGewekeTest() ? "TRUE" : "FALSE") << std::endl;
-        ss << "Stationarity test:         " << (value->hasPassedStationarityTest() ? "TRUE" : "FALSE") << std::endl;
+        ss << "Filename:                             " << value->getFileName() << std::endl;
+        ss << "Parameter:                            " << value->getParameterName() << std::endl;
+        ss << "Samples:                              " << value->size() << std::endl;
+        ss << "ESS:                                  " << value->getESS() << std::endl;
+        ss << "Burnin:                               " << value->getBurnin() << std::endl;
+        ss << "Mean:                                 " << value->getMean() << std::endl;
+        ss << "SEM:                                  " << value->getSEM() << std::endl;
+        ss << "Geweke test (p = 0.01):               " << (value->hasPassedGewekeTest() ? "TRUE" : "FALSE") << std::endl;
+        ss << "Stationarity test (p = 0.01, n = 10): " << (value->hasPassedStationarityTest() ? "TRUE" : "FALSE") << std::endl;
 
         RBOUT(ss.str());
 

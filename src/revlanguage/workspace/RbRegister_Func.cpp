@@ -97,6 +97,7 @@
 #include "Func_formatDiscreteCharacterData.h"
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
+#include "Func_MinBLTimeScaling.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
 #include "Func_phyloDiversity.h"
@@ -253,10 +254,12 @@
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
 #include "Func_geometricMean.h"
+#include "Func_cos.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
 #include "Func_log.h"
+#include "Func_logit.h"
 #include "Func_logistic.h"
 #include "Func_matrix.h"
 #include "Func_max.h"
@@ -447,6 +450,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_extantTree()                                      );
         addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
+        addFunction( new Func_MinBLTimeScaling()                                );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
         addFunction( new Func_phyloDiversity()                                  );
@@ -527,6 +531,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // log function
         addFunction( new Func_log()  );
 
+        // logit function
+        addFunction( new Func_logit()  );
+
         // matrix function (converts into MatrixReal)
         addFunction( new Func_matrix() );
 
@@ -578,7 +585,10 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_geographicalDistance() );
         addFunction( new Func_shortestDistance() );
 
-                // hyperbolic tangent function
+        // trigonometric functions
+        addFunction( new Func_cos()  );
+
+        // hyperbolic tangent function
         addFunction( new Func_hyperbolicTangent() );
 
         // hyperbolic sine function
@@ -595,7 +605,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_variance()  );
 
         // vector flatten
-        addFunction( new Func_vectorFlatten() );
+        addFunction( new Func_vectorFlatten<Real>() );
+        addFunction( new Func_vectorFlatten<RealPos>() );
+        addFunction( new Func_vectorFlatten<Probability>() );
+        addFunction( new Func_vectorFlatten<Integer>() );
+        addFunction( new Func_vectorFlatten<Natural>() );
 
         // get ln Probability function
         addFunction( new Func_lnProbability() );
@@ -604,7 +618,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_posteriorPredictiveProbability()  );
 
 
- 		/* Statistics functions (in folder "functions/statistics") */
+        /* Statistics functions (in folder "functions/statistics") */
 
         // helpers for Markov Random Field models
         addFunction( new Func_assembleContinuousMRF( )     );
