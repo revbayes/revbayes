@@ -172,7 +172,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // 2. we need to work with the times
     double parent_age  = parent.getAge();
     double my_age      = node->getAge();
-    double child_Age   = std::max(node->getChild( 0 ).getAge(), child_Age < node->getChild( 1 ).getAge());
+    double child_Age   = std::max(node->getChild( 0 ).getAge(), node->getChild( 1 ).getAge());
 
     // now we store all necessary values
     stored_node = node;
