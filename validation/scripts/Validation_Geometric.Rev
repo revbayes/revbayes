@@ -11,7 +11,7 @@
 
 ## Global settings
 
-NUM_VALIDATION_REPLICATES = 10000
+NUM_VALIDATION_REPLICATES = 1000
 NUM_MCMC_ITERATIONS       = 10000
 
 
@@ -38,7 +38,6 @@ moves.append( mvBetaProbability(p, weight=5) )
 for ( j in 1:NUM_VARS ) {
 
   tries[j] ~ dnGeometric(gm_p)
-#  tries[j] ~ dnUniformNatural(10,20)
   moves.append( mvRandomNaturalWalk(tries[j],weight=5) )
   moves.append( mvRandomGeometricWalk(tries[j],weight=5) )
 
