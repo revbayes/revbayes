@@ -2889,9 +2889,9 @@ mvRandomNaturalWalk)");
 	help_strings[string("mvRateAgeBetaShift")][string("description")] = string(R"(Resample a single node age and adjust neighboring rates to preserve distances)");
 	help_strings[string("mvRateAgeBetaShift")][string("details")] = string(R"(This move first selects a tree node that is not a tip or the root of the tree.
 
-The age of the tree node is resampled from the interval 
+The age of the tree node is resampled from the interval
    [max(child1.age, child2.age), parent.age]
-using a Beta distribution(a,b).
+using a Beta distribution.
 
 The rates of the parent edge and two child edges are then modified to ensure that the rate*time
 remains unchanged for the tree branches.)");
