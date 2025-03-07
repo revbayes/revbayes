@@ -288,6 +288,13 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         }
     }
 
+    if (logMCMC >= 3)
+    {
+        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+            std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        std::cerr<<"\n";
+    }
+
     double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
     double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
