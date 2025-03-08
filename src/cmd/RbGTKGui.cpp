@@ -123,7 +123,7 @@ void RbGTKGui::executeRevCommand(const std::string &next_command, bool append)
             command += ";" + current_command;
         }
         
-        command_result = RevLanguage::Parser::getParser().processCommand(command, &RevLanguage::Workspace::userWorkspace());
+        command_result = RevLanguage::Parser::getParser().processCommand(command, RevLanguage::Workspace::userWorkspacePtr());
         
         const std::string &output = rev_output->getOutputString();
         if ( output != "" )
