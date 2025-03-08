@@ -23,9 +23,19 @@ class RevObject;
      * @brief Environment: Base class for frames
      *
      * Instances of the Environment class are used to hold information about an
-     * evaluation or execution environment, such as the stack frame of a function call.
-     * Each environment has a pointer to the enclosing (parent) environment.
-     * A frame ('Environment') and its parents constitute an evaluation environment.
+     * evaluation or execution environment, such as the stack frame of a function call
+     * or a namespace.
+     *
+     * (a) Environment's that represent stack frames only define local variables and
+     *     contain a pointer to the enclosing (parent) environment to look up external variables.
+     *     Such environments contains a reference to the parent environment so that the parent
+     *     environment will not be destroyed before the stack frame environment.
+     *
+     * (b) Environment's that represent a namespace do not contain a pointer to the parent
+     *     Environment.  Instead, the parent environment holds a references to the namespace.
+     *     This ensures that the namespace environment will not be destroyed before the
+     *     enclosing environment.
+     *
      * The base environment is the global workspace. It is a
      * special type of environment, which is described in the class
      * Workspace, derived from Environment.
