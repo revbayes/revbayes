@@ -26,15 +26,15 @@ class RevObject;
      * evaluation or execution environment, such as the stack frame of a function call
      * or a namespace.
      *
-     * (a) Environment's that represent stack frames only define local variables and
+     * (a) Environment objects that represent stack frames only define local variables and
      *     contain a pointer to the enclosing (parent) environment to look up external variables.
-     *     Such environments contains a reference to the parent environment so that the parent
-     *     environment will not be destroyed before the stack frame environment.
+     *     Such Environments contain a reference to the parent Environment so that the parent
+     *     Environment will not be destroyed before the stack frame Environment.
      *
-     * (b) Environment's that represent a namespace do not contain a pointer to the parent
-     *     Environment.  Instead, the parent environment holds a references to the namespace.
-     *     This ensures that the namespace environment will not be destroyed before the
-     *     enclosing environment.
+     * (b) Environment objects that represent a namespace do not contain a pointer to the parent
+     *     Environment.  Instead, the parent Environment holds a references to the namespace.
+     *     This ensures that the namespace Environment will not be destroyed before the
+     *     enclosing Environment.
      *
      * The base environment is the global workspace. It is a
      * special type of environment, which is described in the class
