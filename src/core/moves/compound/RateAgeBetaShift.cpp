@@ -117,6 +117,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // These are the nodes that are (indirectly) affected.
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
 
+    // 0. Initial checks and debug logging.
+
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
@@ -212,7 +214,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // 5. set the rates
     double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
 
-    // Set the rate for the PARENT branch.
+    // 5a. Set the rate for the PARENT branch.
     if ( rates == NULL )
     {
         // this will automatically call a touch
@@ -224,7 +226,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         rates->touch();
     }
 
-    // Set the rate for CHILD branches..
+    // 5b. Set the rate for CHILD branches..
     for (size_t i = 0; i < node->getNumberOfChildren(); i++)
     {
         size_t child_idx = node->getChild(i).getIndex();
@@ -240,6 +242,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         else
         {
             rates->getValue()[child_idx] = child_new_rate;
+            // We already did a touch in 5a.
         }
     }
 
@@ -254,7 +257,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
     double ln_hastings_ratio = backward - forward + jacobian;
 
-    // 7. we also need to get the prob ratios of all descendants of the tree
+    // 7. compute the heated posterior ratio
     double ln_likelihood_ratio = 0;
     double ln_prior_ratio = 0;
     for(auto node: views::concat(nodes, affected_nodes))
@@ -291,6 +294,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
+    // 8. Determine whether to accept or reject
     bool rejected = false;
 
     if (ln_acceptance_ratio >= 0.0)
@@ -314,6 +318,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         }
     }
 
+    // 9. Perform the acceptance or rejection.
     if (rejected)
     {
         reject();
@@ -363,7 +368,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         }
     }
 
-    
+    // 10. Final checks and debug logging.
     std::map<const DagNode*, double> finalPdfs;
     if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
 	finalPdfs = getNodePrs(nodes, affected_nodes);
