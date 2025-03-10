@@ -257,7 +257,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // 7. we also need to get the prob ratios of all descendants of the tree
     double ln_likelihood_ratio = 0;
     double ln_prior_ratio = 0;
-    std::vector<std::pair<std::string, double>> Prs2;
     for(auto node: views::concat(nodes, affected_nodes))
     {
         if (auto test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(node))
@@ -271,7 +270,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             }
         }
 
-        Prs2.push_back({node->getName(), node->getLnProbabilityRatio()});
         if ( node->isClamped() == true )
         {
             ln_likelihood_ratio += node->getLnProbabilityRatio();
