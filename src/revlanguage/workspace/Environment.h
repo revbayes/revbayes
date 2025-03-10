@@ -40,7 +40,7 @@ class RevObject;
         
     public:
         Environment(const std::string &n);                                                                                                              //!< Constructor of Environment with NULL parent
-        Environment(Environment* parentFr, const std::string &n);                                                                                             //!< Constructor of Environment with parent
+        Environment(const std::shared_ptr<Environment>& parentFr, const std::string &n);                                                                                             //!< Constructor of Environment with parent
         Environment(const Environment& x);                                                                                              //!< Copy Constructor
         virtual ~Environment(void);                                                                                                     //!< Destrcutor
 
@@ -66,7 +66,10 @@ class RevObject;
         bool                                existsVariable(const std::string& name) const;                                              //!< Does variable exist?
         bool                                existsVariableInFrame(const std::string& name) const;                                       //!< Does variable exist in this frame?
         std::string                         generateUniqueVariableName(void);                                                           //!< Automatically generate a unique variable name
-        Environment*                        getChildEnvironment(const std::string &name);                                               //!< Get child environment with the name
+
+        std::shared_ptr<Environment>        getParentEnvironment();                                                                     //!< Get parent environment
+        std::shared_ptr<const Environment>  getParentEnvironment() const;                                                              //!< Get parent environment
+        std::shared_ptr<Environment>        getChildEnvironment(const std::string &name);                                               //!< Get child environment by name
         Function*                           getFunction(const std::string& name);                                                       //!< Get function reference
         const Function&                     getFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;   //!< Get function reference
         const Function*                     findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;  //!< Get function reference
@@ -81,7 +84,7 @@ class RevObject;
         bool                                hasChildEnvironment(const std::string &name);                                               //!< Has a child environment with the name
         bool                                isProcedure(const std::string& fxnName) const;                                              //!< Is 'fxnName' a procedure?
         virtual bool                        isSameOrParentOf(const Environment& otherEnvironment) const;                                //!< Is the Environment same or parent of other Environment?
-        void                                setParentEnvironment(Environment* newEnvironment);                                          //!< Set parent Environment
+        void                                setParentEnvironment(const std::shared_ptr<Environment>& newEnvironment);                   //!< Set parent Environment
         size_t                              size(void) const;                                                                           //!< Get size of variable table
         
 
@@ -89,12 +92,11 @@ class RevObject;
 
         FunctionTable                       function_table;                                                                              //!< Table holding functions
         int                                 numUnnamedVariables;                                                                        //!< Current number of unnamed variables
-        Environment*                        parentEnvironment;                                                                          //!< Pointer to enclosing Environment
+        std::shared_ptr<Environment>        parentEnvironment;                                                                          //!< Pointer to enclosing Environment
         VariableTable                       variableTable;                                                                              //!< Variable table
     
-        std::map<std::string, Environment*> children;
+        std::map<std::string, std::shared_ptr<Environment>> children;
         std::string                         name;
-
     };
 
 }

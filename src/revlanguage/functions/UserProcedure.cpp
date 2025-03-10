@@ -50,7 +50,7 @@ RevPtr<RevVariable> UserProcedure::execute( void )
     RevPtr<RevVariable> retVar = NULL;
     
     // Create new evaluation frame with function base class execution environment as parent
-    Environment* procedureFrame = new Environment( getEnvironment(), "UserProcedureEnvironment" );
+    auto procedureFrame = std::make_shared<Environment>( getEnvironment(), "UserProcedureEnvironment" );
     
     // Add the arguments to our environment as alias variables (modifiable and assignable)
     for (std::vector<Argument>::iterator it = args.begin(); it != args.end(); ++it)
@@ -63,7 +63,7 @@ RevPtr<RevVariable> UserProcedure::execute( void )
     for ( std::list<SyntaxElement*>::const_iterator i=code.begin(); i!=code.end(); i++ ) {
         
         SyntaxElement* theSyntaxElement = *i;
-        retVar = theSyntaxElement->evaluateContent( *procedureFrame );
+        retVar = theSyntaxElement->evaluateContent( procedureFrame );
         
         if ( Signals::getSignals().isSet( Signals::RETURN ) )
         {
@@ -71,9 +71,6 @@ RevPtr<RevVariable> UserProcedure::execute( void )
             break;
         }
     }
-    
-    // Delete evaluation frame
-    delete procedureFrame;
     
     // Return the return value
     return retVar;

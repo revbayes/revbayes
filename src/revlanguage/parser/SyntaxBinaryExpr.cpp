@@ -106,7 +106,7 @@ SyntaxElement* SyntaxBinaryExpr::clone () const
  *
  * @todo Support this evaluation context better
  */
-RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Package the arguments
