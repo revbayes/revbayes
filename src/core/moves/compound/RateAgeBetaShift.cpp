@@ -223,8 +223,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         rates->getValue()[node_idx] = my_new_rate;
         rates->touch();
     }
-    // get the probability ratio of the new rate
-    double rates_prob_ratio = ( rates == NULL ? rates_vec[node_idx]->getLnProbabilityRatio() : 0.0 );
 
     // Set the rate for CHILD branches..
     for (size_t i = 0; i < node->getNumberOfChildren(); i++)
