@@ -56,7 +56,7 @@ namespace RevBayesCore {
 
         // Parameter management functions
         double                                          computeLnProbabilityTimes(void) const override;                            //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityDivergenceTimes(void);                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void);  /* override fail. should be const. */            //!< Compute the log-transformed probability of the current value.
 
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const override;
@@ -66,9 +66,9 @@ namespace RevBayesCore {
         double                                          simulateDivergenceTime(double origin, double present) const override;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const override;                 //!< Simulate n speciation events.
 
-        void                                            keepSpecialization(const DagNode *toucher);
-        void                                            restoreSpecialization(const DagNode *toucher);
-        void                                            touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                            keepSpecialization(const DagNode *toucher) override;
+        void                                            restoreSpecialization(const DagNode *toucher) override;
+        void                                            touchSpecialization(const DagNode *toucher, bool touchAll) override;
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;                //!< Swap a parameter

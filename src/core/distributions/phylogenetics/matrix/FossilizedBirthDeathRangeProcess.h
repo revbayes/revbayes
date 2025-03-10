@@ -43,7 +43,7 @@ namespace RevBayesCore {
                                           bool bds);                                                                        //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathRangeProcess*         clone(void) const;                                                        //!< Create an independent clone
+        FossilizedBirthDeathRangeProcess*               clone(void) const override;                                         //!< Create an independent clone
 
     protected:
         void                                            updateStartEndTimes();
@@ -53,11 +53,11 @@ namespace RevBayesCore {
         double                                          computeLnProbabilityBDS(void);                                      //!< Compute the log probability assuming complete lineage sampling.
 
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter
 
-        void                                            keepSpecialization(const DagNode *toucher);
-        void                                            restoreSpecialization(const DagNode *toucher);
-        void                                            touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                            keepSpecialization(const DagNode *toucher) override;
+        void                                            restoreSpecialization(const DagNode *toucher) override;
+        void                                            touchSpecialization(const DagNode *toucher, bool touchAll) override;
 
     private:
         
