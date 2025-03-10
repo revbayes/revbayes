@@ -407,7 +407,6 @@ void PiecewiseCoalescent::restoreSpecialization(const DagNode *affecter)
 }
 
 
-
 /**
  * Simulate new coalescent times.
  *
@@ -625,7 +624,6 @@ void PiecewiseCoalescent::touchSpecialization(const DagNode *affecter, bool touc
 //    updateIntervals();
     
 }
-
 
 
 /**
