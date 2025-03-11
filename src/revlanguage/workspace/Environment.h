@@ -32,7 +32,7 @@ class RevObject;
      *     Environment will not be destroyed before the stack frame Environment.
      *
      * (b) Environment objects that represent a namespace do not contain a pointer to the parent
-     *     Environment.  Instead, the parent Environment holds a references to the namespace.
+     *     Environment.  Instead, the parent Environment holds a reference to the namespace.
      *     This ensures that the namespace Environment will not be destroyed before the
      *     enclosing Environment.
      *
