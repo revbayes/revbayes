@@ -26,16 +26,16 @@ template <class valueType> class TypedDagNode;
         LinearDemographicFunction(const LinearDemographicFunction &f);                                                                  //!< Copy constructor
         
         // destructor
-        virtual                                        ~LinearDemographicFunction(void);                                  //!< Destructor
-        LinearDemographicFunction&                      operator=(const LinearDemographicFunction &f);                    //!< Assignment operator
+        virtual                                        ~LinearDemographicFunction(void);                            //!< Destructor
+        LinearDemographicFunction&                      operator=(const LinearDemographicFunction &f);              //!< Assignment operator
         
         // public methods
         
         // pure virtual public methods
-        LinearDemographicFunction*                      clone(void) const;                                      //!< Clone the LinearDemographicFunction
-        double                                          getDemographic(double t) const;                         //!< Returns the demographic function N(t) at time t.
-        double                                          getIntegral(double start, double finish) const;         //!< Calculates the integral 1/N(x) dx between start and finish.
-        double                                          getWaitingTime(double time, double lambda) const;       //!< Calculates the waiting time until the next coalescent event.
+        LinearDemographicFunction*                      clone(void) const;                                          //!< Clone the LinearDemographicFunction
+        double                                          getDemographic(double t) const;                             //!< Returns the demographic function N(t) at time t.
+        double                                          getIntegral(double start, double finish) const;             //!< Calculates the integral 1/N(x) dx between start and finish.
+        double                                          getWaitingTime(double time, double lambda) const;           //!< Calculates the waiting time until the next coalescent event.
         
     protected:
         virtual void                                    swapNodeInternal(const DagNode *oldN, const DagNode *newN); //!< Internally replacing a DAG node containing a variable with a different one

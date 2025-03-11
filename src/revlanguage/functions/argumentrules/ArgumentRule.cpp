@@ -301,9 +301,9 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 
             Environment& env = Workspace::globalWorkspace();
             
-            try
+            if (auto orig_func = env.findFunction(function_name, args, once))
             {
-                Function* func = env.getFunction(function_name, args, once).clone();
+                Function* func = orig_func->clone();
 
                 // Allow the function to process the arguments
                 func->processArguments( args, once );
@@ -321,11 +321,6 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 conversionVar->setRequiredTypeSpec( argTypeSpec );
                 
                 return Argument( conversionVar, arg.getLabel(), evalType == BY_CONSTANT_REFERENCE );
-                
-            }
-            catch (RbException& e)
-            {
-                // we do nothing here
             }
         } 
     }
@@ -427,7 +422,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     {
         return -1;
     }
-   
+    
     // we need to store and check all arg types
     std::vector<double> penalties;
     for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
@@ -444,7 +439,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         {
             penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
         }
-            
+        
         if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
         {
             penalties.push_back( penalty );
@@ -495,6 +490,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             }
         }
     }
+    
     
     return best_penalty;
 }

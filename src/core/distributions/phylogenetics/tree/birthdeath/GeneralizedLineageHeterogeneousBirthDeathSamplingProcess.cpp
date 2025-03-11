@@ -847,7 +847,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditio
 }
 
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter)
 {
     if ( affecter == age )
     {
