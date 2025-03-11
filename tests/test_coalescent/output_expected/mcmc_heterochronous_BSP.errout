@@ -1,0 +1,92 @@
+   Successfully read one character matrix from file 'data/horses_heterochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+Problem when computing waiting time.
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 51 different moves in a random move schedule with 754.05 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  pop_size[1]              2.0000         19         14      0.7368 lambda = 0.1000
+Scaling                                  pop_size[2]              2.0000         13         10      0.7692 lambda = 0.1000
+Scaling                                  pop_size[3]              2.0000         19         12      0.6316 lambda = 0.1000
+Scaling                                  pop_size[4]              2.0000         27         21      0.7778 lambda = 0.1000
+Scaling                                  pop_size[5]              2.0000         17         10      0.5882 lambda = 0.1000
+Scaling                                  pop_size[6]              2.0000         23         16      0.6957 lambda = 0.1000
+Scaling                                  pop_size[7]              2.0000         24         19      0.7917 lambda = 0.1000
+Scaling                                  pop_size[8]              2.0000         28         23      0.8214 lambda = 0.1000
+Scaling                                  pop_size[9]              2.0000         21         18      0.8571 lambda = 0.1000
+Scaling                                  pop_size[10]             2.0000         18         11      0.6111 lambda = 0.1000
+Scaling                                  pop_size[11]             2.0000         26         18      0.6923 lambda = 0.1000
+Scaling                                  pop_size[12]             2.0000         20         17      0.8500 lambda = 0.1000
+Scaling                                  pop_size[13]             2.0000         29         22      0.7586 lambda = 0.1000
+Scaling                                  pop_size[14]             2.0000         24         16      0.6667 lambda = 0.1000
+Scaling                                  pop_size[15]             2.0000         19         17      0.8947 lambda = 0.1000
+Scaling                                  pop_size[16]             2.0000         13          9      0.6923 lambda = 0.1000
+Scaling                                  pop_size[17]             2.0000         23         15      0.6522 lambda = 0.1000
+Scaling                                  pop_size[18]             2.0000         22         17      0.7727 lambda = 0.1000
+Scaling                                  pop_size[19]             2.0000         30         22      0.7333 lambda = 0.1000
+Scaling                                  pop_size[20]             2.0000         21         19      0.9048 lambda = 0.1000
+Scaling                                  pop_size[21]             2.0000         26         23      0.8846 lambda = 0.1000
+Scaling                                  pop_size[22]             2.0000         22         13      0.5909 lambda = 0.1000
+Scaling                                  pop_size[23]             2.0000         21         19      0.9048 lambda = 0.1000
+Scaling                                  pop_size[24]             2.0000         10          9      0.9000 lambda = 0.1000
+Scaling                                  pop_size[25]             2.0000         16         12      0.7500 lambda = 0.1000
+Scaling                                  pop_size[26]             2.0000         14         12      0.8571 lambda = 0.1000
+Scaling                                  pop_size[27]             2.0000         20         19      0.9500 lambda = 0.1000
+Scaling                                  pop_size[28]             2.0000         29         24      0.8276 lambda = 0.1000
+Scaling                                  pop_size[29]             2.0000         25         25      1.0000 lambda = 0.1000
+Scaling                                  pop_size[30]             2.0000         16         15      0.9375 lambda = 0.1000
+Scaling                                  pop_size[31]             2.0000         16         15      0.9375 lambda = 0.1000
+Scaling                                  pop_size[32]             2.0000         15         12      0.8000 lambda = 0.1000
+Scaling                                  pop_size[33]             2.0000         26         26      1.0000 lambda = 0.1000
+Scaling                                  pop_size[34]             2.0000         16         14      0.8750 lambda = 0.1000
+Scaling                                  pop_size[35]             2.0000         21         19      0.9048 lambda = 0.1000
+IndependentPriorMove                     number_events_pi         1.0000          9          9      1.0000 
+NarrowExchange                           psi                    173.0000       1710        416      0.2433 
+NNI                                      psi                    173.0000       1792        201      0.1122 
+FNPR                                     psi                     43.2500        416         94      0.2260 
+SubtreeScale                             psi                     34.6000        319         75      0.2351 
+NodeTimeSlideUniform                     psi                    173.0000       1696        728      0.4292 
+RootTimeScaleBactrian                    psi                     34.6000        361        188      0.5208 
+TreeScale                                psi                     34.6000        329         15      0.0456 delta = 1.0000
+BetaSimplex                              er                       3.0000         34         19      0.5588 alpha = 1.0000
+DirichletSimplex                         er                       1.0000         14          2      0.1429 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         24          7      0.2917 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000         10          0      0.0000 alpha = 1.0000
+Scaling                                  alpha                    2.0000         23          9      0.3913 lambda = 1.0000
+Sliding                                  p_inv                    1.0000          8          0      0.0000 delta = 1.0000
+Scaling                                  clock                    2.0000         21          5      0.2381 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         45          6      0.1333 lambda = 1.0000
+

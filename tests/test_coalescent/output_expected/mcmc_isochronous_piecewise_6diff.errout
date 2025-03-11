@@ -1,0 +1,65 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 25 different moves in a random move schedule with 175.6 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  pop_size[1]              2.0000         24         23      0.9583 lambda = 0.1000
+Scaling                                  pop_size[2]              2.0000         25         22      0.8800 lambda = 0.1000
+Scaling                                  pop_size[3]              2.0000         21         16      0.7619 lambda = 0.1000
+Scaling                                  pop_size[4]              2.0000         21         16      0.7619 lambda = 0.1000
+Scaling                                  pop_size[5]              2.0000         15         15      1.0000 lambda = 0.1000
+Sliding                                  change_points[1]         2.0000         17         17      1.0000 delta = 0.1000
+Sliding                                  change_points[2]         2.0000         19         19      1.0000 delta = 0.1000
+Sliding                                  change_points[3]         2.0000         19         19      1.0000 delta = 0.1000
+Sliding                                  change_points[4]         2.0000         20         20      1.0000 delta = 0.1000
+Sliding                                  change_points[5]         2.0000         19         19      1.0000 delta = 0.1000
+NarrowExchange                           psi                     36.0000        344         83      0.2413 
+NNI                                      psi                     36.0000        351         60      0.1709 
+FNPR                                     psi                      9.0000         87         15      0.1724 
+SubtreeScale                             psi                      7.2000         83         23      0.2771 
+NodeTimeSlideUniform                     psi                     36.0000        365        143      0.3918 
+RootTimeScaleBactrian                    psi                      7.2000         90          2      0.0222 
+TreeScale                                psi                      7.2000         75          5      0.0667 delta = 1.0000
+BetaSimplex                              er                       3.0000         39         19      0.4872 alpha = 1.0000
+DirichletSimplex                         er                       1.0000         12          2      0.1667 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         16          2      0.1250 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000          4          0      0.0000 alpha = 1.0000
+Scaling                                  alpha                    2.0000         14          6      0.4286 lambda = 1.0000
+Sliding                                  p_inv                    1.0000         10          4      0.4000 delta = 1.0000
+Scaling                                  clock                    2.0000         20          3      0.1500 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         50          4      0.0800 lambda = 1.0000
+

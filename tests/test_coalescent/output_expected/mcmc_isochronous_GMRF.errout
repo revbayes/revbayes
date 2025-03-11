@@ -1,0 +1,126 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 32 different moves in a random move schedule with 255.6 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+ScalingBactrian                          population_size_at_present     5.0000         52          0      0.0000 sigma = 1.0000
+MirrorMultiplier                         population_size_at_present     5.0000         47          0      0.0000 sigma = 1.0000
+HalfRandomDive                           population_size_at_present     5.0000         48         15      0.3125 delta = 1.0000
+ScalingBactrian                          population_size_global_scale     5.0000         54         10      0.1852 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[1]     5.0000         54          2      0.0370 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[2]     5.0000         47          0      0.0000 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[3]     5.0000         59          0      0.0000 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[4]     5.0000         39          0      0.0000 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[5]     5.0000         57          3      0.0526 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[6]     5.0000         42          0      0.0000 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[7]     5.0000         55          1      0.0182 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[8]     5.0000         43          1      0.0233 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[9]     5.0000         49          2      0.0408 sigma = 1.0000
+EllipticalSliceSamplingSimpleMove        delta_log_population_size[1]     5.0000         46 
+  Ave. cos(angle(x1,x2)) = 0.0694
+  Ave. # of Pr evals = 1.5000
+  window = 6.2832
+
+VectorSlide                              delta_log_population_size[1]    10.0000         88          3      0.0341 lambda = 1.0000
+UpDownScaling                            population_size_at_present    10.0000        109         44      0.4037 lambda = 1.0000
+ShrinkExpand                             delta_log_population_size[1]    10.0000         97         86      0.8866 lambda = 1.0000
+NarrowExchange                           psi                     36.0000        357        110      0.3081 
+NNI                                      psi                     36.0000        378         64      0.1693 
+FNPR                                     psi                      9.0000         97         21      0.2165 
+SubtreeScale                             psi                      7.2000         83         28      0.3373 
+NodeTimeSlideUniform                     psi                     36.0000        336        148      0.4405 
+RootTimeScaleBactrian                    psi                      7.2000         68         29      0.4265 
+TreeScale                                psi                      7.2000         65          7      0.1077 delta = 1.0000
+BetaSimplex                              er                       3.0000         34         11      0.3235 alpha = 1.0000
+DirichletSimplex                         er                       1.0000         14          2      0.1429 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         28          8      0.2857 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000         11          0      0.0000 alpha = 1.0000
+Scaling                                  alpha                    2.0000         21         14      0.6667 lambda = 1.0000
+Sliding                                  p_inv                    1.0000         15          3      0.2000 delta = 1.0000
+Scaling                                  clock                    2.0000         27         10      0.3704 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         40         14      0.3500 lambda = 1.0000
+
