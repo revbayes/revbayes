@@ -23,6 +23,7 @@
 #include "RlRateGenerator.h"
 #include "RlRateGeneratorSequence.h"
 #include "RlString.h"
+#include "RootRejectionSampleProposal.h"
 #include "TipRejectionSampleProposal.h"
 #include "TypedDagNode.h"
 #include "TypeSpec.h"
@@ -166,6 +167,19 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
             }
             p = tmp_p;
         }
+        else if (gt == "root" && pt == "rejection")
+        {
+            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
+            if (use_site)
+            {
+                tmp_p->setRateGenerator( qmap_site_tdn );
+            }
+            else if (use_seq)
+            {
+                tmp_p->setRateGenerator( qmap_seq_tdn );
+            }
+            p = tmp_p;
+        }
     }
     else if (mt == "RNA")
     {
@@ -210,6 +224,19 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
             }
             p = tmp_p;
         }
+        else if (gt == "root" && pt == "rejection")
+        {
+            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
+            if (use_site)
+            {
+                tmp_p->setRateGenerator( qmap_site_tdn );
+            }
+            else if (use_seq)
+            {
+                tmp_p->setRateGenerator( qmap_seq_tdn );
+            }
+            p = tmp_p;
+        }
     }
     else if (mt == "AA" || mt == "Protein")
     {
@@ -244,6 +271,19 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         else if (gt == "tip" && pt == "rejection")
         {
             RevBayesCore::TipRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
+            if (use_site)
+            {
+                tmp_p->setRateGenerator( qmap_site_tdn );
+            }
+            else if (use_seq)
+            {
+                tmp_p->setRateGenerator( qmap_seq_tdn );
+            }
+            p = tmp_p;
+        }
+        else if (gt == "root" && pt == "rejection")
+        {
+            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -340,6 +380,19 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
             }
             p = tmp_p;
         }
+        else if (gt == "root" && pt == "rejection")
+        {
+            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            if (use_site)
+            {
+                tmp_p->setRateGenerator( qmap_site_tdn );
+            }
+            else if (use_seq)
+            {
+                tmp_p->setRateGenerator( qmap_seq_tdn );
+            }
+            p = tmp_p;
+        }
     }
     else if (mt == "NaturalNumbers")
     {
@@ -416,6 +469,19 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         else if (gt == "tip" && pt == "rejection")
         {
             RevBayesCore::TipRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
+            if (use_site)
+            {
+                tmp_p->setRateGenerator( qmap_site_tdn );
+            }
+            else if (use_seq)
+            {
+                tmp_p->setRateGenerator( qmap_seq_tdn );
+            }
+            p = tmp_p;
+        }
+        else if (gt == "root" && pt == "rejection")
+        {
+            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -515,6 +581,7 @@ const MemberRules& RevLanguage::Move_CharacterHistory::getParameterRules(void) c
         optionsGraph.push_back( "cladogenetic" );
         optionsGraph.push_back( "cladogenetic2" );
         optionsGraph.push_back( "tip" );
+        optionsGraph.push_back( "root" );
         nodeChrsMoveMemberRules.push_back( new OptionRule( "graph", new RlString("node"), optionsGraph, "" ) );
         
         std::vector<std::string> optionsProposal;
