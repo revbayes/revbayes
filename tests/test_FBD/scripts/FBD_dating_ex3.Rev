@@ -191,7 +191,7 @@ trace = readTreeTrace("output/bears_FBD_ex3_all.trees")
 
 # Maximum clade credibility tree #
 mapTree(trace_extant, file="output/bears_FBD_ex3_extant.mapc.tre" )
-mapTree(trace, file="output/bears_FBD_all.map.tre" )
+mapTree(trace, file="output/bears_FBD_all_ex3.map.tre" )
 
 # Maximum clade credibility tree #
 mccTree(trace_extant, file="output/bears_FBD_ex3_extant.mcc.tre" )
