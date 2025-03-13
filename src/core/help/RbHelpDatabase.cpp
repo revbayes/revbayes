@@ -2241,7 +2241,7 @@ map_tree = mapTree(trace=tree_trace, file="map.tree"))");
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
 	help_arrays[string("matrix")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("matrix")][string("description")] = string(R"(Create matrix object.)");
-	help_strings[string("matrix")][string("details")] = string(R"(This function creates a matrix object from a 2-dimensional set of real numbers.)");
+	help_strings[string("matrix")][string("details")] = string(R"(This function creates a matrix object from a vector of vectors.)");
 	help_strings[string("matrix")][string("example")] = string(R"(# create set of real numbers to convert to matrix
 x <- [[1, 1], [1, 1]]
 # convert x to matrix object
@@ -3954,14 +3954,11 @@ z[0])");
 	help_strings[string("var")][string("details")] = string(R"(This function accepts a vector of real numbers and returns the variance.
 This a measure of how the data points deviate from the mean which is calculated
 as follows:
-\[
-s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
-\]
-Where:
-- \( s^2 \) = sample variance  
-- \( n \) = number of data points  
-- \( x_i \) = each individual data point  
-- \( \bar{x} \) = mean of the data)");
+
+s² = (1 / (n - 1)) * Σ (x[i] - x̄)² 
+
+which is essentially:
+(sum of squared differences from the mean) / (n - 1))");
 	help_strings[string("var")][string("example")] = string(R"(# Define vector to calculate variance
 x <- v(1, 2, 3, 4)
 # or

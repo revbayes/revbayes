@@ -8,14 +8,11 @@ Calculate variance of a vector of real numbers
 This function accepts a vector of real numbers and returns the variance.
 This a measure of how the data points deviate from the mean which is calculated
 as follows:
-\[
-s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
-\]
-Where:
-- \( s^2 \) = sample variance  
-- \( n \) = number of data points  
-- \( x_i \) = each individual data point  
-- \( \bar{x} \) = mean of the data 
+
+s² = (1 / (n - 1)) * Σ (x[i] - x̄)² 
+
+which is essentially:
+(sum of squared differences from the mean) / (n - 1)
 
 ## authors
 ## see_also

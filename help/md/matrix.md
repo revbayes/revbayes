@@ -5,7 +5,7 @@ Matrix
 ## description
 Create matrix object.
 ## details
-This function creates a matrix object from a 2-dimensional set of real numbers.
+This function creates a matrix object from a vector of vectors.
 ## authors
 Michael Landis
 ## see_also
