@@ -1694,7 +1694,22 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
+	help_arrays[string("fnJC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("fnJC")][string("description")] = string(R"(Jukes Cantor rate matrix)");
+	help_strings[string("fnJC")][string("details")] = string(R"(Rate matrix with n states in which each state has an equal probability to change 
+to any other state. The rate of transition from one state to another is equal to 
+n / n-1.)");
+	help_strings[string("fnJC")][string("example")] = string(R"(# Rate Matrix for DNA
+q := fnJC(4)
+# Rate Matrix for Amino Acids
+q := fnJC(20)
+# Binary Character Matrix
+q := fnJC(2))");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
+	help_references[string("fnJC")].push_back(RbHelpReference(R"(Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132. )",R"()",R"()"));
+	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_strings[string("fnJC")][string("title")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
 	help_strings[string("fnK80")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1980).)");
 	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.
@@ -3248,7 +3263,16 @@ mymcmc.operatorSummary())");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
 	help_strings[string("posteriorPredictiveProbability")][string("name")] = string(R"(posteriorPredictiveProbability)");
 	help_strings[string("posteriorPredictiveSimulation")][string("name")] = string(R"(posteriorPredictiveSimulation)");
+	help_arrays[string("power")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("power")][string("description")] = string(R"(The function raises any real number to the power of x.)");
+	help_strings[string("power")][string("details")] = string(R"(This function accepts two arguments: one real number (the base) and a second real number (the exponenent).)");
+	help_strings[string("power")][string("example")] = string(R"(
+# Raise 2 to the 3rd power
+    x<-2
+    power(x, 3))");
 	help_strings[string("power")][string("name")] = string(R"(power)");
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(log)"));
+	help_strings[string("power")][string("title")] = string(R"(power)");
 	help_strings[string("powerPosterior")][string("name")] = string(R"(powerPosterior)");
 	help_arrays[string("printSeed")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("printSeed")][string("description")] = string(R"(Print the seed of the random number generator.)");
@@ -3681,7 +3705,17 @@ mymcmc.run(rules = stopping_rules)
 	help_references[string("srStationarity")].push_back(RbHelpReference(R"(Hill, S.D. and Spall, J.C. 2011. Stationarity and Convergence of the Metropolis-Hastings Algorithm: Insights into Theoretical Aspects. IEEE Control Systems Magazine 39.)",R"(10.1109/MCS.2018.2876959)",R"()"));
 	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
 	help_strings[string("srStationarity")][string("title")] = string(R"(Stationarity stopping rule)");
+	help_arrays[string("stdev")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("stdev")][string("description")] = string(R"(Finds the standard deviation of a vector of real numbers.)");
+	help_strings[string("stdev")][string("details")] = string(R"(Accepts one argument, a vector of real numbers, and returns the standard deviation
+as a real number.)");
+	help_strings[string("stdev")][string("example")] = string(R"(x <- v(4, 3, 2, 1)
+s := stdev(x))");
 	help_strings[string("stdev")][string("name")] = string(R"(stdev)");
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(v)"));
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(mean)"));
+	help_strings[string("stdev")][string("title")] = string(R"(Standard Deviation)");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
 	help_arrays[string("stochasticMatrix")][string("authors")].push_back(string(R"(Michael R. May)"));
 	help_strings[string("stochasticMatrix")][string("description")] = string(R"(A stochastic matrix is a matrix (not necessarily square) with rows that sum to 1.)");
@@ -3918,7 +3952,22 @@ z[0])");
 	help_strings[string("validationAnalysis")][string("name")] = string(R"(validationAnalysis)");
 	help_strings[string("var")][string("name")] = string(R"(var)");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
+	help_arrays[string("write")][string("authors")].push_back(string(R"(The RevBayes Development Core Team)"));
+	help_strings[string("write")][string("description")] = string(R"(This function write values in a RevObject to a file specified by the user.)");
+	help_strings[string("write")][string("details")] = string(R"(This function accepts multiple RevObjects in the first arguments to be written to a file.
+After this, users can specify the filename with a string which can include the directory path
+to where the file should be made. Users can also specify whether to append or overwrite the file
+using a boolean operator (default is false). Lastly, a seperator can be specified using a string
+for specifying how to sperate values in the RevObject (default is "").)");
+	help_strings[string("write")][string("example")] = string(R"(
+# define RevObject to write
+    x <- matrix([[1, 1],[1, 1]])
+# write to CSV file
+    write(x, "/path/to/file/filenmae.csv", false, ","))");
 	help_strings[string("write")][string("name")] = string(R"(write)");
+	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeDelimitedCharacterData)"));
+	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_strings[string("write")][string("title")] = string(R"(Write RevObject to  file)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
