@@ -99,7 +99,7 @@ size_t RateAgeBetaShift::getNumberAcceptedTotal( void ) const
 /* Perform the move
  *
  * The move:
- * - chooses a node that is not a tip or the root.
+ * - chooses a node that is not a tip, the root, or a sampled-ancestor-parent.
  * - modifies the time for the node
  * - modifies the rate for the three adjacent branches so that rate*time remains unchanged
  *   on each branch.
