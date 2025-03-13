@@ -162,7 +162,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     if (tau.getNumberOfTips() <= 2)
     {
-        return 0.0;
+        return;
     }
 
     // 1. pick a random node which is not the root and neithor the direct descendant of the root
