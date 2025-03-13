@@ -160,6 +160,11 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     Tree& tau = tree->getValue();
 
+    if (tau.getNumberOfTips() <= 2)
+    {
+        return 0.0;
+    }
+
     // 1. pick a random node which is not the root and neithor the direct descendant of the root
     TopologyNode* node;
     size_t node_idx = 0;
@@ -167,7 +172,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         double u = rng->uniform01();
         node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_idx);
-    } while ( node->isRoot() || node->isTip() ); 
+    } while ( node->isRoot() || node->isTip()  || node -> isSampledAncestorParent() );
     
     TopologyNode& parent = node->getParent();
 
