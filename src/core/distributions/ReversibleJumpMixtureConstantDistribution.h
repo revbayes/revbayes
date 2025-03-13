@@ -326,7 +326,9 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::resto
         {
             this->dag_node->restoreAffected();
         }
+        
     }
+    
 }
 
 
@@ -429,6 +431,7 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touch
             this->dag_node->touchAffected();
         }
     }
+    
 }
 
 #endif
