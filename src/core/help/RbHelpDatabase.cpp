@@ -1747,7 +1747,22 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
+	help_arrays[string("fnJC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("fnJC")][string("description")] = string(R"(Jukes Cantor rate matrix)");
+	help_strings[string("fnJC")][string("details")] = string(R"(Rate matrix with n states in which each state has an equal probability to change 
+to any other state. The rate of transition from one state to another is equal to 
+n / n-1.)");
+	help_strings[string("fnJC")][string("example")] = string(R"(# Rate Matrix for DNA
+q := fnJC(4)
+# Rate Matrix for Amino Acids
+q := fnJC(20)
+# Binary Character Matrix
+q := fnJC(2))");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
+	help_references[string("fnJC")].push_back(RbHelpReference(R"(Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132. )",R"()",R"()"));
+	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_strings[string("fnJC")][string("title")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
 	help_strings[string("fnK80")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1980).)");
 	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.
@@ -2277,7 +2292,16 @@ map_tree = mapTree(trace=tree_trace, file="map.tree"))");
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(mccTree)"));
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
+	help_arrays[string("matrix")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("matrix")][string("description")] = string(R"(Create matrix object.)");
+	help_strings[string("matrix")][string("details")] = string(R"(This function creates a matrix object from a vector of vectors.)");
+	help_strings[string("matrix")][string("example")] = string(R"(# create set of real numbers to convert to matrix
+x <- [[1, 1], [1, 1]]
+# convert x to matrix object
+y <- matrix(x))");
 	help_strings[string("matrix")][string("name")] = string(R"(matrix)");
+	help_arrays[string("matrix")][string("see_also")].push_back(string(R"(MatrixReal)"));
+	help_strings[string("matrix")][string("title")] = string(R"(Matrix)");
 	help_strings[string("max")][string("description")] = string(R"(Finds the maximum of a vector of numbers.)");
 	help_strings[string("max")][string("example")] = string(R"(a = v(1,2,3,4,5)
 max(a)
@@ -3743,7 +3767,17 @@ mymcmc.run(rules = stopping_rules)
 	help_references[string("srStationarity")].push_back(RbHelpReference(R"(Hill, S.D. and Spall, J.C. 2011. Stationarity and Convergence of the Metropolis-Hastings Algorithm: Insights into Theoretical Aspects. IEEE Control Systems Magazine 39.)",R"(10.1109/MCS.2018.2876959)",R"()"));
 	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
 	help_strings[string("srStationarity")][string("title")] = string(R"(Stationarity stopping rule)");
+	help_arrays[string("stdev")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("stdev")][string("description")] = string(R"(Finds the standard deviation of a vector of real numbers.)");
+	help_strings[string("stdev")][string("details")] = string(R"(Accepts one argument, a vector of real numbers, and returns the standard deviation
+as a real number.)");
+	help_strings[string("stdev")][string("example")] = string(R"(x <- v(4, 3, 2, 1)
+s := stdev(x))");
 	help_strings[string("stdev")][string("name")] = string(R"(stdev)");
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(v)"));
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(mean)"));
+	help_strings[string("stdev")][string("title")] = string(R"(Standard Deviation)");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
 	help_arrays[string("stochasticMatrix")][string("authors")].push_back(string(R"(Michael R. May)"));
 	help_strings[string("stochasticMatrix")][string("description")] = string(R"(A stochastic matrix is a matrix (not necessarily square) with rows that sum to 1.)");
@@ -3978,7 +4012,27 @@ z[0])");
 	help_arrays[string("v")][string("see_also")].push_back(string(R"(rep)"));
 	help_strings[string("v")][string("title")] = string(R"(Create a vector)");
 	help_strings[string("validationAnalysis")][string("name")] = string(R"(validationAnalysis)");
+	help_strings[string("var")][string("description")] = string(R"(Calculate variance of a vector of real numbers)");
+	help_strings[string("var")][string("details")] = string(R"(This function accepts a vector of real numbers and returns the variance.
+This a measure of how the data points deviate from the mean which is calculated
+as follows:
+
+s² = (1 / (n - 1)) * Σ (x[i] - x̄)² 
+
+which is essentially:
+(sum of squared differences from the mean) / (n - 1))");
+	help_strings[string("var")][string("example")] = string(R"(# Define vector to calculate variance
+x <- v(1, 2, 3, 4)
+# or
+x <- [1, 2, 3, 4]
+# Calculate variance
+var(x))");
 	help_strings[string("var")][string("name")] = string(R"(var)");
+  help_arrays[string("var")][string("see_also")].push_back(string(R"(mean)"));
+	help_arrays[string("var")][string("see_also")].push_back(string(R"(stdev)"));
+	help_arrays[string("var")][string("see_also")].push_back(string(R"(median)"));
+	help_strings[string("var")][string("title")] = string(R"(Variance)");
+
 	help_arrays[string("vectorFlatten")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("vectorFlatten")][string("description")] = string(R"(Flatten a vector to one dimension.)");
 	help_strings[string("vectorFlatten")][string("details")] = string(R"(This function accepts a two-dimensional vector as an argument and flattens it
