@@ -299,9 +299,9 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             Argument theArg = Argument( the_var, "arg" );
             args.push_back( the_var );
                 
-            Environment& env = Workspace::globalWorkspace();
+            auto env = Workspace::globalWorkspacePtr();
             
-            if (auto orig_func = env.findFunction(function_name, args, once))
+            if (auto orig_func = env->findFunction(function_name, args, once))
             {
                 Function* func = orig_func->clone();
 
@@ -309,7 +309,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 func->processArguments( args, once );
             
                 // Set the execution environment of the function
-                func->setExecutionEnviroment( &env );
+                func->setExecutionEnviroment( env );
                 
                 // Evaluate the function
                 RevPtr<RevVariable> conversionVar = func->execute();
