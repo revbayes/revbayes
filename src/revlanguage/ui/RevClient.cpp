@@ -375,7 +375,7 @@ void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
         }
 
         // Process the line and record result
-        result = Parser::getParser().processCommand( commandLine, &Workspace::userWorkspace() );
+        result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
         if ( result == 2 )
         {
             if (error_exit)
