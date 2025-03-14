@@ -87,42 +87,28 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
             }
         }
     }
-    
-    for (unsigned int i =0 ; i < source_files.size(); ++i)
+
+    try
     {
-        line = "source(\"" + source_files[i] + "\")";
-        
-        // let only the master process print to the screen
-        if ( pid == 0 )
+        for (unsigned int i =0 ; i < source_files.size(); ++i)
         {
-            std::cout << "> " << line << std::endl;
+            RevClient::execute_file(source_files[i], false, true);
         }
-        
-        // Process the command line
-        if (result == 1)
+    }
+    catch (const RbException& e)
+    {
+        RBOUT(e.getMessage());
+    }
+    catch (const std::exception& e)
+    {
+        if (rank == 0)
         {
-            command_line += line;
+            RBOUT(e.what());
         }
-        else
-        {
-            command_line = line;
-        }
-        
-        result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
-
-        // We just hope for better input next time
-        if (result == 2)
-        {
-            result = 0;
-
-            if( batch_mode == true )
-            {
-                RevClient::shutdown();
-
-                exit(1);
-            }
-        }
-        
+    }
+    catch (...)
+    {
+        RBOUT("Error: unknown exception!");
     }
     
 }
