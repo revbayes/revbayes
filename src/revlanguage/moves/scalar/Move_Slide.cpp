@@ -60,7 +60,6 @@ Move_Slide* Move_Slide::clone(void) const
  * constructor and passing the move-parameters (the variable and other parameters) as arguments of the
  * constructor. The move constructor takes care of the proper hook-ups.
  *
- * \return A new internal distribution object.
  */
 void Move_Slide::constructInternalObject( void )
 {

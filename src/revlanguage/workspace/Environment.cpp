@@ -29,7 +29,7 @@ Environment::Environment(const std::string &n) :
 
 
 /** Construct environment with parent */
-Environment::Environment(Environment* parentEnv, const std::string &n) :
+Environment::Environment(const std::shared_ptr<Environment>& parentEnv, const std::string &n) :
     function_table(&parentEnv->getFunctionTable()),
     numUnnamedVariables(0),
     parentEnvironment(parentEnv),
@@ -65,12 +65,7 @@ Environment::~Environment()
     // Clear the variable table and function table
     clear();
     
-    
-    for (std::map<std::string,Environment*>::iterator it = children.begin(); it != children.end(); ++it)
-    {
-        delete it->second;
-    }
-    
+    // Child environments will be destroyed when they are completely unreferenced.
     children.clear();
 }
 
@@ -318,22 +313,32 @@ std::string Environment::generateUniqueVariableName(void)
 }
 
 
-
-Environment* Environment::getChildEnvironment(const std::string &name)
+std::shared_ptr<Environment> Environment::getParentEnvironment()
 {
-    
-    std::map<std::string, Environment*>::iterator it = children.find(name);
+    return parentEnvironment;
+}
+
+
+std::shared_ptr<const Environment> Environment::getParentEnvironment() const
+{
+    return parentEnvironment;
+}
+
+
+std::shared_ptr<Environment> Environment::getChildEnvironment(const std::string &name)
+{
+    auto it = children.find(name);
     if ( it == children.end() )
     {
-        Environment *env = new Environment(this, name);
-        children.insert( std::pair<std::string, Environment*>(name, env) );
+        std::shared_ptr<Environment> null;
+        auto env = std::make_shared<Environment>(null, name);
+        children.insert( {name, env} );
         return env;
     }
     else
     {
         return it->second;
     }
-    
 }
 
 
@@ -417,14 +422,13 @@ RevPtr<RevVariable>& Environment::getVariable(const std::string& name)
 /** Return a specific variable (const version) */
 const RevPtr<RevVariable>& Environment::getVariable(const std::string& name) const
 {
-    std::map<std::string, RevPtr<RevVariable> >::const_iterator it = variableTable.find(name);
+    auto it = variableTable.find(name);
     
     if ( variableTable.find(name) == variableTable.end() )
     {
-        
-        if ( parentEnvironment != NULL )
+        if ( parentEnvironment )
         {
-            return const_cast<const Environment*>( parentEnvironment )->getVariable( name );
+            getParentEnvironment()->getVariable( name );
         }
         else
         {
@@ -455,11 +459,9 @@ const VariableTable& Environment::getVariableTable(void) const
 
 bool Environment::hasChildEnvironment(const std::string &name)
 {
-    
-    std::map<std::string, Environment*>::iterator it = children.find(name);
+    auto it = children.find(name);
 
     return it != children.end();
-    
 }
 
 

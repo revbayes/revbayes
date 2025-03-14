@@ -66,7 +66,6 @@ using namespace RevLanguage;
 
 extern int yylex(void);
 extern char *yytext;
-extern Environment *executionEnvironment;
 
 /* The function yyerror handles errors. It is defined below. */
 int yyerror(const char *);
@@ -256,7 +255,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
 #endif
-                    int rv = parser.execute($1, *executionEnvironment);
+                    int rv = parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }
@@ -265,7 +264,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
 #endif
-                    int rv =  parser.execute($1, *executionEnvironment);
+                    int rv =  parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }
@@ -274,7 +273,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
 #endif
-                    int rv =  parser.execute($1, *executionEnvironment);
+                    int rv =  parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }
@@ -283,7 +282,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
 #endif
-                    int rv =  parser.execute($1, *executionEnvironment);
+                    int rv =  parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }

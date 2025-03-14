@@ -2239,7 +2239,16 @@ map_tree = mapTree(trace=tree_trace, file="map.tree"))");
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(mccTree)"));
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("mapTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
+	help_arrays[string("matrix")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("matrix")][string("description")] = string(R"(Create matrix object.)");
+	help_strings[string("matrix")][string("details")] = string(R"(This function creates a matrix object from a vector of vectors.)");
+	help_strings[string("matrix")][string("example")] = string(R"(# create set of real numbers to convert to matrix
+x <- [[1, 1], [1, 1]]
+# convert x to matrix object
+y <- matrix(x))");
 	help_strings[string("matrix")][string("name")] = string(R"(matrix)");
+	help_arrays[string("matrix")][string("see_also")].push_back(string(R"(MatrixReal)"));
+	help_strings[string("matrix")][string("title")] = string(R"(Matrix)");
 	help_strings[string("max")][string("description")] = string(R"(Finds the maximum of a vector of numbers.)");
 	help_strings[string("max")][string("example")] = string(R"(a = v(1,2,3,4,5)
 max(a)
@@ -4038,7 +4047,26 @@ z[0])");
 	help_arrays[string("v")][string("see_also")].push_back(string(R"(rep)"));
 	help_strings[string("v")][string("title")] = string(R"(Create a vector)");
 	help_strings[string("validationAnalysis")][string("name")] = string(R"(validationAnalysis)");
+	help_strings[string("var")][string("description")] = string(R"(Calculate variance of a vector of real numbers)");
+	help_strings[string("var")][string("details")] = string(R"(This function accepts a vector of real numbers and returns the variance.
+This a measure of how the data points deviate from the mean which is calculated
+as follows:
+
+s² = (1 / (n - 1)) * Σ (x[i] - x̄)² 
+
+which is essentially:
+(sum of squared differences from the mean) / (n - 1))");
+	help_strings[string("var")][string("example")] = string(R"(# Define vector to calculate variance
+x <- v(1, 2, 3, 4)
+# or
+x <- [1, 2, 3, 4]
+# Calculate variance
+var(x))");
 	help_strings[string("var")][string("name")] = string(R"(var)");
+	help_arrays[string("var")][string("see_also")].push_back(string(R"(mean)"));
+	help_arrays[string("var")][string("see_also")].push_back(string(R"(stdev)"));
+	help_arrays[string("var")][string("see_also")].push_back(string(R"(median)"));
+	help_strings[string("var")][string("title")] = string(R"(Variance)");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
