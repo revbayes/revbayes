@@ -63,7 +63,7 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
 
     ArgumentRules* burnin_arg_rules = new ArgumentRules();
     burnin_arg_rules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency when the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency at which the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burnin_arg_rules) );
 
 }
@@ -119,9 +119,9 @@ void PowerPosteriorAnalysis::constructInternalObject( void )
     else
     {
         int k = (int)static_cast<const Natural &>( cats->getRevObject() ).getValue();
-        for (int i = k; i >= 0; --i)
+        for (int i = k - 1; i >= 0; --i) // subtract 1 to account for the difference between 1-based and 0-based indexing
         {
-            double b = RevBayesCore::RbStatistics::Beta::quantile(alpha,1.0,i / double(k));
+            double b = RevBayesCore::RbStatistics::Beta::quantile(alpha, 1.0, i / double(k - 1));
             beta.push_back( b );
         }
     }
@@ -156,10 +156,6 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
     {
         found = true;
         
-        /* We will keep the C++ indexing from 0. This is un-Rev-like, but it is in keeping with the
-         * 'cats' argument, which functions in the same way (i.e., specifying cats=127 will run 128
-         * stones with indices ranging from 0 to 127)
-         */
         size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         long gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
