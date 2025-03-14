@@ -116,7 +116,7 @@ for t in test_*; do
         mkdir -p output
         tmp0=${f#scripts/}
         tmp1=${tmp0%.[Rr]ev}
-        ${rb_exec} -b $f &> output/${tmp1}.errout # print output so we can see any error messages
+        ${rb_exec} --no-header -b $f &> output/${tmp1}.errout # print output so we can see any error messages
         res="$?"
         if [ $res = 139 ]; then
             res="segfault: $f"
@@ -168,12 +168,7 @@ while [  $i -lt ${#tests[@]} ]; do
             tmp0=${f#scripts/}
             tmp1=${tmp0%.[Rr]ev}
 
-            # Delete all before the 1st occurrence of the string '   Processing file' (inclusive)
-            # Use a temporary intermediate file to make this work w/ both GNU and BSD sed
-            sed '1,/   Processing file/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
-            mv output/${tmp1}.errout.tmp output/${tmp1}.errout
-
-            # Also delete the final line of failing tests, which reprints the path to the script
+            # Delete the final line of failing tests, which reprints the path to the script
             # that differs between Windows and Unix (has no effect if the line is absent)
             sed '/   Error:\tProblem processing/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
             mv output/${tmp1}.errout.tmp output/${tmp1}.errout
