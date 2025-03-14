@@ -139,7 +139,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
     {
         found = true;
 
-        // get the member with give index
+        // get the member with a given index
         long gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;
@@ -156,7 +156,8 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
     {
         found = true;
         
-        size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
+        size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         long gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;

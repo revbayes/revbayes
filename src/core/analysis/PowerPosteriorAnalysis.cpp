@@ -228,7 +228,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         throw RbException("Please provide a filename with an extension");
     }
 
-    std::string stone_tag = "_stone_" + std::to_string(idx);
+    std::string stone_tag = "_stone_" + std::to_string(idx + 1); // number the stones from 1 to n, not from 0 to (n - 1)
 
     path stoneFileName = appendToStem(filename, stone_tag);
     createDirectoryForFile( stoneFileName );
@@ -395,7 +395,7 @@ void PowerPosteriorAnalysis::summarizeStones( void )
     // Append each stone
     for (size_t idx = 0; idx < powers.size(); ++idx)
     {
-        std::string stone_tag = "_stone_" + std::to_string(idx);
+        std::string stone_tag = "_stone_" + std::to_string(idx + 1); // number the stones from 1 to n, not from 0 to (n - 1)
         path stoneFileName = appendToStem( filename, stone_tag );
 
         // read the i-th stone
