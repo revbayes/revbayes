@@ -40,7 +40,10 @@ namespace RevBayesCore {
 																 const size_t                  num_states_,
 																 bool                          use_origin_,
 																 bool                          zero_indexed_,
-																 size_t                        n_proc_);
+																 size_t                        n_proc_,
+																 double                        abs_tol_,
+																 double                        rel_tol_,
+																 size_t                        n_dense_steps_);
 
         // pure virtual member functions
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
@@ -52,7 +55,7 @@ namespace RevBayesCore {
         virtual void                                                      redrawValue(void);
         virtual void                                                      setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
-        void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories);
+        void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool use_simmap_default=true);
         void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events);
         void                                                              drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates);
 
@@ -85,8 +88,10 @@ namespace RevBayesCore {
         double current_ln_prob = 0.0;
         double old_ln_prob = 0.0;
         bool   probability_dirty = true;
+        bool   tp_can_reset = true;
 
         // tensorphylo interface
+        size_t                                    n_dense_steps;
         size_t                                    n_proc;
         TensorPhylo::DistributionHandlerSharedPtr tp_ptr;
 
@@ -108,6 +113,10 @@ namespace RevBayesCore {
         void                                                              executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;
         RevLanguage::RevPtr<RevLanguage::RevVariable>                     executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
+        // dirty nodes
+        void                                                              resizeVectors(size_t num_nodes);
+        void                                                              recursivelyFlagNodeDirty(const TopologyNode& n);
+
         // updating function
         void                                                              prepareParameters(bool force = false);
         void                                                              updateTree(bool force = false);
@@ -200,6 +209,8 @@ namespace RevBayesCore {
 
 		// misc. book-keeping
 		bool tree_dirty = true;
+        std::vector<bool> dirty_nodes;
+
 
     };
     
