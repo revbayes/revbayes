@@ -18,7 +18,7 @@
 #include <mpi.h>
 #endif
 
-RevLanguageMain::RevLanguageMain(bool b) : batch_mode(b)
+RevLanguageMain::RevLanguageMain(bool b, bool b2) : batch_mode(b), show_header(b2)
 {
 
 }
@@ -43,10 +43,13 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     }
 
 
-    // Print a nifty message
-    RbVersion version = RbVersion();
-    RevLanguage::UserInterface::userInterface().output(version.getHeader(), false);
-    RevLanguage::UserInterface::userInterface().output("", false);
+    if (show_header)
+    {
+        // Print a nifty message
+        RbVersion version = RbVersion();
+        RevLanguage::UserInterface::userInterface().output(version.getHeader(), false);
+        RevLanguage::UserInterface::userInterface().output("", false);
+    }
     
     RevLanguage::Workspace::globalWorkspace().initializeGlobalWorkspace();
 

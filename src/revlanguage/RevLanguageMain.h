@@ -25,13 +25,14 @@ class RevLanguageMain {
     
     public:
     
-        RevLanguageMain(bool batch = false);
+        RevLanguageMain(bool batch = false, bool show_header = true);
     
         void startRevLanguageEnvironment(const std::vector<std::string> &args, const std::vector<std::string> &source_files);
 
     private:
     
         bool batch_mode;
+        bool show_header;
 };
 
 #endif
