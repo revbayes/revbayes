@@ -31,7 +31,7 @@ template <class valueType> class TypedDagNode;
         
     public:
         
-        BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode<RbVector<double> >* sr, TypedDagNode< RbVector<double> >* wf, TypedDagNode< RbVector< RbVector<double> > >* bf, unsigned mrs, unsigned msss, std::string ct="cutset");
+        BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode<RbVector<double> >* sr, TypedDagNode< RbVector<double> >* wf, TypedDagNode< RbVector< RbVector<double> > >* bf, unsigned mrs, unsigned msss, bool nss, std::string ct="cutset");
         virtual                                                     ~BiogeographyCladogeneticBirthDeathFunction(void);
         
         const static unsigned NUM_CLADO_EVENT_TYPES                 = 3;
@@ -53,9 +53,7 @@ template <class valueType> class TypedDagNode;
        
         void                                                        setRateMultipliers(const TypedDagNode< RbVector< double > >* rm);
         void                                                        update(void);
-        
-       
-        
+    
     protected:
         
         void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);
@@ -99,6 +97,7 @@ template <class valueType> class TypedDagNode;
         // model settings
         bool                                                        use_hidden_rate;
         bool                                                        use_cutset_mean;
+        bool                                                        normalize_split_scores;
         std::string                                                 connectivityType;
         
         // range codes

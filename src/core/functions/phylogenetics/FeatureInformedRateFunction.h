@@ -28,7 +28,8 @@ namespace RevBayesCore {
             const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* cf,
             const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* qf,
             const TypedDagNode< RbVector<double> >* cp,
-            const TypedDagNode< RbVector<double> >* qp
+            const TypedDagNode< RbVector<double> >* qp,
+            const TypedDagNode< double >* nr
         );
         virtual                                                                         ~FeatureInformedRateFunction(void);
         
@@ -47,13 +48,14 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector<RbVector<RbVector<double> > > >*  quantitative_features;
         const TypedDagNode< RbVector<double> >*  categorical_params;
         const TypedDagNode< RbVector<double> >*  quantitative_params;
+        const TypedDagNode< double >* null_rate;
         
         size_t numCategoricalFeatures;
         size_t numQuantitativeFeatures;
         size_t numDim1;
         size_t numDim2;
+        
     };
-    
 }
 
 

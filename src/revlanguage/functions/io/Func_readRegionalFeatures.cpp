@@ -6,6 +6,7 @@
 //
 
 #include <algorithm>
+#include <limits.h>
 #include <ostream>
 #include <set>
 #include <string>
@@ -88,10 +89,9 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     const std::string& filename = static_cast<RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     const std::string& delimiter = static_cast<RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     const bool& header = static_cast<RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string& nonexistent_region_token = static_cast<RlString&>( args[3].getVariable()->getRevObject() ).getValue();
     size_t header_offset = 0;
     if (header) header_offset = 1;
-    
-    std::cout << filename << "\n";
     
     RevBayesCore::DelimitedDataReader* rdr = new RevBayesCore::DelimitedDataReader(filename, delimiter, 0);
     const std::vector<std::vector<std::string> >&data = rdr->getChars();
@@ -101,6 +101,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     std::vector<std::string> featurePath;
     std::vector<std::string> featureRelationship;
     std::vector<std::string> featureType;
+    // do we add a description field?
 
     size_t nRow = data.size();
     size_t nCol = data[0].size();
@@ -191,36 +192,34 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     for (auto it = s_rel.begin(); it != s_rel.end(); it++) {
         // categorical/quantitative
         for (auto jt = s_type.begin(); jt != s_type.end(); jt++) {
+            
             // time_index
             auto tmp_unique = uniqueFeatureIndex[*it][*jt];
-            std::set<size_t> s1;
-            std::set<size_t> s2;
+            
+            // no need to relationship/type-combo features for layer exists
+            // across all timeslices if no relationship/type-combo layers
+            // are defined, e.g. if user provides NO within/categorical features
+            if (tmp_unique.size() == 0) {
+                continue;
+            }
+            
+            // MJL 230516: seems like this code checks that every relationship/
+            // type combo exists, when we probably shouldn't require it
+            // ... verify at some point
             for (auto kt = uniqueTimeIndex.begin(); kt != uniqueTimeIndex.end(); kt++) {
                 if (tmp_unique.find(*kt) == tmp_unique.end())
                     throw RbException() << "Missing entry in readRegionalFeatures: relationship=" << *it << " type=" << *jt << " time_index=" << *kt << "\n";
             }
             
+            // check that layer exists across all timeslices
+            std::set<size_t> s1;
+            std::set<size_t> s2;
             for (auto kt = tmp_unique.begin(); kt != tmp_unique.end(); kt++) {
                 s2 = s1;
                 s1 = kt->second;
                 
                 if (kt != tmp_unique.begin()) {
-                    /*
-                    std::stringstream ss;
-                    ss << "r=" << *it << " t=" << *jt << " t=" << kt->first << "\n  s1=[";
-                    for (std::set<size_t>::iterator ii = s1.begin(); ii != s1.end(); ii++) {
-                        if (ii != s1.begin()) { ss << ","; }
-                        ss << *ii;
-                    }
-                    ss << "]\n  s2=[";
-                    for (std::set<size_t>::iterator ii = s2.begin(); ii != s2.end(); ii++) {
-                        if (ii != s2.begin()) { ss << ","; }
-                        ss << *ii;
-                    }
-                    ss << "]\n";
-                    std::cout << ss.str() << "\n";
-                    */
-                    
+                  
                     // does set of feature_index match between time slices?
                     if (s1 != s2)
                         throw RbException() << "Missing entry in readRegionalFeatures: relationship=" << *it << " type=" << *jt << " time_index=" << kt->first << "\n";
@@ -240,21 +239,37 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
         RevBayesCore::DelimitedDataReader* row_rdr = new RevBayesCore::DelimitedDataReader(feature_path, delimiter, header_offset);
         std::vector<std::vector<std::string> > row_dat = row_rdr->getChars();
         
+        
         if (feature_relationship == "within" && feature_type == "categorical") {
             for (size_t k = 0; k < row_dat[0].size(); k++) {
-                long val = std::stoi( row_dat[0][k] );
+                long val = 0;
+                if (row_dat[0][k] == nonexistent_region_token) {
+                    val = -1;
+                } else {
+                    val = std::stoi( row_dat[0][k] );
+                }
                 within_categorical[time_index][feature_index].push_back(val);
             }
         } else if (feature_relationship == "within" && feature_type == "quantitative") {
             for (size_t k = 0; k < row_dat[0].size(); k++) {
-                double val = std::stod(row_dat[0][k] );
+                double val = 0.0;
+                if (row_dat[0][k] == nonexistent_region_token) {
+                    val = NAN;
+                } else {
+                    val = std::stod(row_dat[0][k] );
+                }
                 within_quantitative[time_index][feature_index].push_back(val);
             }
         } else if (feature_relationship == "between" && feature_type == "categorical") {
             for (size_t j = 0; j < row_dat.size(); j++) {
                 between_categorical[time_index][feature_index].push_back( std::vector<long>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
-                    long val = std::stoi( row_dat[j][k] );
+                    long val = 0;
+                    if (row_dat[j][k] == nonexistent_region_token) {
+                        val = -1;
+                    } else {
+                        val = std::stoi( row_dat[j][k] );
+                    }
                     between_categorical[time_index][feature_index][j].push_back(val);
                 }
             }
@@ -262,7 +277,12 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
             for (size_t j = 0; j < row_dat.size(); j++) {
                 between_quantitative[time_index][feature_index].push_back( std::vector<double>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
-                    double val = std::stod( row_dat[j][k] );
+                    double val = 0.0;
+                    if (row_dat[j][k] == nonexistent_region_token) {
+                        val = NAN;
+                    } else {
+                        val = std::stod(row_dat[j][k] );
+                    }
                     between_quantitative[time_index][feature_index][j].push_back(val);
                 }
             }
@@ -293,7 +313,9 @@ const ArgumentRules& Func_readRegionalFeatures::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "delimiter", RlString::getClassTypeSpec(), "The delimiter between columns.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "," ) ) );
        
         argumentRules.push_back( new ArgumentRule( "header", RlBoolean::getClassTypeSpec(), "Do the summary file and the data files have headers?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "nonexistent_region_token", RlString::getClassTypeSpec(), "What string token represents a non-existent region (for null rate assignments)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("NA") ) );
        
+        
         rules_set = true;
         
     }
