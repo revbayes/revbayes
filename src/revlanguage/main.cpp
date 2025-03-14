@@ -54,6 +54,7 @@ variables_map parse_cmd_line(int argc, char* argv[])
     // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
 	("batch,b","Run in batch mode.")
+	("no-header","Suppress header.")
     ("jupyter,j","Run in jupyter mode.")
     // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
     ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
@@ -217,7 +218,10 @@ int main(int argc, char* argv[]) {
     }
 
     /* initialize environment */
-    RevLanguageMain rl = RevLanguageMain(batch_mode);
+    bool show_header=true;
+    if (args.count("no-header"))
+        show_header = false;
+    RevLanguageMain rl = RevLanguageMain(batch_mode, show_header);
 
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
