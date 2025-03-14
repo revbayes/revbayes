@@ -3264,10 +3264,9 @@ mymcmc.operatorSummary())");
 	help_strings[string("posteriorPredictiveProbability")][string("name")] = string(R"(posteriorPredictiveProbability)");
 	help_strings[string("posteriorPredictiveSimulation")][string("name")] = string(R"(posteriorPredictiveSimulation)");
 	help_arrays[string("power")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("power")][string("description")] = string(R"(The function raises any real number to the power of x.)");
+	help_strings[string("power")][string("description")] = string(R"(The function raises any real number to a power.)");
 	help_strings[string("power")][string("details")] = string(R"(This function accepts two arguments: one real number (the base) and a second real number (the exponenent).)");
-	help_strings[string("power")][string("example")] = string(R"(
-# Raise 2 to the 3rd power
+	help_strings[string("power")][string("example")] = string(R"(# Raise 2 to the 3rd power
     x<-2
     power(x, 3))");
 	help_strings[string("power")][string("name")] = string(R"(power)");
