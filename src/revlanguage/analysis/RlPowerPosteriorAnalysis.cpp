@@ -158,6 +158,10 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         
         // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
         size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        if (ind < 0 or ind > value->getPowers().size() - 1)
+        {
+            throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size();
+        }
         long gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;

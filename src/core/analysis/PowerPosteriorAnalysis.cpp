@@ -145,6 +145,12 @@ PowerPosteriorAnalysis* PowerPosteriorAnalysis::clone( void ) const
 }
 
 
+std::vector<double> PowerPosteriorAnalysis::getPowers( void ) const
+{
+    return powers;
+}
+
+
 void PowerPosteriorAnalysis::initMPI( void )
 {
     
