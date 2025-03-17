@@ -22,10 +22,6 @@ class TypeSpec;
     /**
      * The RevLanguage wrapper of the sin function.
      *
-     * The RevLanguage wrapper of the square root function connects
-     * the variables/parameters of the function and creates the internal SqrtFunction object.
-     * Please read the SqrtFunction.h for more info.
-     *
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
