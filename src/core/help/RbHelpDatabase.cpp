@@ -3566,6 +3566,14 @@ getwd())");
 	help_strings[string("simCompleteTree")][string("name")] = string(R"(simCompleteTree)");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
+	help_arrays[string("sin")][string("authors")].push_back(string(R"(Sigournie Brock)"));
+	help_strings[string("sin")][string("description")] = string(R"('sin' calculates the trigonometric ratio of the length of the side opposite the angle and length of the hypotenuse. 
+
+sin(x) = opposite/hypotenuse.)");
+	help_strings[string("sin")][string("example")] = string(R"(pi <- 3.1415926536
+sin(pi/2))");
+	help_strings[string("sin")][string("name")] = string(R"(sin)");
+	help_strings[string("sin")][string("title")] = string(R"(Apply the sine function to an angular input 'x' in radians.)");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
 	help_strings[string("sort")][string("description")] = string(R"(Function for sorting the members of a vector in either ascending or descending order.)");
 	help_strings[string("sort")][string("details")] = string(R"(The vector to be sorted can be of any numeric type. Ascending or descending is specified via the `ascending` argument)");
