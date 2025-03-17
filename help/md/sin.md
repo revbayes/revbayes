@@ -11,7 +11,8 @@ sin(x) = opposite/hypotenuse.
 Sigournie Brock
 ## see_also
 ## example
-sin(0.785398163397448) 
-    # pi/4 radians = 0.785398163397448 radians
+pi <- 3.1415926536
+sin(pi/2) 
+## = 1 
 	
 ## references
