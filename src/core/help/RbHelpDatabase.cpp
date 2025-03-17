@@ -3563,8 +3563,8 @@ getwd())");
 	help_strings[string("sin")][string("description")] = string(R"('sin' calculates the trigonometric ratio of the length of the side opposite the angle and length of the hypotenuse. 
 
 sin(x) = opposite/hypotenuse.)");
-	help_strings[string("sin")][string("example")] = string(R"(sin(0.785398163397448)
-    # pi/4 radians = 0.785398163397448 radians)");
+	help_strings[string("sin")][string("example")] = string(R"(pi <- 3.1415926536
+sin(pi/2))");
 	help_strings[string("sin")][string("name")] = string(R"(sin)");
 	help_strings[string("sin")][string("title")] = string(R"(Apply the sine function to an angular input 'x' in radians.)");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
