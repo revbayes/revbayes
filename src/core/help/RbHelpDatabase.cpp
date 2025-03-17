@@ -3413,7 +3413,14 @@ range(20,-20)
 	help_strings[string("readRelativeNodeAgeWeightedConstraints")][string("name")] = string(R"(readRelativeNodeAgeWeightedConstraints)");
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
 	help_strings[string("readTaxonData")][string("name")] = string(R"(readTaxonData)");
+	help_strings[string("readTrace")][string("description")] = string(R"(Read an MCMC log file.)");
+	help_strings[string("readTrace")][string("details")] = string(R"(Read an MCMC log file with field delimited by `separator`.
+Then drop the first `burnin` iterations if `burnin` is an integer,
+or the fraction `burnin` of iterations if `burnin` if a Real number.
+Then we keep every `n`th entry if the `thinning` is `n`.)");
+	help_strings[string("readTrace")][string("example")] = string(R"(trace <- readTrace(filename, burnin=burnin)[1])");
 	help_strings[string("readTrace")][string("name")] = string(R"(readTrace)");
+	help_strings[string("readTrace")][string("title")] = string(R"(readTrace)");
 	help_strings[string("readTreeTrace")][string("name")] = string(R"(readTreeTrace)");
 	help_arrays[string("readTrees")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("readTrees")][string("description")] = string(R"(Reads trees from a file containing trees (Nexus, Phylip or Newick accepted), or from a string containing Newick representations of trees.)");
