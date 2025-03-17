@@ -70,7 +70,7 @@ SyntaxReferenceAssignment* SyntaxReferenceAssignment::clone () const
  * Note that the return variable is variable returned by the rhs expression.
  * We need not clone it.
  */
-RevPtr<RevVariable> SyntaxReferenceAssignment::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxReferenceAssignment::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Declare variable storing the return value of the assignment expression

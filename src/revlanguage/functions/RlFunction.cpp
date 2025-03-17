@@ -440,7 +440,7 @@ const TypeSpec& Function::getClassTypeSpec(void)
 
 
 /** Get execution environment of function */
-Environment* Function::getEnvironment(void) const
+std::shared_ptr<Environment> Function::getEnvironment(void) const
 {
     
     return env;
@@ -928,7 +928,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 }
 
 
-void Function::setExecutionEnviroment(Environment *e)
+void Function::setExecutionEnviroment(const std::shared_ptr<Environment>& e)
 {
     
     env = e;

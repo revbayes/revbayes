@@ -94,12 +94,12 @@ namespace RevLanguage {
         enum ParserMode { CHECKING, EXECUTING };                                                    //!< Parser modes
 
         // Regular functions
-        int                 execute(SyntaxElement* root, Environment &env) const;                   //!< Execute the syntax tree
+        int                 execute(SyntaxElement* root, const std::shared_ptr<Environment>& env) const;  //!< Execute the syntax tree
         void                getline(char* buf, size_t maxsize);                                     //!< Give flex one line to process
         int                 help(const std::string& symbol) const;                                  //!< Get help for a symbol
         int                 help(const std::string& baseSymbol, const std::string& symbol) const;   //!< Get help for a symbol
         int                 help(const SyntaxFunctionCall* root) const;                             //!< Get help for a function call
-        int                 processCommand(std::string& command, Environment *env);                 //!< Process command with help from Bison
+        int                 processCommand(std::string& command, const std::shared_ptr<Environment>& env);     //!< Process command with help from Bison
 
         // State checking functions
         bool                isChecking(void) { return parser_mode == CHECKING; }                     //!< Are we in state-checking mode?
@@ -108,7 +108,7 @@ namespace RevLanguage {
         void                setfunction_name( const std::string& n ) { function_name = n; }           //!< Set function name
         void                setArgumentLabel( const std::string& n ) { argument_label = n; }         //!< Set argument label
         
-        ParserInfo          checkCommand(std::string& command, Environment *env);                   //!< Parse command without executing it
+        ParserInfo          checkCommand(std::string& command, const std::shared_ptr<Environment>& env);     //!< Parse command without executing it
         
         /** Get singleton parser */
         static Parser& getParser( void ) {
@@ -137,6 +137,8 @@ namespace RevLanguage {
     };
 
 }
+
+extern std::shared_ptr<RevLanguage::Environment> executionEnvironment;
 
 // Global call-back function for flex-generated code
 void rrinput(char* buf, int& result, size_t maxsize);
