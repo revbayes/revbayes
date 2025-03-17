@@ -98,15 +98,8 @@ double GewekeStoppingRule::getStatistic( size_t g )
 }
 
 
-std::string GewekeStoppingRule::printAsStatement( size_t g )
+std::string GewekeStoppingRule::printAsStatement( size_t g, bool target_only )
 {
-    // Note that # of comparisons = (# of replicates) * (# of parameters)
-    // If there are multiple runs, we will grab the # of parameters from the 1st run
-    path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(1)) : filename;
-    TraceContinuousReader reader = TraceContinuousReader( fn );
-    std::vector<TraceNumeric> &data = reader.getTraces();
-    size_t nComp = numReplicates * data.size();
-    
     // Nicely format the confidence interval bounds
     std::stringstream lss;
     lss << std::setprecision(5) << std::noshowpoint << alpha/2;
@@ -116,9 +109,26 @@ std::string GewekeStoppingRule::printAsStatement( size_t g )
     uss << std::setprecision(5) << std::noshowpoint << 1 - alpha/2;
     std::string ubound = uss.str();
     
-    size_t val = (size_t)getStatistic(g);
-    std::string pt1 = "Comparisons in which the Geweke test statistic is < " + lbound + " or > " + ubound + ": " + std::to_string(val);
-    std::string statement = pt1 + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
+    std::string statement;
+    
+    if (target_only)
+    {
+        statement = "Target value of the Geweke test statistic: > " + lbound + " and < " + ubound + "\n";
+    }
+    else
+    {
+        // Note that # of comparisons = (# of replicates) * (# of parameters)
+        // If there are multiple runs, we will grab the # of parameters from the 1st run
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(1)) : filename;
+        TraceContinuousReader reader = TraceContinuousReader( fn );
+        std::vector<TraceNumeric> &data = reader.getTraces();
+        size_t nComp = numReplicates * data.size();
+        
+        size_t val = (size_t)getStatistic(g);
+        std::string pt1 = "Comparisons in which the Geweke test statistic is < " + lbound + " or > " + ubound + ": " + std::to_string(val);
+        statement = pt1 + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
+    }
+    
     return statement;
 }
 

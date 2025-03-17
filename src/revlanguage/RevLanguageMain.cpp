@@ -56,7 +56,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
 
     // Ensure that args exists and has size 0.
     command_line = "args = [\"\"]; args.erase(\"\")";
-    RevLanguage::Parser::getParser().processCommand(command_line, &RevLanguage::Workspace::userWorkspace());
+    RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
 
     for (unsigned int i =0 ; i < args.size(); ++i)
     {
@@ -68,7 +68,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         {
             command_line = "args[" + StringUtilities::to_string(i+1) + "] = \"" + args[i] + "\"";
         }
-        result = RevLanguage::Parser::getParser().processCommand(command_line, &RevLanguage::Workspace::userWorkspace());
+        result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
         
         // We just hope for better input next time
         if (result == 2)
@@ -109,7 +109,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
             command_line = line;
         }
         
-        result = RevLanguage::Parser::getParser().processCommand(command_line, &RevLanguage::Workspace::userWorkspace());
+        result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
 
         // We just hope for better input next time
         if (result == 2)

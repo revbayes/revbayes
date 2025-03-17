@@ -45,7 +45,7 @@ bool foundEOF;
 std::stringstream rrcommand;
 
 
-RevLanguage::Environment *executionEnvironment;
+std::shared_ptr<RevLanguage::Environment> executionEnvironment;
 
 /** Constructor. Here we set the parser mode to executing. */
 RevLanguage::Parser::Parser(void) {
@@ -137,7 +137,8 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
  * As long as we return to the bison code, bison takes care of deleting the syntax tree. However,
  * if we encounter a quit() call, we delete the syntax tree ourselves and exit immediately.
  */
-int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const {
+int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Environment>& env) const
+{
 
     // don't execute command if we are in checking mode
     if (RevLanguage::Parser::getParser().isChecking())
@@ -239,7 +240,7 @@ void RevLanguage::Parser::executeBaseVariable(void)
 {
     if (base_variable_expr != NULL)
     {
-        base_variable = base_variable_expr->evaluateContent(Workspace::userWorkspace());
+        base_variable = base_variable_expr->evaluateContent(Workspace::userWorkspacePtr());
     }
 }
 
@@ -380,7 +381,7 @@ void RevLanguage::Parser::setParserMode(ParserMode mode)
  *       signal is set to 2. Any remaining part of the command buffer
  *       is discarded.
  */
-int RevLanguage::Parser::processCommand(std::string& command, Environment* env)
+int RevLanguage::Parser::processCommand(std::string& command, const std::shared_ptr<Environment>& env)
 {
 
     // make sure mode is not checking
@@ -568,7 +569,7 @@ int RevLanguage::Parser::processCommand(std::string& command, Environment* env)
     return 0;
 }
 
-ParserInfo Parser::checkCommand(std::string& command, Environment* env)
+ParserInfo Parser::checkCommand(std::string& command, const std::shared_ptr<Environment>& env)
 {
 
     setParserMode(CHECKING);

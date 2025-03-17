@@ -597,6 +597,13 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 if (max + 1 == n)
                 {
                     v.includeCharacter(i);
+                    for (size_t j = 0; j < nTaxa; j++)
+                    {
+                        RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                        std::string labels = td.getCharacter(i).getStateLabels();
+                        labels = labels.substr(0,n);
+                        td.getCharacter(i).setStateLabels(labels);
+                    }
                 }
                 else
                 {
