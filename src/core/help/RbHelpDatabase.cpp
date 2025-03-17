@@ -3414,7 +3414,18 @@ range(20,-20)
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
 	help_strings[string("readTaxonData")][string("name")] = string(R"(readTaxonData)");
 	help_strings[string("readTrace")][string("name")] = string(R"(readTrace)");
+	help_strings[string("readTreeTrace")][string("description")] = string(R"(Reads trees (Nexus or Newick accepted) from a file or folder containing a set of trees and saves them in one object. If a folder is provided, all the files that contain trees in that directory are read in the same object.)");
+	help_strings[string("readTreeTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument)");
+	help_strings[string("readTreeTrace")][string("example")] = string(R"(# read a tree trace
+tree_trace=readTreeTrace("my_filename.tree", treetype = "clock", burnin=0.5)
+
+# make a summary MCC tree
+map_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_strings[string("readTreeTrace")][string("name")] = string(R"(readTreeTrace)");
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrace)"));
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readCharacterData)"));
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrees)"));
+	help_strings[string("readTreeTrace")][string("title")] = string(R"(Function to read in a treeTrace, usually produced as the output of an MCMC.)");
 	help_arrays[string("readTrees")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("readTrees")][string("description")] = string(R"(Reads trees from a file containing trees (Nexus, Phylip or Newick accepted), or from a string containing Newick representations of trees.)");
 	help_strings[string("readTrees")][string("details")] = string(R"(Either a file name (with the file argument) or a string (with the text argument) must be provided as argument. If both are provided, trees will be read from both sources.)");
