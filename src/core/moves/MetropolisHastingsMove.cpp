@@ -266,13 +266,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // These are the nodes that are (indirectly) affected.
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
 
+    // 0. Initial checks and debug logging.
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
     std::map<const DagNode*, double> initialPdfs;
     if (logMCMC >= 3 or debugMCMC >= 1)
-	initialPdfs = getNodePrs(nodes, affected_nodes);
+    	initialPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {

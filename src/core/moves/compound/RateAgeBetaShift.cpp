@@ -118,14 +118,13 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
 
     // 0. Initial checks and debug logging.
-
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
     std::map<const DagNode*, double> initialPdfs;
     if (logMCMC >= 3 or debugMCMC >= 1)
-	initialPdfs = getNodePrs(nodes, affected_nodes);
+    	initialPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {
@@ -156,7 +155,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
 
     // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
     Tree& tau = tree->getValue();
 
@@ -165,21 +164,21 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         return;
     }
 
-    // 1. pick a random node which is not the root and neithor the direct descendant of the root
+    // 1. pick a random node which is not the root, a tip, or a sampled ancestor
     TopologyNode* node;
     size_t node_idx = 0;
     do {
         double u = rng->uniform01();
         node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_idx);
-    } while ( node->isRoot() || node->isTip()  || node -> isSampledAncestorParent() );
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestorParent() );
     
     TopologyNode& parent = node->getParent();
 
     // 2. we need to work with the times
-    double parent_age  = parent.getAge();
-    double my_age      = node->getAge();
-    double child_Age   = std::max(node->getChild( 0 ).getAge(), node->getChild( 1 ).getAge());
+    double parent_age = parent.getAge();
+    double my_age     = node->getAge();
+    double child_Age  = std::max(node->getChild( 0 ).getAge(), node->getChild( 1 ).getAge());
 
     // now we store all necessary values
     stored_node = node;
@@ -214,7 +213,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     // get the probability ratio of the tree
     double tree_prob_ratio = tree->getLnProbabilityRatio();
-
 
     // 5. set the rates
     double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
