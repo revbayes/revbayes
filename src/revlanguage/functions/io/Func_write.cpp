@@ -129,7 +129,7 @@ const ArgumentRules& Func_write::getArgumentRules( void ) const
         argumentRules.push_back( new Ellipsis( "Additional variables to write.", RevObject::getClassTypeSpec() ) );
         argumentRules.push_back( new ArgumentRule( "filename" , RlString::getClassTypeSpec() , "Output will be written to this file, or to the screen if no value is provided.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
         argumentRules.push_back( new ArgumentRule( "append"   , RlBoolean::getClassTypeSpec(), "Append or overwrite existing file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        argumentRules.push_back( new ArgumentRule( "separator", RlString::getClassTypeSpec() , "Character(s) with which to separate written variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\\t (tab)") ) );
+        argumentRules.push_back( new ArgumentRule( "separator", RlString::getClassTypeSpec() , "Character(s) with which to separate written variables.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("\t") ) );
         rules_set = true;
     }
     
