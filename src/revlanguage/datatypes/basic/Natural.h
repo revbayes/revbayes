@@ -7,7 +7,6 @@
 #include <string>
 
 
-
 namespace RevLanguage {
 
     class RealPos;
@@ -25,7 +24,7 @@ namespace RevLanguage {
         Natural(void);                                                                                      //!< Default constructor (value is 0)
         Natural(RevBayesCore::TypedDagNode<long> *v);                                                       //!< Constructor with DAG node
         Natural(long x);                                                                                    //!< Constructor from int
-//        Natural(unsigned long x);                                                                           //!< Constructor from size_t
+//        Natural(std::uint64_t x);                                                                           //!< Constructor from size_t
 
         // Basic operator functions
         RevObject*                  add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements

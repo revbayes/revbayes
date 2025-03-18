@@ -107,7 +107,7 @@ namespace RevBayesCore {
         std::vector<std::vector<double> >                                   historyLikelihoods;
 
         // the data
-        std::vector<std::vector<unsigned long> >                            charMatrix;
+        std::vector<std::vector<std::uint64_t> >                            charMatrix;
         std::vector<std::vector<bool> >                                     gapMatrix;
         std::vector<BranchHistory*>                                         histories;
         std::vector<std::vector<double> >                                   tipProbs;

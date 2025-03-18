@@ -6,6 +6,7 @@
 
 #include <ostream>
 #include <string>
+#include <cstdint>
 
 namespace RevLanguage {
     
@@ -17,7 +18,7 @@ namespace RevLanguage {
         Integer(void);                                                                                          //!< Default constructor
         Integer(RevBayesCore::TypedDagNode<long> *v);                                                           //!< Constructor from DAG node
         Integer(long v);                                                                                        //!< Constructor from long
-//        Integer(unsigned long v);                                                                               //!< Constructor from unsigned long
+//        Integer(std::uint64_t v);                                                                               //!< Constructor from std::uint64_t
 
         // Basic operator functions
         virtual RevObject*              add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements
