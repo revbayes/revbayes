@@ -32,7 +32,7 @@ AncestralStateTrace::AncestralStateTrace() : WorkspaceToCoreWrapperObject<RevBay
 {
 
 	ArgumentRules* summarizeArgRules = new ArgumentRules();
-    summarizeArgRules->push_back( new ArgumentRule("burnin", Natural::getClassTypeSpec(), "The number of iterations to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0LL)) );
+    summarizeArgRules->push_back( new ArgumentRule("burnin", Natural::getClassTypeSpec(), "The number of iterations to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0)) );
     
 }
 
@@ -41,7 +41,7 @@ AncestralStateTrace::AncestralStateTrace() : WorkspaceToCoreWrapperObject<RevBay
 AncestralStateTrace::AncestralStateTrace(const RevBayesCore::AncestralStateTrace& m) : WorkspaceToCoreWrapperObject<RevBayesCore::AncestralStateTrace>( new RevBayesCore::AncestralStateTrace( m ) ) {
     
 	ArgumentRules* summarizeArgRules = new ArgumentRules();
-    summarizeArgRules->push_back( new ArgumentRule("burnin", Natural::getClassTypeSpec(), "The number of iterations to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0LL)) );
+    summarizeArgRules->push_back( new ArgumentRule("burnin", Natural::getClassTypeSpec(), "The number of iterations to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0)) );
 
 }
 

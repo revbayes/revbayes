@@ -22,9 +22,10 @@ namespace RevLanguage {
 
         public:
         Natural(void);                                                                                      //!< Default constructor (value is 0)
-        Natural(RevBayesCore::TypedDagNode<std::int64_t> *v);                                                       //!< Constructor with DAG node
-        Natural(std::int64_t x);                                                                                    //!< Constructor from int
-//        Natural(std::uint64_t x);                                                                           //!< Constructor from size_t
+        Natural(RevBayesCore::TypedDagNode<std::int64_t> *v);                                               //!< Constructor with DAG node
+        Natural(std::int64_t x);                                                                            //!< Constructor from int
+        template <typename T, typename U=std::enable_if_t<std::is_integral_v<T>,T>> Natural(T v):           //!< Constructor from T
+            Natural(std::int64_t(v)) {}
 
         // Basic operator functions
         RevObject*                  add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements

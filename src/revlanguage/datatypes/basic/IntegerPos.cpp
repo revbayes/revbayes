@@ -18,7 +18,7 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-IntegerPos::IntegerPos( void ) : Natural( 0LL )
+IntegerPos::IntegerPos( void ) : Natural( 0 )
 {
 
 }
@@ -40,7 +40,6 @@ IntegerPos::IntegerPos( std::int64_t x ) : Natural( x )
     }
     
 }
-
 
 /**
  * Generic addition operator.

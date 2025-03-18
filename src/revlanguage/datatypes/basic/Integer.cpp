@@ -46,7 +46,6 @@ Integer::Integer(std::int64_t v) : ModelObject<std::int64_t>( new std::int64_t(v
 
 }
 
-
 /**
  * Generic addition operator.
  * We test if the rhs is of a type that we use for a specialized addition operation.
