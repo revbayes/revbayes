@@ -18,7 +18,7 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-Natural::Natural( void ) : Integer( 0L )
+Natural::Natural( void ) : Integer( 0LL )
 {
 
 }

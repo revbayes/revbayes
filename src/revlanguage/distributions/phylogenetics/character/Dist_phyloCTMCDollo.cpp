@@ -310,7 +310,7 @@ const MemberRules& Dist_phyloCTMCDollo::getParameterRules(void) const
         ModelVector<RealPos> *defaultSiteRates = new ModelVector<RealPos>();
         dist_member_rules.push_back( new ArgumentRule( "siteRates", ModelVector<RealPos>::getClassTypeSpec(), "The rate categories for the sites.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultSiteRates ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "nSites", Natural::getClassTypeSpec(), "The number of sites, used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
+        dist_member_rules.push_back( new ArgumentRule( "nSites", Natural::getClassTypeSpec(), "The number of sites, used for simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0LL) ) );
         std::vector<std::string> options;
         options.push_back( "Standard" );
         options.push_back( "Binary" );

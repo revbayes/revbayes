@@ -18,7 +18,7 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-IntegerPos::IntegerPos( void ) : Natural( 0L )
+IntegerPos::IntegerPos( void ) : Natural( 0LL )
 {
 
 }
