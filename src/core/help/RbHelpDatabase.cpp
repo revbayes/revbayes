@@ -2922,7 +2922,20 @@ mvRandomNaturalWalk)");
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
 	help_strings[string("mvRandomNaturalWalk")][string("title")] = string(R"(Random walk on natural numbers)");
+	help_strings[string("mvRateAgeBetaShift")][string("description")] = string(R"(Resample a single node age and adjust neighboring rates to preserve distances)");
+	help_strings[string("mvRateAgeBetaShift")][string("details")] = string(R"(This move first selects a tree node that is not a tip or the root of the tree.
+
+The age of the tree node is resampled from the interval
+   [max(child1.age, child2.age), parent.age]
+using a Beta distribution.
+
+The rates of the parent edge and two child edges are then modified to ensure that the rate*time
+remains unchanged for the tree branches.)");
+	help_strings[string("mvRateAgeBetaShift")][string("example")] = string(R"(moves.append( mvRateAgeBetaShift(tree=timetree, rates=branch_rates, tune=true, weights=n_taxa ) ))");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
+	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeProposal)"));
+	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
+	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
 	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
 	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
