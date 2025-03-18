@@ -12,12 +12,12 @@ namespace RevLanguage {
     
     class Real;
 
-    class Integer : public ModelObject<long> {
+    class Integer : public ModelObject<std::int64_t> {
 
     public:
         Integer(void);                                                                                          //!< Default constructor
-        Integer(RevBayesCore::TypedDagNode<long> *v);                                                           //!< Constructor from DAG node
-        Integer(long v);                                                                                        //!< Constructor from long
+        Integer(RevBayesCore::TypedDagNode<std::int64_t> *v);                                                           //!< Constructor from DAG node
+        Integer(std::int64_t v);                                                                                        //!< Constructor from std::int64_t
 //        Integer(std::uint64_t v);                                                                               //!< Constructor from std::uint64_t
 
         // Basic operator functions

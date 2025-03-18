@@ -321,7 +321,7 @@ std::vector<unsigned int> PhylowoodNhxMonitor::getParentCharacterCounts(size_t i
     return parentCharacterCounts[idx];
 }
 
-long PhylowoodNhxMonitor::getNumSamples(void)
+std::int64_t PhylowoodNhxMonitor::getNumSamples(void)
 {
     return numSamples;
 }

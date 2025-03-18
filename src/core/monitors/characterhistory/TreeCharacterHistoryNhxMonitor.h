@@ -40,7 +40,7 @@ namespace RevBayesCore {
         void                                    printHeader(void);                                                  //!< Print header
         std::vector<unsigned int>               getChildCharacterCounts(int idx);
         std::vector<unsigned int>               getParentCharacterCounts(int idx);
-        long                                    getNumSamples(void);
+        std::int64_t                                    getNumSamples(void);
         
     private:
         std::string                             buildExtendedNewick();
@@ -74,9 +74,9 @@ namespace RevBayesCore {
         bool                                append;
         bool                                showMetadata;
         bool                                showRates;
-        long                                numSamples;
+        std::int64_t                                numSamples;
         std::uint64_t                       maxGen;
-        long                                burn;
+        std::int64_t                                burn;
         
     };
     
@@ -428,7 +428,7 @@ std::vector<unsigned int> RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>
 }
 
 template<class charType>
-long RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::getNumSamples(void)
+std::int64_t RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::getNumSamples(void)
 {
     return numSamples;
 }

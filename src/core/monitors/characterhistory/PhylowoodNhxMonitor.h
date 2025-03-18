@@ -40,7 +40,7 @@ template <class variableType> class StochasticNode;
         void                                printHeader(void);                                                  //!< Print header
         std::vector<unsigned int>           getChildCharacterCounts(size_t idx);
         std::vector<unsigned int>           getParentCharacterCounts(size_t idx);
-        long                                getNumSamples(void);
+        std::int64_t                                getNumSamples(void);
         
     private:
         std::string                         buildExtendedNewick();
@@ -72,9 +72,9 @@ template <class variableType> class StochasticNode;
         bool                                append;
         bool                                showMetadata;
         bool                                showRates;
-        long                                numSamples;
+        std::int64_t                                numSamples;
         std::uint64_t                       maxGen;
-        long                                burn;
+        std::int64_t                                burn;
         
     };
     

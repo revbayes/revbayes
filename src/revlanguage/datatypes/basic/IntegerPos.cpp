@@ -24,14 +24,14 @@ IntegerPos::IntegerPos( void ) : Natural( 0L )
 }
 
 
-IntegerPos::IntegerPos( RevBayesCore::TypedDagNode<long> *v ) : Natural( v )
+IntegerPos::IntegerPos( RevBayesCore::TypedDagNode<std::int64_t> *v ) : Natural( v )
 {
     
 }
 
 
 /** Construct from Natural */
-IntegerPos::IntegerPos( long x ) : Natural( x )
+IntegerPos::IntegerPos( std::int64_t x ) : Natural( x )
 {
 
     if ( x < 1 )

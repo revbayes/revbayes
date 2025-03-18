@@ -124,18 +124,18 @@ RevBayesCore::PhyloCTMCClado<charType>::PhyloCTMCClado(const TypedDagNode<Tree> 
 //    et.push_back("s");
 //    et.push_back("a");
     
-//    const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states 
+//    const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states 
     
     
     // create a dummy matrix of identical cladogenetic inheritance triplets
-    RevBayesCore::RbVector<RevBayesCore::RbVector<long> >* clado_events_mtx_tmp = new RevBayesCore::RbVector<RevBayesCore::RbVector<long> >();
+    RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> >* clado_events_mtx_tmp = new RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> >();
     for (size_t i = 0; i < nChars; i++) {
-        clado_events_mtx_tmp->push_back( RevBayesCore::RbVector<long>(3, i) );
+        clado_events_mtx_tmp->push_back( RevBayesCore::RbVector<std::int64_t>(3, i) );
     }
     
     // populate a dummy node with those events
-    TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* clado_events_tmp;
-    clado_events_tmp = new RevBayesCore::ConstantNode< RevBayesCore::RbVector< RevBayesCore::RbVector<long> > >(".cladogenetic_events", clado_events_mtx_tmp);
+    TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* clado_events_tmp;
+    clado_events_tmp = new RevBayesCore::ConstantNode< RevBayesCore::RbVector< RevBayesCore::RbVector<std::int64_t> > >(".cladogenetic_events", clado_events_mtx_tmp);
     
     // populate a dummy event probs vector where each event has prob = 1
     TypedDagNode< RevBayesCore::RbVector<double> >* clado_probs_tmp;

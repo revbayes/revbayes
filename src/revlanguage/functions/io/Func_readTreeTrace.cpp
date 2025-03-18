@@ -90,10 +90,10 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     bool unroot_nonclock = static_cast<const RlBoolean&>( args[arg_unroot_nonclock].getVariable()->getRevObject() ).getValue();
 
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
-    long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
-    long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
+    std::int64_t                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
+    std::int64_t                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
     bool                nexus    = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
-    long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
+    std::int64_t                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
     std::vector<RevBayesCore::path> vectorOfFileNames;
     
@@ -195,7 +195,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         throw RbException("Unknown tree type to read.");
     }
     
-    long burnin = 0;
+    std::int64_t burnin = 0;
 
     RevObject& b = args[arg_index_burnin].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
@@ -218,7 +218,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
-            burnin = long( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
+            burnin = std::int64_t( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
 
             (*rv)[i].getValue().setBurnin(burnin);
         }
@@ -330,7 +330,7 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, const std::string& treetype, bool unroot_nonclock, long thinning, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, const std::string& treetype, bool unroot_nonclock, std::int64_t thinning, std::int64_t offset)
 {
     bool clock = (treetype == "clock");
 
@@ -499,7 +499,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, const string& treetype, bool unroot_nonclock, long thin, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, const string& treetype, bool unroot_nonclock, std::int64_t thin, std::int64_t offset)
 {
     std::vector<TraceTree> data;
 

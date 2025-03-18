@@ -2863,7 +2863,7 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvNodeTimeSlideUniform")][string("name")] = string(R"(mvNodeTimeSlideUniform)");
 	help_strings[string("mvNodeTimeSlideUniformAgeConstrained")][string("name")] = string(R"(mvNodeTimeSlideUniformAgeConstrained)");
 	help_strings[string("mvRJSwitch")][string("name")] = string(R"(mvRJSwitch)");
-	help_strings[string("mvRandomDive")][string("description")] = string(R"(The multiplicative proposal of Dutta 2012, allows for long-distance moves.
+	help_strings[string("mvRandomDive")][string("description")] = string(R"(The multiplicative proposal of Dutta 2012, allows for std::int64_t-distance moves.
 
 Useful for fat-tailed distributions, possibly for bimoodal distributions.
 

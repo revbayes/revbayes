@@ -20,7 +20,7 @@
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so long as that work isn't itself a
+   under terms of your choice, so std::int64_t as that work isn't itself a
    parser generator using the skeleton or a modified version thereof
    as a parser skeleton.  Alternatively, if you modify or redistribute
    the parser skeleton itself, you may (at your option) remove this
@@ -387,7 +387,7 @@ typedef int yytype_uint16;
 #  define YYPTRDIFF_T ptrdiff_t
 #  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
 # else
-#  define YYPTRDIFF_T long
+#  define YYPTRDIFF_T std::int64_t
 #  define YYPTRDIFF_MAXIMUM LONG_MAX
 # endif
 #endif
@@ -1888,7 +1888,7 @@ yysetstate:
 
       YY_IGNORE_USELESS_CAST_BEGIN
       YYDPRINTF ((stderr, "Stack size increased to %ld\n",
-                  YY_CAST (long, yystacksize)));
+                  YY_CAST (std::int64_t, yystacksize)));
       YY_IGNORE_USELESS_CAST_END
 
       if (yyss + yystacksize - 1 <= yyssp)

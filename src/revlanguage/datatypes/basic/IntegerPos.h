@@ -23,8 +23,8 @@ namespace RevLanguage {
 
         public:
         IntegerPos(void);                                                                                      //!< Default constructor (value is 0)
-        IntegerPos(RevBayesCore::TypedDagNode<long> *v);                                                       //!< Constructor with DAG node
-        IntegerPos(long x);                                                                                    //!< Constructor from int
+        IntegerPos(RevBayesCore::TypedDagNode<std::int64_t> *v);                                                       //!< Constructor with DAG node
+        IntegerPos(std::int64_t x);                                                                                    //!< Constructor from int
 //        Natural(std::uint64_t x);                                                                           //!< Constructor from size_t
 
         // Basic operator functions

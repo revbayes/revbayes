@@ -188,7 +188,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 			{
 				// add the extinct node to the active nodes list, remove it from the extinct nodes list
 				active_nodes.push_back( extinct_nodes.at(j) );
-				extinct_nodes.erase( extinct_nodes.begin() + long(j) );
+				extinct_nodes.erase( extinct_nodes.begin() + std::int64_t(j) );
 			}
 		}
 
@@ -197,14 +197,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 		TopologyNode* leftChild = active_nodes.at(left);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(left) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(left) );
 
 		// randomly draw one child (arbitrarily called left) node from the list of active nodes
 		size_t right = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
 		TopologyNode* rightChild = active_nodes.at(right);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(right) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(right) );
 
 		// add the parent
 		size_t num_taxa = taxa.size();

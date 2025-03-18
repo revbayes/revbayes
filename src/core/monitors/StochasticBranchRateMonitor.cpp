@@ -71,7 +71,7 @@ void StochasticBranchRateMonitor::monitorVariables(std::uint64_t gen)
 	std::vector<double> extinction;
 	std::vector<double> sampling;
 	std::vector<double> destructive_sampling;
-    std::vector<long>   n_shifts;
+    std::vector<std::int64_t>   n_shifts;
 
     size_t num_nodes = cdbdp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
@@ -137,7 +137,7 @@ void StochasticBranchRateMonitor::printFileHeader()
     std::vector<double> extinction;
     std::vector<double> sampling;
     std::vector<double> destructive_sampling;
-    std::vector<long>   n_shifts;
+    std::vector<std::int64_t>   n_shifts;
 
     size_t num_nodes = cdbdp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );

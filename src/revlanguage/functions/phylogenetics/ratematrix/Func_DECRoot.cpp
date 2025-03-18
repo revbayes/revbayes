@@ -75,7 +75,7 @@ RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_DECRoot::createFuncti
         rs = new RevBayesCore::ConstantNode<RevBayesCore::Simplex>("", new RevBayesCore::Simplex(n,p));
     }
     
-//    RevBayesCore::TypedDagNode<long>* mrs = static_cast<const Natural&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+//    RevBayesCore::TypedDagNode<std::int64_t>* mrs = static_cast<const Natural&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::DispersalExtinctionRootStructureFunction* f = new RevBayesCore::DispersalExtinctionRootStructureFunction( rf,rs );
     

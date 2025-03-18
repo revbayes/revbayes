@@ -27,13 +27,13 @@
 using namespace RevLanguage;
 
 /* Default constructor */
-Integer::Integer(void) : ModelObject<long>()
+Integer::Integer(void) : ModelObject<std::int64_t>()
 {
     
 }
 
 
-Integer::Integer( RevBayesCore::TypedDagNode<long> *v ) : ModelObject<long>( v )
+Integer::Integer( RevBayesCore::TypedDagNode<std::int64_t> *v ) : ModelObject<std::int64_t>( v )
 {
     
 }
@@ -41,7 +41,7 @@ Integer::Integer( RevBayesCore::TypedDagNode<long> *v ) : ModelObject<long>( v )
 
 
 /* Construct from int */
-Integer::Integer(long v) : ModelObject<long>( new long(v) )
+Integer::Integer(std::int64_t v) : ModelObject<std::int64_t>( new std::int64_t(v) )
 {
 
 }
@@ -64,7 +64,7 @@ RevObject* Integer::add( const RevObject& rhs ) const
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
         return add( static_cast<const Integer&>( rhs ) );
     
-    return ModelObject<long>::add( rhs );
+    return ModelObject<std::int64_t>::add( rhs );
 }
 
 
@@ -164,7 +164,7 @@ RevObject* Integer::divide( const RevObject& rhs ) const
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
         return divide( static_cast<const Integer&>( rhs ) );
     
-    return ModelObject<long>::divide( rhs );
+    return ModelObject<std::int64_t>::divide( rhs );
 }
 
 
@@ -314,7 +314,7 @@ RevObject* Integer::multiply( const RevObject& rhs ) const
         return multiply( static_cast<const Integer&>( rhs ) );
     }
     
-    return ModelObject<long>::multiply( rhs );
+    return ModelObject<std::int64_t>::multiply( rhs );
 }
 
 
@@ -373,7 +373,7 @@ RevObject* Integer::subtract( const RevObject& rhs ) const
         return subtract( static_cast<const Integer&>( rhs ) );
     }
     
-    return ModelObject<long>::subtract( rhs );
+    return ModelObject<std::int64_t>::subtract( rhs );
 }
 
 
