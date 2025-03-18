@@ -4,18 +4,18 @@ fnCovarion
 The Covarion model rate matrix.
 ## description
 The `fnCovarion` function defines a covarion model rate matrix for character evolution.
-The resulting rate matrix incorporates rate heterogeniety where the characters/sites are allowed to move between rate categories with a switching rate.
+The resulting rate matrix incorporates rate heterogeneity where the characters/sites are allowed to move between rate categories with a switching rate.
 
 ## details
-The covarion model allows for variation in evolutionary rates across sites over time, accomodating shifts in character state evolution.
+The covarion model allows for variation in evolutionary rates across sites over time, accommodating shifts in character state evolution.
 
 ## authors
 Sebastian Hoehna and Lyndon Coghill
 
 ## see_also
-`fnJC` - Jukes-Cantor Model
+fnJC
 
-`fnF81` - Felsenstein 1981 Model
+fnF81
 
 ## example
     # define number of rate categories
