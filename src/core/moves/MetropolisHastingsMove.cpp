@@ -341,8 +341,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
     {
-        if (fail_probability) break;
-
         if (not node->isStochastic()) continue;
 
         double ratio = 0;
