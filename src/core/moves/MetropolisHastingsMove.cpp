@@ -366,7 +366,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             if ( e.getExceptionType() != RbException::MATH_ERROR )
                 throw;
 
-            ratio = RbConstants::Double::neginf;
+            ratio = RbConstants::Double::nan;
         }
 
         if ( node->isClamped() )
