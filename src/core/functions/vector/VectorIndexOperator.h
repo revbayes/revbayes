@@ -51,26 +51,6 @@ namespace RevBayesCore {
         const TypedDagNode< Simplex >*                      value_simplex;
 
     };
-
-
-    template<>
-    inline void                                                    VectorIndexOperator<double>::update( void )
-    {
-
-        const RbVector<double> &v = (value_vector != NULL ? value_vector->getValue() : value_simplex->getValue());
-        size_t idx = size_t(index->getValue());
-
-        if ( idx < 1 || idx > v.size() )
-        {
-            std::stringstream ss_err;
-            ss_err << "Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
-            throw RbException(ss_err.str());
-        }
-
-        delete this->value;
-        this->value = new double( v[idx - 1] );
-    }
-   
 }
 
 
@@ -123,19 +103,25 @@ RevBayesCore::VectorIndexOperator<valueType>* RevBayesCore::VectorIndexOperator<
 template <class valueType>
 void RevBayesCore::VectorIndexOperator<valueType>::update( void )
 {
+    const RbVector<valueType> *v;
 
-    const RbVector<valueType> &v = value_vector->getValue();
+    // If valueType is double, then the vector node might be `value_simplex` instead of `value_vector`.
+    if constexpr (std::is_same_v<valueType,double>)
+        v = (value_vector != NULL ? &value_vector->getValue() : &value_simplex->getValue());
+    else
+        v = &value_vector->getValue();
+
     auto idx = index->getValue();
 
-    if ( idx < 1 || idx > v.size() )
+    if ( idx < 1 || idx > v->size() )
     {
         // This is a MATH_ERROR to avoid stopping MCMC when we propose an out-of-range index during MCMC.
-        auto err = RbException(RbException::MATH_ERROR)<<"Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
+        auto err = RbException(RbException::MATH_ERROR)<<"Index out of bounds: The vector of size " << v->size() << " does not have an element for index " << idx << ".";
         throw err;
     }
 
     delete this->value;
-    this->value = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v[idx - 1] );
+    this->value = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( (*v)[idx - 1] );
 }
 
 
