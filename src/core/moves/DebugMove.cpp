@@ -5,6 +5,7 @@
 #include "DebugMove.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
+#include "RbConstants.h"
 
 using namespace RevBayesCore;
 
@@ -14,7 +15,19 @@ std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, 
 {
     std::map<const DagNode*, double> Prs;
     for(auto node: views::concat(nodes, affected_nodes))
-	Prs.insert({node, node->getLnProbability()});
+    {
+        double lnPr = RbConstants::Double::nan;
+        try
+        {
+            lnPr = node->getLnProbability();
+        }
+        catch (RbException& e)
+        {
+            if (e.getExceptionType() != RbException::MATH_ERROR)
+                throw;
+        }
+        Prs.insert({node, lnPr});
+    }
     return Prs;
 }
 
