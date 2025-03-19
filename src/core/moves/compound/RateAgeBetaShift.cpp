@@ -129,8 +129,11 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     if (logMCMC >= 3)
     {
         std::cerr<<std::setprecision(11);
-        for(auto& [node,pr]: initialPdfs)
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = initialPdfs.at(node);
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
@@ -288,8 +291,12 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+        auto proposedPrs = getNodePrs(nodes, affected_nodes);
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = proposedPrs.at(node);
             std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
@@ -378,8 +385,11 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: finalPdfs)
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = finalPdfs.at(node);
             std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
