@@ -125,13 +125,13 @@ void RevBayesCore::VectorIndexOperator<valueType>::update( void )
 {
 
     const RbVector<valueType> &v = value_vector->getValue();
-    size_t idx = size_t(index->getValue());
+    auto idx = index->getValue();
 
     if ( idx < 1 || idx > v.size() )
     {
-        std::stringstream ss_err;
-        ss_err << "Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
-        throw RbException(ss_err.str());
+        // This is a MATH_ERROR to avoid stopping MCMC when we propose an out-of-range index during MCMC.
+        auto err = RbException(RbException::MATH_ERROR)<<"Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
+        throw err;
     }
 
     delete this->value;
