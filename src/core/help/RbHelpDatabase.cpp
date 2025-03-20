@@ -1467,7 +1467,7 @@ print(categories))");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
 	help_strings[string("fnDiscretizeDistribution")][string("description")] = string(R"(`fnDiscretizeDistribution` transforms a continuous probability distribution into a discrete one by dividing it into a specified number of categories.)");
 	help_strings[string("fnDiscretizeDistribution")][string("details")] = string(R"(This function takes as two arguments: a continuous probability distribution and a specified number of categories (`num_cats`).
-It then yields a sequence of values that approximate the distribution, assuming that each bin represents an equal probability mass.)");
+It then yields a sequence of median values that approximate the distribution, assuming that each bin represents an equal probability mass.)");
 	help_strings[string("fnDiscretizeDistribution")][string("example")] = string(R"(# Using a Normal distribution to discretize it into 5 categories
 discrete_values := fnDiscretizeDistribution( dnNormal( 0.0, 1.0 ), 5 )
 
@@ -2489,6 +2489,7 @@ min(a)
 	help_strings[string("mnNexus")][string("name")] = string(R"(mnNexus)");
 	help_strings[string("mnProbability")][string("name")] = string(R"(mnProbability)");
 	help_strings[string("mnScreen")][string("name")] = string(R"(mnScreen)");
+	help_strings[string("mnScreen")][string("title")] = string(R"(Monitor for the screen)");
 	help_strings[string("mnStochasticBranchRate")][string("name")] = string(R"(mnStochasticBranchRate)");
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");

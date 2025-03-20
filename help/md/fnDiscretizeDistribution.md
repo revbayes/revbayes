@@ -7,7 +7,7 @@ Discretize a Continuous Distribution
 
 ## details
 This function takes as two arguments: a continuous probability distribution and a specified number of categories (`num_cats`).
-It then yields a sequence of values that approximate the distribution, assuming that each bin represents an equal probability mass.
+It then yields a sequence of median values that approximate the distribution, assuming that each bin represents an equal probability mass.
 
 ## authors
 ## see_also
