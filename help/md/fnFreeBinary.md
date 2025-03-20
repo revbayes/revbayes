@@ -17,6 +17,9 @@ This function enables the user to define the non-normalized off-diagonal element
 0 and 1 represent our 2 states:
 Q = [[-q_{01}, q_{01}],[q_{10}, -q_{10}]]
 
+When len(transiton_rates) = 1, the single element will get recycled.
+When len(transition_rates) > 2, everything after the first two elements in the vector will be ignored.
+
 ## authors
 
 ## see_also
