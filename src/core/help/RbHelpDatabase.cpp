@@ -3370,7 +3370,15 @@ mymcmc.operatorSummary())");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
 	help_strings[string("posteriorPredictiveProbability")][string("name")] = string(R"(posteriorPredictiveProbability)");
 	help_strings[string("posteriorPredictiveSimulation")][string("name")] = string(R"(posteriorPredictiveSimulation)");
+	help_arrays[string("power")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("power")][string("description")] = string(R"(The function raises any real number to a power.)");
+	help_strings[string("power")][string("details")] = string(R"(This function accepts two arguments: one real number (the base) and a second real number (the exponenent).)");
+	help_strings[string("power")][string("example")] = string(R"(# Raise 2 to the 3rd power
+    x<-2
+    power(x, 3))");
 	help_strings[string("power")][string("name")] = string(R"(power)");
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(log)"));
+	help_strings[string("power")][string("title")] = string(R"(power)");
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
@@ -4169,7 +4177,22 @@ var(x))");
 	help_arrays[string("var")][string("see_also")].push_back(string(R"(median)"));
 	help_strings[string("var")][string("title")] = string(R"(Variance)");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
+	help_arrays[string("write")][string("authors")].push_back(string(R"(The RevBayes Development Core Team)"));
+	help_strings[string("write")][string("description")] = string(R"(This function write values in a RevObject to a file specified by the user.)");
+	help_strings[string("write")][string("details")] = string(R"(This function accepts multiple RevObjects in the first arguments to be written to a file.
+After this, users can specify the filename with a string which can include the directory path
+to where the file should be made. Users can also specify whether to append or overwrite the file
+using a boolean operator (default is false). Lastly, a seperator can be specified using a string
+for specifying how to separate values in the RevObject (default is "").)");
+	help_strings[string("write")][string("example")] = string(R"(
+# define RevObject to write
+    x <- matrix([[1, 1],[1, 1]])
+# write to CSV file
+    write(x, "/path/to/file/filenmae.csv", false, ","))");
 	help_strings[string("write")][string("name")] = string(R"(write)");
+	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeDelimitedCharacterData)"));
+	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_strings[string("write")][string("title")] = string(R"(Write RevObject to file)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
