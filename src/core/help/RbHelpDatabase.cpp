@@ -1406,7 +1406,43 @@ Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
 	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
 	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
+	help_arrays[string("fnCovarion")][string("authors")].push_back(string(R"(Sebastian Hoehna and Lyndon Coghill)"));
+	help_strings[string("fnCovarion")][string("description")] = string(R"(The `fnCovarion` function defines a covarion model rate matrix for character evolution.
+The resulting rate matrix incorporates rate heterogeneity where the characters/sites are allowed to move between rate categories with a switching rate.)");
+	help_strings[string("fnCovarion")][string("details")] = string(R"(The covarion model allows for variation in evolutionary rates across sites over time, accommodating shifts in character state evolution.)");
+	help_strings[string("fnCovarion")][string("example")] = string(R"(# define number of rate categories
+num_cats = 2
+
+# define rate scalars
+rate_scalars <- [ 0, 1.0 ]
+
+# obtain substitution model rate matrix for rescaling
+for ( i in 1:num_cats ) {
+  Q_sub[i] := fnJC( 4 )
+}
+
+# define switching rate
+switching_rate = 0.1
+
+for ( i in 1:num_cats ) {
+  for ( j in 1:num_cats ) {
+    if ( i == j ) {
+      switch_rates[i][j] := 0
+    } else {
+      switch_rates[i][j] := switching_rate
+    }
+  }
+}
+
+# finally construct the covarion rate matrix
+Q_Cov := fnCovarion(RateMatrices = Q_sub, RateScalars = rate_scalars, SwitchRates = switch_rates, rescaled = FALSE))");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
+	help_references[string("fnCovarion")].push_back(RbHelpReference(R"(Fitch, W. M., & Markowitz, E. (1970). An improved method for determining codon variability in a gene and its application to the rate of fixation of mutations in evolution. _Biochemical genetics_, 4, 579-593.)",R"(10.1007/BF00486096)",R"(https://doi.org/10.1007/BF00486096 )"));
+	help_references[string("fnCovarion")].push_back(RbHelpReference(R"(Tuffley, C., & Steel, M. (1998). Modeling the covarion hypothesis of nucleotide substitution. _Mathematical biosciences_, 147(1), 63-91.)",R"(10.1016/S0025-5564(97)00081-3)",R"(https://doi.org/10.1016/S0025-5564(97)00081-3 )"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_strings[string("fnCovarion")][string("title")] = string(R"(The Covarion model rate matrix.)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");
 	help_strings[string("fnDECCladoProbs")][string("name")] = string(R"(fnDECCladoProbs)");
@@ -1439,8 +1475,33 @@ print(categories))");
 	help_arrays[string("fnDiscretizeBeta")][string("see_also")].push_back(string(R"(A translation of `fnDiscretizeBeta` into R is available at https://gist.github.com/ms609/883632d10d4d80ea5391cee9c47071fc.)"));
 	help_strings[string("fnDiscretizeBeta")][string("title")] = string(R"(Disctetize a beta distribution)");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
+	help_strings[string("fnDiscretizeDistribution")][string("description")] = string(R"(`fnDiscretizeDistribution` transforms a continuous probability distribution into a discrete one by dividing it into a specified number of categories.)");
+	help_strings[string("fnDiscretizeDistribution")][string("details")] = string(R"(This function takes as two arguments: a continuous probability distribution and a specified number of categories (`num_cats`).
+It then yields a sequence of median values that approximate the distribution, assuming that each bin represents an equal probability mass.)");
+	help_strings[string("fnDiscretizeDistribution")][string("example")] = string(R"(# Using a Normal distribution to discretize it into 5 categories
+discrete_values := fnDiscretizeDistribution( dnNormal( 0.0, 1.0 ), 5 )
+
+# print the discretized values to the screen
+discrete_values)");
 	help_strings[string("fnDiscretizeDistribution")][string("name")] = string(R"(fnDiscretizeDistribution)");
+	help_arrays[string("fnDiscretizeDistribution")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
+	help_arrays[string("fnDiscretizeDistribution")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("fnDiscretizeDistribution")][string("see_also")].push_back(string(R"(fnDiscretizeBeta)"));
+	help_strings[string("fnDiscretizeDistribution")][string("title")] = string(R"(Discretize a Continuous Distribution)");
+	help_strings[string("fnDiscretizeGamma")][string("description")] = string(R"(`fnDiscretizeGamma` approximates a continuous gamma distribution by dividing it into a specified number of discrete categories (quantiles), using either the mean or the median of each interval.)");
+	help_strings[string("fnDiscretizeGamma")][string("details")] = string(R"(This function takes a gamma distribution parameterized by `shape` and `rate`, along with a specified number of categories (`numCats`).
+It then discretizes the distribution into `numCats` bins yielding a sequence of values, assuming that each bin represents an equal probability mass.
+The representative values for each category can be chosen based on either the mean or the median of the interval.)");
+	help_strings[string("fnDiscretizeGamma")][string("example")] = string(R"(# to obtain the mean of the quantiles
+alpha = 0.5
+
+discrete_values := fnDiscretizeGamma( shape = alpha, rate = alpha, numCats = 4, median = FALSE ))");
 	help_strings[string("fnDiscretizeGamma")][string("name")] = string(R"(fnDiscretizeGamma)");
+	help_references[string("fnDiscretizeGamma")].push_back(RbHelpReference(R"(Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306–314.)",R"(10.1007/BF00160154 usl: https://doi.org/10.1007/BF00160154 )",R"()"));
+	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeDistribution)"));
+	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeBeta)"));
+	help_strings[string("fnDiscretizeGamma")][string("title")] = string(R"(Discretize a Gamma distribution)");
 	help_strings[string("fnDiscretizeGammaFromBetaQuantiles")][string("name")] = string(R"(fnDiscretizeGammaFromBetaQuantiles)");
 	help_strings[string("fnDiscretizeGammaQuadrature")][string("name")] = string(R"(fnDiscretizeGammaQuadrature)");
 	help_strings[string("fnDiscretizeLognormalQuadrature")][string("name")] = string(R"(fnDiscretizeLognormalQuadrature)");
@@ -1576,6 +1637,27 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
 	help_strings[string("fnFMutSel0")][string("title")] = string(R"(The FMutSel0 model)");
+	help_strings[string("fnFreeBinary")][string("description")] = string(R"(Constructs a transition rate matrix between two states.)");
+	help_strings[string("fnFreeBinary")][string("details")] = string(R"(This function enables the user to define the non-normalized off-diagonal elements of the matrix while also providing the option to normalize the matrix. Normalization ensures that the mean instantaneous rate equals 1. For example, a branch of length 1 in a non-clock tree corresponds to an expected 1 substitution per character.
+ 
+ It takes in two arguments: 
+    (1) transition_rates (tr) - A vector of real numbers of length 2 that represents the rate of transition between states.
+    (2) rescaled - A boolean value that indicates whether or not the matrix should be normalized. Takes on TRUE by default.
+
+0 and 1 represent our 2 states:
+Q = [[-q_{01}, q_{01}],[q_{10}, -q_{10}]]
+
+When len(transition_rates) = 1, the single element will get recycled.
+When len(transition_rates) > 2, everything after the first two elements in the vector will be ignored.)");
+	help_strings[string("fnFreeBinary")][string("example")] = string(R"(# Under the ERM model
+rate_pr := phylogeny.treeLength() / 10
+mu ~ dnExp(rate_pr)
+
+moves.append( mvScale(mu, lambda=1, weight=2.0) )
+
+rate := rep(mu, 2)
+
+Q := fnFreeBinary(rate, rescaled=false))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
 	help_arrays[string("fnFreeK")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("fnFreeK")][string("description")] = string(R"(This function generates and returns a free rates matrix.)");
@@ -1616,6 +1698,8 @@ fnFreeK(x)
 [ [ -1.0000, 0.6000, 0.4000 ] ,
   [ 0.2000, -0.6000, 0.4000 ] ,
   [ 0.3000, 0.3000, -0.6000 ] ])");
+	help_arrays[string("fnFreeBinary")][string("see_also")].push_back(string(R"(fnFreeK)"));
+	help_strings[string("fnFreeBinary")][string("title")] = string(R"(Free Binary transition rate matrix)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(RateMatrix)"));
 	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeBinary)"));
@@ -2481,6 +2565,7 @@ min(a)
 	help_strings[string("mnNexus")][string("name")] = string(R"(mnNexus)");
 	help_strings[string("mnProbability")][string("name")] = string(R"(mnProbability)");
 	help_strings[string("mnScreen")][string("name")] = string(R"(mnScreen)");
+	help_strings[string("mnScreen")][string("title")] = string(R"(Monitor for the screen)");
 	help_strings[string("mnStochasticBranchRate")][string("name")] = string(R"(mnStochasticBranchRate)");
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
@@ -2939,7 +3024,20 @@ mvRandomNaturalWalk)");
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
 	help_strings[string("mvRandomNaturalWalk")][string("title")] = string(R"(Random walk on natural numbers)");
+	help_strings[string("mvRateAgeBetaShift")][string("description")] = string(R"(Resample a single node age and adjust neighboring rates to preserve distances)");
+	help_strings[string("mvRateAgeBetaShift")][string("details")] = string(R"(This move first selects a tree node that is not a tip or the root of the tree.
+
+The age of the tree node is resampled from the interval
+   [max(child1.age, child2.age), parent.age]
+using a Beta distribution.
+
+The rates of the parent edge and two child edges are then modified to ensure that the rate*time
+remains unchanged for the tree branches.)");
+	help_strings[string("mvRateAgeBetaShift")][string("example")] = string(R"(moves.append( mvRateAgeBetaShift(tree=timetree, rates=branch_rates, tune=true, weights=n_taxa ) ))");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
+	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeProposal)"));
+	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
+	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
 	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
 	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
@@ -3325,8 +3423,108 @@ mymcmc.operatorSummary())");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
 	help_strings[string("posteriorPredictiveProbability")][string("name")] = string(R"(posteriorPredictiveProbability)");
 	help_strings[string("posteriorPredictiveSimulation")][string("name")] = string(R"(posteriorPredictiveSimulation)");
+	help_arrays[string("power")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("power")][string("description")] = string(R"(The function raises any real number to a power.)");
+	help_strings[string("power")][string("details")] = string(R"(This function accepts two arguments: one real number (the base) and a second real number (the exponenent).)");
+	help_strings[string("power")][string("example")] = string(R"(# Raise 2 to the 3rd power
+    x<-2
+    power(x, 3))");
 	help_strings[string("power")][string("name")] = string(R"(power)");
+	help_arrays[string("power")][string("see_also")].push_back(string(R"(log)"));
+	help_strings[string("power")][string("title")] = string(R"(power)");
+	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
+	help_strings[string("powerPosterior")][string("description")] = string(R"(Samples from a series of "power posterior" distributions with the likelihood
+term raised to a power between 0 and 1. Such distributions are often used to
+estimate marginal likelihoods for model selection or hypothesis testing via
+Bayes factors (Gelman & Meng 1998; Friel & Pettitt 2008).)");
+	help_strings[string("powerPosterior")][string("details")] = string(R"(A power posterior analysis samples from a series of importance distributions of
+the form:
+    f_beta(theta | Y) = f(theta) x f(Y | theta)^beta
+    
+where theta jointly denotes the parameters of interest and Y denotes data, so
+f(theta) denotes the prior and f(Y | theta) denotes the likelihood. Since beta
+ranges from 0 to 1, the power posterior distributions form "stepping stones"
+along the path between the prior (beta = 0) and the posterior (beta = 1). For
+this reason, individual power posteriors are also referred to as stones, and
+the two main techniques that employ them to estimate marginal likelihoods are
+known as path sampling (Gelman & Meng 1998; Lartillot & Philippe 2006) and
+stepping-stone sampling (Fan et al. 2011; Xie et al. 2011).
+
+The user can either supply their own vector of beta powers using the `powers`
+argument, or just a number of power posteriors to sample from using the `cats`
+argument. In the latter case, if `cats=K`, the powers are calculated following
+Xie et al. (2011) as:
+    beta_i = [i / (K - 1)]^(1 / alpha) for i in K - 1, ..., 0
+    
+so that they correspond to evenly spaced quantiles of the Beta(alpha, 1)
+distribution, where the shape parameter `alpha` is a user-specified argument
+set to 0.2 by default. The samples from each distribution are recorded in a
+file with a base name specified by the `filename` argument and an automatically
+appended suffix equal to (K - i). The output file with the suffix "_stone_1" 
+will therefore contain samples from the actual posterior (beta = 1), while the
+file with the suffix "_stone_<K>" will contain samples from the prior. For 
+reasons of numerical stability, the beta of this final stone is not set exactly
+to 0 but to an extremely small positive number (~ 1.2e-302).
+
+The RevBayes implementation of power posterior analysis is fully parallelized
+(Hoehna et al. 2021). In general, after a common pre-burnin stage that should
+allow the sampler to converge to the posterior (see the `.burnin()` method),
+the `.run()` method will distribute the K stones among M available CPUs in such
+a way that each CPU handles floor(K/M) or ceiling(K/M) consecutive powers. This
+has the advantage of allowing the last sample for one power to be used as the
+starting state for the subsequent power. However, to account for the transition
+from one power to the next, each power posterior should still include a small
+burnin fraction (set to 0.25 by default and specified by the `burninFraction`
+argument to the `.run()` method). For example, with K = 50, M = 8, and a single
+CPU used for each likelihood computation (`procPerLikelihood=1`, by default),
+the individual power posteriors will be distributed among the CPUs as follows:
+
+    -----------------------------------------------------------------
+                        Filename suffix (= K - i)
+    -----------------------------------------------------------------
+    | CPU 1 | CPU 2 | CPU 3 | CPU 4 | CPU 5 | CPU 6 | CPU 7 | CPU 8 |
+    |-------|-------|-------|-------|-------|-------|-------|-------|
+    |   1   |   7   |   13  |   19  |   26  |   32  |   38  |   44  |
+    |   2   |   8   |   14  |   20  |   27  |   33  |   39  |   45  |
+    |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |
+    |   6   |   12  |   18  |   24  |   31  |   37  |   43  |   49  |
+    |       |       |       |   25  |       |       |       |   50  |
+
+More flexible strategies are enabled by the `.runOneStone()` method, which
+allows the user to execute a separate analysis for each power posterior.)");
+	help_strings[string("powerPosterior")][string("example")] = string(R"(# Create a simple model (unclamped)
+a ~ dnExponential(1)
+mymodel = model(a)
+
+# Create a move vector and a monitor vector
+moves[1] = mvScale(a, lambda = 1.0, weight = 1.0)
+monitors[1] = mnFile(a, filename = "output/out.log")
+
+# Create an analysis object to sample from 16 distributions
+pow_p = powerPosterior(mymodel, monitors, moves, "output/out.pp", cats=16, sampleFreq=1)
+
+# Execute a single power posterior ("stone"), or the entire analysis
+pow_p.burnin(generations=100, tuningInterval=50)                # pre-burnin
+pow_p.runOneStone(index=1, generations=20, burninFraction=0.1)  # run just the posterior
+pow_p.runOneStone(index=16, generations=20, burninFraction=0.1) # run just the prior
+pow_p.run(generations=20, burninFraction=0.1)                   # run all stones
+
+# Compute the marginal likelihood using the stepping-stone sampler
+ss = steppingStoneSampler(file="output/out.pp", powerColumnName="power",
+                          likelihoodColumnName="likelihood")
+ss.marginal())");
 	help_strings[string("powerPosterior")][string("name")] = string(R"(powerPosterior)");
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Fan Y, Wu R, Chen M-H, Kuo L, Lewis PO (2011). Choosing among partition models in Bayesian phylogenetics. Molecular Biology and Evolution, 28(1):523-532.)",R"(10.1093/molbev/msq224)",R"(https://academic.oup.com/mbe/article/28/1/523/983866 )"));
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Friel N, Pettitt AN (2008). Marginal likelihood estimation via power posteriors. Journal of the Royal Statistical Society Series B: Statistical Methodology, 70(3):589-607.)",R"(10.1111/j.1467-9868.2007.00650.x)",R"(https://academic.oup.com/jrsssb/article-abstract/70/3/589/7109555 )"));
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.)",R"(10.1214/ss/1028905934)",R"(https://www.jstor.org/stable/2676756 )"));
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Hoehna S, Landis MJ, Huelsenbeck JP (2021). Parallel power posterior analyses for fast computation of marginal likelihoods in phylogenetics. PeerJ, 9:e12438.)",R"(10.7717/peerj.12438)",R"(https://peerj.com/articles/12438/ )"));
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195–207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Xie W, Lewis PO, Fan Y, Kuo L, Chen M-H (2010). Improving marginal likelihood estimation for Bayesian phylogenetic model selection. Systematic Biology, 60(2):150-160.)",R"(10.1093/sysbio/syq085)",R"(https://academic.oup.com/sysbio/article-abstract/60/2/150/2461669 )"));
+	help_arrays[string("powerPosterior")][string("see_also")].push_back(string(R"(pathSampler)"));
+	help_arrays[string("powerPosterior")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
+	help_strings[string("powerPosterior")][string("title")] = string(R"(Power posterior analysis)");
 	help_arrays[string("printSeed")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("printSeed")][string("description")] = string(R"(Print the seed of the random number generator.)");
 	help_strings[string("printSeed")][string("example")] = string(R"(printSeed()
@@ -3529,6 +3727,14 @@ getwd())");
 	help_strings[string("simCompleteTree")][string("name")] = string(R"(simCompleteTree)");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
+	help_arrays[string("sin")][string("authors")].push_back(string(R"(Sigournie Brock)"));
+	help_strings[string("sin")][string("description")] = string(R"('sin' calculates the trigonometric ratio of the length of the side opposite the angle and length of the hypotenuse. 
+
+sin(x) = opposite/hypotenuse.)");
+	help_strings[string("sin")][string("example")] = string(R"(pi <- 3.1415926536
+sin(pi/2))");
+	help_strings[string("sin")][string("name")] = string(R"(sin)");
+	help_strings[string("sin")][string("title")] = string(R"(Apply the sine function to an angular input 'x' in radians.)");
 	help_strings[string("sinh")][string("name")] = string(R"(sinh)");
 	help_strings[string("sort")][string("description")] = string(R"(Function for sorting the members of a vector in either ascending or descending order.)");
 	help_strings[string("sort")][string("details")] = string(R"(The vector to be sorted can be of any numeric type. Ascending or descending is specified via the `ascending` argument)");
@@ -4046,7 +4252,22 @@ x_flat
 	help_arrays[string("vectorFlatten")][string("see_also")].push_back(string(R"(v)"));
 	help_arrays[string("vectorFlatten")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("vectorFlatten")][string("title")] = string(R"(Vector Flatten)");
+	help_arrays[string("write")][string("authors")].push_back(string(R"(The RevBayes Development Core Team)"));
+	help_strings[string("write")][string("description")] = string(R"(This function write values in a RevObject to a file specified by the user.)");
+	help_strings[string("write")][string("details")] = string(R"(This function accepts multiple RevObjects in the first arguments to be written to a file.
+After this, users can specify the filename with a string which can include the directory path
+to where the file should be made. Users can also specify whether to append or overwrite the file
+using a boolean operator (default is false). Lastly, a seperator can be specified using a string
+for specifying how to separate values in the RevObject (default is "").)");
+	help_strings[string("write")][string("example")] = string(R"(
+# define RevObject to write
+    x <- matrix([[1, 1],[1, 1]])
+# write to CSV file
+    write(x, "/path/to/file/filenmae.csv", false, ","))");
 	help_strings[string("write")][string("name")] = string(R"(write)");
+	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeDelimitedCharacterData)"));
+	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_strings[string("write")][string("title")] = string(R"(Write RevObject to file)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "Argument.h"
 #include "ArgumentRule.h"
@@ -50,7 +51,7 @@ namespace RevLanguage {
         std::string                                     getHelpUsage(void) const;
         std::string                                     getRevDeclaration(void) const;                                                      //!< Get Rev declaration of the function
         void                                            printValue(std::ostream& o, bool user) const;                                       //!< Print the general information on the function ('usage')
-        void                                            setExecutionEnviroment(Environment *e);                                             //!< Set the environment from which the function was called.
+        void                                            setExecutionEnviroment(const std::shared_ptr<Environment>& e);                                             //!< Set the environment from which the function was called.
     
         // Functions you have to override
         virtual RevPtr<RevVariable>                     execute(void) = 0;                                                                  //!< Execute function
@@ -77,7 +78,7 @@ namespace RevLanguage {
         void                                            clear(void);                                                                        //!< Clear argument frame "args"
         const std::vector<Argument>&                    getArguments(void) const;                                                           //!< Get processed arguments in argument Environment "args"
         std::vector<Argument>&                          getArguments(void);                                                                 //!< Get processed arguments in argument Environment "args"
-        Environment*                                    getEnvironment(void) const;                                                         //!< Get the execution environment
+        std::shared_ptr<Environment>                    getEnvironment(void) const;                                                         //!< Get the execution environment
         
         
         
@@ -94,7 +95,7 @@ namespace RevLanguage {
         // Member variables
         bool                                            argsProcessed;                                                                      //!< Are arguments processed?
         std::vector<Argument>                           args;                                                                               //!< Vector of arguments
-        Environment*                                    env;                                                                                //!< Evaluation environment
+        std::shared_ptr<Environment>                    env;                                                                                //!< Evaluation environment
 
     private:
         double                                          computeMatchScore(const RevVariable* arg, const ArgumentRule& rule);
