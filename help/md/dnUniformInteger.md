@@ -7,7 +7,7 @@ This distribution creates a stochastic node drawing a random integer from a unif
 ## details
 This distribution will randomly draw an integer using uniform distribution
 from a minimum to maximum integer set in the first and second arguments.
-This function can alsonbe called using the alias 'dnUnifInt'.
+This function can also be called using the alias 'dnUnifInt'.
 ## authors
 Sebastion Hoehna
 ## see_also

@@ -6,7 +6,7 @@ Read VCF
 Read VCF file into RevBayes
 ## details
 readVCF reads in a file that is in Variant Call Format (VCF), accepting two
- arguments. The first argument specifies the relative or absolute 
+arguments. The first argument specifies the relative or absolute 
 file path to desired VCF file. The second specifies type of data
 to be constructed (default binary). This function
 only allows for 0, 1, and . characters in the VCF file.

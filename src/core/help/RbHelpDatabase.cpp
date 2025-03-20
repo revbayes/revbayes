@@ -1242,7 +1242,7 @@ u ~ dnUniform(a, b))");
 	help_strings[string("dnUniformInteger")][string("description")] = string(R"(This distribution creates a stochastic node drawing a random integer from a uniform distribution.)");
 	help_strings[string("dnUniformInteger")][string("details")] = string(R"(This distribution will randomly draw an integer using uniform distribution
 from a minimum to maximum integer set in the first and second arguments.
-This function can alsonbe called using the alias 'dnUnifInt'.)");
+This function can also be called using the alias 'dnUnifInt'.)");
 	help_strings[string("dnUniformInteger")][string("example")] = string(R"(# Create and assign stochastic node
 x ~ dnUniformInteger(1, 10))");
 	help_strings[string("dnUniformInteger")][string("name")] = string(R"(dnUniformInteger)");
@@ -1585,8 +1585,8 @@ rates, returning a rate matrix object. The function will fill rates in the matri
 left to right as provided in the first argument, skipping the diagonal when using a vector
 as input. For this reason, using a vector of lengths 2 to 5 will create a 2-by-2 rate
 matrix but a vector of length 6 will create a 3-by-3 rate matrix as fnFreeK will have 
-enough values to fill the matrix. Using a matrix to create in fnFreeK will create a 
-rate matrix object with rates assigned using  their respective position in the provided matrix.
+enough values to fill the matrix. Using a matrix in fnFreeK will create a rate matrix object with
+rates assigned using their respective position in the provided matrix.
 Users can specify if matrix should be normalized in the second argument using a boolean 
 variable (default TRUE). Lastly users can specify what matrix exponential method to
 use (default eigen) with a string. Possible options include:
@@ -3393,7 +3393,7 @@ print(trees))");
 	help_strings[string("readTrees")][string("title")] = string(R"(Function to read in trees.)");
 	help_strings[string("readVCF")][string("description")] = string(R"(Read VCF file into RevBayes)");
 	help_strings[string("readVCF")][string("details")] = string(R"(readVCF reads in a file that is in Variant Call Format (VCF), accepting two
- arguments. The first argument specifies the relative or absolute 
+arguments. The first argument specifies the relative or absolute 
 file path to desired VCF file. The second specifies type of data
 to be constructed (default binary). This function
 only allows for 0, 1, and . characters in the VCF file.)");
@@ -4028,11 +4028,10 @@ x <- [1, 2, 3, 4]
 # Calculate variance
 var(x))");
 	help_strings[string("var")][string("name")] = string(R"(var)");
-  help_arrays[string("var")][string("see_also")].push_back(string(R"(mean)"));
+	help_arrays[string("var")][string("see_also")].push_back(string(R"(mean)"));
 	help_arrays[string("var")][string("see_also")].push_back(string(R"(stdev)"));
 	help_arrays[string("var")][string("see_also")].push_back(string(R"(median)"));
 	help_strings[string("var")][string("title")] = string(R"(Variance)");
-
 	help_arrays[string("vectorFlatten")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("vectorFlatten")][string("description")] = string(R"(Flatten a vector to one dimension.)");
 	help_strings[string("vectorFlatten")][string("details")] = string(R"(This function accepts a two-dimensional vector as an argument and flattens it
