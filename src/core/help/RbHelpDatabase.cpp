@@ -1238,7 +1238,17 @@ b <- -3.9
 u ~ dnUniform(a, b))");
 	help_strings[string("dnUniform")][string("name")] = string(R"(dnUniform)");
 	help_strings[string("dnUniform")][string("title")] = string(R"(Uniform Distribution)");
+	help_arrays[string("dnUniformInteger")][string("authors")].push_back(string(R"(Sebastion Hoehna)"));
+	help_strings[string("dnUniformInteger")][string("description")] = string(R"(This distribution creates a stochastic node drawing a random integer from a uniform distribution.)");
+	help_strings[string("dnUniformInteger")][string("details")] = string(R"(This distribution will randomly draw an integer using uniform distribution
+from a minimum to maximum integer set in the first and second arguments.
+This function can also be called using the alias 'dnUnifInt'.)");
+	help_strings[string("dnUniformInteger")][string("example")] = string(R"(# Create and assign stochastic node
+x ~ dnUniformInteger(1, 10))");
 	help_strings[string("dnUniformInteger")][string("name")] = string(R"(dnUniformInteger)");
+	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnUniform)"));
+	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnNormal)"));
+	help_strings[string("dnUniformInteger")][string("title")] = string(R"(Uniform Integer Distribution)");
 	help_strings[string("dnUniformNatural")][string("name")] = string(R"(dnUniformNatural)");
 	help_strings[string("dnUniformTimeTree")][string("name")] = string(R"(dnUniformTimeTree)");
 	help_strings[string("dnUniformTopology")][string("name")] = string(R"(dnUniformTopology)");
@@ -1649,9 +1659,52 @@ rate := rep(mu, 2)
 
 Q := fnFreeBinary(rate, rescaled=false))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
+	help_arrays[string("fnFreeK")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("fnFreeK")][string("description")] = string(R"(This function generates and returns a free rates matrix.)");
+	help_strings[string("fnFreeK")][string("details")] = string(R"(This function accepts both a vector or a matrix of non-negative, real numbers in the 
+first argument to automatically generate a rate matrix with corresponding substitution 
+rates, returning a rate matrix object. The function will fill rates in the matrix from
+left to right as provided in the first argument, skipping the diagonal when using a vector
+as input. For this reason, using a vector of lengths 2 to 5 will create a 2-by-2 rate
+matrix but a vector of length 6 will create a 3-by-3 rate matrix as fnFreeK will have 
+enough values to fill the matrix. Using a matrix in fnFreeK will create a rate matrix object with
+rates assigned using their respective position in the provided matrix.
+Users can specify if matrix should be normalized in the second argument using a boolean 
+variable (default TRUE). Lastly users can specify what matrix exponential method to
+use (default eigen) with a string. Possible options include:
+scalingAndSquaring
+scalingAndSquaringPade
+scalingAndSquaringTaylor
+uniformization
+eigen)");
+	help_strings[string("fnFreeK")][string("example")] = string(R"(# Define vector to pass, this will create a 2-by-2 matrix
+x <- v(0.5, 0,5)
+# Use fnFreeK to create rate matrix
+# Note the second argument is true in this case so rates will be normalized
+fnFreeK(x)
+[ [ -1.0000, 1.0000 ] ,
+  [ 1.0000, -1.0000 ] ]
+
+# Case where rates are not normalized
+x <- v(0.5, 0.5)
+fnFreeK(x, false)
+[ [ -0.5000, 0.5000 ] ,
+  [ 0.5000, -0.5000 ] ]
+
+# Define matrix for 3-by-3 rate matrix object
+x <- v([0, .6, .4], [.2, 0, .4], [.3, .3, 0])
+# Create rate matrix object
+fnFreeK(x)
+[ [ -1.0000, 0.6000, 0.4000 ] ,
+  [ 0.2000, -0.6000, 0.4000 ] ,
+  [ 0.3000, 0.3000, -0.6000 ] ])");
 	help_arrays[string("fnFreeBinary")][string("see_also")].push_back(string(R"(fnFreeK)"));
 	help_strings[string("fnFreeBinary")][string("title")] = string(R"(Free Binary transition rate matrix)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
+	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(RateMatrix)"));
+	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeBinary)"));
+	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeSymmetricRateMatrix)"));
+	help_strings[string("fnFreeK")][string("title")] = string(R"(Free K Rate Matrix)");
 	help_strings[string("fnFreeSymmetricRateMatrix")][string("name")] = string(R"(fnFreeSymmetricRateMatrix)");
 	help_strings[string("fnGTR")][string("description")] = string(R"(DNA evolution model proposed in Tavare (1986).)");
 	help_strings[string("fnGTR")][string("details")] = string(R"(In this model, states are allowed to have different stationary frequencies, and exchangeability rates between states are allowed to be different. Its first argument, exchangeRates, codes for the transition rates between states (as in other models, transition rates are assumed to be symmetric). Its second argument, baseFrequencies, codes for the stationary frequencies of these states. Note that for n states, exchangeRates should have length n*(n-1)/2, and baseFrequencies should have length n. While this is usually used for DNA (and therefore has four states), the function can take any number of states, and therefore be used for many other applications (such as aminoacid or morphological evolution).
@@ -3536,7 +3589,16 @@ print(trees))");
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readDataDelimitedFile)"));
 	help_arrays[string("readTrees")][string("see_also")].push_back(string(R"(readCharacterData)"));
 	help_strings[string("readTrees")][string("title")] = string(R"(Function to read in trees.)");
+	help_strings[string("readVCF")][string("description")] = string(R"(Read VCF file into RevBayes)");
+	help_strings[string("readVCF")][string("details")] = string(R"(readVCF reads in a file that is in Variant Call Format (VCF), accepting two
+arguments. The first argument specifies the relative or absolute 
+file path to desired VCF file. The second specifies type of data
+to be constructed (default binary). This function
+only allows for 0, 1, and . characters in the VCF file.)");
+	help_strings[string("readVCF")][string("example")] = string(R"(x <- readVCF("path/to/VCF/file", "binary"))");
 	help_strings[string("readVCF")][string("name")] = string(R"(readVCF)");
+	help_references[string("readVCF")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_strings[string("readVCF")][string("title")] = string(R"(Read VCF)");
 	help_arrays[string("rep")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("rep")][string("description")] = string(R"('rep' creates a vector of 'n' copies of the value 'x'.)");
 	help_strings[string("rep")][string("details")] = string(R"('rep' creates a vector of 'n' elements, each with value 'x', preserving the type of 'x' in the returned vector.)");
@@ -4176,7 +4238,20 @@ var(x))");
 	help_arrays[string("var")][string("see_also")].push_back(string(R"(stdev)"));
 	help_arrays[string("var")][string("see_also")].push_back(string(R"(median)"));
 	help_strings[string("var")][string("title")] = string(R"(Variance)");
+	help_arrays[string("vectorFlatten")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("vectorFlatten")][string("description")] = string(R"(Flatten a vector to one dimension.)");
+	help_strings[string("vectorFlatten")][string("details")] = string(R"(This function accepts a two-dimensional vector as an argument and flattens it
+to one dimension.)");
+	help_strings[string("vectorFlatten")][string("example")] = string(R"(# Define Vector
+x <- v([1, 2], [3, 4])
+# Flatten
+x_flat <- vectorFlatten(x)
+x_flat
+[1, 2, 3, 4])");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
+	help_arrays[string("vectorFlatten")][string("see_also")].push_back(string(R"(v)"));
+	help_arrays[string("vectorFlatten")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("vectorFlatten")][string("title")] = string(R"(Vector Flatten)");
 	help_arrays[string("write")][string("authors")].push_back(string(R"(The RevBayes Development Core Team)"));
 	help_strings[string("write")][string("description")] = string(R"(This function write values in a RevObject to a file specified by the user.)");
 	help_strings[string("write")][string("details")] = string(R"(This function accepts multiple RevObjects in the first arguments to be written to a file.
