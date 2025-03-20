@@ -3957,7 +3957,7 @@ z[0])");
 After this, users can specify the filename with a string which can include the directory path
 to where the file should be made. Users can also specify whether to append or overwrite the file
 using a boolean operator (default is false). Lastly, a seperator can be specified using a string
-for specifying how to sperate values in the RevObject (default is "").)");
+for specifying how to separate values in the RevObject (default is "").)");
 	help_strings[string("write")][string("example")] = string(R"(
 # define RevObject to write
     x <- matrix([[1, 1],[1, 1]])
@@ -3966,7 +3966,7 @@ for specifying how to sperate values in the RevObject (default is "").)");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeDelimitedCharacterData)"));
 	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeFasta)"));
-	help_strings[string("write")][string("title")] = string(R"(Write RevObject to  file)");
+	help_strings[string("write")][string("title")] = string(R"(Write RevObject to file)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
