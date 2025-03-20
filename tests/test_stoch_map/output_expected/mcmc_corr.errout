@@ -7,20 +7,6 @@
    This simulation runs 1 independent replicate.
    The simulator uses 10 different moves in a random move schedule with 20 moves per iteration
    
-
-Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
-----------------------------------------------------------------------------------------------------
-0           |       -78.3753   |       -118.418   |        40.0423   |   00:00:00   |   --:--:--   |
-1           |       -76.0132   |       -115.213   |        39.2003   |   00:00:00   |   --:--:--   |
-2           |       -75.3726   |       -115.097   |        39.7248   |   00:00:00   |   00:00:00   |
-3           |       -75.9535   |       -115.826   |        39.8726   |   00:00:00   |   00:00:00   |
-4           |       -75.1952   |       -114.102   |        38.9072   |   00:00:00   |   00:00:00   |
-5           |       -76.0877   |       -115.402   |        39.3147   |   00:00:00   |   00:00:00   |
-6           |       -66.6216   |       -104.666   |        38.0441   |   00:00:00   |   00:00:00   |
-7           |       -63.2774   |       -100.044   |        36.7662   |   00:00:00   |   00:00:00   |
-8           |       -63.6702   |       -100.551   |        36.8812   |   00:00:00   |   00:00:00   |
-9           |       -63.1313   |       -100.052   |        36.9207   |   00:00:00   |   00:00:00   |
-10          |       -59.9846   |       -95.4043   |        35.4198   |   00:00:00   |   00:00:00   |
    Processing file 'output/solitariness_terrestrially_corr.states.txt'
    Compiling MAP ancestral states from 11 samples in the ancestral state trace, using a burnin of 2 samples.
    

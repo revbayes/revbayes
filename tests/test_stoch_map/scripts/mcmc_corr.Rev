@@ -116,7 +116,7 @@ mymodel = model(phylogeny)
 # 1. for the full model #
 monitors.append( mnModel(filename="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr.log", printgen=1) )
 # 2. and a few select parameters to be printed to the screen #
-monitors.append( mnScreen(printgen=1) )
+# monitors.append( mnScreen(printgen=1) )
 # 3. add an ancestral state monitor
 monitors.append( mnJointConditionalAncestralState(tree=phylogeny,
                                                   ctmc=phyMorpho,
