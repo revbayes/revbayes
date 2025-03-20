@@ -1576,7 +1576,7 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 0 and 1 represent our 2 states:
 Q = [[-q_{01}, q_{01}],[q_{10}, -q_{10}]]
 
-When len(transiton_rates) = 1, the single element will get recycled.
+When len(transition_rates) = 1, the single element will get recycled.
 When len(transition_rates) > 2, everything after the first two elements in the vector will be ignored.)");
 	help_strings[string("fnFreeBinary")][string("example")] = string(R"(# Under the ERM model
 rate_pr := phylogeny.treeLength() / 10
