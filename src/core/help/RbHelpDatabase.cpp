@@ -1396,7 +1396,43 @@ Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
 	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
 	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
+	help_arrays[string("fnCovarion")][string("authors")].push_back(string(R"(Sebastian Hoehna and Lyndon Coghill)"));
+	help_strings[string("fnCovarion")][string("description")] = string(R"(The `fnCovarion` function defines a covarion model rate matrix for character evolution.
+The resulting rate matrix incorporates rate heterogeneity where the characters/sites are allowed to move between rate categories with a switching rate.)");
+	help_strings[string("fnCovarion")][string("details")] = string(R"(The covarion model allows for variation in evolutionary rates across sites over time, accommodating shifts in character state evolution.)");
+	help_strings[string("fnCovarion")][string("example")] = string(R"(# define number of rate categories
+num_cats = 2
+
+# define rate scalars
+rate_scalars <- [ 0, 1.0 ]
+
+# obtain substitution model rate matrix for rescaling
+for ( i in 1:num_cats ) {
+  Q_sub[i] := fnJC( 4 )
+}
+
+# define switching rate
+switching_rate = 0.1
+
+for ( i in 1:num_cats ) {
+  for ( j in 1:num_cats ) {
+    if ( i == j ) {
+      switch_rates[i][j] := 0
+    } else {
+      switch_rates[i][j] := switching_rate
+    }
+  }
+}
+
+# finally construct the covarion rate matrix
+Q_Cov := fnCovarion(RateMatrices = Q_sub, RateScalars = rate_scalars, SwitchRates = switch_rates, rescaled = FALSE))");
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
+	help_references[string("fnCovarion")].push_back(RbHelpReference(R"(Fitch, W. M., & Markowitz, E. (1970). An improved method for determining codon variability in a gene and its application to the rate of fixation of mutations in evolution. _Biochemical genetics_, 4, 579-593.)",R"(10.1007/BF00486096)",R"(https://doi.org/10.1007/BF00486096 )"));
+	help_references[string("fnCovarion")].push_back(RbHelpReference(R"(Tuffley, C., & Steel, M. (1998). Modeling the covarion hypothesis of nucleotide substitution. _Mathematical biosciences_, 147(1), 63-91.)",R"(10.1016/S0025-5564(97)00081-3)",R"(https://doi.org/10.1016/S0025-5564(97)00081-3 )"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(fnJC)"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_strings[string("fnCovarion")][string("title")] = string(R"(The Covarion model rate matrix.)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");
 	help_strings[string("fnDECCladoProbs")][string("name")] = string(R"(fnDECCladoProbs)");
@@ -1429,8 +1465,33 @@ print(categories))");
 	help_arrays[string("fnDiscretizeBeta")][string("see_also")].push_back(string(R"(A translation of `fnDiscretizeBeta` into R is available at https://gist.github.com/ms609/883632d10d4d80ea5391cee9c47071fc.)"));
 	help_strings[string("fnDiscretizeBeta")][string("title")] = string(R"(Disctetize a beta distribution)");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
+	help_strings[string("fnDiscretizeDistribution")][string("description")] = string(R"(`fnDiscretizeDistribution` transforms a continuous probability distribution into a discrete one by dividing it into a specified number of categories.)");
+	help_strings[string("fnDiscretizeDistribution")][string("details")] = string(R"(This function takes as two arguments: a continuous probability distribution and a specified number of categories (`num_cats`).
+It then yields a sequence of median values that approximate the distribution, assuming that each bin represents an equal probability mass.)");
+	help_strings[string("fnDiscretizeDistribution")][string("example")] = string(R"(# Using a Normal distribution to discretize it into 5 categories
+discrete_values := fnDiscretizeDistribution( dnNormal( 0.0, 1.0 ), 5 )
+
+# print the discretized values to the screen
+discrete_values)");
 	help_strings[string("fnDiscretizeDistribution")][string("name")] = string(R"(fnDiscretizeDistribution)");
+	help_arrays[string("fnDiscretizeDistribution")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
+	help_arrays[string("fnDiscretizeDistribution")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("fnDiscretizeDistribution")][string("see_also")].push_back(string(R"(fnDiscretizeBeta)"));
+	help_strings[string("fnDiscretizeDistribution")][string("title")] = string(R"(Discretize a Continuous Distribution)");
+	help_strings[string("fnDiscretizeGamma")][string("description")] = string(R"(`fnDiscretizeGamma` approximates a continuous gamma distribution by dividing it into a specified number of discrete categories (quantiles), using either the mean or the median of each interval.)");
+	help_strings[string("fnDiscretizeGamma")][string("details")] = string(R"(This function takes a gamma distribution parameterized by `shape` and `rate`, along with a specified number of categories (`numCats`).
+It then discretizes the distribution into `numCats` bins yielding a sequence of values, assuming that each bin represents an equal probability mass.
+The representative values for each category can be chosen based on either the mean or the median of the interval.)");
+	help_strings[string("fnDiscretizeGamma")][string("example")] = string(R"(# to obtain the mean of the quantiles
+alpha = 0.5
+
+discrete_values := fnDiscretizeGamma( shape = alpha, rate = alpha, numCats = 4, median = FALSE ))");
 	help_strings[string("fnDiscretizeGamma")][string("name")] = string(R"(fnDiscretizeGamma)");
+	help_references[string("fnDiscretizeGamma")].push_back(RbHelpReference(R"(Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306–314.)",R"(10.1007/BF00160154 usl: https://doi.org/10.1007/BF00160154 )",R"()"));
+	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeDistribution)"));
+	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"()"));
+	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeBeta)"));
+	help_strings[string("fnDiscretizeGamma")][string("title")] = string(R"(Discretize a Gamma distribution)");
 	help_strings[string("fnDiscretizeGammaFromBetaQuantiles")][string("name")] = string(R"(fnDiscretizeGammaFromBetaQuantiles)");
 	help_strings[string("fnDiscretizeGammaQuadrature")][string("name")] = string(R"(fnDiscretizeGammaQuadrature)");
 	help_strings[string("fnDiscretizeLognormalQuadrature")][string("name")] = string(R"(fnDiscretizeLognormalQuadrature)");
@@ -2451,6 +2512,7 @@ min(a)
 	help_strings[string("mnNexus")][string("name")] = string(R"(mnNexus)");
 	help_strings[string("mnProbability")][string("name")] = string(R"(mnProbability)");
 	help_strings[string("mnScreen")][string("name")] = string(R"(mnScreen)");
+	help_strings[string("mnScreen")][string("title")] = string(R"(Monitor for the screen)");
 	help_strings[string("mnStochasticBranchRate")][string("name")] = string(R"(mnStochasticBranchRate)");
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
@@ -2909,7 +2971,20 @@ mvRandomNaturalWalk)");
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
 	help_strings[string("mvRandomNaturalWalk")][string("title")] = string(R"(Random walk on natural numbers)");
+	help_strings[string("mvRateAgeBetaShift")][string("description")] = string(R"(Resample a single node age and adjust neighboring rates to preserve distances)");
+	help_strings[string("mvRateAgeBetaShift")][string("details")] = string(R"(This move first selects a tree node that is not a tip or the root of the tree.
+
+The age of the tree node is resampled from the interval
+   [max(child1.age, child2.age), parent.age]
+using a Beta distribution.
+
+The rates of the parent edge and two child edges are then modified to ensure that the rate*time
+remains unchanged for the tree branches.)");
+	help_strings[string("mvRateAgeBetaShift")][string("example")] = string(R"(moves.append( mvRateAgeBetaShift(tree=timetree, rates=branch_rates, tune=true, weights=n_taxa ) ))");
 	help_strings[string("mvRateAgeBetaShift")][string("name")] = string(R"(mvRateAgeBetaShift)");
+	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeProposal)"));
+	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
+	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
 	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
 	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
