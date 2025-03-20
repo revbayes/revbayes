@@ -7,7 +7,7 @@ Discretize a Gamma distribution
 
 ## details
 This function takes a gamma distribution parameterized by `shape` and `rate`, along with a specified number of categories (`numCats`).
-It then discretizes the distribution into `numCats` bins, ensuring that each bin represents an equal probability mass.
+It then discretizes the distribution into `numCats` bins yielding a sequence of values, assuming that each bin represents an equal probability mass.
 The representative values for each category can be chosen based on either the mean or the median of the interval.
 
 ## authors

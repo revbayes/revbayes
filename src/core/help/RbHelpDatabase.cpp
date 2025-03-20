@@ -1467,9 +1467,7 @@ print(categories))");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
 	help_strings[string("fnDiscretizeDistribution")][string("description")] = string(R"(`fnDiscretizeDistribution` transforms a continuous probability distribution into a discrete one by dividing it into a specified number of categories.)");
 	help_strings[string("fnDiscretizeDistribution")][string("details")] = string(R"(This function takes as two arguments: a continuous probability distribution and a specified number of categories (`num_cats`).
-It then discretizes the distribution into `num_cats` bins, ensuring that each bin represents an equal probability mass.
-
-Note: The values obtained from this function are not automatically normalized. If normalized values are desired, one can use `normalize()` function.)");
+It then yields a sequence of values that approximate the distribution, assuming that each bin represents an equal probability mass.)");
 	help_strings[string("fnDiscretizeDistribution")][string("example")] = string(R"(# Using a Normal distribution to discretize it into 5 categories
 discrete_values := fnDiscretizeDistribution( dnNormal( 0.0, 1.0 ), 5 )
 
@@ -1482,7 +1480,7 @@ discrete_values)");
 	help_strings[string("fnDiscretizeDistribution")][string("title")] = string(R"(Discretize a Continuous Distribution)");
 	help_strings[string("fnDiscretizeGamma")][string("description")] = string(R"(`fnDiscretizeGamma` approximates a continuous gamma distribution by dividing it into a specified number of discrete categories (quantiles), using either the mean or the median of each interval.)");
 	help_strings[string("fnDiscretizeGamma")][string("details")] = string(R"(This function takes a gamma distribution parameterized by `shape` and `rate`, along with a specified number of categories (`numCats`).
-It then discretizes the distribution into `numCats` bins, ensuring that each bin represents an equal probability mass.
+It then discretizes the distribution into `numCats` bins yielding a sequence of values, assuming that each bin represents an equal probability mass.
 The representative values for each category can be chosen based on either the mean or the median of the interval.)");
 	help_strings[string("fnDiscretizeGamma")][string("example")] = string(R"(# to obtain the mean of the quantiles
 alpha = 0.5
