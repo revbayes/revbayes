@@ -1,7 +1,7 @@
 ## name
 readTreeTrace
 ## title
-Function to read in a treeTrace, usually produced as the output of an MCMC.
+Function to read in a tree trace, usually produced as the output of an MCMC.
 ## description
 Reads trees (Nexus or Newick accepted) from a file or folder containing a set of trees and saves them in one object. 
 ## details
@@ -13,9 +13,9 @@ readCharacterData
 readTrees
 ## example
     # read a tree trace
-    tree_trace=readTreeTrace("my_filename.tree", treetype = "clock", burnin=0.5)
+    tree_trace = readTreeTrace("my_filename.tree", treetype="clock", burnin=0.5)
 
     # make a summary MCC tree
-    map_tree = mccTree(trace=tree_trace, file="mcc.tree")
+    mcc_tree = mccTree(trace=tree_trace, file="mcc.tree")
 
 ## references
