@@ -1,0 +1,12 @@
+   Successfully read one character matrix from file '/Users/levi/Documents/revbayes/tests/data/strepsipteraFAM000008.faRN_cleaned'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 35 different moves in a random move schedule with 75.5 moves per iteration
+   
+   Processing file "/Users/levi/Documents/test_negCladeConst/output_expected/strepColeop.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+

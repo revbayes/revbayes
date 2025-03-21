@@ -1,0 +1,133 @@
+################################################################################
+#
+# RevBayes Validation Test: negative clade constraints are respected
+#
+#
+# authors: Levi Raskin and David Černý
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in sequence data
+seqDat <- readDiscreteCharacterData("/data/strepsipteraFAM000008.faRN_cleaned")
+
+coleopteraList = v("Archostemata", "Megacyllene", "Ripiphoridae","PogonusAndolfatto", "Anoplura", "Plagiodera","Rhyssomatus", "Cyrtepistomus", "Labidomera","Curculionoidea", "Chrysochus", "Tetraopes","Meloidae", "Tenebrionidae","PogonusNCBI", "Adephaga")
+
+strepsipteraList = v("Xenos", "Mengenilla", "Mengenillidia")
+
+for(k in seqDat.taxa()){
+    if(coleopteraList.contains(k.getName()) == false && strepsipteraList.contains(k.getName()) == false){
+        seqDat.setTaxonName(k.getName(), "AAA"+k.getName())
+    }
+}
+
+## helpers
+n_taxa <- seqDat.size()
+taxa <- seqDat.taxa()
+num_branches <- 2 * n_taxa -3
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+## phylogenetic model
+sf_hp <- rep(1, 20)
+sf ~ dnDirichlet(sf_hp)
+
+# Then the exchangeability rates #
+er_hp <- rep(1, 190)
+er ~ dnDirichlet(er_hp)
+
+moves.append( mvBetaSimplex(sf, weight=2.0) )
+moves.append( mvDirichletSimplex(sf, weight=1.0) )
+
+moves.append( mvBetaSimplex(er, weight=3.0) )
+moves.append( mvDirichletSimplex(er, weight=1.5) )
+
+# Create the matrix #
+Q := fnGTR(er,sf)
+
+# Create a discretized gamma distribution of rate categories  #
+# the shape parameter is drawn from an exponential prior #
+alpha ~ dnExponential( 1.0 )
+
+moves.append( mvScale(alpha, lambda=0.01, weight=1.0) )
+moves.append( mvScale(alpha, lambda=0.1,  weight=1.0) )
+moves.append( mvScale(alpha, lambda=1,    weight=1.0) )
+
+rates := fnDiscretizeGamma( alpha, alpha, 4 )
+
+###set up clade constraints:
+coleopteraList = v("Archostemata", "Megacyllene", "Ripiphoridae","PogonusAndolfatto", "Anoplura", "Plagiodera","Rhyssomatus", "Cyrtepistomus", "Labidomera","Curculionoidea", "Chrysochus", "Tetraopes","Meloidae", "Tenebrionidae","PogonusNCBI", "Adephaga")
+
+strepsipteraList = v("Xenos", "Mengenilla", "Mengenillidia")
+
+for(k in coleopteraList){
+    if(taxa.contains(taxon(k)) == false){
+        coleopteraList.erase(k)
+    }
+}
+for(k in strepsipteraList){
+    if(taxa.contains(taxon(k)) == false){
+        strepsipteraList.erase(k)
+    }
+}
+
+strepsipteraTaxa = clade(strepsipteraList)
+coleopteraTaxa = clade(coleopteraList)
+coleopteraTaxaN = clade(coleopteraList, negative = TRUE)
+strepColeop = clade(strepsipteraTaxa, coleopteraTaxa)
+
+c = v(strepColeop)
+
+phylogeny ~ dnUniformTopology(taxa, constraints=c)
+
+moves.append(mvNNI(phylogeny, weight=num_branches/2.0))
+moves.append(mvSPR(phylogeny, weight=num_branches/10.0))
+moves.append(mvBranchLengthScale(phylogeny, weight=num_branches))
+
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(10.0)
+    moves.append( mvScale(bl[i]) )
+}
+
+TL := sum(bl)
+
+psi := treeAssembly(phylogeny, bl)
+
+### Create the substitution model and clamp with our observed DNA data ###
+phySeq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=rates, type="AA")
+phySeq.clamp(seqDat)
+
+
+########
+# MCMC #
+########
+
+# initialize the model object #
+mymodel = model(psi)
+
+
+# Create a vector of monitors #
+# 1. for the full model #
+monitors.append( mnModel(filename="/output/strepColeop.log", printgen=1) )
+
+# 2. the tree #
+monitors.append( mnFile(filename= "/output/strepColeop.trees", printgen=1, psi) )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=100)
+
+trace = readTreeTrace("/output/strepColeop.trees",burnin=0)
+
+for (i in 1:trace.size()) {
+    if ( trace.getTree(i).containsClade(coleopteraTaxaN) ) {
+        print("Something went wrong!")
+    }
+}
+
+clear()
+q()
