@@ -1659,6 +1659,8 @@ rate := rep(mu, 2)
 
 Q := fnFreeBinary(rate, rescaled=false))");
 	help_strings[string("fnFreeBinary")][string("name")] = string(R"(fnFreeBinary)");
+	help_arrays[string("fnFreeBinary")][string("see_also")].push_back(string(R"(fnFreeK)"));
+	help_strings[string("fnFreeBinary")][string("title")] = string(R"(Free Binary transition rate matrix)");
 	help_arrays[string("fnFreeK")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("fnFreeK")][string("description")] = string(R"(This function generates and returns a free rates matrix.)");
 	help_strings[string("fnFreeK")][string("details")] = string(R"(This function accepts both a vector or a matrix of non-negative, real numbers in the 
@@ -1698,8 +1700,6 @@ fnFreeK(x)
 [ [ -1.0000, 0.6000, 0.4000 ] ,
   [ 0.2000, -0.6000, 0.4000 ] ,
   [ 0.3000, 0.3000, -0.6000 ] ])");
-	help_arrays[string("fnFreeBinary")][string("see_also")].push_back(string(R"(fnFreeK)"));
-	help_strings[string("fnFreeBinary")][string("title")] = string(R"(Free Binary transition rate matrix)");
 	help_strings[string("fnFreeK")][string("name")] = string(R"(fnFreeK)");
 	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(RateMatrix)"));
 	help_arrays[string("fnFreeK")][string("see_also")].push_back(string(R"(fnFreeBinary)"));
@@ -2565,7 +2565,6 @@ min(a)
 	help_strings[string("mnNexus")][string("name")] = string(R"(mnNexus)");
 	help_strings[string("mnProbability")][string("name")] = string(R"(mnProbability)");
 	help_strings[string("mnScreen")][string("name")] = string(R"(mnScreen)");
-	help_strings[string("mnScreen")][string("title")] = string(R"(Monitor for the screen)");
 	help_strings[string("mnStochasticBranchRate")][string("name")] = string(R"(mnStochasticBranchRate)");
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
@@ -3573,7 +3572,18 @@ range(20,-20)
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
 	help_strings[string("readTaxonData")][string("name")] = string(R"(readTaxonData)");
 	help_strings[string("readTrace")][string("name")] = string(R"(readTrace)");
+	help_strings[string("readTreeTrace")][string("description")] = string(R"(Reads trees (Nexus or Newick accepted) from a file or folder containing a set of trees and saves them in one object.)");
+	help_strings[string("readTreeTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument. If a folder is provided, all the files that contain trees in that directory are read in the same object.)");
+	help_strings[string("readTreeTrace")][string("example")] = string(R"(# read a tree trace
+tree_trace = readTreeTrace("my_filename.tree", treetype="clock", burnin=0.5)
+
+# make a summary MCC tree
+mcc_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_strings[string("readTreeTrace")][string("name")] = string(R"(readTreeTrace)");
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrace)"));
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readCharacterData)"));
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrees)"));
+	help_strings[string("readTreeTrace")][string("title")] = string(R"(Function to read in a tree trace, usually produced as the output of an MCMC.)");
 	help_arrays[string("readTrees")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("readTrees")][string("description")] = string(R"(Reads trees from a file containing trees (Nexus, Phylip or Newick accepted), or from a string containing Newick representations of trees.)");
 	help_strings[string("readTrees")][string("details")] = string(R"(Either a file name (with the file argument) or a string (with the text argument) must be provided as argument. If both are provided, trees will be read from both sources.)");
