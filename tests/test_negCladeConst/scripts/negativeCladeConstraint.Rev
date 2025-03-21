@@ -14,7 +14,7 @@ seed(12345)
 #######################
 
 ### Read in sequence data
-seqDat <- readDiscreteCharacterData("/data/strepsipteraFAM000008.faRN_cleaned")
+seqDat <- readDiscreteCharacterData("data/strepsipteraFAM000008.faRN_cleaned")
 
 coleopteraList = v("Archostemata", "Megacyllene", "Ripiphoridae","PogonusAndolfatto", "Anoplura", "Plagiodera","Rhyssomatus", "Cyrtepistomus", "Labidomera","Curculionoidea", "Chrysochus", "Tetraopes","Meloidae", "Tenebrionidae","PogonusNCBI", "Adephaga")
 
@@ -113,15 +113,15 @@ mymodel = model(psi)
 
 # Create a vector of monitors #
 # 1. for the full model #
-monitors.append( mnModel(filename="/output/strepColeop.log", printgen=1) )
+monitors.append( mnModel(filename="output/strepColeop.log", printgen=1) )
 
 # 2. the tree #
-monitors.append( mnFile(filename= "/output/strepColeop.trees", printgen=1, psi) )
+monitors.append( mnFile(filename= "output/strepColeop.trees", printgen=1, psi) )
 
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.run(generations=100)
 
-trace = readTreeTrace("/output/strepColeop.trees",burnin=0)
+trace = readTreeTrace("output/strepColeop.trees",burnin=0)
 
 for (i in 1:trace.size()) {
     if ( trace.getTree(i).containsClade(coleopteraTaxaN) ) {
