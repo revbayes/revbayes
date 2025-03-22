@@ -63,7 +63,7 @@ void Mntr_Model::constructInternalObject( void )
     }
 
     SampleFormat Format = (fmt == "json") ? SampleFormat(JSONFormat()) : SampleFormat(SeparatorFormat(sep));
-    RevBayesCore::ModelMonitor *m = new RevBayesCore::ModelMonitor((unsigned long)g, fn, Format, exclude_list);
+    RevBayesCore::ModelMonitor *m = new RevBayesCore::ModelMonitor((std::uint64_t)g, fn, Format, exclude_list);
     
     // now set the flags
     m->setAppend( ap );

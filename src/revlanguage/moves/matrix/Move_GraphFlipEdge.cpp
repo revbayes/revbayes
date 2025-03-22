@@ -72,7 +72,7 @@ void Move_GraphFlipEdge::constructInternalObject( void )
     double l = static_cast<const Probability &>( prob->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<RevBayesCore::RbVector<long> >&e = static_cast<const ModelVector<ModelVector<Natural> > &>( edges->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> >&e = static_cast<const ModelVector<ModelVector<Natural> > &>( edges->getRevObject() ).getValue();
 
     
     RevBayesCore::Proposal *p = NULL;

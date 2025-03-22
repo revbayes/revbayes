@@ -16,7 +16,7 @@ template <class valueType> class TypedDagNode;
      *
      *
      */
-    class RoundFunction : public TypedFunction<long> {
+    class RoundFunction : public TypedFunction<std::int64_t> {
         
     public:
         RoundFunction(const TypedDagNode<double> *a);

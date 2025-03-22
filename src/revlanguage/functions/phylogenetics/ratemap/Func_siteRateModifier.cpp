@@ -49,9 +49,9 @@ RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_
 {
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* rate_multipliers  = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* event_classes;
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* event_classes;
     event_classes = static_cast<const ModelVector<ModelVector<Natural> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<long> >* site_classes;
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* site_classes;
     site_classes = static_cast<const ModelVector<Natural> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::SiteRateModifierFunction* f = new RevBayesCore::SiteRateModifierFunction(rate_multipliers, event_classes, site_classes);
