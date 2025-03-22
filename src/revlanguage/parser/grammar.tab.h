@@ -20,7 +20,7 @@
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so std::int64_t as that work isn't itself a
+   under terms of your choice, so long as that work isn't itself a
    parser generator using the skeleton or a modified version thereof
    as a parser skeleton.  Alternatively, if you modify or redistribute
    the parser skeleton itself, you may (at your option) remove this
@@ -175,12 +175,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 82 "./grammar.y"
+#line 83 "./grammar.y"
 
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    std::int64_t                                             longIntValue;
+    std::int64_t                                    longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
