@@ -1398,8 +1398,8 @@ Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
 	help_arrays[string("fnCovarion")][string("authors")].push_back(string(R"(Sebastian Hoehna and Lyndon Coghill)"));
 	help_strings[string("fnCovarion")][string("description")] = string(R"(The `fnCovarion` function defines a covarion model rate matrix for character evolution.
-The resulting rate matrix incorporates rate heterogeniety where the characters/sites are allowed to move between rate categories with a switching rate.)");
-	help_strings[string("fnCovarion")][string("details")] = string(R"(The covarion model allows for variation in evolutionary rates across sites over time, accomodating shifts in character state evolution.)");
+The resulting rate matrix incorporates rate heterogeneity where the characters/sites are allowed to move between rate categories with a switching rate.)");
+	help_strings[string("fnCovarion")][string("details")] = string(R"(The covarion model allows for variation in evolutionary rates across sites over time, accommodating shifts in character state evolution.)");
 	help_strings[string("fnCovarion")][string("example")] = string(R"(# define number of rate categories
 num_cats = 2
 
@@ -1429,9 +1429,9 @@ Q_Cov := fnCovarion(RateMatrices = Q_sub, RateScalars = rate_scalars, SwitchRate
 	help_strings[string("fnCovarion")][string("name")] = string(R"(fnCovarion)");
 	help_references[string("fnCovarion")].push_back(RbHelpReference(R"(Fitch, W. M., & Markowitz, E. (1970). An improved method for determining codon variability in a gene and its application to the rate of fixation of mutations in evolution. _Biochemical genetics_, 4, 579-593.)",R"(10.1007/BF00486096)",R"(https://doi.org/10.1007/BF00486096 )"));
 	help_references[string("fnCovarion")].push_back(RbHelpReference(R"(Tuffley, C., & Steel, M. (1998). Modeling the covarion hypothesis of nucleotide substitution. _Mathematical biosciences_, 147(1), 63-91.)",R"(10.1016/S0025-5564(97)00081-3)",R"(https://doi.org/10.1016/S0025-5564(97)00081-3 )"));
-	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(`fnJC` - Jukes-Cantor Model)"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(fnJC)"));
 	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"()"));
-	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(`fnF81` - Felsenstein 1981 Model)"));
+	help_arrays[string("fnCovarion")][string("see_also")].push_back(string(R"(fnF81)"));
 	help_strings[string("fnCovarion")][string("title")] = string(R"(The Covarion model rate matrix.)");
 	help_strings[string("fnCovarionRateMatrix")][string("name")] = string(R"(fnCovarionRateMatrix)");
 	help_strings[string("fnCpRev")][string("name")] = string(R"(fnCpRev)");
