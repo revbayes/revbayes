@@ -20,7 +20,7 @@ namespace RevBayesCore {
         
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        PhyloBrownianProcessStateDependentTrend(const TypedDagNode<CharacterHistoryDiscrete> *bh);
+        PhyloBrownianProcessStateDependentTrend(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites);
         virtual                                                            ~PhyloBrownianProcessStateDependentTrend(void);                                                              //!< Virtual destructor
         
         // public member functions

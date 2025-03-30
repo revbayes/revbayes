@@ -49,11 +49,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
     
     // get the parameters
+    size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
     
     const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
 
-    RevBayesCore::PhyloBrownianProcessStateDependentTrend *dist = new RevBayesCore::PhyloBrownianProcessStateDependentTrend(char_hist);
+    RevBayesCore::PhyloBrownianProcessStateDependentTrend *dist = new RevBayesCore::PhyloBrownianProcessStateDependentTrend(char_hist, n);
     
     // set tau
     if ( tau->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
@@ -165,7 +166,8 @@ const MemberRules& Dist_PhyloBrownianProcessStateDependentTrend::getParameterRul
         rootStateTypes.push_back( Real::getClassTypeSpec() );
         Real *defaultrootState = new Real(0.0);
         dist_member_rules.push_back( new ArgumentRule( "rootState" , rootStateTypes, "The root state.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultrootState ) );
-       
+        
+        dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
         rules_set = true;
     }
     
@@ -222,6 +224,15 @@ void Dist_PhyloBrownianProcessStateDependentTrend::printValue(std::ostream& o) c
     {
         o << "?";
     }
+    o << ", nSites=";
+    if ( n_sites != NULL )
+    {
+        o << n_sites->getName();
+    }
+    else
+    {
+        o << "?";
+    }
     
     o << ")";
     
@@ -247,6 +258,10 @@ void Dist_PhyloBrownianProcessStateDependentTrend::setConstParameter(const std::
     else if ( name == "rootState" )
     {
         root_state = var;
+    }
+    else if ( name == "nSites" )
+    {
+        n_sites = var;
     }
     else
     {

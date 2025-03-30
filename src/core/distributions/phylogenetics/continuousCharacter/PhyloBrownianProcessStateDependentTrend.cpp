@@ -33,7 +33,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloBrownianProcessStateDependentTrend::PhyloBrownianProcessStateDependentTrend(const TypedDagNode<CharacterHistoryDiscrete> *ch) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloBrownianProcessStateDependentTrend::PhyloBrownianProcessStateDependentTrend(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes) ) ),
