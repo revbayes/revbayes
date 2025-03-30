@@ -109,7 +109,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set the root states
     if (rt == "parameter"){
         RevBayesCore::TypedDagNode< double >* rs;
-        rs = static_cast<const Real &>( root_states->getRevObject() ).getDagNode();
+        rs = static_cast<const Real &>( root_state->getRevObject() ).getDagNode();
         dist->setRootState( rs );
     }
     
@@ -203,9 +203,8 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         
         std::vector<TypeSpec> rootStateTypes;
         rootStateTypes.push_back( Real::getClassTypeSpec() );
-        rootStateTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
-        Real *defaultRootStates = new Real(0.0);
-        dist_member_rules.push_back( new ArgumentRule( "rootStates" , rootStateTypes, "The vector of root states.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootStates ) );
+        Real *defaultRootState = new Real(0.0);
+        dist_member_rules.push_back( new ArgumentRule( "rootState" , rootStateTypes, "The state of the continuous trait at root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootState ) );
        
         std::vector<std::string> options;
         options.push_back( "optimum" );
@@ -290,9 +289,9 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     {
         sigma = var;
     }
-    else if ( name == "rootStates" )
+    else if ( name == "rootState" )
     {
-        root_states = var;
+        root_state = var;
     }
     else if ( name == "nSites" )
     {

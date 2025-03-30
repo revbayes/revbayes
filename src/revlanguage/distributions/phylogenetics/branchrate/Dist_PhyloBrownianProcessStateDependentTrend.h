@@ -1,5 +1,5 @@
-#ifndef Dist_PhyloOrnsteinUhlenbeckStateDependent_H
-#define Dist_PhyloOrnsteinUhlenbeckStateDependent_H
+#ifndef Dist_PhyloBrownianProcessStateDependentTrend_H
+#define Dist_PhyloBrownianProcessStateDependentTrend_H
 
 #include <math.h>
 #include <iosfwd>
@@ -27,14 +27,14 @@
 namespace RevLanguage {
 class TypeSpec;
     
-    class Dist_PhyloOrnsteinUhlenbeckStateDependent :  public TypedDistribution< ContinuousCharacterData > {
+    class Dist_PhyloBrownianProcessStateDependentTrend :  public TypedDistribution< ContinuousCharacterData > {
         
     public:
-        Dist_PhyloOrnsteinUhlenbeckStateDependent( void );
-        virtual ~Dist_PhyloOrnsteinUhlenbeckStateDependent();
+        Dist_PhyloBrownianProcessStateDependentTrend( void );
+        virtual ~Dist_PhyloBrownianProcessStateDependentTrend();
         
         // Basic utility functions
-        Dist_PhyloOrnsteinUhlenbeckStateDependent*      clone(void) const;                                                                      //!< Clone the object
+        Dist_PhyloBrownianProcessStateDependentTrend*      clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                          getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::vector<std::string>                        getDistributionFunctionAliases( void ) const;
@@ -54,14 +54,10 @@ class TypeSpec;
         
     private:
         
-        RevPtr<const RevVariable>                       alpha;
-        RevPtr<const RevVariable>                       theta;
+        RevPtr<const RevVariable>                       tau;
         RevPtr<const RevVariable>                       sigma;
         RevPtr<const RevVariable>                       root_state;
-        RevPtr<const RevVariable>                       root_treatment;
-        RevPtr<const RevVariable>                       character_history;
-        RevPtr<const RevVariable>                       n_sites;
-        
+        RevPtr<const RevVariable>                       character_history;        
         
     };
     
