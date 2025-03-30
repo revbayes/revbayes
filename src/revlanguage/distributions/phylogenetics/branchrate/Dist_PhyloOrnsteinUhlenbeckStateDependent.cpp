@@ -68,7 +68,19 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         throw RbException("argument rootTreatment must be one of \"optimum\", \"equilibrium\" or \"parameter\"");
     }
 
-    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n, rtr);
+    const std::string& oet = static_cast<const RlString &>( obs_err_treatment->getRevObject() ).getValue();
+    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT oetr;
+    if (oet == "none"){
+        oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::NONE;
+    }else if (oet == "uniform"){
+        oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::UNIFORM;
+    }else if (oet == "variable"){
+        oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::VARIABLE;
+   }else{
+        throw RbException("argument rootTreatment must be one of \"none\", \"uniform\" or \"variable\"");
+    }
+    
+    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, oetr);
 
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
@@ -206,14 +218,19 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         Real *defaultRootState = new Real(0.0);
         dist_member_rules.push_back( new ArgumentRule( "rootState" , rootStateTypes, "The state of the continuous trait at root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootState ) );
        
-        std::vector<std::string> options;
-        options.push_back( "optimum" );
-        options.push_back( "equilibrium" );
-        options.push_back( "parameter" );
-        dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), options, "whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
+        std::vector<std::string> rootTreatmentTypes;
+        rootTreatmentTypes.push_back( "optimum" );
+        rootTreatmentTypes.push_back( "equilibrium" );
+        rootTreatmentTypes.push_back( "parameter" );
+        dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
         // setting the default
         //RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
-
+        std::vector<std::string> observationalErrorTreatmentTypes;
+        observationalErrorTreatmentTypes.push_back( "none" );
+        observationalErrorTreatmentTypes.push_back( "uniform" );
+        observationalErrorTreatmentTypes.push_back( "variable" );
+        dist_member_rules.push_back( new OptionRule ("observationalErrorTreatment", new RlString("none"), observationalErrorTreatmentTypes, "Whether the observational error at tips is assumed to be zero, uniform across tips, or vary from tip to tip.") );
+        
         dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
        
         rules_set = true;
@@ -300,6 +317,10 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     else if ( name == "rootTreatment" )
     {
         root_treatment = var;
+    }
+    else if ( name == "observationalErrorTreatment" )
+    {
+        obs_err_treatment = var;
     }
     else
     {

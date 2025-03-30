@@ -20,8 +20,9 @@ namespace RevBayesCore {
         
     public:
         enum                                                                ROOT_TREATMENT { OPTIMUM, EQUILIBRIUM, PARAMETER };
+        enum                                                                OBS_ERR_TREATMENT { NONE, UNIFORM, VARIABLE };
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt);
+        PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, OBS_ERR_TREATMENT oet);
         virtual                                                            ~PhyloOrnsteinUhlenbeckStateDependent(void);                                                              //!< Virtual destructor
         
         // public member functions
@@ -38,7 +39,8 @@ namespace RevBayesCore {
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
         void                                                                setRootTreatment(ROOT_TREATMENT rt) { root_treatment = rt; }
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
-
+        void                                                                setObservationalErrorTreatment(OBS_ERR_TREATMENT oet) { obs_err_treatment = oet; }
+        OBS_ERR_TREATMENT                                                      getObservationalErrorTreatment() const { return obs_err_treatment; }
         // non-virtual
 //        void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                             //!< The tree has changed and we want to know which part.
         virtual void                                                        redrawValue(void);
@@ -84,8 +86,8 @@ namespace RevBayesCore {
         double                                                              simulateEpisode(size_t state_index, double delta_t, double ancestral_value);
         void                                                                computeEpisode(double &mu, double &variance, double &log_nf, size_t state_index, double time);  
 
-        ROOT_TREATMENT                                                      root_treatment;  
-
+        ROOT_TREATMENT                                                      root_treatment;
+        OBS_ERR_TREATMENT                                                   obs_err_treatment;
         const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;
 
         const TypedDagNode< double >*                                       root_state;

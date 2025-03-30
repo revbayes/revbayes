@@ -59,6 +59,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       sigma;
         RevPtr<const RevVariable>                       root_state;
         RevPtr<const RevVariable>                       root_treatment;
+        RevPtr<const RevVariable>                       obs_err_treatment;
         RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
         
