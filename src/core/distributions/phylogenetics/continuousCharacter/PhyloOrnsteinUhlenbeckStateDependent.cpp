@@ -224,7 +224,32 @@ void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* af
 
 void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
-    
+    // add observational error to tips
+    // TODO_pris: where to put this block?
+    if ( node.isTip() == true && dirty_nodes[node_index] == true )
+    {
+        dirty_nodes[node_index] = false;
+        const std::vector<double> &mu_tip  = this->means[this->active_likelihood[node_index]][node_index];
+        double mean_tip      = mu_tip[0];
+        double obs_err = 0;
+        if (obs_err_treatment == NONE)
+        {
+            obs_err = 0;
+        }
+        else if (obs_err_treatment == UNIFORM)
+        {
+            obs_err = 1;
+        }
+        else if (obs_err_treatment == SCALED)
+        {
+            obs_err = sqrt( mean_tip * 0.1 ) / 2;
+        }
+        else
+        {
+            throw RbException("Unkown observational error treatment chosen for probability computation in state-dependent Ornstein-Uhlenbeck process.");
+        }
+        this->variances[this->active_likelihood[node_index]][node_index] += obs_err;
+    }
     // check for recomputation
     if ( node.isTip() == false && dirty_nodes[node_index] == true )
     {

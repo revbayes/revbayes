@@ -74,10 +74,10 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::NONE;
     }else if (oet == "uniform"){
         oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::UNIFORM;
-    }else if (oet == "variable"){
-        oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::VARIABLE;
+    }else if (oet == "scaled"){
+        oetr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::OBS_ERR_TREATMENT::SCALED;
    }else{
-        throw RbException("argument rootTreatment must be one of \"none\", \"uniform\" or \"variable\"");
+        throw RbException("argument rootTreatment must be one of \"none\", \"uniform\" or \"scaled\"");
     }
     
     RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, oetr);
@@ -228,7 +228,7 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         std::vector<std::string> observationalErrorTreatmentTypes;
         observationalErrorTreatmentTypes.push_back( "none" );
         observationalErrorTreatmentTypes.push_back( "uniform" );
-        observationalErrorTreatmentTypes.push_back( "variable" );
+        observationalErrorTreatmentTypes.push_back( "scaled" );
         dist_member_rules.push_back( new OptionRule ("observationalErrorTreatment", new RlString("none"), observationalErrorTreatmentTypes, "Whether the observational error at tips is assumed to be zero, uniform across tips, or vary from tip to tip.") );
         
         dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );

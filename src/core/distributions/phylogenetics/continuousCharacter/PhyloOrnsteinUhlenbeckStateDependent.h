@@ -20,7 +20,7 @@ namespace RevBayesCore {
         
     public:
         enum                                                                ROOT_TREATMENT { OPTIMUM, EQUILIBRIUM, PARAMETER };
-        enum                                                                OBS_ERR_TREATMENT { NONE, UNIFORM, VARIABLE };
+        enum                                                                OBS_ERR_TREATMENT { NONE, UNIFORM, SCALED };
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
         PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, OBS_ERR_TREATMENT oet);
         virtual                                                            ~PhyloOrnsteinUhlenbeckStateDependent(void);                                                              //!< Virtual destructor
