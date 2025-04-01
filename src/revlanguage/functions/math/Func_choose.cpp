@@ -41,11 +41,11 @@ Func_choose* Func_choose::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction<long>* Func_choose::createFunction( void ) const
+RevBayesCore::TypedFunction<std::int64_t>* Func_choose::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<long>* n = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* k = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* n = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* k = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::ChooseFunction* f = new RevBayesCore::ChooseFunction( n, k );
     
     return f;

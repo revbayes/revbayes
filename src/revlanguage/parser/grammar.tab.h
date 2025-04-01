@@ -175,12 +175,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 82 "./grammar.y"
+#line 83 "./grammar.y"
 
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    long                                             longIntValue;
+    std::int64_t                                    longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;

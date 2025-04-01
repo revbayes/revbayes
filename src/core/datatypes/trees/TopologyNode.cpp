@@ -1836,7 +1836,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                         {
                             // add the extinct child to the active children list, remove it from the extinct children list
                             active_children.push_back( extinct_children.at(j) );
-                            extinct_children.erase( extinct_children.begin() + long(j) );
+                            extinct_children.erase( extinct_children.begin() + std::int64_t(j) );
                         }
                     }
                     
@@ -1845,14 +1845,14 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     TopologyNode* leftChild = active_children.at(left);
                     
                     // remove the randomly drawn node from the list
-                    active_children.erase( active_children.begin() + long(left) );
+                    active_children.erase( active_children.begin() + std::int64_t(left) );
                     
                     // randomly draw one child (arbitrarily called right) node from the list of active children
                     size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
                     TopologyNode* rightChild = active_children.at(right);
                     
                     // remove the randomly drawn node from the list
-                    active_children.erase( active_children.begin() + long(right) );
+                    active_children.erase( active_children.begin() + std::int64_t(right) );
                     
                     // remove the two also from the list of the children of the current node
                     children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
@@ -1888,14 +1888,14 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
                     TopologyNode* leftChild = active_children.at(left);
                     
                     // remove the randomly drawn node from the list
-                    active_children.erase( active_children.begin() + long(left) );
+                    active_children.erase( active_children.begin() + std::int64_t(left) );
                     
                     // randomly draw one child (arbitrarily called left) node from the list of active children
                     size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
                     TopologyNode* rightChild = active_children.at(right);
                     
                     // remove the randomly drawn node from the list
-                    active_children.erase( active_children.begin() + long(right) );
+                    active_children.erase( active_children.begin() + std::int64_t(right) );
                     
                     // remove the two also from the list of the children of the current node
                     children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );

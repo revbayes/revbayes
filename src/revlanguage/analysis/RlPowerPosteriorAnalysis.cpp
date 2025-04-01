@@ -140,7 +140,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         found = true;
 
         // get the member with a given index
-        long gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::int64_t gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;
         if ( args[2].getVariable()->getRevObject() != RevNullObject::getInstance() )
@@ -162,7 +162,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         {
             throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size();
         }
-        long gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::int64_t gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;
         if ( args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )

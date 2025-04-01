@@ -14,10 +14,10 @@ using namespace RevBayesCore;
 
 /*Multinomial Distribution Constructor
  * @param p A simplex of the the probabilities for each category
- * @param n A long for the number of trials
+ * @param n A std::int64_t for the number of trials
  */
 
-MultinomialDistribution::MultinomialDistribution(const TypedDagNode<Simplex> *p, const TypedDagNode<long> *n) : TypedDistribution< RbVector<long> >( new RbVector<long>() ),
+MultinomialDistribution::MultinomialDistribution(const TypedDagNode<Simplex> *p, const TypedDagNode<std::int64_t> *n) : TypedDistribution< RbVector<std::int64_t> >( new RbVector<std::int64_t>() ),
     p( p ),
     n( n )
 {
@@ -67,6 +67,6 @@ void MultinomialDistribution::swapParameterInternal(const DagNode *oldP, const D
     }
     else if (oldP == n)
     {
-        n = static_cast<const TypedDagNode<long>* >(newP);
+        n = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
 }

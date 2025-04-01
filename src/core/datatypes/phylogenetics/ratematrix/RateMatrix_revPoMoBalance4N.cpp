@@ -17,7 +17,7 @@ using namespace RevBayesCore;
 
 
 /** Construct rate matrix with n states */
-RateMatrix_revPoMoBalance4N::RateMatrix_revPoMoBalance4N( long ss, long in_n ) : TimeReversibleRateMatrix( ss ),
+RateMatrix_revPoMoBalance4N::RateMatrix_revPoMoBalance4N( std::int64_t ss, std::int64_t in_n ) : TimeReversibleRateMatrix( ss ),
     N( in_n ),
     pi( 4, 0.25),
     rho( 6, 0.001 ),
@@ -435,7 +435,7 @@ void RateMatrix_revPoMoBalance4N::tiProbsComplexEigens(double t, TransitionProba
 }
 
 
-void RateMatrix_revPoMoBalance4N::setN( long n )
+void RateMatrix_revPoMoBalance4N::setN( std::int64_t n )
 {
     
     N = n;
@@ -480,7 +480,7 @@ void RateMatrix_revPoMoBalance4N::setBeta( const std::vector<double> &b )
     needs_update = true;
 }
 
-void RateMatrix_revPoMoBalance4N::setB( const std::vector<long> &Bf )
+void RateMatrix_revPoMoBalance4N::setB( const std::vector<std::int64_t> &Bf )
 {
     B = Bf;
     
