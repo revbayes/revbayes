@@ -492,10 +492,12 @@ bool UniformTopologyDistribution::matchesConstraints( void )
 		const TopologyNode &root = value->getRoot();
 		for (std::vector<Clade>::iterator it = constraints.begin(); it != constraints.end(); ++it) 
 		{
-            if ( root.containsClade( *it, true ) == false && it->isNegativeConstraint() == false) //LYR changed
+            if ( root.containsClade( *it, true ) == false && it->isNegativeConstraint() == false ) //LYR changed
 			{
 				return false;
-			}else if ( root.containsClade( *it, true ) == true && it->isNegativeConstraint() == true){//LYR changed
+			}
+            else if ( root.containsClade( *it, true ) == true && it->isNegativeConstraint() == true ) //LYR changed
+            {
                 return false;
             }
 		}

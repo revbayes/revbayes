@@ -3,7 +3,7 @@
 # RevBayes Validation Test: negative clade constraints are respected
 #
 #
-# authors: Levi Raskin and David Černý
+# authors: Levi Raskin and David Cerny
 #
 ################################################################################
 
@@ -15,16 +15,6 @@ seed(12345)
 
 ### Read in sequence data
 seqDat <- readDiscreteCharacterData("data/strepsipteraFAM000008.faRN_cleaned")
-
-coleopteraList = v("Archostemata", "Megacyllene", "Ripiphoridae","PogonusAndolfatto", "Anoplura", "Plagiodera","Rhyssomatus", "Cyrtepistomus", "Labidomera","Curculionoidea", "Chrysochus", "Tetraopes","Meloidae", "Tenebrionidae","PogonusNCBI", "Adephaga")
-
-strepsipteraList = v("Xenos", "Mengenilla", "Mengenillidia")
-
-for(k in seqDat.taxa()){
-    if(coleopteraList.contains(k.getName()) == false && strepsipteraList.contains(k.getName()) == false){
-        seqDat.setTaxonName(k.getName(), "AAA"+k.getName())
-    }
-}
 
 ## helpers
 n_taxa <- seqDat.size()
@@ -60,30 +50,19 @@ moves.append( mvScale(alpha, lambda=1,    weight=1.0) )
 
 rates := fnDiscretizeGamma( alpha, alpha, 4 )
 
-###set up clade constraints:
-coleopteraList = v("Archostemata", "Megacyllene", "Ripiphoridae","PogonusAndolfatto", "Anoplura", "Plagiodera","Rhyssomatus", "Cyrtepistomus", "Labidomera","Curculionoidea", "Chrysochus", "Tetraopes","Meloidae", "Tenebrionidae","PogonusNCBI", "Adephaga")
+### Set up clade constraints:
+paraneopteraList = v("Anoplura", "Aphidiformes", "Neohemiptera")
+coleopteraList = v("Archostemata", "PogonusNCBI", "Ripiphoridae")
+strepsipteraList = v("Mengenilla", "Mengenillidia", "Xenos")
 
-strepsipteraList = v("Xenos", "Mengenilla", "Mengenillidia")
-
-for(k in coleopteraList){
-    if(taxa.contains(taxon(k)) == false){
-        coleopteraList.erase(k)
-    }
-}
-for(k in strepsipteraList){
-    if(taxa.contains(taxon(k)) == false){
-        strepsipteraList.erase(k)
-    }
-}
-
+### Make Coleoptera+Strepsiptera monophyletic but Coleoptera non-monophyletic
 strepsipteraTaxa = clade(strepsipteraList)
 coleopteraTaxa = clade(coleopteraList)
 coleopteraTaxaN = clade(coleopteraList, negative = TRUE)
 strepColeop = clade(strepsipteraTaxa, coleopteraTaxa)
 
-c = v(strepColeop)
-
-phylogeny ~ dnUniformTopology(taxa, constraints=c)
+c = v(coleopteraTaxaN, strepColeop)
+phylogeny ~ dnUniformTopology(taxa, outgroup=clade(paraneopteraList), constraints=c)
 
 moves.append(mvNNI(phylogeny, weight=num_branches/2.0))
 moves.append(mvSPR(phylogeny, weight=num_branches/10.0))
@@ -110,7 +89,6 @@ phySeq.clamp(seqDat)
 # initialize the model object #
 mymodel = model(psi)
 
-
 # Create a vector of monitors #
 # 1. for the full model #
 monitors.append( mnModel(filename="output/strepColeop.log", printgen=1) )
@@ -124,7 +102,7 @@ mymcmc.run(generations=100)
 trace = readTreeTrace("output/strepColeop.trees",burnin=0)
 
 for (i in 1:trace.size()) {
-    if ( trace.getTree(i).containsClade(coleopteraTaxaN) ) {
+    if ( trace.getTree(i).containsClade(coleopteraTaxa) ) {
         print("Something went wrong!")
     }
 }
