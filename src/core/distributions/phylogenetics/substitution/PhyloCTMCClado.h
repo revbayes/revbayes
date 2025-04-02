@@ -124,18 +124,18 @@ RevBayesCore::PhyloCTMCClado<charType>::PhyloCTMCClado(const TypedDagNode<Tree> 
 //    et.push_back("s");
 //    et.push_back("a");
     
-//    const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states 
+//    const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states 
     
     
     // create a dummy matrix of identical cladogenetic inheritance triplets
-    RevBayesCore::RbVector<RevBayesCore::RbVector<long> >* clado_events_mtx_tmp = new RevBayesCore::RbVector<RevBayesCore::RbVector<long> >();
+    RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> >* clado_events_mtx_tmp = new RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> >();
     for (size_t i = 0; i < nChars; i++) {
-        clado_events_mtx_tmp->push_back( RevBayesCore::RbVector<long>(3, i) );
+        clado_events_mtx_tmp->push_back( RevBayesCore::RbVector<std::int64_t>(3, i) );
     }
     
     // populate a dummy node with those events
-    TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* clado_events_tmp;
-    clado_events_tmp = new RevBayesCore::ConstantNode< RevBayesCore::RbVector< RevBayesCore::RbVector<long> > >(".cladogenetic_events", clado_events_mtx_tmp);
+    TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* clado_events_tmp;
+    clado_events_tmp = new RevBayesCore::ConstantNode< RevBayesCore::RbVector< RevBayesCore::RbVector<std::int64_t> > >(".cladogenetic_events", clado_events_mtx_tmp);
     
     // populate a dummy event probs vector where each event has prob = 1
     TypedDagNode< RevBayesCore::RbVector<double> >* clado_probs_tmp;
@@ -641,7 +641,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const Topology
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
-    const std::vector<unsigned long> &char_node = this->char_matrix[data_tip_index];
+    const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
 
     // compute the transition probabilities
@@ -740,7 +740,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const Topology
                     }
                     else // no ambiguous characters in use
                     {
-                        unsigned long org_val = char_node[site];
+                        std::uint64_t org_val = char_node[site];
                         
                         // store the likelihood
                         p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
@@ -1257,7 +1257,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::simulate( const TopologyNode &node,
     for ( size_t i = 0; i < this->num_sites; ++i )
     {
         // this is the parent's state before clado change
-        unsigned long parentState = parent.getCharacter( i ).getStateIndex();
+        std::uint64_t parentState = parent.getCharacter( i ).getStateIndex();
         
         // simulate left and right states after clado changes
         charType cl = charType( this->num_chars );
@@ -1311,7 +1311,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::simulate( const TopologyNode &node,
         for ( size_t i = 0; i < this->num_sites; ++i )
         {
             // get the parent's state after clado change
-            unsigned long parentState;
+            std::uint64_t parentState;
             if (first_child)
             {
                 parentState = left->getCharacter( i ).getStateIndex();

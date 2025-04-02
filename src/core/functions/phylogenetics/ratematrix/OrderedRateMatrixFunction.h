@@ -23,7 +23,7 @@ template <class valueType> class TypedDagNode;
     class OrderedRateMatrixFunction : public TypedFunction<RateGenerator> {
         
     public:
-        OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state, bool rescale, std::string method);
+        OrderedRateMatrixFunction(const TypedDagNode<std::int64_t> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state, bool rescale, std::string method);
         
         virtual                                     ~OrderedRateMatrixFunction(void);                                               //!< Virtual destructor
         

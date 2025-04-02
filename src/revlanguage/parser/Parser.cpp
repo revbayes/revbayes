@@ -134,7 +134,7 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
 
 /**
  * This function causes recursive execution of a syntax tree by calling the root to get its value.
- * As long as we return to the bison code, bison takes care of deleting the syntax tree. However,
+ * As std::int64_t as we return to the bison code, bison takes care of deleting the syntax tree. However,
  * if we encounter a quit() call, we delete the syntax tree ourselves and exit immediately.
  */
 int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Environment>& env) const
@@ -260,7 +260,7 @@ void RevLanguage::Parser::getline(char* buf, size_t maxsize)
     else
     {
         foundNewline = false;
-        rrcommand.getline(buf, long(maxsize) - 3);
+        rrcommand.getline(buf, std::int64_t(maxsize) - 3);
         // Deal with line endings in case getline uses non-Unix endings
         size_t i = strlen(buf);
         if (i >= 1 && buf[i - 1] == '\r')
