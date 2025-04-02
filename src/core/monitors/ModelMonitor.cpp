@@ -13,7 +13,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-ModelMonitor::ModelMonitor(unsigned long g, const path &fname, const SampleFormat &f, std::set<std::string> exclude_list) :
+ModelMonitor::ModelMonitor(std::uint64_t g, const path &fname, const SampleFormat &f, std::set<std::string> exclude_list) :
     VariableMonitor(std::vector<DagNode *>(),g,fname,f),
     stochastic_nodes_only( false ),
     exclude(exclude_list)

@@ -11,7 +11,7 @@ using namespace RevBayesCore;
  * @param x a double with the value to be truncated
  */
 
-TruncateFunction::TruncateFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
+TruncateFunction::TruncateFunction(const TypedDagNode<double> *x) : TypedFunction<std::int64_t>( new std::int64_t(0) ),
     a( x )
 {
     addParameter( x );

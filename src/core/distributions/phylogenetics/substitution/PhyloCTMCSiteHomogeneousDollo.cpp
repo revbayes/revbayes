@@ -598,7 +598,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
-    const std::vector<unsigned long> &char_node = this->char_matrix[data_tip_index];
+    const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
@@ -680,7 +680,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
                 {
                     // get the original character
                     // shift the characters so that a zero state is the (n-1)th state
-                    unsigned long org_val = char_node[site] == 0 ? dim : char_node[site] - 1;
+                    std::uint64_t org_val = char_node[site] == 0 ? dim : char_node[site] - 1;
 
                     // store the branch likelihoods and integrated node likelihood
                     for (size_t c = 0; c < dim + 1; c++)
@@ -1737,7 +1737,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulate( const TopologyNode &
 
         if (u < survival[rateIndex])
         {
-            unsigned long cp = parentState.getStateIndex() - 1;
+            std::uint64_t cp = parentState.getStateIndex() - 1;
 
             double *freqs = this->transition_prob_matrices[ rateIndex ][ cp ];
 

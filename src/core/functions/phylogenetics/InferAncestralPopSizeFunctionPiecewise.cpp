@@ -47,7 +47,7 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
                                           																				const DagNode *inoccurrence,
                                           																				const DagNode *ineventsampling,
                                           																				const DagNode *intreatment,
-                                          																				const TypedDagNode<long> *n,
+                                          																				const TypedDagNode<std::int64_t> *n,
                                           																				const std::string& cdt,
 								                                          										    const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                           																				const std::vector<double> &tau,
@@ -191,7 +191,7 @@ void InferAncestralPopSizeFunctionPiecewise::update( void )
 {
 		updateVectorParameters();
     size_t S = time_points.size();
-    long N = maxHiddenLin->getValue();
+    std::int64_t N = maxHiddenLin->getValue();
 
     const Tree& tree = timeTree->getValue();
     const std::vector<double>& occurrence_ages = occurrences->getValue(); 
@@ -375,7 +375,7 @@ void InferAncestralPopSizeFunctionPiecewise::swapParameterInternal( const DagNod
     }
     else if (oldP == maxHiddenLin)
     {
-        maxHiddenLin         = static_cast<const TypedDagNode< long >* >( newP );
+        maxHiddenLin         = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
     else if (oldP == timeTree)
     {

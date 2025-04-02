@@ -37,7 +37,7 @@ namespace RevBayesCore {
     class TopologyNode;
     class TaxonMap;
 
-    class Tree : public Cloneable, public MemberObject<double>, public MemberObject<long>, public MemberObject<Boolean>, public Serializable, public Printable {
+    class Tree : public Cloneable, public MemberObject<double>, public MemberObject<std::int64_t>, public MemberObject<Boolean>, public Serializable, public Printable {
 
     public:
         Tree(void) = default;                                                                                                                                   //!< Default constructor
@@ -76,7 +76,7 @@ namespace RevBayesCore {
         void                                                dropTipNode(size_t i);                                                          //!< Get a pointer to tip node i
         void                                                dropTipNodeWithName(const std::string &n);                                                          //!< Get a pointer to tip node i
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;       //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;       //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Boolean &rv) const;    //!< Map the member methods to internal function calls
         std::map<RbBitSet, TopologyNode*>                   getBitsetToNodeMap(void) const;                                                                     //!< Get a map between node bitsets and nodes in the Tree
         std::vector<Taxon>                                  getFossilTaxa() const;                                                                              //!< Get all the taxa in the tree
@@ -89,7 +89,7 @@ namespace RevBayesCore {
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>*                              getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
-        std::vector<long>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
+        std::vector<std::int64_t>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of non-root internal nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfExtantTips(void) const;                                                                  //!< Get the number of extant tip nodes in the Tree

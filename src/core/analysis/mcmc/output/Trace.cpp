@@ -42,10 +42,10 @@ int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool 
 
 
 template <>
-int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+int Trace<std::int64_t>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
 {
 
-    long sample = atof( v.c_str() );
+    std::int64_t sample = atof( v.c_str() );
 
     double smaller_values_count = 0;
     double equal_values_count   = 0;

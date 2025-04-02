@@ -119,7 +119,7 @@ const ArgumentRules& Func_formatDiscreteCharacterData::getArgumentRules( void ) 
         optionsStrategy.push_back( "GeoSSE" );
         argumentRules.push_back( new OptionRule( "format", new RlString("DEC"), optionsStrategy, "The data format." ) );
         
-        argumentRules.push_back( new ArgumentRule( "numStates", Natural::getClassTypeSpec(), "The number of states (format==\"DEC\" or \"GeoSSE\" only).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)) );
+        argumentRules.push_back( new ArgumentRule( "numStates", Natural::getClassTypeSpec(), "The number of states (format==\"DEC\" or \"GeoSSE\" only).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0)) );
 
         rulesSet = true;
     }
