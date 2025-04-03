@@ -1,6 +1,7 @@
 ## name
 sinh
 ## title
+Hyperbolic Sine Function
 ## description
 Hyperbolic functions are analogues of the ordinary trigonometric functions but based on hyperbolas instead of circles.
 ## details

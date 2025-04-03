@@ -8,6 +8,7 @@ The floor function is the function that takes as input a real number x, and give
  For example, for floor: ⌊2.4⌋ = 2, ⌊−2.4⌋ = −3
 ## authors
 ## see_also
+trunc
 ## example
 x <- 3.7
 y <- floor(x)
