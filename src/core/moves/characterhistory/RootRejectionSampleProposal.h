@@ -558,7 +558,6 @@ void RevBayesCore::RootRejectionSampleProposal<charType>::sampleNodeCharacters( 
     }
 
 
-
 }
 
 
