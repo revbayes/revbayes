@@ -1,6 +1,6 @@
 #include "ContinuousCharacterData.h"
 
-#include <math.h>
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <map>
@@ -144,7 +144,7 @@ void ContinuousCharacterData::concatenate(const ContinuousCharacterData &obsd, s
             }
             else
             {
-                throw RbException("Cannot add two character data objects because second character data object has no taxon with name '" + n + "n'!");
+                throw RbException() << "Cannot add two character data objects because second character data object has no taxon with name '" << n << "n'!";
             }
         }
 
@@ -171,7 +171,7 @@ void ContinuousCharacterData::concatenate(const ContinuousCharacterData &obsd, s
             }
             else if ( type != "intersection" )
             {
-                throw RbException("Cannot concatenate two character data objects because first character data object has no taxon with name '" + obsd.getTaxonNameWithIndex(i) + "n'!");
+                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
             }
         }
     }
@@ -191,7 +191,7 @@ ContinuousCharacterData* ContinuousCharacterData::clone( void ) const
     return new ContinuousCharacterData(*this);
 }
 
-DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter(double error, long num_bins, double cushion_width) const
+DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter(double error, std::int64_t num_bins, double cushion_width) const
 {
 	// create the new matrix
 	size_t num_chars     = this->getNumberOfCharacters();
@@ -391,13 +391,13 @@ void ContinuousCharacterData::executeMethod(const std::string &n, const std::vec
     
     if ( n == "get" )
     {
-        long index_taxon = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
-        long index_site = static_cast<const TypedDagNode<long> *>( args[1] )->getValue()-1;
+        std::int64_t index_taxon = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        std::int64_t index_site = static_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue()-1;
         rv = getTaxonData(index_taxon)[index_site];
     }
     else
     {
-        throw RbException("A continuous character data object does not have a member method called '" + n + "'.");
+        throw RbException() << "A continuous character data object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -989,7 +989,7 @@ const ContinuousTaxonData& ContinuousCharacterData::getTaxonData( size_t tn ) co
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + name + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the CharacterData matrix.";
     }
     
 }
@@ -1017,7 +1017,7 @@ ContinuousTaxonData& ContinuousCharacterData::getTaxonData( size_t tn )
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + name + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the CharacterData matrix.";
     }
     
 }
@@ -1044,7 +1044,7 @@ const ContinuousTaxonData& ContinuousCharacterData::getTaxonData( const std::str
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + tn + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << tn << "' in the CharacterData matrix.";
     }
     
 }
@@ -1073,7 +1073,7 @@ ContinuousTaxonData& ContinuousCharacterData::getTaxonData( const std::string &t
     else 
     {
         
-        throw RbException("Cannot find taxon '" + tn + "' in the CharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << tn << "' in the CharacterData matrix.";
     }
     
 }

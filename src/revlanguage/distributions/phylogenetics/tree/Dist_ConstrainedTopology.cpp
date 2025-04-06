@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -94,7 +94,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
     }
     
     // number of decimal places to use when checking the initial tree against taxon ages
-    long pr = 0; // unset
+    std::int64_t pr = 0; // unset
     if ( age_check_precision != NULL )
     {
         pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();

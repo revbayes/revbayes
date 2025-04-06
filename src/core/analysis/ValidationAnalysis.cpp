@@ -81,7 +81,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
             for (size_t j = 0; j < current_ordered_nodes.size(); ++j)
             {
                 DagNode *the_node = current_ordered_nodes[j];
-            
+                            
                 if ( the_node->isStochastic() == true )
                 {
                     the_node->redraw( SimulationCondition::VALIDATION );
@@ -238,9 +238,9 @@ void ValidationAnalysis::burnin(size_t generations, size_t tuningInterval)
         if ( runs[i] == NULL ) std::cerr << "Runing bad burnin (pid=" << pid <<", run="<< i << ") of runs.size()=" << runs.size() << "." << std::endl;
         // run the i-th analyses
 #ifdef RB_MPI
-        runs[i]->burnin(generations, MPI_COMM_WORLD, tuningInterval, false, false);
+        runs[i]->burnin(generations, MPI_COMM_WORLD, tuningInterval, 0);
 #else
-        runs[i]->burnin(generations, tuningInterval, false, false);
+        runs[i]->burnin(generations, tuningInterval, 0);
 #endif
         if ( process_active == true )
         {
@@ -329,9 +329,9 @@ void ValidationAnalysis::runSim(size_t idx, size_t gen)
     
     
 #ifdef RB_MPI
-    analysis->run(gen, rules, MPI_COMM_WORLD, 100, "", 0, false);
+    analysis->run(gen, rules, MPI_COMM_WORLD, 100, "", 0, 0);
 #else
-    analysis->run(gen, rules, 100, "", 0, false);
+    analysis->run(gen, rules, 100, "", 0, 0);
 #endif
 
 }

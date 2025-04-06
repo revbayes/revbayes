@@ -30,6 +30,7 @@
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -48,7 +49,7 @@ using namespace RevBayesCore;
 TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist,
                                                                           const std::vector<Clade> &c,
                                                                           Tree *t,
-                                                                          long age_check_precision) : TypedDistribution<Tree>( NULL ),
+                                                                          std::int64_t age_check_precision) : TypedDistribution<Tree>( NULL ),
 //    active_backbone_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     active_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     backbone_topology(NULL),
@@ -235,17 +236,19 @@ TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone(
  */
 double TopologyConstrainedTreeDistribution::computeLnProbability( void )
 {
+    using namespace RbConstants;
+
     recursivelyUpdateClades( value->getRoot() );
     
     // first check if the current tree matches the clade constraints
     if ( matchesConstraints() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
     }
     
     if ( matchesBackbone() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
     }
     
     double lnProb = base_distribution->computeLnProbability();
@@ -270,7 +273,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                 std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                 if ( it == taxon_map.end() )
                 {
-                    throw RbException("Could not find taxon with name '" + name + "'.");
+                    throw RbException() << "Could not find taxon with name '" << name << "'.";
                 }
                 size_t k = it->second;
                 
@@ -292,7 +295,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                     std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                     if ( it == taxon_map.end() )
                     {
-                        throw RbException("Could not find taxon with name '" + name + "'.");
+                        throw RbException() << "Could not find taxon with name '" << name << "'.";
                     }
                     size_t s = it->second;
                     
@@ -492,7 +495,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyAddBackboneConstraints(
         std::map<std::string, size_t>::const_iterator it = taxon_map.find(name);
         if (it == taxon_map.end()) {
             
-            throw RbException("Taxon named " + it->first + " not found in tree's taxon map!");
+            throw RbException() << "Taxon named " << it->first << " not found in tree's taxon map!";
         }
         tmp.set( it->second );
     }

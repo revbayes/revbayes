@@ -3,9 +3,9 @@ dnCategorical
 ## title
 The Categorical Distribution
 ## description
-The categorical distribution, sometimes referred to as the generalized Bernoulli distribution. It describes the probability of one of K different outcomes, labeled from 1 to K, with each outcome probability separately specified.
+The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability. 
 ## details
-The argument to the constructor is a simplex containing the probabilities of the outcomes. The outcomes are labeled from 1 to K, where K is the number of elements in the simplex. Outcome i has probability specified by component i in the simplex.
+The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
 
 A typical scenario where a categorical variable is used is in the definition of a variable drawn from a mixture. A vector of mixture components is set up first, and then a stochastic variable drawn from a categorical distribution is used as an index in a deterministic assignment that points to a component in the mixture. See example below.
 

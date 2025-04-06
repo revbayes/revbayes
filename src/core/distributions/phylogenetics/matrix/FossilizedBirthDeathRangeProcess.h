@@ -47,28 +47,28 @@ namespace RevBayesCore {
                                                       bool pa );  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathRangeProcess*   clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathRangeProcess*               clone(void) const override;                                                //!< Create an independent clone
 
     protected:
-        void                                            updateStartEndTimes() const;
+        void                                            updateStartEndTimes() const override;
 
         // Parameter management functions
-        double                                          computeLnProbability(void);                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbability(void) override;                                       //!< Compute the log-transformed probability of the current value.
 
         double                                          pSurvival(double start, double end) const;
 
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter
 
-        void                                            keepSpecialization(DagNode *toucher);
-        void                                            restoreSpecialization(DagNode *toucher);
-        void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+        void                                            keepSpecialization(const DagNode *toucher) override;
+        void                                            restoreSpecialization(const DagNode *toucher) override;
+        void                                            touchSpecialization(const DagNode *toucher, bool touchAll) override;
 
     private:
         
         // helper functions
-        void                                            updateGamma(bool force = false);                             //!< Number of species alive at time t.
-        void                                            redrawValue(void);
+        void                                            updateGamma(bool force = false);                                           //!< Number of species alive at time t.
+        void                                            redrawValue(void) override;
 
         mutable double                                  origin;
 

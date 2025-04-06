@@ -1,5 +1,7 @@
-#include <math.h>
-#include <stddef.h>
+#include "Dist_FBDRP.h"
+
+#include <cmath>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>

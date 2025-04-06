@@ -128,7 +128,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
         std::string data_type = ctmc_sn->getValue().getDataType();
         if (data_type == "Standard") {
             RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>( ctmc_sn, (unsigned long)print_gen, file_name, is, sd, sep, idx - 1 );
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
             m->setAppend( app );
             m->setPrintVersion( wv );
             
@@ -137,7 +137,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
             
         } else if (data_type == "NaturalNumbers") {
             RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( ctmc_sn, (unsigned long)print_gen, file_name, is, sd, sep, idx - 1 );
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
             m->setAppend( app );
             m->setPrintVersion( wv );
             
@@ -150,7 +150,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     {
         if (data_type == "NaturalNumbers") {
             RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( cdbdp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( cdbdp_sn, (std::uint64_t)print_gen, file_name, is, sd, sep );
             m->setAppend( app );
             m->setPrintVersion( wv );
             
@@ -163,7 +163,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     	if (data_type == "NaturalNumbers")
     	{
             RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (unsigned long)print_gen, file_name, is, sd, sep );
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (std::uint64_t)print_gen, file_name, is, sd, sep );
             m->setAppend( app );
             m->setPrintVersion( wv );
 

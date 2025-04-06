@@ -1,0 +1,29 @@
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cox2.nex'
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 67 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/PS_codon_run_1.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Processing file "output/PS_codon_run_2.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 10 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...

@@ -24,7 +24,7 @@ namespace RevBayesCore {
      * @since 2014-11-18, version 1.0
      */
     template <class mixtureType>
-    class MixtureDistribution : public TypedDistribution<mixtureType>, public MemberObject<long> {
+    class MixtureDistribution : public TypedDistribution<mixtureType>, public MemberObject<std::int64_t> {
         
     public:
         // constructor(s)
@@ -33,7 +33,7 @@ namespace RevBayesCore {
         // public member functions
         MixtureDistribution*                                clone(void) const;                                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const;
         size_t                                              getCurrentIndex(void) const;
         std::vector<double>                                 getMixtureProbabilities(void) const;
@@ -106,16 +106,16 @@ double RevBayesCore::MixtureDistribution<mixtureType>::computeLnProbability( voi
 
 
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( n == "getAllocationIndex" )
     {
-        rv = long(index) + 1;
+        rv = std::int64_t(index) + 1;
     }
     else
     {
-        throw RbException("A mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A mixture distribution does not have a member method called '" << n << "'.";
     }
     
 }

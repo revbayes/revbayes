@@ -35,7 +35,7 @@ namespace RevBayesCore {
         virtual Trace*                  clone(void) const;                              //!< Clone object
 
         const valueType&                objectAt(size_t index, bool post = false) const { return post ? values.at(index + burnin) : values.at(index); }
-        long                            size(bool post = false) const                   { return post ? values.size() - burnin : values.size(); }
+        std::int64_t                            size(bool post = false) const                   { return post ? values.size() - burnin : values.size(); }
 
         virtual void                    addObject(const valueType& d);
         virtual void                    addObject(valueType&& d);
@@ -50,7 +50,7 @@ namespace RevBayesCore {
         size_t                          getBurnin() const                               { return burnin; }
         const std::vector<valueType>&   getValues() const                               { return values; }
 
-        virtual void                    setBurnin(long b);
+        virtual void                    setBurnin(std::int64_t b);
         void                            setValues(std::vector<valueType> v)             { values = v; }
         
 
@@ -88,7 +88,7 @@ namespace RevBayesCore {
      * Typedefs
      */
     typedef Trace<RevBayesCore::Simplex> TraceSimplex;
-    typedef Trace<long> TraceNumericInteger;
+    typedef Trace<std::int64_t> TraceNumericInteger;
     typedef Trace<RevBayesCore::RbVector<double> > TraceNumericVector;
     typedef Trace<std::string> AncestralStateTrace;
     typedef Trace<std::string> ModelTrace;
@@ -101,7 +101,7 @@ namespace RevBayesCore {
     int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
 
     template <>
-    int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
+    int Trace<std::int64_t>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
 
     template <>
     int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
@@ -159,7 +159,7 @@ RevBayesCore::Trace<valueType>* RevBayesCore::Trace<valueType>::clone() const
 template <class valueType>
 int RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/)
 {
-    throw RbException("Cannot compute interval coverage for '" + parmName + "' because there are not trace objects implemented for this value type.");
+    throw RbException() << "Cannot compute interval coverage for '" << parmName << "' because there are not trace objects implemented for this value type.";
 }
 
 
@@ -182,7 +182,7 @@ void RevBayesCore::Trace<valueType>::removeLastObject()
 
 
 template <class valueType>
-void RevBayesCore::Trace<valueType>::setBurnin(long b)
+void RevBayesCore::Trace<valueType>::setBurnin(std::int64_t b)
 {
     size_t old = burnin;
     if (b == -1)

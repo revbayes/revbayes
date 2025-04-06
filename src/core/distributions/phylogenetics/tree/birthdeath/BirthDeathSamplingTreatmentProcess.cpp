@@ -65,7 +65,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
                                                                         Tree *t,
-                                                                        long age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        std::int64_t age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -173,6 +173,15 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     if ( starting_tree == NULL )
     {
         RbVector<Clade> constr;
+
+        double root_age = getOriginAge(); 
+        if ( use_origin) root_age -= 1e-5; //adjust so root age is slightly below the origin time
+        
+        // create a clade that contains all species
+        Clade all_species = Clade(taxa);
+        all_species.setAge(root_age);
+        constr.push_back(all_species);
+
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
         StartingTreeSimulator simulator;
         RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
@@ -1491,12 +1500,20 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
         if ( starting_tree == NULL )
         {
             // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
-//            simulateTree();
+            // simulateTree();
             
             RbVector<Clade> constr;
-            // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+            double root_age = getOriginAge(); 
+            if ( use_origin) root_age -= 1e-5; //adjust so root age is slightly below the origin time
+            
+            // create a clade that contains all species
+            Clade all_species = Clade(taxa);
+            all_species.setAge(root_age);
+            constr.push_back(all_species);
+
             StartingTreeSimulator simulator;
-            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );            
+            
             // store the new value
             value = my_tree;
         }

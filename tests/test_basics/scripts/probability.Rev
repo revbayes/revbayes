@@ -2,6 +2,8 @@ Probability(0)
 Probability(0.5)
 Probability(1)
 
+seed(12345)
+
 x ~ dnBinomial(size=10, p=0.5)
 x
 

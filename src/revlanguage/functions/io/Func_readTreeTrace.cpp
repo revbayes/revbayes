@@ -1,6 +1,6 @@
 #include "Func_readTreeTrace.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <map>
 #include <set>
@@ -90,10 +90,10 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     bool unroot_nonclock = static_cast<const RlBoolean&>( args[arg_unroot_nonclock].getVariable()->getRevObject() ).getValue();
 
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
-    long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
-    long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
+    std::int64_t                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
+    std::int64_t                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
     bool                nexus    = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
-    long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
+    std::int64_t                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
     std::vector<RevBayesCore::path> vectorOfFileNames;
     
@@ -195,7 +195,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         throw RbException("Unknown tree type to read.");
     }
     
-    long burnin = 0;
+    std::int64_t burnin = 0;
 
     RevObject& b = args[arg_index_burnin].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
@@ -218,7 +218,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
-            burnin = long( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
+            burnin = std::int64_t( floor( rv->getValue()[i].getValue().size()*burninFrac ) );
 
             (*rv)[i].getValue().setBurnin(burnin);
         }
@@ -265,12 +265,12 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         burninTypes.push_back( Probability::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
 
-        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
-        argumentRules.push_back( new ArgumentRule( "offset",   Natural::getClassTypeSpec(), "The offset of the first sample to read, i.e., how many samples should we skip before we take the first sample.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 0l ) ) );
+        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
+        argumentRules.push_back( new ArgumentRule( "offset",   Natural::getClassTypeSpec(), "The offset of the first sample to read, i.e., how many samples should we skip before we take the first sample.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 0 ) ) );
 
         argumentRules.push_back( new ArgumentRule( "nexus", RlBoolean::getClassTypeSpec(), "Whether the file to read is in NEXUS format.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
 
-        argumentRules.push_back( new ArgumentRule( "nruns", Natural::getClassTypeSpec(), "The number of trace files with the same basename (i.e. the number of filenames with pattern <file>_run_<n>.trees", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
+        argumentRules.push_back( new ArgumentRule( "nruns", Natural::getClassTypeSpec(), "The number of trace files with the same basename (i.e. the number of filenames with pattern <file>_run_<n>.trees", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
 
         rules_set = true;
     }
@@ -330,7 +330,7 @@ const TypeSpec& Func_readTreeTrace::getReturnType( void ) const
 }
 
 
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, const std::string& treetype, bool unroot_nonclock, long thinning, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevBayesCore::path> &vector_of_file_names, const std::string &delimiter, const std::string& treetype, bool unroot_nonclock, std::int64_t thinning, std::int64_t offset)
 {
     bool clock = (treetype == "clock");
 
@@ -499,7 +499,7 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
  *
  * @note if multiple files are given, the traces will all be appended without regard for burnin
  * */
-WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, const string& treetype, bool unroot_nonclock, long thin, long offset)
+WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector<RevBayesCore::path> &fns, const string& treetype, bool unroot_nonclock, std::int64_t thin, std::int64_t offset)
 {
     std::vector<TraceTree> data;
 

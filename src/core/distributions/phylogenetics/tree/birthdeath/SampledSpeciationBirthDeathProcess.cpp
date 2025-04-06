@@ -390,7 +390,7 @@ double SampledSpeciationBirthDeathProcess::computeRootLikelihood( void )
 }
 
 
-void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
     
     if ( n == "numberEvents" )
@@ -407,7 +407,7 @@ void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, con
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" << n << "'.";
     }
     
 }
@@ -437,7 +437,7 @@ void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, con
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" << n << "'.";
     }
     
 }

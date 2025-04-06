@@ -1,14 +1,6 @@
-//
-//  BitsetCharacterDataConverter.cpp
-//  revbayes-proj
-//
-//  Created by Michael Landis on 10/1/16.
-//  Copyright © 2016 Michael Landis. All rights reserved.
-//
-
 #include "BitsetCharacterDataConverter.h"
 
-#include <math.h>
+#include <cmath>
 #include <sstream>
 #include <string>
 
@@ -27,7 +19,11 @@ using namespace RevBayesCore;
  * The default constructor does nothing except allocating the object.
  */
 //BitsetCharacterDataConverter::BitsetCharacterDataConverter(void)
-BitsetCharacterDataConverter::BitsetCharacterDataConverter(const HomologousDiscreteCharacterData<StandardState>& d, std::string f, size_t ns) : data(d), format(f), numStates(ns), numAllStates(0)
+BitsetCharacterDataConverter::BitsetCharacterDataConverter(const HomologousDiscreteCharacterData<StandardState>& d, std::string f, size_t ns) :
+    data(d),
+    format(f),
+    numStates(ns),
+    numAllStates(0)
 {
     // get dimensions
     num_taxa = data.getNumberOfTaxa();
@@ -84,7 +80,7 @@ HomologousDiscreteCharacterData<NaturalNumbersState>* BitsetCharacterDataConvert
             }
             ss << "->" << numberState;
             ss << ", max=" << numStates;
-            throw RbException("Converted state value for " + taxon.getTaxonName() + " exceeds number of states: " + ss.str());
+            throw RbException() << "Converted state value for " << taxon.getTaxonName() << " exceeds number of states: " << ss.str();
         }
         
         // create NaturalNumberState character

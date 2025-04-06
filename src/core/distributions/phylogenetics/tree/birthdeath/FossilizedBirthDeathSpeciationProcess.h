@@ -49,30 +49,30 @@ namespace RevBayesCore {
                                                       long age_check_precision);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                               //!< Create an independent clone
 
-        void                                            redrawValue(void);
-        void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn);
-        bool                                            allowsSA();                                                             //!< Checks if distribution is compatible with sampled ancestors
+        void                                            redrawValue(void) override;
+        void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
+        bool                                            allowsSA() override;                                                      //!< Checks if distribution is compatible with sampled ancestors
 
     protected:
-        void                                            updateStartEndTimes() const;
+        void                                            updateStartEndTimes() const override;
         int                                             updateStartEndTimes(const TopologyNode & ) const;
 
-        double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
+        double                                          pSurvival(double start, double end) const override;                       //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
         // Parameter management functions
-        double                                          computeLnProbabilityTimes(void) const;                            //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityDivergenceTimes(void) const;                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityTimes(void) const override;                           //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void) const override;                 //!< Compute the log-transformed probability of the current value.
 
-        double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
-        double                                          lnProbTreeShape(void) const;
+        double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
+        double                                          lnProbTreeShape(void) const override;
 
-        double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
-        std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const;                 //!< Simulate n speciation events.
+        double                                          simulateDivergenceTime(double origin, double present) const override;     //!< Simulate a speciation event.
+        std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const override;                 //!< Simulate n speciation events.
 
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override; //!< Swap a parameter
 
     private:
         
