@@ -1,0 +1,5 @@
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 15 different moves, with a single move picked randomly per iteration
+   

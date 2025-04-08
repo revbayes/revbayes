@@ -1,0 +1,67 @@
+################################################################################
+#
+# RevBayes Test-Script: Compute the likelihood of fossil occurrences in the form
+#                       of presence/absence data under the "treeless" version of
+#                       the Fossilized Birth Death Range (FBDR) process
+#
+# authors: Bruno do Rosario Petrucci and David Cerny
+#
+################################################################################
+
+seed(1)
+
+# Read taxa
+taxa <- readTaxonData("data/m12_taxa_1.tsv")
+
+# Read presence-absence data
+k <- readFossilCountsFile("data/m3_taxa_1.tsv", header = true, taxa = taxa)
+
+# Read time intervals
+timeline <- readDataDelimitedFile("data/m3_timeline_1.txt")[1]
+
+moves = VectorMoves()
+
+psi ~ dnExp(1)
+lambda ~ dnLognormal(-2, 0.5)
+mu ~ dnLognormal(-2, 0.5)
+
+moves.append( mvScale(psi, lambda = 0.01, weight = 3.0) )
+moves.append( mvScale(psi, lambda = 0.1, weight = 3.0) )
+moves.append( mvScale(psi, lambda = 1, weight = 3.0) )
+
+moves.append( mvScale(mu, lambda = 0.01, weight = 3.0) )
+moves.append( mvScale(mu, lambda = 0.1, weight = 3.0) )
+moves.append( mvScale(mu, lambda = 1, weight = 3.0) )
+
+moves.append( mvScale(lambda, lambda = 0.01, weight = 3.0) )
+moves.append( mvScale(lambda, lambda = 0.1, weight = 3.0) )
+moves.append( mvScale(lambda, lambda = 1, weight = 3.0) )
+
+rho <- 0
+
+# Use the FBD-range process as a prior distribution on stratigraphic ranges
+bd ~ dnFBDRMatrix(taxa=taxa, k = k, lambda=lambda, mu=mu, psi=psi, rho=rho, timeline = timeline, condition = "time", binary = true)
+
+moves.append( mvMatrixElementScale(bd, lambda = 0.01, weight=taxa.size()/10))
+moves.append( mvMatrixElementScale(bd, lambda = 0.1, weight=taxa.size()/10))
+moves.append( mvMatrixElementScale(bd, lambda = 1, weight=taxa.size()/10))
+
+moves.append( mvMatrixElementSlide(bd, delta = 0.01, weight=taxa.size()/10))
+moves.append( mvMatrixElementSlide(bd, delta = 0.1, weight=taxa.size()/10))
+moves.append( mvMatrixElementSlide(bd, delta = 1, weight=taxa.size()/10))
+
+mymodel = model(bd)
+
+# Create a vector of monitors
+monitors = VectorMonitors()
+monitors.append( mnModel(filename="output/FBDR.log", printgen=25000) )
+
+# Initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+# Run the MCMC
+mymcmc.run(generations=500000)
+
+# Clear the workspace and quit RevBayes
+clear()
+q()
