@@ -129,10 +129,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     range_parameters.push_back( species_interval_fossil_counts );
     range_parameters.push_back( interval_fossil_counts );
     range_parameters.push_back( fossil_counts );
-    
-    std::cout << "species_interval_fossil_counts.size(): " << (species_interval_fossil_counts == NULL) << std::endl;
-    std::cout << "interval_fossil_counts == NULL: " << (interval_fossil_counts == NULL) << std::endl;
-    std::cout << "fossil_counts == NULL: " << (fossil_counts == NULL) << std::endl;
 
     marginalize_k = ( species_interval_fossil_counts == NULL && interval_fossil_counts == NULL && fossil_counts == NULL);
 
