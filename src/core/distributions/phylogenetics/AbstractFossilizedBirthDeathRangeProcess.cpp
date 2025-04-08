@@ -122,13 +122,17 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
         }
     }
 
-    species_interval_fossil_counts = dynamic_cast<const TypedDagNode<RbVector<RbVector<long> > >*>(incounts);
-    interval_fossil_counts         = dynamic_cast<const TypedDagNode<RbVector<long> >*>(incounts);
-    fossil_counts                  = dynamic_cast<const TypedDagNode<long> *>(incounts);
+    species_interval_fossil_counts = dynamic_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >*>(incounts);
+    interval_fossil_counts         = dynamic_cast<const TypedDagNode<RbVector<std::int64_t> >*>(incounts);
+    fossil_counts                  = dynamic_cast<const TypedDagNode<std::int64_t> *>(incounts);
 
     range_parameters.push_back( species_interval_fossil_counts );
     range_parameters.push_back( interval_fossil_counts );
     range_parameters.push_back( fossil_counts );
+    
+    std::cout << "species_interval_fossil_counts.size(): " << (species_interval_fossil_counts == NULL) << std::endl;
+    std::cout << "interval_fossil_counts == NULL: " << (interval_fossil_counts == NULL) << std::endl;
+    std::cout << "fossil_counts == NULL: " << (fossil_counts == NULL) << std::endl;
 
     marginalize_k = ( species_interval_fossil_counts == NULL && interval_fossil_counts == NULL && fossil_counts == NULL);
 
@@ -233,7 +237,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( voi
     double maxb = 0;
     double maxl = 0;
 
-    std::vector<long> kappa_prime (num_intervals, 0);
+    std::vector<std::int64_t> kappa_prime (num_intervals, 0);
     std::vector<double> L (num_intervals, 0.0);
 
     // add the fossil tip age terms
@@ -427,7 +431,7 @@ double AbstractFossilizedBirthDeathRangeProcess::getExtinctionRate( size_t index
 }
 
 
-long AbstractFossilizedBirthDeathRangeProcess::getFossilCount( size_t interval, size_t species ) const
+std::int64_t AbstractFossilizedBirthDeathRangeProcess::getFossilCount( size_t interval, size_t species ) const
 {
 
     // remove the old parameter first
@@ -467,7 +471,7 @@ long AbstractFossilizedBirthDeathRangeProcess::getFossilCount( size_t interval, 
 }
 
 
-long AbstractFossilizedBirthDeathRangeProcess::getFossilCount( size_t interval ) const
+std::int64_t AbstractFossilizedBirthDeathRangeProcess::getFossilCount( size_t interval ) const
 {
 
     // remove the old parameter first
@@ -494,7 +498,7 @@ long AbstractFossilizedBirthDeathRangeProcess::getFossilCount( size_t interval )
             throw(RbException("Fossil count index out of bounds"));
         }
 
-        long total = 0;
+        std::int64_t total = 0;
 
         for(size_t i = 0; i < species_interval_fossil_counts->getValue().size(); i++)
         {
@@ -786,14 +790,14 @@ void AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNo
     }
     else if (oldP == fossil_counts)
     {
-        fossil_counts = static_cast<const TypedDagNode< long >* >( newP );
+        fossil_counts = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
     else if (oldP == interval_fossil_counts)
     {
-        interval_fossil_counts = static_cast<const TypedDagNode< RbVector<long> >* >( newP );
+        interval_fossil_counts = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
     }
     else if (oldP == species_interval_fossil_counts)
     {
-        species_interval_fossil_counts = static_cast<const TypedDagNode< RbVector<RbVector<long> > >* >( newP );
+        species_interval_fossil_counts = static_cast<const TypedDagNode< RbVector<RbVector<std::int64_t> > >* >( newP );
     }
 }
