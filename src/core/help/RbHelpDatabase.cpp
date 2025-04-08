@@ -55,11 +55,26 @@ myHillClimberObject.operatorSummary())");
 	help_strings[string("HillClimber")][string("name")] = string(R"(HillClimber)");
 	help_arrays[string("HillClimber")][string("see_also")].push_back(string(R"(SimulatedAnnealing)"));
 	help_strings[string("HillClimber")][string("title")] = string(R"(Hill-Climber analysis object)");
+	help_strings[string("Integer")][string("description")] = string(R"(Integer Datatype)");
+	help_strings[string("Integer")][string("details")] = string(R"(This datatype includes all whole  positive and negative numbers.)");
+	help_strings[string("Integer")][string("example")] = string(R"(x  = -1
+x ~ dnUniformInteger(1, 10))");
 	help_strings[string("Integer")][string("name")] = string(R"(Integer)");
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(IntegerPos)"));
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("Integer")][string("title")] = string(R"(Integer)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
 	help_strings[string("MatrixRealSymmetric")][string("name")] = string(R"(MatrixRealSymmetric)");
+	help_strings[string("Natural")][string("details")] = string(R"(All whole number greater than or equal to zero.)");
+	help_strings[string("Natural")][string("example")] = string(R"(x = 0
+x = 1
+x ~ dnUniformNatural(0, 2))");
 	help_strings[string("Natural")][string("name")] = string(R"(Natural)");
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Integer)"));
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Real)"));
+	help_strings[string("Natural")][string("title")] = string(R"(Natural Numbers)");
 	help_arrays[string("Probability")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("Probability")][string("description")] = string(R"(A Probability is a real value between 0.0 and 1.0)");
 	help_strings[string("Probability")][string("example")] = string(R"(# Create a RealPos
@@ -406,8 +421,96 @@ mymcmc.run(generations=200000))");
 	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
+	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shift in birth and death rates.)");
+	help_strings[string("dnCBDSP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models.
+dnCBDSP accepts several arguments to simulate a birth-death process:
+- rootAge : Start time for the birth-death process. Accepts a real positive number
+- rootLambda : Speciation rate at the root the root of tree. Accepts a real positive number
+- rootMu : Extinction rate at the root of tree. Accepts a real positive number
+- lambda : Prior distribution for speciation rates. Accepts a real positive distribution. Default = NULL
+- mu : Prior distribution for extinction rates. Accepts a real positive distribution. Default = NULL
+- delta : The rate factor of jumping between rate categories. Accepts real positive numbers
+- rho : Taxon sampling probability
+- condition : Condition of birth death process. Accepts string. Default = survival. Options: time|survival
+- taxa : The taxon names used for initialization. Accepts Taxon[])");
+	help_strings[string("dnCBDSP")][string("example")] = string(R"(# set distributions for tree
+root_age ~ dnUniform(0, 2)
+root_lambda ~ dnUniform(0, 1)
+root_mu ~ dnUniform(0, 1)
+sampling_prob := 1/2
+# simulate tree
+tree ~ dnCBDSP( rootAge           = root_age,
+                rootLambda        = root_lambda,
+                rootMu            = root_mu,
+                delta             = .2,
+                rho               = sampling_prob,
+                condition         = "survival"
+                taxa              = TBD))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnSBBDP)"));
+	help_strings[string("dnCBDSP")][string("title")] = string(R"(Conditional birth-death shift process)");
+	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("dnCDBDP")][string("description")] = string(R"(This function simulates a tree under a character-dependent birth-death process.)");
+	help_strings[string("dnCDBDP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models.
+dnCDBDP accepts several arguments to simulate a birth-death process:
+- rootAge : Start time for the birth-death process. Accepts a Real positive number
+- speciationRates/lamda/cladoEventMap : Vector of speciation rate if anagenetic-only model or cladogenetic event map.
+- extinctionRates/mu : Vector of extinction rates. Accepts real positive numbers
+- psi/phi : Vector of serial sample rates. Accepts real positive numbers. Default = NULL
+- Q : The rate matrix of jumping between categories. Default = NULL
+- delta : The rate factor of jumping between categories. Accepts real positive numbers. Default = 1
+- pi : Root state frequencies. Accepts simplex. Default = NULL
+- rho : Taxon sampling probability. Default = 1
+- condition : Condition of birth death process. Accepts string. Default = time. Options: time|survival
+- nTimeSlices : Number of time slices for numeric ODE. Accepts real positive number. Default = 500
+- simulateCondition : Conditions under which to simulate. Accepts string. Default = startTime. Options: startTime|numTips|tipStates|tree
+- minNumLineages : Minimum number of lineages to simulate; applied under startTime condition. Accepts a natural number. Default = 0
+- maxNumLineages : Maximum number of lineages to simulate; applied under startTime condition. Accepts a natural number. Default = 500
+- exactNumLineages : Exact number of lineages to simulate; applied under numTips and tipStates conditions. Accepts a natural number. Default = 100
+- maxTime : Maximum time for lineages to coalesce when simulating; applied under the numTips and tipStates condition. Accepts a real positive number. Default = 1000.
+- pruneExtinctLineages : Should simulation prune extinct lineages? Accepts boolean. Default = TRUE.
+- allowRateShiftsAtExtinctLineages : Should we allow rate shifts to occur on extinct lineages?. Accepts boolean. Default = TRUE.)");
+	help_strings[string("dnCDBDP")][string("example")] = string(R"(# set basic starting parameters
+root_age ~ dnUniform(0, 2)
+rho := Probability(1/2)
+
+# set up cladogenetic events, probabilities, and number of states
+clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
+clado_prob[1] := 1/4
+clado_prob[2] := 1/4
+clado_prob[3] := 1/4
+clado_prob[4] := 1/4
+num_states = 2
+
+# create cladogenetic rate matrix
+clado_matrix = fnCladogeneticProbabilityMatrix(clado_events, clado_prob, num_states)
+
+# specifiying extinction probabilites
+mu_vec[1] := .1
+mu_vec[2] := .1
+
+# set up Q-matrix
+q_matrix <- matrix([[0, .2], [.2, 0]])
+
+# set pi, root state freq
+pi <- simplex([1, 2])
+
+# basic use of the function
+timetree ~ dnCDBDP( rootAge           = root_age,
+                    speciationRates   = clado_matrix,
+                    extinctionRates   = mu_vec,
+                    Q                 = q_matrix,
+                    pi                = pi,
+                    rho               = rho,
+                    condition         = "time"))");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticSpeciationRateMatrix)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCDCladoBDP)"));
+	help_strings[string("dnCDBDP")][string("title")] = string(R"(Character Dependent Birth Death Process)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
 	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
 	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
@@ -1184,7 +1287,30 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnPoisson")][string("see_also")].push_back(string(R"(dnGeom)"));
 	help_strings[string("dnPoisson")][string("title")] = string(R"(Poisson Distribution)");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
+	help_arrays[string("dnSBBDP")][string("authors")].push_back(string(R"(Michael Landis & Sebastian Hoehna)"));
+	help_strings[string("dnSBBDP")][string("description")] = string(R"(Simulates a tree under a birth-death process with a specified sampling rate.)");
+	help_strings[string("dnSBBDP")][string("details")] = string(R"(dnSBBDP accepts several arguments to simulate a birth-death process:
+- rootAge : Start time for the birth-death process. Accepts a real positive number
+- lambda : Vector of speciation rates. Accepts a real positive number
+- mu : Vector of extinction rates. Accepts a real positive number
+- rho : Taxon sampling probability.  Accepts probability
+- taxa : The taxa used for simulation. Accepts Taxon[])");
+	help_strings[string("dnSBBDP")][string("example")] = string(R"(# set starting paramters for tree
+root_age ~ dnUniform(0, 2)
+lambda ~ dnUniform(0, 1)
+mu ~ dnUniform(0, 1)
+rho := 1/2
+# simulate tree
+tree ~ dnSBBDP( rootAge       = root_age,
+                lambda        = lambda,
+                mu            = mu,
+                rho           = rho,
+                taxa          = TBD))");
 	help_strings[string("dnSBBDP")][string("name")] = string(R"(dnSBBDP)");
+	help_references[string("dnSBBDP")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_strings[string("dnSBBDP")][string("title")] = string(R"(Sampled speciation birth-death process)");
 	help_arrays[string("dnScaledDirichlet")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_strings[string("dnScaledDirichlet")][string("description")] = string(R"(Scaled Dirichlet probability distribution on a simplex.)");
 	help_strings[string("dnScaledDirichlet")][string("details")] = string(R"(The scaled Dirichlet probability distribution is the generalization of the dirichlet distribution. A random variable from a scaled Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1. If b[1]=b[2]=...=b[n], then the scaledDirichlet(alpha,beta) collapses to the Dirichlet with the same alphas.)");
@@ -2489,7 +2615,6 @@ min(a)
 	help_strings[string("mnNexus")][string("name")] = string(R"(mnNexus)");
 	help_strings[string("mnProbability")][string("name")] = string(R"(mnProbability)");
 	help_strings[string("mnScreen")][string("name")] = string(R"(mnScreen)");
-	help_strings[string("mnScreen")][string("title")] = string(R"(Monitor for the screen)");
 	help_strings[string("mnStochasticBranchRate")][string("name")] = string(R"(mnStochasticBranchRate)");
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
