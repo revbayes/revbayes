@@ -1,6 +1,5 @@
 ## name
 mvSlideBactrian
-
 ## title
 Bactrian Slide Move for MCMC 
 ## description
