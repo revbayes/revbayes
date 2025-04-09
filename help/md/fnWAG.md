@@ -1,28 +1,25 @@
 ## name
 fnWAG
 ## title
-WAG (Whelan and Goldman) Empirical Amino Acid Substitution Rate Matrix 
+WAG (Whelan and Goldman) Amino Acid Substitution Rate Matrix 
 ## description
-The WAG model generates a rate matrix based on the Whelan and Goldman (WAG) substitution model for amino acid evolution
-
+Generates a rate matrix based on the Whelan and Goldman (WAG) substitution model for amino acid evolution.
 ## details
-TThe WAG model is an empirical model of amino acid replacement derived using an approximate maximum-likelihood method from 3,905 sequences across 182 protein families. It outperforms previous models like Dayhoff and JTT in terms of accuracy and likelihood for phylogenetic analysis, aiming to provide better evolutionary tree estimates and applications in sequence alignment, database searches, and protein structure prediction.
+The WAG model is an empirical model of amino acid replacement derived using an approximate maximum-likelihood method from 3,905 sequences across 182 protein families. It outperforms previous models like Dayhoff and JTT in terms of accuracy and likelihood for phylogenetic analysis, aiming to provide better evolutionary tree estimates and applications in sequence alignment, database searches, and protein structure prediction.
 ## authors
-
 ## see_also
 fnDayhoff
 fnJones
 fnLG
 ## example
-  #WAG model with estimated frequencies 
+  # WAG model with estimated frequencies 
   pi ~ dnDirichlet( rep(1,20) )
   Q := fnWAG(pi)
 
-  #WAG model with fixed frequencies
-  Q2 := fnWAG()
-
-
+  # WAG model with fixed frequencies
+  Q2 <- fnWAG()
 
 ## references
-- citation: Simon Whelan, Nick Goldman, A General Empirical Model of Protein Evolution Derived from Multiple Protein Families Using a Maximum-Likelihood Approach, Molecular Biology and Evolution, Volume 18, Issue 5, May 2001, Pages 691–699,
-  url: https://doi.org/10.1093/oxfordjournals.molbev.a003851 
+- citation: Whelan S, Goldman N (2001). A general empirical model of protein evolution derived from multiple protein families using a maximum-likelihood approach. Molecular Biology and Evolution, 18(5):691-699.
+  doi: 10.1093/oxfordjournals.molbev.a003851
+  url: https://academic.oup.com/mbe/article/18/5/691/1018653 

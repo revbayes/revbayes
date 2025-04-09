@@ -1694,7 +1694,22 @@ M := fnJC(4) |> fnInv(p1) |> fnInv(p2) # Fraction of invariable sites is p2 + (1
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_arrays[string("fnInvASRV")][string("see_also")].push_back(string(R"(fnScale)"));
 	help_strings[string("fnInvASRV")][string("title")] = string(R"(fnInvASRV)");
+	help_arrays[string("fnJC")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("fnJC")][string("description")] = string(R"(Jukes Cantor rate matrix)");
+	help_strings[string("fnJC")][string("details")] = string(R"(Rate matrix with n states in which each state has an equal probability to change 
+to any other state. The rate of transition from one state to another is equal to 
+n / n-1.)");
+	help_strings[string("fnJC")][string("example")] = string(R"(# Rate Matrix for DNA
+q := fnJC(4)
+# Rate Matrix for Amino Acids
+q := fnJC(20)
+# Binary Character Matrix
+q := fnJC(2))");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
+	help_references[string("fnJC")].push_back(RbHelpReference(R"(Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132. )",R"()",R"()"));
+	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnF81)"));
+	help_strings[string("fnJC")][string("title")] = string(R"(fnJC)");
 	help_strings[string("fnJones")][string("name")] = string(R"(fnJones)");
 	help_strings[string("fnK80")][string("description")] = string(R"(DNA evolution model proposed in Kimura (1980).)");
 	help_strings[string("fnK80")][string("details")] = string(R"(In this model, all nucleotides have an equal stationary frequency, and transition and transversion rates are allowed to be different. Its only parameter, kappa, codes for the ratio between the rate of transitions and transversions.
@@ -1753,7 +1768,20 @@ The Kimura (1981) nucleotide rate matrix)");
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnHKY)"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnTrN)"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_strings[string("fnLG")][string("description")] = string(R"(Generates a rate matrix based on the Le and Gascuel (LG) substitution model for amino acid evolution.)");
+	help_strings[string("fnLG")][string("details")] = string(R"(The LG model is an empirical model of amino acid replacement derived from large-scale protein alignments. It refines substitution rate estimation by explicitly considering site-specific rate variation.)");
+	help_strings[string("fnLG")][string("example")] = string(R"(# LG model with estimated frequencies
+pi ~ dnDirichlet( rep(1,20) )
+Q := fnLG(pi)
+
+# LG model with fixed frequencies
+Q2 <- fnLG())");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
+	help_references[string("fnLG")].push_back(RbHelpReference(R"(Le SQ, Gascuel O (2008). An improved general amino acid replacement matrix. Molecular Biology and Evolution, 25(7):1307-1320. )",R"(10.1093/molbev/msn067)",R"(https://academic.oup.com/mbe/article/25/7/1307/1041491 )"));
+	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnDayhoff)"));
+	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnJones)"));
+	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnWAG)"));
+	help_strings[string("fnLG")][string("title")] = string(R"(LG (Le and Gascuel) Amino Acid Substitution Rate Matrix)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
@@ -2038,7 +2066,20 @@ M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(r
 	help_strings[string("fnUpperTriangle")][string("name")] = string(R"(fnUpperTriangle)");
 	help_strings[string("fnVT")][string("name")] = string(R"(fnVT)");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
+	help_strings[string("fnWAG")][string("description")] = string(R"(Generates a rate matrix based on the Whelan and Goldman (WAG) substitution model for amino acid evolution.)");
+	help_strings[string("fnWAG")][string("details")] = string(R"(The WAG model is an empirical model of amino acid replacement derived using an approximate maximum-likelihood method from 3,905 sequences across 182 protein families. It outperforms previous models like Dayhoff and JTT in terms of accuracy and likelihood for phylogenetic analysis, aiming to provide better evolutionary tree estimates and applications in sequence alignment, database searches, and protein structure prediction.)");
+	help_strings[string("fnWAG")][string("example")] = string(R"(# WAG model with estimated frequencies
+pi ~ dnDirichlet( rep(1,20) )
+Q := fnWAG(pi)
+
+# WAG model with fixed frequencies
+Q2 <- fnWAG())");
 	help_strings[string("fnWAG")][string("name")] = string(R"(fnWAG)");
+	help_references[string("fnWAG")].push_back(RbHelpReference(R"(Whelan S, Goldman N (2001). A general empirical model of protein evolution derived from multiple protein families using a maximum-likelihood approach. Molecular Biology and Evolution, 18(5):691-699.)",R"(10.1093/oxfordjournals.molbev.a003851)",R"(https://academic.oup.com/mbe/article/18/5/691/1018653  )"));
+	help_arrays[string("fnWAG")][string("see_also")].push_back(string(R"(fnDayhoff)"));
+	help_arrays[string("fnWAG")][string("see_also")].push_back(string(R"(fnJones)"));
+	help_arrays[string("fnWAG")][string("see_also")].push_back(string(R"(fnLG)"));
+	help_strings[string("fnWAG")][string("title")] = string(R"(WAG (Whelan and Goldman) Amino Acid Substitution Rate Matrix)");
 	help_strings[string("fnWattersonsTheta")][string("name")] = string(R"(fnWattersonsTheta)");
 	help_strings[string("fnX2")][string("description")] = string(R"(Constructs a double rate matrix on the 16 nucleotide pairs.
 
@@ -3681,7 +3722,17 @@ mymcmc.run(rules = stopping_rules)
 	help_references[string("srStationarity")].push_back(RbHelpReference(R"(Hill, S.D. and Spall, J.C. 2011. Stationarity and Convergence of the Metropolis-Hastings Algorithm: Insights into Theoretical Aspects. IEEE Control Systems Magazine 39.)",R"(10.1109/MCS.2018.2876959)",R"()"));
 	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
 	help_strings[string("srStationarity")][string("title")] = string(R"(Stationarity stopping rule)");
+	help_arrays[string("stdev")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("stdev")][string("description")] = string(R"(Finds the standard deviation of a vector of real numbers.)");
+	help_strings[string("stdev")][string("details")] = string(R"(Accepts one argument, a vector of real numbers, and returns the standard deviation
+as a real number.)");
+	help_strings[string("stdev")][string("example")] = string(R"(x <- v(4, 3, 2, 1)
+s := stdev(x))");
 	help_strings[string("stdev")][string("name")] = string(R"(stdev)");
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(v)"));
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(mean)"));
+	help_strings[string("stdev")][string("title")] = string(R"(Standard Deviation)");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
 	help_arrays[string("stochasticMatrix")][string("authors")].push_back(string(R"(Michael R. May)"));
 	help_strings[string("stochasticMatrix")][string("description")] = string(R"(A stochastic matrix is a matrix (not necessarily square) with rows that sum to 1.)");
