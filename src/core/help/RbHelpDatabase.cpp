@@ -1905,7 +1905,20 @@ The Kimura (1981) nucleotide rate matrix)");
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnHKY)"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnTrN)"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnGTR)"));
+	help_strings[string("fnLG")][string("description")] = string(R"(Generates a rate matrix based on the Le and Gascuel (LG) substitution model for amino acid evolution.)");
+	help_strings[string("fnLG")][string("details")] = string(R"(The LG model is an empirical model of amino acid replacement derived from large-scale protein alignments. It refines substitution rate estimation by explicitly considering site-specific rate variation.)");
+	help_strings[string("fnLG")][string("example")] = string(R"(# LG model with estimated frequencies
+pi ~ dnDirichlet( rep(1,20) )
+Q := fnLG(pi)
+
+# LG model with fixed frequencies
+Q2 <- fnLG())");
 	help_strings[string("fnLG")][string("name")] = string(R"(fnLG)");
+	help_references[string("fnLG")].push_back(RbHelpReference(R"(Le SQ, Gascuel O (2008). An improved general amino acid replacement matrix. Molecular Biology and Evolution, 25(7):1307-1320. )",R"(10.1093/molbev/msn067)",R"(https://academic.oup.com/mbe/article/25/7/1307/1041491 )"));
+	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnDayhoff)"));
+	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnJones)"));
+	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnWAG)"));
+	help_strings[string("fnLG")][string("title")] = string(R"(LG (Le and Gascuel) Amino Acid Substitution Rate Matrix)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
@@ -2190,7 +2203,20 @@ M := fnDECRateMatrix(dr,er,"Include") |> fnUnitMixture(rootFrequencies=simplex(r
 	help_strings[string("fnUpperTriangle")][string("name")] = string(R"(fnUpperTriangle)");
 	help_strings[string("fnVT")][string("name")] = string(R"(fnVT)");
 	help_strings[string("fnVarCovar")][string("name")] = string(R"(fnVarCovar)");
+	help_strings[string("fnWAG")][string("description")] = string(R"(Generates a rate matrix based on the Whelan and Goldman (WAG) substitution model for amino acid evolution.)");
+	help_strings[string("fnWAG")][string("details")] = string(R"(The WAG model is an empirical model of amino acid replacement derived using an approximate maximum-likelihood method from 3,905 sequences across 182 protein families. It outperforms previous models like Dayhoff and JTT in terms of accuracy and likelihood for phylogenetic analysis, aiming to provide better evolutionary tree estimates and applications in sequence alignment, database searches, and protein structure prediction.)");
+	help_strings[string("fnWAG")][string("example")] = string(R"(# WAG model with estimated frequencies
+pi ~ dnDirichlet( rep(1,20) )
+Q := fnWAG(pi)
+
+# WAG model with fixed frequencies
+Q2 <- fnWAG())");
 	help_strings[string("fnWAG")][string("name")] = string(R"(fnWAG)");
+	help_references[string("fnWAG")].push_back(RbHelpReference(R"(Whelan S, Goldman N (2001). A general empirical model of protein evolution derived from multiple protein families using a maximum-likelihood approach. Molecular Biology and Evolution, 18(5):691-699.)",R"(10.1093/oxfordjournals.molbev.a003851)",R"(https://academic.oup.com/mbe/article/18/5/691/1018653  )"));
+	help_arrays[string("fnWAG")][string("see_also")].push_back(string(R"(fnDayhoff)"));
+	help_arrays[string("fnWAG")][string("see_also")].push_back(string(R"(fnJones)"));
+	help_arrays[string("fnWAG")][string("see_also")].push_back(string(R"(fnLG)"));
+	help_strings[string("fnWAG")][string("title")] = string(R"(WAG (Whelan and Goldman) Amino Acid Substitution Rate Matrix)");
 	help_strings[string("fnWattersonsTheta")][string("name")] = string(R"(fnWattersonsTheta)");
 	help_strings[string("fnX2")][string("description")] = string(R"(Constructs a double rate matrix on the 16 nucleotide pairs.
 
