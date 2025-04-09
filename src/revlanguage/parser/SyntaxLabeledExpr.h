@@ -46,7 +46,7 @@ namespace RevLanguage {
         const SyntaxElement&        getExpression(void) const { return *expression; }                               //!< Return expression
         SyntaxElement&              getExpression(void) { return *expression; }                                     //!< Return expression
         const std::string&          getLabel() const { return label; }                                              //!< Return label
-        RevPtr<RevVariable>         evaluateContent(Environment& env, bool dynamic=false);                          //!< Get semantic value
+        RevPtr<RevVariable>         evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);   //!< Get semantic value
         bool                        isConstExpression(void) const;                                                  //!< Is the expression constant?
         bool                        isFunctionSafe(const Environment&       env,
                                                    std::set<std::string>&   localVars) const;                       //!< Is this element safe in a function?

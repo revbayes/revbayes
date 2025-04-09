@@ -97,7 +97,7 @@ RevPtr<RevVariable> Func_source::execute( void )
         }
             
         // Process the line and record result
-        result = Parser::getParser().processCommand( commandLine, &Workspace::userWorkspace() );
+        result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
         if ( result == 2 )
         {
             throw RbException() << "Problem processing line " << lineNumber << " in file " << fname;

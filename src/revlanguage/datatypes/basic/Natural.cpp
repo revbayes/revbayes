@@ -18,20 +18,20 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-Natural::Natural( void ) : Integer( 0L )
+Natural::Natural( void ) : Integer( 0 )
 {
 
 }
 
 
-Natural::Natural( RevBayesCore::TypedDagNode<long> *v ) : Integer( v )
+Natural::Natural( RevBayesCore::TypedDagNode<std::int64_t> *v ) : Integer( v )
 {
     
 }
 
 
 /** Construct from int */
-Natural::Natural( long x ) : Integer( x )
+Natural::Natural( std::int64_t x ) : Integer( x )
 {
 
     if ( x < 0 )

@@ -5,7 +5,7 @@
 using namespace RevBayesCore;
 
 
-revPoMoThree4NRateMatrixFunction::revPoMoThree4NRateMatrixFunction( const TypedDagNode< long > *n, 
+revPoMoThree4NRateMatrixFunction::revPoMoThree4NRateMatrixFunction( const TypedDagNode< std::int64_t > *n, 
                                                                     const TypedDagNode< Simplex > *bf,
                                                                     const TypedDagNode< RbVector<double> > *ex ,
                                                                     const TypedDagNode< RbVector<double> > *fc   ) : TypedFunction<RateGenerator>( new RateMatrix_revPoMoThree4N() ), 
@@ -56,7 +56,7 @@ void revPoMoThree4NRateMatrixFunction::swapParameterInternal(const DagNode *oldP
 {
     if (oldP == N )
     {
-        N = static_cast< const TypedDagNode< long >* >( newP );
+        N = static_cast< const TypedDagNode< std::int64_t >* >( newP );
     }
 
     else if (oldP == pi)

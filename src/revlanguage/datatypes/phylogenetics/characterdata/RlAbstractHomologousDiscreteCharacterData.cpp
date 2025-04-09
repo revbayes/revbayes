@@ -204,7 +204,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             ambig_treat = RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT::RESCALE;
         }
 
-        std::vector<long> sfs = this->dag_node->getValue().computeSiteFrequencySpectrum(folded, ambig_treat);
+        std::vector<std::int64_t> sfs = this->dag_node->getValue().computeSiteFrequencySpectrum(folded, ambig_treat);
 
         return new RevVariable( new ModelVector<Natural>(sfs) );
     }
@@ -221,7 +221,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        long n = static_cast<const Natural&>( argument ).getValue();
+        std::int64_t n = static_cast<const Natural&>( argument ).getValue();
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().expandCharacters( n );
 
@@ -243,7 +243,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         bool excl = static_cast<const RlBoolean&>( argument ).getValue();
 
         std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
-        std::vector<long> inv_vect(begin(tmp), end(tmp));
+        std::vector<std::int64_t> inv_vect(begin(tmp), end(tmp));
 
         return new RevVariable( new ModelVector<Natural>(inv_vect) );
     }
@@ -596,6 +596,13 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 if (max + 1 == n)
                 {
                     v.includeCharacter(i);
+                    for (size_t j = 0; j < nTaxa; j++)
+                    {
+                        RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                        std::string labels = td.getCharacter(i).getStateLabels();
+                        labels = labels.substr(0,n);
+                        td.getCharacter(i).setStateLabels(labels);
+                    }
                 }
                 else
                 {

@@ -16,7 +16,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-RandomGeometricWalkProposal::RandomGeometricWalkProposal( StochasticNode<long> *n, double a ) : Proposal(),
+RandomGeometricWalkProposal::RandomGeometricWalkProposal( StochasticNode<std::int64_t> *n, double a ) : Proposal(),
     variable( n ),
     stored_value( 0 ),
     alpha( a )
@@ -83,7 +83,7 @@ double RandomGeometricWalkProposal::doProposal( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    long &val = variable->getValue();
+    std::int64_t &val = variable->getValue();
     
     // copy value
     stored_value = val;
@@ -156,7 +156,7 @@ void RandomGeometricWalkProposal::undoProposal( void )
 void RandomGeometricWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<long>* >(newN) ;
+    variable = static_cast<StochasticNode<std::int64_t>* >(newN) ;
     
 }
 

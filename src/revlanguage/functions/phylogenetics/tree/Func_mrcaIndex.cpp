@@ -54,7 +54,7 @@ Func_mrcaIndex* Func_mrcaIndex::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction<long>* Func_mrcaIndex::createFunction( void ) const
+RevBayesCore::TypedFunction<std::int64_t>* Func_mrcaIndex::createFunction( void ) const
 {
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();

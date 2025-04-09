@@ -181,10 +181,6 @@ jobs:
         ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
-    - name: Update submodules
-      run: |
-        git submodule update --init --recursive
-        
     - name: Configure and build
       if: matrix.name != 'windows'
       env:
@@ -240,6 +236,7 @@ jobs:
         # Don't put the wrapper in the same dir as rb.exe so we don't ship it
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'
+          echo 'export WINEDEBUG=-all'
           echo 'if [ "$#" -gt "1" ]; then'
           echo '  wine ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'else'

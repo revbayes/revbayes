@@ -15,7 +15,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-MrcaIndexStatistic::MrcaIndexStatistic(const TypedDagNode<Tree> *t, const Clade &c) : TypedFunction<long>( new long(-1) ),
+MrcaIndexStatistic::MrcaIndexStatistic(const TypedDagNode<Tree> *t, const Clade &c) : TypedFunction<std::int64_t>( new std::int64_t(-1) ),
     tree( t ),
     clade( c ),
     index( -1 )

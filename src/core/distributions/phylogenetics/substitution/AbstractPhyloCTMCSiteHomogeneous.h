@@ -204,7 +204,7 @@ namespace RevBayesCore {
 
         // the data
         std::vector<std::vector<RbBitSet> >                                 ambiguous_char_matrix;
-        std::vector<std::vector<unsigned long> >                            char_matrix;
+        std::vector<std::vector<std::uint64_t> >                            char_matrix;
         std::vector<std::vector<bool> >                                     gap_matrix;
         std::vector<size_t>                                                 pattern_counts;
         std::vector<bool>                                                   site_invariant;
@@ -855,7 +855,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
         else
         {
-            unsigned long c = char_matrix[taxon_index][i];
+            std::uint64_t c = char_matrix[taxon_index][i];
             
             if ( c < 0 || c >= this->num_chars )
             {
@@ -3019,7 +3019,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
             else
             {
                 // get the ancestral character for this site
-                unsigned long parentState = parent.getCharacter( i ).getStateIndex();
+                std::uint64_t parentState = parent.getCharacter( i ).getStateIndex();
 
                 double *freqs = transition_prob_matrices[ perSiteMixtures[i] ][ parentState ];
 
