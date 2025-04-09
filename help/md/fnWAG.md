@@ -6,7 +6,7 @@ WAG (Whelan and Goldman) Empirical Amino Acid Substitution Rate Matrix
 The WAG model generates a rate matrix based on the Whelan and Goldman (WAG) substitution model for amino acid evolution
 
 ## details
-The WAG model, a empirical model of amino acid replacement derived using an approximate maximum-likelihood method from 3,905 sequences across 182 protein families. It outperforms widely used models like Dayhoff and JTT in terms of accuracy and likelihood for phylogenetic analysis, aiming to provide better evolutionary tree estimates and applications in sequence alignment, database searches, and protein structure prediction.
+TThe WAG model is an empirical model of amino acid replacement derived using an approximate maximum-likelihood method from 3,905 sequences across 182 protein families. It outperforms previous models like Dayhoff and JTT in terms of accuracy and likelihood for phylogenetic analysis, aiming to provide better evolutionary tree estimates and applications in sequence alignment, database searches, and protein structure prediction.
 ## authors
 
 ## see_also
