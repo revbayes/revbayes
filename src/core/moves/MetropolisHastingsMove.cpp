@@ -271,7 +271,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
-    std::map<const DagNode*, double> initialPdfs;
+    NodePrMap initialPdfs;
     if (logMCMC >= 3 or debugMCMC >= 1)
     	initialPdfs = getNodePrs(nodes, affected_nodes);
 
@@ -444,7 +444,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         proposal->cleanProposal();
     }
 
-    std::map<const DagNode*, double> finalPdfs;
+    NodePrMap finalPdfs;
     if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
 	finalPdfs = getNodePrs(nodes, affected_nodes);
 

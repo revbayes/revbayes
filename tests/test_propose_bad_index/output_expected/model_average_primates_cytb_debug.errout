@@ -332,7 +332,7 @@ generation = 0    proposal = 24/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -20212.967892
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -2.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -20212.967892
@@ -724,7 +724,7 @@ generation = 0    proposal = 52/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19641.261311
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -4.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19641.261311
@@ -1550,7 +1550,7 @@ generation = 1    proposal = 9/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19402.391276
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -2.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19402.391276
@@ -1592,7 +1592,7 @@ generation = 1    proposal = 12/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19402.391276
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -2.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19402.391276
@@ -1914,7 +1914,7 @@ generation = 1    proposal = 35/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19374.441199
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -2.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19374.441199
@@ -1970,7 +1970,7 @@ generation = 1    proposal = 39/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19368.906551
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -2.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19368.906551
@@ -2012,7 +2012,7 @@ generation = 1    proposal = 42/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19368.906118
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -1.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19368.906118
@@ -2194,7 +2194,7 @@ generation = 1    proposal = 55/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19314.989283
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -2.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19314.989283
@@ -2488,7 +2488,7 @@ generation = 1    proposal = 76/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19292.719859
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -1.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19292.719859
@@ -2740,7 +2740,7 @@ generation = 1    proposal = 94/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -19194.507816
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -3.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -19194.507816
@@ -3370,7 +3370,7 @@ generation = 2    proposal = 37/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18830.946571
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 0.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18830.946571
@@ -3944,7 +3944,7 @@ generation = 2    proposal = 78/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18684.351903
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 0.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18684.351903
@@ -4056,7 +4056,7 @@ generation = 2    proposal = 86/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18684.439108
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -1.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18684.439108
@@ -4756,7 +4756,7 @@ generation = 3    proposal = 34/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18489.706577
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 0.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18489.706577
@@ -5638,7 +5638,7 @@ generation = 3    proposal = 97/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18234.250395
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 0.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18234.250395
@@ -5862,7 +5862,7 @@ generation = 4    proposal = 11/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18232.136434
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -1.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18232.136434
@@ -6310,7 +6310,7 @@ generation = 4    proposal = 43/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18200.146922
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -3.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18200.146922
@@ -6324,7 +6324,7 @@ generation = 4    proposal = 44/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18200.146922
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 0.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18200.146922
@@ -6492,7 +6492,7 @@ generation = 4    proposal = 56/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18152.174029
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 7.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18152.174029
@@ -6618,7 +6618,7 @@ generation = 4    proposal = 65/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18134.107097
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index -1.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18134.107097
@@ -6772,7 +6772,7 @@ generation = 4    proposal = 76/102    RandomGeometricWalk(model_indicator)
     BEFORE:   seq:  -18119.871984
 
     PROPOSED: model_indicator:  -inf
-    PROPOSED: seq:  nan
+    PROPOSED: seq:  Exception: Index out of bounds: The vector of size 5 does not have an element for index 0.
 
     FINAL:    model_indicator:  -1.6094379124
     FINAL:    seq:  -18119.871984
