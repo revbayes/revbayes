@@ -366,7 +366,7 @@ void AbstractMultispeciesCoalescent::simulateTree( void )
             throw RbException("Cannot match a taxon without species to a tip in the species tree. The taxon map is probably wrong.");
         }
 
-        TopologyNode *species_node = species_names_2_nodes[species_name];
+        TopologyNode *species_node = species_names_2_nodes.at(species_name);
 
         if ( species_node == NULL )
         {
