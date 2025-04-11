@@ -14,3 +14,4 @@ mvScale
 x ~ dnUniform(0, 10)
 moves.append(mvSlideBactrian(x, sigma=0.5, m=0.95, tune=TRUE, weight=1))
 ## references
+Z. Yang, & C.E. Rodríguez, Searching for efficient Markov chain Monte Carlo proposal kernels, Proc. Natl. Acad. Sci. U.S.A. 110 (48) 19307-19312, https://doi.org/10.1073/pnas.1311790110 (2013).
