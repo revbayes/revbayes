@@ -425,9 +425,8 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     
     // we need to store and check all arg types
     std::vector<double> penalties;
-    for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
+    for (auto& req_arg_type_spec: argTypeSpecs)
     {
-        const TypeSpec& req_arg_type_spec = *it;
         if ( the_var->getRevObject().isType( req_arg_type_spec ) )
         {
             return 0.0;
@@ -435,7 +434,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             
         double penalty = -1;
         // make sure that we only perform type casting when the variable will not be part of a model graph
-        if ( once == true || the_var->getRevObject().isConstant() == true )
+        if ( the_var->getRevObject().isConstant() == true )
         {
             penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
         }
@@ -448,17 +447,10 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         {
             penalties.push_back( penalty );
         }
-
-//        else if ( once == true &&
-////                 !var->isAssignable() &&
-//                  the_var->getRevObject().isConvertibleTo( argTypeSpec, true ) != -1 &&
-//                  (argTypeSpec).isDerivedOf( the_var->getRequiredTypeSpec() )
-//                )
-//        {
-//            return the_var->getRevObject().isConvertibleTo( argTypeSpec, true );
-//        }
         else if ( nodeType != STOCHASTIC )
         {
+            // If we want a stochastic node, then it doesn't work to create a deterministic
+            // node to perform the type conversion and then pass that.
             
             const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
             const TypeSpec& typeTo   = req_arg_type_spec;
