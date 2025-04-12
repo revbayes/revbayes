@@ -304,7 +304,7 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 
             auto env = Workspace::globalWorkspacePtr();
             
-            if (auto orig_func = env->findFunction(function_name, args, once))
+            if (auto orig_func = env->findFunction(function_name, args))
             {
                 Function* func = orig_func->clone();
 
@@ -470,7 +470,7 @@ double ArgumentRule::isArgumentValid( Argument &arg) const
             args.push_back( the_var );
                 
             Environment& env = Workspace::globalWorkspace();
-	    if (env.findFunction(function_name, args, once) != nullptr)
+	    if (env.findFunction(function_name, args) != nullptr)
 		return 0.1;
         }
     }

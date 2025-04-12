@@ -110,7 +110,7 @@ RevPtr<RevVariable> SyntaxUnaryExpr::evaluateContent( const std::shared_ptr<Envi
     
     // Find the function
     std::string funcName = "_" + opCode[ operation ];
-    Function* func = Workspace::globalWorkspace().getFunction( funcName, arg, !dynamic ).clone();
+    Function* func = Workspace::globalWorkspace().getFunction( funcName, arg ).clone();
     func->processArguments( arg );
     
     RevPtr<RevVariable> funcReturnValue = func->execute();

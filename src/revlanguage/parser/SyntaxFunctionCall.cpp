@@ -169,7 +169,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
         // This call will throw a relevant message if the function is not found
         if ( found == false )
         {
-            func = env->getFunction(function_name, args, !dynamic).clone();
+            func = env->getFunction(function_name, args).clone();
         }
         
         // Allow the function to process the arguments
@@ -190,7 +190,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
         
         const MethodTable& mt = the_member_object.getMethods();
         
-        const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
+        const Function* the_const_function = mt.findFunction( function_name, args );
 
         Function* the_function;
         if ( the_const_function != NULL )
