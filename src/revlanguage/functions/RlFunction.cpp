@@ -185,7 +185,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
                     }
                     
                     Argument &arg = const_cast<Argument&>(passed_args[i]);
-                    double penalty = the_rules[j].isArgumentValid( arg, once );
+                    double penalty = the_rules[j].isArgumentValid( arg );
                     if ( penalty != -1 )
                     {
                         taken[i]          = true;
@@ -255,7 +255,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
         {
             
             Argument &arg = const_cast<Argument&>(passed_args[i]);
-            double penalty = the_rules[match_rule].isArgumentValid(arg, once );
+            double penalty = the_rules[match_rule].isArgumentValid(arg );
             if ( penalty != -1 )
             {
                 taken[i]            = true;
@@ -299,7 +299,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
             {
                 
                 Argument &arg = const_cast<Argument&>(passed_args[i]);
-                double penalty = the_rules[j].isArgumentValid( arg, once );
+                double penalty = the_rules[j].isArgumentValid( arg );
                 if ( penalty != -1 )
                 {
                     taken[i]          = true;
@@ -853,7 +853,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
             {
                 
                 Argument &arg = const_cast<Argument&>(passed_args[i]);
-                double penalty = the_rules[j].isArgumentValid( arg, once );
+                double penalty = the_rules[j].isArgumentValid( arg );
                 if ( penalty != -1 )
                 {
                     p_args[i].setLabel( the_rules[j].getArgumentAliases().front() );

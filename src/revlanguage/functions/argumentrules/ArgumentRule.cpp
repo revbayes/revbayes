@@ -186,11 +186,14 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
 {
 
     RevPtr<RevVariable> the_var = arg.getVariable();
-    if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant() )
+    if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {
         once = true;
     }
-    
+    else if (evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
+    {
+        once = true;
+    }
     
     for ( auto& argTypeSpec: argTypeSpecs )
     {
@@ -396,19 +399,24 @@ bool ArgumentRule::hasDefault(void) const
  *
  * @todo See the TODOs for fitArgument(...)
  */
-double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
+double ArgumentRule::isArgumentValid( Argument &arg) const
 {
-    
     RevPtr<RevVariable> the_var = arg.getVariable();
     if ( the_var == NULL )
     {
         return -1;
     }
     
-    if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || ( the_var->getRevObject().isModelObject() && the_var->getRevObject().getDagNode()->getDagNodeType() == RevBayesCore::DagNode::CONSTANT) )
+    bool once = false;
+    if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {
         once = true;
     }
+    else if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
+    {
+        once = true;
+    }
+
     if ( nodeType == STOCHASTIC || nodeType == DETERMINISTIC )
     {
         once = false;
@@ -425,7 +433,7 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     
     // we need to store and check all arg types
     std::vector<double> penalties;
-    for (auto& req_arg_type_spec: argTypeSpecs)
+    for ( auto& req_arg_type_spec: argTypeSpecs )
     {
         if ( the_var->getRevObject().isType( req_arg_type_spec ) )
         {
@@ -449,8 +457,6 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         }
         else if ( nodeType != STOCHASTIC )
         {
-            // If we want a stochastic node, then it doesn't work to create a deterministic
-            // node to perform the type conversion and then pass that.
             
             const TypeSpec& typeFrom = the_var->getRevObject().getTypeSpec();
             const TypeSpec& typeTo   = req_arg_type_spec;
@@ -467,7 +473,6 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
 	    if (env.findFunction(function_name, args, once) != nullptr)
 		return 0.1;
         }
-            
     }
         
     // check which one was the best penalty

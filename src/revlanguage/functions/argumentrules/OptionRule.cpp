@@ -91,16 +91,20 @@ const std::vector<std::string>& OptionRule::getOptions( void ) const
 }
 
 
-double OptionRule::isArgumentValid( Argument &arg, bool once) const
+double OptionRule::isArgumentValid( Argument &arg ) const
 {
-    
     RevPtr<RevVariable> the_var = arg.getVariable();
     if ( the_var == NULL )
     {
         return -1;
     }
     
-    if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || ( the_var->getRevObject().isModelObject() && the_var->getRevObject().getDagNode()->getDagNodeType() == RevBayesCore::DagNode::CONSTANT) )
+    bool once = false;
+    if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
+    {
+        once = true;
+    }
+    else if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
     {
         once = true;
     }
