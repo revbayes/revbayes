@@ -182,9 +182,9 @@ ArgumentRule* RevLanguage::ArgumentRule::clone( void ) const
  *       wrapper, which should be unique (not the same as the incoming variable
  *       wrapper), has the right required type.
  */
-Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
+Argument ArgumentRule::fitArgument( Argument& arg ) const
 {
-
+    bool once = false;
     RevPtr<RevVariable> the_var = arg.getVariable();
     if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {

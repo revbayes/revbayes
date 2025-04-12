@@ -173,7 +173,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
         }
         
         // Allow the function to process the arguments
-        func->processArguments( args, !dynamic );
+        func->processArguments( args );
         
         // Set the execution environment of the function
         func->setExecutionEnviroment( env );
@@ -202,7 +202,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
             throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
         }
         
-        the_function->processArguments(args, !dynamic);
+        the_function->processArguments(args );
         
         MemberMethod* the_member_method = dynamic_cast<MemberMethod*>( the_function );
         if ( the_member_method != NULL )

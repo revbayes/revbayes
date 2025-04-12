@@ -39,7 +39,7 @@ namespace RevLanguage {
         virtual void                        printValue(std::ostream& o) const;                                              //!< Print value for user
 
         // ArgumentRule functions
-        Argument                            fitArgument( Argument& arg, bool once ) const;                                  //!< Fit a passed argument into a slot using the rule
+        Argument                            fitArgument( Argument& arg ) const;                                             //!< Fit a passed argument into a slot using the rule
         const std::vector<std::string>&     getArgumentAliases(void) const;                                                 //!< Get aliases of argument
         DagNodeType                         getArgumentDagNodeType(void) const;                                             //!< Get the DAG node type
         const std::string&                  getArgumentLabel(void) const;                                                   //!< Get label of argument

@@ -216,7 +216,7 @@ RevObject& RevVariable::getRevObject(void) const
         // if this is not dynamic, then the vector is always converted into a constant variable and does not allow it's elements to change.
         bool dynamic = true;
         std::unique_ptr<Function> func( Workspace::userWorkspace().getFunction("v", args, dynamic).clone() );
-        func->processArguments(args, dynamic);
+        func->processArguments(args);
         
         // Evaluate the function (call the static evaluation function)
         RevPtr<RevVariable> func_return_value = func->execute();

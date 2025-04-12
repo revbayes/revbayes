@@ -128,7 +128,7 @@ RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( const std::shared_ptr<Env
     
     func_name += opCode[ operation ];
     Function* the_function = Workspace::globalWorkspace().getFunction( func_name, args, false ).clone();
-    the_function->processArguments( args, !dynamic );
+    the_function->processArguments( args );
     
     RevPtr<RevVariable> the_return_value = the_function->execute();
     

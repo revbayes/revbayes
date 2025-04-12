@@ -257,7 +257,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( const std::shared_ptr
             args.push_back( Argument( indexVar, "index" ) );
             
             Function* f = Workspace::userWorkspace().getFunction("[]", args, false).clone();
-            f->processArguments( args, false );
+            f->processArguments( args );
             the_var = f->execute();
             the_var->setName( identifier );
             the_var->setElementVariableState(true);
@@ -278,7 +278,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( const std::shared_ptr
             args.push_back( Argument( indexVar, "index" ) );
             
             Function* the_function = mt.getFunction( "[]", args, !dynamic ).clone();
-            the_function->processArguments(args, !dynamic);
+            the_function->processArguments(args);
             
             MemberMethod* theMemberMethod = dynamic_cast<MemberMethod*>( the_function );
             if ( theMemberMethod != NULL )
@@ -350,7 +350,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
                 args.push_back( Argument( elementVar ) );
             }
             Function* func = Workspace::userWorkspace().getFunction("v",args,false).clone();
-            func->processArguments(args,false);
+            func->processArguments(args);
             
             // Evaluate the function (call the static evaluation function)
             RevPtr<RevVariable> funcReturnValue = func->execute();
