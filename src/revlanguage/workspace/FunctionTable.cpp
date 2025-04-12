@@ -318,7 +318,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
     if (hits == 1)
     {
         std::vector<bool> arg_mapped(args.size(), false);
-        if (ret_val.first->second->checkArguments(args,NULL,arg_mapped,once) == false)
+        if (ret_val.first->second->checkArguments(args,NULL,arg_mapped) == false)
         {
             std::ostringstream msg;
 
@@ -405,7 +405,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         {
             match_score->clear();
             std::vector<bool> arg_mapped(args.size(), false);
-            if ( (*it).second->checkArguments(args, match_score, arg_mapped, once) == true )
+            if ( (*it).second->checkArguments(args, match_score, arg_mapped) == true )
             {
                 std::sort(match_score->begin(), match_score->end(), std::greater<double>());
                 if ( best_match == NULL )

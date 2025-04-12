@@ -161,7 +161,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
             {
                 func = static_cast<Function*>( the_object.clone() );
                 std::vector<bool> arg_mapped(args.size(), false);
-                found = func->checkArguments(args, NULL, arg_mapped, !dynamic);
+                found = func->checkArguments(args, NULL, arg_mapped);
             }
         }
         

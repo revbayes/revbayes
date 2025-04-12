@@ -309,7 +309,7 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 Function* func = orig_func->clone();
 
                 // Allow the function to process the arguments
-                func->processArguments( args, once );
+                func->processArguments( args );
             
                 // Set the execution environment of the function
                 func->setExecutionEnviroment( env );
