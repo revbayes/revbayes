@@ -230,25 +230,31 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( const std::shared_
  */
 RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic)
 {
-
     RevPtr<RevVariable> indexVar     = index->evaluateContent(env,dynamic);
     RevPtr<RevVariable> theParentVar = base_variable->evaluateContent( env );
-    std::string identifier = theParentVar->getName() + "[" + indexVar->getRevObject().toString() + "]";
-
     RevPtr<RevVariable> the_var = NULL;
 
+    bool constant_index = true;
+    if (indexVar->getRevObject().hasDagNode())
+        constant_index = indexVar->getRevObject().getDagNode()->isConstant();
+
+    string index_name = "_"; // Choose a character that doesn't break model.graph(filename).
+    if (constant_index)
+        index_name = indexVar->getRevObject().toString();
+    else if (not indexVar->getName().empty())
+        index_name = indexVar->getName();
+
+    std::string identifier = theParentVar->getName() + "[" + index_name + "]";
+
     // test whether we want to directly assess the variable or if we want to assess subelement of this container
-    // if this variable already exists in the workspace
-    if ( env->existsVariable( identifier ) )
+    // if this variable already exists in the workspace and the index cannot change
+    if ( env->existsVariable( identifier ) and constant_index)
     {
         // get the from the workspace
         the_var = env->getVariable( identifier );
-
     }
     else
     {
-
-
         try
         {
             // convert the value into a member object

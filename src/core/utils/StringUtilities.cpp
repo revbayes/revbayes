@@ -428,8 +428,11 @@ std::string StringUtilities::oneLiner( const std::string& input, size_t maxLen )
         
         if ( i < input.size() )
         {
-            if ( maxLen - oneLiner.size() < 3 )
+            if ( oneLiner.size() + 3 > maxLen)
             {
+                if (oneLiner.size() < maxLen)
+                    oneLiner += std::string(' ', maxLen - oneLiner.size());
+
                 oneLiner[ maxLen - 1 ] = '.';
                 oneLiner[ maxLen - 2 ] = '.';
                 oneLiner[ maxLen - 3 ] = '.';
