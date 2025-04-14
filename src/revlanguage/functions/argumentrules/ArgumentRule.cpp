@@ -184,15 +184,15 @@ ArgumentRule* RevLanguage::ArgumentRule::clone( void ) const
  */
 Argument ArgumentRule::fitArgument( Argument& arg ) const
 {
-    bool once = false;
+    bool convert_by_value = false;
     RevPtr<RevVariable> the_var = arg.getVariable();
     if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {
-        once = true;
+        convert_by_value = true;
     }
     else if (evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
     {
-        once = true;
+        convert_by_value = true;
     }
     
     for ( auto& argTypeSpec: argTypeSpecs )
@@ -207,7 +207,7 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 return Argument( valueVar, arg.getLabel(), true );
             }
 //<<<<<<< HEAD
-//            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
+//            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1 )
 //            {
 //                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
 //                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
@@ -234,7 +234,7 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
 //                }
 //            
 //            }
-//            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+//            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
 //            {
 //                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
 //                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
@@ -270,7 +270,7 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 return Argument( the_var, arg.getLabel(), isEllipsis() or evalType == BY_CONSTANT_REFERENCE );
             }
         }
-        else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, once ) != -1 )
+        else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, convert_by_value ) != -1 )
         {
             // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
             RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
@@ -391,14 +391,6 @@ bool ArgumentRule::hasDefault(void) const
 }
 
 
-/**
- * Test if argument is valid. The boolean flag 'once' is used to signal whether the argument matching
- * is done in a static or a dynamic context. If the rule is constant, then the argument matching
- * is done in a static context (evaluate-once context) regardless of the setting of the once flag.
- * If the argument is constant, we try type promotion if permitted by the variable required type.
- *
- * @todo See the TODOs for fitArgument(...)
- */
 double ArgumentRule::isArgumentValid( Argument &arg) const
 {
     RevPtr<RevVariable> the_var = arg.getVariable();
@@ -407,19 +399,19 @@ double ArgumentRule::isArgumentValid( Argument &arg) const
         return -1;
     }
     
-    bool once = false;
+    bool convert_by_value = false;
     if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {
-        once = true;
+        convert_by_value = true;
     }
     else if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
     {
-        once = true;
+        convert_by_value = true;
     }
 
     if ( nodeType == STOCHASTIC || nodeType == DETERMINISTIC )
     {
-        once = false;
+        convert_by_value = false;
     }
     
     if ( nodeType == STOCHASTIC && the_var->getRevObject().getDagNode()->getDagNodeType() != RevBayesCore::DagNode::STOCHASTIC )
@@ -444,7 +436,7 @@ double ArgumentRule::isArgumentValid( Argument &arg) const
         // make sure that we only perform type casting when the variable will not be part of a model graph
         if ( the_var->getRevObject().isConstant() == true )
         {
-            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
+            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, convert_by_value );
         }
         
         if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )

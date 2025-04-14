@@ -98,17 +98,7 @@ double OptionRule::isArgumentValid( Argument &arg ) const
     {
         return -1;
     }
-    
-    bool once = false;
-    if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
-    {
-        once = true;
-    }
-    else if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
-    {
-        once = true;
-    }
-    
+
     RlString *revObj = dynamic_cast<RlString *>( &the_var->getRevObject() );
     if ( revObj != NULL )
     {
