@@ -8,12 +8,12 @@ Reads trees (Nexus or Newick accepted) from a file or folder containing a set of
 Either a file name or a directory must be provided as argument. If a folder is provided, all the files that contain trees in that directory are read in the same object.
 
 `tree_trace = readTreeTrace(..., nruns = 1)` returns a `TreeTrace` object.
-`tree_trace = readTreeTrace(..., nruns > 1)` returns a `TreeTrace[]` object, in which `trace[n]` corresponds to the trace of run $n$.
+`tree_trace = readTreeTrace(..., nruns > 1)` returns a `TreeTrace[]` object, in which `trace[n]` corresponds to the trace of run n.
 
 A `TreeTrace` stores every `thinning`th sample from a file, starting at the sample numbered `offset + 1`.
 
 Pertinent methods of a `TreeTrace` object include:
-`tree_trace.getTree(n)`: returns the $n$th entry of the `TreeTrace` object.
+`tree_trace.getTree(n)`: returns the n-th entry of the `TreeTrace` object.
 `tree_trace.getTrees()`: returns a vector of trees from the `TreeTrace` object, after excluding the burnin.
 
 
