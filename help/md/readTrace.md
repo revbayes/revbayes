@@ -26,5 +26,6 @@ Pertinent methods of a `Trace` object include:
 readTreeTrace
 readCharacterData
 ## example
-trace <- readTrace(filename, burnin=burnin)[1]
+trace = readTrace(filename, burnin=burnin)
+trace[1].summarize()
 ## references
