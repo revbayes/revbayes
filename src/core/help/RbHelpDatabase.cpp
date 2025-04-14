@@ -3597,7 +3597,14 @@ range(20,-20)
 	help_strings[string("readRelativeNodeAgeWeightedConstraints")][string("name")] = string(R"(readRelativeNodeAgeWeightedConstraints)");
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
 	help_strings[string("readTaxonData")][string("name")] = string(R"(readTaxonData)");
+	help_strings[string("readTrace")][string("description")] = string(R"(Read an MCMC log file.)");
+	help_strings[string("readTrace")][string("details")] = string(R"(Read an MCMC log file with field delimited by `separator`.
+Then drop the first `burnin` iterations if `burnin` is an integer,
+or the fraction `burnin` of iterations if `burnin` if a Real number.
+Then we keep every `n`th entry if the `thinning` is `n`.)");
+	help_strings[string("readTrace")][string("example")] = string(R"(trace <- readTrace(filename, burnin=burnin)[1])");
 	help_strings[string("readTrace")][string("name")] = string(R"(readTrace)");
+	help_strings[string("readTrace")][string("title")] = string(R"(readTrace)");
 	help_strings[string("readTreeTrace")][string("description")] = string(R"(Reads trees (Nexus or Newick accepted) from a file or folder containing a set of trees and saves them in one object.)");
 	help_strings[string("readTreeTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument. If a folder is provided, all the files that contain trees in that directory are read in the same object.)");
 	help_strings[string("readTreeTrace")][string("example")] = string(R"(# read a tree trace

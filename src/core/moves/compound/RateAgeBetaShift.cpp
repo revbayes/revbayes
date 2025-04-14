@@ -122,15 +122,18 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
-    std::map<const DagNode*, double> initialPdfs;
+    NodePrMap initialPdfs;
     if (logMCMC >= 3 or debugMCMC >= 1)
     	initialPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {
         std::cerr<<std::setprecision(11);
-        for(auto& [node,pr]: initialPdfs)
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = initialPdfs.at(node);
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
@@ -288,8 +291,12 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+        auto proposedPrs = getNodePrs(nodes, affected_nodes);
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = proposedPrs.at(node);
             std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
@@ -372,14 +379,17 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
 
     // 10. Final checks and debug logging.
-    std::map<const DagNode*, double> finalPdfs;
+    NodePrMap finalPdfs;
     if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
 	finalPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: finalPdfs)
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = finalPdfs.at(node);
             std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
