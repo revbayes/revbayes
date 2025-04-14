@@ -1,32 +1,82 @@
 #include <iomanip>
 #include <iostream>
 #include <range/v3/all.hpp> // for ranges::views
+#include <boost/lexical_cast.hpp> // for lexical_cast
 
 #include "DebugMove.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
+#include "RbConstants.h"
+#include "variant.h"
 
 using namespace RevBayesCore;
 
 namespace views = ranges::views;
 
-std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
+const double* ProbOrError::is_prob() const
 {
-    std::map<const DagNode*, double> Prs;
+    return to<double>(*this);
+}
+
+const std::string* ProbOrError::is_error() const
+{
+    return to<std::string>(*this);
+}
+
+double ProbOrError::is_prob_or(double d) const
+{
+    if (auto p = is_prob())
+        return *p;
+    else
+        return d;
+}
+
+std::ostream& operator<<(std::ostream& o, const ProbOrError& pe)
+{
+    if (auto d = pe.is_prob())
+        o<<*d;
+    else if (auto s = pe.is_error())
+        o<<"Exception: "<<*s;
+    else
+        std::abort();
+
+    return o;
+}
+
+NodePrMap getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
+{
+    NodePrMap Prs;
     for(auto node: views::concat(nodes, affected_nodes))
-	Prs.insert({node, node->getLnProbability()});
+    {
+        ProbOrError lnPr(RbConstants::Double::nan);
+
+        try
+        {
+            Prs.insert({node, node->getLnProbability()});
+        }
+        catch (RbException& e)
+        {
+            if (e.getExceptionType() == RbException::MATH_ERROR)
+                Prs.insert({node, e.getMessage()});
+            else
+                throw;
+        }
+    }
     return Prs;
 }
 
-void compareNodePrs(const std::string& name, const std::map<const DagNode*, double>& pdfs1, const std::map<const DagNode*, double>& pdfs2, const std::string& msg)
+void compareNodePrs(const std::string& name, const NodePrMap& pdfs1, const NodePrMap& pdfs2, const std::string& msg)
 {
     RbException E;
     E<<std::setprecision(err_precision)<<"Executing "<<name<<": "<<msg<<"!\n";
     bool err = false;
     bool weird = false;
-    for(auto& [node,pr1]: pdfs1)
+    for(auto& [node,PE1]: pdfs1)
     {
-	auto pr2 = pdfs2.at(node);
+	auto PE2 = pdfs2.at(node);
+
+        double pr1 = PE1.is_prob_or(RbConstants::Double::nan);
+        double pr2 = PE2.is_prob_or(RbConstants::Double::nan);
 
 	// If they are equal then there is no difference.
 	if (pr1 == pr2 or (std::isnan(pr1) and std::isnan(pr2)))
@@ -36,7 +86,7 @@ void compareNodePrs(const std::string& name, const std::map<const DagNode*, doub
             // In the future it could indicate that we haven't yet moved from Pr=0 to Pr>0.
             if (not std::isfinite(pr1))
             {
-                std::cerr<<"    WEIRD: "<<node->getName()<<": "<<pr1<<"\n";
+                std::cerr<<"    WEIRD: "<<node->getName()<<": "<<PE1<<"\n";
                 weird = true;
             }
             continue;

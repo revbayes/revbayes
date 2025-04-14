@@ -262,6 +262,9 @@ jobs:
         if [ ${{ matrix.arch }} == "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} == "win64" ] ; then
            rm -rf test_FBD/output_expected/
            rm -rf test_BDSTP/output_expected/
+
+           # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
+           rm -rf test_propose_bad_index/output_expected/
         fi
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
