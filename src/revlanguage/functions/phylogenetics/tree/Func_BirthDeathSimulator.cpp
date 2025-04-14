@@ -268,7 +268,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     const std::string& cdt_str = static_cast<const RlString &>( args[arg_index].getVariable()->getRevObject() ).getValue();
 
     ++arg_index;
-    long max_lineages = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    std::int64_t max_lineages = static_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
     simulator.setMaxNumLineages(max_lineages);
 
     ++arg_index;

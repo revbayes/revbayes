@@ -409,7 +409,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     

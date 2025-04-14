@@ -24,8 +24,8 @@ template <class valueType> class TypedDagNode;
     class AdjacentRateModifierFunction : public TypedFunction<CharacterHistoryRateModifier> {
         
     public:
-        AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<long>* w, const TypedDagNode<RbVector<RbVector<long> > >* c, size_t ns, size_t nc);
-        AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<long>* w, const TypedDagNode<MatrixReal>* c, size_t ns, size_t nc);
+        AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<std::int64_t>* w, const TypedDagNode<RbVector<RbVector<std::int64_t> > >* c, size_t ns, size_t nc);
+        AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<std::int64_t>* w, const TypedDagNode<MatrixReal>* c, size_t ns, size_t nc);
         
         AdjacentRateModifierFunction(const AdjacentRateModifierFunction& m);
         virtual ~AdjacentRateModifierFunction(void);                                                                                                  //!< Virtual destructor
@@ -42,8 +42,8 @@ template <class valueType> class TypedDagNode;
         // members
         const TypedDagNode<double>*                                       gainFactor;
         const TypedDagNode<double>*                                       lossFactor;
-        const TypedDagNode<long>*                                         width;
-        const TypedDagNode<RbVector<RbVector<long> > >*                   context_array;
+        const TypedDagNode<std::int64_t>*                                         width;
+        const TypedDagNode<RbVector<RbVector<std::int64_t> > >*                   context_array;
         const TypedDagNode<MatrixReal>*                                   context_matrix;
         
         std::string context_type;

@@ -18,15 +18,15 @@ class DagNode;
         
     public:
         // Constructors and Destructors
-        ScreenMonitor(DagNode *n, unsigned long g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with single DAG node
-        ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with vector of DAG nodes
+        ScreenMonitor(DagNode *n, std::uint64_t g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with single DAG node
+        ScreenMonitor(const std::vector<DagNode *> &n, std::uint64_t g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with vector of DAG nodes
         
         // basic methods
         ScreenMonitor*                      clone(void) const;
         
         // Monitor functions
         bool                                isScreenMonitor(void) const;
-        void                                monitor(unsigned long gen);
+        void                                monitor(std::uint64_t gen);
         void                                reset(size_t numCycles);
         void                                setReplicateIndex(size_t idx);
         

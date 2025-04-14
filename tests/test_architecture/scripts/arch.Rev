@@ -1,0 +1,6 @@
+seed(0)
+
+# Check that we are using 64-bit integers.        
+write(12345678901)
+
+q()        

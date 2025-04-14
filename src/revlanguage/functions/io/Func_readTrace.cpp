@@ -80,7 +80,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
         
     std::vector<RevBayesCore::TraceNumeric> data;
         
-    long thinning = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t thinning = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
 
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
     // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
@@ -215,7 +215,7 @@ const ArgumentRules& Func_readTrace::getArgumentRules( void ) const
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
+        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
 
         rules_set = true;
     }

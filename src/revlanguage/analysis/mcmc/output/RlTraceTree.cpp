@@ -225,7 +225,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         found = true;
         
         // get the index which is the only argument for this method
-        long i    = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t i    = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         
         bool post = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         i += post * this->value->getBurnin();

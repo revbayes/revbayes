@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "DagNode.h"
+#include "DebugMove.h"
 #include "MetropolisHastingsMove.h"
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
@@ -258,47 +259,6 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 }
 
-std::map<const DagNode*, double> getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
-{
-    std::map<const DagNode*, double> Prs;
-    for(auto node: views::concat(nodes, affected_nodes))
-	Prs.insert({node, node->getLnProbability()});
-    return Prs;
-}
-
-constexpr double rel_err_threshhold = 1.0e-11;
-constexpr int err_precision = 11;
-
-void compareNodePrs(const Proposal* proposal, const std::map<const DagNode*, double>& pdfs1, const std::map<const DagNode*, double>& pdfs2, const std::string& msg)
-{
-    RbException E;
-    E<<std::setprecision(err_precision)<<"Executing "<<proposal->getLongProposalName()<<": "<<msg<<"!\n";
-    bool err = false;
-    for(auto& [node,pr1]: pdfs1)
-    {
-	auto pr2 = pdfs2.at(node);
-
-	// If they are both NaNs then they that is not a problem.
-	if (std::isnan(pr1) and std::isnan(pr2)) continue;
-
-	// Be a bit careful about computing a relative error.
-	double abs_err = std::abs(pr1 - pr2);
-	double scale = std::min(std::abs(pr1),std::abs(pr2));
-	if (scale < 1 or not RbMath::isAComputableNumber(scale))
-	    scale = 1;
-	double rel_err = abs_err/scale;
-
-	// Complain if rel_err is NaN.
-	if (not (rel_err < rel_err_threshhold))
-	{
-	    E<<"    "<<node->getName()<<": "<<pr1<<" != "<<pr2<<"    diff = "<<pr1-pr2<<"\n";
-	    err = true;
-	}
-    }
-
-    if (err) throw E;
-}
-
 void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
     // These are the nodes we are (directly) modifying.
@@ -306,13 +266,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // These are the nodes that are (indirectly) affected.
     const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
 
+    // 0. Initial checks and debug logging.
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
     std::map<const DagNode*, double> initialPdfs;
     if (logMCMC >= 3 or debugMCMC >= 1)
-	initialPdfs = getNodePrs(nodes, affected_nodes);
+    	initialPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {
@@ -345,7 +306,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             node->keep();
 
         // 5. Compare pdfs for each node
-        compareNodePrs(proposal, untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
+        compareNodePrs(proposal->getLongProposalName(), untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
     }
 
     // Propose a new value
@@ -491,7 +452,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if (debugMCMC >=1 and rejected)
     {
-        compareNodePrs(proposal, initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
+        compareNodePrs(proposal->getLongProposalName(), initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
     }
 
     if (logMCMC >= 2)

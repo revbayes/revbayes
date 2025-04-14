@@ -15,7 +15,7 @@
 
 using namespace RevBayesCore;
 
-AutocorrelatedEventDistribution::AutocorrelatedEventDistribution(TypedDistribution<long> *ep, const std::vector< TypedDistribution<double> *>& vp, const std::vector< Autocorrelation >& ac, const std::vector< std::string >& ac_dep_var, const TypedDagNode< RbVector<double> >* ac_sd, const std::vector< std::string >& n, const std::vector< long >& min, const std::string& sort_var) : TypedDistribution< MultiValueEvent >( new MultiValueEvent() ),
+AutocorrelatedEventDistribution::AutocorrelatedEventDistribution(TypedDistribution<std::int64_t> *ep, const std::vector< TypedDistribution<double> *>& vp, const std::vector< Autocorrelation >& ac, const std::vector< std::string >& ac_dep_var, const TypedDagNode< RbVector<double> >* ac_sd, const std::vector< std::string >& n, const std::vector< std::int64_t >& min, const std::string& sort_var) : TypedDistribution< MultiValueEvent >( new MultiValueEvent() ),
     event_prior( ep ),
     min_events( min ),
     names( n ),
@@ -190,7 +190,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
     {
         const std::vector<double> &these_values = this->value->getValues( index_of_var_to_sort_by );
             
-        long this_num_values = these_values.size();
+        std::int64_t this_num_values = these_values.size();
         
         for (int i = 1; i < this_num_values; ++i)
         {
@@ -206,7 +206,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
     
     
     // compute the prior probability for the number of events
-    event_prior->setValue( new long( value->getNumberOfEvents() ) );
+    event_prior->setValue( new std::int64_t( value->getNumberOfEvents() ) );
     double ln_prob = event_prior->computeLnProbability();
     
     
@@ -216,7 +216,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
 
         const std::vector<double> &these_values = this->value->getValues(j);
         
-        long this_num_values = these_values.size();
+        std::int64_t this_num_values = these_values.size();
         
         if ( (value->getNumberOfEvents()+min_events[j]) != this_num_values )
         {
@@ -238,7 +238,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             // if this variable is correlate via a normal distribution
             else if ( autocorrelation_types[j] == ACN )
             {
-                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+                std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
 
                 double mean = these_values[i-1];
                 double val  = these_values[i];
@@ -250,7 +250,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             // if this variable is correlated via a lognormal distribution
             else if ( autocorrelation_types[j] == ACLN )
             {
-                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+                std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean = log( these_values[i-1] );
                 double val  = these_values[i];
@@ -298,7 +298,7 @@ void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const 
 
 
 
-void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( n == "getNumberOfEvents" )
@@ -313,7 +313,7 @@ void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const 
     
 }
 
-const std::vector<long>& AutocorrelatedEventDistribution::getMinimumNumberOfEvents(void) const
+const std::vector<std::int64_t>& AutocorrelatedEventDistribution::getMinimumNumberOfEvents(void) const
 {
     return min_events;
 }
@@ -376,7 +376,7 @@ void AutocorrelatedEventDistribution::simulate()
     {
         size_t j = simulation_ordering[k];
         
-        long this_num_values = min_events[j] + value->getNumberOfEvents();
+        std::int64_t this_num_values = min_events[j] + value->getNumberOfEvents();
         
         std::vector<double>         these_values    = std::vector<double>(this_num_values, 0.0);
         const std::string&          this_name       = names[j];
@@ -397,7 +397,7 @@ void AutocorrelatedEventDistribution::simulate()
             // if this variable is correlate via a normal distribution
             else if ( autocorrelation_types[j] == ACN )
             {
-                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+                std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
 
                 
                 double mean     = these_values[i-1];
@@ -409,7 +409,7 @@ void AutocorrelatedEventDistribution::simulate()
             // if this variable is correlated via a lognormal distribution
             else if ( autocorrelation_types[j] == ACLN )
             {
-                long time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+                std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean     = log( these_values[i-1] );
                 double dt       = time_values[time_index] - (time_index > 0 ? time_values[time_index-1] : 0.0);

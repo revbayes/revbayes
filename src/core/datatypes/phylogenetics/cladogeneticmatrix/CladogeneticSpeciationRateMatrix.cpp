@@ -64,9 +64,9 @@ void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const
     {
 
         // create variable for event states
-        unsigned anc_state = unsigned( static_cast<const TypedDagNode<long> *>( args[0] )->getValue() );
-        unsigned ch1_state = unsigned( static_cast<const TypedDagNode<long> *>( args[1] )->getValue() );
-        unsigned ch2_state = unsigned( static_cast<const TypedDagNode<long> *>( args[2] )->getValue() );
+        unsigned anc_state = unsigned( static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue() );
+        unsigned ch1_state = unsigned( static_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue() );
+        unsigned ch2_state = unsigned( static_cast<const TypedDagNode<std::int64_t> *>( args[2] )->getValue() );
         std::vector<unsigned> state;
         state.push_back(anc_state);
         state.push_back(ch1_state);
@@ -82,18 +82,18 @@ void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const
     }
 }
 
-void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<RbVector<long> > &rv) const
+void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<RbVector<std::int64_t> > &rv) const
 {
 
     if ( n == "getEvents" )
     {
         // collect all anc -> ch1, ch2 state-triplets
-        RbVector<RbVector<long> > valid_events;
+        RbVector<RbVector<std::int64_t> > valid_events;
         for (auto it = event_map.begin(); it != event_map.end(); it++) {
             std::vector<unsigned> state_unsigned = it->first;
-            std::vector<long> state_long( state_unsigned.size() );
+            std::vector<std::int64_t> state_long( state_unsigned.size() );
             for (size_t i = 0; i < state_unsigned.size(); i++) {
-                state_long[i] = (long)state_unsigned[i];
+                state_long[i] = (std::int64_t)state_unsigned[i];
             }
             valid_events.push_back(state_long);
         }

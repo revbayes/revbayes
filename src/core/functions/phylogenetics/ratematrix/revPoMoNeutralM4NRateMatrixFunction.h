@@ -31,7 +31,7 @@ namespace RevBayesCore {
     class revPoMoNeutralM4NRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        revPoMoNeutralM4NRateMatrixFunction( const TypedDagNode< long > *n, const TypedDagNode< long > *m,  const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex  );
+        revPoMoNeutralM4NRateMatrixFunction( const TypedDagNode< std::int64_t > *n, const TypedDagNode< std::int64_t > *m,  const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex  );
 
         virtual                                             ~revPoMoNeutralM4NRateMatrixFunction(void);                                                    //!< Virtual destructor
 
@@ -44,11 +44,11 @@ namespace RevBayesCore {
 
     private:
 
-        long                                                 computeNumStates( long mi );
+        std::int64_t                                                 computeNumStates( std::int64_t mi );
 
         // members
-        const TypedDagNode< long >*                          N;
-        const TypedDagNode< long >*                          M;
+        const TypedDagNode< std::int64_t >*                          N;
+        const TypedDagNode< std::int64_t >*                          M;
         const TypedDagNode< Simplex >*                       pi;
         const TypedDagNode< RbVector<double> >*              rho;
 
