@@ -1,11 +1,15 @@
 ## name
 readTrace
 ## title
-Read a trace file, usually produced as the output of an MCMC or MCMCMC run.
+Read an MCMC log file.
 ## description
-Reads parameter values from a file, perhaps containing the results of an MCMC run, and saves them in one object.
+Reads parameter values from a log file,  usually produced as the output of an MCMC or MCMCMC run.
 ## details
-Given a delimiter-separated table of values, `readTrace` stores each column as an entry of a `Trace[]` vector, such that `Trace[1]` contains every `thinning`-th value from the first column of `file`, after excluding the first `burnin` values.
+
+Read an MCMC log file with field delimited by `separator`.
+Then drop the first `burnin` iterations if `burnin` is an integer,
+or the fraction `burnin` of iterations if `burnin` if a Real number.
+Then we keep every $n$th entry if the `thinning` is $n$.
 
 Pertinent methods of a `Trace` object include:
 
@@ -22,4 +26,5 @@ Pertinent methods of a `Trace` object include:
 readTreeTrace
 readCharacterData
 ## example
+trace <- readTrace(filename, burnin=burnin)[1]
 ## references
