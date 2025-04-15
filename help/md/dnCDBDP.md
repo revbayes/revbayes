@@ -5,25 +5,18 @@ Character Dependent Birth Death Process
 ## description
 This function simulates a tree under a character-dependent birth-death process.
 ## details
-This function is a flexible simulator that can be used for several phylogenetic models.
-dnCDBDP accepts several arguments to simulate a birth-death process:
-- rootAge : Start time for the birth-death process. Accepts a Real positive number
-- speciationRates/lamda/cladoEventMap : Vector of speciation rate if anagenetic-only model or cladogenetic event map.
-- extinctionRates/mu : Vector of extinction rates. Accepts real positive numbers
-- psi/phi : Vector of serial sample rates. Accepts real positive numbers. Default = NULL
-- Q : The rate matrix of jumping between categories. Default = NULL
-- delta : The rate factor of jumping between categories. Accepts real positive numbers. Default = 1
-- pi : Root state frequencies. Accepts simplex. Default = NULL
-- rho : Taxon sampling probability. Default = 1
-- condition : Condition of birth death process. Accepts string. Default = time. Options: time|survival
-- nTimeSlices : Number of time slices for numeric ODE. Accepts real positive number. Default = 500
-- simulateCondition : Conditions under which to simulate. Accepts string. Default = startTime. Options: startTime|numTips|tipStates|tree
-- minNumLineages : Minimum number of lineages to simulate; applied under startTime condition. Accepts a natural number. Default = 0
-- maxNumLineages : Maximum number of lineages to simulate; applied under startTime condition. Accepts a natural number. Default = 500
-- exactNumLineages : Exact number of lineages to simulate; applied under numTips and tipStates conditions. Accepts a natural number. Default = 100
-- maxTime : Maximum time for lineages to coalesce when simulating; applied under the numTips and tipStates condition. Accepts a real positive number. Default = 1000.
-- pruneExtinctLineages : Should simulation prune extinct lineages? Accepts boolean. Default = TRUE.
-- allowRateShiftsAtExtinctLineages : Should we allow rate shifts to occur on extinct lineages?. Accepts boolean. Default = TRUE.
+This function is a flexible simulator that can be used for several phylogenetic models. Examples of such models are outlined below:
+
+Multiple State-dependent Speciation Extinction (MuSSE)
+This model uses a state-dependent birth-death process to simulate a tree with only anagentic state changes.
+Using dnCDBDP to implement MuSSE, a vector of speciation rates for each state can be passed to the lambda argument.
+Due to being a vector and not a matrix, dnCDBDP will anly allow anagenetic state changes (along branches), with the
+length of the vector corresponding to the number of states.
+
+Cladogenetic State-dependent Speciation Extinction (ClaSSE)
+This model allows for cladogenetic state changes (at nodes)  during the birth-death process. To implement this,
+a cladogenetic event map must be passed to the lamda argument which will be a matrix specifiying rates of state changes 
+at nodes which will be a seperate matrix for state changes along branches which is specified in the Q argument.
 ## authors
 Sebastian Hoehna
 ## see_also
@@ -31,6 +24,7 @@ dnCBDSP
 fnCladogeneticSpeciationRateMatrix
 dnCDCladoBDP
 ## example
+# set up for a two-state ClaSSE model
 # set basic starting parameters
 root_age ~ dnUniform(0, 2)
 rho := Probability(1/2)
@@ -66,8 +60,12 @@ timetree ~ dnCDBDP( rootAge           = root_age,
                     condition         = "time")
 
 ## references
-Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.
-
-FitzJohn, R. G. (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6), 1084-1092.
-
-Goldberg, E. E., & Igić, B. (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12), 3701-3709.
+- citation: Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.
+  doi: https://doi.org/10.1080/10635150701607033
+  url: https://academic.oup.com/sysbio/article/56/5/701/1694265
+- citation: FitzJohn, R. G. (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6), 1084-1092.
+  doi: https://doi.org/10.1111/j.2041-210X.2012.00234.x
+  url: https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x
+- citation: Goldberg, E. E., & Igić, B. (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12), 3701-3709.
+  doi: https://doi.org/10.1111/j.1558-5646.2012.01730.x
+  url: https://academic.oup.com/evolut/article/66/12/3701/6851227

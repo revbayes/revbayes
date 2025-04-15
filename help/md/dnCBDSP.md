@@ -5,17 +5,13 @@ Conditional birth-death shift process
 ## description
 Simulates a tree under a birth-death process with shift in birth and death rates.
 ## details
-This function is a flexible simulator that can be used for several phylogenetic models.
-dnCBDSP accepts several arguments to simulate a birth-death process:
-- rootAge : Start time for the birth-death process. Accepts a real positive number
-- rootLambda : Speciation rate at the root the root of tree. Accepts a real positive number
-- rootMu : Extinction rate at the root of tree. Accepts a real positive number
-- lambda : Prior distribution for speciation rates. Accepts a real positive distribution. Default = NULL
-- mu : Prior distribution for extinction rates. Accepts a real positive distribution. Default = NULL
-- delta : The rate factor of jumping between rate categories. Accepts real positive numbers
-- rho : Taxon sampling probability
-- condition : Condition of birth death process. Accepts string. Default = survival. Options: time|survival
-- taxa : The taxon names used for initialization. Accepts Taxon[]
+This function simulates a tree under a birth-death (lambda-mu) process. The initial 
+birth and death rates can be specified with the rootAge and rootLambda arguments.
+The rates at which speciation and extinction shifts is specified by the delta
+argument and the new speciation or extinction rate can be drawn from a prior distribution
+specfied in the lambda and mu arguments. 
+Simlar to other birth-death processes in RevBayes, you can specify the stopping condition
+of the simulator (either survival or time) and the sampling probability.
 ## authors
 ## see_also
 dnCDBDP
@@ -32,8 +28,11 @@ tree ~ dnCBDSP( rootAge           = root_age,
                 rootMu            = root_mu,
                 delta             = .2,
                 rho               = sampling_prob,
-                condition         = "survival"
-		taxa              = TBD)
+                condition         = "surival")
 ## references
-Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.
-
+- citation: Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.
+  doi: https://doi.org/10.1080/10635150701607033
+  url: https://academic.oup.com/sysbio/article-abstract/56/5/701/1694265
+- citation: Höhna, S., Freyman, W. A., Nolen, Z., Huelsenbeck, J. P., May, M. R., & Moore, B. R. (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. BioRxiv, 555805.
+  doi: https://doi.org/10.1101/555805
+  url: https://www.biorxiv.org/content/10.1101/555805v1.full

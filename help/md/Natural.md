@@ -4,11 +4,11 @@ Natural
 Natural Numbers
 ## description
 ## details
-All whole number greater than or equal to zero.
+All whole numbers greater than or equal to zero.
 ## authors
 ## see_also
 Integer
-Real
+RealPos
 ## example
 x = 0
 x = 1	

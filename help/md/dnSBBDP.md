@@ -5,12 +5,10 @@ Sampled speciation birth-death process
 ## description
 Simulates a tree under a birth-death process with a specified sampling rate.
 ## details
-dnSBBDP accepts several arguments to simulate a birth-death process:
-- rootAge : Start time for the birth-death process. Accepts a real positive number
-- lambda : Vector of speciation rates. Accepts a real positive number
-- mu : Vector of extinction rates. Accepts a real positive number
-- rho : Taxon sampling probability.  Accepts probability
-- taxa : The taxa used for simulation. Accepts Taxon[]
+dnSBBDP simulates a tree under a birth-death process without a character dependent effect.
+Additionally, the sampling probability of taxa can be specified using the rho argument of the 
+function, allowing for a specfic sampling rate of extinct taxon.
+
 ## authors
 Michael Landis & Sebastian Hoehna
 ## see_also
@@ -26,7 +24,5 @@ rho := 1/2
 tree ~ dnSBBDP( rootAge       = root_age,
                 lambda        = lambda,
                 mu            = mu,           
-                rho           = rho,
-                taxa          = TBD)
+                rho           = rho)
 ## references
-Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.

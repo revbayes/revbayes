@@ -56,24 +56,23 @@ myHillClimberObject.operatorSummary())");
 	help_arrays[string("HillClimber")][string("see_also")].push_back(string(R"(SimulatedAnnealing)"));
 	help_strings[string("HillClimber")][string("title")] = string(R"(Hill-Climber analysis object)");
 	help_strings[string("Integer")][string("description")] = string(R"(Integer Datatype)");
-	help_strings[string("Integer")][string("details")] = string(R"(This datatype includes all whole  positive and negative numbers.)");
+	help_strings[string("Integer")][string("details")] = string(R"(This datatype includes all whole, positive and negative numbers.)");
 	help_strings[string("Integer")][string("example")] = string(R"(x  = -1
 x ~ dnUniformInteger(1, 10))");
 	help_strings[string("Integer")][string("name")] = string(R"(Integer)");
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(IntegerPos)"));
-	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Integer")][string("title")] = string(R"(Integer)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
 	help_strings[string("MatrixRealSymmetric")][string("name")] = string(R"(MatrixRealSymmetric)");
-	help_strings[string("Natural")][string("details")] = string(R"(All whole number greater than or equal to zero.)");
+	help_strings[string("Natural")][string("details")] = string(R"(All whole numbers greater than or equal to zero.)");
 	help_strings[string("Natural")][string("example")] = string(R"(x = 0
 x = 1
 x ~ dnUniformNatural(0, 2))");
 	help_strings[string("Natural")][string("name")] = string(R"(Natural)");
 	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Integer)"));
-	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Natural")][string("title")] = string(R"(Natural Numbers)");
 	help_arrays[string("Probability")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("Probability")][string("description")] = string(R"(A Probability is a real value between 0.0 and 1.0)");
@@ -422,17 +421,13 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
 	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shift in birth and death rates.)");
-	help_strings[string("dnCBDSP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models.
-dnCBDSP accepts several arguments to simulate a birth-death process:
-- rootAge : Start time for the birth-death process. Accepts a real positive number
-- rootLambda : Speciation rate at the root the root of tree. Accepts a real positive number
-- rootMu : Extinction rate at the root of tree. Accepts a real positive number
-- lambda : Prior distribution for speciation rates. Accepts a real positive distribution. Default = NULL
-- mu : Prior distribution for extinction rates. Accepts a real positive distribution. Default = NULL
-- delta : The rate factor of jumping between rate categories. Accepts real positive numbers
-- rho : Taxon sampling probability
-- condition : Condition of birth death process. Accepts string. Default = survival. Options: time|survival
-- taxa : The taxon names used for initialization. Accepts Taxon[])");
+	help_strings[string("dnCBDSP")][string("details")] = string(R"(This function simulates a tree under a birth-death (lambda-mu) process. The initial 
+birth and death rates can be specified with the rootAge and rootLambda arguments.
+The rates at which speciation and extinction shifts is specified by the delta
+argument and the new speciation or extinction rate can be drawn from a prior distribution
+specfied in the lambda and mu arguments. 
+Simlar to other birth-death processes in RevBayes, you can specify the stopping condition
+of the simulator (either survival or time) and the sampling probability.)");
 	help_strings[string("dnCBDSP")][string("example")] = string(R"(# set distributions for tree
 root_age ~ dnUniform(0, 2)
 root_lambda ~ dnUniform(0, 1)
@@ -444,35 +439,29 @@ tree ~ dnCBDSP( rootAge           = root_age,
                 rootMu            = root_mu,
                 delta             = .2,
                 rho               = sampling_prob,
-                condition         = "survival"
-                taxa              = TBD))");
+                condition         = "surival"))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
-	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article-abstract/56/5/701/1694265 )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna, S., Freyman, W. A., Nolen, Z., Huelsenbeck, J. P., May, M. R., & Moore, B. R. (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. BioRxiv, 555805.)",R"(https://doi.org/10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnSBBDP)"));
 	help_strings[string("dnCBDSP")][string("title")] = string(R"(Conditional birth-death shift process)");
 	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnCDBDP")][string("description")] = string(R"(This function simulates a tree under a character-dependent birth-death process.)");
-	help_strings[string("dnCDBDP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models.
-dnCDBDP accepts several arguments to simulate a birth-death process:
-- rootAge : Start time for the birth-death process. Accepts a Real positive number
-- speciationRates/lamda/cladoEventMap : Vector of speciation rate if anagenetic-only model or cladogenetic event map.
-- extinctionRates/mu : Vector of extinction rates. Accepts real positive numbers
-- psi/phi : Vector of serial sample rates. Accepts real positive numbers. Default = NULL
-- Q : The rate matrix of jumping between categories. Default = NULL
-- delta : The rate factor of jumping between categories. Accepts real positive numbers. Default = 1
-- pi : Root state frequencies. Accepts simplex. Default = NULL
-- rho : Taxon sampling probability. Default = 1
-- condition : Condition of birth death process. Accepts string. Default = time. Options: time|survival
-- nTimeSlices : Number of time slices for numeric ODE. Accepts real positive number. Default = 500
-- simulateCondition : Conditions under which to simulate. Accepts string. Default = startTime. Options: startTime|numTips|tipStates|tree
-- minNumLineages : Minimum number of lineages to simulate; applied under startTime condition. Accepts a natural number. Default = 0
-- maxNumLineages : Maximum number of lineages to simulate; applied under startTime condition. Accepts a natural number. Default = 500
-- exactNumLineages : Exact number of lineages to simulate; applied under numTips and tipStates conditions. Accepts a natural number. Default = 100
-- maxTime : Maximum time for lineages to coalesce when simulating; applied under the numTips and tipStates condition. Accepts a real positive number. Default = 1000.
-- pruneExtinctLineages : Should simulation prune extinct lineages? Accepts boolean. Default = TRUE.
-- allowRateShiftsAtExtinctLineages : Should we allow rate shifts to occur on extinct lineages?. Accepts boolean. Default = TRUE.)");
-	help_strings[string("dnCDBDP")][string("example")] = string(R"(# set basic starting parameters
+	help_strings[string("dnCDBDP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models. Examples of such models are outlined below:
+
+Multiple State-dependent Speciation Extinction (MuSSE)
+This model uses a state-dependent birth-death process to simulate a tree with only anagentic state changes.
+Using dnCDBDP to implement MuSSE, a vector of speciation rates for each state can be passed to the lambda argument.
+Due to being a vector and not a matrix, dnCDBDP will anly allow anagenetic state changes (along branches), with the
+length of the vector corresponding to the number of states.
+
+Cladogenetic State-dependent Speciation Extinction (ClaSSE)
+This model allows for cladogenetic state changes (at nodes)  during the birth-death process. To implement this,
+a cladogenetic event map must be passed to the lamda argument which will be a matrix specifiying rates of state changes 
+at nodes which will be a seperate matrix for state changes along branches which is specified in the Q argument.)");
+	help_strings[string("dnCDBDP")][string("example")] = string(R"(# set up for a two-state ClaSSE model
+# set basic starting parameters
 root_age ~ dnUniform(0, 2)
 rho := Probability(1/2)
 
@@ -506,7 +495,9 @@ timetree ~ dnCDBDP( rootAge           = root_age,
                     rho               = rho,
                     condition         = "time"))");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
-	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"()",R"()",R"()"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(FitzJohn, R. G. (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6), 1084-1092.)",R"(https://doi.org/10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg, E. E., & Igić, B. (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12), 3701-3709.)",R"(https://doi.org/10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticSpeciationRateMatrix)"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCDCladoBDP)"));
@@ -1289,12 +1280,9 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
 	help_arrays[string("dnSBBDP")][string("authors")].push_back(string(R"(Michael Landis & Sebastian Hoehna)"));
 	help_strings[string("dnSBBDP")][string("description")] = string(R"(Simulates a tree under a birth-death process with a specified sampling rate.)");
-	help_strings[string("dnSBBDP")][string("details")] = string(R"(dnSBBDP accepts several arguments to simulate a birth-death process:
-- rootAge : Start time for the birth-death process. Accepts a real positive number
-- lambda : Vector of speciation rates. Accepts a real positive number
-- mu : Vector of extinction rates. Accepts a real positive number
-- rho : Taxon sampling probability.  Accepts probability
-- taxa : The taxa used for simulation. Accepts Taxon[])");
+	help_strings[string("dnSBBDP")][string("details")] = string(R"(dnSBBDP simulates a tree under a birth-death process without a character dependent effect.
+Additionally, the sampling probability of taxa can be specified using the rho argument of the 
+function, allowing for a specfic sampling rate of extinct taxon.)");
 	help_strings[string("dnSBBDP")][string("example")] = string(R"(# set starting paramters for tree
 root_age ~ dnUniform(0, 2)
 lambda ~ dnUniform(0, 1)
@@ -1304,10 +1292,8 @@ rho := 1/2
 tree ~ dnSBBDP( rootAge       = root_age,
                 lambda        = lambda,
                 mu            = mu,
-                rho           = rho,
-                taxa          = TBD))");
+                rho           = rho))");
 	help_strings[string("dnSBBDP")][string("name")] = string(R"(dnSBBDP)");
-	help_references[string("dnSBBDP")].push_back(RbHelpReference(R"()",R"()",R"()"));
 	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
 	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
 	help_strings[string("dnSBBDP")][string("title")] = string(R"(Sampled speciation birth-death process)");
