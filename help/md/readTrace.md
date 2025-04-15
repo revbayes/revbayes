@@ -9,7 +9,7 @@ Reads parameter values from a log file,  usually produced as the output of an MC
 Read an MCMC log file with field delimited by `separator`.
 Then drop the first `burnin` iterations if `burnin` is an integer,
 or the fraction `burnin` of iterations if `burnin` if a Real number.
-Then we keep every $n$th entry if the `thinning` is $n$.
+Then we keep every `n`th entry if the `thinning` is `n`.
 
 Pertinent methods of a `Trace` object include:
 
