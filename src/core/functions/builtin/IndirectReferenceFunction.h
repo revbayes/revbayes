@@ -75,10 +75,11 @@ void  RevBayesCore::IndirectReferenceFunction<rbType>::swapParameterInternal(con
 template <typename rbType>
 void RevBayesCore::IndirectReferenceFunction<rbType>::update( void )
 {
-    
+    auto new_value = Cloner<rbType, IsDerivedFrom<rbType, Cloneable>::Is >::createClone( argumentNode->getValue() );
+
+    // If the line above throws an exception, then we won't get here.
     delete this->value;
-    this->value = Cloner<rbType, IsDerivedFrom<rbType, Cloneable>::Is >::createClone( argumentNode->getValue() );
-    
+    this->value = new_value;;
 }
 
 
