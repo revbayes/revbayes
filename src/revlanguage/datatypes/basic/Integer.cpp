@@ -251,7 +251,7 @@ void Integer::increment( void )
 /** 
  * Is convertible to language object of type? 
  */
-double Integer::isConvertibleTo( const TypeSpec& type, bool once ) const
+double Integer::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
     if ( type == RlBoolean::getClassTypeSpec() )
@@ -269,26 +269,26 @@ double Integer::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.5;
     }
     
-    if ( once && type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 )
+    if ( convert_by_value && type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 )
     {
         return 0.3;
     }
-    if ( once && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0 )
+    if ( convert_by_value && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0 )
     {
         return 0.1;
     }
 
-    if ( once && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0 )
+    if ( convert_by_value && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0 )
     {
         return 0.1;
     }
     
-    if ( once == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 && dag_node->getValue() >= 0)
+    if ( convert_by_value == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 && dag_node->getValue() >= 0)
     {
         return 0.2;
     }
     
-    return RevObject::isConvertibleTo( type, once );
+    return RevObject::isConvertibleTo( type, convert_by_value );
 }
 
 

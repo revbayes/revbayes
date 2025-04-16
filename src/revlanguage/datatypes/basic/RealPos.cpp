@@ -227,19 +227,19 @@ const TypeSpec& RealPos::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double RealPos::isConvertibleTo(const TypeSpec& type, bool once) const
+double RealPos::isConvertibleTo(const TypeSpec& type, bool convert_by_value) const
 {
     
     if ( type == Real::getClassTypeSpec() )
     {
         return 0.2;
     }
-    else if ( once == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1.0 )
+    else if ( convert_by_value == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1.0 )
     {
         return 0.1;
     }
     
-    double tmp = Real::isConvertibleTo(type, once);
+    double tmp = Real::isConvertibleTo(type, convert_by_value);
     return ( (tmp == -1.0) ? -1.0 : (tmp+0.2));
 }
 

@@ -350,17 +350,17 @@ Function* Environment::getFunction(const std::string& name)
 
 
 /* Get function. This call will throw an error if the function is missing. */
-const Function& Environment::getFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
+const Function& Environment::getFunction(const std::string& name, const std::vector<Argument>& args) const
 {
     
-    return function_table.getFunction(name, args, once);
+    return function_table.getFunction(name, args);
 }
 
 
 /* Get function. This call will throw an error if the function is missing. */
-const Function* Environment::findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
+const Function* Environment::findFunction(const std::string& name, const std::vector<Argument>& args) const
 {
-    return function_table.findFunction(name, args, once);
+    return function_table.findFunction(name, args);
 }
 
 
