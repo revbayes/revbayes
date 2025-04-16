@@ -26,6 +26,9 @@ Pertinent methods of a `Trace` object include:
 readTreeTrace
 readCharacterData
 ## example
-trace = readTrace(filename, burnin=burnin)
-trace[1].summarize()
+# Read in a log file as a vector of traces
+traces = readTrace(filename, burnin = burnin)
+# Get the posterior trace (2nd column in the log file)
+posterior = traces[2]
+posterior.summarize()
 ## references
