@@ -28,7 +28,7 @@ namespace RevBayesCore {
     class GraphShiftEdgeProposal : public Proposal {
         
     public:
-        GraphShiftEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<long>& v, double l, bool s = false);                                                                      //!<  constructor
+        GraphShiftEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<std::int64_t>& v, double l, bool s = false);                                                                      //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -52,7 +52,7 @@ namespace RevBayesCore {
         StochasticNode<MatrixReal>*                   matrix;
         
         double                                  sampling_probability;
-        RbVector<long>                          vertices;
+        RbVector<std::int64_t>                          vertices;
         size_t                                  vertex_list_length;
         double                                  storedValue;                                                                       //!< The value we propose.
         bool                                    symmetric;

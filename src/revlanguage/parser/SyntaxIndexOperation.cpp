@@ -123,7 +123,7 @@ SyntaxIndexOperation* SyntaxIndexOperation::clone () const
  * frame; instead, we return a NULL pointer and set theSlot pointer
  * to NULL as well.
  */
-RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, const std::string &varType)
+RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( const std::shared_ptr<Environment>& env, const std::string &varType)
 {
 
     RevPtr<RevVariable> indexVar     = index->evaluateContent(env);
@@ -163,16 +163,16 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
                     std::string elementIdentifier = theParentVar->getName() + "[" + std::to_string(i) + "]";
                 
                     // first ensure that the environment has a slot named `elementIdentifier`
-                    if ( !env.existsVariable( elementIdentifier ) )
+                    if ( !env->existsVariable( elementIdentifier ) )
                     {
                         // create a new variable for environment slot `elementIdentifier`
                         RevPtr<RevVariable> theElementVar = RevPtr<RevVariable>( new RevVariable( c->getElement(i-1) ) );
-                        env.addVariable( elementIdentifier, theElementVar );
+                        env->addVariable( elementIdentifier, theElementVar );
                         theElementVar->setName( elementIdentifier );
                     }
 
                     // then look up the element variable in the environment by its identifier
-                    RevPtr<RevVariable> theElementVar  = env.getVariable( elementIdentifier );
+                    RevPtr<RevVariable> theElementVar  = env->getVariable( elementIdentifier );
                 
                     // set the element variable as a hidden variable so that it doesn't show in ls()
                     theElementVar->setElementVariableState( true );
@@ -192,16 +192,16 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
     std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
 
     // first ensure that we've got an entry with name `identifier` in the environment
-    if ( not env.existsVariable( identifier ) )
+    if ( not env->existsVariable( identifier ) )
     {
         // create a new variable called `identifier` if the environment doesn't have one.
         RevPtr<RevVariable> the_var = RevPtr<RevVariable>( new RevVariable( NULL ) );
-        env.addVariable( identifier, the_var );
+        env->addVariable( identifier, the_var );
         the_var->setName( identifier );
     }
 
     // then look up the variable in the environment by its identifier
-    RevPtr<RevVariable> the_var  = env.getVariable( identifier );
+    RevPtr<RevVariable> the_var  = env->getVariable( identifier );
     
     // set this variable as an element variable; which is by default a hidden variable so that it doesn't show in ls()
     the_var->setElementVariableState( true );
@@ -228,27 +228,33 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
  * from dynamic evaluation of the index variables. These need to be put
  * in a dynamic lookup variable.
  */
-RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( Environment& env, bool dynamic)
+RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic)
 {
-
     RevPtr<RevVariable> indexVar     = index->evaluateContent(env,dynamic);
     RevPtr<RevVariable> theParentVar = base_variable->evaluateContent( env );
-    std::string identifier = theParentVar->getName() + "[" + indexVar->getRevObject().toString() + "]";
-
     RevPtr<RevVariable> the_var = NULL;
 
+    bool constant_index = true;
+    if (indexVar->getRevObject().hasDagNode())
+        constant_index = indexVar->getRevObject().getDagNode()->isConstant();
+
+    string index_name = "_"; // Choose a character that doesn't break model.graph(filename).
+    if (constant_index)
+        index_name = indexVar->getRevObject().toString();
+    else if (not indexVar->getName().empty())
+        index_name = indexVar->getName();
+
+    std::string identifier = theParentVar->getName() + "[" + index_name + "]";
+
     // test whether we want to directly assess the variable or if we want to assess subelement of this container
-    // if this variable already exists in the workspace
-    if ( env.existsVariable( identifier ) )
+    // if this variable already exists in the workspace and the index cannot change
+    if ( env->existsVariable( identifier ) and constant_index)
     {
         // get the from the workspace
-        the_var = env.getVariable( identifier );
-
+        the_var = env->getVariable( identifier );
     }
     else
     {
-
-
         try
         {
             // convert the value into a member object
@@ -256,8 +262,8 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( Environment& env, boo
             args.push_back( Argument( theParentVar, "v" ) );
             args.push_back( Argument( indexVar, "index" ) );
             
-            Function* f = Workspace::userWorkspace().getFunction("[]", args, false).clone();
-            f->processArguments( args, false );
+            Function* f = Workspace::userWorkspace().getFunction("[]", args).clone();
+            f->processArguments( args );
             the_var = f->execute();
             the_var->setName( identifier );
             the_var->setElementVariableState(true);
@@ -277,8 +283,8 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( Environment& env, boo
             std::vector<Argument> args;
             args.push_back( Argument( indexVar, "index" ) );
             
-            Function* the_function = mt.getFunction( "[]", args, !dynamic ).clone();
-            the_function->processArguments(args, !dynamic);
+            Function* the_function = mt.getFunction( "[]", args ).clone();
+            the_function->processArguments(args);
             
             MemberMethod* theMemberMethod = dynamic_cast<MemberMethod*>( the_function );
             if ( theMemberMethod != NULL )
@@ -349,8 +355,8 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
                 }
                 args.push_back( Argument( elementVar ) );
             }
-            Function* func = Workspace::userWorkspace().getFunction("v",args,false).clone();
-            func->processArguments(args,false);
+            Function* func = Workspace::userWorkspace().getFunction("v",args).clone();
+            func->processArguments(args);
             
             // Evaluate the function (call the static evaluation function)
             RevPtr<RevVariable> funcReturnValue = func->execute();

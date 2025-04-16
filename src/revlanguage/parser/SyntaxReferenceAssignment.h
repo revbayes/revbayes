@@ -84,7 +84,7 @@ namespace RevLanguage {
         bool                            isAssignment(void) const;                                       //!< Is this an assignment statement?
         
         // Regular functions
-        RevPtr<RevVariable>             evaluateContent(Environment& env, bool dynamic=false);          //!< Get semantic value
+        RevPtr<RevVariable>             evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);          //!< Get semantic value
         bool                            isFunctionSafe(const Environment&       env,
                                                        std::set<std::string>&   localVars) const;       //!< Is this element safe in a function?
         

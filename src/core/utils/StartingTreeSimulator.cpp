@@ -334,7 +334,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, doubl
 
             if(sim_age + u > max_clade_age && j > 1) {
                 valid = false;
-                theta /= 2; //we're simulating branch lengths that are too long, so decreasing Ne
+                theta /= 2; //we're simulating branch lengths that are too std::int64_t, so decreasing Ne
             } else {
                 sim_age += u;
                 valid = sim_age < serial_times[index_serial_time] && j > 1;

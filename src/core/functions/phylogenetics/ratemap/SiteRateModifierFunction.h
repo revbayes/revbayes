@@ -20,7 +20,7 @@ template <class valueType> class TypedDagNode;
     class SiteRateModifierFunction : public TypedFunction<CharacterHistoryRateModifier> {
         
     public:
-        SiteRateModifierFunction(const TypedDagNode<RbVector<RbVector<double> > >* rm, const TypedDagNode<RbVector<RbVector<long> > >* ec, const TypedDagNode<RbVector<long> >* sc);
+        SiteRateModifierFunction(const TypedDagNode<RbVector<RbVector<double> > >* rm, const TypedDagNode<RbVector<RbVector<std::int64_t> > >* ec, const TypedDagNode<RbVector<std::int64_t> >* sc);
         SiteRateModifierFunction(const SiteRateModifierFunction& m);
         virtual ~SiteRateModifierFunction(void);                                                                                                  //!< Virtual destructor
         
@@ -35,8 +35,8 @@ template <class valueType> class TypedDagNode;
         
         // members
         const TypedDagNode<RbVector<RbVector<double> > >*                   rate_multipliers;
-        const TypedDagNode<RbVector<RbVector<long> > >*                     event_classes;
-        const TypedDagNode<RbVector<long> >*                                site_classes;
+        const TypedDagNode<RbVector<RbVector<std::int64_t> > >*                     event_classes;
+        const TypedDagNode<RbVector<std::int64_t> >*                                site_classes;
         
     };
 }

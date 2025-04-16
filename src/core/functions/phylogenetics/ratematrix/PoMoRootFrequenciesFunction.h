@@ -36,9 +36,9 @@ template <class valueType> class TypedDagNode;
     class PoMoRootFrequenciesFunction : public TypedFunction< Simplex > {
         
     public:
-        PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< long > *ps);
+        PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< std::int64_t > *ps);
         
-        PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< long > *ps);
+        PoMoRootFrequenciesFunction(const TypedDagNode< Simplex > *fnrf, const TypedDagNode< double > *fopar, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< std::int64_t > *ps);
 
         virtual                                            ~PoMoRootFrequenciesFunction(void);                                                    //!< Virtual destructor
         
@@ -56,7 +56,7 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode< double >*                       frequencyOfPolymorphismsAtTheRoot;
         const TypedDagNode< RbVector<double> >*             mutationRates;
         const TypedDagNode< RateGenerator >*                mutationMatrix;
-        const TypedDagNode< long >*                          populationSize;
+        const TypedDagNode< std::int64_t >*                          populationSize;
         bool                                                useMutationMatrix;
 
         // Private member functions

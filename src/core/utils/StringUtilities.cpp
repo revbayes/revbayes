@@ -382,7 +382,7 @@ bool StringUtilities::isNumber(const std::string& s)
 
 
 /**
- * Utility function for getting a one-line summary being max maxLen long.
+ * Utility function for getting a one-line summary being max maxLen std::int64_t.
  * We find the first non-empty line in the input. If it is longer than maxLen,
  * we truncate it at maxLen - 3 and add "..." at the end. If it is shorter, we
  * just return the complete line (without line break).
@@ -437,8 +437,11 @@ std::string StringUtilities::oneLiner( const std::string& input, size_t maxLen )
         
         if ( i < input.size() )
         {
-            if ( maxLen - oneLiner.size() < 3 )
+            if ( oneLiner.size() + 3 > maxLen)
             {
+                if (oneLiner.size() < maxLen)
+                    oneLiner += std::string(' ', maxLen - oneLiner.size());
+
                 oneLiner[ maxLen - 1 ] = '.';
                 oneLiner[ maxLen - 2 ] = '.';
                 oneLiner[ maxLen - 3 ] = '.';

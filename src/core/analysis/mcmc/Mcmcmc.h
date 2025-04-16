@@ -51,7 +51,7 @@ namespace RevBayesCore {
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
         void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling
         void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
-        void                                    monitor(unsigned long g);
+        void                                    monitor(std::uint64_t g);
         void                                    nextCycle(bool advanceCycle);
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;
         void                                    printOperatorSummary(bool current_period);

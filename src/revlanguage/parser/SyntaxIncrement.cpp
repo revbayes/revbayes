@@ -81,7 +81,7 @@ SyntaxIncrement* SyntaxIncrement::clone () const
  * Evaluate the content of this syntax element. This will perform
  * an increment assignment operation.
  */
-RevPtr<RevVariable> SyntaxIncrement::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxIncrement::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     RevPtr<RevVariable> retVar;

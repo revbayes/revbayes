@@ -539,7 +539,7 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
 }
 
 
-void Mcmcmc::monitor(unsigned long g)
+void Mcmcmc::monitor(std::uint64_t g)
 {
     
     for (size_t i = 0; i < num_chains; ++i)

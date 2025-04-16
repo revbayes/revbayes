@@ -37,8 +37,8 @@ namespace RevLanguage {
         virtual SyntaxElement*          clone(void) const = 0;                                                              //!< Clone object
         
         // Regular functions
-        virtual RevPtr<RevVariable>     evaluateContent(Environment& env, bool dynamic=false) = 0;                          //!< Get semantic value (static)
-        virtual RevPtr<RevVariable>     evaluateLHSContent(Environment& env, const std::string& varType);                   //!< Get semantic value (static)
+        virtual RevPtr<RevVariable>     evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false) = 0;                          //!< Get semantic value (static)
+        virtual RevPtr<RevVariable>     evaluateLHSContent(const std::shared_ptr<Environment>& env, const std::string& varType);                   //!< Get semantic value (static)
         virtual bool                    isAssignment(void) const;                                                           //!< Is this an assignment statement element?
         virtual bool                    isConstExpression(void) const;                                                      //!< Is subtree constant expr?        
         virtual bool                    isFunctionSafe(const Environment&       env,

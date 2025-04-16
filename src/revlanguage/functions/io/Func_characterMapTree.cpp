@@ -65,7 +65,7 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     {
         ancestralstate_traces.push_back( ast_vector[i].getValue() );
     }
-        
+    
     // make a new tree summary object
     RevBayesCore::TraceTree tree_trace;
     const Argument& tt_arg = args[arg_index++];

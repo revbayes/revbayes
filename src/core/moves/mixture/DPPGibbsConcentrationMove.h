@@ -23,7 +23,7 @@ template <class variableType> class StochasticNode;
      *
      * The move has the following member variables:
      *  @param variable the concentration parameter (double)
-     *  @param numCats the number of mixture categories in the current state of the DPP (long)
+     *  @param numCats the number of mixture categories in the current state of the DPP (std::int64_t)
      *  @param gammaShape the shape parameter of the gamma prior (double)
      *  @param gammaRate the rate parameter of the gamma prior (double)
      *  @param numElem the number of elements in the DPP (int)
@@ -33,7 +33,7 @@ template <class variableType> class StochasticNode;
     class DPPGibbsConcentrationMove : public AbstractGibbsMove {
 		
     public:
-        DPPGibbsConcentrationMove(StochasticNode<double> *n, DeterministicNode<long>* v, TypedDagNode< double >* gS, TypedDagNode< double >* gR, int ne, double w);                                                                      //!< Internal constructor
+        DPPGibbsConcentrationMove(StochasticNode<double> *n, DeterministicNode<std::int64_t>* v, TypedDagNode< double >* gS, TypedDagNode< double >* gR, int ne, double w);                                                                      //!< Internal constructor
 		
         // Basic utility functions
         DPPGibbsConcentrationMove*                              clone(void) const;                                                                  //!< Clone object
@@ -46,7 +46,7 @@ template <class variableType> class StochasticNode;
     private:
 		
         StochasticNode<double>*									variable;
-		DeterministicNode<long>*								numCats;
+		DeterministicNode<std::int64_t>*								numCats;
 		TypedDagNode< double >*									gammaShape;
 		TypedDagNode< double >*									gammaRate;
 		int														numElem;
