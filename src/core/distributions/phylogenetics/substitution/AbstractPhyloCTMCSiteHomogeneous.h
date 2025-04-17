@@ -2654,7 +2654,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
         {
             partialLikelihoods[i] = 0.0;
         }
-
+        for(auto&& dirty_node: dirty_nodes)
+        {
+            dirty_node = true;
+        }
     }
 
     if ( useMarginalLikelihoods == true )
@@ -2677,6 +2680,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     activePmatrixOffset         =  num_nodes * num_site_mixtures;
     pmatNodeOffset              =  num_site_mixtures;
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
+    for (auto&& pmat_dirty_node: pmat_dirty_nodes)
+    {
+        pmat_dirty_node = true;
+    }
 
     transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) );
 
