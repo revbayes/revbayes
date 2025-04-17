@@ -119,6 +119,53 @@ M := fnJC(4) |> fnGammaASRV(alpha=1) |> fnInvASRV(pInv=0.1))");
 	help_arrays[string("TimeTree")][string("see_also")].push_back(string(R"(TimeTree)"));
 	help_arrays[string("TimeTree")][string("see_also")].push_back(string(R"(BranchLengthTree)"));
 	help_strings[string("TimeTree")][string("title")] = string(R"(Tree datatype)");
+	help_strings[string("Trace")][string("description")] = string(R"(Corresponds to a single column of a log file, usually produced by the `mnModel` monitor in an MCMC or MCMCMC run.)");
+	help_strings[string("Trace")][string("details")] = string(R"(Method description:
+
+- `getBurnin()`: Return the number of samples that were discarded as burnin, after thinning.
+- `getValues()`: Return a vector (e.g. `Real[]`) containing the values of the sampled parameter,
+  after excluding burnin samples.
+- `setBurnin()`: Modify the number (if >= 1) or fraction (if < 1) of samples to discard as burnin, after thinning.
+- `size()`, `getNumberSamples()`: Report the number of values stored in `trace`,
+  including (`post = FALSE`) or excluding (`post = TRUE`) burnin samples.
+- `summarize()`: Display summary statistics of trace.)");
+	help_strings[string("Trace")][string("example")] = string(R"(# Read in a log file as a vector of traces
+traces = readTrace("out.log", burnin = 0)
+
+# Get the posterior trace (2nd column in the log file)
+posterior = traces[2]
+posterior.getBurnin() # will return 0
+
+# Change burnin from 0 to 50 samples
+posterior.setBurnin(50)
+posterior.getBurnin() # will return 50
+
+# Get summary statistics
+posterior.summarize())");
+	help_strings[string("Trace")][string("name")] = string(R"(Trace)");
+	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(mnModel)"));
+	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(readTrace)"));
+	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(TraceTree)"));
+	help_strings[string("Trace")][string("title")] = string(R"(Trace of numeric parameter values.)");
+	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `MnFile` monitor in an MCMC or MCMCMC run.)");
+	help_strings[string("TraceTree")][string("details")] = string(R"(Important methods include:
+
+- `getTree(n)`: returns the `n`th entry of the `TraceTree` object.
+- `getTrees()`: returns a vector of trees from the `TraceTree` object, after excluding the burnin.)");
+	help_strings[string("TraceTree")][string("example")] = string(R"(# read a tree trace and ignore the first 10 samples
+thinned_trees = readTreeTrace("my_filename.tree", offset = 10, thinning = 10, burnin = 0.5)
+
+thinned_trees.getTree(1) # Returns the 11th tree (offset + 1) in the file
+thinned_trees.getTree(2) # Returns the 21st tree (offset + 1 + thinning) in the file
+
+thinned_trees.getTrees()[1] # Returns the first sampled tree after excluding the burnin fraction)");
+	help_strings[string("TraceTree")][string("name")] = string(R"(TraceTree)");
+	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(mnFile)"));
+	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(readAncestralStateTreeTrace)"));
+	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
+	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(Trace)"));
+	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(Tree)"));
+	help_strings[string("TraceTree")][string("title")] = string(R"(Trace of trees.)");
 	help_strings[string("Tree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
 	help_strings[string("Tree")][string("name")] = string(R"(Tree)");
 	help_arrays[string("Tree")][string("see_also")].push_back(string(R"(TimeTree)"));
@@ -3597,37 +3644,31 @@ range(20,-20)
 	help_strings[string("readRelativeNodeAgeWeightedConstraints")][string("name")] = string(R"(readRelativeNodeAgeWeightedConstraints)");
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
 	help_strings[string("readTaxonData")][string("name")] = string(R"(readTaxonData)");
-	help_strings[string("readTrace")][string("description")] = string(R"(Read an MCMC log file.)");
-	help_strings[string("readTrace")][string("details")] = string(R"(Read an MCMC log file with field delimited by `separator`.
+	help_strings[string("readTrace")][string("description")] = string(R"(Reads parameter values from a log file, usually produced as the output of an MCMC or MCMCMC run.)");
+	help_strings[string("readTrace")][string("details")] = string(R"(
+Read an MCMC log file with field delimited by `separator`.
 Then drop the first `burnin` iterations if `burnin` is an integer,
 or the fraction `burnin` of iterations if `burnin` if a Real number.
 Then we keep every `n`th entry if the `thinning` is `n`.)");
-	help_strings[string("readTrace")][string("example")] = string(R"(trace <- readTrace(filename, burnin=burnin)[1])");
+	help_strings[string("readTrace")][string("example")] = string(R"(# Read in a log file as a vector of traces
+traces = readTrace(filename, burnin = burnin))");
 	help_strings[string("readTrace")][string("name")] = string(R"(readTrace)");
-	help_strings[string("readTrace")][string("title")] = string(R"(readTrace)");
+	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(readAncestralStateTrace)"));
+	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(readTreeTrace)"));
+	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(readCharacterData)"));
+	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(Trace)"));
+	help_strings[string("readTrace")][string("title")] = string(R"(Read an MCMC log file.)");
 	help_strings[string("readTreeTrace")][string("description")] = string(R"(Reads trees (Nexus or Newick accepted) from a file or folder containing a set of trees and saves them in one object.)");
 	help_strings[string("readTreeTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument. If a folder is provided, all the files that contain trees in that directory are read in the same object.
 
-`tree_trace = readTreeTrace(..., nruns = 1)` returns a `TreeTrace` object.
-`tree_trace = readTreeTrace(..., nruns > 1)` returns a `TreeTrace[]` object, in which `trace[n]` corresponds to the trace of run n.
+`tree_trace = readTreeTrace(..., nruns = 1)` returns a `TraceTree` object.
+`tree_trace = readTreeTrace(..., nruns > 1)` returns a `TraceTree[]` object, in which `trace[n]` corresponds to the trace of run `n`.
 
-A `TreeTrace` stores every `thinning`th sample from a file, starting at the sample numbered `offset + 1`.
-
-Pertinent methods of a `TreeTrace` object include:
-`tree_trace.getTree(n)`: returns the n-th entry of the `TreeTrace` object.
-`tree_trace.getTrees()`: returns a vector of trees from the `TreeTrace` object, after excluding the burnin.)");
+The resulting `TraceTree` object stores every `thinning`th sample from a file, starting at the sample numbered `offset + 1`.)");
 	help_strings[string("readTreeTrace")][string("example")] = string(R"(# read a tree trace
 tree_trace = readTreeTrace("my_filename.tree", treetype="clock", burnin=0.5)
 
-# Ignore the first 10 samples
-thinned_trees = readTreeTrace("my_filename.tree", offset = 10, thinning = 10, burnin = 0.5)
-
-thinned_trees.getTree(1) # Returns the 11th tree (offset + 1) in the file
-thinned_trees.getTree(2) # Returns the 21st tree (offset + 1 + thinning) in the file
-
-thinned_trees.getTrees()[1] # Returns the first sampled tree after excluding the burnin fraction
-
-# make a summary MCC tree
+# make a summary maximum clade credibility (MCC) tree
 mcc_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_strings[string("readTreeTrace")][string("name")] = string(R"(readTreeTrace)");
 	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrace)"));
