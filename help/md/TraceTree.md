@@ -3,7 +3,7 @@ TraceTree
 ## title
 Trace of trees.
 ## description
-Stores a tree trace, usually produced by passing a variable of type `Tree` to the `MnFile` monitor in an MCMC or MCMCMC run.
+Stores a tree trace, usually produced by passing a variable of type `Tree` to the `mnFile` monitor in an MCMC or MCMCMC run.
 ## details
 Important methods include:
 
