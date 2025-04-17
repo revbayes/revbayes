@@ -93,9 +93,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::resizeLikelihoodVectors( void 
     if ( in_mcmc_mode == true )
     {
         // we resize the partial likelihood vectors to the new dimensions
-        delete [] partialLikelihoods;
+        partialLikelihoods.clear();
 
-        partialLikelihoods = new double[2*activeLikelihoodOffset];
+        partialLikelihoods.resize(2*activeLikelihoodOffset);
 
         // reinitialize likelihood vectors
         for (size_t i = 0; i < 2*activeLikelihoodOffset; i++)
@@ -322,9 +322,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     this->getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = partialLikelihoods + activeLikelihood[root]  * activeLikelihoodOffset + root  * nodeOffset;
-    const double* p_left   = partialLikelihoods + activeLikelihood[left]  * activeLikelihoodOffset + left  * nodeOffset;
-    const double* p_right  = partialLikelihoods + activeLikelihood[right] * activeLikelihoodOffset + right * nodeOffset;
+          double* p        = partialLikelihoods.data() + activeLikelihood[root]  * activeLikelihoodOffset + root  * nodeOffset;
+    const double* p_left   = partialLikelihoods.data() + activeLikelihood[left]  * activeLikelihoodOffset + left  * nodeOffset;
+    const double* p_right  = partialLikelihoods.data() + activeLikelihood[right] * activeLikelihoodOffset + right * nodeOffset;
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -386,10 +386,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     this->getRootFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = partialLikelihoods + activeLikelihood[root]   * activeLikelihoodOffset + root   * nodeOffset;
-    const double* p_left   = partialLikelihoods + activeLikelihood[left]   * activeLikelihoodOffset + left   * nodeOffset;
-    const double* p_right  = partialLikelihoods + activeLikelihood[right]  * activeLikelihoodOffset + right  * nodeOffset;
-    const double* p_middle = partialLikelihoods + activeLikelihood[middle] * activeLikelihoodOffset + middle * nodeOffset;
+          double* p        = partialLikelihoods.data() + activeLikelihood[root]   * activeLikelihoodOffset + root   * nodeOffset;
+    const double* p_left   = partialLikelihoods.data() + activeLikelihood[left]   * activeLikelihoodOffset + left   * nodeOffset;
+    const double* p_right  = partialLikelihoods.data() + activeLikelihood[right]  * activeLikelihoodOffset + right  * nodeOffset;
+    const double* p_middle = partialLikelihoods.data() + activeLikelihood[middle] * activeLikelihoodOffset + middle * nodeOffset;
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -455,9 +455,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = partialLikelihoods + activeLikelihood[left]*activeLikelihoodOffset + left*nodeOffset;
-    const double*   p_right = partialLikelihoods + activeLikelihood[right]*activeLikelihoodOffset + right*nodeOffset;
-    double*         p_node  = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
+    const double*   p_left  = partialLikelihoods.data() + activeLikelihood[left]*activeLikelihoodOffset + left*nodeOffset;
+    const double*   p_right = partialLikelihoods.data() + activeLikelihood[right]*activeLikelihoodOffset + right*nodeOffset;
+    double*         p_node  = partialLikelihoods.data() + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -526,10 +526,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left      = partialLikelihoods + activeLikelihood[left]*activeLikelihoodOffset + left*nodeOffset;
-    const double*   p_middle    = partialLikelihoods + activeLikelihood[middle]*activeLikelihoodOffset + middle*nodeOffset;
-    const double*   p_right     = partialLikelihoods + activeLikelihood[right]*activeLikelihoodOffset + right*nodeOffset;
-    double*         p_node      = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
+    const double*   p_left      = partialLikelihoods.data() + activeLikelihood[left]*activeLikelihoodOffset + left*nodeOffset;
+    const double*   p_middle    = partialLikelihoods.data() + activeLikelihood[middle]*activeLikelihoodOffset + middle*nodeOffset;
+    const double*   p_right     = partialLikelihoods.data() + activeLikelihood[right]*activeLikelihoodOffset + right*nodeOffset;
+    double*         p_node      = partialLikelihoods.data() + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -593,7 +593,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
 
-    double* p_node = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
+    double* p_node = partialLikelihoods.data() + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
 
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
@@ -1191,7 +1191,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::sumRootLikelihood( void )
     // get the index of the root node
     size_t root_index = root.getIndex();
 
-    const double*   p_root  = this->partialLikelihoods + this->activeLikelihood[root_index] * this->activeLikelihoodOffset + root_index*nodeOffset;
+    const double*   p_root  = this->partialLikelihoods.data() + this->activeLikelihood[root_index] * this->activeLikelihoodOffset + root_index*nodeOffset;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1325,7 +1325,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 
     size_t node_index = node.getIndex();
 
-    const double* p_node  = partialLikelihoods + activeLikelihood[node_index] * activeLikelihoodOffset  + node_index*nodeOffset + pattern*siteOffset;
+    const double* p_node  = partialLikelihoods.data() + activeLikelihood[node_index] * activeLikelihoodOffset  + node_index*nodeOffset + pattern*siteOffset;
 
     double logScalingFactor = perNodeSiteLogScalingFactors[activeLikelihood[node_index]][node_index][pattern];
 
@@ -1352,7 +1352,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
     for (size_t i = 0; i < children.size(); i++)
     {
         size_t child_index = children[i]->getIndex();
-        const double* p_child  = partialLikelihoods + activeLikelihood[child_index]  * activeLikelihoodOffset + child_index*nodeOffset  + pattern*siteOffset;
+        const double* p_child  = partialLikelihoods.data() + activeLikelihood[child_index]  * activeLikelihoodOffset + child_index*nodeOffset  + pattern*siteOffset;
 
         // does this child have descendants?
         if (p_child[dim] == 0)
@@ -1373,7 +1373,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 {
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -1436,7 +1436,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right )
 {
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
     {
@@ -1498,7 +1498,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
-    double* p_node   = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node   = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
     {
