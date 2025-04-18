@@ -239,20 +239,20 @@ void Mcmcmc::checkpoint( void ) const
     for (size_t i = 0; i < num_chains; ++i)
     {
         
-        if ( chains[ chainForHeatIndex(i) ] != NULL )
+        if ( chains[i] != NULL )
         {
             // get the checkpoint file name for the current chain by appending to the base checkpoint file name
             path chain_file_name = appendToStem( base_checkpoint_file_name, "_chain_" + std::to_string(i) );
             
-            chains[ chainForHeatIndex(i) ]->setCheckpointFile( chain_file_name );
-            chains[ chainForHeatIndex(i) ]->checkpoint();
+            chains[i]->setCheckpointFile( chain_file_name );
+            chains[i]->checkpoint();
             
             // assemble the new filename
             path heat_checkpoint_file_name = appendToStem(chain_file_name, "_heat");
             
             // open the stream to the file
             std::ofstream out_stream_mcmc( heat_checkpoint_file_name.string() );
-            out_stream_mcmc << "heat = " << chains[ chainForHeatIndex(i) ]->getChainPosteriorHeat() << std::endl;
+            out_stream_mcmc << "heat = " << chains[i]->getChainPosteriorHeat() << std::endl;
             
             // clean up
             out_stream_mcmc.close();
