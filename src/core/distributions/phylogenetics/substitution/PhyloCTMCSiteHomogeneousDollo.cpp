@@ -307,7 +307,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     this->getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->getPartialLikelihoodsForNode(root);
+          double* p        = this->getCreatePartialLikelihoodsForNode(root);
     const double* p_left   = this->getPartialLikelihoodsForNode(left);
     const double* p_right  = this->getPartialLikelihoodsForNode(right);
 
@@ -371,7 +371,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     this->getRootFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->getPartialLikelihoodsForNode(root);
+          double* p        = this->getCreatePartialLikelihoodsForNode(root);
     const double* p_left   = this->getPartialLikelihoodsForNode(left);
     const double* p_right  = this->getPartialLikelihoodsForNode(right);
     const double* p_middle = this->getPartialLikelihoodsForNode(middle);
@@ -442,7 +442,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left  = this->getPartialLikelihoodsForNode(left);
     const double*   p_right = this->getPartialLikelihoodsForNode(right);
-    double*         p_node  = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -514,7 +514,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     const double*   p_left      = this->getPartialLikelihoodsForNode(left);
     const double*   p_middle    = this->getPartialLikelihoodsForNode(middle);
     const double*   p_right     = this->getPartialLikelihoodsForNode(right);
-    double*         p_node      = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node      = this->getCreatePartialLikelihoodsForNode(node_index);
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -578,7 +578,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
 
-    double* p_node = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index);
 
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
@@ -1358,7 +1358,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 {
-    double* p_node = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node = this->getModifyPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -1421,7 +1421,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right )
 {
-    double* p_node = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node = this->getModifyPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
     {
@@ -1483,7 +1483,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
-    double* p_node   = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node   = this->getModifyPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
     {

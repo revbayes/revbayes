@@ -154,7 +154,9 @@ namespace RevBayesCore {
         void                                                                markPartialLikelihoodsDirtyForNode(int node) const;
         void                                                                markAllPartialLikelihoodsDirty() const;
         bool                                                                partialLikelihoodsDirtyForNode(int node) const;
-        double*                                                             getPartialLikelihoodsForNode(int node) const;
+        const double*                                                       getPartialLikelihoodsForNode(int node) const;
+        double*                                                             getCreatePartialLikelihoodsForNode(int node) const;
+        double*                                                             getModifyPartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
         const double*                                                       getMarginalLikelihoodsForNode(int node) const;
         double*                                                             getMarginalLikelihoodsForNode(int node);
@@ -213,7 +215,8 @@ namespace RevBayesCore {
     private:        
         mutable std::vector<bool>                                           dirty_nodes;
     private:        
-        mutable std::vector< std::vector<double> >                          partialLikelihoods;
+        mutable std::vector< std::shared_ptr<std::vector<double> >>         partialLikelihoods;
+        std::optional<std::vector< std::shared_ptr<std::vector<double> >>>  prevPartialLikelihoods;
         std::vector<double>                                                 marginalLikelihoods;
         std::optional<std::vector<bool>>                                    prev_dirty_nodes;
 
@@ -333,6 +336,7 @@ num_site_rates( nMix ),
 num_site_mixtures( nMix ),
 tau( t ),
 transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) ) ),
+partialLikelihoods( 2*num_nodes ),
 activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
 perNodeSiteLogScalingFactors( std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(num_sites, 0.0) ) ) ),
 site_invariant( num_sites, false ),
@@ -402,6 +406,7 @@ num_matrices( n.num_matrices ),
 tau( n.tau ),
 transition_prob_matrices( n.transition_prob_matrices ),
 partialLikelihoods( n.partialLikelihoods ),
+prevPartialLikelihoods( n.prevPartialLikelihoods ),
 activeLikelihood( n.activeLikelihood ),
 marginalLikelihoods( n.marginalLikelihoods ),
 perNodeSiteLogScalingFactors( n.perNodeSiteLogScalingFactors ),
@@ -625,30 +630,33 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLi
     partialLikelihoods.resize(2*num_nodes);
 
     // reinitialize likelihood vectors
-    for (auto& pl: partialLikelihoods)
-    {
-        pl.resize(nodeOffset);
-        std::fill(pl.begin(), pl.end(), 0.0);
-    }
     markAllPartialLikelihoodsDirty();
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsCleanForNode(int node_index) const
 {
+    int i = this->activeLikelihood[node_index]*num_nodes + node_index;
+    assert(dirty_nodes[node_index]);
+    assert(not partialLikelihoods[i]);
     dirty_nodes[node_index] = false;
+    partialLikelihoods[i] = std::make_shared<std::vector<double>>(nodeOffset, 0.0);
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
 {
+    int i = this->activeLikelihood[node_index]*num_nodes + node_index;
     dirty_nodes[node_index] = true;
+    partialLikelihoods[i].reset();
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markAllPartialLikelihoodsDirty() const
 {
     assert(dirty_nodes.size() == num_nodes);
+    for(auto& pl: partialLikelihoods)
+        pl.reset();
     for(auto&& dirty_node: dirty_nodes)
         dirty_node = true;
 }
@@ -656,13 +664,30 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markAllPartialLik
 template<class charType>
 bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::partialLikelihoodsDirtyForNode(int node_index) const
 {
+    int i = this->activeLikelihood[node_index]*num_nodes + node_index;
+    assert(not dirty_nodes[node_index] == (bool)this->partialLikelihoods[i]);
     return dirty_nodes[node_index];
 }
 
 template<class charType>
-inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
+inline const double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
 {
-    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index].data();
+    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index]->data();
+}
+
+template<class charType>
+inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getCreatePartialLikelihoodsForNode(int node_index) const
+{
+    assert(partialLikelihoodsDirtyForNode(node_index));
+    markPartialLikelihoodsCleanForNode(node_index);
+    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index]->data();
+}
+
+template<class charType>
+inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getModifyPartialLikelihoodsForNode(int node_index) const
+{
+    assert(not partialLikelihoodsDirtyForNode(node_index));
+    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index]->data();
 }
 
 template<class charType>
@@ -995,7 +1020,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             size_t right_index = right.getIndex();
             fillLikelihoodVector( right, right_index );
 
-            markPartialLikelihoodsCleanForNode( root_index );
             computeRootLikelihood( root_index, left_index, right_index );
             scale(root_index, left_index, right_index);
         }
@@ -1011,7 +1035,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             size_t middleIndex = middle.getIndex();
             fillLikelihoodVector( middle, middleIndex );
 
-            markPartialLikelihoodsCleanForNode( root_index );
             computeRootLikelihood( root_index, left_index, right_index, middleIndex );
             scale(root_index, left_index, right_index, middleIndex);
         }
@@ -1028,7 +1051,8 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     if ( in_mcmc_mode == false )
     {
         // free the partial likelihoods
-        partialLikelihoods.clear();
+        for(auto& pl: partialLikelihoods)
+            pl.reset();
     }
 
     // set the ancestral states as stale
@@ -1287,7 +1311,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = getPartialLikelihoodsForNode(node_index);
+    const double*   p_node  = getPartialLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_site           = p_node;
@@ -1409,7 +1433,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAl
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = getPartialLikelihoodsForNode(node_index);
+    const double*   p_node  = getPartialLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_site           = p_node;
@@ -1722,7 +1746,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
+            for(auto& pl: partialLikelihoods)
+                pl.reset();
             in_mcmc_mode = false;
         }
 
@@ -1786,7 +1811,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
+            for(auto& pl: partialLikelihoods)
+                pl.reset();
             in_mcmc_mode = false;
         }
 
@@ -1897,7 +1923,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
+            for(auto& pl: partialLikelihoods)
+                pl.reset();
             in_mcmc_mode = false;
         }
 
@@ -1945,7 +1972,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
+            for(auto& pl: partialLikelihoods)
+                pl.reset();
             in_mcmc_mode = false;
         }
 
@@ -2170,7 +2198,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
     // check for recomputation
     if ( partialLikelihoodsDirtyForNode(node_index) )
     {
-        markPartialLikelihoodsCleanForNode(node_index);
         if ( node.isTip() == true )
         {
             // this is a tip node
@@ -2382,6 +2409,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
     // reset all flags
     prev_dirty_nodes = {};
     prev_pmat_dirty_nodes = {};
+    prevPartialLikelihoods = {};
+
+    for(int node = 0; node < num_nodes; node++)
+    {
+        int index1 = node + num_nodes*activeLikelihood[node];
+        int index2 = node + num_nodes*(1 - activeLikelihood[node]);
+//        if (not dirty_nodes[node])
+//            assert(partialLikelihoods[index1]);
+//        else
+//            partialLikelihoods[index1].reset();
+        assert(not dirty_nodes[node] == (bool)partialLikelihoods[index1]);
+
+        partialLikelihoods[index2].reset();
+    }
 
     for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
     {
@@ -2669,7 +2710,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     if ( in_mcmc_mode == true )
     {
         // we resize the partial likelihood vectors to the new dimensions
-        partialLikelihoods.clear();
+        for(auto& pl: partialLikelihoods)
+            pl.reset();
         allocatePartialLikelihoods();
     }
 
@@ -2714,6 +2756,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
     storedLnProb = {};
     dirty_nodes = *prev_dirty_nodes;
     prev_dirty_nodes = {};
+    std::swap(partialLikelihoods,  *prevPartialLikelihoods);
+    prevPartialLikelihoods = {};
 
     // restore the active likelihoods vector
     for (size_t index = 0; index < changed_nodes.size(); ++index)
@@ -2725,6 +2769,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
 
         // set all flags to false
         changed_nodes[index] = false;
+    }
+    for(int node = 0; node < num_nodes; node++)
+    {
+        int index1 = node + num_nodes*activeLikelihood[node];
+        int index2 = node + num_nodes*(1 - activeLikelihood[node]);
+        if (not dirty_nodes[node])
+            assert(partialLikelihoods[index1]);
+        else
+            partialLikelihoods[index1].reset();
+
+        partialLikelihoods[index2].reset();
+
+        assert(not dirty_nodes[node] == (bool) partialLikelihoods[index1]);
     }
 
     // reset the flags
@@ -2749,7 +2806,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index)
 {
 
-    double* p_node = getPartialLikelihoodsForNode(node_index);
+    double* p_node = getModifyPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2816,7 +2873,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right )
 {
 
-    double* p_node = getPartialLikelihoodsForNode(node_index);
+    double* p_node = getModifyPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2886,7 +2943,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
 
-    double* p_node = getPartialLikelihoodsForNode(node_index);
+    double* p_node = getModifyPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -3184,7 +3241,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     // free old memory
     if ( in_mcmc_mode == true )
     {
-        partialLikelihoods.clear();
+        for(auto& pl: partialLikelihoods)
+            pl.reset();
     }
 
     // set our internal flag
@@ -3618,7 +3676,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = getPartialLikelihoodsForNode(node_index);
+    const double*   p_node  = getPartialLikelihoodsForNode(node_index);
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3627,13 +3685,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     std::vector<double> site_mixture_probs = getMixtureProbs();
 
     // get pointer the likelihood
-    double*   p_mixture     = p_node;
+    const double*   p_mixture     = p_node;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
 
         // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
+        const double*   p_site_mixture     = p_mixture;
         // iterate over all sites
 
         for (size_t site = 0; site < pattern_block_size; ++site)
@@ -3641,7 +3699,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             // temporary variable storing the likelihood
             double tmp = 0.0;
             // get the pointers to the likelihoods for this site and mixture category
-            double* p_site_j   = p_site_mixture;
+            const double* p_site_j   = p_site_mixture;
             // iterate over all starting states
             for (size_t i=0; i<num_chars; ++i)
             {
@@ -3777,7 +3835,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = getPartialLikelihoodsForNode(node_index);
+    double*   p_node  = getCreatePartialLikelihoodsForNode(node_index);
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3918,7 +3976,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = getPartialLikelihoodsForNode(node_index);
+    double*   p_node  = getCreatePartialLikelihoodsForNode(node_index);
 
     size_t num_site_matrices = num_site_mixtures/num_site_rates;
 
@@ -4210,6 +4268,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
 
         prev_dirty_nodes = dirty_nodes;
         prev_pmat_dirty_nodes = pmat_dirty_nodes;
+        prevPartialLikelihoods = partialLikelihoods;
     }
 
 
