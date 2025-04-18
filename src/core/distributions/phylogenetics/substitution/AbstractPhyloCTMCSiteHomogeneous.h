@@ -149,6 +149,8 @@ namespace RevBayesCore {
 
         // functions for accessing mutable caches
         double*                                                             getPartialLikelihoodsForNode(int node) const;
+        const double*                                                       getMarginalLikelihoodsForNode(int node) const;
+        double*                                                             getMarginalLikelihoodsForNode(int node);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                             //!< Swap a parameter
@@ -611,6 +613,24 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
     return false;
 }
 
+template<class charType>
+inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
+{
+    return this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+}
+
+template<class charType>
+inline const double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMarginalLikelihoodsForNode(int node_index) const
+{
+    return this->marginalLikelihoods.data() + node_index*this->nodeOffset;
+}
+
+template<class charType>
+inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMarginalLikelihoodsForNode(int node_index)
+{
+    return this->marginalLikelihoods.data() + node_index*this->nodeOffset;
+}
+
 }
 
 template<class charType>
@@ -981,8 +1001,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node                  = getPartialLikelihoodsForNode(node_index);
-    double*         p_node_marginal         = this->marginalLikelihoods.data() + node_index*this->nodeOffset;
-    const double*   p_parent_node_marginal  = this->marginalLikelihoods.data() + parentnode_index*this->nodeOffset;
+    double*         p_node_marginal         = getMarginalLikelihoodsForNode(node_index);
+    const double*   p_parent_node_marginal  = getMarginalLikelihoodsForNode(parentnode_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_mixture                   = p_node;
@@ -1043,12 +1063,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
 
 
 template<class charType>
-double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
-{
-    return this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-}
-
-template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRootLikelihood( void )
 {
     // get the root node
@@ -1063,7 +1077,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node           = getPartialLikelihoodsForNode(node_index);
-    double*         p_node_marginal  = this->marginalLikelihoods.data() + node_index*this->nodeOffset;
+    double*         p_node_marginal  = getMarginalLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_mixture           = p_node;
@@ -3448,7 +3462,7 @@ std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneo
     std::vector<double> mixture_probs = getMixtureProbs();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node_marginal         = this->marginalLikelihoods.data() + node_index*this->nodeOffset;
+    double*         p_node_marginal         = getMarginalLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     double*         p_mixture_marginal          = p_node_marginal;
