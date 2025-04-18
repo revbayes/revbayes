@@ -205,7 +205,7 @@ namespace RevBayesCore {
         // the likelihoods
         std::vector<size_t>                                                 activeLikelihood;
     private:        
-        mutable std::vector<double>                                         partialLikelihoods;
+        mutable std::vector< std::vector<double> >                          partialLikelihoods;
         std::vector<double>                                                 marginalLikelihoods;
         std::optional<std::vector<bool>>                                    prev_dirty_nodes;
 
@@ -605,12 +605,13 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLikelihoods() const
 {
-    partialLikelihoods.resize(2*activeLikelihoodOffset);
+    partialLikelihoods.resize(2*num_nodes);
 
     // reinitialize likelihood vectors
-    for (size_t i = 0; i < 2*activeLikelihoodOffset; i++)
+    for (auto& pl: partialLikelihoods)
     {
-        partialLikelihoods[i] = 0.0;
+        pl.resize(nodeOffset);
+        std::fill(pl.begin(), pl.end(), 0.0);
     }
     for(auto&& dirty_node: dirty_nodes)
     {
@@ -621,7 +622,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLi
 template<class charType>
 inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
 {
-    return this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index].data();
 }
 
 template<class charType>
