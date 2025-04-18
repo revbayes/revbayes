@@ -268,7 +268,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
     bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestorTip() || node.getChild(1).isSampledAncestorTip();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    double* p_node         = this->getPartialLikelihoodsForNode(root);
+    double* p_node         = this->getCreatePartialLikelihoodsForNode(root);
     const double* p_left   = this->getPartialLikelihoodsForNode(left);
     const double* p_right  = this->getPartialLikelihoodsForNode(right);
     
@@ -368,7 +368,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left  = this->getPartialLikelihoodsForNode(left);
     const double*   p_right = this->getPartialLikelihoodsForNode(right);
-    double*         p_node  = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
     double*         p_clado_node  = this->cladoPartialLikelihoods.data() + this->activeLikelihood[node_index]*this->cladoActiveLikelihoodOffset + node_index*this->cladoNodeOffset;
     
     // iterate over all mixture categories
@@ -622,7 +622,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
     
-    double* p_node = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index);
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
@@ -873,7 +873,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::drawJointConditionalAncestralStates
     std::map<std::vector<unsigned>, double>::iterator it_p;
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
     const double*   p_left  = this->getPartialLikelihoodsForNode(left);
     const double*   p_right = this->getPartialLikelihoodsForNode(right);
 
@@ -1411,7 +1411,7 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->getPartialLikelihoodsForNode(node_index);
+    double*   p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
     
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods

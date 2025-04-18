@@ -78,7 +78,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 {
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->getPartialLikelihoodsForNode(root);
+          double* p        = this->getCreatePartialLikelihoodsForNode(root);
     const double* p_left   = this->getPartialLikelihoodsForNode(left);
     const double* p_right  = this->getPartialLikelihoodsForNode(right);
 
@@ -148,7 +148,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 {
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->getPartialLikelihoodsForNode(root);
+          double* p        = this->getCreatePartialLikelihoodsForNode(root);
     const double* p_left   = this->getPartialLikelihoodsForNode(left);
     const double* p_right  = this->getPartialLikelihoodsForNode(right);
     const double* p_middle = this->getPartialLikelihoodsForNode(middle);
@@ -225,7 +225,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left  = this->getPartialLikelihoodsForNode(left);
     const double*   p_right = this->getPartialLikelihoodsForNode(right);
-    double*         p_node  = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -290,7 +290,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     const double*   p_left      = this->getPartialLikelihoodsForNode(left);
     const double*   p_middle    = this->getPartialLikelihoodsForNode(middle);
     const double*   p_right     = this->getPartialLikelihoodsForNode(right);
-    double*         p_node      = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node      = this->getCreatePartialLikelihoodsForNode(node_index);
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -349,7 +349,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
-    double* p_node = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index);
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
