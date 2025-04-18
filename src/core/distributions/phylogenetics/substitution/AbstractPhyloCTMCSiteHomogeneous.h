@@ -148,6 +148,9 @@ namespace RevBayesCore {
 
 
         // functions for accessing mutable caches
+        void                                                                markPartialLikelihoodsCleanForNode(int node) const;
+        void                                                                markPartialLikelihoodsDirtyForNode(int node) const;
+        bool                                                                partialLikelihoodsDirtyForNode(int node) const;
         double*                                                             getPartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
         const double*                                                       getMarginalLikelihoodsForNode(int node) const;
@@ -204,6 +207,7 @@ namespace RevBayesCore {
 
         // the likelihoods
         std::vector<size_t>                                                 activeLikelihood;
+        mutable std::vector<bool>                                           dirty_nodes;
     private:        
         mutable std::vector< std::vector<double> >                          partialLikelihoods;
         std::vector<double>                                                 marginalLikelihoods;
@@ -227,7 +231,6 @@ namespace RevBayesCore {
         // flags for likelihood recomputation
         bool                                                                touched = false;
         std::vector<bool>                                                   changed_nodes;
-        mutable std::vector<bool>                                           dirty_nodes;
 
         // offsets for nodes
         size_t                                                              activeLikelihoodOffset = -1;
@@ -462,8 +465,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     auto tree_nodes = tau->getValue().getNodes();
     for(auto node: tree_nodes)
     {
-	if (dirty_nodes[node->getIndex()] and not node->isRoot())
-	    assert(dirty_nodes[node->getParent().getIndex()]);
+	if (partialLikelihoodsDirtyForNode(node->getIndex()) and not node->isRoot())
+	    assert(partialLikelihoodsDirtyForNode(node->getParent().getIndex()));
     }
 
     // 2. Invariant: if the P-matrix for a node is dirty, then the conditional likelihoods should be dirty
@@ -471,7 +474,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     {
 	int index = node->getIndex();
 	if (pmat_dirty_nodes[index] and not node->isRoot())
-	    assert(dirty_nodes[index]);
+	    assert(partialLikelihoodsDirtyForNode(index));
     }
 }
 
@@ -617,6 +620,24 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLi
     {
         dirty_node = true;
     }
+}
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsCleanForNode(int node_index) const
+{
+    dirty_nodes[node_index] = false;
+}
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
+{
+    dirty_nodes[node_index] = true;
+}
+
+template<class charType>
+bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::partialLikelihoodsDirtyForNode(int node_index) const
+{
+    return dirty_nodes[node_index];
 }
 
 template<class charType>
@@ -943,7 +964,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     size_t root_index = root.getIndex();
 
     // only necessary if the root is actually dirty
-    if ( dirty_nodes[root_index] == true )
+    if ( partialLikelihoodsDirtyForNode(root_index) )
     {
         // start by filling the likelihood vector for the children of the root
         if ( root.getNumberOfChildren() == 2 ) // rooted trees have two children for the root
@@ -2128,8 +2149,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 {
 
     // check for recomputation
-    if ( dirty_nodes[node_index] == true )
+    if ( partialLikelihoodsDirtyForNode(node_index) )
     {
+        markPartialLikelihoodsCleanForNode(node_index);
         if ( node.isTip() == true )
         {
             // this is a tip node
