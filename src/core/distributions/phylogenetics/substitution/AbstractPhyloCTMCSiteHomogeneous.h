@@ -152,6 +152,7 @@ namespace RevBayesCore {
         // functions for accessing mutable caches
         void                                                                markPartialLikelihoodsCleanForNode(int node) const;
         void                                                                markPartialLikelihoodsDirtyForNode(int node) const;
+        void                                                                markAllPartialLikelihoodsDirty() const;
         bool                                                                partialLikelihoodsDirtyForNode(int node) const;
         double*                                                             getPartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
@@ -209,6 +210,7 @@ namespace RevBayesCore {
 
         // the likelihoods
         std::vector<size_t>                                                 activeLikelihood;
+    private:        
         mutable std::vector<bool>                                           dirty_nodes;
     private:        
         mutable std::vector< std::vector<double> >                          partialLikelihoods;
@@ -628,10 +630,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLi
         pl.resize(nodeOffset);
         std::fill(pl.begin(), pl.end(), 0.0);
     }
-    for(auto&& dirty_node: dirty_nodes)
-    {
-        dirty_node = true;
-    }
+    markAllPartialLikelihoodsDirty();
 }
 
 template<class charType>
@@ -644,6 +643,14 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
 {
     dirty_nodes[node_index] = true;
+}
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markAllPartialLikelihoodsDirty() const
+{
+    assert(dirty_nodes.size() == num_nodes);
+    for(auto&& dirty_node: dirty_nodes)
+        dirty_node = true;
 }
 
 template<class charType>
@@ -954,7 +961,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
-        dirty_nodes = std::vector<bool>(num_nodes, true);
+        markAllPartialLikelihoodsDirty();
         pmat_dirty_nodes = std::vector<bool>(num_nodes, true);
     }
 
@@ -988,7 +995,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             size_t right_index = right.getIndex();
             fillLikelihoodVector( right, right_index );
 
-            dirty_nodes[root_index] = false;
+            markPartialLikelihoodsCleanForNode( root_index );
             computeRootLikelihood( root_index, left_index, right_index );
             scale(root_index, left_index, right_index);
         }
@@ -1004,7 +1011,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             size_t middleIndex = middle.getIndex();
             fillLikelihoodVector( middle, middleIndex );
 
-            dirty_nodes[root_index] = false;
+            markPartialLikelihoodsCleanForNode( root_index );
             computeRootLikelihood( root_index, left_index, right_index, middleIndex );
             scale(root_index, left_index, right_index, middleIndex);
         }
@@ -2396,8 +2403,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
 
-    // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( dirty_nodes[index] == false )
+    // if this node is already dirty, then  all the ancestral nodes must have been flagged as dirty
+    if ( not partialLikelihoodsDirtyForNode(index) )
     {
         // the root doesn't have an ancestor
         if ( n.isRoot() == false )
@@ -2406,7 +2413,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
         }
 
         // set the flag
-        dirty_nodes[index] = true;
+        markPartialLikelihoodsDirtyForNode(index);
 
         // if we previously haven't touched this node, then we need to change the active likelihood pointer
         if ( changed_nodes[index] == false )
@@ -2424,7 +2431,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
 	while(not n2->isRoot())
 	{
 	    n2 = &n2->getParent();
-	    assert(dirty_nodes[n2->getIndex()]);
+	    assert(partialLikelihoodsDirtyForNode(n2->getIndex()));
 	}
 #endif
     }
@@ -2596,10 +2603,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
     // compress the data and initialize internal variables
     compress();
 
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
+    markAllPartialLikelihoodsDirty();
 
     // flip the active likelihood pointers
     for (size_t index = 0; index < changed_nodes.size(); ++index)
@@ -4279,10 +4283,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     if ( touch_all == true )
     {
 
-        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
+        markAllPartialLikelihoodsDirty();
 
         // flip the active likelihood pointers
         for (size_t index = 0; index < changed_nodes.size(); ++index)
