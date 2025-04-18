@@ -14,6 +14,10 @@ mbSubtreeSwap
 topology ~ dnUniformTopology(taxa, outgroup=out_group)
 moves.append( mvSPR(topology, weight=ntaxa*2.0) )
 ## references
-Felsenstein, J. (2004). Inferring phylogenies (pp. 41-46). Sinauer Associates.
+- citation: Swofford, D. L., & Olsen, G. J. (1990). Phylogeny reconstruction. In D. M. Hillis & C. Moritz (Eds.), Molecular Systematics (1st ed., pp.   
+  411–501). Sunderland, MA: Sinauer Associates.
+- citation: Felsenstein J (1981). "Evolutionary trees from DNA sequences: a maximum likelihood approach". Journal of Molecular Evolution. 17:368–76.
+  doi: https://doi.org/10.1007/BF01734359
+  url: https://link.springer.com/article/10.1007/BF01734359
 
-Wikipedia contributors. Tree rearrangement. Wikipedia, The Free Encyclopedia. Retrieved 3/26/2025, from https://en.wikipedia.org/wiki/Tree_rearrangement
+

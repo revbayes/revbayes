@@ -5,14 +5,12 @@ Scaling Moves Proposal Follows Bactrian Distribution
 ## description
 mvScaleBactrian is an MCMC move that scales a parameter while applying a Bactrian-distributed perturbation. 
 ## details
-This encourages larger jumps and improves mixing efficiency, unlike a standard scaling move that uses a log-normal proposal, mvScaleBactrian creates a bimodal proposal, like the two humps of a Bactrian camel, encouraging larger jumps
-A scaling Proposal draws a random uniform number u ~ unif (-0.5,0.5)
- and scales the current vale by a scaling factor
- sf = exp( lambda * u )
- where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
+Proposes multiplicative changes to a positive parameter using a Bactrian kernel—a bimodal distribution centered at zero that avoids small steps. This leads to larger, more diverse proposals, improving mixing efficiency and reducing autocorrelation
 ## authors
 ## see_also
 mvScale 
 ## example
 moves.append( mvScaleBactrian(speciation_rate_at_present,weight=5) )
 ## references
+- Citation: Z. Yang, & C.E. Rodríguez, Searching for efficient Markov chain Monte Carlo proposal kernels, Proc. Natl. Acad. Sci. U.S.A. 110 (48) 
+  19307-19312, https://doi.org/10.1073/pnas.1311790110 (2013).
