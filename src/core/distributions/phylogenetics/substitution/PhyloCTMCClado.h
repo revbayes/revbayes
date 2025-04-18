@@ -268,7 +268,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
     bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestorTip() || node.getChild(1).isSampledAncestorTip();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    double* p_node         = this->getPartialLikelihoodsForNode(root);
+    double* p_node         = this->getCreatePartialLikelihoodsForNode(root);
     const double* p_left   = this->getPartialLikelihoodsForNode(left);
     const double* p_right  = this->getPartialLikelihoodsForNode(right);
     
@@ -368,7 +368,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     const double*   p_left  = this->getPartialLikelihoodsForNode(left);
     const double*   p_right = this->getPartialLikelihoodsForNode(right);
-    double*         p_node  = this->getPartialLikelihoodsForNode(node_index);
+    double*         p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
     double*         p_clado_node  = this->cladoPartialLikelihoods.data() + this->activeLikelihood[node_index]*this->cladoActiveLikelihoodOffset + node_index*this->cladoNodeOffset;
     
     // iterate over all mixture categories
@@ -622,7 +622,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
     
-    double* p_node = this->getPartialLikelihoodsForNode(node_index);
+    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index);
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
@@ -873,7 +873,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::drawJointConditionalAncestralStates
     std::map<std::vector<unsigned>, double>::iterator it_p;
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = this->getPartialLikelihoodsForNode(node_index);
+    const double*   p_node  = this->getPartialLikelihoodsForNode(node_index);
     const double*   p_left  = this->getPartialLikelihoodsForNode(left);
     const double*   p_right = this->getPartialLikelihoodsForNode(right);
 
@@ -890,12 +890,12 @@ void RevBayesCore::PhyloCTMCClado<charType>::drawJointConditionalAncestralStates
         // sum to sample
         double sum = 0.0;
 
-		// if the matrix is compressed use the pattern for this site
+        // if the matrix is compressed use the pattern for this site
         size_t pattern = i;
-		if (this->compressed)
+        if (this->compressed)
         {
-			pattern = this->site_pattern[i];
-		}
+            pattern = this->site_pattern[i];
+        }
 
         // get ptr to first mixture cat for site
         p_site          = p_node  + pattern * this->siteOffset;
@@ -1411,27 +1411,27 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->getPartialLikelihoodsForNode(node_index);
+    const double* p_node  = this->getPartialLikelihoodsForNode(node_index);
     
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
     std::vector<double> per_mixture_Likelihoods = std::vector<double>(this->num_patterns,0.0);
     
     // get pointers the likelihood for both subtrees
-    double*   p_mixture     = p_node;
+    const double* p_mixture     = p_node;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_rates; ++mixture)
     {
 
         // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
+        const double* p_site_mixture     = p_mixture;
         // iterate over all sites
         for (size_t site = 0; site < this->num_patterns; ++site)
         {
             // temporary variable storing the likelihood
             double tmp = 0.0;
             // get the pointers to the likelihoods for this site and mixture category
-            double* p_site_j   = p_site_mixture;
+            const double* p_site_j   = p_site_mixture;
             // iterate over all starting states
             for (size_t i=0; i<this->num_chars; ++i)
             {
