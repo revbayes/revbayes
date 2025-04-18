@@ -202,9 +202,9 @@ namespace RevBayesCore {
         size_t                                                              pmatNodeOffset;
 
         // the likelihoods
-        mutable std::vector<double>                                         partialLikelihoods;
         std::vector<size_t>                                                 activeLikelihood;
     private:        
+        mutable std::vector<double>                                         partialLikelihoods;
         std::vector<double>                                                 marginalLikelihoods;
         std::optional<std::vector<bool>>                                    prev_dirty_nodes;
 
@@ -229,10 +229,10 @@ namespace RevBayesCore {
         mutable std::vector<bool>                                           dirty_nodes;
 
         // offsets for nodes
-        size_t                                                              activeLikelihoodOffset;
-        size_t                                                              nodeOffset;
-        size_t                                                              mixtureOffset;
-        size_t                                                              siteOffset;
+        size_t                                                              activeLikelihoodOffset = -1;
+        size_t                                                              nodeOffset = -1;
+        size_t                                                              mixtureOffset = -1;
+        size_t                                                              siteOffset = -1;
 
         // flags
         bool                                                                using_ambiguous_characters;
@@ -342,11 +342,8 @@ gap_match_clamped( gapmatch )
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
-    activeLikelihoodOffset      =  num_nodes*num_site_mixtures*pattern_block_size*num_chars;
-    nodeOffset                  =  num_site_mixtures*pattern_block_size*num_chars;
-    mixtureOffset               =  pattern_block_size*num_chars;
     siteOffset                  =  num_chars;
-    
+
     activePmatrixOffset         =  num_nodes * num_site_mixtures;
     pmatNodeOffset              =  num_site_mixtures;
     active_pmatrices            =  std::vector<size_t>(num_nodes, 0);
@@ -2638,7 +2635,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     }
 
     // set the offsets for easier iteration through the likelihood vector
-    siteOffset                  =  num_chars;
+    assert(siteOffset == num_chars);
     mixtureOffset               =  pattern_block_size*siteOffset;
     nodeOffset                  =  num_site_mixtures*mixtureOffset;
     activeLikelihoodOffset      =  num_nodes*nodeOffset;
