@@ -48,6 +48,7 @@ namespace RevBayesCore {
         double                                              getChainPosteriorHeat(void) const;                                                      //!< Get the heat for this chain
         double                                              getChainPriorHeat(void) const;
         size_t                                              getChainIndex(void) const;                                                              //!< Get the index of this chain
+        path                                                getCheckpointFile(void) const;
         const Model&                                        getModel(void) const;
         double                                              getModelLnProbability(bool like_only);
         RbVector<Monitor>&                                  getMonitors(void);

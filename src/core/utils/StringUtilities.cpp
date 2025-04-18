@@ -33,12 +33,21 @@ using std::string;
 using std::vector;
 
 
-/** Convert the string s to a number */
+/** Convert the string s to a floating-point number */
+double StringUtilities::asDoubleNumber(const std::string& s)
+{
+    
+    return std::atof( s.c_str() );
+}
+
+
+/** Convert the string s to an integer */
 int StringUtilities::asIntegerNumber(const std::string& s)
 {
     
     return std::atoi( s.c_str() );
 }
+
 
 /**
  * Fill this string with spaces so that it has the required length.
