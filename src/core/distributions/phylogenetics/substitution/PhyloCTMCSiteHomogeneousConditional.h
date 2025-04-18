@@ -47,6 +47,9 @@ namespace RevBayesCore {
 
         virtual void                                        resizeLikelihoodVectors(void);
 
+        vector<double>::const_iterator                      getCorrectionLikelihoodsForNode(int node_index) const;
+        vector<double>::iterator                            getCorrectionLikelihoodsForNode(int node_index);
+
         bool                                                warned;
 
         int                                                 coding;
@@ -308,6 +311,18 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
     return siteIndices;
 }
 
+
+template<class charType>
+inline vector<double>::iterator RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::getCorrectionLikelihoodsForNode( int node_index )
+{
+    return correctionLikelihoods.begin() + this->activeLikelihood[node_index]*this->activeCorrectionOffset + node_index*correctionNodeOffset;
+}
+
+template<class charType>
+inline vector<double>::const_iterator RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::getCorrectionLikelihoodsForNode( int node_index ) const
+{
+    return correctionLikelihoods.begin() + this->activeLikelihood[node_index]*this->activeCorrectionOffset + node_index*correctionNodeOffset;
+}
 
 template<class charType>
 bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternCompatible( std::map<size_t, size_t> charCounts )
