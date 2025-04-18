@@ -26,3 +26,6 @@ tree ~ dnSBBDP( rootAge       = root_age,
                 mu            = mu,           
                 rho           = rho)
 ## references
+- citation: Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.
+  doi: https://doi.org/10.1080/10635150701607033
+  url: https://academic.oup.com/sysbio/article/56/5/701/1694265

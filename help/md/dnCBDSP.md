@@ -3,14 +3,14 @@ dnCBDSP
 ## title
 Conditional birth-death shift process
 ## description
-Simulates a tree under a birth-death process with shift in birth and death rates.
+Simulates a tree under a birth-death process with shifts in birth and death rates.
 ## details
-This function simulates a tree under a birth-death (lambda-mu) process. The initial 
+This function simulates a tree under a birth-death process. The initial 
 birth and death rates can be specified with the rootAge and rootLambda arguments.
 The rates at which speciation and extinction shifts is specified by the delta
 argument and the new speciation or extinction rate can be drawn from a prior distribution
 specfied in the lambda and mu arguments. 
-Simlar to other birth-death processes in RevBayes, you can specify the stopping condition
+Similar to other birth-death processes in RevBayes, you can specify the stopping condition
 of the simulator (either survival or time) and the sampling probability.
 ## authors
 ## see_also
