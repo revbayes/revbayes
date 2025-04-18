@@ -147,6 +147,9 @@ namespace RevBayesCore {
         virtual double                                                      getPInv(void) const;
 
 
+        // functions for accessing mutable caches
+        double*                                                             getPartialLikelihoodsForNode(int node) const;
+
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                             //!< Swap a parameter
 
@@ -977,7 +980,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
     this->updateTransitionProbabilities( node_index );
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node                  = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    const double*   p_node                  = getPartialLikelihoodsForNode(node_index);
     double*         p_node_marginal         = this->marginalLikelihoods.data() + node_index*this->nodeOffset;
     const double*   p_parent_node_marginal  = this->marginalLikelihoods.data() + parentnode_index*this->nodeOffset;
 
@@ -1039,6 +1042,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
 }
 
 
+template<class charType>
+double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
+{
+    return this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+}
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRootLikelihood( void )
@@ -1054,7 +1062,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node           = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    const double*   p_node           = getPartialLikelihoodsForNode(node_index);
     double*         p_node_marginal  = this->marginalLikelihoods.data() + node_index*this->nodeOffset;
 
     // get pointers the likelihood for both subtrees
@@ -1219,7 +1227,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double*         p_node  = getPartialLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_site           = p_node;
@@ -1341,7 +1349,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAl
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double*         p_node  = getPartialLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_site           = p_node;
@@ -1939,8 +1947,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     //    double*         p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-    const double*   p_left  = this->partialLikelihoods.data() + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    const double*   p_right = this->partialLikelihoods.data() + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
+    const double*   p_left  = getPartialLikelihoodsForNode(left);
+    const double*   p_right = getPartialLikelihoodsForNode(right);
 
     // get pointers the likelihood for both subtrees
     //    const double*   p_site           = p_node;
@@ -2715,7 +2723,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index)
 {
 
-    double* p_node = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = getPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2782,7 +2790,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right )
 {
 
-    double* p_node = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = getPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2852,7 +2860,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
 
-    double* p_node = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = getPartialLikelihoodsForNode(node_index);
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -3491,7 +3499,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index] * this->activeLikelihoodOffset  + node_index*this->nodeOffset;
+    double*   p_node  = getPartialLikelihoodsForNode(node_index);
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3650,7 +3658,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index] * this->activeLikelihoodOffset  + node_index*this->nodeOffset;
+    double*   p_node  = getPartialLikelihoodsForNode(node_index);
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3791,7 +3799,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     size_t node_index = root.getIndex();
 
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index] * this->activeLikelihoodOffset  + node_index*this->nodeOffset;
+    double*   p_node  = getPartialLikelihoodsForNode(node_index);
 
     size_t num_site_matrices = num_site_mixtures/num_site_rates;
 
