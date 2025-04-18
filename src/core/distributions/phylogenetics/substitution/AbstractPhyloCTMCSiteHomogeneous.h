@@ -204,9 +204,11 @@ namespace RevBayesCore {
         // the likelihoods
         mutable std::vector<double>                                         partialLikelihoods;
         std::vector<size_t>                                                 activeLikelihood;
+    private:        
         std::vector<double>                                                 marginalLikelihoods;
         std::optional<std::vector<bool>>                                    prev_dirty_nodes;
 
+    protected:
         std::vector< std::vector< std::vector<double> > >                   perNodeSiteLogScalingFactors;
 
         // the data
