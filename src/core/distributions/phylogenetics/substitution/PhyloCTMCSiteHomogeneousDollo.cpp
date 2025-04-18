@@ -84,25 +84,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::resizeLikelihoodVectors( void 
     survival = std::vector<double>(this->num_site_mixtures, 0.0);
 
     // set the offsets for easier iteration through the likelihood vector
-    siteOffset                  =  dim + 2;
-    mixtureOffset               =  pattern_block_size*siteOffset;
-    nodeOffset                  =  num_site_mixtures*mixtureOffset;
-    activeLikelihoodOffset      =  num_nodes*nodeOffset;
-
-    // only do this if we are in MCMC mode. This will safe memory
-    if ( in_mcmc_mode == true )
-    {
-        // we resize the partial likelihood vectors to the new dimensions
-        partialLikelihoods.clear();
-
-        partialLikelihoods.resize(2*activeLikelihoodOffset);
-
-        // reinitialize likelihood vectors
-        for (size_t i = 0; i < 2*activeLikelihoodOffset; i++)
-        {
-            partialLikelihoods[i] = 0.0;
-        }
-    }
+    assert(siteOffset ==  dim + 2);
+    assert(mixtureOffset ==  pattern_block_size*siteOffset);
+    assert(nodeOffset ==  num_site_mixtures*mixtureOffset);
+    assert(activeLikelihoodOffset ==  num_nodes*nodeOffset);
 }
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(size_t node_idx)
