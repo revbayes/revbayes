@@ -1,15 +1,17 @@
 ## name
 floor
 ## title
-The floor function rounds a number down to the nearest integer
+The floor function.
 ## description
-The floor function is the function that takes as input a real number x, and gives as output the greatest integer less than or equal to x. 
+Rounds a number down to the nearest integer.
 ## details
- For example, for floor: ⌊2.4⌋ = 2, ⌊−2.4⌋ = −3
+The floor function takes as input a real number x, and gives as output the
+greatest integer less than or equal to x. For example: ⌊2.4⌋ = 2, ⌊−2.4⌋ = −3.
 ## authors
 ## see_also
 trunc
 ## example
-x <- 3.7
-y <- floor(x)
+    x <- 3.7
+    y <- floor(x)
+
 ## references

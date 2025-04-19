@@ -1,17 +1,39 @@
 ## Name
-mvNNI: Nearest Neighbor Interchange (NNI) 
+mvNNI
 ## Title
-Nearest Neighbor Interchange(NNI) move for unrooted phylogenetic trees
+Nearest Neighbor Interchange (NNI) move.
 ## description
-mvNNI is a tree topology move that performs a Nearest Neighbor Interchange (NNI) on a given time tree. 
+Tree topology move that performs a Nearest Neighbor Interchange (NNI) on
+a rooted or unrooted tree.
 ## details
-mvNNI proposes small changes to a tree topology by interchanging the positions of two subtrees around an internal branch. For each selected internal edge, the move considers two alternative topologies. This move is commonly used in MCMC to explore tree space efficiently while maintaining relatively high acceptance rates
+`mvNNI` changes tree topology by interchanging the positions of two subtrees
+around an internal branch. For each selected internal edge, the move considers
+two alternative topologies. As there are (n - 3) internal edges in an unrooted
+tree of n taxa, every such tree has (2n - 6) NNI "neighbors" that are one NNI
+move away. This neighborhood is smaller than that induced by more complex
+topology moves such as `mvSPR`. As a result, `mvNNI` is computationally cheaper
+than `mvSPR` and will often have exhibit higher acceptance rates, but explores
+tree space less thoroughly and is more likely to get stuck in local optima
+(resulting in poor mixing). The RevBayes implementation of the NNI move can be
+applied to both `BranchLengthTree` and `TimeTree` objects.
 ## authors
 ## see_also
+mvFNPR
 mvSPR
 mvTreeScale
 ## example
-moves.append( mvNNI(tree=topology, weight=ntaxa) )
+    taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+    height ~ dnUniform(0, 10)
+    moves = VectorMoves()
+  
+    # Apply the NNI move to an unrooted BranchLengthTree
+    bltree ~ dnUniformTopology(taxa)
+    moves.append( mvNNI(tree=bltree, weight=taxa.size()) )
+    
+    # Apply the NNI move to a rooted TimeTree
+    timetree ~ dnUniformTimeTree(rootAge=height, taxa=taxa)
+    moves.append( mvNNI(tree=timetree, weight=taxa.size()) )
+
 ## references
 - citation: Robinson DF (1971). Comparison of labeled trees with valency three. Journal of Combinatorial Theory, Series B, 11(2):105-119.
   doi: 10.1016/0095-8956(71)90020-7

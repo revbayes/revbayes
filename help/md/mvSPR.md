@@ -1,23 +1,39 @@
 ## name
 mvSPR
 ## title
-Subtree Pruning and Regrafting (SPR) Move for Tree Rearrangement
+Subtree Prune and Regraft (SPR) move.
 ## description
-mvSPR is a tree topology move used in Markov Chain Monte Carlo (MCMC) sampling
+Tree topology move that performs a Subtree Prune and Regraft (SPR) on
+an unrooted tree.
 ## details
-mvSPR is an MCMC move that changes tree topology using Subtree Pruning and Regrafting (SPR). SPR cuts off a subtree and reattaches it elsewhere in the original tree using the same subtree branch that was originally cut. SPR allows larger jumps in the tree space than Nearest-Neighbor Interchange (NNI), helping MCMC explore a broader range of different topologies.
+`mvSPR` changes tree topology by cutting off a subtree and reattaching it
+elsewhere in the original tree using the same subtree branch that was
+originally cut. Every unrooted tree of n taxa has 2(n - 3)(2n - 7) SPR
+"neighbors" that are one SPR move away (Allen & Steel 2001). This neighborhood
+is larger than, and inclusive of, the neighborhood induced by Nearest-Neighbor
+Interchange (`mvNNI`). As a result, `mvSPR` is more computationally demanding
+than `mvNNI` and may exhibit lower acceptance rates, but explores a broader
+range of different topologies and is less likely to get stuck in local optima.
+The `mvSPR` move can be only be applied to `BranchLengthTreee` objects.
+An analogous move for `TimeTree` objects (Fixed Node-height Prune and Regraft;
+FNPR) is implemented in `mvFNPR`.
 ## authors
 ## see_also
+mvFNPR
 mvNNI
 mbSubtreeSwap
 ## example
-topology ~ dnUniformTopology(taxa, outgroup=out_group)
-moves.append( mvSPR(topology, weight=ntaxa*2.0) )
+    taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+    moves = VectorMoves()
+    
+    topology ~ dnUniformTopology(taxa)
+    moves.append( mvSPR(topology, weight=taxa.size()) )
+
 ## references
-- citation: Swofford, D. L., & Olsen, G. J. (1990). Phylogeny reconstruction. In D. M. Hillis & C. Moritz (Eds.), Molecular Systematics (1st ed., pp.   
-  411–501). Sunderland, MA: Sinauer Associates.
-- citation: Felsenstein J (1981). "Evolutionary trees from DNA sequences: a maximum likelihood approach". Journal of Molecular Evolution. 17:368–76.
-  doi: https://doi.org/10.1007/BF01734359
-  url: https://link.springer.com/article/10.1007/BF01734359
+- citation: Allen BL, Steel M (2001). Subtree transfer operations and their induced metrics
+on evolutionary trees. Annals of Combinatorics, 5:1-15.
+  doi: 10.1007/s00026-001-8006-8
+  url: https://link.springer.com/article/10.1007/s00026-001-8006-8
+- citation: Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411–501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates.
 
 

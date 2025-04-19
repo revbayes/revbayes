@@ -3,7 +3,7 @@ reverse
 ## title
 Reverse function
 ## description
-The reverse functions reverses the order of the elements in a vector.
+Reverses the order of the elements in a vector.
 ## details
 ## authors
 ## see_also

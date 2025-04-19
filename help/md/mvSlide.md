@@ -1,16 +1,24 @@
 ## name
 mvSlide
 ## title
-Sliding Window Move for Continuous Parameters
+Sliding-Window Move
 ## description
-mvSlide is an MCMC move that proposes additive updates to a continuous variable
+Proposes additive updates to continuous parameters.
 ## details
-mvSlide moves propose an update by drawing a random number from a uniform distribution and then adding this random number to the current value. The move have two arguments weight and delta. The argument weight decides how often this move is used in MCMC. The argument delta controls the size of proposed changes.
+The `mvSlide` move updates a parameter by drawing a random number from
+a uniform distribution and adding the draw to the current value. The move takes
+arguments that control how often it should be used (`weight`) and its "window
+size", i.e., the width of the uniform distribution, which determines the size
+of the changes it proposes (`delta`). When the `tune` argument is set to
+`TRUE`, the value of `delta` is automatically adjusted so that the acceptance
+rate of the move reaches `tuneTarget`.
 ## authors
 ## see_also
-mvScale 
-move_uniform
+mvScale
+mvSlideBactrian
 ## example
-p ~ dnUniform(0,1)
-moves.append(mvSlide(p, delta=0.05, weight=1))
+    moves = VectorMoves()
+    p ~ dnUniform(0, 1)
+    moves.append(mvSlide(p, delta=0.05, weight=1))
+
 ## references

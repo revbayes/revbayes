@@ -1,18 +1,36 @@
 ## name
 mvSlideBactrian
 ## title
-Bactrian Slide Move for MCMC 
+Sliding-Window Mode Employing Bactrian Distribution
 ## description
-mvSlideBactrian is an MCMC move that proposes new values differently than the usual slide move
+Updates a parameter by a Bactrian-distributed increment.
 ## details
-This move adds a random increment to the current value. The increment is drawn from a Bactrian distribution, which is symmetric around the current value but has low density at the center, creating a bimodal shape. As a result, it is less likely to propose very small changes, encouraging larger moves. This improves mixing efficiency and helps reduce autocorrelation in the MCMC chain
+Proposes additive changes to a real-valued parameter using a Bactrian kernel
+-- a bimodal distribution centered at zero, obtained as a mixture of two
+unimodal component distributions. Specifically, `mvSlideBactrian` updates
+the current value by adding a random increment of (lambda * delta), where
+lambda is a tuning parameter and delta is drawn from a mixture of two normal
+distributions following Yang & Rodríguez (2013: Supplementary Information,
+Eq. 19): 
+
+    u ~ Unif(0, 1)
+    x ~ N(0, 1)
+    delta = m + x * sqrt(1 - m^2)  if u < 0.5
+          = -m + x * sqrt(1 - m^2) otherwise
+
+with m set to 0.95. As a result, the move is less likely to propose very small
+steps and encourages larger changes, which improves mixing efficiency and
+reduces autocorrelation.
+
 ## authors
 ## see_also
 mvSlide
-mvScale
 ## example
-x ~ dnUniform(0, 10)
-moves.append(mvSlideBactrian(x, sigma=0.5, m=0.95, tune=TRUE, weight=1))
+    moves = VectorMoves()
+    x ~ dnNormal(0, 2)
+    moves.append( mvSlideBactrian(x, tune=TRUE, weight=1) )
+
 ## references
-- Citation: Z. Yang, & C.E. Rodríguez, Searching for efficient Markov chain Monte Carlo proposal kernels, Proc. Natl. Acad. Sci. U.S.A. 110 (48) 
-  19307-19312, https://doi.org/10.1073/pnas.1311790110 (2013).
+- citation: Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.
+  doi: 10.1073/pnas.1311790110
+  url: https://www.pnas.org/doi/full/10.1073/pnas.1311790110
