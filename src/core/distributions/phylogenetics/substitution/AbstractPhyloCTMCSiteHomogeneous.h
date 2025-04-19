@@ -330,7 +330,7 @@ num_site_rates( nMix ),
 num_site_mixtures( nMix ),
 tau( t ),
 transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) ) ),
-partialLikelihoods( 2*num_nodes ),
+partialLikelihoods( num_nodes ),
 activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
 perNodeSiteLogScalingFactors( std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(num_sites, 0.0) ) ) ),
 site_invariant( num_sites, false ),
@@ -615,7 +615,7 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLikelihoods() const
 {
-    partialLikelihoods.resize(2*num_nodes);
+    partialLikelihoods.resize(num_nodes);
 
     // reinitialize likelihood vectors
     markAllPartialLikelihoodsDirty();
@@ -624,19 +624,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLi
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsCleanForNode(int node_index) const
 {
-    int i = this->activeLikelihood[node_index]*num_nodes + node_index;
     assert(dirty_nodes[node_index]);
-    assert(not partialLikelihoods[i]);
+    assert(not partialLikelihoods[node_index]);
     dirty_nodes[node_index] = false;
-    partialLikelihoods[i] = std::make_shared<std::vector<double>>(nodeOffset, 0.0);
+    partialLikelihoods[node_index] = std::make_shared<std::vector<double>>(nodeOffset, 0.0);
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
 {
-    int i = this->activeLikelihood[node_index]*num_nodes + node_index;
     dirty_nodes[node_index] = true;
-    partialLikelihoods[i].reset();
+    partialLikelihoods[node_index].reset();
 }
 
 template<class charType>
@@ -652,15 +650,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markAllPartialLik
 template<class charType>
 bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::partialLikelihoodsDirtyForNode(int node_index) const
 {
-    int i = this->activeLikelihood[node_index]*num_nodes + node_index;
-    assert(not dirty_nodes[node_index] == (bool)this->partialLikelihoods[i]);
+    assert(not dirty_nodes[node_index] == (bool)this->partialLikelihoods[node_index]);
     return dirty_nodes[node_index];
 }
 
 template<class charType>
 inline const double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
 {
-    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index]->data();
+    return this->partialLikelihoods[node_index]->data();
 }
 
 template<class charType>
@@ -668,14 +665,14 @@ inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getCrea
 {
     assert(partialLikelihoodsDirtyForNode(node_index));
     markPartialLikelihoodsCleanForNode(node_index);
-    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index]->data();
+    return this->partialLikelihoods[node_index]->data();
 }
 
 template<class charType>
 inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getModifyPartialLikelihoodsForNode(int node_index) const
 {
     assert(not partialLikelihoodsDirtyForNode(node_index));
-    return this->partialLikelihoods[ this->activeLikelihood[node_index]*num_nodes + node_index]->data();
+    return this->partialLikelihoods[node_index]->data();
 }
 
 template<class charType>
@@ -2002,7 +1999,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
     this->updateTransitionProbabilities( node_index );
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    //    double*         p_node  = this->partialLikelihoods.data() + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
     const double*   p_left  = getPartialLikelihoodsForNode(left);
     const double*   p_right = getPartialLikelihoodsForNode(right);
 
@@ -2401,15 +2397,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
 
     for(int node = 0; node < num_nodes; node++)
     {
-        int index1 = node + num_nodes*activeLikelihood[node];
-        int index2 = node + num_nodes*(1 - activeLikelihood[node]);
-//        if (not dirty_nodes[node])
-//            assert(partialLikelihoods[index1]);
-//        else
-//            partialLikelihoods[index1].reset();
-        assert(not dirty_nodes[node] == (bool)partialLikelihoods[index1]);
-
-        partialLikelihoods[index2].reset();
+        assert(not dirty_nodes[node] == (bool)partialLikelihoods[node]);
     }
 
     for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
@@ -2760,16 +2748,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
     }
     for(int node = 0; node < num_nodes; node++)
     {
-        int index1 = node + num_nodes*activeLikelihood[node];
-        int index2 = node + num_nodes*(1 - activeLikelihood[node]);
-        if (not dirty_nodes[node])
-            assert(partialLikelihoods[index1]);
-        else
-            partialLikelihoods[index1].reset();
-
-        partialLikelihoods[index2].reset();
-
-        assert(not dirty_nodes[node] == (bool) partialLikelihoods[index1]);
+        assert(not dirty_nodes[node] == (bool) partialLikelihoods[node]);
     }
 
     // reset the flags
