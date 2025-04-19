@@ -1411,27 +1411,27 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    double*   p_node  = this->getCreatePartialLikelihoodsForNode(node_index);
+    const double* p_node  = this->getPartialLikelihoodsForNode(node_index);
     
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
     std::vector<double> per_mixture_Likelihoods = std::vector<double>(this->num_patterns,0.0);
     
     // get pointers the likelihood for both subtrees
-    double*   p_mixture     = p_node;
+    const double*   p_mixture     = p_node;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_rates; ++mixture)
     {
 
         // get pointers to the likelihood for this mixture category
-        double*   p_site_mixture     = p_mixture;
+        const double*   p_site_mixture     = p_mixture;
         // iterate over all sites
         for (size_t site = 0; site < this->num_patterns; ++site)
         {
             // temporary variable storing the likelihood
             double tmp = 0.0;
             // get the pointers to the likelihoods for this site and mixture category
-            double* p_site_j   = p_site_mixture;
+            const double* p_site_j   = p_site_mixture;
             // iterate over all starting states
             for (size_t i=0; i<this->num_chars; ++i)
             {
