@@ -357,6 +357,7 @@ gap_match_clamped( gapmatch )
     pmat_dirty_nodes            =  std::vector<bool>(num_nodes, true);
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
 
+    partialLikelihoods.resize(num_nodes);
 
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -609,10 +610,8 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLikelihoods() const
 {
+    partialLikelihoods.clear();
     partialLikelihoods.resize(num_nodes);
-
-    // reinitialize likelihood vectors
-    markAllPartialLikelihoodsDirty();
 }
 
 template<class charType>
@@ -1023,8 +1022,8 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     if ( in_mcmc_mode == false )
     {
         // free the partial likelihoods
-        for(auto& pl: partialLikelihoods)
-            pl.reset();
+        partialLikelihoods.clear();
+        partialLikelihoods.resize(num_nodes);
     }
 
     // set the ancestral states as stale
@@ -1718,8 +1717,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            for(auto& pl: partialLikelihoods)
-                pl.reset();
+            partialLikelihoods.clear();
+            partialLikelihoods.resize(num_nodes);
             in_mcmc_mode = false;
         }
 
@@ -1783,8 +1782,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            for(auto& pl: partialLikelihoods)
-                pl.reset();
+            partialLikelihoods.clear();
+            partialLikelihoods.resize(num_nodes);
             in_mcmc_mode = false;
         }
 
@@ -1895,8 +1894,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            for(auto& pl: partialLikelihoods)
-                pl.reset();
+            partialLikelihoods.clear();
+            partialLikelihoods.resize(num_nodes);
             in_mcmc_mode = false;
         }
 
@@ -1944,8 +1943,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            for(auto& pl: partialLikelihoods)
-                pl.reset();
+            partialLikelihoods.clear();
+            partialLikelihoods.resize(num_nodes);
             in_mcmc_mode = false;
         }
 
@@ -2663,8 +2662,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     if ( in_mcmc_mode == true )
     {
         // we resize the partial likelihood vectors to the new dimensions
-        for(auto& pl: partialLikelihoods)
-            pl.reset();
+        partialLikelihoods.clear();
+        partialLikelihoods.resize(num_nodes);
         allocatePartialLikelihoods();
     }
 
@@ -3160,8 +3159,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     // free old memory
     if ( in_mcmc_mode == true )
     {
-        for(auto& pl: partialLikelihoods)
-            pl.reset();
+        partialLikelihoods.clear();
+        partialLikelihoods.resize(num_nodes);
     }
 
     // set our internal flag
