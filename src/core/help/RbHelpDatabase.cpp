@@ -147,7 +147,7 @@ posterior.summarize())");
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(readTrace)"));
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(TraceTree)"));
 	help_strings[string("Trace")][string("title")] = string(R"(Trace of numeric parameter values.)");
-	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `MnFile` monitor in an MCMC or MCMCMC run.)");
+	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `mnFile` monitor in an MCMC or MCMCMC run.)");
 	help_strings[string("TraceTree")][string("details")] = string(R"(Important methods include:
 
 - `getTree(n)`: returns the `n`th entry of the `TraceTree` object.
@@ -3089,8 +3089,6 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvMultiValueEventScale")][string("name")] = string(R"(mvMultiValueEventScale)");
 	help_strings[string("mvMultiValueEventSlide")][string("name")] = string(R"(mvMultiValueEventSlide)");
 	help_strings[string("mvMultipleElementVectorScale")][string("name")] = string(R"(mvMultipleElementVectorScale)");
-	help_strings[string("mvNNI")][string("Name")] = string(R"(mvNNI)");
-	help_strings[string("mvNNI")][string("Title")] = string(R"(Nearest Neighbor Interchange (NNI) move.)");
 	help_strings[string("mvNNI")][string("description")] = string(R"(Tree topology move that performs a Nearest Neighbor Interchange (NNI) on
 a rooted or unrooted tree.)");
 	help_strings[string("mvNNI")][string("details")] = string(R"(`mvNNI` changes tree topology by interchanging the positions of two subtrees
@@ -3099,8 +3097,8 @@ two alternative topologies. As there are (n - 3) internal edges in an unrooted
 tree of n taxa, every such tree has (2n - 6) NNI "neighbors" that are one NNI
 move away. This neighborhood is smaller than that induced by more complex
 topology moves such as `mvSPR`. As a result, `mvNNI` is computationally cheaper
-than `mvSPR` and will often have exhibit higher acceptance rates, but explores
-tree space less thoroughly and is more likely to get stuck in local optima
+than `mvSPR` and will often exhibit higher acceptance rates, but explores tree
+space less thoroughly and is more likely to get stuck in local optima
 (resulting in poor mixing). The RevBayes implementation of the NNI move can be
 applied to both `BranchLengthTree` and `TimeTree` objects.)");
 	help_strings[string("mvNNI")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
@@ -3114,11 +3112,13 @@ moves.append( mvNNI(tree=bltree, weight=taxa.size()) )
 # Apply the NNI move to a rooted TimeTree
 timetree ~ dnUniformTimeTree(rootAge=height, taxa=taxa)
 moves.append( mvNNI(tree=timetree, weight=taxa.size()) ))");
+	help_strings[string("mvNNI")][string("name")] = string(R"(mvNNI)");
 	help_references[string("mvNNI")].push_back(RbHelpReference(R"(Robinson DF (1971). Comparison of labeled trees with valency three. Journal of Combinatorial Theory, Series B, 11(2):105-119.)",R"(10.1016/0095-8956(71)90020-7)",R"(https://www.sciencedirect.com/science/article/pii/0095895671900207 )"));
 	help_references[string("mvNNI")].push_back(RbHelpReference(R"(Waterman MS, Smith TF (1978). On the similarity of dendrograms. Journal of Theoretical Biology, 73(4):789-800.)",R"(10.1016/0022-5193(78)90137-6)",R"(https://dornsife.usc.edu/msw/wp-content/uploads/sites/236/2023/09/msw-029.pdf )"));
 	help_arrays[string("mvNNI")][string("see_also")].push_back(string(R"(mvFNPR)"));
 	help_arrays[string("mvNNI")][string("see_also")].push_back(string(R"(mvSPR)"));
 	help_arrays[string("mvNNI")][string("see_also")].push_back(string(R"(mvTreeScale)"));
+	help_strings[string("mvNNI")][string("title")] = string(R"(Nearest Neighbor Interchange (NNI) move.)");
 	help_strings[string("mvNarrow")][string("name")] = string(R"(mvNarrow)");
 	help_strings[string("mvNarrowExchangeRateMatrix")][string("name")] = string(R"(mvNarrowExchangeRateMatrix)");
 	help_strings[string("mvNodeRateTimeSlideUniform")][string("name")] = string(R"(mvNodeRateTimeSlideUniform)");
@@ -3223,7 +3223,7 @@ is larger than, and inclusive of, the neighborhood induced by Nearest-Neighbor
 Interchange (`mvNNI`). As a result, `mvSPR` is more computationally demanding
 than `mvNNI` and may exhibit lower acceptance rates, but explores a broader
 range of different topologies and is less likely to get stuck in local optima.
-The `mvSPR` move can be only be applied to `BranchLengthTreee` objects.
+The `mvSPR` move can be applied only to `BranchLengthTreee` objects.
 An analogous move for `TimeTree` objects (Fixed Node-height Prune and Regraft;
 FNPR) is implemented in `mvFNPR`.)");
 	help_strings[string("mvSPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
@@ -3236,7 +3236,7 @@ moves.append( mvSPR(topology, weight=taxa.size()) ))");
 	help_references[string("mvSPR")].push_back(RbHelpReference(R"(Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411–501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates. )",R"()",R"()"));
 	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mvFNPR)"));
 	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mvNNI)"));
-	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mbSubtreeSwap)"));
+	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mvSubtreeSwap)"));
 	help_strings[string("mvSPR")][string("title")] = string(R"(Subtree Prune and Regraft (SPR) move.)");
 	help_strings[string("mvScale")][string("description")] = string(R"(Proposes multiplicative updates to continuous parameters.)");
 	help_strings[string("mvScale")][string("details")] = string(R"(The `mvScale` move updates a parameter by multiplying it with a randomly chosen
@@ -4101,14 +4101,14 @@ getwd())");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
 	help_arrays[string("sin")][string("authors")].push_back(string(R"(Sigournie Brock)"));
-	help_strings[string("sin")][string("description")] = string(R"('sin' calculates the trigonometric ratio of the length of the side opposite the angle and length of the hypotenuse. 
+	help_strings[string("sin")][string("description")] = string(R"(`sin` calculates the trigonometric ratio of the length of the side opposite the angle and length of the hypotenuse. 
 
 sin(x) = opposite/hypotenuse.)");
 	help_strings[string("sin")][string("example")] = string(R"(pi <- 3.1415926536
-sin(pi/2))");
+sin(pi/2) # = 1)");
 	help_strings[string("sin")][string("name")] = string(R"(sin)");
-	help_strings[string("sin")][string("title")] = string(R"(Apply the sine function to an angular input 'x' in radians.)");
-  help_strings[string("sinh")][string("description")] = string(R"(Returns the hyperbolic sine of a real number.)");
+	help_strings[string("sin")][string("title")] = string(R"(Apply the sine function to an angular input `x` in radians.)");
+	help_strings[string("sinh")][string("description")] = string(R"(Returns the hyperbolic sine of a real number.)");
 	help_strings[string("sinh")][string("details")] = string(R"(The function takes a hyperbolic angle `x` as its only argument, and returns
 sinh(x) = (exp(x) - exp(-x))/2.)");
 	help_strings[string("sinh")][string("example")] = string(R"(sinh(1))");

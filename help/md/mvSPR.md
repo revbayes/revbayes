@@ -14,14 +14,14 @@ is larger than, and inclusive of, the neighborhood induced by Nearest-Neighbor
 Interchange (`mvNNI`). As a result, `mvSPR` is more computationally demanding
 than `mvNNI` and may exhibit lower acceptance rates, but explores a broader
 range of different topologies and is less likely to get stuck in local optima.
-The `mvSPR` move can be only be applied to `BranchLengthTreee` objects.
+The `mvSPR` move can be applied only to `BranchLengthTreee` objects.
 An analogous move for `TimeTree` objects (Fixed Node-height Prune and Regraft;
 FNPR) is implemented in `mvFNPR`.
 ## authors
 ## see_also
 mvFNPR
 mvNNI
-mbSubtreeSwap
+mvSubtreeSwap
 ## example
     taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
     moves = VectorMoves()
@@ -30,8 +30,7 @@ mbSubtreeSwap
     moves.append( mvSPR(topology, weight=taxa.size()) )
 
 ## references
-- citation: Allen BL, Steel M (2001). Subtree transfer operations and their induced metrics
-on evolutionary trees. Annals of Combinatorics, 5:1-15.
+- citation: Allen BL, Steel M (2001). Subtree transfer operations and their induced metrics on evolutionary trees. Annals of Combinatorics, 5:1-15.
   doi: 10.1007/s00026-001-8006-8
   url: https://link.springer.com/article/10.1007/s00026-001-8006-8
 - citation: Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411–501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates.

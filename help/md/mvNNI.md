@@ -1,6 +1,6 @@
-## Name
+## name
 mvNNI
-## Title
+## title
 Nearest Neighbor Interchange (NNI) move.
 ## description
 Tree topology move that performs a Nearest Neighbor Interchange (NNI) on
@@ -12,8 +12,8 @@ two alternative topologies. As there are (n - 3) internal edges in an unrooted
 tree of n taxa, every such tree has (2n - 6) NNI "neighbors" that are one NNI
 move away. This neighborhood is smaller than that induced by more complex
 topology moves such as `mvSPR`. As a result, `mvNNI` is computationally cheaper
-than `mvSPR` and will often have exhibit higher acceptance rates, but explores
-tree space less thoroughly and is more likely to get stuck in local optima
+than `mvSPR` and will often exhibit higher acceptance rates, but explores tree
+space less thoroughly and is more likely to get stuck in local optima
 (resulting in poor mixing). The RevBayes implementation of the NNI move can be
 applied to both `BranchLengthTree` and `TimeTree` objects.
 ## authors
