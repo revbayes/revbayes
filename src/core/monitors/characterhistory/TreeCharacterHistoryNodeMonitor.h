@@ -29,7 +29,7 @@ namespace RevBayesCore {
 
     public:
         // Constructors and Destructors
-        TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
+        TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, std::uint64_t g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
 
         // new TreeCharacterHistoryNodeMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
 
@@ -39,7 +39,7 @@ namespace RevBayesCore {
         TreeCharacterHistoryNodeMonitor*          clone(void) const;                                                  //!< Clone the object
 
         // Monitor functions
-        void                                monitor(unsigned long gen);                                         //!< Monitor at generation gen
+        void                                monitor(std::uint64_t gen);                                         //!< Monitor at generation gen
         void                                swapNode(DagNode *oldN, DagNode *newN);
 
         // FileMonitor functions
@@ -81,7 +81,7 @@ namespace RevBayesCore {
 
 /* Constructor */
 template<class charType>
-RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, unsigned long g, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
+RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::TreeCharacterHistoryNodeMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, std::uint64_t g, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
 Monitor(g,t),
 outStream(),
 variable(s),
@@ -487,10 +487,10 @@ std::string RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::buildCladoS
 
 /** Monitor value at generation gen */
 template<class charType>
-void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::monitor(unsigned long gen) {
+void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::monitor(std::uint64_t gen) {
 
     // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    std::uint64_t samplingFrequency = printgen;
 
     if (gen % samplingFrequency == 0) {
         // print the iteration number first

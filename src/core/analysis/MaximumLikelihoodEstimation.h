@@ -50,7 +50,7 @@ namespace RevBayesCore {
         virtual std::string                     getStrategyDescription(void) const = 0;             //!< Get the discription of the strategy used for this sampler.
         virtual bool                            hasConverged(double m) = 0;                         //!< Has the estimator converged to the maximum likelihood value
         virtual void                            initializeSampler(void) = 0;                        //!< Initialize objects for mcmc sampling
-        virtual void                            monitor(unsigned long g) = 0;
+        virtual void                            monitor(std::uint64_t g) = 0;
         virtual void                            nextCycle(void) = 0;
         virtual void                            removeMonitors(void) = 0;
         virtual void                            reset(void) = 0;                                    //!< Reset the sampler for a new run.
@@ -67,7 +67,7 @@ namespace RevBayesCore {
     protected:
         
         // members
-        unsigned long                           generation;
+        std::uint64_t                           generation;
         
     };
     

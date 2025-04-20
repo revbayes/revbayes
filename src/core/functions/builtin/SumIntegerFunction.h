@@ -12,13 +12,13 @@ template <class valueType> class TypedDagNode;
      * @brief Function for computation of the sum of some integers.
      *
      * This class is the function that computes the sum of some numbers.
-     * The numbers are passed in as a DAG node whose value type is a std::vector<long>.
+     * The numbers are passed in as a DAG node whose value type is a std::vector<std::int64_t>.
      *
      */
-    class SumIntegerFunction : public TypedFunction<long> {
+    class SumIntegerFunction : public TypedFunction<std::int64_t> {
         
     public:
-        SumIntegerFunction(const TypedDagNode<RbVector<long> > * v);
+        SumIntegerFunction(const TypedDagNode<RbVector<std::int64_t> > * v);
         virtual                                            ~SumIntegerFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
@@ -31,7 +31,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode<RbVector<long> >*                vals;
+        const TypedDagNode<RbVector<std::int64_t> >*                vals;
         
     };
     

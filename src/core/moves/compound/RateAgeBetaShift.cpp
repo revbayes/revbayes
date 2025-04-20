@@ -3,19 +3,24 @@
 #include <iomanip>
 #include <ostream>
 #include <vector>
+#include <range/v3/all.hpp> // for ranges::views
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "AbstractMove.h"
 #include "DagNode.h"
+#include "DebugMove.h"
 #include "DistributionBeta.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RateAgeBetaShift.h"
 #include "RbException.h"
 #include "RbOrderedSet.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+
+namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
@@ -30,7 +35,6 @@ RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<Stochas
     num_accepted_current_period( 0 ),
     num_accepted_total( 0 )
 {
-    
     addNode( tree );
     addNode( rates );
     for (std::vector<StochasticNode<double>* >::iterator it = rates_vec.begin(); it != rates_vec.end(); ++it)
@@ -40,8 +44,6 @@ RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<Stochas
         
         addNode( the_node );
     }
-
-    
 }
 
 
@@ -94,56 +96,110 @@ size_t RateAgeBetaShift::getNumberAcceptedTotal( void ) const
 }
 
 
-/** Perform the move */
+/* Perform the move
+ *
+ * The move:
+ * - chooses a node that is not a tip, the root, or a sampled-ancestor-parent.
+ * - modifies the time for the node
+ * - modifies the rate for the three adjacent branches so that rate*time remains unchanged
+ *   on each branch.
+ *
+ * The rates are either:
+ * (a) A vector of stochastic nodes (rates == NULL):
+ *     In this case pointers to the stochastic nodes are in held in `rates_vec`.
+ * (b) A single stochastic node of type RbVector<double> (rates !=NULL)
+ *     In this case a pointer to the single stochastic node is held in `rates`.
+ */
 void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHeat )
 {
-    
+    // These are the nodes we are (directly) modifying.
+    const std::vector<DagNode*> nodes = getDagNodes();
+    // These are the nodes that are (indirectly) affected.
+    const RbOrderedSet<DagNode*> &affected_nodes = getAffectedNodes();
+
+    // 0. Initial checks and debug logging.
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    // Compute PDFs for nodes and affected nodes if we are going to use them.
+    NodePrMap initialPdfs;
+    if (logMCMC >= 3 or debugMCMC >= 1)
+    	initialPdfs = getNodePrs(nodes, affected_nodes);
+
+    if (logMCMC >= 3)
+    {
+        std::cerr<<std::setprecision(11);
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = initialPdfs.at(node);
+            std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        }
+        std::cerr<<"\n";
+    }
+
+    if (debugMCMC >= 1)
+    {
+        // 1. Compute PDFs before move, before touch
+        auto& untouched_before_move = initialPdfs;
+
+        // 2. Touch nodes.
+        for (auto node: nodes)
+            node->touch();
+
+        // 3. Compute PDFs before move, after touch
+        auto touched_before_move = getNodePrs(nodes, affected_nodes);
+
+        // 4. Keep nodes
+        for (auto node: nodes)
+            node->keep();
+
+        // 5. Compare pdfs for each node
+        compareNodePrs("RateAgeBetaShift", untouched_before_move, touched_before_move, "PDFs not up-to-date before move");
+    }
+
     // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
     Tree& tau = tree->getValue();
-    RbOrderedSet<DagNode*> affected;
-    tree->initiateGetAffectedNodes( affected );
-    
-    // pick a random node which is not the root and neithor the direct descendant of the root
+
+    if (tau.getNumberOfTips() <= 2)
+    {
+        return;
+    }
+
+    // 1. pick a random node which is not the root, a tip, or a sampled ancestor
     TopologyNode* node;
     size_t node_idx = 0;
     do {
         double u = rng->uniform01();
         node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_idx);
-    } while ( node->isRoot() || node->isTip() ); 
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestorParent() );
     
     TopologyNode& parent = node->getParent();
-    
-    // we need to work with the times
-    double parent_age  = parent.getAge();
-    double my_age      = node->getAge();
-    double child_Age   = node->getChild( 0 ).getAge();
-    if ( child_Age < node->getChild( 1 ).getAge())
-    {
-        child_Age = node->getChild( 1 ).getAge();
-    }
-    
+
+    // 2. we need to work with the times
+    double parent_age = parent.getAge();
+    double my_age     = node->getAge();
+    double child_Age  = std::max(node->getChild( 0 ).getAge(), node->getChild( 1 ).getAge());
+
     // now we store all necessary values
     stored_node = node;
     stored_age = my_age;
-    
-    
+
     stored_rates[node_idx] = (rates == NULL ? rates_vec[node_idx]->getValue() : rates->getValue()[node_idx]);
     for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
     {
         size_t child_idx = node->getChild(i).getIndex();
         stored_rates[child_idx] = (rates == NULL ? rates_vec[child_idx]->getValue() : rates->getValue()[child_idx]);
     }
-    
-    
-    // draw new ages and compute the hastings ratio at the same time
+
+    // 3. draw new ages and compute the hastings ratio at the same time
     double m = (my_age-child_Age) / (parent_age-child_Age);
     double a = delta * m + 1.0;
     double b = delta * (1.0-m) + 1.0;
     double new_m = RbStatistics::Beta::rv(a, b, *rng);
-        
+
     double my_new_age = (parent_age-child_Age) * new_m + child_Age;
     
     // compute the Hastings ratio
@@ -151,24 +207,23 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double new_a = delta * new_m + 1.0;
     double new_b = delta * (1.0-new_m) + 1.0;
     double backward = RbStatistics::Beta::lnPdf(new_a, new_b, m);
-    
-    // set the age
+
+    // 4. set the age
     tau.getNode(node_idx).setAge( my_new_age );
-    
+
     // touch the tree so that the likelihoods are getting stored
     tree->touch();
-    
+
     // get the probability ratio of the tree
     double tree_prob_ratio = tree->getLnProbabilityRatio();
-    
-    
-    // set the rates
+
+    // 5. set the rates
     double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
-    
-    // now we set the new value
-    // this will automatically call a touch
+
+    // 5a. Set the rate for the PARENT branch.
     if ( rates == NULL )
     {
+        // this will automatically call a touch
         rates_vec[node_idx]->setValue( new double( my_new_rate ) );
     }
     else
@@ -176,10 +231,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         rates->getValue()[node_idx] = my_new_rate;
         rates->touch();
     }
-    // get the probability ratio of the new rate
-    double rates_prob_ratio = ( rates == NULL ? rates_vec[node_idx]->getLnProbabilityRatio() : 0.0 );
-    double jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
-    
+
+    // 5b. Set the rate for CHILD branches..
     for (size_t i = 0; i < node->getNumberOfChildren(); i++)
     {
         size_t child_idx = node->getChild(i).getIndex();
@@ -195,140 +248,109 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         else
         {
             rates->getValue()[child_idx] = child_new_rate;
+            // We already did a touch in 5a.
+        }
+    }
+
+    // 6. get the jacobian and the hastings ratio
+    double jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
+
+    for (size_t i = 0; i < node->getNumberOfChildren(); i++)
+    {
+        size_t child_idx = node->getChild(i).getIndex();
+        double a = node->getChild(i).getAge();
+        jacobian += log((my_age - a) / (my_new_age - a));
+    }
+    double ln_hastings_ratio = backward - forward + jacobian;
+
+    // 7. compute the heated posterior ratio
+    double ln_likelihood_ratio = 0;
+    double ln_prior_ratio = 0;
+    for(auto node: views::concat(nodes, affected_nodes))
+    {
+        if (auto test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(node))
+        {
+            if (dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution()))
+            {
+                // In theory the rate*time tree and its branch lengths should be unchanged.
+                // Therefore the substitution likelihood for a data set downstream from the tree should be unchanged.
+                assert( std::abs(node->getLnProbabilityRatio()) < 1.0e-9 );
+                continue;
+            }
         }
 
-        // get the probability ratio of the new rate
-        if ( rates == NULL )
+        if ( node->isClamped() == true )
         {
-            rates_prob_ratio += rates_vec[child_idx]->getLnProbabilityRatio();
-        }
-        jacobian += log((my_age - a) / (my_new_age - a));
-        
-    }
-    if ( rates != NULL )
-    {
-        rates_prob_ratio = rates->getLnProbabilityRatio();
-    }
-    
-    
-    // we also need to get the prob ratio of all descendants of the tree
-    double tree_like_ratio = 0.0;
-    const std::vector<DagNode*>& tree_desc = tree->getChildren();
-    for (size_t i=0; i<tree_desc.size(); ++i)
-    {
-        DagNode* the_node = tree_desc[i];
-        StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
-        if ( test_stoch != NULL )
-        {
-            TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
-            if ( test_dist == NULL )
-            {
-                if ( the_node->isClamped() == true )
-                {
-                    tree_like_ratio += the_node->getLnProbabilityRatio();
-                }
-                else
-                {
-                    tree_prob_ratio += the_node->getLnProbabilityRatio();
-                }
-            }
+            ln_likelihood_ratio += node->getLnProbabilityRatio();
         }
         else
         {
-            if ( the_node->isClamped() == true )
-            {
-                tree_like_ratio += the_node->getLnProbabilityRatio();
-            }
-            else
-            {
-                tree_prob_ratio += the_node->getLnProbabilityRatio();
-            }
+            ln_prior_ratio += node->getLnProbabilityRatio();
         }
     }
-    
-    // we also need to get the prob ratio of all descendants of the rates
-    double rates_like_ratio = 0.0;
-    if ( rates == NULL )
+
+    if (logMCMC >= 3)
     {
-        for (size_t j = 0; j < node->getNumberOfChildren(); ++j)
+        auto proposedPrs = getNodePrs(nodes, affected_nodes);
+        for(auto& node: views::concat(nodes,affected_nodes))
         {
-            size_t child_idx = node->getChild(j).getIndex();
-            const std::vector<DagNode*>& rates_desc = rates_vec[child_idx]->getChildren();
-            for (size_t i=0; i<rates_desc.size(); ++i)
+            auto pr = proposedPrs.at(node);
+            std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        }
+        std::cerr<<"\n";
+    }
+
+    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+
+    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+
+    // 8. Determine whether to accept or reject
+    bool rejected = false;
+
+    if (ln_acceptance_ratio >= 0.0)
+    {
+    }
+    else if (ln_acceptance_ratio < -300.0)
+    {
+        rejected = true;
+    }
+    else
+    {
+        double r = exp(ln_acceptance_ratio);
+        // Accept or reject the move
+        double u = GLOBAL_RNG->uniform01();
+        if (u < r)
+        {
+        }
+        else
+        {
+            rejected = true;
+        }
+    }
+
+    // 9. Perform the acceptance or rejection.
+    if (rejected)
+    {
+        reject();
+        tree->restore();
+        if ( rates == NULL )
+        {
+            rates_vec[node_idx]->restore();
+        }
+        else
+        {
+            rates->restore();
+        }
+        for (size_t i = 0; i < node->getNumberOfChildren(); i++)
+        {
+            size_t childIdx = node->getChild(i).getIndex();
+            if ( rates == NULL )
             {
-                DagNode* the_node = rates_desc[i];
-                StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
-                if ( test_stoch != NULL )
-                {
-                    TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
-                    if ( test_dist == NULL )
-                    {
-                        if ( the_node->isClamped() == true )
-                        {
-                            rates_like_ratio += the_node->getLnProbabilityRatio();
-                        }
-                        else
-                        {
-                            rates_prob_ratio += the_node->getLnProbabilityRatio();
-                        }
-                        
-                    }
-                }
-                else
-                {
-                    if ( the_node->isClamped() == true )
-                    {
-                        rates_like_ratio += the_node->getLnProbabilityRatio();
-                    }
-                    else
-                    {
-                        rates_prob_ratio += the_node->getLnProbabilityRatio();
-                    }
-                }
+                rates_vec[childIdx]->restore();
             }
         }
     }
     else
-    {
-        const std::vector<DagNode*>& rates_desc = rates->getChildren();
-        for (size_t i=0; i<rates_desc.size(); ++i)
-        {
-            DagNode* the_node = rates_desc[i];
-            StochasticNode< AbstractHomologousDiscreteCharacterData >* test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(the_node);
-            if ( test_stoch != NULL )
-            {
-                TypedDistribution< AbstractHomologousDiscreteCharacterData >* test_dist = dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution());
-                if ( test_dist == NULL )
-                {
-                    if ( the_node->isClamped() == true )
-                    {
-                        rates_like_ratio += the_node->getLnProbabilityRatio();
-                    }
-                    else
-                    {
-                        rates_prob_ratio += the_node->getLnProbabilityRatio();
-                    }
-                }
-            }
-            else
-            {
-                if ( the_node->isClamped() == true )
-                {
-                    rates_like_ratio += the_node->getLnProbabilityRatio();
-                }
-                else
-                {
-                    rates_prob_ratio += the_node->getLnProbabilityRatio();
-                }
-            }
-        }
-    }
-    
-    double hastings_ratio = backward - forward + jacobian;
-    double ln_posterior_ratio = pHeat * (lHeat * (tree_like_ratio + rates_like_ratio) + prHeat * (tree_prob_ratio + rates_prob_ratio));
-    double ln_acceptance_ratio = ln_posterior_ratio + hastings_ratio;
-
-    if (ln_acceptance_ratio >= 0.0)
     {
         num_accepted_total++;
         num_accepted_current_period++;
@@ -355,83 +377,33 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             }
         }
     }
-    else if (ln_acceptance_ratio < -300.0)
+
+    // 10. Final checks and debug logging.
+    NodePrMap finalPdfs;
+    if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
+	finalPdfs = getNodePrs(nodes, affected_nodes);
+
+    if (logMCMC >= 3)
     {
-        reject();
-        tree->restore();
-        if ( rates == NULL )
+        for(auto& node: views::concat(nodes,affected_nodes))
         {
-            rates_vec[node_idx]->restore();
+            auto pr = finalPdfs.at(node);
+            std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
         }
-        else
-        {
-            rates->restore();
-        }
-        for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-        {
-            size_t childIdx = node->getChild(i).getIndex();
-            if ( rates == NULL )
-            {
-                rates_vec[childIdx]->restore();
-            }
-        }
-    }
-    else
-    {
-        double r = exp(ln_acceptance_ratio);
-        // Accept or reject the move
-        double u = GLOBAL_RNG->uniform01();
-        if (u < r)
-        {
-            num_accepted_total++;
-            num_accepted_current_period++;
-            
-            //keep
-            tree->touch();
-            tree->keep();
-            if ( rates == NULL )
-            {
-                rates_vec[node_idx]->touch();
-                rates_vec[node_idx]->keep();
-            }
-            else
-            {
-                rates->touch();
-                rates->keep();
-            }
-            for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-            {
-                size_t childIdx = node->getChild(i).getIndex();
-                if ( rates == NULL )
-                {
-                    rates_vec[childIdx]->touch();
-                    rates_vec[childIdx]->keep();
-                }
-            }
-        }
-        else
-        {
-            reject();
-            tree->restore();
-            if ( rates == NULL )
-            {
-                rates_vec[node_idx]->restore();
-            }
-            else
-            {
-                rates->restore();
-            }
-            for (size_t i = 0; i < node->getNumberOfChildren(); i++)
-            {
-                size_t childIdx = node->getChild(i).getIndex();
-                if ( rates == NULL )
-                {
-                    rates_vec[childIdx]->restore();
-                }
-            }
-        }
+        std::cerr<<"\n";
     }
 
+    if (debugMCMC >=1 and rejected)
+    {
+        compareNodePrs("RateAgeBetaShift", initialPdfs, finalPdfs, "PDFs have changed after rejection and restore");
+    }
+
+    if (logMCMC >= 2)
+    {
+        std::cerr<<"    log(posterior_ratio) = "<<ln_posterior_ratio<<"  log(likelihood_ratio) = "<<ln_likelihood_ratio<<"   log(prior_ratio) = "<<ln_prior_ratio<<"\n";
+        std::cerr<<"    log(acceptance_ratio) = "<<ln_acceptance_ratio<<"  log(ln_hastings_ratio) = "<<ln_hastings_ratio<<"\n";
+        std::cerr<<"  The move was " << (rejected ? "REJECTED." : "ACCEPTED.") << std::endl;
+    }
 }
 
 

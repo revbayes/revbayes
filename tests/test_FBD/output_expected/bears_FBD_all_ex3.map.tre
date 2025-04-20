@@ -1,0 +1,33 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=22;
+	Taxlabels
+		Agriarctos_spp
+		Ailurarctos_lufengensis
+		Ailuropoda_melanoleuca
+		Arctodus_simus
+		Ballusia_elmensis
+		Helarctos_malayanus
+		Indarctos_arctoides
+		Indarctos_punjabiensis
+		Indarctos_vireti
+		Kretzoiarctos_beatrix
+		Melursus_ursinus
+		Parictis_montanus
+		Tremarctos_ornatus
+		Ursavus_brevirhinus
+		Ursavus_primaevus
+		Ursus_abstrusus
+		Ursus_americanus
+		Ursus_arctos
+		Ursus_maritimus
+		Ursus_spelaeus
+		Ursus_thibetanus
+		Zaragocyon_daamsi
+		;
+End;
+
+Begin trees;
+tree TREE1 = [&R]((((((((((Arctodus_simus[&index=5,age_95%_HPD={0.012,0.012001}]:4.888000,Indarctos_arctoides[&index=14,sampled_ancestor=0.802632]:0.000000)[&index=23,posterior=0.315789,age_95%_HPD={4.9,4.9}]:0.000000,Agriarctos_spp[&index=13,sampled_ancestor=0.684211,age_95%_HPD={4.9,4.9}]:0.000000)[&index=24,posterior=0.052632,age_95%_HPD={4.9,4.9}]:0.900000,Ailurarctos_lufengensis[&index=19,sampled_ancestor=0.815789]:0.000000)[&index=25,posterior=0.039474,age_95%_HPD={5.8,5.8}]:1.950000,Indarctos_vireti[&index=15,sampled_ancestor=0.750000]:0.000000)[&index=26,posterior=0.039474,age_95%_HPD={7.75,7.75}]:2.419758,(Tremarctos_ornatus[&index=21]:4.900000,Indarctos_punjabiensis[&index=17,sampled_ancestor=0.631579]:0.000000)[&index=27,posterior=0.328947,age_95%_HPD={4.9,4.9}]:5.269759)[&index=28,posterior=0.065789,age_95%_HPD={8.62404,10.3961}]:3.480241,Ursavus_primaevus[&index=18,sampled_ancestor=0.960526]:0.000000)[&index=29,posterior=0.039474,age_95%_HPD={13.65,13.65}]:2.320000,Ursavus_brevirhinus[&index=16,sampled_ancestor=0.828947]:0.000000)[&index=30,posterior=0.039474,age_95%_HPD={15.97,15.97}]:2.601173,Ailuropoda_melanoleuca[&index=22]:18.571173)[&index=31,posterior=0.039474,age_95%_HPD={16.2393,18.1795}]:6.096795,((((((Ursus_americanus[&index=9]:3.273699,Ursus_thibetanus[&index=6]:3.273699)[&index=32,posterior=1.000000,age_95%_HPD={1.25336,6.1451}]:3.039725,Helarctos_malayanus[&index=10]:6.313424)[&index=33,posterior=0.381579,age_95%_HPD={4.59733,8.07613}]:0.171654,(Melursus_ursinus[&index=11]:1.800001,Ursus_abstrusus[&index=7,sampled_ancestor=1.000000]:0.000000)[&index=34,posterior=0.328947,age_95%_HPD={1.8,1.8}]:4.685078)[&index=35,posterior=0.947368,age_95%_HPD={3.08122,10.5788}]:2.760694,(Ursus_arctos[&index=8]:2.723404,Ursus_maritimus[&index=12]:2.723404)[&index=36,posterior=0.947368,age_95%_HPD={0.321371,5.86671}]:6.522368)[&index=37,posterior=1.000000,age_95%_HPD={3.89309,16.6158}]:10.754228,Zaragocyon_daamsi[&index=4,sampled_ancestor=0.828947]:0.000000)[&index=38,posterior=0.052632,age_95%_HPD={20,20}]:1.032654,((Ursus_spelaeus[&index=1,age_95%_HPD={0.027,0.027001}]:11.173000,Kretzoiarctos_beatrix[&index=20,sampled_ancestor=0.789474]:0.000000)[&index=39,posterior=0.105263,age_95%_HPD={11.2,11.2}]:2.500000,Ballusia_elmensis[&index=3,sampled_ancestor=0.986842]:0.000000)[&index=40,posterior=0.039474,age_95%_HPD={13.7,13.7}]:7.332655)[&index=41,posterior=0.026316,age_95%_HPD={21.6839,21.6839}]:3.635314)[&index=42,posterior=0.960526,age_95%_HPD={20.2451,31.84}]:9.232032,Parictis_montanus[&index=2,sampled_ancestor=0.947368]:0.000000)[&index=43,posterior=0.947368,age_95%_HPD={33.9,33.9}]:0.000000;
+End;

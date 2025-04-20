@@ -89,7 +89,7 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 			{
 				// add the extinct node to the active nodes list, remove it from the extinct nodes list
 				active_nodes.push_back( extinct_nodes.at(j) );
-				extinct_nodes.erase( extinct_nodes.begin() + long(j) );
+				extinct_nodes.erase( extinct_nodes.begin() + std::int64_t(j) );
 			}
 		}
 
@@ -98,14 +98,14 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 		TopologyNode* leftChild = active_nodes.at(left);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(left) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(left) );
 
 		// randomly draw one child (arbitrarily called left) node from the list of active nodes
 		size_t right = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
 		TopologyNode* rightChild = active_nodes.at(right);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(right) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(right) );
 
 		// make sure ages are consistent
 
@@ -222,7 +222,7 @@ double UniformSerialSampledTimeTreeDistribution::computeLnProbability( void )
 			{
 				// add the extinct node to the current number of taxa, remove it from the serial times list
 				current_num_taxa++;
-				serial_times.erase( serial_times.begin() + long(j) );
+				serial_times.erase( serial_times.begin() + std::int64_t(j) );
 			}
 		}
 
