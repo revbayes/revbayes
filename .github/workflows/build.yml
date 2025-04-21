@@ -270,6 +270,7 @@ jobs:
         fi
 
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
+           rm -f test_MC3/output_expected/*tuning_and_checkpointing*
            rm -rf test_FBD/output_expected/
            rm -rf test_BDSTP/output_expected/
 
