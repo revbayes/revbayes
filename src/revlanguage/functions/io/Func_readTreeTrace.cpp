@@ -224,7 +224,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         }
     }
 
-    if( nruns == 1 )
+    if ( rv->size() == 1 )
     {
         return new RevVariable( &(*rv)[0] );
     }

@@ -136,7 +136,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     std::vector< std::vector<RevBayesCore::TraceNumeric> > data;
 
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
-    // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
+    // read all of the files in the vector called "vectorOfFileNames" because some of them may not be in a format
     // that can be read.
 
     for (size_t i = 0; i < vectorOfFileNames.size(); i++)
@@ -254,7 +254,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     // return a vector of traces (one trace file) or vector of vectors of traces (multiple trace files)
     WorkspaceVector<WorkspaceVector<Trace> > *rv = new WorkspaceVector<WorkspaceVector<Trace> >(all_traces);
     
-    if( nruns == 1 )
+    if ( rv->size() == 1 )
     {
         return new RevVariable( &(*rv)[0] );
     }
