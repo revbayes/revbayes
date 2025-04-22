@@ -218,10 +218,8 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             }
         }
         
-        std::cout << single_trace.size() << std::endl;
         data.push_back( single_trace );
     }
-    std::cout << data.size() << std::endl;
 
     WorkspaceVector<WorkspaceVector<Trace> > all_traces;
     for (size_t i = 0; i < data.size(); i++)
@@ -255,8 +253,6 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     
     // return a vector of traces (one trace file) or vector of vectors of traces (multiple trace files)
     WorkspaceVector<WorkspaceVector<Trace> > *rv = new WorkspaceVector<WorkspaceVector<Trace> >(all_traces);
-    
-    std::cout << rv->size() << std::endl;
     
     if( nruns == 1 )
     {
