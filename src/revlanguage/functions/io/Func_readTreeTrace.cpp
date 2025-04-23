@@ -99,7 +99,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     
     if ( args[0].getVariable()->getRevObject().isType( ModelVector<RlString>::getClassTypeSpec() ) )
     {
-        if( nruns > 1 )
+        if (nruns > 1)
         {
             throw RbException("Specify only a single base filename when nruns > 1");
         }
@@ -112,7 +112,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
             
             if ( not RevBayesCore::exists(filepath) )
             {
-                std::string errorStr = "Could not find filename: " + filepath.filename().string() + "\n";
+                std::string errorStr = "";
                 RevBayesCore::formatError(filepath, errorStr);
                 throw RbException(errorStr);
             }
@@ -126,7 +126,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
                 tmp.push_back( filepath );
             }
         }
-        // FIXME: doesn't this add tmp to vectorOfFileNames twice?
+        
         for (size_t i = 0; i < tmp.size(); i++)
         {
             vectorOfFileNames.push_back(tmp[i]);
@@ -136,21 +136,21 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     }
     else
     {
-        // check that the file/path name has been correctly specified
-        RevBayesCore::path  bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::path bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
         for (size_t i = 0; i < nruns; i++)
         {
             auto filepath = bn;
-            if ( nruns > 1 )
+            if (nruns > 1)
             {
                 string run_tag = "_run_" + StringUtilities::to_string(i+1);
                 filepath = RevBayesCore::appendToStem(filepath, run_tag);
             }
 
+            // check that the file/path name has been correctly specified
             if ( not RevBayesCore::exists(filepath))
             {
-                std::string errorStr = "Could not find filename: " + filepath.string() + "\n";
+                std::string errorStr = "";
                 RevBayesCore::formatError(filepath, errorStr);
                 throw RbException(errorStr);
             }
@@ -224,7 +224,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         }
     }
 
-    if( nruns == 1 )
+    if ( rv->size() == 1 )
     {
         return new RevVariable( &(*rv)[0] );
     }
@@ -270,7 +270,7 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
 
         argumentRules.push_back( new ArgumentRule( "nexus", RlBoolean::getClassTypeSpec(), "Whether the file to read is in NEXUS format.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
 
-        argumentRules.push_back( new ArgumentRule( "nruns", Natural::getClassTypeSpec(), "The number of trace files with the same basename (i.e. the number of filenames with pattern <file>_run_<n>.trees", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
+        argumentRules.push_back( new ArgumentRule( "nruns", Natural::getClassTypeSpec(), "The number of trace files with the same basename (i.e. the number of filenames with pattern <file>_run_<n>.trees)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
 
         rules_set = true;
     }

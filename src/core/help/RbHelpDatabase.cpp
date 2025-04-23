@@ -147,7 +147,7 @@ posterior.summarize())");
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(readTrace)"));
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(TraceTree)"));
 	help_strings[string("Trace")][string("title")] = string(R"(Trace of numeric parameter values.)");
-	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `MnFile` monitor in an MCMC or MCMCMC run.)");
+	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `mnFile` monitor in an MCMC or MCMCMC run.)");
 	help_strings[string("TraceTree")][string("details")] = string(R"(Important methods include:
 
 - `getTree(n)`: returns the `n`th entry of the `TraceTree` object.
@@ -3644,36 +3644,52 @@ range(20,-20)
 	help_strings[string("readRelativeNodeAgeWeightedConstraints")][string("name")] = string(R"(readRelativeNodeAgeWeightedConstraints)");
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
 	help_strings[string("readTaxonData")][string("name")] = string(R"(readTaxonData)");
-	help_strings[string("readTrace")][string("description")] = string(R"(Reads parameter values from a log file, usually produced as the output of an MCMC or MCMCMC run.)");
-	help_strings[string("readTrace")][string("details")] = string(R"(
-Read an MCMC log file with field delimited by `separator`.
-Then drop the first `burnin` iterations if `burnin` is an integer,
-or the fraction `burnin` of iterations if `burnin` if a Real number.
-Then we keep every `n`th entry if the `thinning` is `n`.)");
-	help_strings[string("readTrace")][string("example")] = string(R"(# Read in a log file as a vector of traces
-traces = readTrace(filename, burnin = burnin))");
+	help_strings[string("readTrace")][string("description")] = string(R"(Reads parameter values from a log file, usually produced as the output of an
+MCMC or MCMCMC run.)");
+	help_strings[string("readTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument. If a folder is
+provided, all the files that contain trees in that directory are read in
+the same object.
+
+When reading individual log files, field is delimited by `separator`. We drop
+the first `burnin` iterations if `burnin` is an integer greater than or equal
+to 1, or the fraction `burnin` of iterations if `burnin` is a real number
+smaller than 1. Then we keep every `n`th entry if the `thinning` is `n`.
+
+`trace = readTrace(..., nruns = 1)` returns a `Trace[]` object.
+`trace = readTrace(..., nruns > 1)` returns a `Trace[][]` object, in which
+`trace[n]` corresponds to the trace of run `n`.)");
+	help_strings[string("readTrace")][string("example")] = string(R"(# read in a single log file as a vector of traces
+traces = readTrace("out.log", burnin=0.5)
+
+# read in two log files called 'out_run_1.log', 'out_run_2.log'
+traces = readTrace("out.log", burnin=0.5, nruns=2))");
 	help_strings[string("readTrace")][string("name")] = string(R"(readTrace)");
 	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(readAncestralStateTrace)"));
 	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(readTreeTrace)"));
-	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(readCharacterData)"));
 	help_arrays[string("readTrace")][string("see_also")].push_back(string(R"(Trace)"));
 	help_strings[string("readTrace")][string("title")] = string(R"(Read an MCMC log file.)");
-	help_strings[string("readTreeTrace")][string("description")] = string(R"(Reads trees (Nexus or Newick accepted) from a file or folder containing a set of trees and saves them in one object.)");
-	help_strings[string("readTreeTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument. If a folder is provided, all the files that contain trees in that directory are read in the same object.
+	help_strings[string("readTreeTrace")][string("description")] = string(R"(Reads trees (Nexus or Newick accepted) from a file or folder containing a set
+of trees and saves them in one object.)");
+	help_strings[string("readTreeTrace")][string("details")] = string(R"(Either a file name or a directory must be provided as argument. If a folder is
+provided, all the files that contain trees in that directory are read in
+the same object.
 
 `tree_trace = readTreeTrace(..., nruns = 1)` returns a `TraceTree` object.
-`tree_trace = readTreeTrace(..., nruns > 1)` returns a `TraceTree[]` object, in which `trace[n]` corresponds to the trace of run `n`.
+`tree_trace = readTreeTrace(..., nruns > 1)` returns a `TraceTree[]` object,
+in which `tree_trace[n]` corresponds to the trace of run `n`.
 
-The resulting `TraceTree` object stores every `thinning`th sample from a file, starting at the sample numbered `offset + 1`.)");
+The resulting `TraceTree` object stores every `thinning`th sample from a file,
+starting at the sample numbered `offset + 1`.)");
 	help_strings[string("readTreeTrace")][string("example")] = string(R"(# read a tree trace
 tree_trace = readTreeTrace("my_filename.tree", treetype="clock", burnin=0.5)
 
 # make a summary maximum clade credibility (MCC) tree
 mcc_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_strings[string("readTreeTrace")][string("name")] = string(R"(readTreeTrace)");
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readAncestralStateTrace)"));
 	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrace)"));
-	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readCharacterData)"));
 	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(readTrees)"));
+	help_arrays[string("readTreeTrace")][string("see_also")].push_back(string(R"(TraceTree)"));
 	help_strings[string("readTreeTrace")][string("title")] = string(R"(Function to read in a tree trace, usually produced as the output of an MCMC.)");
 	help_arrays[string("readTrees")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("readTrees")][string("description")] = string(R"(Reads trees from a file containing trees (Nexus, Phylip or Newick accepted), or from a string containing Newick representations of trees.)");
