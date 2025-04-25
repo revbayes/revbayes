@@ -601,10 +601,10 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
     }
     
-    // Let user know what we are doing
-    std::stringstream ss;
     if ( process_active == true && runs[0] != NULL && verbose >= 1 )
     {
+        // Let user know what we are doing
+        std::stringstream ss;
         
         if ( runs[0]->getCurrentGeneration() == 0 )
         {
@@ -723,7 +723,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     runs[i]->tune();                   
                 }
                 
-                // check for autotuning
+                // check for checkpointing
                 if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
                 {                    
                     runs[i]->checkpoint();                    

@@ -1673,7 +1673,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::redrawValue( void ) {
 
         // recursively simulate the sequences
         std::map<size_t, size_t> charCounts;
-        simulate( birthNode, siteData, rateIndex, charCounts);
+        simulateDollo( birthNode, siteData, rateIndex, charCounts);
 
         if ( !isSitePatternCompatible(charCounts) )
         {
@@ -1715,7 +1715,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::redrawValue( void ) {
 
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulate( const TopologyNode &node, std::vector<StandardState> &data, size_t rateIndex, std::map<size_t, size_t>& charCounts) {
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulateDollo( const TopologyNode &node, std::vector<StandardState> &data, size_t rateIndex, std::map<size_t, size_t>& charCounts) {
 
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
@@ -1767,7 +1767,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulate( const TopologyNode &
             if (child.isTip())
                 charCounts[c.getStateIndex()]++;
             else
-                simulate( child, data, rateIndex, charCounts);
+                simulateDollo( child, data, rateIndex, charCounts);
         }
     }
 

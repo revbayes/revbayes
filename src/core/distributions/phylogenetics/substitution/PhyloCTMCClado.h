@@ -73,7 +73,7 @@ namespace RevBayesCore {
 
 
     private:
-        virtual void                                            simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<size_t> &perSiteRates);
+        virtual void                                            simulateClado(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<size_t> &perSiteRates);
         virtual double                                          sumRootLikelihood( void );
         void                                                    updateTransitionProbabilityMatrices(void);
         
@@ -1233,7 +1233,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::setCladogenesisTimes(const TypedDag
 }
 
 template<class charType>
-void RevBayesCore::PhyloCTMCClado<charType>::simulate( const TopologyNode &node, std::vector< DiscreteTaxonData< charType > > &taxa, const std::vector<size_t> &perSiteRates)
+void RevBayesCore::PhyloCTMCClado<charType>::simulateClado( const TopologyNode &node, std::vector< DiscreteTaxonData< charType > > &taxa, const std::vector<size_t> &perSiteRates)
 {
 //    std::cout << "SIMULATE\n";
     // first simulate cladogenic changes
@@ -1359,7 +1359,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::simulate( const TopologyNode &node,
         else
         {
             // recursively simulate the sequences
-            simulate( child, taxa, perSiteRates );
+            simulateClado( child, taxa, perSiteRates );
         }
         first_child = false;
     }
@@ -1835,7 +1835,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::redrawValue( void )
     root.setTaxon( Taxon("Root") );
     
     // recursively simulate the sequences
-    simulate( this->tau->getValue().getRoot(), taxa, perSiteRates );
+    simulateClado( this->tau->getValue().getRoot(), taxa, perSiteRates );
     
     // add the taxon data to the character data
     for (size_t i = 0; i < this->tau->getValue().getNumberOfNodes(); ++i)
