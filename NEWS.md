@@ -1,36 +1,46 @@
 # RevBayes 1.3.0 (unreleased)
 ## What's Changed
-* simmap bugfix for when some characters are excluded by @kopperud in https://github.com/revbayes/revbayes/pull/636
-* Fix `.dropTip()` behavior for multifurcations by @davidcerny in https://github.com/revbayes/revbayes/pull/640
 * Print convergence statistics during MCMC runs with stopping rules by @davidcerny in https://github.com/revbayes/revbayes/pull/645
-* Random resolution of multifurcations and MBL time-scaling by @davidcerny in https://github.com/revbayes/revbayes/pull/641
-* Add cosine function by @bredelings in https://github.com/revbayes/revbayes/pull/647
-* MPI checkpointing fix by @davidcerny in https://github.com/revbayes/revbayes/pull/646
-* Prevent loss of integer precision in MC^3 by @davidcerny in https://github.com/revbayes/revbayes/pull/652
+* Display current stopping rule values when resuming from a checkpoint by @davidcerny in https://github.com/revbayes/revbayes/pull/739
 * Improvements to stopping rule messages by @davidcerny in https://github.com/revbayes/revbayes/pull/657
-* Use different seeds for replicates in MPI run by @bjoelle in https://github.com/revbayes/revbayes/pull/662
+* Better documentation and progress monitoring for power posterior analyses by @davidcerny in https://github.com/revbayes/revbayes/pull/673
+
+* Add an `nruns` argument to `readTrace()` by @davidcerny in https://github.com/revbayes/revbayes/pull/736
 * Prevent modification of clamped value by @ms609 in https://github.com/revbayes/revbayes/pull/600
-* Prevent NaN heats in MC^3 by @davidcerny in https://github.com/revbayes/revbayes/pull/661
+* Random resolution of multifurcations and MBL time-scaling by @davidcerny in https://github.com/revbayes/revbayes/pull/641
+
 * Dev hoehna lab by @hoehna in https://github.com/revbayes/revbayes/pull/682
 * Additional coalescent development by @hoehna in https://github.com/revbayes/revbayes/pull/473
-* Don't treat deterministic nodes as constants by @bredelings in https://github.com/revbayes/revbayes/pull/678
-* Use std::shared_ptr<Environment> to hold Environments. by @bredelings in https://github.com/revbayes/revbayes/pull/687
-* Fix state space when subsetting by state space by @hoehna in https://github.com/revbayes/revbayes/pull/696
-* Better documentation and progress monitoring for power posterior analyses by @davidcerny in https://github.com/revbayes/revbayes/pull/673
+
 * Added sine function by @sigibrock in https://github.com/revbayes/revbayes/pull/648
-* Fix mvRateAgeBetaShift by @bredelings in https://github.com/revbayes/revbayes/pull/688
-* Fix windows long by @bredelings in https://github.com/revbayes/revbayes/pull/708
-* BUG #668 dnUniformTopology ignores neg clade const by @Levi-Raskin in https://github.com/revbayes/revbayes/pull/711
-* Fix out of range proposal by @bredelings in https://github.com/revbayes/revbayes/pull/709
-* Fix deterministic index by @bredelings in https://github.com/revbayes/revbayes/pull/719
-* Only type-convert variables based on value if they are constant by @bredelings in https://github.com/revbayes/revbayes/pull/721
+* Add cosine function by @bredelings in https://github.com/revbayes/revbayes/pull/647
+
+
+## Fixes
+* MPI checkpointing fix by @davidcerny in https://github.com/revbayes/revbayes/pull/646
+* Prevent loss of integer precision in MC^3 by @davidcerny in https://github.com/revbayes/revbayes/pull/652
+* Use different seeds for replicates in MPI run by @bjoelle in https://github.com/revbayes/revbayes/pull/662
+* Prevent NaN heats in MC^3 by @davidcerny in https://github.com/revbayes/revbayes/pull/661
 * Fix logging when running Mcmcmc twice. by @bredelings in https://github.com/revbayes/revbayes/pull/727
 * MC^3 checkpointing fix by @davidcerny in https://github.com/revbayes/revbayes/pull/670
-* Fix `readTrees(text = ...)` by @davidcerny in https://github.com/revbayes/revbayes/pull/735
-* Add an `nruns` argument to `readTrace()` by @davidcerny in https://github.com/revbayes/revbayes/pull/736
+
+* Don't treat deterministic nodes as constants by @bredelings in https://github.com/revbayes/revbayes/pull/678
+* Only type-convert variables based on value if they are constant by @bredelings in https://github.com/revbayes/revbayes/pull/721
+* Fix out of range proposal by @bredelings in https://github.com/revbayes/revbayes/pull/709
+* Fix deterministic index by @bredelings in https://github.com/revbayes/revbayes/pull/719
+
+* Fix mvRateAgeBetaShift by @bredelings in https://github.com/revbayes/revbayes/pull/688
 * Fix caching bugs in phyloCTMC by @bredelings in https://github.com/revbayes/revbayes/pull/729
 * Allow MCMC moves with low prob ratio and high Jacobian/Hastings ratio by @bredelings in https://github.com/revbayes/revbayes/pull/728
-* Display current stopping rule values when resuming from a checkpoint by @davidcerny in https://github.com/revbayes/revbayes/pull/739
+
+* Fix state space when subsetting by state space by @hoehna in https://github.com/revbayes/revbayes/pull/696
+* BUG #668 dnUniformTopology ignores neg clade const by @Levi-Raskin in https://github.com/revbayes/revbayes/pull/711
+* Fix `readTrees(text = ...)` by @davidcerny in https://github.com/revbayes/revbayes/pull/735
+* simmap bugfix for when some characters are excluded by @kopperud in https://github.com/revbayes/revbayes/pull/636
+* Fix `.dropTip()` behavior for multifurcations by @davidcerny in https://github.com/revbayes/revbayes/pull/640
+
+* Fix windows long by @bredelings in https://github.com/revbayes/revbayes/pull/708
+* Use std::shared_ptr<Environment> to hold Environments. by @bredelings in https://github.com/revbayes/revbayes/pull/687
 
 ## Documentation
 * Filled out help file for exp function. by @brpetrucci in https://github.com/revbayes/revbayes/pull/653
