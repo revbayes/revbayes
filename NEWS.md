@@ -1,89 +1,88 @@
 # RevBayes 1.3.0 (unreleased)
 ## What's Changed
-* Print convergence statistics during MCMC runs with stopping rules by @davidcerny in https://github.com/revbayes/revbayes/pull/645
-* Display current stopping rule values when resuming from a checkpoint by @davidcerny in https://github.com/revbayes/revbayes/pull/739
-* Improvements to stopping rule messages by @davidcerny in https://github.com/revbayes/revbayes/pull/657
-* Better documentation and progress monitoring for power posterior analyses by @davidcerny in https://github.com/revbayes/revbayes/pull/673
+* Print convergence statistics during MCMC runs with stopping rules [#645](https://github.com/revbayes/revbayes/pull/645)
+* Display current stopping rule values when resuming from a checkpoint [#739](https://github.com/revbayes/revbayes/pull/739)
+* Improvements to stopping rule messages [#657](https://github.com/revbayes/revbayes/pull/657)
+* Better documentation and progress monitoring for power posterior analyses [#673](https://github.com/revbayes/revbayes/pull/673)
 
-* Add an `nruns` argument to `readTrace()` by @davidcerny in https://github.com/revbayes/revbayes/pull/736
-* Prevent modification of clamped value by @ms609 in https://github.com/revbayes/revbayes/pull/600
-* Random resolution of multifurcations and MBL time-scaling by @davidcerny in https://github.com/revbayes/revbayes/pull/641
+* Add an `nruns` argument to `readTrace()` [#736](https://github.com/revbayes/revbayes/pull/736)
+* Prevent modification of clamped value [#600](https://github.com/revbayes/revbayes/pull/600)
+* Random resolution of multifurcations and MBL time-scaling [#641](https://github.com/revbayes/revbayes/pull/641)
 
-* Dev hoehna lab by @hoehna in https://github.com/revbayes/revbayes/pull/682
-* Additional coalescent development by @hoehna in https://github.com/revbayes/revbayes/pull/473
+* Dev hoehna lab [#682](https://github.com/revbayes/revbayes/pull/682)
+* Additional coalescent development [#473](https://github.com/revbayes/revbayes/pull/473)
 
-* Added sine function by @sigibrock in https://github.com/revbayes/revbayes/pull/648
-* Add cosine function by @bredelings in https://github.com/revbayes/revbayes/pull/647
+* Added sine function [#648](https://github.com/revbayes/revbayes/pull/648)
+* Add cosine function [#647](https://github.com/revbayes/revbayes/pull/647)
 
 
 ## Fixes
-* MPI checkpointing fix by @davidcerny in https://github.com/revbayes/revbayes/pull/646
-* Prevent loss of integer precision in MC^3 by @davidcerny in https://github.com/revbayes/revbayes/pull/652
-* Use different seeds for replicates in MPI run by @bjoelle in https://github.com/revbayes/revbayes/pull/662
-* Prevent NaN heats in MC^3 by @davidcerny in https://github.com/revbayes/revbayes/pull/661
-* Fix logging when running Mcmcmc twice. by @bredelings in https://github.com/revbayes/revbayes/pull/727
-* MC^3 checkpointing fix by @davidcerny in https://github.com/revbayes/revbayes/pull/670
+* MPI checkpointing fix [#646](https://github.com/revbayes/revbayes/pull/646)
+* Prevent loss of integer precision in MC^3 [#652](https://github.com/revbayes/revbayes/pull/652)
+* Use different seeds for replicates in MPI run [#662](https://github.com/revbayes/revbayes/pull/662)
+* Prevent NaN heats in MC^3 [#661](https://github.com/revbayes/revbayes/pull/661)
+* Fix logging when running Mcmcmc twice. [#727](https://github.com/revbayes/revbayes/pull/727)
+* MC^3 checkpointing fix [#670](https://github.com/revbayes/revbayes/pull/670)
 
-* Don't treat deterministic nodes as constants by @bredelings in https://github.com/revbayes/revbayes/pull/678
-* Only type-convert variables based on value if they are constant by @bredelings in https://github.com/revbayes/revbayes/pull/721
-* Fix out of range proposal by @bredelings in https://github.com/revbayes/revbayes/pull/709
-* Fix deterministic index by @bredelings in https://github.com/revbayes/revbayes/pull/719
+* Only convert deterministic nodes to constant nodes if they really are constant [#678](https://github.com/revbayes/revbayes/pull/678)
+* Only type-convert variables based on value if they are constant [#721](https://github.com/revbayes/revbayes/pull/721)
+* Allow MCMC proposals to propose out-of-range indices [#709](https://github.com/revbayes/revbayes/pull/709)
+* Indexing by a deterministic index should create a deterministic node [#719](https://github.com/revbayes/revbayes/pull/719)
 
-* Fix mvRateAgeBetaShift by @bredelings in https://github.com/revbayes/revbayes/pull/688
-* Fix caching bugs in phyloCTMC by @bredelings in https://github.com/revbayes/revbayes/pull/729
-* Allow MCMC moves with low prob ratio and high Jacobian/Hastings ratio by @bredelings in https://github.com/revbayes/revbayes/pull/728
+* Fix mvRateAgeBetaShift [#688](https://github.com/revbayes/revbayes/pull/688)
+* Fix caching bugs in phyloCTMC [#729](https://github.com/revbayes/revbayes/pull/729)
+* Allow MCMC moves with low prob ratio and high Jacobian/Hastings ratio [#728](https://github.com/revbayes/revbayes/pull/728)
 
-* Fix state space when subsetting by state space by @hoehna in https://github.com/revbayes/revbayes/pull/696
-* BUG #668 dnUniformTopology ignores neg clade const by @Levi-Raskin in https://github.com/revbayes/revbayes/pull/711
-* Fix `readTrees(text = ...)` by @davidcerny in https://github.com/revbayes/revbayes/pull/735
-* simmap bugfix for when some characters are excluded by @kopperud in https://github.com/revbayes/revbayes/pull/636
-* Fix `.dropTip()` behavior for multifurcations by @davidcerny in https://github.com/revbayes/revbayes/pull/640
-
-* Fix windows long by @bredelings in https://github.com/revbayes/revbayes/pull/708
-* Use std::shared_ptr<Environment> to hold Environments. by @bredelings in https://github.com/revbayes/revbayes/pull/687
+* Fix state space when subsetting by state space [#696](https://github.com/revbayes/revbayes/pull/696)
+* Don't ignore negative clade const [#711](https://github.com/revbayes/revbayes/pull/711)
+* Fix `readTrees(text = ...)` [#735](https://github.com/revbayes/revbayes/pull/735)
+* Fix simmap when there are excluded characters [#636](https://github.com/revbayes/revbayes/pull/636)
+* Fix `.dropTip()` behavior for multifurcations [#640](https://github.com/revbayes/revbayes/pull/640)
+* Fix handling of large integers on windows [#708](https://github.com/revbayes/revbayes/pull/708)
+* Fix crash in user functions [#687](https://github.com/revbayes/revbayes/pull/687)
 
 ## Documentation
-* Filled out help file for exp function. by @brpetrucci in https://github.com/revbayes/revbayes/pull/653
-* Document simplex moves by @ms609 in https://github.com/revbayes/revbayes/pull/606
-* Changes to rate matrix model help files by @brpetrucci in https://github.com/revbayes/revbayes/pull/656
-* Completing and standardizing stats distributions help files, part 1 by @brpetrucci in https://github.com/revbayes/revbayes/pull/663
-* Document DPP moves by @davidcerny in https://github.com/revbayes/revbayes/pull/666
-* add help for jukes cantor by @raymondcast18 in https://github.com/revbayes/revbayes/pull/649
-* Created matrix.md and var.md files for review by @raymondcast18 in https://github.com/revbayes/revbayes/pull/681
-* Added function covarion documentation by @basanta33 in https://github.com/revbayes/revbayes/pull/704
-* Adding documentation to 'fnDiscretizeDistribution' and 'fnDiscretizeG… by @basanta33 in https://github.com/revbayes/revbayes/pull/707
-* updated fnFreeBinary help file by @sigibrock in https://github.com/revbayes/revbayes/pull/706
-* Wrote help files for power and write function by @raymondcast18 in https://github.com/revbayes/revbayes/pull/690
-* vectorFlatten.md fnFreeK.md, fnReadVCF.md, dnUniformInteger.md help files by @raymondcast18 in https://github.com/revbayes/revbayes/pull/667
-* Updating documentation for readTreeTrace by @ixchelgzlzr in https://github.com/revbayes/revbayes/pull/703
-* Editing WAG help file  by @PhyloevoTi in https://github.com/revbayes/revbayes/pull/655
-* Update readTrace.md by @bredelings in https://github.com/revbayes/revbayes/pull/702
-* Document TreeTrace methods by @ms609 in https://github.com/revbayes/revbayes/pull/722
-* Document readTrace methods by @ms609 in https://github.com/revbayes/revbayes/pull/723
+* Filled out help file for exp function. [#653]([#653](https://github.com/revbayes/revbayes/pull/653))
+* Document simplex moves [#606]([#606](https://github.com/revbayes/revbayes/pull/606))
+* Changes to rate matrix model help files [#656](https://github.com/revbayes/revbayes/pull/656)
+* Completing and standardizing stats distributions help files, part 1 [#663](https://github.com/revbayes/revbayes/pull/663)
+* Document DPP moves [#666](https://github.com/revbayes/revbayes/pull/666)
+* add help for jukes cantor [#649](https://github.com/revbayes/revbayes/pull/649)
+* Created matrix.md and var.md files for review [#681](https://github.com/revbayes/revbayes/pull/681)
+* Added function covarion documentation [#704](https://github.com/revbayes/revbayes/pull/704)
+* Adding documentation to 'fnDiscretizeDistribution' and 'fnDiscretizeG… [#707](https://github.com/revbayes/revbayes/pull/707)
+* updated fnFreeBinary help file [#706](https://github.com/revbayes/revbayes/pull/706)
+* Wrote help files for power and write function [#690](https://github.com/revbayes/revbayes/pull/690)
+* vectorFlatten.md fnFreeK.md, fnReadVCF.md, dnUniformInteger.md help files [#667](https://github.com/revbayes/revbayes/pull/667)
+* Updating documentation for readTreeTrace [#703](https://github.com/revbayes/revbayes/pull/703)
+* Editing WAG help file  [#655](https://github.com/revbayes/revbayes/pull/655)
+* Update readTrace.md [#702](https://github.com/revbayes/revbayes/pull/702)
+* Document TreeTrace methods [#722](https://github.com/revbayes/revbayes/pull/722)
+* Document readTrace methods [#723](https://github.com/revbayes/revbayes/pull/723)
 
 ## Infrastructure
-* Fix CI builds by dropping openlibm by @bredelings in https://github.com/revbayes/revbayes/pull/644
-* Changes to build files to streamline help infrastructure by @brpetrucci in https://github.com/revbayes/revbayes/pull/659
-* Revamped tutorial testing by @brpetrucci in https://github.com/revbayes/revbayes/pull/674
-* Ensuring integration tests can run tutorial checkpoint tests by @brpetrucci in https://github.com/revbayes/revbayes/pull/676
-* Changed website submodule to pull from source rather than master. by @brpetrucci in https://github.com/revbayes/revbayes/pull/692
+* Fix CI builds by dropping openlibm [#644](https://github.com/revbayes/revbayes/pull/644)
+* Changes to build files to streamline help infrastructure [#659](https://github.com/revbayes/revbayes/pull/659)
+* Revamped tutorial testing [#674](https://github.com/revbayes/revbayes/pull/674)
+* Ensuring integration tests can run tutorial checkpoint tests [#676](https://github.com/revbayes/revbayes/pull/676)
+* Changed website submodule to pull from source rather than master. [#692](https://github.com/revbayes/revbayes/pull/692)
 
 ## Ignore
-* Bump version after v1.2.5 release by @bredelings in https://github.com/revbayes/revbayes/pull/637
-* Revert accidentally committed-by-unreview patch by @bredelings in https://github.com/revbayes/revbayes/pull/654
-* Remove empty touch( ), keep( ), and  restore( ) specializations. by @bredelings in https://github.com/revbayes/revbayes/pull/658
-* Update nlohmann::json to avoid tons of compilation warnings with GCC 15. by @bredelings in https://github.com/revbayes/revbayes/pull/685
-* Fix broken overrides part1 by @bredelings in https://github.com/revbayes/revbayes/pull/684
-* Mark overridden virtual functions as such in tree event moves by @davidcerny in https://github.com/revbayes/revbayes/pull/669
-* Don't throw exception to perform a simple check. by @bredelings in https://github.com/revbayes/revbayes/pull/677
+* Bump version after v1.2.5 release [#637](https://github.com/revbayes/revbayes/pull/637)
+* Revert accidentally committed-by-unreview patch [#654](https://github.com/revbayes/revbayes/pull/654)
+* Remove empty touch( ), keep( ), and  restore( ) specializations. [#658](https://github.com/revbayes/revbayes/pull/658)
+* Update nlohmann::json to avoid tons of compilation warnings with GCC 15. [#685](https://github.com/revbayes/revbayes/pull/685)
+* Fix broken overrides part1 [#684](https://github.com/revbayes/revbayes/pull/684)
+* Mark overridden virtual functions as such in tree event moves [#669](https://github.com/revbayes/revbayes/pull/669)
+* Don't throw exception to perform a simple check. [#677](https://github.com/revbayes/revbayes/pull/677)
 
 ## New Contributors
-* @raymondcast18 made their first contribution in https://github.com/revbayes/revbayes/pull/649
-* @sigibrock made their first contribution in https://github.com/revbayes/revbayes/pull/648
-* @basanta33 made their first contribution in https://github.com/revbayes/revbayes/pull/704
-* @ixchelgzlzr made their first contribution in https://github.com/revbayes/revbayes/pull/703
-* @Levi-Raskin made their first contribution in https://github.com/revbayes/revbayes/pull/711
-* @PhyloevoTi made their first contribution in https://github.com/revbayes/revbayes/pull/655
+* @raymondcast18 made their first contribution in [#649](https://github.com/revbayes/revbayes/pull/649)
+* @sigibrock made their first contribution in [#648](https://github.com/revbayes/revbayes/pull/648)
+* @basanta33 made their first contribution in [#704](https://github.com/revbayes/revbayes/pull/704)
+* @ixchelgzlzr made their first contribution in [#703](https://github.com/revbayes/revbayes/pull/703)
+* @Levi-Raskin made their first contribution in [#711](https://github.com/revbayes/revbayes/pull/711)
+* @PhyloevoTi made their first contribution in [#655](https://github.com/revbayes/revbayes/pull/655)
 
 # RevBayes 1.2.5 (Dec 19, 2025)
 
@@ -134,7 +133,7 @@
   * Misc
       - Allow reading non-square matrices (#564).
       - Allow checking `args.size()` when no arguments are given. (#479).
-      - Balance braces when printing Matrix<Real> (#615).
+      - Balance braces when printing `Matrix<Real>` (#615).
 
 ## Documentation improvements
   * `dnPhyloCTMC( )` (#487).
