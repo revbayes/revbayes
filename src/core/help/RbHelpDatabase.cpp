@@ -1293,7 +1293,10 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnSBBDP")][string("description")] = string(R"(Simulates a tree under a birth-death process with a specified sampling rate.)");
 	help_strings[string("dnSBBDP")][string("details")] = string(R"(dnSBBDP simulates a tree under a birth-death process without a character dependent effect.
 Additionally, the sampling probability of taxa can be specified using the rho argument of the 
-function, allowing for a specfic sampling rate of extinct taxon.)");
+function, allowing for a specfic sampling rate of extinct taxon.
+
+This function is an older version of a birth death process with an explicit sampling rate.
+To see a newer version with more funcitonality see: dnBDSTP)");
 	help_strings[string("dnSBBDP")][string("example")] = string(R"(# set starting paramters for tree
 root_age ~ dnUniform(0, 2)
 lambda ~ dnUniform(0, 1)
@@ -1308,7 +1311,8 @@ tree ~ dnSBBDP( rootAge       = root_age,
 	help_references[string("dnSBBDP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
 	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
 	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
-	help_strings[string("dnSBBDP")][string("title")] = string(R"(Sampled speciation birth-death process)");
+	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnBDSTP)"));
+	help_strings[string("dnSBBDP")][string("title")] = string(R"(Serially sampled birth-death process)");
 	help_arrays[string("dnScaledDirichlet")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_strings[string("dnScaledDirichlet")][string("description")] = string(R"(Scaled Dirichlet probability distribution on a simplex.)");
 	help_strings[string("dnScaledDirichlet")][string("details")] = string(R"(The scaled Dirichlet probability distribution is the generalization of the dirichlet distribution. A random variable from a scaled Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1. If b[1]=b[2]=...=b[n], then the scaledDirichlet(alpha,beta) collapses to the Dirichlet with the same alphas.)");
