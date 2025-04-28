@@ -5,9 +5,9 @@ git submodule update --init --recursive
 if [ -z "$1" ] ; then
     printf "Please supply the full path to rb as first argument.\n\n"
     printf "Examples:\n"
-    printf '  ./run_integration_tests.sh "$(readlink -f ../projects/cmake/built/rb)"\n'
-    printf '  ./run_integration_tests.sh "$PWD/../projects/cmake/built/rb"\n'
-    printf '  ./run_integration_tests.sh  -mpi true "$PWD/../projects/cmake/built-mpi/rb-mpi"\n'
+    printf '  ./run_integration_tests.sh "$(readlink -f ../projects/cmake/build/rb)"\n'
+    printf '  ./run_integration_tests.sh "$PWD/../projects/cmake/build/rb"\n'
+    printf '  ./run_integration_tests.sh  -mpi true "$PWD/../projects/cmake/build-mpi/rb-mpi"\n'
 #    printf '  ./run_integration_tests.sh mpirun -np 4 "$(readlink -f ../projects/cmake/rb)"\n'
     exit 101
 fi
