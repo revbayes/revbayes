@@ -1,7 +1,5 @@
 #!/bin/bash
 
-git submodule update --init --recursive
-
 if [ -z "$1" ] ; then
     printf "Please supply the full path to rb as first argument.\n\n"
     printf "Examples:\n"
@@ -51,6 +49,11 @@ fi
 
 tests=()
 status=()
+
+if [ ! -d "revbayes.github.io" ] ; then
+    echo "No revbayes.github.io directory, cloning it"
+git clone https://github.com/revbayes/revbayes.github.io.git
+fi
 
 for t in revbayes.github.io/tutorials/*/tests.txt; do
     testname=`echo $t | cut -d '/' -f 2-3`;

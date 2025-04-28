@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction::DiscretizeGammaFromBetaQuantilesFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
+RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction::DiscretizeGammaFromBetaQuantilesFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<std::int64_t> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
     alpha( a ),
     beta( b ),
     shape( s ),
@@ -56,7 +56,7 @@ void RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction::swapParameterIntern
 
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
 
 }

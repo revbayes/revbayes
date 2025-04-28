@@ -85,8 +85,8 @@ UniformTopologyDistribution::UniformTopologyDistribution(const std::vector<Taxon
         for (size_t j = 0; j < constraints[i].size(); ++j)
         {
             size_t k = taxon_bitset_map[ constraints[i].getTaxonName(j) ];
-
             b.set(k);
+            
         }
 
         constraints[i].setBitRepresentation( b );
@@ -189,10 +189,10 @@ void UniformTopologyDistribution::simulateClade(std::vector<TopologyNode *> &n )
         // randomly pick two nodes
         size_t index_left = static_cast<size_t>( floor(rng->uniform01()*active_nodes.size()) );
         TopologyNode* left_child = active_nodes[index_left];
-        active_nodes.erase(active_nodes.begin()+long(index_left));
+        active_nodes.erase(active_nodes.begin()+std::int64_t(index_left));
         size_t index_right = static_cast<size_t>( floor(rng->uniform01()*active_nodes.size()) );
         TopologyNode* right_right = active_nodes[index_right];
-        active_nodes.erase(active_nodes.begin()+long(index_right));
+        active_nodes.erase(active_nodes.begin()+std::int64_t(index_right));
                 
         // erase the nodes also from the origin nodes vector
         n.erase(std::remove(n.begin(), n.end(), left_child), n.end());
@@ -264,7 +264,10 @@ void UniformTopologyDistribution::simulateTree( void )
     }
     
     // we need a sorted vector of constraints, starting with the smallest
-    std::vector<Clade> sorted_clades = constraints;
+    std::vector<Clade> sorted_clades = {};
+    for(int i = 0; i < constraints.size(); i++) //lyr changed
+        if(constraints[i].isNegativeConstraint() == false)
+            sorted_clades.push_back(constraints[i]);
     
     // create a clade that contains all species
     Clade all_ingroup_species = Clade(ingroup_taxa);
@@ -489,10 +492,14 @@ bool UniformTopologyDistribution::matchesConstraints( void )
 		const TopologyNode &root = value->getRoot();
 		for (std::vector<Clade>::iterator it = constraints.begin(); it != constraints.end(); ++it) 
 		{
-			if ( root.containsClade( *it, true ) == false )
+            if ( root.containsClade( *it, true ) == false && it->isNegativeConstraint() == false ) //LYR changed
 			{
 				return false;
 			}
+            else if ( root.containsClade( *it, true ) == true && it->isNegativeConstraint() == true ) //LYR changed
+            {
+                return false;
+            }
 		}
         
 		return true;

@@ -61,12 +61,12 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 using namespace RevLanguage;
 
 extern int yylex(void);
 extern char *yytext;
-extern Environment *executionEnvironment;
 
 /* The function yyerror handles errors. It is defined below. */
 int yyerror(const char *);
@@ -84,7 +84,7 @@ Parser& parser = Parser::getParser();
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    long                                             longIntValue;
+    std::int64_t                                    longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;
@@ -256,7 +256,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
 #endif
-                    int rv = parser.execute($1, *executionEnvironment);
+                    int rv = parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }
@@ -265,7 +265,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
 #endif
-                    int rv =  parser.execute($1, *executionEnvironment);
+                    int rv =  parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }
@@ -274,7 +274,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
 #endif
-                    int rv =  parser.execute($1, *executionEnvironment);
+                    int rv =  parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }
@@ -283,7 +283,7 @@ prog    :       END_OF_INPUT
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
 #endif
-                    int rv =  parser.execute($1, *executionEnvironment);
+                    int rv =  parser.execute($1, executionEnvironment);
                     delete $1;
                     return rv;
                 }

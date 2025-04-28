@@ -29,7 +29,7 @@ moves = VectorMoves()
 moves.append( mvSlide(r, delta=0.1, weight=1) )
 
 monitors = VectorMonitors()
-monitors.append( mnModel(filename = "output/Geweke_test.log", printgen = 100, p) )
+monitors.append( mnModel(filename = "output/Geweke_test.log", printgen = 100) )
 
 # Create the MCMC object with 4 independent runs. Note that Geweke's diagnostic can
 # be calculated from a single run, so multiple runs are not strictly necessary here.

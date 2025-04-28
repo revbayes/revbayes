@@ -51,7 +51,7 @@ namespace RevBayesCore {
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
         void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling
         void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
-        void                                    monitor(unsigned long g);
+        void                                    monitor(std::uint64_t g);
         void                                    nextCycle(bool advanceCycle);
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;
         void                                    printOperatorSummary(bool current_period);
@@ -123,6 +123,7 @@ namespace RevBayesCore {
         std::string                             swap_mode;                                          // whether making a single attempt per swap interval or attempt multiple (= nchains or nchains^2 for neighbor or random swaps, respectively) times.
         
         Mcmc*                                   base_chain;
+        path                                    base_checkpoint_file_name;
         
         size_t                                  generation;
         std::vector< std::vector<size_t> >      num_attempted_swaps;

@@ -18,20 +18,20 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-Natural::Natural( void ) : Integer( 0L )
+Natural::Natural( void ) : Integer( 0 )
 {
 
 }
 
 
-Natural::Natural( RevBayesCore::TypedDagNode<long> *v ) : Integer( v )
+Natural::Natural( RevBayesCore::TypedDagNode<std::int64_t> *v ) : Integer( v )
 {
     
 }
 
 
 /** Construct from int */
-Natural::Natural( long x ) : Integer( x )
+Natural::Natural( std::int64_t x ) : Integer( x )
 {
 
     if ( x < 0 )
@@ -231,7 +231,7 @@ const TypeSpec& Natural::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double Natural::isConvertibleTo( const TypeSpec& type, bool once ) const
+double Natural::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
     if ( type == RlBoolean::getClassTypeSpec() )
@@ -249,7 +249,7 @@ double Natural::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.2;
     }
     
-    if ( once == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 )
+    if ( convert_by_value == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 )
     {
         return 0.1;
     }
@@ -264,7 +264,7 @@ double Natural::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.7;
     }
     
-    return Integer::isConvertibleTo( type, once );
+    return Integer::isConvertibleTo( type, convert_by_value );
 }
 
 

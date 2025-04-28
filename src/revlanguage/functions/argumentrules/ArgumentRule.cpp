@@ -182,15 +182,18 @@ ArgumentRule* RevLanguage::ArgumentRule::clone( void ) const
  *       wrapper, which should be unique (not the same as the incoming variable
  *       wrapper), has the right required type.
  */
-Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
+Argument ArgumentRule::fitArgument( Argument& arg ) const
 {
-
+    bool convert_by_value = false;
     RevPtr<RevVariable> the_var = arg.getVariable();
-    if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant() )
+    if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {
-        once = true;
+        convert_by_value = true;
     }
-    
+    else if (evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
+    {
+        convert_by_value = true;
+    }
     
     for ( auto& argTypeSpec: argTypeSpecs )
     {
@@ -204,7 +207,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 return Argument( valueVar, arg.getLabel(), true );
             }
 //<<<<<<< HEAD
-//            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1 )
+//            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1 )
 //            {
 //                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
 //                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
@@ -231,7 +234,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
 //                }
 //            
 //            }
-//            else if ( the_var->getRevObject().isConvertibleTo( *it, once ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
+//            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
 //            {
 //                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
 //                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
@@ -267,7 +270,7 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
                 return Argument( the_var, arg.getLabel(), isEllipsis() or evalType == BY_CONSTANT_REFERENCE );
             }
         }
-        else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, once ) != -1 )
+        else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, convert_by_value ) != -1 )
         {
             // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
             RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
@@ -299,17 +302,17 @@ Argument ArgumentRule::fitArgument( Argument& arg, bool once ) const
             Argument theArg = Argument( the_var, "arg" );
             args.push_back( the_var );
                 
-            Environment& env = Workspace::globalWorkspace();
+            auto env = Workspace::globalWorkspacePtr();
             
-            if (auto orig_func = env.findFunction(function_name, args, once))
+            if (auto orig_func = env->findFunction(function_name, args))
             {
                 Function* func = orig_func->clone();
 
                 // Allow the function to process the arguments
-                func->processArguments( args, once );
+                func->processArguments( args );
             
                 // Set the execution environment of the function
-                func->setExecutionEnviroment( &env );
+                func->setExecutionEnviroment( env );
                 
                 // Evaluate the function
                 RevPtr<RevVariable> conversionVar = func->execute();
@@ -388,30 +391,27 @@ bool ArgumentRule::hasDefault(void) const
 }
 
 
-/**
- * Test if argument is valid. The boolean flag 'once' is used to signal whether the argument matching
- * is done in a static or a dynamic context. If the rule is constant, then the argument matching
- * is done in a static context (evaluate-once context) regardless of the setting of the once flag.
- * If the argument is constant, we try type promotion if permitted by the variable required type.
- *
- * @todo See the TODOs for fitArgument(...)
- */
-double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
+double ArgumentRule::isArgumentValid( Argument &arg) const
 {
-    
     RevPtr<RevVariable> the_var = arg.getVariable();
     if ( the_var == NULL )
     {
         return -1;
     }
     
-    if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || ( the_var->getRevObject().isModelObject() && the_var->getRevObject().getDagNode()->getDagNodeType() == RevBayesCore::DagNode::CONSTANT) )
+    bool convert_by_value = false;
+    if (not the_var->getRevObject().hasDagNode() or the_var->getRevObject().getDagNode()->isConstant())
     {
-        once = true;
+        convert_by_value = true;
     }
+    else if ( evalType == BY_VALUE || the_var->isWorkspaceVariable() || the_var->getRevObject().isConstant())
+    {
+        convert_by_value = true;
+    }
+
     if ( nodeType == STOCHASTIC || nodeType == DETERMINISTIC )
     {
-        once = false;
+        convert_by_value = false;
     }
     
     if ( nodeType == STOCHASTIC && the_var->getRevObject().getDagNode()->getDagNodeType() != RevBayesCore::DagNode::STOCHASTIC )
@@ -425,9 +425,8 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
     
     // we need to store and check all arg types
     std::vector<double> penalties;
-    for ( std::vector<TypeSpec>::const_iterator it = argTypeSpecs.begin(); it != argTypeSpecs.end(); ++it )
+    for ( auto& req_arg_type_spec: argTypeSpecs )
     {
-        const TypeSpec& req_arg_type_spec = *it;
         if ( the_var->getRevObject().isType( req_arg_type_spec ) )
         {
             return 0.0;
@@ -435,9 +434,9 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             
         double penalty = -1;
         // make sure that we only perform type casting when the variable will not be part of a model graph
-        if ( once == true || the_var->getRevObject().isConstant() == true )
+        if ( the_var->getRevObject().isConstant() == true )
         {
-            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, once );
+            penalty = the_var->getRevObject().isConvertibleTo( req_arg_type_spec, convert_by_value );
         }
         
         if ( penalty != -1 && req_arg_type_spec.isDerivedOf( the_var->getRequiredTypeSpec() ) )
@@ -448,15 +447,6 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
         {
             penalties.push_back( penalty );
         }
-
-//        else if ( once == true &&
-////                 !var->isAssignable() &&
-//                  the_var->getRevObject().isConvertibleTo( argTypeSpec, true ) != -1 &&
-//                  (argTypeSpec).isDerivedOf( the_var->getRequiredTypeSpec() )
-//                )
-//        {
-//            return the_var->getRevObject().isConvertibleTo( argTypeSpec, true );
-//        }
         else if ( nodeType != STOCHASTIC )
         {
             
@@ -472,10 +462,9 @@ double ArgumentRule::isArgumentValid( Argument &arg, bool once) const
             args.push_back( the_var );
                 
             Environment& env = Workspace::globalWorkspace();
-	    if (env.findFunction(function_name, args, once) != nullptr)
+	    if (env.findFunction(function_name, args) != nullptr)
 		return 0.1;
         }
-            
     }
         
     // check which one was the best penalty
