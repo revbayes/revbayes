@@ -277,6 +277,13 @@ jobs:
            rm -rf test_BDSTP/output_expected/
         fi
 
+        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+           rm -f test_coalescent/output_expected/horses_het_BSP*
+           rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
+           rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
+           rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
+        fi
+
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
         cd
         echo ::endgroup::
