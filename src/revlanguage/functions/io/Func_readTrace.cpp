@@ -9,6 +9,7 @@
 
 #include "ArgumentRule.h"
 #include "Delimiter.h"
+#include "ModelVector.h"
 #include "Probability.h"
 #include "RbException.h"
 #include "RbFileManager.h"
@@ -51,43 +52,96 @@ Func_readTrace* Func_readTrace::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_readTrace::execute( void )
 {
-
-    // get the information from the arguments for reading the file
-    RevBayesCore::path trace_file_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     // get the column delimiter
-    const std::string& delimiter = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter       = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    // get burnin
+    RevObject&         b               = args[2].getVariable()->getRevObject();
+    // get the thinning frequency
+    std::int64_t       thinning        = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    // get the number of runs
+    std::int64_t       nruns           = static_cast<const Natural&>( args[4].getVariable()->getRevObject() ).getValue();
     
-    
-    // check that the file/path name has been correctly specified
-    if ( not RevBayesCore::exists( trace_file_name ))
-    {
-        std::string errorStr = "";
-        RevBayesCore::formatError( trace_file_name, errorStr );
-        throw RbException(errorStr);
-    }
-        
-    // set up a vector of strings containing the name or names of the files to be read
     std::vector<RevBayesCore::path> vectorOfFileNames;
-    if ( RevBayesCore::is_directory( trace_file_name) )
+    
+    if ( args[0].getVariable()->getRevObject().isType( ModelVector<RlString>::getClassTypeSpec() ) )
     {
-        RevBayesCore::setStringWithNamesOfFilesInDirectory( trace_file_name, vectorOfFileNames );
+        if (nruns > 1)
+        {
+            throw RbException("Specify only a single base filename when nruns > 1");
+        }
+
+        const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::vector<RevBayesCore::path> tmp;
+        for (size_t i = 0; i < fn.size(); i++)
+        {
+            RevBayesCore::path filepath = fn[i];
+            
+            if ( not RevBayesCore::exists(filepath) )
+            {
+                std::string errorStr = "";
+                RevBayesCore::formatError(filepath, errorStr);
+                throw RbException(errorStr);
+            }
+            
+            if ( RevBayesCore::is_directory(filepath))
+            {
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( filepath, tmp );
+            }
+            else
+            {
+                tmp.push_back( filepath );
+            }
+        }
+        
+        for (size_t i = 0; i < tmp.size(); i++)
+        {
+            vectorOfFileNames.push_back(tmp[i]);
+        }
+        std::set<RevBayesCore::path> s( vectorOfFileNames.begin(), vectorOfFileNames.end() );
+        vectorOfFileNames.assign( s.begin(), s.end() );
     }
     else
     {
-        vectorOfFileNames.push_back( trace_file_name );
+        RevBayesCore::path trace_file_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+        
+        for (size_t i = 0; i < nruns; i++)
+        {
+            auto filepath = trace_file_name;
+            if (nruns > 1)
+            {
+                string run_tag = "_run_" + StringUtilities::to_string(i+1);
+                filepath = RevBayesCore::appendToStem(filepath, run_tag);
+            }
+            
+            // check that the file/path name has been correctly specified
+            if ( not RevBayesCore::exists(filepath))
+            {
+                std::string errorStr = "";
+                RevBayesCore::formatError(filepath, errorStr);
+                throw RbException(errorStr);
+            }
+            
+            // set up a vector of strings containing the name or names of the files to be read
+            if (RevBayesCore::is_directory( filepath ))
+            {
+                RevBayesCore::setStringWithNamesOfFilesInDirectory( filepath, vectorOfFileNames );
+            }
+            else
+            {
+                vectorOfFileNames.push_back( filepath );
+            }
+        }
     }
-
         
-    std::vector<RevBayesCore::TraceNumeric> data;
-        
-    long thinning = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    std::vector< std::vector<RevBayesCore::TraceNumeric> > data;
 
     // Set up a map with the file name to be read as the key and the file type as the value. Note that we may not
-    // read all of the files in the string called "vectorOfFileNames" because some of them may not be in a format
+    // read all of the files in the vector called "vectorOfFileNames" because some of them may not be in a format
     // that can be read.
 
-    for (auto& filename: vectorOfFileNames)
+    for (size_t i = 0; i < vectorOfFileNames.size(); i++)
     {
+        RevBayesCore::path filename = vectorOfFileNames[i];
         bool hasHeaderBeenRead = false;
         
         /* Open file */
@@ -100,11 +154,12 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
         std::string commandLine;
         RBOUT("Processing file \"" + filename.string() + "\"");
         size_t n_samples = 0;
+        
+        std::vector<RevBayesCore::TraceNumeric> single_trace;
             
         /* Command-processing loop */
         while ( inFile.good() )
         {
-                
             // Read a line
             std::string line;
             RevBayesCore::safeGetline(inFile, line);
@@ -115,7 +170,6 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             {
                 continue;
             }
-                
                 
             // removing comments
             if (line[0] == '#')
@@ -130,8 +184,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             // we assume a header at the first line of the file
             if (!hasHeaderBeenRead)
             {
-                    
-                for (size_t j=0; j<columns.size(); j++)
+                for (size_t j = 0; j < columns.size(); j++)
                 {
                     RevBayesCore::TraceNumeric t;
                         
@@ -139,14 +192,12 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
                     t.setParameterName(parmName);
                     t.setFileName( filename );
                         
-                    data.push_back( t );
+                    single_trace.push_back( t );
                 }
                     
                 hasHeaderBeenRead = true;
-                    
                 continue;
             }
-            
             
             // increase our sample counter
             ++n_samples;
@@ -157,44 +208,60 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
                 continue;
             }
             
-            // adding values to the Tracess
-            for (size_t j=0; j<columns.size(); j++)
+            // adding values to the Traces
+            for (size_t j = 0; j < columns.size(); j++)
             {
-                RevBayesCore::TraceNumeric& t = static_cast<RevBayesCore::TraceNumeric&>( data[j] );
+                RevBayesCore::TraceNumeric& t = static_cast<RevBayesCore::TraceNumeric&>( single_trace[j] );
                 std::string tmp = columns[j];
                 double d = atof( tmp.c_str() );
                 t.addObject(d);
             }
         }
+        
+        data.push_back( single_trace );
     }
-    
-    RevObject& b = args[2].getVariable()->getRevObject();
 
-    WorkspaceVector<Trace> *rv = new WorkspaceVector<Trace>();
-    for (std::vector<RevBayesCore::TraceNumeric>::iterator it = data.begin(); it != data.end(); ++it)
+    WorkspaceVector<WorkspaceVector<Trace> > all_traces;
+    for (size_t i = 0; i < data.size(); i++)
     {
-        int burnin = 0;
-
-        if ( b.isType( Integer::getClassTypeSpec() ) )
+        WorkspaceVector<Trace> one_trace;
+        
+        for (std::vector<RevBayesCore::TraceNumeric>::iterator it = data[i].begin(); it != data[i].end(); ++it)
         {
-            burnin = (int)static_cast<const Integer &>(b).getValue();
+            int burnin = 0;
+            
+            if ( b.isType( Integer::getClassTypeSpec() ) )
+            {
+                burnin = (int)static_cast<const Integer &>(b).getValue();
+            }
+            else
+            {
+                double burninFrac = static_cast<const Probability &>(b).getValue();
+                burnin = int( floor( it->size()*burninFrac ) );
+            }
+            
+            it->computeStatistics();
+            
+            Trace trace( *it );
+            trace.getValue().setBurnin(burnin);
+            
+            one_trace.push_back( trace );
         }
-        else
-        {
-            double burninFrac = static_cast<const Probability &>(b).getValue();
-            burnin = int( floor( it->size()*burninFrac ) );
-        }
-
-        it->computeStatistics();
-
-        Trace trace( *it );
-        trace.getValue().setBurnin(burnin);
-
-        rv->push_back( trace );
+        
+        all_traces.push_back( one_trace );
     }
     
-    // return the vector of traces
-    return new RevVariable( rv );
+    // return a vector of traces (one trace file) or vector of vectors of traces (multiple trace files)
+    WorkspaceVector<WorkspaceVector<Trace> > *rv = new WorkspaceVector<WorkspaceVector<Trace> >(all_traces);
+    
+    if ( rv->size() == 1 )
+    {
+        return new RevVariable( &(*rv)[0] );
+    }
+    else
+    {
+        return new RevVariable( rv );
+    }
 }
 
 
@@ -215,7 +282,8 @@ const ArgumentRules& Func_readTrace::getArgumentRules( void ) const
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
+        argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
+        argumentRules.push_back( new ArgumentRule( "nruns", Natural::getClassTypeSpec(), "The number of trace files with the same basename (i.e. the number of filenames with pattern <file>_run_<n>.log)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1 ) ) );
 
         rules_set = true;
     }

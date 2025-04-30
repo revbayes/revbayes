@@ -56,7 +56,7 @@ RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_pomoRootFrequencies::
     
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* q = static_cast<const RateGenerator &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::TypedDagNode< long >* n = static_cast<const Natural &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n = static_cast<const Natural &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::PoMoRootFrequenciesFunction* pomorf = new RevBayesCore::PoMoRootFrequenciesFunction( rbf, rpp, q, n );
     

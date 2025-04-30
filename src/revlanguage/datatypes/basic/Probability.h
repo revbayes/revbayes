@@ -42,7 +42,7 @@ class TypeSpec;
         std::string                     getConstructorFunctionName(void) const;                                 //!< Get the name used for the constructor function in Rev.
         const MemberRules&              getParameterRules(void) const;                                          //!< Get member rules (const)
         const TypeSpec&                 getTypeSpec(void) const;                                                //!< Get language type of the object
-        virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
+        virtual double                  isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;                 //!< Is convertible to type?
 
         std::string                     getGuiName(void) { return "Probability"; }
         std::string                     getGuiUnicodeSymbol(void) { return "P"; }

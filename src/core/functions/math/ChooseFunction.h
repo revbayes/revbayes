@@ -9,13 +9,13 @@ template <class valueType> class TypedDagNode;
     
     /**
      * @brief Calculates the binomial coefficient of a choose b for two
-     * TypedDagNodes of type long. Calculated as a! / b! (a - b)!
+     * TypedDagNodes of type std::int64_t. Calculated as a! / b! (a - b)!
      *
      */
-    class ChooseFunction : public TypedFunction<long> {
+    class ChooseFunction : public TypedFunction<std::int64_t> {
         
     public:
-        ChooseFunction(const TypedDagNode<long> *a, const TypedDagNode<long> *b);
+        ChooseFunction(const TypedDagNode<std::int64_t> *a, const TypedDagNode<std::int64_t> *b);
         
         ChooseFunction*                      clone(void) const;                                                  //!< Create a clon.
         void                                update(void);                                                       //!< Recompute the value
@@ -24,8 +24,8 @@ template <class valueType> class TypedDagNode;
         void                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Implementation of swaping parameters
         
     private:
-        const TypedDagNode<long>*         n;
-        const TypedDagNode<long>*         k;
+        const TypedDagNode<std::int64_t>*         n;
+        const TypedDagNode<std::int64_t>*         k;
     };
 }
 

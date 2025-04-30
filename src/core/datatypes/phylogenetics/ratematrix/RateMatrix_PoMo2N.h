@@ -41,7 +41,7 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
 
         //RateMatrix_PoMo2N(size_t num_states) ;
-        RateMatrix_PoMo2N(long num_states, long in_n )  ;
+        RateMatrix_PoMo2N(std::int64_t num_states, std::int64_t in_n )  ;
         RateMatrix_PoMo2N(const RateMatrix_PoMo2N& m) ;
 
         RateMatrix_PoMo2N&                         operator=(const RateMatrix_PoMo2N &r) ;
@@ -54,7 +54,7 @@ namespace RevBayesCore {
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setN( long &ni );
+        void                                        setN( std::int64_t &ni );
         void                                        setMu(  const std::vector<double> &m );
         void                                        setPhi( const std::vector<double> &f );
 
@@ -63,7 +63,7 @@ namespace RevBayesCore {
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
         
-        long                                        N;
+        std::int64_t                                        N;
         std::vector<double>                         mu;   
         std::vector<double>                         phi;    
         std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies

@@ -2,6 +2,7 @@
 #define VectorSlideProposal_H
 
 #include <cstddef>
+#include <cstdint>
 #include <ostream>
 #include <vector>
 
@@ -30,7 +31,7 @@ template <class variableType> class StochasticNode;
     class VectorSlideProposal : public Proposal {
         
     public:
-        VectorSlideProposal(StochasticNode<RbVector<double> >* n, const std::vector<long> &i,double l);                                 //!< Constructor
+        VectorSlideProposal(StochasticNode<RbVector<double> >* n, const std::vector<std::int64_t> &i,double l);                                 //!< Constructor
         
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         VectorSlideProposal*                        clone(void) const;                                                                  //!< Clone object
@@ -52,7 +53,7 @@ template <class variableType> class StochasticNode;
         // parameters
         
         StochasticNode<RbVector<double> >*          variable;
-        std::vector<long>                           indices;
+        std::vector<std::int64_t>                           indices;
         double                                      lambda;                                                                             //!< The Slide parameter of the Proposal (larger lambda -> larger proposals).
         size_t                                      length;
         double                                      storedSlidingFactor;                                                                        //!< The stored value of the last modified element.

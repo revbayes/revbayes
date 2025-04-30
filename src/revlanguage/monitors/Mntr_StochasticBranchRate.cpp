@@ -65,7 +65,7 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
         sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
         sse_process->setSampleCharacterHistory( true );
 
-        m = new RevBayesCore::StochasticBranchRateMonitor( cdbdp_sn, (unsigned long)print_gen, file_name, sep );
+        m = new RevBayesCore::StochasticBranchRateMonitor( cdbdp_sn, (std::uint64_t)print_gen, file_name, sep );
         m->setAppend( app );
         m->setPrintVersion( wv );
     }
@@ -74,7 +74,7 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
 
-        m = new RevBayesCore::StochasticBranchRateMonitor( glhbdsp_sn, (unsigned long)print_gen, file_name, sep );
+        m = new RevBayesCore::StochasticBranchRateMonitor( glhbdsp_sn, (std::uint64_t)print_gen, file_name, sep );
         m->setAppend( app );
         m->setPrintVersion( wv );
     }

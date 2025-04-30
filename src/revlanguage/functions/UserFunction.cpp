@@ -74,7 +74,7 @@ RevPtr<RevVariable> UserFunction::executeCode( void )
     {
         // Note: We can add also temporary variable arguments as references because we
         // currently store them as arguments of the Rev function in UserFunctionArgs
-        // as long as the UserFunctionCall exists.
+        // as std::int64_t as the UserFunctionCall exists.
         function_frame->addReference( it->getLabel(), it->getVariable() );
     }
 

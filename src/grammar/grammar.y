@@ -61,6 +61,7 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 using namespace RevLanguage;
 
@@ -83,7 +84,7 @@ Parser& parser = Parser::getParser();
     char*                                           c_string;
     std::string*                                    string;
     double                                          realValue;
-    long                                             longIntValue;
+    std::int64_t                                    longIntValue;
     bool                                            boolValue;
     RevLanguage::SyntaxElement*                     syntaxElement;
     RevLanguage::SyntaxVariable*                    syntaxVariable;

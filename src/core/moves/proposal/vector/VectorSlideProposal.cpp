@@ -15,7 +15,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-VectorSlideProposal::VectorSlideProposal( StochasticNode< RbVector<double> > *n, const std::vector<long> &i, double l) : Proposal(),
+VectorSlideProposal::VectorSlideProposal( StochasticNode< RbVector<double> > *n, const std::vector<std::int64_t> &i, double l) : Proposal(),
     variable( n ),
     indices( i ),
     lambda( l ),

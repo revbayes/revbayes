@@ -271,15 +271,18 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
-    std::map<const DagNode*, double> initialPdfs;
+    NodePrMap initialPdfs;
     if (logMCMC >= 3 or debugMCMC >= 1)
     	initialPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {
         std::cerr<<std::setprecision(11);
-        for(auto& [node,pr]: initialPdfs)
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = initialPdfs.at(node);
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
@@ -341,8 +344,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
     {
-        if (fail_probability) break;
-
         if (not node->isStochastic()) continue;
 
         double ratio = 0;
@@ -366,7 +367,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             if ( e.getExceptionType() != RbException::MATH_ERROR )
                 throw;
 
-            ratio = RbConstants::Double::neginf;
+            ratio = RbConstants::Double::nan;
         }
 
         if ( node->isClamped() )
@@ -379,8 +380,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: getNodePrs(nodes, affected_nodes))
+        auto proposedPrs = getNodePrs(nodes, affected_nodes);
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = proposedPrs.at(node);
             std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 
@@ -426,8 +431,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     else
     {
-        if ( ln_posterior_ratio < -1000 )
-            throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
+        if ( ln_posterior_ratio < -1000 and logMCMC + debugMCMC >= 1)
+            std::cerr << "Warning: Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
 
         num_accepted_total++;
         num_accepted_current_period++;
@@ -439,14 +444,17 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         proposal->cleanProposal();
     }
 
-    std::map<const DagNode*, double> finalPdfs;
+    NodePrMap finalPdfs;
     if (logMCMC >=3 or (debugMCMC >= 1 and rejected))
 	finalPdfs = getNodePrs(nodes, affected_nodes);
 
     if (logMCMC >= 3)
     {
-        for(auto& [node,pr]: finalPdfs)
+        for(auto& node: views::concat(nodes,affected_nodes))
+        {
+            auto pr = finalPdfs.at(node);
             std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
+        }
         std::cerr<<"\n";
     }
 

@@ -106,7 +106,7 @@ RevBayesCore::VectorMixtureDistribution< typename valType::valueType >* RevLangu
     }
 
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* p = static_cast<const Simplex &>( probabilities->getRevObject() ).getDagNode();
-    long n = static_cast<const Natural &>( num_values->getRevObject() ).getValue();
+    std::int64_t n = static_cast<const Natural &>( num_values->getRevObject() ).getValue();
 
     RevBayesCore::VectorMixtureDistribution<typename valType::valueType>* d = new RevBayesCore::VectorMixtureDistribution<typename valType::valueType>(bd,p,n);
     
