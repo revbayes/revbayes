@@ -431,8 +431,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     else
     {
-        if ( ln_posterior_ratio < -1000 )
-            throw RbException() << "Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
+        if ( ln_posterior_ratio < -1000 and logMCMC + debugMCMC >= 1)
+            std::cerr << "Warning: Accepted move '" << proposal->getProposalName() << "' with with posterior ratio of " << ln_posterior_ratio << " and Hastings ratio of " << ln_hastings_ratio << ".";
 
         num_accepted_total++;
         num_accepted_current_period++;
