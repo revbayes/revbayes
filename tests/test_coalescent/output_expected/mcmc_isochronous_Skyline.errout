@@ -1,0 +1,67 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 22 different moves in a random move schedule with 169.6 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  pop_size[1]              2.0000         23         16      0.6957 lambda = 0.1000
+Scaling                                  pop_size[2]              2.0000         21         15      0.7143 lambda = 0.1000
+Scaling                                  pop_size[3]              2.0000         13         11      0.8462 lambda = 0.1000
+Scaling                                  pop_size[4]              2.0000         20         14      0.7000 lambda = 0.1000
+Scaling                                  pop_size[5]              2.0000         23         18      0.7826 lambda = 0.1000
+Scaling                                  pop_size[6]              2.0000         17         14      0.8235 lambda = 0.1000
+Scaling                                  pop_size[7]              2.0000         23         23      1.0000 lambda = 0.1000
+NarrowExchange                           psi                     36.0000        370         87      0.2351 
+NNI                                      psi                     36.0000        336         73      0.2173 
+FNPR                                     psi                      9.0000         80         21      0.2625 
+SubtreeScale                             psi                      7.2000         87         36      0.4138 
+NodeTimeSlideUniform                     psi                     36.0000        396        187      0.4722 
+RootTimeScaleBactrian                    psi                      7.2000         70         10      0.1429 
+TreeScale                                psi                      7.2000         69          4      0.0580 delta = 1.0000
+BetaSimplex                              er                       3.0000         30         11      0.3667 alpha = 1.0000
+DirichletSimplex                         er                       1.0000          9          2      0.2222 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         22          3      0.1364 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000          5          0      0.0000 alpha = 1.0000
+Scaling                                  alpha                    2.0000         10          5      0.5000 lambda = 1.0000
+Sliding                                  p_inv                    1.0000         12          2      0.1667 delta = 1.0000
+Scaling                                  clock                    2.0000         20          5      0.2500 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         44          4      0.0909 lambda = 1.0000
+
