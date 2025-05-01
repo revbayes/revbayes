@@ -1929,6 +1929,9 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
+    // set the new root
+    setRoot( &n.getParent(), reindex );
+    
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
     {
@@ -1938,10 +1941,7 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
         // second, we suppress any internal nodes of outdegree 1 ("knuckles" / sampled ancestors)
         suppressOutdegreeOneNodes(true);
         
-    } // end-if we do not want to make the tree bifurcating
-
-    // set the new root
-    setRoot( &n.getParent(), reindex );
+    }
 }
 
 
