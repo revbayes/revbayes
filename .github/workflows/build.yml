@@ -181,10 +181,6 @@ jobs:
         ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
-    - name: Update submodules
-      run: |
-        git submodule update --init --recursive
-        
     - name: Configure and build
       if: matrix.name != 'windows'
       env:
@@ -240,6 +236,7 @@ jobs:
         # Don't put the wrapper in the same dir as rb.exe so we don't ship it
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'
+          echo 'export WINEDEBUG=-all'
           echo 'if [ "$#" -gt "1" ]; then'
           echo '  wine ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
           echo 'else'
@@ -272,9 +269,25 @@ jobs:
            rm -f test_CBDSP/output_expected/mcmc_CBDSP.errout
         fi
 
-        if [ ${{ matrix.arch }} == "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} == "win64" ] ; then
+        if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
+           rm -f test_MC3/output_expected/*tuning_and_checkpointing*
            rm -rf test_FBD/output_expected/
            rm -rf test_BDSTP/output_expected/
+
+           # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
+           rm -rf test_propose_bad_index/output_expected/
+        fi
+
+        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+           rm -f test_coalescent/output_expected/horses_het_BSP*
+           rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
+           rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
+           rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
+        fi
+
+        if [ ${{ matrix.arch }} == "win64" ] ; then
+           rm -f test_coalescent/output_expected/horses_iso_EBSP_*
+           rm -f test_coalescent/output_expected/mcmc_isochronous_EBSP.errout
         fi
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb

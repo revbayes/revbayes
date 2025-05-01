@@ -56,7 +56,7 @@ namespace RevBayesCore {
         virtual void                                                      setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
         void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool use_simmap_default=true);
-        void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events);
+        void                                                              drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<std::int64_t>& num_events);
         void                                                              drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates);
 
         void                                                              dumpModel(std::string file_name);

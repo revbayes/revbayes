@@ -149,9 +149,9 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
     }
     
     // index by time_index, feature_index, region_index, (region_index)
-    std::map<size_t, std::map<size_t, std::vector<long> > > within_categorical;
+    std::map<size_t, std::map<size_t, std::vector<std::int64_t> > > within_categorical;
     std::map<size_t, std::map<size_t, std::vector<double> > > within_quantitative;
-    std::map<size_t, std::map<size_t, std::vector<std::vector<long> > > > between_categorical;
+    std::map<size_t, std::map<size_t, std::vector<std::vector<std::int64_t> > > > between_categorical;
     std::map<size_t, std::map<size_t, std::vector<std::vector<double> > > > between_quantitative;
 
     // error checking
@@ -242,7 +242,7 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
         
         if (feature_relationship == "within" && feature_type == "categorical") {
             for (size_t k = 0; k < row_dat[0].size(); k++) {
-                long val = 0;
+                std::int64_t val = 0;
                 if (row_dat[0][k] == nonexistent_region_token) {
                     val = -1;
                 } else {
@@ -262,9 +262,9 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
             }
         } else if (feature_relationship == "between" && feature_type == "categorical") {
             for (size_t j = 0; j < row_dat.size(); j++) {
-                between_categorical[time_index][feature_index].push_back( std::vector<long>() );
+                between_categorical[time_index][feature_index].push_back( std::vector<std::int64_t>() );
                 for (size_t k = 0; k < row_dat[0].size(); k++) {
-                    long val = 0;
+                    std::int64_t val = 0;
                     if (row_dat[j][k] == nonexistent_region_token) {
                         val = -1;
                     } else {

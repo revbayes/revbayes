@@ -25,7 +25,7 @@ namespace RevBayesCore {
     public:
         
         FeatureInformedRateFunction(
-            const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* cf,
+            const TypedDagNode< RbVector<RbVector<RbVector<std::int64_t> > > >* cf,
             const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* qf,
             const TypedDagNode< RbVector<double> >* cp,
             const TypedDagNode< RbVector<double> >* qp,
@@ -44,7 +44,7 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode< RbVector<RbVector<RbVector<long> > > >*    categorical_features;
+        const TypedDagNode< RbVector<RbVector<RbVector<std::int64_t> > > >*    categorical_features;
         const TypedDagNode< RbVector<RbVector<RbVector<double> > > >*  quantitative_features;
         const TypedDagNode< RbVector<double> >*  categorical_params;
         const TypedDagNode< RbVector<double> >*  quantitative_params;

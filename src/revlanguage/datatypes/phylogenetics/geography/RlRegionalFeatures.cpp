@@ -104,7 +104,7 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
     if (name == "numLayers") {
         found = true;
         std::map<std::string, std::map<std::string, size_t> > val = this->dag_node->getValue().getNumLayers();
-        std::vector<long> x;
+        std::vector<std::int64_t> x;
         x.push_back( val["within"]["categorical"] );
         x.push_back( val["within"]["quantitative"] );
         x.push_back( val["between"]["categorical"] );

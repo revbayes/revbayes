@@ -1,0 +1,119 @@
+#################################################################################################
+#
+# RevBayes Example: Coalescent process with GMRF prior applied to heterochronous horse tree data
+#
+# authors: Sebastian Hoehna, Ronja Billenstein
+#
+#################################################################################################
+
+## Global settings
+
+seed(1234)
+NUM_REPLICATES      = 2
+NUM_MCMC_ITERATIONS = 10
+THINNING            = 1
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+# Read in the tree sample and create a MAP (maximum a posteriori) tree
+trees = readTreeTrace("output/horses_het_BSP.trees", treetype = "clock", burnin = 0.1)
+maptree = mapTree(trace=trees, conditionalAges=TRUE)
+taxa <- maptree.taxa()
+
+# Get the number of taxa. We need it later on.
+n_taxa <- taxa.size()
+
+##############
+# Tree model #
+##############
+
+MAX_AGE = maptree.rootAge()
+print("max age: ", MAX_AGE)
+
+NUM_INTERVALS <- 10
+
+for (i in 1:(NUM_INTERVALS-1)) {
+
+    changePoints[i] <- i * ((MAX_AGE)/NUM_INTERVALS)
+
+}
+
+
+population_size_at_present ~ dnUniform(0,1E8)
+population_size_at_present.setValue(100000)
+
+moves.append( mvScaleBactrian(population_size_at_present,weight=5) )
+moves.append( mvMirrorMultiplier(population_size_at_present,weight=5) )
+moves.append( mvRandomDive(population_size_at_present,weight=5) )
+
+# this value depends on the number of intervals, you can find the best value using RevGadgets
+# setMRFGlobalScaleHyperpriorNShifts(9, "GMRF")
+population_size_global_scale_hyperprior <- 0.1203
+population_size_global_scale ~ dnHalfCauchy(0,1)
+
+moves.append( mvScaleBactrian(population_size_global_scale,weight=5.0) )
+
+for (i in 1:(NUM_INTERVALS-1)) {
+  # non-centralized parameterization of horseshoe
+  delta_log_population_size[i] ~ dnNormal( mean=0, sd=population_size_global_scale*population_size_global_scale_hyperprior )
+  # Make sure values initialize to something reasonable
+  delta_log_population_size[i].setValue(runif(1,-0.1,0.1)[1])
+  moves.append( mvSlideBactrian(delta_log_population_size[i], weight=5) )
+}
+
+population_size := fnassembleContinuousMRF(population_size_at_present,delta_log_population_size,initialValueIsLogScale=FALSE,order=1)
+
+# Move all field parameters in one go
+moves.append( mvEllipticalSliceSamplingSimple(delta_log_population_size,weight=5,tune=FALSE) )
+# joint sliding moves of all vector elements
+moves.append( mvVectorSlide(delta_log_population_size, weight=10) )
+# up-down slide of the entire vector and the rate at present
+rates_up_down_move = mvUpDownScale(weight=10.0)
+rates_up_down_move.addVariable(population_size_at_present,FALSE)
+rates_up_down_move.addVariable(delta_log_population_size,TRUE)
+moves.append( rates_up_down_move )
+# shrink expand moves
+moves.append( mvShrinkExpand( delta_log_population_size, sd=population_size_global_scale, weight=10 ) )
+
+
+### the time tree is a stochastic node modeled by the coalescent skyline process (dnCoalescentSkyline)
+psi ~ dnCoalescentSkyline(theta=population_size, times=changePoints, method="specified", taxa=taxa)
+psi.clamp(maptree)
+
+interval_times := changePoints
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+
+
+################
+# The Analysis #
+################
+
+#add monitors
+monitors.append( mnModel(filename="output/horses_het_GMRF_maptreebased.log",printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_het_GMRF_maptreebased_NEs.log",population_size,printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_het_GMRF_maptreebased_times.log",interval_times,printgen=THINNING) )
+
+mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPLICATES, combine="mixed")
+mymcmc.run(NUM_MCMC_ITERATIONS, tuning = 100)
+
+mymcmc.operatorSummary()
+
+################
+
+# you may want to quit RevBayes now
+q()

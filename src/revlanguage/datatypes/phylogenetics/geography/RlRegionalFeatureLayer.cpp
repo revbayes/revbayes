@@ -92,9 +92,9 @@ RevPtr<RevVariable> RlRegionalFeatureLayer::executeMethod(std::string const &nam
         
         if (relationship == "within" && type == "categorical") {
             std::vector<std::vector<double> > val = layer.getFeatureValues();
-            RevBayesCore::RbVector<RevBayesCore::RbVector<long> > z(1);
+            RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > z(1);
             for (size_t i = 0; i < val[0].size(); i++) {
-                z[0].push_back((long)val[0][i]);
+                z[0].push_back((std::int64_t)val[0][i]);
             }
             return new RevVariable( new ModelVector<ModelVector<Integer> >( z ) );
             
@@ -107,11 +107,11 @@ RevPtr<RevVariable> RlRegionalFeatureLayer::executeMethod(std::string const &nam
             return new RevVariable( new ModelVector<ModelVector<Real> >( z ) );
         } else if (relationship == "between" && type == "categorical") {
             std::vector<std::vector<double> > val = layer.getFeatureValues();
-            RevBayesCore::RbVector<RevBayesCore::RbVector<long> > z;
+            RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > z;
             for (size_t i = 0; i < val.size(); i++) {
-                z.push_back(RevBayesCore::RbVector<long>());
+                z.push_back(RevBayesCore::RbVector<std::int64_t>());
                 for (size_t j = 0; j < val[i].size(); j++) {
-                    z[i].push_back((long)val[i][j]);
+                    z[i].push_back((std::int64_t)val[i][j]);
                 }
             }
             const ModelVector<ModelVector<Integer> >& x = static_cast<const ModelVector<ModelVector<Integer> >&>(z);

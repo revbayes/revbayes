@@ -51,7 +51,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_discretizePr
        
     const ProbabilityContinuousDistribution& rlDistribution = static_cast<const ProbabilityContinuousDistribution&>( this->args[0].getVariable()->getRevObject() );
     RevBayesCore::ContinuousDistribution* g0 = static_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<long>* num_cats = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* num_cats = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::DiscretizeDistributionFunction *func = new RevBayesCore::DiscretizeDistributionFunction( g0, num_cats );
     

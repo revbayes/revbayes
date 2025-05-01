@@ -49,7 +49,7 @@ using namespace RevBayesCore;
 TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist,
                                                                           const std::vector<Clade> &c,
                                                                           Tree *t,
-                                                                          long age_check_precision) : TypedDistribution<Tree>( NULL ),
+                                                                          std::int64_t age_check_precision) : TypedDistribution<Tree>( NULL ),
 //    active_backbone_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     active_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     backbone_topology(NULL),

@@ -1,0 +1,43 @@
+   Processing file "output/horses_het_BSP.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+max age: 	1046041
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 17 different moves in a random move schedule with 100 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+ScalingBactrian                          population_size_at_present     5.0000         53          2      0.0377 sigma = 1.0000
+MirrorMultiplier                         population_size_at_present     5.0000         43          0      0.0000 sigma = 1.0000
+HalfRandomDive                           population_size_at_present     5.0000         39          7      0.1795 delta = 1.0000
+ScalingBactrian                          population_size_global_scale     5.0000         41          4      0.0976 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[1]     5.0000         57          2      0.0351 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[2]     5.0000         54          7      0.1296 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[3]     5.0000         53          5      0.0943 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[4]     5.0000         42         10      0.2381 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[5]     5.0000         47         20      0.4255 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[6]     5.0000         44         26      0.5909 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[7]     5.0000         63         38      0.6032 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[8]     5.0000         53         36      0.6792 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[9]     5.0000         48         29      0.6042 sigma = 1.0000
+EllipticalSliceSamplingSimpleMove        delta_log_population_size[1]     5.0000         61 
+  Ave. cos(angle(x1,x2)) = 0.9626
+  Ave. # of Pr evals = 5.7213
+  window = 6.2832
+
+VectorSlide                              delta_log_population_size[1]    10.0000        104         23      0.2212 lambda = 1.0000
+UpDownScaling                            population_size_at_present    10.0000        103         13      0.1262 lambda = 1.0000
+ShrinkExpand                             delta_log_population_size[1]    10.0000         95         48      0.5053 lambda = 1.0000
+

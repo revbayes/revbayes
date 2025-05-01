@@ -161,7 +161,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
             {
                 func = static_cast<Function*>( the_object.clone() );
                 std::vector<bool> arg_mapped(args.size(), false);
-                found = func->checkArguments(args, NULL, arg_mapped, !dynamic);
+                found = func->checkArguments(args, NULL, arg_mapped);
             }
         }
         
@@ -169,11 +169,11 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
         // This call will throw a relevant message if the function is not found
         if ( found == false )
         {
-            func = env->getFunction(function_name, args, !dynamic).clone();
+            func = env->getFunction(function_name, args).clone();
         }
         
         // Allow the function to process the arguments
-        func->processArguments( args, !dynamic );
+        func->processArguments( args );
         
         // Set the execution environment of the function
         func->setExecutionEnviroment( env );
@@ -190,7 +190,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
         
         const MethodTable& mt = the_member_object.getMethods();
         
-        const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
+        const Function* the_const_function = mt.findFunction( function_name, args );
 
         Function* the_function;
         if ( the_const_function != NULL )
@@ -202,7 +202,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
             throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
         }
         
-        the_function->processArguments(args, !dynamic);
+        the_function->processArguments(args );
         
         MemberMethod* the_member_method = dynamic_cast<MemberMethod*>( the_function );
         if ( the_member_method != NULL )

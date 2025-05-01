@@ -178,7 +178,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
         //    rv.resize(n_states);
         rv.clear();
         
-        size_t from_idx = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         
         for (size_t to_idx = 0; to_idx < n_states; to_idx++)
         {
@@ -216,7 +216,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 ////    rv.resize(n_states);
 //    rv.clear();
 //
-//    size_t from_idx = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+//    size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
 //
 //    for (size_t to_idx = 0; to_idx < n_states; to_idx++)
 //    {

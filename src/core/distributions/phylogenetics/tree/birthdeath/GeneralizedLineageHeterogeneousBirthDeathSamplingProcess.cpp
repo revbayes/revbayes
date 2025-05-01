@@ -202,7 +202,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 			{
 				// add the extinct node to the active nodes list, remove it from the extinct nodes list
 				active_nodes.push_back( extinct_nodes.at(j) );
-				extinct_nodes.erase( extinct_nodes.begin() + long(j) );
+				extinct_nodes.erase( extinct_nodes.begin() + std::int64_t(j) );
 			}
 		}
 
@@ -211,14 +211,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 		TopologyNode* leftChild = active_nodes.at(left);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(left) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(left) );
 
 		// randomly draw one child (arbitrarily called left) node from the list of active nodes
 		size_t right = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
 		TopologyNode* rightChild = active_nodes.at(right);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(right) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(right) );
 
 		// add the parent
 		size_t num_taxa = taxa.size();
@@ -851,13 +851,18 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
     
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<std::int64_t>& num_events_)
 {
+        // Convert from long to std::int64_t for TensorPhylo
+        std::vector<long> num_events;
+        for(auto n: num_events_)
+            num_events.push_back(n);
 
 	// prepare parameters for the pointer
 	prepareParameters(false);
 
-	// draw the stochastic map
+
+        // draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);
 
 	// translate the map to a vector of strings

@@ -18,8 +18,8 @@ class DagNode;
         
     public:
         // Constructors and Destructors
-        AbstractFileMonitor(DagNode *n, unsigned long g, const path &fname, bool ap=false, bool wv=true);  //!< Constructor with single DAG node
-        AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, bool ap=false, bool wv=true);  //!< Constructor with vector of DAG node
+        AbstractFileMonitor(DagNode *n, std::uint64_t g, const path &fname, bool ap=false, bool wv=true);  //!< Constructor with single DAG node
+        AbstractFileMonitor(const std::vector<DagNode *> &n, std::uint64_t g, const path &fname, bool ap=false, bool wv=true);  //!< Constructor with vector of DAG node
         AbstractFileMonitor(const AbstractFileMonitor& f);
         
         virtual ~AbstractFileMonitor(void);
@@ -29,7 +29,7 @@ class DagNode;
         
         // Monitor functions
         void                                addFileExtension(const std::string &s, bool dir);
-        virtual void                        monitor(unsigned long gen) = 0;
+        virtual void                        monitor(std::uint64_t gen) = 0;
         virtual void                        printHeader(void) = 0;
         
         // FileMonitor functions
