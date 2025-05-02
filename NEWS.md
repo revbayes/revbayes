@@ -3,7 +3,7 @@
 ## Backwards-incompatible changes
   * Change the name of the tuning argument of `mvUpDownSlide` from `lambda` to `delta`.
   * Change the name of the first argument of `Tree.reroot( )` from `clade` to `outgroup`.
-  * In `powerPosterior( )`, specifying `ncats=N` sets up N analyses numbered 1--N, rather than N+1 analyses numbered 0--N.
+  * In `powerPosterior( )`, specifying `cats=N` sets up N analyses numbered 1--N, rather than N+1 analyses numbered 0--N.
 
 ## Features
   * Interface
