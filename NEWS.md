@@ -1,4 +1,16 @@
-# RevBayes 1.3.0 (unreleased)
+# RevBayes 1.3.1 (unreleased)
+
+## Backwards-incompatible changes
+
+## Features
+
+## Bug fixes
+
+## Documentation improvements
+
+## Infrastructure
+
+# RevBayes 1.3.0 (May 2, 2025)
 
 ## Backwards-incompatible changes
   * Change the name of the tuning argument of `mvUpDownSlide` from `lambda` to `delta`.
