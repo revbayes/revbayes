@@ -101,7 +101,7 @@
   * @basanta33 made their first contribution in [#704](https://github.com/revbayes/revbayes/pull/704)
   * @Levi-Raskin made their first contribution in [#711](https://github.com/revbayes/revbayes/pull/711)
 
-# RevBayes 1.2.5 (Dec 19, 2025)
+# RevBayes 1.2.5 (Dec 19, 2024)
 
 ## Backwards-incompatible changes
   * Remove `underPrior` argument to `mcmc.run( )` and `mcmcmc.run( )`.  You can use `model.ignoreAllData()` instead.
@@ -161,9 +161,9 @@
   * Clarify differences between `.clamp()` and `.setValue()` (#599).
   * Stopping and convergence rules (#488).
   * `mcmc` and `mcmcmc`
-    - `.run( )` (#485, #488).
-    - `.initializeFromCheckpoint( )` (#505).
-    - `moveschedule` parameter and the `weight` parameter of moves (#506).
+      - `.run( )` (#485, #488).
+      - `.initializeFromCheckpoint( )` (#505).
+      - `moveschedule` parameter and the `weight` parameter of moves (#506).
   * Corrections to `dnBivariatePoisson` (#539) and `mcmcmc` (#541).
 
 # RevBayes 1.2.4 (May 29, 2024)
