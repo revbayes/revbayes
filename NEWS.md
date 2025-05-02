@@ -41,6 +41,7 @@
       - Fix stochastic character mapping when there are excluded characters (#636).
       - Fix handling of large integers on Windows (#708).
       - Don't ignore negative clade constraints (#711).
+      - Allow for machine uncertainty in `dnEpisodicBirthDeath` with empirical sampling (#713).
       - Fix partial likelihood caching in `dnPhyloCTMC` (#729).
       - Allow reading multiple trees from a string (`readTrees(text = ...)`) (#735).
   * Partial
@@ -74,32 +75,21 @@
   * Discretization functions: `fnDiscretizeDistribution`, `fnDiscretizeGamma` (#707).
 
 ## Infrastructure
-  * Update validation tests [#473](https://github.com/revbayes/revbayes/pull/473)
-  * Fix CI builds by dropping openlibm [#644](https://github.com/revbayes/revbayes/pull/644)
-  * Changes to build files to streamline help infrastructure [#659](https://github.com/revbayes/revbayes/pull/659)
-  * Revamped tutorial testing [#674](https://github.com/revbayes/revbayes/pull/674)
-  * Ensuring integration tests can run tutorial checkpoint tests [#676](https://github.com/revbayes/revbayes/pull/676)
-  * Add integration tests for revised coalescent classes [#689](https://github.com/revbayes/revbayes/pull/689)
-  * Changed website submodule to pull from source rather than master. [#692](https://github.com/revbayes/revbayes/pull/692)
+  * Update validation tests (#473).
+  * Fix continuous-integration builds by dropping openlibm (#644).
+  * Change build files to streamline updates to the help database (#659).
+  * Make tutorial tests more flexible (#674).
+  * Make sure the test runner can handle tutorial checkpoint tests (#676).
+  * Add integration tests for revised coalescent classes (#689).
+  * Change website submodule to pull from source rather than master (#692).
 
-## Ignore
-  * Bump version after v1.2.5 release [#637](https://github.com/revbayes/revbayes/pull/637)
-  * Prevent loss of integer precision in MC^3 [#652](https://github.com/revbayes/revbayes/pull/652)
-  * Revert accidentally committed-by-unreview patch [#654](https://github.com/revbayes/revbayes/pull/654)
-  * Remove empty touch( ), keep( ), and  restore( ) specializations. [#658](https://github.com/revbayes/revbayes/pull/658)
-  * Mark overridden virtual functions as such in tree event moves [#669](https://github.com/revbayes/revbayes/pull/669)
-  * Don't throw exception to perform a simple check. [#677](https://github.com/revbayes/revbayes/pull/677)
-  * Dev hoehna lab [#682](https://github.com/revbayes/revbayes/pull/682)
-  * Fix broken overrides part1 [#684](https://github.com/revbayes/revbayes/pull/684)
-  * Update nlohmann::json to avoid tons of compilation warnings with GCC 15. [#685](https://github.com/revbayes/revbayes/pull/685)
-
-## New Contributors
-  * @sigibrock made their first contribution in [#648](https://github.com/revbayes/revbayes/pull/648)
-  * @raymondcast18 made their first contribution in [#649](https://github.com/revbayes/revbayes/pull/649)
-  * @PhyloevoTi made their first contribution in [#655](https://github.com/revbayes/revbayes/pull/655)
-  * @ixchelgzlzr made their first contribution in [#703](https://github.com/revbayes/revbayes/pull/703)
-  * @basanta33 made their first contribution in [#704](https://github.com/revbayes/revbayes/pull/704)
-  * @Levi-Raskin made their first contribution in [#711](https://github.com/revbayes/revbayes/pull/711)
+## New contributors
+  * @sigibrock made their first contribution in #648.
+  * @raymondcast18 made their first contribution in #649.
+  * @PhyloevoTi made their first contribution in #655.
+  * @ixchelgzlzr made their first contribution in #703.
+  * @basanta33 made their first contribution in #704.
+  * @Levi-Raskin made their first contribution in #711.
 
 # RevBayes 1.2.5 (Dec 19, 2024)
 
