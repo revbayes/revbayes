@@ -7,7 +7,7 @@
 
 ## Features
   * Interface
-      - Print convergence statistics during MCMC runs with stopping rules (#645, #657, #739).
+      - Print convergence statistics during MCMC runs with stopping rules if `verbose=2` (#645, #657, #739).
       - Better progress monitoring for power posterior analyses (#673).
   * Methods / arguments
       - Add member procedure for randomly resolving multifurcations (#641).
@@ -47,24 +47,31 @@
       - Prevent some instances of clamped values from being modified (#600).
 
 ## Documentation improvements
-  * Document simplex moves [#606](https://github.com/revbayes/revbayes/pull/606))
-  * Add help for jukes cantor [#649](https://github.com/revbayes/revbayes/pull/649)
-  * Fill out help file for exp function [#653](https://github.com/revbayes/revbayes/pull/653))
-  * Edit WAG help file  [#655](https://github.com/revbayes/revbayes/pull/655)
-  * Change rate matrix model help files [#656](https://github.com/revbayes/revbayes/pull/656)
-  * Complete and standardize stats distributions help files, part 1 [#663](https://github.com/revbayes/revbayes/pull/663)
-  * Document DPP moves [#666](https://github.com/revbayes/revbayes/pull/666)
-  * vectorFlatten.md fnFreeK.md, fnReadVCF.md, dnUniformInteger.md help files [#667](https://github.com/revbayes/revbayes/pull/667)
-  * Create matrix.md and var.md files for review [#681](https://github.com/revbayes/revbayes/pull/681)
-  * More move help files [#683](https://github.com/revbayes/revbayes/pull/683)
-  * Write help files for power and write function [#690](https://github.com/revbayes/revbayes/pull/690)
-  * Update readTrace.md [#702](https://github.com/revbayes/revbayes/pull/702)
-  * Update documentation for readTreeTrace [#703](https://github.com/revbayes/revbayes/pull/703)
-  * Add function covarion documentation [#704](https://github.com/revbayes/revbayes/pull/704)
-  * Update fnFreeBinary help file [#706](https://github.com/revbayes/revbayes/pull/706)
-  * Add documentation to 'fnDiscretizeDistribution' and 'fnDiscretizeG… [#707](https://github.com/revbayes/revbayes/pull/707)
-  * Document TreeTrace methods [#722](https://github.com/revbayes/revbayes/pull/722)
-  * Document readTrace methods [#723](https://github.com/revbayes/revbayes/pull/723)
+  * `Simplex` (#606).
+  * Moves
+      - `mvBetaSimplex`, `mvDirichletSimplex`, `mvElementSwapSimplex` (#606).
+      - `mvDPPValueBetaSimplex`, `mvDPPValueScaling`, `mvDPPValueSliding` (#666).
+      - `mvNNI`, `mvSPR`, `mvScale`, `mvScaleBactrian`, `mvSlide`, `mvSlideBactrian`, `mvTreeScale`, `mvUpDownScale`, `mvUpDownSlide` (#683).
+  * `sin` (#648, #683).
+  * Substitution models
+      - `fnJC` (#649).
+      - `fnF81`, `fnGTR`, `fnHKY`, `fnK80`, `fnK81`, `fnT92`, `fnTrN` (#653, #656).
+      - `fnLG`, `fnWAG` (#655).
+      - `fnFreeK` (#667).
+      - `fnCovarion` (#704).
+      - `fnFreeBinary` (#706).
+  * `exp` (#653).
+  * Complete and standardize documentation for `dnBernoulli`, `dnBeta`, `dnBimodalLognormal`, `dnBimodalNormal`, `dnBinomial`, `dnCategorical`, `dnCauchy`, `dnChisq`, `dnDirichlet`, `dnExponential`, `dnGamma` (#663).
+  * `dnUniformInteger`, `fnReadVCF`, `vectorFlatten` (#667).
+  * Expand documentation for `powerPosterior` (#673).
+  * `matrix`, `var` (#681).
+  * `floor`, `mnModel`, `reverse`, `sinh` (#683).
+  * `power`, `write` (#690).
+  * Analysis output types and I/O functions
+      - `readTrace` (#702, #723, #736).
+      - `readTreeTrace` (#703, #722, #723, #736).
+      - `Trace`, `TraceTree` (#723).
+  * Discretization functions: `fnDiscretizeDistribution`, `fnDiscretizeGamma` (#707).
 
 ## Infrastructure
   * Update validation tests [#473](https://github.com/revbayes/revbayes/pull/473)
