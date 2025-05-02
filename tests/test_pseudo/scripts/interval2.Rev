@@ -1,3 +1,5 @@
+seed(1)
+
 t ~ dnNormal(0,10)
 
 a ~ dnNormal(-1,1)

@@ -1,3 +1,5 @@
+seed(1)
+
 t ~ dnNormal(0,10)
 fossil ~ dnPseudo(t)
 fossil.clamp(pdInterval(-1,3))
