@@ -119,20 +119,20 @@ namespace RevBayesCore {
     }
     
     std::vector<int>                    operator+(const std::vector<int>&    x, const std::vector<int>&    y);              //!< Overloaded addition operator
-    std::vector<long>                   operator+(const std::vector<long>&   x, const std::vector<long>&   y);              //!< Overloaded addition operator
+    std::vector<std::int64_t>                   operator+(const std::vector<std::int64_t>&   x, const std::vector<std::int64_t>&   y);              //!< Overloaded addition operator
     std::vector<double>                 operator+(const std::vector<double>& x, const std::vector<double>& y);              //!< Overloaded addition operator
     std::vector<int>                    operator-(const std::vector<int>&    x, const std::vector<int>&    y);              //!< Overloaded subtraction operator
-    std::vector<long>                   operator-(const std::vector<long>&   x, const std::vector<long>&   y);              //!< Overloaded subtraction operator
+    std::vector<std::int64_t>                   operator-(const std::vector<std::int64_t>&   x, const std::vector<std::int64_t>&   y);              //!< Overloaded subtraction operator
     std::vector<double>                 operator-(const std::vector<double>& x, const std::vector<double>& y);              //!< Overloaded subtraction operator
     std::vector<int>                    operator*(const std::vector<int>&    x, const std::vector<int>&    y);              //!< Overloaded multiplication operator
-    std::vector<long>                   operator*(const std::vector<long>&   x, const std::vector<long>&   y);              //!< Overloaded multiplication operator
+    std::vector<std::int64_t>                   operator*(const std::vector<std::int64_t>&   x, const std::vector<std::int64_t>&   y);              //!< Overloaded multiplication operator
     std::vector<double>                 operator*(const std::vector<double>& x, const std::vector<double>& y);              //!< Overloaded multiplication operator
     std::vector<double>                 operator/(const std::vector<int>&    x, const std::vector<int>&    y);              //!< Overloaded division operator
-    std::vector<double>                 operator/(const std::vector<long>&   x, const std::vector<long>&   y);              //!< Overloaded division operator
+    std::vector<double>                 operator/(const std::vector<std::int64_t>&   x, const std::vector<std::int64_t>&   y);              //!< Overloaded division operator
     std::vector<double>                 operator/(const std::vector<double>& x, const std::vector<int>&    y);              //!< Overloaded division operator
-    std::vector<double>                 operator/(const std::vector<double>& x, const std::vector<long>&   y);              //!< Overloaded division operator
+    std::vector<double>                 operator/(const std::vector<double>& x, const std::vector<std::int64_t>&   y);              //!< Overloaded division operator
     std::vector<double>                 operator/(const std::vector<int>&    x, const std::vector<double>& y);              //!< Overloaded division operator
-    std::vector<double>                 operator/(const std::vector<long>&   x, const std::vector<double>& y);              //!< Overloaded division operator
+    std::vector<double>                 operator/(const std::vector<std::int64_t>&   x, const std::vector<double>& y);              //!< Overloaded division operator
     std::vector<double>                 operator/(const std::vector<double>& x, const std::vector<double>& y);              //!< Overloaded division operator
 
 }

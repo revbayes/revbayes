@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <vector>
 
+#include "EssTest.h"
+#include "GelmanRubinTest.h"
 #include "GewekeTest.h"
 #include "StationarityTest.h"
 #include "Cloner.h"
@@ -26,8 +28,11 @@ TraceNumeric::TraceNumeric() :
     essw( 0 ),
     meanw( RbConstants::Double::nan ),
     semw( RbConstants::Double::nan ),
-    passedStationarityTest( false ),
+    converged( false ),
+    passedEssThreshold( false ),
+    passedGelmanRubinTest( false ),
     passedGewekeTest( false ),
+    passedStationarityTest( false ),
     stats_dirty( true ),
     statsw_dirty( true )
 {
@@ -45,17 +50,32 @@ TraceNumeric* TraceNumeric::clone() const
 
 void TraceNumeric::computeStatistics( void )
 {
+    converged = true;
+    size_t nBlocks = 10;
+    
+    // Check whether the chain attained an effective sample size threshold
+    EssTest testE = EssTest(625); // see Guimaraes Fabreti & Hoehna 2022
+    passedEssThreshold = testE.assessConvergence(*this);
+    converged &= passedEssThreshold;
+    
+    // Gelman-Rubin statistic (= potential scale reduction factor) for convergence within a chain
+    // This statistic is normally used for convergence between multiple chains; here, we will
+    // break the trace into 10 blocks/windows and use these in place of separate chains.
+    GelmanRubinTest testGR = GelmanRubinTest(1.01, nBlocks);
+    passedGelmanRubinTest = testGR.assessConvergence(*this);
+    converged &= passedGelmanRubinTest;
 
-    // Sebastian (20210519): The convergence test are currently broken and don't work anymore.
-//    // test stationarity within chain
-//    size_t nBlocks = 10;
-//    StationarityTest testS = StationarityTest(nBlocks, 0.01);
-//    passedStationarityTest = testS.assessConvergence(*this);
-//
-//    // Geweke's test for convergence within a chain
-//    GewekeTest testG = GewekeTest(0.01);
-//    passedGewekeTest = testG.assessConvergence(*this);
-
+    // Geweke's test for convergence within a chain
+    GewekeTest testG = GewekeTest(0.01);
+    passedGewekeTest = testG.assessConvergence(*this);
+    converged &= passedGewekeTest;
+    
+    // Stationarity test for convergence within a chain
+    // This statistic is normally used for convergence between multiple chains; here, we will
+    // break the trace into 10 blocks/windows and use these in place of separate chains.
+    StationarityTest testS = StationarityTest(nBlocks, 0.01);
+    passedStationarityTest = testS.assessConvergence(*this);
+    converged &= passedStationarityTest;
 }
 
 
@@ -83,7 +103,7 @@ double TraceNumeric::getMean() const
 }
 
 
-double TraceNumeric::getMean(long inbegin, long inend) const
+double TraceNumeric::getMean(std::int64_t inbegin, std::int64_t inend) const
 {
     if( begin != inbegin || end != inend)
     {
@@ -112,7 +132,7 @@ double TraceNumeric::getMean(long inbegin, long inend) const
  * @param end       end index for analysis
  *
  */
-double TraceNumeric::getESS(long begin, long end) const
+double TraceNumeric::getESS(std::int64_t begin, std::int64_t end) const
 {
 
     update(begin, end);
@@ -139,7 +159,7 @@ double TraceNumeric::getESS() const
  * @param end       end index for analysis
  *
  */
-double TraceNumeric::getSEM(long begin, long end) const
+double TraceNumeric::getSEM(std::int64_t begin, std::int64_t end) const
 {
 
     update(begin, end);
@@ -222,7 +242,7 @@ void TraceNumeric::update() const
  * Analyze trace within a range of values
  *
  */
-void TraceNumeric::update(long inbegin, long inend) const
+void TraceNumeric::update(std::int64_t inbegin, std::int64_t inend) const
 {
     // if we have not yet calculated the mean, do this now
     getMean(inbegin, inend);

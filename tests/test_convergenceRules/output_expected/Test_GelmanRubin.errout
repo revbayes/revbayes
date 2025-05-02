@@ -3,3 +3,15 @@
    This simulation runs 4 independent replicates.
    The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
    
+   Stopping rule:
+       Target value for the Gelman-Rubin statistic (PSRF): < 1.01
+   
+   
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.013099 (target: < 1.01)
+   
+   
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.013139 (target: < 1.01)
+   
+   
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.006976 (target: < 1.01)
+   

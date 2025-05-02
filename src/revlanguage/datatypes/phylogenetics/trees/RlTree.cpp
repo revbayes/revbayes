@@ -194,7 +194,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if ( name == "getDescendantTaxa" )
     {
         found = true;
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         RevBayesCore::Tree &tree = dag_node->getValue();
         std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
@@ -203,7 +203,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         RevBayesCore::Tree &tree = dag_node->getValue();
-        std::vector<long> indices = tree.getNodeIndices();
+        std::vector<std::int64_t> indices = tree.getNodeIndices();
         ModelVector<Natural> *n = new ModelVector<Natural>( indices );
         return new RevVariable( n );
     }
@@ -238,7 +238,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         RevBayesCore::Tree &tree = dag_node->getValue();
-        long n = tree.getRoot().getIndex() + 1;
+        std::int64_t n = tree.getRoot().getIndex() + 1;
         return new RevVariable( new Natural( n ) );
     }
     else if (name == "isBinary")
@@ -252,7 +252,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
 
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
@@ -268,7 +268,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
         return new RevVariable( new RlString( n ) );
     }
@@ -302,10 +302,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "reroot")
     {
         found = true;
-        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        
         bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.reroot(tmp, make_bifurcating, true);
+        
+        if ( args[0].getVariable()->getRevObject().isType( RlString::getClassTypeSpec() ) )
+        {
+            const std::string &outgr_leaf = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+            tree.reroot(outgr_leaf, make_bifurcating, true);
+        }
+        else if ( args[0].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
+        {
+            const RevBayesCore::Clade &outgr_clade = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+            tree.reroot(outgr_clade, make_bifurcating, true);
+        }
         
         return NULL;
     }
@@ -317,6 +327,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         RevBayesCore::Tree &tree = dag_node->getValue();
         RevBayesCore::TreeUtilities::rescaleTree(tree.getRoot(), f);
 
+        return NULL;
+    }
+    else if (name == "resolveMultifurcations")
+    {
+        found = true;
+        
+        bool resolve_root = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        tree.resolveMultifurcations( resolve_root );
+        
         return NULL;
     }
     else if (name == "setBranchLength")
@@ -348,7 +368,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         double tf = static_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.setNegativeConstraint(tf);
-//        RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
+        // RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
 
         return NULL;
     }
@@ -393,7 +413,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         {
             tip_name = static_cast<const Taxon&>( args[0].getVariable()->getRevObject() ).getValue().getSpeciesName();
         }
-        long index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
+        std::int64_t index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
         return new RevVariable( new Natural( index ) );
     }
 
@@ -571,9 +591,16 @@ void Tree::initMethods( void )
     methods.addFunction( new MemberProcedure( "getRootIndex", Natural::getClassTypeSpec(),  getRootIndexArgRules ) );
 
     ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> outgroup_types;
+    outgroup_types.push_back( RlString::getClassTypeSpec() );
+    outgroup_types.push_back( Clade::getClassTypeSpec() );
+    rerootArgRules->push_back( new ArgumentRule( "outgroup", outgroup_types, "The leaf or clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     rerootArgRules->push_back( new ArgumentRule( "makeBifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
+    
+    ArgumentRules* resolveMultiArgRules = new ArgumentRules();
+    resolveMultiArgRules->push_back( new ArgumentRule( "resolveRoot", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "resolveMultifurcations", RlUtils::Void, resolveMultiArgRules ) );
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();
     getDescendantTaxaArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "the index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );

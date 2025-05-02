@@ -163,11 +163,6 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
 
-    if ( args.count("verbose") > 0 )
-    {
-        int verbosity = args["verbose"].as<int>();
-    }
-
     if ( args.count("setOption") > 0 )
     {
         std::vector<std::string> options = args["setOption"].as<std::vector<std::string> >();
@@ -196,7 +191,8 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-    
+
+
     if ( args.count("args") && args.count("cmd"))
     {
         throw RbException("command line: received both --args and --cmd");

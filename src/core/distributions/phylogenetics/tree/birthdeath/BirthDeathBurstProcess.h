@@ -16,7 +16,7 @@ class DagNode;
 template <class valueType> class RbOrderedSet;
 template <class valueType> class TypedDagNode;
     
-    class BirthDeathBurstProcess : public AbstractBirthDeathProcess, public MemberObject< long > {
+    class BirthDeathBurstProcess : public AbstractBirthDeathProcess, public MemberObject< std::int64_t > {
         
     public:
         BirthDeathBurstProcess(const TypedDagNode<double> *ra,
@@ -37,7 +37,7 @@ template <class valueType> class TypedDagNode;
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
         
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                  //!< get affected nodes

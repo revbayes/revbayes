@@ -65,7 +65,7 @@ OccurrenceBirthDeathProcess::OccurrenceBirthDeathProcess(                       
                                                                                            const std::vector<Taxon> &tn,
                                                                                            bool uo,
                                                                                            Tree *t,
-                                                                                           const TypedDagNode<long> *n,
+                                                                                           const TypedDagNode<std::int64_t> *n,
                                                                                            const TypedDagNode<RbVector<double> > *O,
                                                                                            bool mt,
                                                                                            bool vb) : AbstractBirthDeathProcess( sa, cdt, tn, uo, t ),

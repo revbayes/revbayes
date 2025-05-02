@@ -1,0 +1,60 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 20 different moves in a random move schedule with 165.6 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  pop_size[1]              2.0000         14          8      0.5714 lambda = 0.1000
+Scaling                                  pop_size[2]              2.0000         20         20      1.0000 lambda = 0.1000
+Scaling                                  pop_size[3]              2.0000         20         20      1.0000 lambda = 0.1000
+Sliding                                  change_points[1]         2.0000         19         19      1.0000 delta = 0.1000
+Sliding                                  change_points[2]         2.0000         20         20      1.0000 delta = 0.1000
+NarrowExchange                           psi                     36.0000        343         94      0.2741 
+NNI                                      psi                     36.0000        367         51      0.1390 
+FNPR                                     psi                      9.0000         93         22      0.2366 
+SubtreeScale                             psi                      7.2000         79         22      0.2785 
+NodeTimeSlideUniform                     psi                     36.0000        394        185      0.4695 
+RootTimeScaleBactrian                    psi                      7.2000         75          2      0.0267 
+TreeScale                                psi                      7.2000         76          0      0.0000 delta = 1.0000
+BetaSimplex                              er                       3.0000         21          5      0.2381 alpha = 1.0000
+DirichletSimplex                         er                       1.0000          3          2      0.6667 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         17          4      0.2353 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000          8          0      0.0000 alpha = 1.0000
+Scaling                                  alpha                    2.0000          9          3      0.3333 lambda = 1.0000
+Sliding                                  p_inv                    1.0000         12          2      0.1667 delta = 1.0000
+Scaling                                  clock                    2.0000         18          5      0.2778 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         52          0      0.0000 lambda = 1.0000
+
