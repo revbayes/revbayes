@@ -302,10 +302,20 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "reroot")
     {
         found = true;
-        const RevBayesCore::Clade &tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        
         bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.reroot(tmp, make_bifurcating, true);
+        
+        if ( args[0].getVariable()->getRevObject().isType( RlString::getClassTypeSpec() ) )
+        {
+            const std::string &outgr_leaf = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+            tree.reroot(outgr_leaf, make_bifurcating, true);
+        }
+        else if ( args[0].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
+        {
+            const RevBayesCore::Clade &outgr_clade = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+            tree.reroot(outgr_clade, make_bifurcating, true);
+        }
         
         return NULL;
     }
@@ -581,7 +591,10 @@ void Tree::initMethods( void )
     methods.addFunction( new MemberProcedure( "getRootIndex", Natural::getClassTypeSpec(),  getRootIndexArgRules ) );
 
     ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> outgroup_types;
+    outgroup_types.push_back( RlString::getClassTypeSpec() );
+    outgroup_types.push_back( Clade::getClassTypeSpec() );
+    rerootArgRules->push_back( new ArgumentRule( "outgroup", outgroup_types, "The leaf or clade to use as outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     rerootArgRules->push_back( new ArgumentRule( "makeBifurcating", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void, rerootArgRules ) );
     

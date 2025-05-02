@@ -41,7 +41,7 @@ namespace RevLanguage {
  
         // Type conversion functions
         RevObject*                                              convertTo(const TypeSpec& type) const;                      //!< Convert to requested type
-        virtual double                                          isConvertibleTo(const TypeSpec& type, bool once) const;     //!< Is this object convertible to the requested type?
+        virtual double                                          isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;     //!< Is this object convertible to the requested type?
 
         // Member object functions
         virtual RevPtr<RevVariable>                             executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found); //!< Map member methods to internal methods
@@ -515,10 +515,10 @@ void ModelVector<rlType>::initMethods( void )
  * of Real, for example.
  */
 template <typename rlType>
-double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) const
+double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
-    if ( once == true && type.getParentType() == getClassTypeSpec().getParentType() )
+    if ( convert_by_value == true && type.getParentType() == getClassTypeSpec().getParentType() )
     {
         // We want to convert to another model vector
         if ( getClassType() == "RealPos[]" && type.getType() == "Real[]" )
@@ -549,7 +549,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
             if ( org_element.getTypeSpec() != *type.getElementTypeSpec() )
             {
             
-                double element_penalty = org_element.isConvertibleTo( *type.getElementTypeSpec(), once );
+                double element_penalty = org_element.isConvertibleTo( *type.getElementTypeSpec(), convert_by_value );
                 if ( element_penalty == -1 )
                 {
                     // we cannot convert this element
@@ -580,7 +580,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
         return 0.0;
     }
 
-    return ModelObject<RevBayesCore::RbVector<typename rlType::valueType> >::isConvertibleTo( type, once );
+    return ModelObject<RevBayesCore::RbVector<typename rlType::valueType> >::isConvertibleTo( type, convert_by_value );
 }
 
 

@@ -1,0 +1,22 @@
+seed(0)
+setOption("debugMCMC", 1)
+
+chars <- readDiscreteCharacterData("data/bears_cytb.nex")
+taxa <- chars.names()
+nTaxa <- chars.size()
+nEdge <- 2 * nTaxa - 3
+
+topology ~ dnUniformTopology(taxa)
+br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+phylogeny := treeAssembly(topology, br_lengths)
+
+m_morph[1] ~ dnPhyloCTMC(tree = phylogeny, Q = fnJC(4), type = "DNA")
+m_morph[1].clamp(chars)
+
+monitors = VectorMonitors()
+monitors.append( mnModel(filename="output/one-chain.log", printgen=1) )
+
+# PDFs not up-to-date before proposal
+mcmcmc(model(phylogeny), monitors, [ mvNNI(topology) ], nchains=1).run(generations = 20)
+
+q()

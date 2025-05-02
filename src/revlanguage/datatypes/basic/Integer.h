@@ -43,7 +43,7 @@ namespace RevLanguage {
         static const std::string&       getClassType(void);                                                     //!< Get Rev type
         static const TypeSpec&          getClassTypeSpec(void);                                                 //!< Get class type spec
         virtual const TypeSpec&         getTypeSpec(void) const;                                                //!< Get language type of the object
-        virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
+        virtual double                  isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;                 //!< Is convertible to type?
         
         std::string                     getGuiName(void) { return "Integer"; }
         std::string                     getGuiUnicodeSymbol(void) { return "Z"; }

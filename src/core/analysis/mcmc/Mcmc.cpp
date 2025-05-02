@@ -209,6 +209,8 @@ void Mcmc::checkpoint( void ) const
         bool flatten = false;
         
         createDirectoryForFile( checkpoint_file_name );
+        // the following is useful for ensuring that in MCMCMC analyses, the chain indices in the checkpoint file names are ordered by heat:
+        // std::cout << "Printing file " << checkpoint_file_name << " for chain with a posterior heat of " << getChainPosteriorHeat() << std::endl;
         
         // open the stream to the file
         std::ofstream out_stream( checkpoint_file_name.string() );
@@ -330,34 +332,6 @@ void Mcmc::disableScreenMonitor( bool all, size_t rep )
 
 
 /**
- * Finish the monitors which will close the output streams.
- */
-void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
-{
-    
-    // iterate over all monitors
-    for (size_t i=0; i<monitors.size(); ++i)
-    {
-        
-        // if this chain is active, then close the stream
-        if ( chain_active == true && process_active == true )
-        {
-            monitors[i].closeStream();
-            
-            // combine results if we used more than one replicate
-            if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
-            {
-                monitors[i].combineReplicates( n_reps, tc );
-            }
-            
-        }
-        
-    }
-    
-}
-
-
-/**
  * Get the heat of the likelihood of this chain.
  */
 double Mcmc::getChainLikelihoodHeat(void) const
@@ -390,6 +364,12 @@ double Mcmc::getChainPriorHeat(void) const
 size_t Mcmc::getChainIndex(void) const
 {
     return chain_idx;
+}
+
+
+path Mcmc::getCheckpointFile(void) const
+{
+    return checkpoint_file_name;
 }
 
 
@@ -1382,6 +1362,28 @@ void Mcmc::startMonitors( size_t num_cycles, bool reopen )
     }
     
 }
+
+/**
+ * Finish the monitors which will close the output streams.
+ */
+void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
+{
+    
+    // iterate over all monitors
+    for (size_t i=0; i<monitors.size(); ++i)
+    {
+        // close filestream for each monitor
+        monitors[i].closeStream();
+            
+        // combine results if we used more than one replicate
+        if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
+        {
+            monitors[i].combineReplicates( n_reps, tc );
+        }
+    }
+    
+}
+
 
 /**
  * Write the header for each of the monitors.

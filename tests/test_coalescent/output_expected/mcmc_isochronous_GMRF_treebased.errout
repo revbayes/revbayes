@@ -1,0 +1,37 @@
+   Processing file "output/horses_iso_Constant.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+max age: 	356378.2
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 17 different moves in a random move schedule with 100 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+ScalingBactrian                          population_size_at_present     5.0000         61          2      0.0328 sigma = 1.0000
+MirrorMultiplier                         population_size_at_present     5.0000         61          0      0.0000 sigma = 1.0000
+HalfRandomDive                           population_size_at_present     5.0000         47         12      0.2553 delta = 1.0000
+ScalingBactrian                          population_size_global_scale     5.0000         41          6      0.1463 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[1]     5.0000         42          5      0.1190 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[2]     5.0000         47          4      0.0851 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[3]     5.0000         44          3      0.0682 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[4]     5.0000         46          3      0.0652 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[5]     5.0000         46          2      0.0435 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[6]     5.0000         53          2      0.0377 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[7]     5.0000         41          2      0.0488 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[8]     5.0000         56          3      0.0536 sigma = 1.0000
+SlidingBactrian                          delta_log_population_size[9]     5.0000         47          0      0.0000 sigma = 1.0000
+EllipticalSliceSamplingSimpleMove        delta_log_population_size[1]     5.0000         55 
+  Ave. cos(angle(x1,x2)) = 0.2915
+  Ave. # of Pr evals = 1.3455
+  window = 6.2832
+
+VectorSlide                              delta_log_population_size[1]    10.0000         92         13      0.1413 lambda = 1.0000
+UpDownScaling                            population_size_at_present    10.0000        109         53      0.4862 lambda = 1.0000
+ShrinkExpand                             delta_log_population_size[1]    10.0000        112        100      0.8929 lambda = 1.0000
+

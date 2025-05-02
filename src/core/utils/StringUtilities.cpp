@@ -33,12 +33,21 @@ using std::string;
 using std::vector;
 
 
-/** Convert the string s to a number */
+/** Convert the string s to a floating-point number */
+double StringUtilities::asDoubleNumber(const std::string& s)
+{
+    
+    return std::atof( s.c_str() );
+}
+
+
+/** Convert the string s to an integer */
 int StringUtilities::asIntegerNumber(const std::string& s)
 {
     
     return std::atoi( s.c_str() );
 }
+
 
 /**
  * Fill this string with spaces so that it has the required length.
@@ -428,8 +437,11 @@ std::string StringUtilities::oneLiner( const std::string& input, size_t maxLen )
         
         if ( i < input.size() )
         {
-            if ( maxLen - oneLiner.size() < 3 )
+            if ( oneLiner.size() + 3 > maxLen)
             {
+                if (oneLiner.size() < maxLen)
+                    oneLiner += std::string(' ', maxLen - oneLiner.size());
+
                 oneLiner[ maxLen - 1 ] = '.';
                 oneLiner[ maxLen - 2 ] = '.';
                 oneLiner[ maxLen - 3 ] = '.';
