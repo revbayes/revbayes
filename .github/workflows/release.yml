@@ -151,14 +151,14 @@ jobs:
 
         # This is a hack.
         ( cd
-          curl -O -L https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.gz
-          tar -xzvf boost_1_84_0.tar.gz
-          cd boost_1_84_0
-          ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization --prefix=../installed-boost-1.84.0
+          curl -O -L https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz
+          tar -xzvf boost_1_88_0.tar.gz
+          cd boost_1_88_0
+          ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization --prefix=../installed-boost-1.88.0
           ./b2 link=static install
-          echo -e "\n    BOOST root is at $(cd ../installed-boost-1.84.0; pwd)\n"
-          echo BOOST_ROOT=$(cd ../installed-boost-1.84.0; pwd) >> $GITHUB_ENV
-          echo CMAKE_PREFIX_PATH=$(cd ../installed-boost-1.84.0; pwd) >> $GITHUB_ENV
+          echo -e "\n    BOOST root is at $(cd ../installed-boost-1.88.0; pwd)\n"
+          echo BOOST_ROOT=$(cd ../installed-boost-1.88.0; pwd) >> $GITHUB_ENV
+          echo CMAKE_PREFIX_PATH=$(cd ../installed-boost-1.88.0; pwd) >> $GITHUB_ENV
         )
 
     - name: Install BOOST and set up build (Windows meson cross compile)
