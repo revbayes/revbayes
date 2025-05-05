@@ -1,13 +1,11 @@
 #!/bin/bash
 
-git submodule update --init --recursive
-
 if [ -z "$1" ] ; then
     printf "Please supply the full path to rb as first argument.\n\n"
     printf "Examples:\n"
-    printf '  ./run_integration_tests.sh "$(readlink -f ../projects/cmake/rb)"\n'
-    printf '  ./run_integration_tests.sh "$PWD/../projects/cmake/rb"\n'
-    printf '  ./run_integration_tests.sh  -mpi true "$PWD/../projects/cmake/rb"\n'
+    printf '  ./run_integration_tests.sh "$(readlink -f ../projects/cmake/build/rb)"\n'
+    printf '  ./run_integration_tests.sh "$PWD/../projects/cmake/build/rb"\n'
+    printf '  ./run_integration_tests.sh  -mpi true "$PWD/../projects/cmake/build-mpi/rb-mpi"\n'
 #    printf '  ./run_integration_tests.sh mpirun -np 4 "$(readlink -f ../projects/cmake/rb)"\n'
     exit 101
 fi
@@ -52,30 +50,45 @@ fi
 tests=()
 status=()
 
-for t in revbayes.github.io/tutorials/*/test.sh; do
-    testname=`echo $t | cut -d '/' -f 2-3`
-    dirname=`echo $t | cut -d '/' -f 1-3`
-    
-    cd $dirname
+if [ ! -d "revbayes.github.io" ] ; then
+    echo "No revbayes.github.io directory, cloning it"
+git clone https://github.com/revbayes/revbayes.github.io.git
+fi
 
+for t in revbayes.github.io/tutorials/*/tests.txt; do
+    testname=`echo $t | cut -d '/' -f 2-3`;
+    dirname=`echo $t | cut -d '/' -f 1-3`;
+
+
+    cd $dirname
     tests+=($testname)
 
     printf "\n\n#### Running test: $testname\n\n"
-    sh test.sh
-    res="$?"
-    if [ $res = 1 ]; then
-        res="error: $f"
-        break
-    elif [ $res = 139 ]; then
-        res="segfault: $f"
-        break
-    elif [ $res != 0 ]; then
-        res="error $res: $f"
-        break
-    fi
-    if [ $res != 0 ] ; then
-        echo "${dirname}/test.sh ==> error $res"
-    fi
+
+    for script in $(cat tests.txt);
+    do
+        (
+        cd scripts
+        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
+        )
+        ${rb_exec} -b scripts/cp_$script
+        res="$?"
+        if [ $res = 1 ]; then
+            res="error: $f"
+            break
+        elif [ $res = 139 ]; then
+            res="segfault: $f"
+            break
+        elif [ $res != 0 ]; then
+            res="error $res: $f"
+            break
+        fi
+        if [ $res != 0 ] ; then
+            echo "${dirname}/test.sh ==> error $res"
+        fi
+        rm scripts/cp_$script
+        rm -rf output
+    done
 
     status+=("$res")
 
@@ -149,29 +162,29 @@ while [  $i -lt ${#tests[@]} ]; do
             find output -type f -exec sed -i 's/e-00/e-0/g' {} \;
             find output -type f -exec sed -i 's/e+00/e+0/g' {} \;
         fi
-        
+
         # some special handling for the *.errout files
         for f in scripts/*.[Rr]ev ; do
             tmp0=${f#scripts/}
             tmp1=${tmp0%.[Rr]ev}
-            
+
             # Delete all before the 1st occurrence of the string '   Processing file' (inclusive)
             # Use a temporary intermediate file to make this work w/ both GNU and BSD sed
             sed '1,/   Processing file/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
             mv output/${tmp1}.errout.tmp output/${tmp1}.errout
-            
+
             # Also delete the final line of failing tests, which reprints the path to the script
             # that differs between Windows and Unix (has no effect if the line is absent)
             sed '/   Error:\tProblem processing/d' output/${tmp1}.errout > output/${tmp1}.errout.tmp
             mv output/${tmp1}.errout.tmp output/${tmp1}.errout
-            
+
             # Account for OS-specific differences in path separators
             if [ "$windows" = "true" ]; then
                 sed 's/\\/\//g' output/${tmp1}.errout > output/${tmp1}.errout.tmp
                 mv output/${tmp1}.errout.tmp output/${tmp1}.errout
             fi
         done
-        
+
         for f in $(ls ${exp_out_dir}); do
             if [ ! -e output/$f ]; then
                 errs+=("missing:  $f")
@@ -182,7 +195,7 @@ while [  $i -lt ${#tests[@]} ]; do
 
         cd ..
     fi
-    
+
     # check if a script exited with an error
     if [ "${status[$i]}" != 0 ]; then
         errs=("${status[$i]}")

@@ -28,7 +28,7 @@ namespace RevBayesCore {
     class GraphFlipCliqueProposal : public Proposal {
         
     public:
-        GraphFlipCliqueProposal( StochasticNode<MatrixReal> *n, const RbVector<long>& v, double l, double vp=0.1, double ep=1.0, bool s = false);                                                                      //!<  constructor
+        GraphFlipCliqueProposal( StochasticNode<MatrixReal> *n, const RbVector<std::int64_t>& v, double l, double vp=0.1, double ep=1.0, bool s = false);                                                                      //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -54,7 +54,7 @@ namespace RevBayesCore {
         double                                  set_sample_rate;
         double                                  edge_probability;
         double                                  vertex_probability;
-        RbVector<long>                          vertices;
+        RbVector<std::int64_t>                          vertices;
         size_t                                  vertex_list_length;
         double                                  storedValue;                                                                       //!< The value we propose.
         bool                                    symmetric;

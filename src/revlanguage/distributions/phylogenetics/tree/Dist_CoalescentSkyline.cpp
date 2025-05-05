@@ -97,7 +97,7 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
         ti = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
     }
     // number of events per interval
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<long> >* enpi       = NULL;
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<std::int64_t> >* enpi       = NULL;
     if ( events_per_interval != NULL && events_per_interval->getRevObject() != RevNullObject::getInstance() )
     {
         enpi = static_cast<const ModelVector<Natural> &>( events_per_interval->getRevObject() ).getDagNode();

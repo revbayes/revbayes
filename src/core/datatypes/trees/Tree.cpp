@@ -50,7 +50,7 @@ Tree::Tree(const Tree& t) :
         // do not reorder node indices when copying (WP)
         setRoot(newRoot, false);
     }
-
+    
 }
 
 
@@ -64,7 +64,7 @@ Tree::Tree(Tree&& t)
 /* Destructor */
 Tree::~Tree(void)
 {
-
+    
     nodes.clear();
     std::set<TreeChangeEventListener*> l = changeEventHandler.getListeners();
     for ( std::set<TreeChangeEventListener*>::iterator it = l.begin(); it != l.end(); ++it )
@@ -289,42 +289,51 @@ void Tree::dropTipNodeWithName( const std::string &n )
 void Tree::dropTipNode( size_t index )
 {
     // get the index of this name
-    TopologyNode &node          = getTipNode( index );
+    TopologyNode &node = getTipNode( index );
     if (node.isRoot() == true && nodes.size() == 1)
     {
         // there is nothing left to prune
         node.setName("");
         return;
     }
+    
     TopologyNode &parent        = node.getParent();
     TopologyNode &grand_parent  = parent.getParent();
-    if (parent.isRoot() == false)
+    
+    /* If the parent of the current node has more than two children, we can just delete this child without affecting
+     * the rest of the tree (i.e., we do not have to remove any internal nodes, nor adjust character history).
+     */
+    if (parent.getNumberOfChildren() > 2)
     {
-        TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == &node )
-        {
-            sibling = &parent.getChild( 1 );
-        }
-        grand_parent.removeChild( &parent );
-        parent.removeChild( sibling );
-        grand_parent.addChild( sibling );
-        sibling->setParent( &grand_parent );
-
-        // update character history
-        if (parent.getTimeInStates().size() > 0 && sibling->getTimeInStates().size() > 0)
-        {
-            std::vector<double> sibling_state_times = sibling->getTimeInStates();
-            for (size_t i = 0; i < parent.getTimeInStates().size(); i++)
-            {
-                sibling_state_times[i] += parent.getTimeInStates()[i];
-            }
-            sibling->setTimeInStates(sibling_state_times);
-            sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
-        }
+        parent.removeChild( &node );
     }
     else
     {
-        if (root->getNumberOfChildren() > 1)
+        if (parent.isRoot() == false)
+        {
+            TopologyNode *sibling = &parent.getChild( 0 );
+            if ( sibling == &node )
+            {
+                sibling = &parent.getChild( 1 );
+            }
+            grand_parent.removeChild( &parent );
+            parent.removeChild( sibling );
+            grand_parent.addChild( sibling );
+            sibling->setParent( &grand_parent );
+
+            // update character history
+            if (parent.getTimeInStates().size() > 0 && sibling->getTimeInStates().size() > 0)
+            {
+                std::vector<double> sibling_state_times = sibling->getTimeInStates();
+                for (size_t i = 0; i < parent.getTimeInStates().size(); i++)
+                {
+                    sibling_state_times[i] += parent.getTimeInStates()[i];
+                }
+                sibling->setTimeInStates(sibling_state_times);
+                sibling->setNumberOfShiftEvents( sibling->getNumberOfShiftEvents() + parent.getNumberOfShiftEvents() );
+            }
+        }
+        else
         {
             TopologyNode *sibling = &root->getChild( 0 );
             if ( sibling == &node )
@@ -339,10 +348,6 @@ void Tree::dropTipNode( size_t index )
                 root->setTimeInStates(std::vector<double>(root->getTimeInStates().size(), 0.0));
                 root->setNumberOfShiftEvents( 0 );
             }
-        }
-        else
-        {
-            root->removeChild(&node);
         }
     }
 
@@ -372,12 +377,12 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "branchLength" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = getNode( index ).getBranchLength();
     }
     else if ( n == "nodeAge" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = getNode( index ).getAge();
     }
     else if ( n == "treeLength" )
@@ -442,17 +447,17 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 }
 
 
-void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
 
     if ( n == "parent" )
     {
-        long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        std::int64_t index = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         if (getNode( index ).isRoot() == true)
         {
             throw RbException("Root has no parent.");
         }
-        rv = long( getNode( index ).getParent().getIndex() )+1;
+        rv = std::int64_t( getNode( index ).getParent().getIndex() )+1;
     }
     else if ( n == "child" )
     {
@@ -513,7 +518,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 
     if ( n == "isContainedInClade" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         Clade clade = static_cast<const TypedDagNode<Clade> *>( args[1] )->getValue();
         clade.resetTaxonBitset( getTaxonBitSetMap() );
 
@@ -774,9 +779,9 @@ std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
 }
 
 
-std::vector<long> Tree::getNodeIndices(void) const
+std::vector<std::int64_t> Tree::getNodeIndices(void) const
 {
-    std::vector<long> indices;
+    std::vector<std::int64_t> indices;
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -1521,7 +1526,7 @@ void Tree::orderNodesByIndex( void )
 
 // Prints tree for user (rounding)
 void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
-    long previousPrecision = o.precision();
+    std::int64_t previousPrecision = o.precision();
     std::ios_base::fmtflags previousFlags = o.flags();
 
     std::fixed( o );
@@ -1924,6 +1929,9 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
+    // set the new root
+    setRoot( &n.getParent(), reindex );
+    
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
     {
@@ -1933,10 +1941,7 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
         // second, we suppress any internal nodes of outdegree 1 ("knuckles" / sampled ancestors)
         suppressOutdegreeOneNodes(true);
         
-    } // end-if we do not want to make the tree bifurcating
-
-    // set the new root
-    setRoot( &n.getParent(), reindex );
+    }
 }
 
 
@@ -1965,6 +1970,29 @@ void Tree::resetTaxonBitSetMap( void )
         taxon_bitset_map[ordered_taxa[i]] = i;
     }
     
+}
+
+
+void Tree::resolveMultifurcations( bool resolve_root )
+{
+    bool does_use_ages = isTimeTree();
+    
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        if ( nodes[i]->getNumberOfChildren() > 2 )
+        {
+            // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
+            nodes[i]->setUseAges( does_use_ages, true );
+            // resolve the multifurcation
+            nodes[i]->resolveMultifurcation( resolve_root );
+            // we need to reindex nodes because we added new ones
+            reindexNodes();
+        }
+    }
+    
+    // Remove the outdegree-1 nodes ("knuckles") introduced by the above process of resolving multifurcations.
+    // NOTE: This only works if we assume that trees can contain multifurcations or knuckles, but not both.
+    suppressOutdegreeOneNodes( false );
 }
 
 

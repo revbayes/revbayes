@@ -118,7 +118,8 @@ RevLanguage::WorkspaceToCoreWrapperObject<rbType>& RevLanguage::WorkspaceToCoreW
 
 
 template <typename rbType>
-const std::string& RevLanguage::WorkspaceToCoreWrapperObject<rbType>::getClassType(void) {
+const std::string& RevLanguage::WorkspaceToCoreWrapperObject<rbType>::getClassType(void)
+{
     
     static std::string rev_type = "WorkspaceToCoreWrapperObject";
     
@@ -128,7 +129,8 @@ const std::string& RevLanguage::WorkspaceToCoreWrapperObject<rbType>::getClassTy
 
 /** Get class type spec describing type of object */
 template <typename rlType>
-const RevLanguage::TypeSpec& RevLanguage::WorkspaceToCoreWrapperObject<rlType>::getClassTypeSpec(void) {
+const RevLanguage::TypeSpec& RevLanguage::WorkspaceToCoreWrapperObject<rlType>::getClassTypeSpec(void)
+{
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( WorkspaceObject::getClassTypeSpec() ) );
     

@@ -23,7 +23,7 @@ template <class valueType> class TypedDagNode;
     class DiscretizeBetaFunction : public TypedFunction< RbVector<double> >{
         
     public:
-        DiscretizeBetaFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc, bool med);
+        DiscretizeBetaFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<std::int64_t> *nc, bool med);
         
         DiscretizeBetaFunction*            clone(void) const;                                                  //!< Create a clon.
         void                                update(void);                                                       //!< Recompute the value
@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         const TypedDagNode<double>*         alpha;
         const TypedDagNode<double>*         beta;
-        const TypedDagNode<long>*            numCats;
+        const TypedDagNode<std::int64_t>*            numCats;
         bool                                median;
     };
 }

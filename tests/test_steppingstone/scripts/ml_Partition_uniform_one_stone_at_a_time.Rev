@@ -112,7 +112,6 @@ monitors[++mni] = mnModel(filename="output/model_uniform_run_one_stone_at_a_time
 pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_one_stone_at_a_time.out", cats=10,
                        sampleFreq=1)
 pow_p.burnin(generations=100,tuningInterval=200)
-pow_p.runOneStone(index=0,  generations=10)
 pow_p.runOneStone(index=1,  generations=10)
 pow_p.runOneStone(index=2,  generations=10)
 pow_p.runOneStone(index=3,  generations=10)

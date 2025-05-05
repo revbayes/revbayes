@@ -209,9 +209,9 @@ void PosteriorPredictiveAnalysis::runSim(MonteCarloAnalysis *sampler, size_t gen
     rules.push_back( MaxIterationStoppingRule(gen + currentGen) );
     
 #ifdef RB_MPI
-    sampler->run(gen, rules, c, 100, "", 0, false);
+    sampler->run(gen, rules, c, 100, "", 0, 0);
 #else
-    sampler->run(gen, rules, 100, "", 0, false);
+    sampler->run(gen, rules, 100, "", 0, 0);
 #endif
     
 }

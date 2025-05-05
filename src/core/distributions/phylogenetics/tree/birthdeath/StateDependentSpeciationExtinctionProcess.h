@@ -31,7 +31,7 @@ namespace RevBayesCore {
      * Will Freyman 6/22/16
      *
      */
-    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
+    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<std::int64_t> >, public MemberObject< RbVector<double> > {
         
     public:
         StateDependentSpeciationExtinctionProcess(const TypedDagNode<double> *root,
@@ -61,7 +61,7 @@ namespace RevBayesCore {
         double                                                          getOriginAge(void) const;
         std::vector<double>                                             getAverageExtinctionRatePerBranch(void) const;
         std::vector<double>                                             getAverageSpeciationRatePerBranch(void) const;
-        std::vector<long>                                               getNumberOfShiftEventsPerBranch(void) const;
+        std::vector<std::int64_t>                                               getNumberOfShiftEventsPerBranch(void) const;
         std::vector<double>                                             getTimeInStates(void) const;
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
@@ -98,7 +98,7 @@ namespace RevBayesCore {
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;  
-        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;     //!< Map the member methods to internal function calls
+        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
         // helper functions
@@ -130,7 +130,7 @@ namespace RevBayesCore {
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
         std::vector<double>                                             average_speciation;
         std::vector<double>                                             average_extinction;
-        std::vector<long>                                               num_shift_events;
+        std::vector<std::int64_t>                                               num_shift_events;
         std::vector<double>                                             time_in_states;
         std::string                                                     simmap;
         
