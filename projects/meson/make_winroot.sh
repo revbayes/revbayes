@@ -96,44 +96,47 @@ cd ${SYSROOT}
 # libwinpthread-git-9.0.0.6090.ad98746a-1
 # We can use the libwinpthread-1 from the cross-compiler instead of download it.
 
-PKGS="boost-1.83.0-2
-dlfcn-1.4.1-1
+PKGS="boost-1.88.0-1
+boost-libs-1.88.0-1
+dlfcn-1.4.2-1
 "
 
 if [ "${gtk}" = "true" ] ; then
     PKGS="$PKGS
-    atk-2.50.0-1
-    brotli-1.1.0-1
+    atk-2.56.2-1
+    brotli-1.1.0-4
     bzip2-1.0.8-3
-    cairo-1.18.0-1
-    expat-2.5.0-1
-    fontconfig-2.14.2-1
-    freetype-2.13.2-1
-    fribidi-1.0.13-1
-    gdk-pixbuf2-2.42.12-1
+    cairo-1.18.4-1
+    expat-2.7.1-2
+    fontconfig-2.16.2-1
+    freetype-2.13.3-1
+    fribidi-1.0.16-1
+    gdk-pixbuf2-2.42.12-4
     gettext-0.22.4-3
-    glib2-2.78.2-1
-    graphite2-1.3.14-2
+    glib2-2.84.1-2
+    graphite2-1.3.14-3
     gtk2-2.24.33-6
-    harfbuzz-8.3.0-1
-    iconv-1.17-4
-    libiconv-1.17-4
-    jasper-4.0.0-1
+    harfbuzz-11.2.0-1
+    iconv-1.18-1
+    libiconv-1.18-1
+    jasper-4.2.5-2
+    jbigkit-2.1-5
+    lerc-4.0.0-1
     libdatrie-0.2.13-3
-    libdeflate-1.19-1
-    libffi-3.4.4-1
-    libjpeg-turbo-3.0.1-1
-    libpng-1.6.40-1
+    libdeflate-1.23-1
+    libffi-3.4.8-1
+    libjpeg-turbo-3.1.0-1
+    libpng-1.6.48-1
     libthai-0.1.29-3
-    libtiff-4.6.0-1
-    libwebp-1.3.2-1
+    libtiff-4.7.0-1
+    libwebp-1.5.0-1
     lzo2-2.10-2
-    pango-1.50.14-4
-    pcre2-10.42-1
-    pixman-0.42.2-1
-    xz-5.4.5-1
-    zlib-1.3-1
-    zstd-1.5.5-1
+    pango-1.56.3-1
+    pcre2-10.45-1
+    pixman-0.46.0-1
+    xz-5.8.1-1
+    zlib-1.3.1-1
+    zstd-1.5.7-1
 "
 fi
 
