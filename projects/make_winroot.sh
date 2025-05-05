@@ -96,8 +96,8 @@ cd ${SYSROOT}
 # libwinpthread-git-9.0.0.6090.ad98746a-1
 # We can use the libwinpthread-1 from the cross-compiler instead of download it.
 
-PKGS="boost-1.88.0-1
-boost-libs-1.88.0-1
+PKGS="boost-1.88.0-2
+boost-libs-1.88.0-2
 dlfcn-1.4.2-1
 "
 
