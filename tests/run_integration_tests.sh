@@ -21,6 +21,7 @@ while echo $1 | grep ^- > /dev/null; do
         echo '
 Command line options are:
 -h                              : print this help and exit.
+-test name                      : run a specific non-tutorial test
 '
         exit
     fi
@@ -43,7 +44,7 @@ export rb_exec
 
 
 if ! ${rb_exec} --help > /dev/null 2>&1 ; then
-    echo "RevBayes command '${rb_exec}' seems not to work!\n"
+    echo -e "RevBayes command '${rb_exec}' seems not to work!\n"
     exit 102
 fi
 
@@ -55,7 +56,12 @@ if [ ! -d "revbayes.github.io" ] ; then
 git clone https://github.com/revbayes/revbayes.github.io.git
 fi
 
-for t in revbayes.github.io/tutorials/*/tests.txt; do
+tutorials=$(echo revbayes.github.io/tutorials/*/tests.txt)
+if [ -n "$test" ]; then
+    tutorials=""
+fi
+
+for t in $tutorials; do
     testname=`echo $t | cut -d '/' -f 2-3`;
     dirname=`echo $t | cut -d '/' -f 1-3`;
 
@@ -63,25 +69,23 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
     cd $dirname
     tests+=($testname)
 
-    printf "\n\n#### Running test: $testname\n\n"
+    printf "\n#### Running test: $testname\n\n"
 
     for script in $(cat tests.txt);
     do
+        printf "  $script\n"
         (
-        cd scripts
-        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
+            cd scripts
+            sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
         )
         ${rb_exec} -b scripts/cp_$script
         res="$?"
         if [ $res = 1 ]; then
             res="error: $f"
-            break
         elif [ $res = 139 ]; then
             res="segfault: $f"
-            break
         elif [ $res != 0 ]; then
             res="error $res: $f"
-            break
         fi
         if [ $res != 0 ] ; then
             echo "${dirname}/test.sh ==> error $res"
@@ -95,7 +99,12 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
     cd -
 done
 
-for t in test_*; do
+test_dirs=$(echo test_*)
+if [ -n "$test" ]; then
+    test_dirs=test_${test}
+fi
+
+for t in ${test_dirs} ; do
     testname=`echo $t | cut -d _ -f 2-`
 
     if [ -d $t ]; then
@@ -113,6 +122,7 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
+        printf "  $f\n"
         mkdir -p output
         tmp0=${f#scripts/}
         tmp1=${tmp0%.[Rr]ev}
@@ -189,6 +199,7 @@ while [  $i -lt ${#tests[@]} ]; do
             if [ ! -e output/$f ]; then
                 errs+=("missing:  $f")
             elif ! diff output/$f ${exp_out_dir}/$f > /dev/null; then
+                echo "mismatch: diff output/$f ${exp_out_dir}/$f"
                 errs+=("mismatch: $f")
             fi
         done
