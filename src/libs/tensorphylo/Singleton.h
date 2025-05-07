@@ -24,7 +24,7 @@
 #ifndef SINGLETON_H_
 #define SINGLETON_H_
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace Utils {
 template <typename T>

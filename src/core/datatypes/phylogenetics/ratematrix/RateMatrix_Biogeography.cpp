@@ -8,7 +8,7 @@
 
 //#define DEBUG_DEC
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <list>
 #include <complex>

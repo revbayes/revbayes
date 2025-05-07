@@ -1,7 +1,7 @@
 #ifndef TreeBipartitions_H
 #define TreeBipartitions_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 #include <map>

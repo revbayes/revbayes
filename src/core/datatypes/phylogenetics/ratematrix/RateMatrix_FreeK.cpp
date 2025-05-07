@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <string>
 #include <complex>
@@ -217,6 +217,8 @@ void RateMatrix_FreeK::calculateCijk(void)
 /** Calculate the transition probabilities */
 void RateMatrix_FreeK::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const
 {
+    assert(num_states == P.num_states);
+
     // The eigensystem code was returning NaN likelihood values when transition rates
     // were close to 0.0, so now we use the scaling and squaring method.
     double t = rate * (startAge - endAge);
@@ -487,20 +489,18 @@ void RateMatrix_FreeK::tiProbsEigens(double t, TransitionProbabilityMatrix& P) c
     // calculate the transition probabilities
     const double* ptr = &c_ijk[0];
     double*         p = P.theMatrix;
-    for (size_t i=0; i<num_states; i++)
+    for (int i=0; i<num_states; i++)
     {
-        for (size_t j=0; j<num_states; j++, ++p)
+        for (int j=0; j<num_states; j++)
         {
             double sum = 0.0;
-            for (size_t s=0; s<num_states; s++)
-            {
+            for (int s=0; s<num_states; s++)
                 sum += (*ptr++) * eigValExp[s];
-            }
             
-            //                  P[i][j] = (sum < 0.0) ? 0.0 : sum;
-            (*p) = (sum < 0.0) ? 0.0 : sum;
+            p[j] = (sum < 0.0) ? 0.0 : sum;
         }
-        
+
+        p += num_states;
     }
     
 //    double tol = RbSettings::userSettings().getTolerance();

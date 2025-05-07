@@ -8,7 +8,7 @@
 #ifndef __RelativeNodeAgeWeightedConstraints__
 #define __RelativeNodeAgeWeightedConstraints__
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <utility>
 #include <vector>

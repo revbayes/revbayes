@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -45,7 +45,6 @@ using namespace RevLanguage;
  */
 Dist_BDSTP::Dist_BDSTP() : BirthDeathProcess()
 {
-
 }
 
 
@@ -93,6 +92,13 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     {
         init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
+    
+    // number of decimal places to use when checking the initial tree against taxon ages
+    long pr = NULL;
+    if ( age_check_precision != NULL )
+    {
+        pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
+    }
 
     RevBayesCore::AbstractBirthDeathProcess* d;
 
@@ -105,17 +111,17 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     // serial sampling rate
     RevBayesCore::DagNode* s_s = phi->getRevObject().getDagNode();
     // treatment probability
-    RevBayesCore::DagNode* t_s = r->getRevObject().getDagNode();
+    RevBayesCore::DagNode* t_s = getRemovalProbability();
 
     // birth burst
     RevBayesCore::DagNode* b_e = NULL;
-    if (Lambda->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
+    if (Lambda != nullptr && Lambda->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
     {
       b_e = Lambda->getRevObject().getDagNode();
     }
     // death burst (mass extinction)
     RevBayesCore::DagNode* d_e = NULL;
-    if (Mu->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
+    if (Mu != nullptr && Mu->getRevObject().isType( ModelVector<Probability>::getClassTypeSpec() ))
     {
       d_e = Mu->getRevObject().getDagNode();
     }
@@ -127,7 +133,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     }
     // event treatment
     RevBayesCore::DagNode* t_e = NULL;
-    if ( r_event->getRevObject() != RevNullObject::getInstance() )
+    if ( r_event != nullptr && r_event->getRevObject() != RevNullObject::getInstance() )
     {
         t_e = r_event->getRevObject().getDagNode();
     }
@@ -159,19 +165,19 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
-    if ( r_timeline->getRevObject() != RevNullObject::getInstance() )
+    if ( r_timeline != nullptr && r_timeline->getRevObject() != RevNullObject::getInstance() )
     {
         rt = static_cast<const ModelVector<RealPos> &>( r_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Lt = NULL;
-    if ( Lambda_timeline->getRevObject() != RevNullObject::getInstance() )
+    if ( Lambda_timeline != nullptr && Lambda_timeline->getRevObject() != RevNullObject::getInstance() )
     {
         Lt = static_cast<const ModelVector<RealPos> &>( Lambda_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Mt = NULL;
-    if ( Mu_timeline->getRevObject() != RevNullObject::getInstance() )
+    if ( Mu_timeline != nullptr && Mu_timeline->getRevObject() != RevNullObject::getInstance() )
     {
         Mt = static_cast<const ModelVector<RealPos> &>( Mu_timeline->getRevObject() ).getDagNode();
     }
@@ -202,9 +208,19 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
                                                              cond,
                                                              tn,
                                                              uo,
-                                                             init);
+                                                             init,
+                                                             pr);
 
     return d;
+}
+
+/**
+ * Gets the removal probability from the r node.
+ *
+ * Necessary for using a fixed r in the FBD process.
+ */
+RevBayesCore::DagNode* Dist_BDSTP::getRemovalProbability( void ) const {
+    return r->getRevObject().getDagNode();
 }
 
 
@@ -270,10 +286,10 @@ std::string Dist_BDSTP::getDistributionFunctionName( void ) const
 /**
  * Get the member rules used to create the constructor of this object.
  *
- * The member rules of the constant-rate birth-death process are:
- * (1) the speciation rate lambda which must be a positive real.
- * (2) the extinction rate mu that must be a positive real.
- * (3) all member rules specified by BirthDeathProcess.
+ * The member rules of the BDSTP process are:
+ * (1) Required arguments: lambda, mu, rho/Phi, r, phi/psi, taxa and start_age
+ * (2) Optional arguments: Lambda and Mu for burst/mass extinctions, R for mass sampling, conditioning
+ * (3) Optional argument: global timeline or parameter-specific timelines for any of the other arguments
  *
  * \return The member rules.
  */
@@ -285,6 +301,41 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
 
     if ( rules_set == false )
     {
+        addCommonRules(dist_member_rules);
+        addBurstRules(dist_member_rules);
+
+        std::vector<TypeSpec> event_sampling_paramTypes;
+        event_sampling_paramTypes.push_back(Probability::getClassTypeSpec());
+        event_sampling_paramTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
+
+        std::vector<std::string> aliases_event_sampling;
+        aliases_event_sampling.push_back("Phi");
+        aliases_event_sampling.push_back("rho");
+        dist_member_rules.push_back(new ArgumentRule(aliases_event_sampling, event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
+
+        std::vector<TypeSpec> other_event_paramTypes;
+        other_event_paramTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
+        dist_member_rules.push_back(new ArgumentRule("R", other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL));
+
+        std::vector<TypeSpec> rTypes;
+        rTypes.push_back(Probability::getClassTypeSpec());
+        rTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
+        dist_member_rules.push_back(new ArgumentRule("r", rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
+        dist_member_rules.push_back(new ArgumentRule("rTimeline", ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL));
+
+        rules_set = true;
+    }
+
+    return dist_member_rules;
+}
+
+/**
+ * Adds the member rules common to all variants of the BDSTP (default, FBD and phylodynamic)
+ *
+ * \param The member rules.
+ */
+void Dist_BDSTP::addCommonRules(MemberRules& dist_member_rules) const
+{
         std::vector<std::string> aliases;
         aliases.push_back("rootAge");
         aliases.push_back("originAge");
@@ -301,36 +352,15 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         aliases_serial_sampling.push_back("psi");
         dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling,     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        std::vector<TypeSpec> rTypes;
-        rTypes.push_back( Probability::getClassTypeSpec() );
-        rTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "r",       rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
-
-        std::vector<TypeSpec> other_event_paramTypes;
-        other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
-        std::vector<TypeSpec> event_sampling_paramTypes;
-        event_sampling_paramTypes.push_back( Probability::getClassTypeSpec() );
-        event_sampling_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        std::vector<std::string> aliases_event_sampling;
-        aliases_event_sampling.push_back("Phi");
-        aliases_event_sampling.push_back("rho");
-        dist_member_rules.push_back( new ArgumentRule( aliases_event_sampling,     event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-
-        dist_member_rules.push_back( new ArgumentRule( "R",       other_event_paramTypes, "The treatment probabilities for the sampling events (excluding sampling at present).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
         dist_member_rules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "lambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "muTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
         std::vector<std::string> aliases_serial_sampling_timeline;
         aliases_serial_sampling_timeline.push_back("phiTimeline");
         aliases_serial_sampling_timeline.push_back("psiTimeline");
         dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling_timeline,       ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the sampling rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "rTimeline",         ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa give birth with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa die with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        
         std::vector<std::string> aliases_event_sampling_timeline;
         aliases_event_sampling_timeline.push_back("PhiTimeline");
         aliases_event_sampling_timeline.push_back("rhoTimeline");
@@ -343,11 +373,23 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
+}
 
-        rules_set = true;
-    }
+/**
+ * Adds the member rules specific to burst/mass extinctions (default and FBD processes only)
+ *
+ * \param The member rules.
+ */
+void Dist_BDSTP::addBurstRules(MemberRules& dist_member_rules) const
+{
+    std::vector<TypeSpec> other_event_paramTypes;
+    other_event_paramTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
+    dist_member_rules.push_back( new ArgumentRule( "Lambda",  other_event_paramTypes, "The episodic birth burst probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    dist_member_rules.push_back( new ArgumentRule( "Mu",      other_event_paramTypes, "The episodic death burst (mass extinction) probabilities.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-    return dist_member_rules;
+    dist_member_rules.push_back( new ArgumentRule( "LambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa give birth with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    dist_member_rules.push_back( new ArgumentRule( "MuTimeline",        ModelVector<RealPos>::getClassTypeSpec(), "Times at which all taxa die with some probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );       
 }
 
 
@@ -449,6 +491,10 @@ void Dist_BDSTP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "initialTree" )
     {
         initial_tree = var;
+    }
+    else if ( name == "ageCheckPrecision" )
+    {
+        age_check_precision = var;
     }
     else
     {

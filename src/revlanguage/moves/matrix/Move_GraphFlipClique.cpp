@@ -7,7 +7,7 @@
 
 #include "Move_GraphFlipClique.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <vector>
 

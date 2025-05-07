@@ -20,7 +20,7 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *
      */
-    class Dist_multispeciesCoalescentInverseGammaPrior :  public  TypedDistribution<TimeTree> {
+    class Dist_multispeciesCoalescentInverseGammaPrior :  public  TypedDistribution< ModelVector<TimeTree> > {
 
     public:
         Dist_multispeciesCoalescentInverseGammaPrior( void );
@@ -46,9 +46,10 @@ namespace RevLanguage {
     private:
 
         RevPtr<const RevVariable>                           shape;                                                                                  //!< The shape of the inverse gamma distribution
-        RevPtr<const RevVariable>                           rate;                                                                                   //!< The rate of the inverse gamma distribution
+        RevPtr<const RevVariable>                           scale;                                                                                  //!< The scale of the inverse gamma distribution
         RevPtr<const RevVariable>                           species_tree;                                                                           //!< The species tree
-        RevPtr<const RevVariable>                           taxa;                                                                                   //!< The taxons
+        RevPtr<const RevVariable>                           taxa;                                                                                   //!< The taxa
+        RevPtr<const RevVariable>                           num_gene_trees;                                                                         //!< The number of genes
 
 
     };

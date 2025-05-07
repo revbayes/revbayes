@@ -1,6 +1,6 @@
 #include "CorrelationMatrixProposal.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <iostream>
 

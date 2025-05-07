@@ -1,7 +1,7 @@
 #ifndef CorrelationMatrixReparameterizationMove_H
 #define CorrelationMatrixReparameterizationMove_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "AbstractMove.h"

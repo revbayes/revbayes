@@ -7,7 +7,7 @@
 
 #include "Move_CorrelationMatrixUpdate.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

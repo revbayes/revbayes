@@ -1,6 +1,6 @@
 #include "CheckNodeOrderConstraintsFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 

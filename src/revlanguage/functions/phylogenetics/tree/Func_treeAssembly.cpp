@@ -1,6 +1,6 @@
 #include "Func_treeAssembly.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ModelVector.h"
 #include "RbException.h"

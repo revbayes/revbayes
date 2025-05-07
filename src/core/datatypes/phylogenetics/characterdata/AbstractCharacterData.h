@@ -1,7 +1,7 @@
 #ifndef AbstractCharacterData_H
 #define AbstractCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>

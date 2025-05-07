@@ -1,6 +1,6 @@
 #include "ContinuousTaxonData.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <ostream>
 
 #include "RbException.h"

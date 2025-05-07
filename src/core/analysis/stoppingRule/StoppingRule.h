@@ -1,7 +1,7 @@
 #ifndef StoppingRule_H
 #define StoppingRule_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "Cloneable.h"

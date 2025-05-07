@@ -1,7 +1,7 @@
 #ifndef RbRbBitSet_H
 #define RbRbBitSet_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 #include <boost/dynamic_bitset.hpp>

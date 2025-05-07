@@ -11,14 +11,13 @@
 
 #include "ModelVector.h"
 #include "Real.h"
-#include "RealPos.h"
 #include "RlTypedFunction.h"
 
 #include <string>
 
 namespace RevLanguage {
     
-    class Func_vectorFlatten :  public TypedFunction<ModelVector<RealPos> > {
+    class Func_vectorFlatten :  public TypedFunction<ModelVector<Real> > {
         
     public:
         Func_vectorFlatten();

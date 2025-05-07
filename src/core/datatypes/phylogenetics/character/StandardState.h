@@ -16,7 +16,7 @@
 #ifndef StandardState_H
 #define StandardState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "DiscreteCharacterState.h"

@@ -1,6 +1,6 @@
 #include "Mntr_StochasticBranchRate.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

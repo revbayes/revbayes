@@ -1,6 +1,6 @@
 #include "CovarionFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RateMatrix_FreeK.h"

@@ -1,7 +1,7 @@
 #ifndef EssMax_H
 #define EssMax_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "BurninEstimatorContinuous.h"
 

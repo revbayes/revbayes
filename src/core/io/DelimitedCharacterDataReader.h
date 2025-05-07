@@ -1,7 +1,7 @@
 #ifndef DelimitedCharacterDataReader_H
 #define DelimitedCharacterDataReader_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

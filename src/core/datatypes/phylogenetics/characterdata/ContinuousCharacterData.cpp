@@ -1479,6 +1479,12 @@ void ContinuousCharacterData::printForComplexStoring( std::ostream &o, const std
     throw RbException( "Complex printing has not yet been implemented for this datatype" );
 }
 
+//!< print object with maximum precision
+json ContinuousCharacterData::toJSON() const
+{
+    throw RbException( "Complex printing has not yet been implemented for this datatype" );
+}
+
 
 
 /**

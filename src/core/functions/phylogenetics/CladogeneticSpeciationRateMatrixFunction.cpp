@@ -7,7 +7,7 @@
 
 #include "CladogeneticSpeciationRateMatrixFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "RbException.h"

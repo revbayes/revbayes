@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 revbayes team. All rights reserved.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 
 #include "DistributionGilbertGraph.h"

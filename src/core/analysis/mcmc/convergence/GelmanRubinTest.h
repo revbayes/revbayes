@@ -1,7 +1,7 @@
 #ifndef GelmanRubinTest_H
 #define GelmanRubinTest_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "ConvergenceDiagnosticContinuous.h"

@@ -1,6 +1,6 @@
 #include "VarianceCovarianceFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVector.h"

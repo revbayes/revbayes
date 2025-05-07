@@ -7,7 +7,7 @@
 
 #include "Move_CorrelationMatrixElementSwap.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

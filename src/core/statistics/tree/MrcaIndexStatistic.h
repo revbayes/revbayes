@@ -18,7 +18,7 @@
 #ifndef MrcaIndexStatistic_H
 #define MrcaIndexStatistic_H
 
-#include <stddef.h>
+#include <cstddef>
 
 //#include "Statistic.h"
 #include "Clade.h"

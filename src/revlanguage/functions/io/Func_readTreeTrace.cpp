@@ -1,7 +1,7 @@
 #include "Func_readTreeTrace.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <set>
 #include <sstream>
@@ -92,7 +92,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
     long                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
     long                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
-    bool nexus = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
+    bool                nexus    = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
     long                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
     std::vector<RevBayesCore::path> vectorOfFileNames;
@@ -204,6 +204,11 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
+            if ( burnin >= rv->getValue()[i].getValue().size() )
+            {
+                throw RbException("Specified burnin equals or exceeds the total number of trees in the trace.");
+            }
+            
             (*rv)[i].getValue().setBurnin(burnin);
         }
     }
@@ -256,8 +261,8 @@ const ArgumentRules& Func_readTreeTrace::getArgumentRules( void ) const
         argumentRules.push_back( new Delimiter() );
 
         std::vector<TypeSpec> burninTypes;
-        burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
+        burninTypes.push_back( Probability::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes     , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
 
         argumentRules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "The frequency of samples to read, i.e., we will only used every n-th sample where n is defined by this argument.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 1l ) ) );
@@ -437,6 +442,12 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTrees(const std::vector<RevB
             
             // increase our sample counter
             ++n_samples;
+            
+            // we need to check if we skip this sample in case of skipping.
+            if ( (double(n_samples)-offset) <= 0 )
+            {
+                continue;
+            }
             
             // we need to check if we skip this sample in case of thinning.
             if ( (n_samples-1-offset) % thinning > 0 )

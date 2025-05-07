@@ -1046,7 +1046,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
             
             if ( c < 0 || c >= this->num_states )
             {
-                throw RbException() << "Possible bug: Invar sites with ambiguous chars at index " << c << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
+                throw RbException() << "Possible bug: Invar sites with ambiguous chars at site " << i << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
             }
             invariant_site_index[i].push_back(c);
 
@@ -2449,11 +2449,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
             }
 
             // get the ambiguous character's bitset for the tip taxon
-            RbBitSet bs = RbBitSet(this->num_states, true);
-            if ( c.isMissingState() == false )
-            {
+            RbBitSet bs = RbBitSet(this->num_states);
+            if ( c.isMissingState() )
+                bs.set(); // set to all 1s.
+            else
                 bs = c.getState();
-            }
 
             // iterate over possible end states for each site given start state
             for (size_t j = 0; j < this->num_states; j++)
@@ -4040,12 +4040,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setRateMatrix(con
 
     this->resizeLikelihoodVectors();
 
-    if (rm != NULL && rm->getValue().size() != this->num_states)
-    {
-        std::stringstream ss;
-        ss << "Rate generator dimensions (" << rm->getValue().size() << " do not match the number of character states (" << this->num_states << ")";
-        throw(RbException(ss.str()));
-    }
+    if (rm != NULL && rm->getValue().size() != num_states)
+        throw RbException()<<"Rate generator dimensions (" << rm->getValue().size() << " do not match the number of character states (" << this->num_states << ")";
 
     // add the new parameter
     this->addParameter( homogeneous_rate_matrix );
@@ -5067,7 +5063,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
         touch_all = true;
     }
-    else if ( affecter != tau && affecter != site_rates_probs && affecter != site_matrix_probs) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter == site_rates_probs || affecter == site_matrix_probs )
+    {
+	// This doesn't affect the cached conditional likelihoods (so don't touch all of them).
+	// But it does affect the final likelihood (so we need to recompute that).
+    }
+    else if ( affecter != tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touch_all = true;
     }
@@ -5198,6 +5199,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                 rm = &jc;
             }
 
+	    // The rm can change behind our back if the user redefines it.
+	    if (rm->size() != num_states)
+		throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_states<<" states";
+
             // now also get the site specific rates
             for (size_t j = 0; j < this->num_site_rates; ++j)
             {
@@ -5227,6 +5232,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         {
             rm = &jc;
         }
+
+	// The rm can change behind our back if the user redefines it.
+	if (rm->size() != num_states)
+	    throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_states<<" states";
 
         for (size_t j = 0; j < this->num_site_rates; ++j)
         {
@@ -5294,7 +5303,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             {
                 rm = &this->homogeneous_rate_matrix->getValue();
             }
-            
+
+	    // The rm can change behind our back if the user redefines it.
+	    if (rm->size() != num_states)
+		throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_states<<" states";
+
             for (size_t j = 0; j < this->num_site_rates; ++j)
             {
                 double r = 1.0;
@@ -5317,8 +5330,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         {
             rm = &this->homogeneous_rate_matrix->getValue();
         }
-        
-        for (size_t j = 0; j < this->num_site_rates; ++j)
+
+	// The rm can change behind our back if the user redefines it.
+	if (rm->size() != num_states)
+	    throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_states<<" states";
+
+	for (size_t j = 0; j < this->num_site_rates; ++j)
         {
             double r = 1.0;
             if ( this->rate_variation_across_sites == true )

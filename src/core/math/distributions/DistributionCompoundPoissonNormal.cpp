@@ -7,7 +7,7 @@
 //
 
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 
 #include "RbMathCombinatorialFunctions.h"

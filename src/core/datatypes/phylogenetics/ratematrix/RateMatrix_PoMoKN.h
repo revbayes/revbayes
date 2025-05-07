@@ -21,7 +21,7 @@
 #ifndef RateMatrix_PoMoKN_H
 #define RateMatrix_PoMoKN_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"

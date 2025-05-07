@@ -8,7 +8,7 @@
 
 #include "Move_MatrixRealSymmetricSlide.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

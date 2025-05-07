@@ -9,7 +9,7 @@
 #ifndef __rb_mlandis__RegionalFeatures__
 #define __rb_mlandis__RegionalFeatures__
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 #include <map>

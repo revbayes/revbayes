@@ -1,7 +1,7 @@
 #ifndef Parser_H
 #define Parser_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <list>
 #include <string>
 #include <sstream>

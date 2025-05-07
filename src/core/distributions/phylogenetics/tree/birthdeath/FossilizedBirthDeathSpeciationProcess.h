@@ -46,7 +46,7 @@ namespace RevBayesCore {
         FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
 
         void                                            redrawValue(void);
-        void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present);
+        void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn);
 
     protected:
         void                                            updateStartEndTimes(void);
@@ -64,7 +64,7 @@ namespace RevBayesCore {
         double                                          q(size_t i, double t, bool tilde = false) const;
 
         double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
-        std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min) const;                 //!< Simulate n speciation events.
+        std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const;                 //!< Simulate n speciation events.
 
         void                                            keepSpecialization(DagNode *toucher);
         void                                            restoreSpecialization(DagNode *toucher);

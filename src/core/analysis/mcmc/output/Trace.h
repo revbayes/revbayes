@@ -1,7 +1,7 @@
 #ifndef Trace_H
 #define Trace_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <ostream>
 

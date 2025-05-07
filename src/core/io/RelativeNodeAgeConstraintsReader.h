@@ -1,7 +1,7 @@
 #ifndef RelativeNodeAgeConstraintsReader_H
 #define RelativeNodeAgeConstraintsReader_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 #include <utility>

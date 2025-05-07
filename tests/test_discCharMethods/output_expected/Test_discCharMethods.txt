@@ -1,0 +1,51 @@
+Invariant character indices:
+[ 31 ]
+
+Number of invariant characters according to getNumInvariantSites():
+1
+
+Size of the vector of indices created above:
+1
+
+Are the two values identical?
+TRUE
+
+Invariant character indices with excludeAmbiguous = TRUE:
+[ 24, 28, 31 ]
+
+Number of invariant characters according to getNumInvariantSites()
+(excludeAmbiguous = TRUE):
+3
+
+Size of the vector of indices created above:
+3
+
+Are the two values identical?
+TRUE
+
+Total number of characters:
+31
+
+Number of included characters:
+31
+
+Are the two values identical?
+TRUE
+
+Total number of characters after excluding invariant characters:
+31
+
+Number of included characters after excluding invariant characters:
+28
+
+Do the two numbers differ by the size of the invariant character vector?
+TRUE
+
+Total number of characters after removing excluded characters:
+28
+
+Number of included characters after removing excluded characters:
+28
+
+Are the two values identical?
+TRUE

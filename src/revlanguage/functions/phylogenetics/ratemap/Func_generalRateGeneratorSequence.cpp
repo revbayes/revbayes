@@ -9,7 +9,7 @@
 //#include "BiogeographyRateGeneratorSequenceFunction.h"
 #include "Func_generalRateGeneratorSequence.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "GeneralRateGeneratorSequenceFunction.h"
 #include "ModelVector.h"

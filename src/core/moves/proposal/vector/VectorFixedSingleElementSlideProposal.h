@@ -1,7 +1,7 @@
 #ifndef VectorSingleElementSlideMove_H
 #define VectorSingleElementSlideMove_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "Proposal.h"

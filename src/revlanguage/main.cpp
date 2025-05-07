@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/program_options.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>

@@ -1,6 +1,6 @@
 #include "Mntr_SiteMixtureAllocation.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "BinaryState.h"

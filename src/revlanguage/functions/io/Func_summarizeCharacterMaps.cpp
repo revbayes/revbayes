@@ -1,7 +1,7 @@
 #include "Func_summarizeCharacterMaps.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <vector>
 

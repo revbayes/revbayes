@@ -9,7 +9,7 @@
 #ifndef RangeEvolutionRateModifierFunction_hpp
 #define RangeEvolutionRateModifierFunction_hpp
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "CharacterHistoryRateModifier.h"
 #include "TypedFunction.h"

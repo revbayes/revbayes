@@ -1,7 +1,7 @@
 #ifndef OdeHeterogeneousRateBirthDeath_H
 #define OdeHeterogeneousRateBirthDeath_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVector.h"

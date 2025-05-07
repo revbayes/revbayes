@@ -24,7 +24,7 @@ extern "C" {
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <algorithm>
 #include <map>

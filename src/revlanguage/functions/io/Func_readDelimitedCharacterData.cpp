@@ -1,6 +1,6 @@
 #include "Func_readDelimitedCharacterData.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 #include <ostream>
 #include <string>

@@ -7,7 +7,7 @@
 
 #include "RateMatrix_ReversiblePoMo.h"
 
-#include <assert.h>
+#include <cassert>
 #include <cstddef>
 
 #include "RbException.h"

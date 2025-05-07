@@ -8,7 +8,7 @@
 
 #include "SimplexScaleFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDagNode.h"
 #include "Cloneable.h"

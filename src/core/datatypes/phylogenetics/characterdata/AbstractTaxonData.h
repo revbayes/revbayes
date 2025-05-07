@@ -1,7 +1,7 @@
 #ifndef AbstractTaxonData_H
 #define AbstractTaxonData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <iosfwd>
 

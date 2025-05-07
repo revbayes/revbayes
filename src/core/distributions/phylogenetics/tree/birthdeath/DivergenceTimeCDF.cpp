@@ -1,6 +1,6 @@
 #include "DivergenceTimeCDF.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 
 #include "RbMathLogic.h"

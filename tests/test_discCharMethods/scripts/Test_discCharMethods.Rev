@@ -1,0 +1,144 @@
+################################################################################
+#
+# RevBayes Test-Script: Manipulating character matrices
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+# testing the newly added getInvariantSiteIndices() and removeExcludedCharacters() methods
+
+# first read in a version of the lamprey morphological matrix from Brownstein & Near (2023),
+# Curr. Biol. 33(2): 397-404, modified to exclude the fossils
+
+morpho <- readDiscreteCharacterData("data/petromyzontiformes.nex")
+
+# get the indices of all sites that are invariant
+# for now, we will only count a character as invariant if *all* of its states are identical
+
+inv_ix_one = morpho.getInvariantSiteIndices()
+
+print(filename = "output/Test_discCharMethods.txt", append = FALSE, "Invariant character indices:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, inv_ix_one)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+
+# check that the size of this vector is identical to the output of a pre-existing method
+# that gets the number of invariant characters but not their indices:
+
+num_inv_one = morpho.getNumInvariantSites()
+
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Number of invariant characters according to getNumInvariantSites():")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, num_inv_one)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Size of the vector of indices created above:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, inv_ix_one.size() )
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Are the two values identical?")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, inv_ix_one.size() == num_inv_one)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+
+# get the indices of all sites that are invariant
+# this time, we count a character as invariant if all of its *unambiguous* states are identical
+
+inv_ix_two = morpho.getInvariantSiteIndices(excludeAmbiguous = TRUE)
+
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Invariant character indices with excludeAmbiguous = TRUE:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, inv_ix_two)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+
+num_inv_two = morpho.getNumInvariantSites(excludeAmbiguous = TRUE)
+
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Number of invariant characters according to getNumInvariantSites()")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "(excludeAmbiguous = TRUE):")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, num_inv_two)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Size of the vector of indices created above:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, inv_ix_two.size() )
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Are the two values identical?")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, inv_ix_two.size() == num_inv_two)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+
+# check that the number of included characters is the same as the total number of characters
+# the easiest way to get the total number of characters is to run nchar() on the first taxon
+
+all_chars_one = morpho[1].nchar()
+incl_chars_one = morpho.getIncludedCharacterIndices().size()
+
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Total number of characters:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, all_chars_one)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Number of included characters:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, incl_chars_one)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Are the two values identical?")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, all_chars_one == incl_chars_one)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+
+# exclude all characters that are invariant according to the second criterion
+
+morpho.excludeCharacter( inv_ix_two )
+
+# check that the new number of included characters decreased but the total number did not change
+
+all_chars_two = morpho[1].nchar()
+incl_chars_two = morpho.getIncludedCharacterIndices().size()
+
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Total number of characters after excluding invariant characters:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, all_chars_two)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Number of included characters after excluding invariant characters:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, incl_chars_two)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Do the two numbers differ by the size of the invariant character vector?")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      incl_chars_two == all_chars_two - inv_ix_two.size() )
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+
+# remove excluded characters, make sure the total number of characters now decreased as well
+
+morpho.removeExcludedCharacters()
+all_chars_three = morpho[1].nchar()
+incl_chars_three = morpho.getIncludedCharacterIndices().size()
+
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Total number of characters after removing excluded characters:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, all_chars_three)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE,
+      "Number of included characters after removing excluded characters:")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, incl_chars_three)
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "Are the two values identical?")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, "\n")
+print(filename = "output/Test_discCharMethods.txt", append = TRUE, all_chars_three == incl_chars_three)
+clear()
+
+q()

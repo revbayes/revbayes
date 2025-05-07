@@ -1,7 +1,7 @@
 #ifndef GeneralRateMatrix_H
 #define GeneralRateMatrix_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"

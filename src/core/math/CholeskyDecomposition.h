@@ -1,7 +1,7 @@
 #ifndef CholeskyDecomposition_H
 #define CholeskyDecomposition_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "MatrixReal.h"
 

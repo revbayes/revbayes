@@ -1,0 +1,2 @@
+trees = readTreeTrace("data/trees1.trees")
+q()

@@ -9,7 +9,7 @@
 #include <ostream>
 #include <set>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include <vector>
 

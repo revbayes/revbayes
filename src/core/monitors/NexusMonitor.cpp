@@ -1,6 +1,6 @@
 #include "NexusMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "DagNode.h"

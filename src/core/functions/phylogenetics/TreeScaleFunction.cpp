@@ -1,5 +1,5 @@
 #include "TreeScaleFunction.h"
-#include <stddef.h>
+#include <cstddef>
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
 

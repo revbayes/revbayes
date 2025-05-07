@@ -55,6 +55,8 @@ HomeologPhaseMonitor* HomeologPhaseMonitor::clone(void) const
  */
 void HomeologPhaseMonitor::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
     std::map<std::string, std::string> homeologMap = ctmc->getValue().getHomeologMap();
     for (std::map<std::string, std::string>::iterator it = homeologMap.begin(); it != homeologMap.end(); ++it)
     {
@@ -69,6 +71,8 @@ void HomeologPhaseMonitor::monitorVariables(unsigned long gen)
  */
 void HomeologPhaseMonitor::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
     std::map<std::string, std::string> homeologMap = ctmc->getValue().getHomeologMap();
     for (std::map<std::string, std::string>::iterator it = homeologMap.begin(); it != homeologMap.end(); ++it)
     {

@@ -8,7 +8,7 @@
 
 #include "Mntr_StochasticBranchStateTimes.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "ArgumentRule.h"

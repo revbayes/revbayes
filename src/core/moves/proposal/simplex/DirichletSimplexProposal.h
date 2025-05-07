@@ -1,7 +1,7 @@
 #ifndef DirichletSimplexProposal_H
 #define DirichletSimplexProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

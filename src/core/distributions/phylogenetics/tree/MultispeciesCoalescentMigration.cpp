@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <cstddef>
 #include <iostream>

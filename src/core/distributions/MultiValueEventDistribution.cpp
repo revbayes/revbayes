@@ -1,6 +1,6 @@
 #include "MultiValueEventDistribution.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "DagNode.h"

@@ -6,7 +6,7 @@
 #include "TypedDagNode.h"
 
 #include <cmath>
-#include <stddef.h>
+#include <cstddef>
 
 namespace RevBayesCore { class DagNode; }
 

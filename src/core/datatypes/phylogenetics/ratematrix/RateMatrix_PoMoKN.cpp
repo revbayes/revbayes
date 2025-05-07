@@ -1,6 +1,6 @@
 #include "RateMatrix_PoMoKN.h"
 
-#include <assert.h>
+#include <cassert>
 #include <cstddef>
 
 #include "RbException.h"

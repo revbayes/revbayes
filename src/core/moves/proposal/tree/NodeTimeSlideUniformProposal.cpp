@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 
@@ -88,10 +88,9 @@ double NodeTimeSlideUniformProposal::getProposalTuningParameter( void ) const
  */
 double NodeTimeSlideUniformProposal::doProposal( void )
 {
-    
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
-    
+
     // get the current tree either from the single variable or the vector of trees
     Tree *tmp = NULL;
     if ( variable != NULL )
@@ -104,43 +103,40 @@ double NodeTimeSlideUniformProposal::doProposal( void )
         tmp = &(vector_variable->getValue()[tree_index]);
     }
     Tree& tau = *tmp;
-    
-    if (tau.getNumberOfTips() <= 2)
-    {
-        return 0.0;
-    }
+
+    storedNode = nullptr;
 
     // pick a random node which is not the root and neithor the direct descendant of the root
-    TopologyNode* node;
-    do {
-        double u = rng->uniform01();
-        size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
-    
+    std::vector<TopologyNode*> ok_nodes;
+    for(int i=0;i<tau.getNumberOfNodes();i++)
+    {
+	auto& node = tau.getNode(i);
+	if (not node.isRoot() and not node.isTip() and not node.isSampledAncestorTipOrParent())
+	    ok_nodes.push_back( & node );
+    }
+
+    if (ok_nodes.empty()) return 0.0;
+
+    int index = std::floor(ok_nodes.size() * rng->uniform01());
+    TopologyNode* node = ok_nodes[index];
     TopologyNode& parent = node->getParent();
-    
+
     // we need to work with the times
     double parent_age  = parent.getAge();
     double my_age      = node->getAge();
-    double child_Age   = node->getChild( 0 ).getAge();
-    if ( child_Age < node->getChild( 1 ).getAge())
-    {
-        child_Age = node->getChild( 1 ).getAge();
-    }
-    
+    double child_Age   = std::max(node->getChild( 0 ).getAge(), node->getChild( 1 ).getAge());
+
     // now we store all necessary values
     storedNode = node;
     storedAge = my_age;
-    
+
     // draw new ages and compute the hastings ratio at the same time
     double my_new_age = (parent_age-child_Age) * rng->uniform01() + child_Age;
-    
+
     // set the age
     tau.getNode(node->getIndex()).setAge( my_new_age );
-    
+
     return 0.0;
-    
 }
 
 
@@ -178,7 +174,8 @@ void NodeTimeSlideUniformProposal::undoProposal( void )
 {
     
     // undo the proposal
-    storedNode->setAge( storedAge );
+    if (storedNode)
+	storedNode->setAge( storedAge );
     
 }
 

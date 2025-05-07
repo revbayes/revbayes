@@ -1,5 +1,5 @@
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iomanip>
 #include <algorithm>
 #include <cstddef>
@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 #include <optional>
+#include <range/v3/all.hpp>
 
 #include "NewickConverter.h"
 #include "ProgressBar.h"
@@ -36,6 +37,7 @@
 
 using namespace RevBayesCore;
 
+namespace views = ranges::views;
 
 /*
  * TreeSummary constructor
@@ -834,7 +836,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
             if ( clock == true )
             {
-                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestor() ) )
+                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestorTip() ) )
                 {
                     std::string label = "age_" + StringUtilities::toString( (int)(report.node_ages_HPD * 100) ) + "%_HPD";
                     n->addNodeParameter(label, interval);
@@ -887,7 +889,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
     {
         n.getTaxa(taxa);
 
-        if ( rooted && n.isSampledAncestor() )
+        if ( rooted && n.isSampledAncestorTip() )
         {
             sampled_ancestor_counts[n.getTaxon()]++;
 
@@ -902,7 +904,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
             child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
 
-            if ( rooted && child_node.isSampledAncestor() )
+            if ( rooted && child_node.isSampledAncestorTip() )
             {
                 mrca.insert(child_node.getTaxon());
             }
@@ -945,15 +947,16 @@ MatrixReal TreeSummary::computeConnectivity(double credible_interval_size, const
     NewickConverter converter;
     double total_prob = 0;
     double total_samples = sampleSize(true);
-    for (std::set<Sample<std::string> >::const_reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (auto& [newick, count]: tree_samples | views::reverse)
     {
-        double freq = it->second;
+        double freq = count;
         double p = freq/total_samples;
         total_prob += p;
 
         sample_count.push_back( freq );
 
-        Tree* current_tree = converter.convertFromNewick( it->first );
+        Tree* current_tree = converter.convertFromNewick( newick );
+        current_tree->makeInternalNodesBifurcating(true, true);
         unique_trees.push_back( current_tree );
         
 //        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1009,9 +1012,9 @@ double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa,
     double total_samples = sampleSize(true);
     double entropy = 0.0;
     /*double tree_count = 0.0;*/
-    for (std::set<Sample<std::string> >::const_reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (auto& [newick, count]: tree_samples | views::reverse )
     {
-        double freq = it->second;
+        double freq = count;
         double p = freq/total_samples;
         /*double p = freq/(total_samples);*/
         total_prob += p;
@@ -1040,15 +1043,16 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
     NewickConverter converter;
     double total_prob = 0;
     double total_samples = sampleSize(true);
-    for (std::set<Sample<std::string> >::const_reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (auto& [newick, count]: tree_samples | views::reverse)
     {
-        double freq = it->second;
+        double freq = count;
         double p = freq/total_samples;
         total_prob += p;
 
         sample_count.push_back( freq );
 
-        Tree* current_tree = converter.convertFromNewick( it->first );
+        Tree* current_tree = converter.convertFromNewick( newick );
+        current_tree->makeInternalNodesBifurcating(true, true);
         unique_trees.push_back( current_tree );
         
         std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1258,10 +1262,10 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non
     VectorUtilities::sort( ordered_taxa );
     size_t num_taxa = ordered_taxa.size();
 
-    for (std::set<Sample<Split> >::const_reverse_iterator it = clade_samples.rbegin(); it != clade_samples.rend(); ++it)
+    for (auto& [clade, count]: clade_samples | views::reverse)
     {
 
-        double freq = it->second;
+        double freq = count;
         double p    = freq/total_samples;
 
         // first we check if this clade is above the minimum level
@@ -1271,8 +1275,8 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non
         }
 
         // now lets actually construct the clade
-        Clade current_clade(it->first.first, ordered_taxa);
-        current_clade.setMrca(it->first.second);
+        Clade current_clade(clade.first, ordered_taxa);
+        current_clade.setMrca(clade.second);
 
         if ( current_clade.size() <= 1 || current_clade.size() >= ( rooted ? num_taxa : (num_taxa-1) ) ) continue;
 
@@ -1292,13 +1296,14 @@ std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bo
     NewickConverter converter;
     double total_prob = 0;
     double total_samples = sampleSize(true);
-    for (std::set<Sample<std::string> >::const_reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (auto& [newick, count]: tree_samples | views::reverse)
     {
-        double freq =it->second;
+        double freq = count;
         double p =freq/total_samples;
         total_prob += p;
 
-        Tree* current_tree = converter.convertFromNewick( it->first );
+        Tree* current_tree = converter.convertFromNewick( newick );
+        current_tree->makeInternalNodesBifurcating(true, true);
         unique_trees.push_back( *current_tree );
         delete current_tree;
         if ( total_prob >= credible_interval_size )
@@ -1349,17 +1354,16 @@ bool TreeSummary::isCoveredInInterval(const Tree &tree, double ci_size, bool ver
 
     double totalSamples = sampleSize(true);
     double totalProb = 0.0;
-    for (std::set<Sample<std::string> >::reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (auto& [current_sample, count]: tree_samples | views::reverse)
     {
 
-        double p = it->second/totalSamples;
+        double p = count/totalSamples;
 //        double include_prob = p / (1.0-totalProb) * (ci_size - totalProb) / (1.0-totalProb);
         double include_prob = (ci_size-totalProb)/p;
 //        double include_prob = p * ci_size;
 
         if ( include_prob > rng->uniform01() )
         {
-            const std::string &current_sample = it->first;
             if ( newick == current_sample )
             {
                 return true;
@@ -1547,6 +1551,7 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
     std::string bestNewick = tree_samples.rbegin()->first;
     NewickConverter converter;
     Tree* tmp_best_tree = converter.convertFromNewick( bestNewick );
+    tmp_best_tree->makeInternalNodesBifurcating(true,true);
 
     Tree* tmp_tree = NULL;
 
@@ -1599,6 +1604,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
 
             NewickConverter converter;
             Tree* tmp_tree = converter.convertFromNewick( newick );
+            tmp_tree->makeInternalNodesBifurcating(true, true);
             if ( clock == true )
             {
                 best_tree = TreeUtilities::convertTree( *tmp_tree );
@@ -1656,7 +1662,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples)
+    for (const auto& [clade, count]: clade_samples | views::reverse)
     {
         float cladeFreq = count / totalSamples;
         if (cladeFreq < cutoff)  break;
@@ -1788,14 +1794,14 @@ void TreeSummary::printCladeSummary(std::ostream &o, double minCladeProbability,
     std::vector<Taxon> ordered_taxa = traces.front()->objectAt(0).getTaxa();
     VectorUtilities::sort( ordered_taxa );
 
-    for (std::set<Sample<Split> >::reverse_iterator it = clade_samples.rbegin(); it != clade_samples.rend(); ++it)
+    for (auto& [clade, count]: clade_samples | views::reverse)
     {
-        Clade c(it->first.first, ordered_taxa);
-        c.setMrca(it->first.second);
+        Clade c(clade.first, ordered_taxa);
+        c.setMrca(clade.second);
 
         if ( c.size() == 1 ) continue;
 
-        double freq = it->second;
+        double freq = count;
         double p = freq/totalSamples;
 
 
@@ -1876,9 +1882,9 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
     o << "----------------------------------------------------------------" << std::endl;
     double totalSamples = sampleSize(true);
     double totalProb = 0.0;
-    for (std::set<Sample<std::string> >::reverse_iterator it = tree_samples.rbegin(); it != tree_samples.rend(); ++it)
+    for (auto& [newick, count]: tree_samples | views::reverse)
     {
-        double freq =it->second;
+        double freq = count;
         double p = freq/totalSamples;
         totalProb += p;
 
@@ -1906,7 +1912,7 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
          StringUtilities::fillWithSpaces(s, 16, true);
          o << s;*/
 
-        o << it->first;
+        o << newick;
         o << std::endl;
 
         if ( totalProb >= credibleIntervalSize )

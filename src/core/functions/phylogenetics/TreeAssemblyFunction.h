@@ -1,7 +1,7 @@
 #ifndef TreeAssemblyFunction_H
 #define TreeAssemblyFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 
 #include "Tree.h"

@@ -120,6 +120,7 @@ SiteMixtureAllocationMonitor<characterType>* SiteMixtureAllocationMonitor<charac
 template<class characterType>
 void SiteMixtureAllocationMonitor<characterType>::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
 	// make sure the CTMC has been already sampled mixture components
 	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
@@ -175,7 +176,9 @@ void SiteMixtureAllocationMonitor<characterType>::monitorVariables(unsigned long
 template<class characterType>
 void SiteMixtureAllocationMonitor<characterType>::printFileHeader()
 {
-	// get the number of sites
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
+        // get the number of sites
 	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
 	const TypedDagNode<Tree> *tree = dist_ctmc->getTree();
 	size_t num_sites = dist_ctmc->getValue().getNumberOfCharacters();

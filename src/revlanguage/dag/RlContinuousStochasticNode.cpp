@@ -1,7 +1,7 @@
 #include "RlContinuousStochasticNode.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 

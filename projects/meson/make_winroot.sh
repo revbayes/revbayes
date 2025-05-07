@@ -54,7 +54,7 @@ cat > "${CROSSNAME}" <<EOF
 ${COMPILER_LINES}
 ar = 'x86_64-w64-mingw32-ar'
 strip = 'x86_64-w64-mingw32-strip'
-pkgconfig = 'pkg-config'
+pkg-config = 'pkg-config'
 exe_wrapper = 'wine64' # A command used to run generated executables.
 
 # why do we still need these? shouldn't they get added automatically if we find boost?
@@ -96,42 +96,45 @@ cd ${SYSROOT}
 # libwinpthread-git-9.0.0.6090.ad98746a-1
 # We can use the libwinpthread-1 from the cross-compiler instead of download it.
 
-PKGS="boost-1.81.0-2
+PKGS="boost-1.83.0-2
 openlibm-0.8.1-1
-dlfcn-1.3.1-1
+dlfcn-1.4.1-1
 "
 
 if [ "${gtk}" = "true" ] ; then
     PKGS="$PKGS
-    atk-2.36.0-2
-    brotli-1.0.9-4
-    bzip2-1.0.8-2
-    cairo-1.17.6-2
-    expat-2.4.6-1
-    fontconfig-2.13.96-1
-    freetype-2.11.1-2
-    fribidi-1.0.11-1
-    gdk-pixbuf2-2.42.6-2
-    gettext-0.21-3
-    glib2-2.70.4-1
+    atk-2.50.0-1
+    brotli-1.1.0-1
+    bzip2-1.0.8-3
+    cairo-1.18.0-1
+    expat-2.5.0-1
+    fontconfig-2.14.2-1
+    freetype-2.13.2-1
+    fribidi-1.0.13-1
+    gdk-pixbuf2-2.42.9-1
+    gettext-0.22.4-3
+    glib2-2.78.2-1
     graphite2-1.3.14-2
-    gtk2-2.24.33-4
-    harfbuzz-3.4.0-1
-    iconv-1.16-2
-    jasper-2.0.33-1
-    libdatrie-0.2.13-1
-    libffi-3.3-4
-    libiconv-1.16-2
-    libjpeg-turbo-2.1.3-1
-    libpng-1.6.37-6
-    libthai-0.1.29-1
-    libtiff-4.3.0-7
+    gtk2-2.24.33-6
+    harfbuzz-8.3.0-1
+    iconv-1.17-4
+    libiconv-1.17-4
+    jasper-4.0.0-1
+    libdatrie-0.2.13-3
+    libdeflate-1.19-1
+    libffi-3.4.4-1
+    libjpeg-turbo-3.0.1-1
+    libpng-1.6.40-1
+    libthai-0.1.29-3
+    libtiff-4.6.0-1
+    libwebp-1.3.2-1
     lzo2-2.10-2
-    pango-1.50.4-1
-    pcre-8.45-1
-    pixman-0.40.0-2
-    xz-5.2.5-2
-    zlib-1.2.11-9
+    pango-1.50.14-4
+    pcre2-10.42-1
+    pixman-0.42.2-1
+    xz-5.4.5-1
+    zlib-1.3-1
+    zstd-1.5.5-1
 "
 fi
 

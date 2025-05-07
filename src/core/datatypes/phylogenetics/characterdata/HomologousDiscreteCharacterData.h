@@ -57,6 +57,7 @@ namespace RevBayesCore {
         std::vector<double>                                 getEmpiricalBaseFrequencies(void) const;                                    //!< Compute the empirical base frequencies
         const std::set<size_t>&                             getExcludedCharacters(void) const;                                          //!< Returns the name of the file the data came from
         std::vector<size_t>                                 getIncludedSiteIndices(void) const;
+        std::vector<size_t>                                 getInvariantSiteIndices(bool excl) const;                                   //!< Get the indices of invariant characters in this matrix
         size_t                                              getMaxObservedStateIndex(void) const;                                       //!< Get the number of observed states for the characters in this matrix
         size_t                                              getNumberOfCharacters(void) const;                                          //!< Number of characters
         size_t                                              getNumberOfIncludedCharacters(void) const;                                  //!< Number of characters
@@ -938,6 +939,57 @@ std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::get
 
 
 
+/**
+ * Get the indices of invariant characters in taxon data object.
+ * This is regardless of whether the character are included or excluded.
+ *
+ * \return    The total number of characters
+ */
+template<class charType>
+std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::getInvariantSiteIndices(bool exclude_missing) const
+{
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> inv_site_indices;
+    size_t nt = this->getNumberOfTaxa();
+
+    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
+    size_t nc = firstTaxonData.getNumberOfCharacters();
+    for (size_t j=0; j<nc; j++)
+    {
+        const DiscreteCharacterState* a = &firstTaxonData[j];
+        size_t k = 1;
+        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
+        {
+            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
+            a = &td[j];
+            ++k;
+        }
+        
+        bool invariant = true;
+        for (size_t i=1; i<nt; i++)
+        {
+            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
+            const DiscreteCharacterState& b = secondTaxonData[j];
+            
+            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
+            {
+                invariant &= (*a == b);
+            }
+
+        }
+        
+        if ( invariant == true )
+        {
+            inv_site_indices.push_back( j + 1 );
+        }
+
+    }
+    
+    return inv_site_indices;
+}
+
+
 
 /** 
  * Get the number of characters in taxon data object. 
@@ -1053,49 +1105,15 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfState
 
 
 /**
- * Get the set of excluded character indices.
+ * Get the number of invariant characters.
  *
- * \return    The excluded character indices.
+ * \return    The number of invariant sites.
  */
 template<class charType>
 size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfInvariantSites(bool exclude_missing) const
 {
-    size_t invSites = 0;
-    size_t nt = this->getNumberOfTaxa();
-
-    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
-    size_t nc = firstTaxonData.getNumberOfCharacters();
-    for (size_t j=0; j<nc; j++)
-    {
-        const DiscreteCharacterState* a = &firstTaxonData[j];
-        size_t k = 1;
-        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
-        {
-            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
-            a = &td[j];
-            ++k;
-        }
-        
-        bool invariant = true;
-        for (size_t i=1; i<nt; i++)
-        {
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
-            const DiscreteCharacterState& b = secondTaxonData[j];
-            
-            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
-            {
-                invariant &= (*a == b);
-            }
-
-        }
-        
-        if ( invariant == true )
-        {
-            ++invSites;
-        }
-
-    }
-    
+    std::vector<size_t> inv_site_indices = this->getInvariantSiteIndices(exclude_missing);
+    size_t invSites = inv_site_indices.size();
     return invSites;
 }
 

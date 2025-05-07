@@ -45,13 +45,15 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
-        
+        virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                                          //!< Set the number of processes for this distribution.
+
         
     private:
         // helper methods
         RbVector<valueType>*                                simulate();
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
+        void                                                setInternalDistributions(void);
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // private members
@@ -65,6 +67,7 @@ namespace RevBayesCore {
         size_t                                              sample_block_size;
 
         std::vector<double>                                 ln_probs;
+        RbVector<valueType>                                 internal_value_copy;
         
 #ifdef RB_MPI
         std::vector<size_t>                                 pid_per_sample;
@@ -111,7 +114,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistributio
 }
 
 template <class valueType>
-RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution( const EmpiricalSampleDistribution &d ) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>( d.getValue() ) ),
+RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistribution( const EmpiricalSampleDistribution &d ) : TypedDistribution< RbVector<valueType> >( d ),
     base_distribution( d.base_distribution->clone() ),
     base_distribution_instances(),
     sample_prior_density( d.sample_prior_density ),
@@ -119,7 +122,8 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::EmpiricalSampleDistributio
     sample_block_start( d.sample_block_start ),
     sample_block_end( d.sample_block_end ),
     sample_block_size( d.sample_block_size ),
-    ln_probs( d.ln_probs )
+    ln_probs( d.ln_probs ),
+    internal_value_copy( d.internal_value_copy )
 {
     
 #ifdef RB_MPI
@@ -151,6 +155,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>::~EmpiricalSampleDistributi
     for (size_t i = 0; i < num_samples; ++i)
     {
         delete base_distribution_instances[i];
+        base_distribution_instances[i] = NULL;
     }
     
 }
@@ -169,6 +174,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
         for (size_t i = 0; i < num_samples; ++i)
         {
             delete base_distribution_instances[i];
+            base_distribution_instances[i] = NULL;
         }
         base_distribution_instances.clear();
         
@@ -180,6 +186,11 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>& RevBayesCore::EmpiricalSam
         sample_block_size   = d.sample_block_size;
         
         ln_probs            = d.ln_probs;
+        internal_value_copy = RbVector<valueType>(d.internal_value_copy.size());
+        for (size_t i = 0; i < d.internal_value_copy.size(); ++i)
+        {
+            internal_value_copy[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( d.internal_value_copy[i] );
+        }
 
         
 #ifdef RB_MPI
@@ -238,10 +249,10 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
 #ifdef RB_MPI
     for (size_t i = 0; i < num_samples; ++i)
     {
-        
+
         if ( this->pid == pid_per_sample[i] )
         {
-            
+
             // send the likelihood from the helpers to the master
             if ( this->process_active == false )
             {
@@ -249,7 +260,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
                 // send from the workers the log-likelihood to the master
                 MPI_Send(&ln_probs[i], 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
             }
-            
+
         }
         // receive the likelihoods from the helpers
         else if ( this->process_active == true )
@@ -258,7 +269,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
             MPI_Recv(&ln_probs[i], 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
 
         }
-        
+
     }
 #endif
     
@@ -298,19 +309,19 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
         ln_prob = std::log( prob ) + max - std::log( num_samples );
         
 #ifdef RB_MPI
-        
+
         for (size_t i=this->active_PID+1; i<this->active_PID+this->num_processes; ++i)
         {
             MPI_Send(&ln_prob, 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
         }
-        
+
     }
     else
     {
-        
+
         MPI_Status status;
         MPI_Recv(&ln_prob, 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
-        
+
     }
 #endif
 
@@ -443,16 +454,23 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::swapParameterInternal
 
 
 template <class valueType>
-void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<valueType> *v, bool force)
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::setActivePIDSpecialized(size_t a, size_t n)
 {
     
+    setInternalDistributions();
+    
+}
+
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::setInternalDistributions( void )
+{
     // free the old distributions
-    for (size_t i = 0; i < num_samples; ++i)
+    for (size_t i = 0; i < base_distribution_instances.size(); ++i)
     {
         delete base_distribution_instances[i];
+        base_distribution_instances[i] = NULL;
     }
-
-    num_samples = v->size();
     
     // compute which block of the data this process needs to compute
     sample_block_start = 0;
@@ -462,19 +480,21 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     sample_block_end   = size_t(ceil( (double(this->pid+1 - this->active_PID)   / this->num_processes ) * num_samples) );
 #endif
     sample_block_size  = sample_block_end - sample_block_start;
-    
+        
     base_distribution_instances = std::vector< TypedDistribution<valueType>* >( num_samples, NULL );
     for (size_t i = sample_block_start; i < sample_block_end; ++i)
     {
         TypedDistribution<valueType> *base_distribution_clone = base_distribution->clone();
         base_distribution_instances[i] = base_distribution_clone;
-        base_distribution_clone->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( (*v)[i]) );
+        base_distribution_clone->setValue( Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( internal_value_copy[i]) );
     }
+    
+
     
 #ifdef RB_MPI
     // now we need to populate which process is responsible for the given sample
     pid_per_sample = std::vector<size_t>( num_samples, 0 );
-    for (size_t i = 0; i < (this->num_processes-this->active_PID); ++i)
+    for (size_t i = this->active_PID; i < (this->active_PID+this->num_processes); ++i)
     {
         size_t this_pid_sample_block_start = size_t(ceil( (double(i   - this->active_PID)   / this->num_processes ) * num_samples) );
         size_t this_pid_sample_block_end   = size_t(ceil( (double(i+1 - this->active_PID)   / this->num_processes ) * num_samples) );
@@ -485,8 +505,19 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
     }
 #endif
     
-    ln_probs = std::vector<double>(num_samples, 0.0);
+}
 
+
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<valueType> *v, bool force)
+{
+    
+    num_samples = v->size();
+    internal_value_copy = *v;
+    
+    ln_probs = std::vector<double>(num_samples, 0.0);
+    
+    setInternalDistributions();
     
     // delegate class
     TypedDistribution< RbVector<valueType> >::setValue( v, force );

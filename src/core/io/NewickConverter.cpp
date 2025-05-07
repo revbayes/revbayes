@@ -1,7 +1,7 @@
 #include "NewickConverter.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <sstream>
 #include <vector>
 #include <string>
@@ -271,11 +271,6 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
             // Avoid infinite loop.
             throw RbException()<<"Not enough closing parentheses!";
         }
-    }
-
-    if (node->getNumberOfChildren() == 1)
-    {
-        node->setSampledAncestor( true );
     }
 
     // remove closing parenthesis

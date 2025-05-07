@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <cassert>
 #include <iomanip>
@@ -234,7 +234,7 @@ find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, doub
 
     assert(L < R);
 
-    return std::pair<double,double>(L,R);
+    return {L,R};
 }
 
 std::tuple<double,double,optional<double>,optional<double>>
@@ -304,7 +304,7 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     //  std::cerr<<"[]    L0 = "<<L<<"   x0 = "<<x0<<"   R0 = "<<R<<"\n";
 
     // FIXME: GCC 5 complains if we don't write out the tuple type. GCC 7 does not need it.  How about GCC 6?
-    return std::tuple<double,double,optional<double>,optional<double>>{L,R,gL_cached,gR_cached};
+    return {L,R,gL_cached,gR_cached};
 }
 
 double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
@@ -419,10 +419,7 @@ double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
     double logy = gx0 + log(uniform()); // - exponential(1.0);
 
     // Find the initial interval to sample from.
-
-    std::pair<double,double> interval = find_slice_boundaries_stepping_out(x0,g,logy,w,m);
-    double L = interval.first;
-    double R = interval.second;
+    auto [L, R] = find_slice_boundaries_stepping_out(x0,g,logy,w,m);
 
     // Sample from the interval, shrinking it on each rejection
 
@@ -442,13 +439,7 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
     double logy = g() + log(uniform()); // - exponential(1);
 
     // 2. Find the initial interval to sample from.
-    // FIXME: use structured bindings after we switch to c++17
-    // auto [L,R,gL_cached,gR_cached] = find_slice_boundaries_doubling(x0,g,logy,w,m);
-    auto B = find_slice_boundaries_doubling(x0,g,logy,w,m);
-    auto L = std::get<0>(B);
-    auto R = std::get<1>(B);
-    auto gL_cached = std::get<2>(B);
-    auto gR_cached = std::get<3>(B);
+    auto [L, R, gL_cached, gR_cached]  = find_slice_boundaries_doubling(x0,g,logy,w,m);
 
     // 3. Sample from the interval, shrinking it on each rejection
     double x1 = search_interval(x0,L,R,g,logy);

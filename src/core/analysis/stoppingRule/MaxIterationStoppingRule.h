@@ -1,7 +1,7 @@
 #ifndef MaxIterationStoppingRule_H
 #define MaxIterationStoppingRule_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "StoppingRule.h"

@@ -1,6 +1,6 @@
 #include "NarrowExchangeProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 
 #include "RandomNumberFactory.h"

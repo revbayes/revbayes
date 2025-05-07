@@ -1,6 +1,6 @@
 #include "SynchronizedVectorFixedSingleElementSlideProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"

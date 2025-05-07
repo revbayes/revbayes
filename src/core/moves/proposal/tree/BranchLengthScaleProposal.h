@@ -1,7 +1,7 @@
 #ifndef BranchLengthScaleProposal_H
 #define BranchLengthScaleProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

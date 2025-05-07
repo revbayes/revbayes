@@ -14,7 +14,7 @@
  * $Id$
  */
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <sstream> // IWYU pragma: keep

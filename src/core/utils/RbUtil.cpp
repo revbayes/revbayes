@@ -6,7 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbException.h"

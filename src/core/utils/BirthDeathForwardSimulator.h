@@ -1,7 +1,7 @@
 #ifndef BirthDeathForwardSimulator_H
 #define BirthDeathForwardSimulator_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 namespace RevBayesCore {

@@ -18,7 +18,7 @@
 #ifndef DistributionMultinomial_H
 #define DistributionMultinomial_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 
 namespace RevBayesCore {

@@ -1,7 +1,7 @@
 #ifndef AbstractCoalescent_H
 #define AbstractCoalescent_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Taxon.h"

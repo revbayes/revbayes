@@ -1,7 +1,7 @@
 #ifndef MatrixRealSingleElementScaleProposal_H
 #define MatrixRealSingleElementScaleProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

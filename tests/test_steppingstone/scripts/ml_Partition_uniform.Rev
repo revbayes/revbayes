@@ -107,23 +107,28 @@ mymodel = model(psi)
 
 # add monitors
 monitors[++mni] = mnScreen(alpha, pinvar, TL, printgen=1000)
-monitors[++mni] = mnFile(psi, filename="output/PS_uniform.trees", printgen=10)
-monitors[++mni] = mnModel(filename="output/PS_uniform.log",printgen=10)
+monitors[++mni] = mnFile(psi, filename="output/model_uniform_run_all.trees", printgen=10)
+monitors[++mni] = mnModel(filename="output/model_uniform_run_all.log", printgen=10)
 
 # run the analysis
-pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform.out", cats=10, sampleFreq=1)
+pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_all.out", cats=10, sampleFreq=1)
 pow_p.burnin(generations=100,tuningInterval=200)
 pow_p.run(generations=10)
 
-ss = steppingStoneSampler(file="output/model_uniform.out", powerColumnName="power", likelihoodColumnName="likelihood")
+ss = steppingStoneSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
+                          likelihoodColumnName="likelihood")
 ss.marginal()
-write(file="output/PS_uniform_marginal_likelihood.out",ss.marginal(),"\n")
+print(filename="output/uniform_marginal_likelihoods_run_all.out", append=FALSE,
+      "Marginal likelihood estimates when running the stones all at once:\n\n")
+print(filename="output/uniform_marginal_likelihoods_run_all.out", append=TRUE, "Stepping-stone estimate: ",
+      ss.marginal(), "\n")
 
-ps = pathSampler(file="output/model_uniform.out", powerColumnName="power", likelihoodColumnName="likelihood")
+ps = pathSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
+                 likelihoodColumnName="likelihood")
 ps.marginal()
-write(file="output/PS_uniform_marginal_likelihood.out",ps.marginal(),"\n",append=TRUE)
+print(filename="output/uniform_marginal_likelihoods_run_all.out", append=TRUE, "Path-sampling estimate: ",
+      ps.marginal() )
 
 
 # you may want to quit RevBayes now
 q()
-

@@ -188,7 +188,7 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         TopologyNode* child = &n->getChild( 0 );
         if ( child->getAge() < p.getAge() )
         {
-            if ( child->isSampledAncestor() == false ) b.push_back( child );
+            if ( child->isSampledAncestorTip() == false ) b.push_back( child );
         }
         else
         {
@@ -199,7 +199,7 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         child = &n->getChild( 1 );
         if ( child->getAge() < p.getAge() )
         {
-            if ( child->isSampledAncestor() == false ) b.push_back( child );
+            if ( child->isSampledAncestorTip() == false ) b.push_back( child );
         }
         else
         {
@@ -261,7 +261,7 @@ double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<char
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->getParent().isRoot() || node->getParent().getChild(0).isSampledAncestor() || node->getParent().getChild(1).isSampledAncestor() );
+    } while ( node->isRoot() || node->getParent().isRoot() || node->getParent().getChild(0).isSampledAncestorTip() || node->getParent().getChild(1).isSampledAncestorTip() );
     
     TopologyNode* parent        = &node->getParent();
     TopologyNode* grandparent   = &parent->getParent();

@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
@@ -71,7 +71,7 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     tree( NULL ),
     taxon( n.taxon ),
     index( n.index ),
-    sampled_ancestor( n.sampled_ancestor ),
+    sampled_ancestor_tip( n.sampled_ancestor_tip ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
     time_in_states( n.time_in_states ),
@@ -128,7 +128,7 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         index                   = n.index;
         node_comments           = n.node_comments;
         parent                  = n.parent;
-        sampled_ancestor        = n.sampled_ancestor;
+        sampled_ancestor_tip    = n.sampled_ancestor_tip;
         sampling_event          = n.sampling_event;
         serial_sampling         = n.serial_sampling;
         serial_speciation       = n.serial_speciation;
@@ -580,6 +580,14 @@ std::string TopologyNode::computeNewick( bool round )
 /* Build newick string */
 std::string TopologyNode::computePlainNewick( void ) const
 {
+    /* NOTE: Representing a topology as with WITH NO ANNOTATIONS
+     * means that we have to represent sampled ancestors as
+     * out-degree-1 nodes.
+     *
+     * If you want to build a tree object from that, you may
+     * need to call tree->makeInternalNodesBifurcating(true,true).
+     */
+
     // test whether this is a internal or external node
     if ( isTip() )
     {
@@ -588,15 +596,20 @@ std::string TopologyNode::computePlainNewick( void ) const
     }
     else
     {
-        // Can we do this unconditionally?
-        // That is, do we ever have taxon names for non-sampled ancestors?
-        string node_name;
-        if (sampled_ancestor and getNumberOfChildren() == 1)
-            node_name = taxon.getName();
+	// If this is non-empty, then there is a taxon here.  Right?
+        string node_name = taxon.getName();
 
         std::vector<std::string> child_newicks;
         for (size_t i = 0; i < getNumberOfChildren(); ++i)
-            child_newicks.push_back( getChild(i).computePlainNewick() );
+	{
+	    if (getChild(i).isSampledAncestorTip())
+	    {
+		assert(node_name == "");
+		node_name = getChild(i).taxon.getName();
+	    }
+	    else
+		child_newicks.push_back( getChild(i).computePlainNewick() );
+	}
 
         sort(child_newicks.begin(), child_newicks.end());
 
@@ -998,7 +1011,7 @@ Clade TopologyNode::getClade( void ) const
 
     if( isTip() )
     {
-        if( isSampledAncestor() )
+        if( isSampledAncestorTip() )
         {
             mrca.insert( getTaxon() );
         }
@@ -1008,7 +1021,7 @@ Clade TopologyNode::getClade( void ) const
         // if a child is a sampled ancestor, its taxon is a mrca
         for (size_t i = 0; i < children.size(); i++)
         {
-            if ( children[i]->isSampledAncestor() )
+            if ( children[i]->isSampledAncestorTip() )
             {
                 mrca.insert( children[i]->getTaxon() );
             }
@@ -1579,34 +1592,46 @@ bool TopologyNode::isRoot( void ) const
 }
 
 
-bool TopologyNode::isTipSampledAncestor() const
+bool TopologyNode::isSampledAncestorTip() const
 {
-    /*
-     * Only return true for tips that are sampled ancestors,
-     * not for other nodes which might have the sampled_ancestor
-     * flag set, including:
-     *   - parents of those tips (which should have the same time)
-     *   - nodes with 1 child.
-     */
+    // Only tips can have the sampled_ancestor_tip flag set.
+    assert(not sampled_ancestor_tip or isTip());
 
-    // Should we check that the branch length is 0?
-
-    return sampled_ancestor and isTip();
+    return sampled_ancestor_tip;
 }
 
-bool TopologyNode::isSampledAncestor(  bool propagate ) const
+
+bool TopologyNode::isSampledAncestorParent() const
 {
+    // Only tips can have the sampled_ancestor_tip flag set.
+    assert(not sampled_ancestor_tip or isTip());
 
-    bool sa = sampled_ancestor;
-    if( propagate == true )
-    {
-        for(size_t i = 0; i < children.size(); i++)
-        {
-            sa = sa || children[i]->isSampledAncestor(false);
-        }
-    }
+    for(auto child: children)
+	if (child->isSampledAncestorTip())
+	    return true;
 
-    return sa;
+    return false;
+}
+
+
+bool TopologyNode::isSampledAncestorTipOrParent() const
+{
+    return isSampledAncestorTip() or isSampledAncestorParent();
+}
+
+
+// This function exists partly to distinguish "real" sampled ancestors
+// from the parent/tip "fake" sampled ancestors.
+bool TopologyNode::isSampledAncestorKnuckle() const
+{
+    // Only tips can have the sampled_ancestor_tip flag set.
+    assert(not sampled_ancestor_tip or isTip());
+
+    // This function intentionally does NOT query the sampled_ancestor_tip flag.
+    // One question is whether we should require there to be a Taxon present here to be
+    //   considered a sampled ancestor.
+    
+    return getNumberOfChildren() == 1;
 }
 
 
@@ -1817,21 +1842,9 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    // Sometimes the `sampled_ancestor` flag is set to `true` for nodes with 1 child.
-    // For those nodes we want to set the age directly, not modify the parent.
-    if ( isTipSampledAncestor() and propagate == true )
+    if ( sampled_ancestor_tip == true && propagate == true )
     {
-        // The parent should be a bifurcating node.
-        assert(parent->getNumberOfChildren() == 2);
-
-        // We can get away with doing nothing to the nothing to current node
-        // because we'll handle the current node while processing the parent.
         parent->setAge(a);
-
-        // These will be true AFTER the parent->setAge( ) call fixes them up.
-        assert(getAge() == parent->getAge());
-        assert(branch_length == 0);
-
         return;
     }
 
@@ -1845,7 +1858,7 @@ void TopologyNode::setAge(double a, bool propagate)
 
     // we need to recompute my branch-length
     recomputeBranchLength();
-
+    
     // fire tree change event
     // we need to also flag this node as dirty (instead of only its children) as
     // 1) this node can be a tip, and
@@ -1856,9 +1869,10 @@ void TopologyNode::setAge(double a, bool propagate)
     }
 
     // we also need to recompute the branch lengths of my children
-    for (auto& child: children)
+    for (std::vector<TopologyNode *>::iterator it = children.begin(); it != children.end(); ++it)
     {
-        if ( child->isTipSampledAncestor() )
+        TopologyNode *child = *it;
+        if ( child->isSampledAncestorTip() )
         {
             child->setAge(a, false);
         }
@@ -1976,9 +1990,10 @@ void TopologyNode::setUseAges(bool tf, bool recursive)
 
 void TopologyNode::setSampledAncestor(bool tf)
 {
+    sampled_ancestor_tip = tf;
 
-    sampled_ancestor = tf;
-
+    // Only tips can have the sampled_ancestor_tip flag set.
+    assert(not sampled_ancestor_tip or isTip());
 }
 
 

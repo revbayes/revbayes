@@ -9,7 +9,7 @@
 #ifndef __rb_mlandis__TimeAtlas__
 #define __rb_mlandis__TimeAtlas__
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 #include "RbFileManager.h"

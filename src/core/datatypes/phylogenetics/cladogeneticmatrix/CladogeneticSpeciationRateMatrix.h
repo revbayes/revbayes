@@ -7,7 +7,7 @@
 #ifndef CladogeneticSpeciationRateMatrix_h
 #define CladogeneticSpeciationRateMatrix_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>
@@ -66,6 +66,7 @@ namespace RevBayesCore {
         size_t                                                  getNumberOfStates(void) const;      //!< Return the number of states
         size_t                                                  size(void) const;                   //!< Get the size of the rate matrix, same as the number of states
         
+	json                                                    toJSON() const;
         virtual void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;
         virtual void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;
         virtual void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;

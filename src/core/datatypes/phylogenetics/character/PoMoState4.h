@@ -17,7 +17,7 @@
 #ifndef PoMoState4_H
 #define PoMoState4_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

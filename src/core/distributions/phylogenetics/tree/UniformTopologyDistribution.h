@@ -1,7 +1,7 @@
 #ifndef UniformTopologyDistribution_H
 #define UniformTopologyDistribution_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Taxon.h"

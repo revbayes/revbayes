@@ -1,7 +1,7 @@
 #ifndef DistanceMatrixReader_H
 #define DistanceMatrixReader_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

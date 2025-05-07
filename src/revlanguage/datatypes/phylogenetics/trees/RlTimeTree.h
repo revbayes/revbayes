@@ -48,6 +48,7 @@ namespace RevLanguage {
     protected:
         
         void                                initMethods(void);
+        void                                recursiveSetAge(RevBayesCore::Tree& tree, size_t index, double age, double diff);
 
     };
     

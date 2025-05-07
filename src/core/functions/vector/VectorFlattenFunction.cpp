@@ -8,7 +8,7 @@
 
 #include "VectorFlattenFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDagNode.h"
 #include "Cloner.h"
@@ -58,7 +58,7 @@ void VectorFlattenFunction::update( void )
     const RbVector<RbVector<double> >& v = vector2d->getValue();
     for (size_t i = 0; i < v.size(); ++i)
     {
-        for (size_t j = i+1; j < v.size(); ++j)
+        for (size_t j = 0; j < v[i].size(); ++j)
         {
             value->push_back(v[i][j]);
         }

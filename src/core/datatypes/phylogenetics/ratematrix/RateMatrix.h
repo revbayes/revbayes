@@ -1,7 +1,7 @@
 #ifndef RateMatrix_H
 #define RateMatrix_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RateGenerator.h"

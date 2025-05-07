@@ -1,7 +1,7 @@
 #ifndef AbstractMove_H
 #define AbstractMove_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

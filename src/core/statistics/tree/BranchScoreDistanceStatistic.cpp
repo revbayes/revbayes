@@ -1,7 +1,7 @@
 #include "BranchScoreDistanceStatistic.h"
 
 #include <math.h>
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "TreeBipartitions.h"

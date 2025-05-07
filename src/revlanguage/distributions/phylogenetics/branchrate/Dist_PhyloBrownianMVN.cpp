@@ -1,6 +1,6 @@
 #include "Dist_PhyloBrownianMVN.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloBrownianProcessMVN.h"

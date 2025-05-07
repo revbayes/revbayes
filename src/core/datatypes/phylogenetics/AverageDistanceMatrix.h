@@ -1,7 +1,7 @@
 #ifndef AverageDistanceMatrix_H
 #define AverageDistanceMatrix_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

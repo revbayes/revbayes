@@ -16,7 +16,7 @@
 
 #include "VectorDoubleProductStatistic.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "TypedDagNode.h"

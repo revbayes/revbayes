@@ -177,6 +177,22 @@ size_t CladogeneticSpeciationRateMatrix::size( void ) const
 }
 
 
+json CladogeneticSpeciationRateMatrix::toJSON() const
+{
+    json matrix;
+    for (auto& [v,w]: event_map)
+    {
+	json row;
+	row.push_back(v[0]);
+	row.push_back(v[1]);
+	row.push_back(v[2]);
+	row.push_back(w);
+
+	matrix.push_back(row);
+    }
+    return matrix;
+}
+
 void CladogeneticSpeciationRateMatrix::printForUser(std::ostream &o, const std::string &sep, int l, bool left) const
 {
     std::streamsize previous_precision = o.precision();

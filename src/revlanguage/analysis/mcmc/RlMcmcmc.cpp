@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <functional>
 #include <ostream>

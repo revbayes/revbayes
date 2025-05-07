@@ -1,6 +1,6 @@
 #include "DiscretizeBetaQuadratureFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <map>
 #include <utility>

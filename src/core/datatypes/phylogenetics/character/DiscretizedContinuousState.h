@@ -16,7 +16,7 @@
 #ifndef DiscretizedContinuousState_H
 #define DiscretizedContinuousState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

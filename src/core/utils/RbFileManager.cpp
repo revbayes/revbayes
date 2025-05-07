@@ -1,5 +1,5 @@
 #include <sys/stat.h>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h> // IWYU pragma: keep
 #include <iostream>
 #include <string>

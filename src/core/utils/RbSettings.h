@@ -1,7 +1,7 @@
 #ifndef RbSettings_H
 #define RbSettings_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string> // IWYU pragma: keep
 

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iosfwd>
 #include <vector>
@@ -42,7 +42,7 @@ DiversityDependentPureBirthProcess::DiversityDependentPureBirthProcess(const Typ
     addParameter( initialSpeciation );
     addParameter( capacity );
     
-    simulateTree();
+    simulateTree(true);
 }
 
 

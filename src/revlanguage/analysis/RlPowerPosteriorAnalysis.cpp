@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -49,6 +49,17 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     run_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
+    
+    ArgumentRules* run_one_stone_arg_rules = new ArgumentRules();
+    run_one_stone_arg_rules->push_back( new ArgumentRule("index", Natural::getClassTypeSpec(), "Index of the stone/power to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("burninFraction", Probability::getClassTypeSpec(), "The fraction of samples to discard.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+    methods.addFunction( new MemberProcedure( "runOneStone", RlUtils::Void, run_one_stone_arg_rules) );
+    
+    ArgumentRules* summarize_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "summarize", RlUtils::Void, summarize_arg_rules) );
 
     ArgumentRules* burnin_arg_rules = new ArgumentRules();
     burnin_arg_rules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -126,7 +137,6 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
 
     if (name == "run")
     {
-
         found = true;
 
         // get the member with give index
@@ -140,6 +150,35 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         size_t tune_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
         value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int );
 
+        return NULL;
+    }
+    else if (name == "runOneStone")
+    {
+        found = true;
+        
+        /* We will keep the C++ indexing from 0. This is un-Rev-like, but it is in keeping with the
+         * 'cats' argument, which functions in the same way (i.e., specifying cats=127 will run 128
+         * stones with indices ranging from 0 to 127)
+         */
+        size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        long gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+        size_t preburn_gen = gen;
+        if ( args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+            preburn_gen = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+        }
+        size_t tune_int = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
+        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int );
+        
+        return NULL;
+    }
+    else if (name == "summarize")
+    {
+        found = true;
+        
+        value->summarizeStones();
+        
         return NULL;
     }
     else if (name == "burnin")

@@ -1,6 +1,6 @@
 #include "RlContinuousCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ConstantNode.h"
 #include "RlMemberFunction.h"

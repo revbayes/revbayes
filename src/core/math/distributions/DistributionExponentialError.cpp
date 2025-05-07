@@ -9,6 +9,8 @@
 #include "DistributionExponentialError.h"
 
 #include <cmath>
+#include <numeric>
+#include <algorithm>
 
 #include "DistributionDirichlet.h"
 #include "RandomNumberGenerator.h"
@@ -16,10 +18,13 @@
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "StringUtilities.h"
 #include "AverageDistanceMatrix.h"
 #include "DistanceMatrix.h"
 
 using namespace RevBayesCore;
+
+
 
 /*!
  * This function calculates the probability density for a distance matrix
@@ -60,23 +65,35 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         return RbConstants::Double::neginf;
     }
     
-    std::vector<std::string> txNames( avgDistMat.getSize() );
-    for(size_t i = 0; i < txNames.size(); i++)
+    std::vector<std::string> admNames( avgDistMat.getSize() );
+    for(size_t i = 0; i < admNames.size(); i++)
     {
-        txNames[i] = avgDistMat.getTaxa()[i].getName();
+        admNames[i] = avgDistMat.getTaxa()[i].getName();
     }
     
-    double dist = 0;
-    
-    for (size_t i=0; i<avgDistMat.getSize(); i++)
+    std::vector<std::string> zNames( z.getSize() );
+    for(size_t i = 0; i < zNames.size(); i++)
     {
-        size_t rowInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
-        for (size_t j=0; j<i; j++)
+        zNames[i] = z.getTaxa()[i].getName();
+    }
+    
+    std::vector<uint32_t> ix0 = StringUtilities::stringSortIndices(zNames);
+    std::vector<uint32_t> ix1 = StringUtilities::stringSortIndices(admNames);
+
+    double dist = 0;
+
+    for (size_t i = 0; i < avgDistMat.getSize(); i++)
+    {
+        uint32_t k = ix0[i];
+        uint32_t m = ix1[i];
+        for (size_t j = 0; j < i; j++)
         {
-            size_t colInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[j].getName() ));
-            if (z.getMask()[i][j])
+            uint32_t l = ix0[j];
+            uint32_t n = ix1[j];
+            if (z.getMask()[k][l])
             {
-                dist += pow(z.getDistanceMatrix()[i][j] - avgDistMat.getDistanceMatrix()[rowInd][colInd], 2.0);
+                double difference = z.getDistanceMatrix()[k][l] - avgDistMat.getDistanceMatrix()[m][n];
+                dist += difference * difference;
             }
         }
     }
@@ -194,24 +211,36 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
     {
         return RbConstants::Double::neginf;
     }
-    
-    std::vector<std::string> txNames( distMat.getSize() );
-    for(size_t i = 0; i < txNames.size(); i++)
+
+    std::vector<std::string> dmNames( distMat.getSize() );
+    for(size_t i = 0; i < dmNames.size(); i++)
     {
-        txNames[i] = distMat.getTaxa()[i].getName();
+        dmNames[i] = distMat.getTaxa()[i].getName();
     }
+
+    std::vector<std::string> zNames( z.getSize() );
+    for(size_t i = 0; i < zNames.size(); i++)
+    {
+        zNames[i] = z.getTaxa()[i].getName();
+    }
+    
+    std::vector<uint32_t> ix0 = StringUtilities::stringSortIndices(zNames);
+    std::vector<uint32_t> ix1 = StringUtilities::stringSortIndices(dmNames);
     
     double dist = 0;
     
-    for (size_t i=0; i<distMat.getSize(); i++)
+    for (size_t i = 0; i < distMat.getSize(); i++)
     {
-        size_t rowInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[i].getName() ));
-        for (size_t j=0; j<i; j++)
+        uint32_t k = ix0[i];
+        uint32_t m = ix1[i];
+        for (size_t j = 0; j < i; j++)
         {
-            size_t colInd = std::distance(txNames.begin(), std::find( txNames.begin(), txNames.end(), z.getTaxa()[j].getName() ));
-            if (z.getMask()[i][j])
+            uint32_t l = ix0[j];
+            uint32_t n = ix1[j];
+            if (z.getMask()[k][l])
             {
-                dist += pow(z.getDistanceMatrix()[i][j] - distMat[rowInd][colInd], 2.0);
+                double difference = z.getDistanceMatrix()[k][l] - distMat[m][n];
+                dist += difference * difference;
             }
         }
     }

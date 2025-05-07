@@ -55,7 +55,7 @@ BirthDeathBurstProcess::BirthDeathBurstProcess( const TypedDagNode<double> *ra,
     addParameter( time_burst );
     addParameter( rho );
     
-    simulateTree();
+    simulateTree(true);
     
 }
 
@@ -475,7 +475,7 @@ void BirthDeathBurstProcess::redrawValue( SimulationCondition condition )
     {
         if ( starting_tree == NULL )
         {
-            simulateTree();
+            simulateTree(true);
         }
     }
     else if ( condition == SimulationCondition::VALIDATION )

@@ -673,7 +673,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
 {
-	// check that tree is binary
+
+    // make sure the input tree is binary
+    v->makeInternalNodesBifurcating(true, true);
+
+	// check that tree is binary (this seems redundant? MRM 7/26/2023)
     if (v->isBinary() == false)
     {
         throw RbException("The process is only implemented for binary trees.");
@@ -686,9 +690,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     {
     	param_taxa.push_back( taxa[i].getName() );
     }
+
+//    // get the taxa names from the input tree
+//    std::vector<Taxon> input_taxa_obj = v->getTaxa();
+//    std::vector<std::string> input_taxa;
+//    for (size_t i = 0; i < input_taxa_obj.size(); ++i)
+//	{
+//    	input_taxa.push_back( input_taxa_obj[i].getSpeciesName() );
+//    }
+//
+//    // get the taxa names from the current tree
+//    std::vector<Taxon> current_taxa_obj = value->getTaxa();
+//    std::vector<std::string> current_taxa;
+//    for (size_t i = 0; i < current_taxa_obj.size(); ++i)
+//	{
+//    	current_taxa.push_back( current_taxa_obj[i].getSpeciesName() );
+//    }
+
     std::vector<std::string> input_taxa   = v->getSpeciesNames();
     std::vector<std::string> current_taxa = value->getSpeciesNames();
-//    std::vector<std::string> current_taxa = v->getSpeciesNames();
 
     // check that the number of taxa match
     if ( input_taxa.size() != num_taxa )
@@ -1338,8 +1358,21 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 {
 	if ( force or tree_dirty )
 	{
+
+		// MRM/BP 7/26/23: Bruno and I made a change here to collapse zero-length branches
+		// into sampled ancestors before getting the newick string. This solves a problem
+		// but may create a new one: might be expensive to traverse entire tree and collapse
+		// ancestors every time we change the tree?
+		// possible alternative: use a different algorithm to make the newick string that
+		// correctly creates sampled ancestor nodes even when the branch has zero length
+
+		// collapse sampled ancestors
+		Tree* tmp_tree = this->getValue().clone();
+		tmp_tree->collapseSampledAncestors();
+
 		// get the newick string
-		std::string var = this->getValue().getNewickRepresentation();
+		std::string var = tmp_tree->getNewickRepresentation();
+//		std::string var = this->getValue().getNewickRepresentation();
 
 		if ( use_origin )
 		{

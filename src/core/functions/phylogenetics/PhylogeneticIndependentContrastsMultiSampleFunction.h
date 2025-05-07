@@ -1,7 +1,7 @@
 #ifndef PhylogeneticIndependentContrastsMultiSampleFunction_H
 #define PhylogeneticIndependentContrastsMultiSampleFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

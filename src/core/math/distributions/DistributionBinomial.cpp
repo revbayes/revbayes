@@ -282,9 +282,9 @@ double RbStatistics::Binomial::quantile(double quantile_prob, double n, double p
  * \throws Does not throw an error.
  */
 
-#include <stdlib.h>
-#include <limits.h>
-#include <float.h>
+#include <cstdlib>
+#include <climits>
+#include <cfloat>
 
 #include "RandomNumberGenerator.h"
 

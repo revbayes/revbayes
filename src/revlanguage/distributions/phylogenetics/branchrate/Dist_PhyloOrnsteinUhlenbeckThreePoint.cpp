@@ -1,6 +1,6 @@
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloOrnsteinUhlenbeckThreePoint.h"

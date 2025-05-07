@@ -1,7 +1,7 @@
 #ifndef MatrixRealSymmetricSingleElementSlidingProposal_H
 #define MatrixRealSymmetricSingleElementSlidingProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

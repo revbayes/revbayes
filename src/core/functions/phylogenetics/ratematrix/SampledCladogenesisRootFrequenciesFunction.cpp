@@ -6,7 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iterator>
 #include <map>

@@ -1,7 +1,7 @@
 #ifndef VectorSlideProposal_H
 #define VectorSlideProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

@@ -9,7 +9,7 @@
 #ifndef AdjacentRateModifierFunction_h
 #define AdjacentRateModifierFunction_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "CharacterHistoryRateModifier.h"

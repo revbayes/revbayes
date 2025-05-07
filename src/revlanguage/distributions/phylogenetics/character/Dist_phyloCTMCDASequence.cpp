@@ -1,6 +1,6 @@
 #include "Dist_phyloCTMCDASequence.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "GeneralTreeHistoryCtmc.h"

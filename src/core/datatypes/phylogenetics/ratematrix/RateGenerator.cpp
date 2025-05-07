@@ -242,6 +242,22 @@ bool RateGenerator::simulateStochasticMapping(double startAge, double endAge, do
 
 
 
+json RateGenerator::toJSON() const
+{
+    json matrix;
+    
+    // print the RbMatrix with each column of equal width and each column centered on the decimal
+    for (size_t i=0; i < size(); i++)
+    {
+	json row;
+        for (size_t j = 0; j < size(); ++j)
+	    row.push_back( getRate( i, j, 1e-6, 1.0) );
+	matrix.push_back(row);
+    }
+
+    return matrix;
+}
+
 void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l, bool left) const
 {
     std::streamsize previous_precision = o.precision();

@@ -96,6 +96,27 @@ namespace RevBayesCore {
             a = b;
             b = temp;
         }
+
+	json                                                toJSON() const
+	{
+	    json j;
+            for (size_t i=0; i<size(); ++i)
+	    {
+		if constexpr (std::is_base_of_v<Printable,valueType>)
+		    j.push_back(this->operator[](i).toJSON());
+		else if constexpr (std::is_convertible_v<valueType,json>)
+		    j.push_back(this->operator[](i));
+		else
+		{
+		    std::stringstream ss;
+		    ss.precision(std::numeric_limits<double>::digits10);
+		    ss << this->operator[](i);
+		    j.push_back(ss.str());
+		}
+	    }
+	    return j;
+	}
+
         void                                                printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const
         {
             o << "[";
@@ -255,6 +276,27 @@ namespace RevBayesCore {
 
             delete temp;
         }
+
+	json                                                toJSON() const
+	{
+	    json j;
+            for (size_t i=0; i<size(); ++i)
+	    {
+		if constexpr (std::is_base_of_v<Printable,valueType>)
+		    j.push_back(this->operator[](i).toJSON());
+		else if constexpr (std::is_convertible_v<valueType,json>)
+		    j.push_back(this->operator[](i));
+		else
+		{
+		    std::stringstream ss;
+		    ss.precision(std::numeric_limits<double>::digits10);
+		    ss << this->operator[](i);
+		    j.push_back(ss.str());
+		}
+	    }
+	    return j;
+	}
+
         void                                                printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const
         {
             o << "[";

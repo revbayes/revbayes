@@ -1,6 +1,6 @@
 #include "RlAbstractDiscreteTaxonData.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "MemberProcedure.h"

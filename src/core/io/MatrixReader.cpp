@@ -1,6 +1,6 @@
 #include "MatrixReader.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 #include <functional>
 #include <istream>

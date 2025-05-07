@@ -1,6 +1,6 @@
 #include "Mntr_JointConditionalAncestralState.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "BinaryState.h"

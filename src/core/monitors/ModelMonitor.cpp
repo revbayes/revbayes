@@ -1,6 +1,6 @@
 #include "ModelMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <string>
 #include <vector>
@@ -13,8 +13,8 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-ModelMonitor::ModelMonitor(unsigned long g, const std::string &fname, const std::string &del, std::set<std::string> exclude_list) :
-    VariableMonitor(std::vector<DagNode *>(),g,fname,del),
+ModelMonitor::ModelMonitor(unsigned long g, const path &fname, const SampleFormat &f, std::set<std::string> exclude_list) :
+    VariableMonitor(std::vector<DagNode *>(),g,fname,f),
     stochastic_nodes_only( false ),
     exclude(exclude_list)
 {}
@@ -63,9 +63,9 @@ void ModelMonitor::resetDagNodes( void )
         const std::vector<DagNode*> &n = model->getDagNodes();
         for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) 
         {
-            
+
             DagNode *the_node = *it;
-            
+
             // only simple numeric variables can be monitored (i.e. only integer and real numbers)
             if ( the_node->isSimpleNumeric() && the_node->isClamped() == false )
             {

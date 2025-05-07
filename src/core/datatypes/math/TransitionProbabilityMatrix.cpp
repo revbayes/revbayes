@@ -16,7 +16,7 @@
  * $Id$
  */
 
-#include <stddef.h>
+#include <cstddef>
 #include <iomanip>
 #include <ostream>
 

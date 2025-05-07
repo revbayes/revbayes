@@ -1,5 +1,5 @@
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -95,8 +95,11 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         size_t args_index = 0;
         
         RevBayesCore::RbVector<RevBayesCore::StoppingRule> rules;
-        int gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue() + currentGen;
-        rules.push_back( RevBayesCore::MaxIterationStoppingRule(gen) );
+        int gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        if(gen > 0) {
+            gen += currentGen;
+            rules.push_back( RevBayesCore::MaxIterationStoppingRule(gen) );
+        }
         
         // get the member with given index
         if ( args[args_index++].getVariable()->getRevObject() != RevNullObject::getInstance() )
@@ -106,6 +109,10 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
             {
                 rules.push_back( ws_vec[i].getValue() );
             }
+        }
+
+        if(rules.size() < 1) {
+            throw RbException("Analysis requires a maximum number of generations or at least one stopping rule");
         }
         
         // the tuning interval (0 by default)
@@ -267,7 +274,7 @@ void MonteCarloAnalysis::initializeMethods()
 {
     
     ArgumentRules* run_arg_rules = new ArgumentRules();
-    run_arg_rules->push_back( new ArgumentRule( "generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    run_arg_rules->push_back( new ArgumentRule( "generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
     run_arg_rules->push_back( new ArgumentRule( "rules", WorkspaceVector<StoppingRule>::getClassTypeSpec(), "The rules when to automatically stop the run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );

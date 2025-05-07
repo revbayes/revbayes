@@ -136,6 +136,7 @@ JointConditionalAncestralStateMonitor<characterType>* JointConditionalAncestralS
 template<class characterType>
 void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsigned long gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
     size_t num_sites;
     size_t num_nodes;
@@ -279,6 +280,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
 template<class characterType>
 void JointConditionalAncestralStateMonitor<characterType>::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
 	std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
 	

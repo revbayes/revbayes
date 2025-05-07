@@ -1,7 +1,7 @@
 #ifndef RateMatrix_InfiniteSites_H
 #define RateMatrix_InfiniteSites_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TimeReversibleRateMatrix.h"
 
