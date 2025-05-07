@@ -30,7 +30,6 @@ namespace RevBayesCore
         SiteRateModifier(const SiteRateModifier& g);
         
         
-        SiteRateModifier&                   assign(const Assignable &m);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, CharacterEvent* currState, CharacterEvent* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, unsigned currState, unsigned newState, unsigned charIdx=0, double age=0.0);

@@ -1,7 +1,6 @@
 #ifndef RateGenerator_H
 #define RateGenerator_H
 
-#include "Assignable.h"
 #include "CharacterEventDiscrete.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
@@ -13,7 +12,7 @@ namespace RevBayesCore {
 
     class TransitionProbabilityMatrix;
     
-    class RateGenerator : public Cloneable, public Assignable, public Printable, public Serializable, public MemberObject<RbVector<RbVector<double> > >, public MemberObject<RbVector<double> >, public MemberObject<Simplex> {
+    class RateGenerator : public Cloneable, public Printable, public Serializable, public MemberObject<RbVector<RbVector<double> > >, public MemberObject<RbVector<double> >, public MemberObject<Simplex> {
         
     public:
         virtual                             ~RateGenerator(void);
@@ -24,7 +23,6 @@ namespace RevBayesCore {
         bool                                operator<=(const RateGenerator &rm) const { return operator<(rm) || operator==(rm); }
 
         // pure virtual methods
-        virtual RateGenerator&              assign(const Assignable &m);
         virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const = 0;  //!< Calculate the transition matrixmatrix
         virtual RateGenerator*              clone(void) const = 0;
         virtual void                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<double> >& rv) const;      //!< Map the member methods to internal function calls
@@ -37,7 +35,7 @@ namespace RevBayesCore {
         virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, double age=0.0, double rate=1.0) const;
 
         // virtual methods that may need to overwritten
-        virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times);
+        virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times) const;
         virtual void                        update(void) {};
 
         // public methods

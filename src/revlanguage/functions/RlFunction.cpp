@@ -133,7 +133,7 @@ std::string Function::callSignature(void) const
  *       Finally, the ellipsis arguments no longer have to be last among the rules, but they
  *       are still the last arguments after processing.
  */
-bool Function::checkArguments( const std::vector<Argument>& passed_args, std::vector<double>* match_score, bool once)
+bool Function::checkArguments( const std::vector<Argument>& passed_args, std::vector<double>* match_score, std::vector<bool>& arg_mapped, bool once)
 {
     
     /*********************  0. Initialization  **********************/
@@ -190,6 +190,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
                     {
                         taken[i]          = true;
                         filled[j]         = true;
+                        arg_mapped[i]     = true;
 
                         if ( match_score != NULL)
                         {
@@ -257,8 +258,9 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
             double penalty = the_rules[match_rule].isArgumentValid(arg, once );
             if ( penalty != -1 )
             {
-                taken[i]                  = true;
-                filled[match_rule]        = true;
+                taken[i]            = true;
+                filled[match_rule]  = true;
+                arg_mapped[i]       = true;
             
                 if ( match_score != NULL)
                 {
@@ -293,7 +295,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
         for (size_t j=0; j<num_rules; j++)
         {
             
-            if ( filled[j] == false ) 
+            if ( filled[j] == false )
             {
                 
                 Argument &arg = const_cast<Argument&>(passed_args[i]);
@@ -301,6 +303,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
                 if ( penalty != -1 )
                 {
                     taken[i]          = true;
+                    arg_mapped[i]     = true;
                     if ( the_rules[j].isEllipsis() == false )
                     {
                         filled[j]     = true;

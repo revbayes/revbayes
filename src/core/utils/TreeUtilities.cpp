@@ -712,6 +712,9 @@ RevBayesCore::AverageDistanceMatrix RevBayesCore::TreeUtilities::getAverageDista
 
     // repopulate the original vector with unique values only
     allNames.assign( uniqueNames.begin(), uniqueNames.end() );
+    
+    // sort alphabetically
+    std::sort( allNames.begin(), allNames.end() );
 
     // initialize the sum and divisor matrices using the size-based constructor:
     RevBayesCore::MatrixReal sumMatrix = MatrixReal( allNames.size() );

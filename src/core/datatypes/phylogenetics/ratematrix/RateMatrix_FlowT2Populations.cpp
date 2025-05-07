@@ -81,23 +81,6 @@ RateMatrix_FlowT2Populations& RateMatrix_FlowT2Populations::operator=(const Rate
 }
 
 
-RateMatrix_FlowT2Populations& RateMatrix_FlowT2Populations::assign(const Assignable &m)
-{
-    
-    const RateMatrix_FlowT2Populations *rm = dynamic_cast<const RateMatrix_FlowT2Populations*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
-
 /** Do precalculations on eigenvectors */
 void RateMatrix_FlowT2Populations::calculateCijk(void)
 {

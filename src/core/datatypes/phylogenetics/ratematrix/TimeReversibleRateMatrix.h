@@ -16,7 +16,6 @@ namespace RevBayesCore {
         
         
         // pure virtual method
-        virtual TimeReversibleRateMatrix&   assign(const Assignable &m) = 0;
         virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const = 0;   //!< Calculate the transition the rate matrix
         virtual TimeReversibleRateMatrix*   clone(void) const = 0;
         virtual void                        update(void) = 0;                                                                           //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)

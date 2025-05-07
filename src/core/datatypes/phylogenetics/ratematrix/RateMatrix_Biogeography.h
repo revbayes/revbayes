@@ -22,7 +22,6 @@ namespace RevBayesCore {
         
         // overloaded operators
         RateMatrix_Biogeography&                   operator=(const RateMatrix_Biogeography& r);
-        virtual RateMatrix_Biogeography&           assign(const Assignable &m);
         
         // RateMatrix functions
         double                              averageRate(void) const;

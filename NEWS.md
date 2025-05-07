@@ -1,3 +1,14 @@
+# RevBayes 1.2.4 (May 29, 2024)
+
+## Features
+  * Refactor coalescent to allow heterochronous samples and more.
+  * Allow constructing substitution models as SiteMixtureModel objects.
+  * Imputation of missing entries in AverageDistanceMatrix
+
+## Bug fixes
+  * Fix simulation of rate categories with variable coding.
+  * Fix operator[] in AverageDistanceMatrix
+
 # RevBayes 1.2.3 (Apr 26, 2024)
 
 ## Changes
@@ -8,15 +19,17 @@
 ## Features
   * Allow mnFile and mnModel to write JSON output if given format="json" (#377)
   * Refactor dnBDSTP, dnFBDP, and dnPhylodynamicBDP (#386, #440)
-  * Compute average distance matrices more efficiently.
+  * Compute average distance matrices more efficiently (#454).
+  * Compute ExponentialError probability densities more efficiently (#432, #434).
   * Add member procedure to set node age (#380).
-  * Add member procedure to remove invariant gap sites (#379).
+  * Add member procedures to remove invariant and gap sites (#379, #392).
   * Be less picky about initial tree ages matching ages from taxon files (#455).
-  * Make mvCollapseExpandFossilBranch complain if r=1 (no fossil sampling)
+  * Make mvCollapseExpandFossilBranch complain if r=1 (no fossil sampling) (#440).
+  * Make power posterior analyses more flexible (#397).
 
 ## Bug fixes
   * Stop BD simulations from hanging in situations with many constraints (#453).
-  * Stop moving fossil tip nodes in mvRootTimeSlideUniform
+  * Stop moving fossil tip nodes in mvRootTimeSlideUniform (#447).
   * Fix consensusTree (#441).
   * Fix crash reading trees with bad indices (#403, #395).
   * Fix ancestral state reconstruction with missing data (#396)

@@ -10,7 +10,6 @@
 #include "DistanceRateModifier.h"
 #include "RbConstants.h"
 #include "TimeAtlas.h"
-#include "Assignable.h"
 #include "CharacterEvent.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Cloneable.h"
@@ -136,20 +135,6 @@ DistanceRateModifier::DistanceRateModifier(const DistanceRateModifier& g) : Char
 
         setDistancePower(1.0, true);
         update();
-    }
-}
-
-DistanceRateModifier& DistanceRateModifier::assign(const Assignable &m)
-{
-    
-    const DistanceRateModifier *crm = dynamic_cast<const DistanceRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
     }
 }
 

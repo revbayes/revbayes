@@ -11,7 +11,6 @@
 #include <cstddef>
 
 #include "RbException.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
@@ -100,25 +99,6 @@ RateMatrix_ReversiblePoMo::~RateMatrix_ReversiblePoMo(void)
 
 }
 
-
-/**
- * assign the value of m to this instance. this function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_ReversiblePoMo& RateMatrix_ReversiblePoMo::assign(const Assignable &m)
-{
-
-    const RateMatrix_ReversiblePoMo *rm = dynamic_cast<const RateMatrix_ReversiblePoMo*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
 
 double RateMatrix_ReversiblePoMo::averageRate(void) const
 {

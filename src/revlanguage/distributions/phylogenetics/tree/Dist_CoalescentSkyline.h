@@ -1,7 +1,7 @@
 #ifndef Dist_CoalescentSkyline_H
 #define Dist_CoalescentSkyline_H
 
-#include "PiecewiseConstantCoalescent.h"
+#include "PiecewiseCoalescent.h"
 #include "RlTypedDistribution.h"
 #include "RlTimeTree.h"
 
@@ -30,13 +30,13 @@ namespace RevLanguage {
         static const std::string&                           getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                              getClassTypeSpec(void);                                                                 //!< Get class type spec
         std::string                                         getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
-        virtual MethodTable                                 getDistributionMethods( void ) const;                                                                       //!< Get the member methods
+        virtual MethodTable                                 getDistributionMethods( void ) const;                                                   //!< Get the member methods
         const TypeSpec&                                     getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                                  getParameterRules(void) const;                                                          //!< Get member rules (const)
         
         
         // Distribution functions you have to override
-        RevBayesCore::PiecewiseConstantCoalescent*          createDistribution(void) const;                                                         //!< Create an internal object of the diveristy-dependent pure-birth process.
+        RevBayesCore::PiecewiseCoalescent*                  createDistribution(void) const;                                                         //!< Create an internal object of the diveristy-dependent pure-birth process.
         
     protected:
         
@@ -51,6 +51,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           theta;
         RevPtr<const RevVariable>                           times;
         RevPtr<const RevVariable>                           method;
+        RevPtr<const RevVariable>                           model;
+        RevPtr<const RevVariable>                           events_per_interval;
         
     };
     

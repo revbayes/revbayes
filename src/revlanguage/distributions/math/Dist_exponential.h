@@ -21,7 +21,7 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_exponential :  public PositiveContinuousDistribution {
+    class Dist_exponential : public PositiveContinuousDistribution {
         
     public:
         Dist_exponential( void );                                                                                                                       //!< Default constructor

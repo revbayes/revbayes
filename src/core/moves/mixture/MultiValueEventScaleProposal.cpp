@@ -4,10 +4,11 @@
 #include <iostream>
 #include <vector>
 
+#include "Cloneable.h"
+#include "Move.h"
+#include "MultiValueEvent.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "Cloneable.h"
-#include "MultiValueEvent.h"
 #include "RbConstants.h"
 #include "StochasticNode.h"
 
@@ -94,7 +95,7 @@ double MultiValueEventScaleProposal::doProposal( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    MultiValueEvent &mve = event_var->getValue();    
+    MultiValueEvent &mve = event_var->getValue();
     std::vector<double> &values = mve.getValues( value_name );
     
     double hr = RbConstants::Double::neginf;
@@ -122,6 +123,8 @@ double MultiValueEventScaleProposal::doProposal( void )
     else
     {
         failed = true;
+        // we also need to decrement the counters for our tuning
+        move->decrementTriedCounter();
     }
     
     return hr;
@@ -220,4 +223,3 @@ void MultiValueEventScaleProposal::tune( double rate )
     }
 
 }
-

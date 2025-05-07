@@ -6,7 +6,6 @@
 
 #include "CharacterEventDiscrete.h"
 #include "RangeEvolutionRateModifier.h"
-#include "Assignable.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Cloneable.h"
 #include "RbException.h"
@@ -38,20 +37,6 @@ RangeEvolutionRateModifier::RangeEvolutionRateModifier(const RangeEvolutionRateM
         context_matrix             = g.context_matrix;
         forbid_extinction          = g.forbid_extinction;
         is_null_range_absorbing    = g.is_null_range_absorbing;
-    }
-}
-
-RangeEvolutionRateModifier& RangeEvolutionRateModifier::assign(const Assignable &m)
-{
-    
-    const RangeEvolutionRateModifier *crm = dynamic_cast<const RangeEvolutionRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
     }
 }
 

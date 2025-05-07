@@ -20,12 +20,14 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution() {
+Dist_lnorm::Dist_lnorm() : PositiveContinuousDistribution()
+{
     
 }
 
 
-Dist_lnorm* Dist_lnorm::clone( void ) const {
+Dist_lnorm* Dist_lnorm::clone( void ) const
+{
     return new Dist_lnorm(*this);
 }
 
@@ -44,11 +46,12 @@ RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) cons
 
 
 /* Get Rev type of object */
-const std::string& Dist_lnorm::getClassType(void) { 
+const std::string& Dist_lnorm::getClassType(void)
+{
     
     static std::string rev_type = "Dist_lnorm";
     
-	return rev_type; 
+    return rev_type;
 }
 
 /* Get class type spec describing type of object */
@@ -57,7 +60,7 @@ const TypeSpec& Dist_lnorm::getClassTypeSpec(void)
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( PositiveContinuousDistribution::getClassTypeSpec() ) );
     
-	return rev_type_spec; 
+    return rev_type_spec;
 }
 
 
@@ -95,19 +98,19 @@ std::string Dist_lnorm::getDistributionFunctionName( void ) const
 const MemberRules& Dist_lnorm::getParameterRules(void) const
 {
     
-    static MemberRules memberRules;
+    static MemberRules member_rules;
     static bool rules_set = false;
     
-    if ( !rules_set ) 
+    if ( rules_set == false )
     {
         
-        memberRules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m))." , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "mean",   Real::getClassTypeSpec()   , "The mean in log-space (observed mean is exp(m))." , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "sd"  ,   RealPos::getClassTypeSpec(), "The standard deviation in log-space."             , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
     }
     
-    return memberRules;
+    return member_rules;
 }
 
 
@@ -141,15 +144,15 @@ void Dist_lnorm::printValue(std::ostream& o) const {
 /** Set a member variable */
 void Dist_lnorm::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
-    if ( name == "mean" ) 
+    if ( name == "mean" )
     {
         mean = var;
     }
-    else if ( name == "sd" ) 
+    else if ( name == "sd" )
     {
         sd = var;
     }
-    else 
+    else
     {
         PositiveContinuousDistribution::setConstParameter(name, var);
     }

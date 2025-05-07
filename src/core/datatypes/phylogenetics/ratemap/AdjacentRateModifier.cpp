@@ -7,7 +7,6 @@
 
 #include "CharacterEventDiscrete.h"
 #include "AdjacentRateModifier.h"
-#include "Assignable.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
@@ -46,20 +45,6 @@ AdjacentRateModifier::AdjacentRateModifier(const AdjacentRateModifier& g) : Char
         context_type = g.context_type;
         exp_gain_factors = g.exp_gain_factors;
         exp_loss_factors = g.exp_loss_factors;
-    }
-}
-
-AdjacentRateModifier& AdjacentRateModifier::assign(const Assignable &m)
-{
-    
-    const AdjacentRateModifier *crm = dynamic_cast<const AdjacentRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
     }
 }
 
