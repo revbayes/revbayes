@@ -2,7 +2,7 @@
 #define PhyloCTMCSiteHomogeneousConditional_H
 
 #include <bitset>
-#include <math.h>
+#include <cmath>
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "DistributionBinomial.h"
 #include "DistributionNegativeBinomial.h"

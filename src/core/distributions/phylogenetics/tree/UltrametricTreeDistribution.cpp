@@ -89,7 +89,7 @@ UltrametricTreeDistribution::UltrametricTreeDistribution( TypedDistribution<Tree
 
     if ( sample_prior_density != NULL && tree_trace.size() != sample_prior_density->size() && tree_trace.getBurnin() != sample_prior_density->getBurnin() )
     {
-        throw RbException("The size of the tree trace (" + StringUtilities::to_string(tree_trace.size()) + ") and the prior density trace (" + StringUtilities::to_string(sample_prior_density->size()) + ") does not match!");
+        throw RbException() << "The size of the tree trace (" << tree_trace.size() << ") and the prior density trace (" << sample_prior_density->size() << ") does not match!";
     }
 
 
@@ -613,7 +613,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("An ultrametric tree distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "An ultrametric tree distribution does not have a member method called '" << n << "'.";
     }
 
 }

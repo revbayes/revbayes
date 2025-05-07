@@ -46,8 +46,9 @@ namespace RevBayesCore {
      * This file contains the distribution class for a character state evolving along a tree.
      * This abstract base class can be derived for any character evolution model with homogeneous mixture sites. A
      * homogeneous mixture model over sites is a model where all sites are drawn from the same distribution and the
-     * specific instance of the per site parameter is integrated over. The per site parameter could be a rate scaler (e.g. the + gamma models)
-     * or different rate matrices or anything else.
+     * specific instance of the per site parameter is integrated over.
+     * The per site parameter could be a rate scaler (e.g. the + gamma models) or different rate matrices
+     * or anything else.
      *
      * The pruning algorithm is implemented in this base class and calls some few pure virtual methods.
      * The important functions you have to override are:
@@ -58,8 +59,8 @@ namespace RevBayesCore {
      * - updateTransitionProbabilities()
      *
      *
-     * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) and can
-     * be compressed.
+     * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) 
+     * and can be compressed.
      *
      * The partial likelihoods are stored in a c-style array called partial_branch_likelihoods. The dimension are
      * partial_branch_likelihoods[active][node_index][siteRateIndex][siteIndex][charIndex], however, since this is a one-dimensional c-style array,
@@ -77,8 +78,10 @@ namespace RevBayesCore {
      * This gives the more convenient access via
      * partial_branch_likelihoods[active*active_branch_likelihood_offset + node_index*node_offset + siteRateIndex*mixture_offset + siteIndex*site_offset + charIndex]
      *
-     * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node, but not for site rates.
-     * We also use twice as much memory because we store the partial likelihood along each branch and not only for each internal node.
+     * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node,
+     * but not for site rates.
+     * We also use twice as much memory because we store the partial likelihood along each branch and not only 
+     * for each internal node.
      * This gives us a speed improvement during MCMC proposal in the order of a factor 2.
      *
      * The transition probability matrices are stored in a c-style array called partial_branch_likelihoods. The dimension are
@@ -97,6 +100,7 @@ namespace RevBayesCore {
     template<class charType>
     class AbstractPhyloCTMCSiteHomogeneous : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public MemberObject< RbVector<double> >, public MemberObject < MatrixReal >, public TreeChangeEventListener {
 
+	virtual void                                                       checkInvariants() const;
     public:
         
         enum PARTIAL_LIKELIHOOD_STORING { BRANCH, NODE, BOTH };
@@ -624,6 +628,25 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     }
 }
 
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( void ) const
+{
+    // 1. Invariant: if a node is dirty then its parent is also dirty
+    auto tree_nodes = tau->getValue().getNodes();
+    for(auto node: tree_nodes)
+    {
+	if (dirty_nodes[node->getIndex()] and not node->isRoot())
+	    assert(dirty_nodes[node->getParent().getIndex()]);
+    }
+
+    // 2. Invariant: if the P-matrix for a node is dirty, then the conditional likelihoods should be dirty
+    for(auto node: tree_nodes)
+    {
+	int index = node->getIndex();
+	if (pmat_dirty_branches[index])
+	    assert(dirty_nodes[index]);
+    }
+}
 
 /**
  * Destructor. Because we added ourselves as a reference to tau when we added a listener to its
@@ -1075,6 +1098,8 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         dirty_nodes    = std::vector<bool>(num_nodes, true);
         pmat_dirty_branches = std::vector<bool>(num_nodes, true);
     }
+
+    checkInvariants();
 
     // update transition probability matrices
     this->updateTransitionProbabilityMatrices();
@@ -2132,7 +2157,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
     }
     else
     {
-        throw RbException("The PhyloCTMC process does not have a member method called '" + n + "'.");
+        throw RbException() << "The PhyloCTMC process does not have a member method called '" << n << "'.";
     }
 
 }
@@ -2260,7 +2285,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
     }
     else
     {
-        throw RbException("The PhyloCTMC process does not have a member method called '" + n + "'.");
+        throw RbException() << "The PhyloCTMC process does not have a member method called '" << n << "'.";
     }
 
 }
@@ -2989,6 +3014,18 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
             changed_nodes[index] = true;
         }
 
+    }
+    else
+    {
+#ifndef NDEBUG
+	// Check the invariant that if a node is dirty, its parent is also dirty.
+	auto n2 = &n;
+	while(not n2->isRoot())
+	{
+	    n2 = &n2->getParent();
+	    assert(dirty_nodes[n2->getIndex()]);
+	}
+#endif
     }
 
 }

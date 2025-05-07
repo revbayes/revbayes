@@ -107,14 +107,11 @@ double PhyloMultivariateBrownianProcessREML::computeLnProbability( void )
     
     // only necessary if the root is actually dirty
     if ( this->dirty_nodes[rootIndex] )
-    {
-        
         recursiveComputeLnProbability( root, rootIndex );
+
+    // return the likelihood at the root
+    this->ln_prob = this->partial_branch_likelihoods[this->active_likelihood[rootIndex]][rootIndex];
         
-        // return the likelihood at the root
-        this->ln_prob = this->partial_branch_likelihoods[this->active_likelihood[rootIndex]][rootIndex];
-        
-    }
     
     return this->ln_prob;
     

@@ -4,35 +4,36 @@
 #include <cstddef>
 #include <iosfwd>
 #include <string> // IWYU pragma: keep
+#include <sstream>
 
 #include "RbFileManager.h"
 
 class RbSettings {
+public:
+    static RbSettings&          userSettings(void)                                  //!< Get a reference to the singleton RbSettings object
+    {
+        static RbSettings settings;
+        return settings;
+    }
 
-    public:
-        static RbSettings&          userSettings(void)                                  //!< Get a reference to the singleton RbSettings object
-                                    {
-                                       static RbSettings settings = RbSettings();
-									   return settings;
-                                    }
-   
-        void                        initializeUserSettings(void);                       //!< Initialize the user settings to default values
+    void                            listOptions(void) const;                            //!< Retrieve a list of all user options and their current values
+    void                            readUserSettings(void);                             //!< Read settings from the config file.
+    void                            writeUserSettings(void);                            //!< Write the current settings into a file.
     
-    
-        // Access functions
-        bool                        getCollapseSampledAncestors(void) const;            //!< Retrieve the whether to should display sampled ancestors as 2-degree nodes when printing
-        size_t                      getLineWidth(void) const;                           //!< Retrieve the line width that will be used for the screen width when printing
-        const RevBayesCore::path&   getModuleDir(void) const;                           //!< Retrieve the module directory name
-        std::string                 getOption(const std::string &k) const;              //!< Retrieve a user option
-        size_t                      getOutputPrecision(void) const;                     //!< Retrieve the default output precision width
-        const std::string&          getPartialLikelihoodStoring(void) const;            //!< Retrieve the method for partial likelihood storing
-        bool                        getPrintNodeIndex(void) const;                      //!< Retrieve the flag whether we should print node indices
-        size_t                      getScalingDensity(void) const;                      //!< Retrieve the scaling density that determines how often to scale the likelihood in CTMC models
-        const std::string&          getScalingMethod(void) const;                       //!< Retrieve the scaling method for the likelihood in CTMC models
-        bool                        getScalingPerMixture(void) const;                   //!< Retrieve the flag whether we should scale the likelihood in CTMC models per mixture category or all categories jointly
-        double                      getTolerance(void) const;                           //!< Retrieve the tolerance for comparing doubles
-        bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
-        void                        listOptions(void) const;                            //!< Retrieve a list of all user options and their current values
+    // Access functions
+    size_t                          getLineWidth(void) const;                           //!< Retrieve the line width that will be used for the screen width when printing
+    const RevBayesCore::path&       getModuleDir(void) const;                           //!< Retrieve the module directory name
+    std::string                     getOption(const std::string &k) const;              //!< Retrieve a user option
+    size_t                          getOutputPrecision(void) const;                     //!< Retrieve the default output precision width
+    const std::string&              getPartialLikelihoodStoring(void) const;            //!< Retrieve the method for partial likelihood storing
+    bool                            getPrintNodeIndex(void) const;                      //!< Retrieve the flag whether we should print node indices
+    size_t                          getScalingDensity(void) const;                      //!< Retrieve the scaling density that determines how often to scale the likelihood in CTMC models
+    const std::string&              getScalingMethod(void) const;                       //!< Retrieve the scaling method for the likelihood in CTMC models
+    bool                            getScalingPerMixture(void) const;                   //!< Retrieve the flag whether we should scale the likelihood in CTMC models per mixture category or all categories jointly
+    double                          getTolerance(void) const;                           //!< Retrieve the tolerance for comparing doubles
+    bool                            getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
+    int                             getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
+    int                             getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
 
     bool                            getUseBeagle(void) const;                           //!< Retrieve the flag whether we should use the BEAGLE library in CTMC models
 #if defined( RB_BEAGLE )
@@ -59,6 +60,8 @@ class RbSettings {
     void                            setTolerance(double t);                             //!< Set the tolerance for comparing double
     void                            setUseScaling(bool tf);                             //!< Set the flag whether we should scale the likelihood in CTMC models
     void                            setWorkingDirectory(const std::string &wd);         //!< Set the current working directory
+    void                            setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
+    void                            setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
        
 #if defined( RB_BEAGLE )
     void                            setUseBeagle(bool s);                               //!< Set the flag whether we should use the BEAGLE library in CTMC models
@@ -70,40 +73,56 @@ class RbSettings {
     void                            setBeagleDynamicScalingFrequency(size_t w);         //!< Set the BEAGLE evaluation frequency for calculation of updated numerical scaling factors
 #endif /* RB_BEAGLE */
 
-
-    private:
-                                    RbSettings(void);                                   //!< Default constructor
-                                    RbSettings(const RbSettings&) {}                    //!< Prevent copy
-                                   ~RbSettings(void) {}                                 //!< Delete function table
-        RbSettings&                 operator=(const RbSettings& s);                     //!< Prevent assignment
-
-
-        void                        writeUserSettings(void);                            //!< Write the current settings into a file.
     
+private:
+    RbSettings(void);                                   //!< Default constructor
+    RbSettings(const RbSettings&) = delete;             //!< Prevent copy
+    ~RbSettings(void) {};                               //!< Delete function table
+    RbSettings&                 operator=(const RbSettings& s) = delete;                     //!< Prevent assignment
+
     // Variables that have user settings
-        bool                        collapseSampledAncestors;
-        size_t                      lineWidth;
-        RevBayesCore::path          moduleDir;
-        size_t                      outputPrecision;
-        bool                        printNodeIndex;                                     //!< Should the node index of a tree be printed as a comment?
-        double                      tolerance;                                          //!< Tolerance for comparison of doubles
-        std::string                 partial_likelihood_storing;                         //!< How should we store partial likelihoods (branch|node|both)?
+    size_t                      lineWidth = 160;
+    RevBayesCore::path          moduleDir = "modules";
+    size_t                      outputPrecision = 7;
+    bool                        printNodeIndex = true;                                     //!< Should the node index of a tree be printed as a comment?
+    double                      tolerance=10e-10;                                          //!< Tolerance for comparison of doubles
+    int                         debugMCMC = 0;
+    int                         logMCMC = 0;
+    std::string                 partial_likelihood_storing = "branch";                     //!< How should we store partial likelihoods (branch|node|both)?
+
     // related to rescaling to avoid underflow
-        bool                        use_scaling;
-        size_t                      scaling_density;
-        bool                        scaling_per_mixture;
-        std::string                 scaling_method;
+    bool                        use_scaling = true;                                        // the default useScaling
+    size_t                      scaling_density = 1;                                       // the default scaling density
+    bool                        scaling_per_mixture = false;                               // the default scaling option per or over mixture categories
+    std::string                 scaling_method = "threshhold";                             // the default useScaling
 
 #if defined( RB_BEAGLE )
-    bool                        useBeagle;
-    std::string                 beagleDevice;
-    size_t                      beagleResource;        
-    bool                        beagleUseDoublePrecision;
-    size_t                      beagleMaxCPUThreads;
-    std::string                 beagleScalingMode;
-    size_t                      beagleDynamicScalingFrequency;
+    bool                        useBeagle                     = false;                     // don't use BEAGLE by default
+    std::string                 beagleDevice                  = "auto";                    // auto select BEAGLE device by default
+    size_t                      beagleResource                = 0;                         // the default BEAGLE resource
+    bool                        beagleUseDoublePrecision      = true;                      // BEAGLE will use double precision by default
+    size_t                      beagleMaxCPUThreads           = -1;                        // no max set, auto threading up to number of cores
+    std::string                 beagleScalingMode             = "manual";                  // manually rescale as needed
+    size_t                      beagleDynamicScalingFrequency = 100;                       // dynamic rescale every 100 evaluations by default
 #endif /* RB_BEAGLE */
-    
+};
+
+void showDebug(const std::string& s, int level=1);
+
+class withReason
+{
+    double value;
+    int level = 2;
+    std::ostringstream reason;
+
+public:
+    template <typename T>
+    withReason& operator<<(const T& t) {reason<<t; return *this;}
+
+    operator double() const {showDebug(reason.str(), level); return value;}
+
+    withReason(double d):value(d) {}
+    withReason(double d, int l):value(d), level(l) {}
 };
 
 #endif

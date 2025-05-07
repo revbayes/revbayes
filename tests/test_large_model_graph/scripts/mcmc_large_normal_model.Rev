@@ -1,0 +1,34 @@
+################################################################################
+#
+# RevBayes Test Script: A model graph with many nodes
+# 
+# Description: Tests that RevBayes does not segfault when the number of nodes in the graph is large (>15000)
+#
+# authors: Michael R. May
+#
+################################################################################
+
+seed(12345)
+
+mvi = 0
+n = 15000 # the number of variables in the model
+
+# make the variables
+for(i in 1:n) {
+  x[i] ~ dnNormal(0, 1)
+  moves[++mvi] = mvSlide(x[i])
+}
+
+# make the model
+my_model = model(x)
+
+# make the monitors
+monitors[1] = mnModel(printgen = 10, filename = "output/large_normal_model.log")
+
+my_mcmc = mcmc(my_model, monitors, moves, moveschedule = "single")
+
+# run the mcmc
+my_mcmc.run(generations = 1000)
+
+# quit
+q()
