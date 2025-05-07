@@ -61,7 +61,7 @@ class TypeSpec;
         const MemberRules&                          getParameterRules(void) const;                                      //!< Get member rules (const)
         virtual const TypeSpec&                     getTypeSpec(void) const;                                            //!< Get language type of the object
         virtual Probability*                        getElement(size_t idx) const;                                       //!< Get element variable (vector of indices)
-        double                                      isConvertibleTo( const TypeSpec& type, bool once ) const;
+        double                                      isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const;
         void                                        initMethods(void);
         void                                        printValue( std::ostream& o, bool user ) const;
         virtual void                                push_back(const double &x);                                         //!< Append element to end

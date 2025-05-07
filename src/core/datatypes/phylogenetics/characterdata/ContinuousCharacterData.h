@@ -54,7 +54,7 @@ class DagNode;
         void                                            concatenate(const ContinuousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices
         void                                            concatenate(const HomologousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices
         void                                            concatenate(const AbstractCharacterData &d, std::string type = "");                                //!< Concatenate data matrices
-        DiscretizedContinuousCharacterData*             discretizeCharacter(double error, long num_bins, double cushion_width) const; //!< Discretize the ith character into k bins
+        DiscretizedContinuousCharacterData*             discretizeCharacter(double error, std::int64_t num_bins, double cushion_width) const; //!< Discretize the ith character into k bins
         void                                            excludeAllCharacters(void);                                                 //!< Exclude all characters
         void                                            excludeCharacter(size_t i);                                                 //!< Exclude character
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls

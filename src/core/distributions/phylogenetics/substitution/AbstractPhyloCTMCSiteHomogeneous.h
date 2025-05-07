@@ -209,7 +209,7 @@ namespace RevBayesCore {
         
         // members
         double                                                              lnProb = 0;
-        double                                                              storedLnProb = 0;
+        std::optional<double>                                               storedLnProb;
         PARTIAL_LIKELIHOOD_STORING                                          partial_likelihood_storing_approach;
         size_t                                                              num_matrices = 1;
         size_t                                                              num_nodes;
@@ -225,6 +225,7 @@ namespace RevBayesCore {
         std::vector<size_t>                                                 active_pmatrices;
         std::vector<bool>                                                   pmat_changed_nodes;
         mutable std::vector<bool>                                           pmat_dirty_branches;
+        std::optional<std::vector<bool>>                                    prev_pmat_dirty_branches;
         
         // offsets for nodes
         size_t                                                              active_P_matrix_offset;
@@ -237,13 +238,15 @@ namespace RevBayesCore {
         std::vector<size_t>                                                 active_branch_likelihood;
         std::vector<size_t>                                                 active_node_likelihood;
         double*                                                             marginalLikelihoods = nullptr;
+        std::optional<std::vector<bool>>                                    prev_dirty_nodes;
+        std::optional<std::vector<bool>>                                    prev_dirty_branches;
 
         std::vector< std::vector< std::vector<double> > >                   per_node_site_log_scaling_factors;
         std::vector< std::vector< std::vector<std::vector<double> > > >     per_node_site_mixture_log_scaling_factors;
 
         // the data
         std::vector<std::vector<RbBitSet> >                                 ambiguous_char_matrix;
-        std::vector<std::vector<unsigned long> >                            char_matrix;
+        std::vector<std::vector<std::uint64_t> >                            char_matrix;
         std::vector<std::vector<bool> >                                     gap_matrix;
         std::vector<size_t>                                                 pattern_counts;
         std::vector<bool>                                                   site_invariant;
@@ -495,6 +498,8 @@ active_eigen_system( n.active_eigen_system ),
 touched_eigen_system( n.touched_eigen_system ),
 beagle_instance( NULL ),
 #endif /* RB_BEAGLE */
+prev_dirty_nodes( n.prev_dirty_nodes ),
+prev_dirty_branches( n.prev_dirty_branches ),
 using_ambiguous_characters( n.using_ambiguous_characters ),
 treatUnknownAsGap( n.treatUnknownAsGap ),
 treatAmbiguousAsGaps( n.treatAmbiguousAsGaps ),
@@ -536,6 +541,7 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     active_pmatrices                =  n.active_pmatrices;
     pmat_changed_nodes              =  n.pmat_changed_nodes;
     pmat_dirty_branches             =  n.pmat_dirty_branches;
+    prev_pmat_dirty_branches           =  n.prev_pmat_dirty_branches;
     pmatrices                       =  n.pmatrices;
 
     // flags specifying which model variants we use
@@ -1037,7 +1043,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
         else
         {
-            unsigned long c = char_matrix[taxon_index][i];
+            std::uint64_t c = char_matrix[taxon_index][i];
             
             if ( c < 0 || c >= this->num_states )
             {
@@ -1136,10 +1142,9 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     
     if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BRANCH )
     {
-        // only necessary if the root is actually dirty
-        if ( dirty_branches[root_index] == true )
+        // start by filling the likelihood vector for the children of the root
+        if ( dirty_branches[root_index] ) // rooted trees have two children for the root
         {
-
             // start by filling the likelihood vector for the children of the root
             if ( root.getNumberOfChildren() == 2 ) // rooted trees have two children for the root
             {
@@ -1152,7 +1157,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( right, right_index );
 
                 computeRootLikelihood( root_index, left_index, right_index );
-
                 
                 //-- We only need to scale if we are not using BEAGLE
 #if !defined ( RB_BEAGLE )
@@ -1186,10 +1190,10 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
             }
 
-            // sum the partials up
-            this->lnProb = sumRootLikelihood();
-            
         }
+
+        // sum the partials up
+        this->lnProb = sumRootLikelihood();
 
     }
     else if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::NODE )
@@ -1197,7 +1201,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         // only necessary if the root is actually dirty
         if ( dirty_nodes[root_index] == true )
         {
-
             // start by filling the likelihood vector for the children of the root
             if ( root.getNumberOfChildren() == 2 ) // rooted trees have two children for the root
             {
@@ -1209,6 +1212,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( left, left_index );
                 fillLikelihoodVector( right, right_index );
 
+                dirty_nodes[root_index] = false;
                 computeRootLikelihoodNode( root_index, left_index, right_index );
             
                 // now call scaling
@@ -1228,6 +1232,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( right, right_index );
                 fillLikelihoodVector( middle, middleIndex );
 
+                dirty_nodes[root_index] = false;
                 computeRootLikelihoodNode( root_index, left_index, right_index, middleIndex );
             
                 // now call scaling
@@ -1238,10 +1243,10 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
             }
 
-            // sum the partials up
-            this->lnProb = sumRootLikelihood();
-            
         }
+
+        // sum the partials up
+        this->lnProb = sumRootLikelihood();
     }
     else if ( partial_likelihood_storing_approach == PARTIAL_LIKELIHOOD_STORING::BOTH )
     {
@@ -1260,6 +1265,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( left, left_index );
                 fillLikelihoodVector( right, right_index );
 
+                dirty_nodes[root_index] = false;
                 computeRootLikelihoodBranchNode( root_index, left_index, right_index );
             
                 // now call scaling
@@ -1279,6 +1285,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 fillLikelihoodVector( right, right_index );
                 fillLikelihoodVector( middle, middleIndex );
 
+                dirty_nodes[root_index] = false;
                 computeRootLikelihoodBranchNode( root_index, left_index, right_index, middleIndex );
 
                 // now call scaling
@@ -1289,10 +1296,10 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
                 throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
             }
 
-            // sum the partials up
-            this->lnProb = sumRootLikelihood();
-            
         }
+
+        // sum the partials up
+        this->lnProb = sumRootLikelihood();
     }
 
     // if we are not in MCMC mode, then we need to (temporarily) free memory
@@ -1863,6 +1870,7 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawSt
     // NOTE: ambiguous tip states are sampled along with internal node states
     end_state = end_states[node_index][site].getStateIndex();
 
+
     // set up vectors to hold the character transition events
     std::vector<size_t> transition_states;
     std::vector<double> transition_times;
@@ -2405,14 +2413,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
     // for now, always sample the clamped character
+    
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> site_indices = getIncludedSiteIndices();
 
     // sample characters conditioned on start states, going to end states
     std::vector<double> p(this->num_states, 0.0);
     for (size_t i = 0; i < this->num_sites; i++)
     {
-
-        charType c = td.getCharacter(i);
-
+        charType c = td.getCharacter(site_indices[i]);
 
         if ( c.isAmbiguous() == false )
         {
@@ -2616,7 +2626,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillTipLikelihood
             size_t data_tip_index = this->taxon_name_2_tip_index_map[ node->getName() ];
 
             const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
-            const std::vector<unsigned long> &char_node = this->char_matrix[data_tip_index];
+            const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
             const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
 
             size_t char_data_node_index = this->value->indexOfTaxonWithName(node->getName());
@@ -2687,7 +2697,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillTipLikelihood
                     else // no ambiguous characters in use
                     {
                             
-                        unsigned long org_val = char_node[site];
+                        std::uint64_t org_val = char_node[site];
                         
                         // iterate over all possible initial states
                         for (size_t c1 = 0; c1 < this->num_states; ++c1)
@@ -2906,31 +2916,20 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
     // reset flags for likelihood computation
     touched = false;
 
-    // reset the ln probability
-    this->storedLnProb = this->lnProb;
+    // we don't have a previous state anymore.
+    this->storedLnProb = {};
 
     // reset all flags
-    for (std::vector<bool>::iterator it = this->dirty_branches.begin(); it != this->dirty_branches.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
-    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
+    prev_dirty_nodes = {};
+    prev_dirty_branches = {};
+    prev_pmat_dirty_branches = {};
+
     for (std::vector<bool>::iterator it = this->changed_branches.begin(); it != this->changed_branches.end(); ++it)
     {
         (*it) = false;
     }
 
     for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
-    for (std::vector<bool>::iterator it = this->pmat_dirty_branches.begin(); it != this->pmat_dirty_branches.end(); ++it)
     {
         (*it) = false;
     }
@@ -2986,7 +2985,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagBr
         }
 
     }
-
 }
 
 template<class charType>
@@ -3292,6 +3290,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
                 partial_branch_likelihoods[i] = 0.0;
             }
         }
+
         if ( RbSettings::userSettings().getPartialLikelihoodStoring() == "node" || RbSettings::userSettings().getPartialLikelihoodStoring() == "both" )
         {
             partial_node_likelihoods = new double[2*active_node_likelihood_offset];
@@ -3301,6 +3300,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
             {
                 partial_node_likelihoods[i] = 0.0;
             }
+        }
+
+        for(auto&& dirty_node: dirty_nodes)
+        {
+            dirty_node = true;
+        }
+        for(auto&& dirty_branch: dirty_branches)
+        {
+            dirty_branch = true;
         }
     }
 
@@ -3326,6 +3334,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     pmat_node_offset        =  num_site_mixtures;
     pmatrices               =  std::vector<TransitionProbabilityMatrix>(active_P_matrix_offset * 2, TransitionProbabilityMatrix(num_states));
 
+    for (auto&& pmat_dirty_branch: pmat_dirty_branches)
+    {
+        pmat_dirty_branch = true;
+    }
+
     transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_states) );
 }
 
@@ -3333,22 +3346,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecialization( const DagNode* affecter )
 {
-
     // reset flags for likelihood computation
     touched = false;
 
-    // reset the ln probability
-    this->lnProb = this->storedLnProb;
-
     // reset the flags
-    for (std::vector<bool>::iterator it = dirty_branches.begin(); it != dirty_branches.end(); ++it)
-    {
-        (*it) = false;
-    }
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
+    lnProb = *storedLnProb;
+    storedLnProb = {};
+    dirty_nodes = *prev_dirty_nodes;
+    dirty_branches = *prev_dirty_branches;
+    prev_dirty_nodes = {};
+    prev_dirty_branches = {};
 
     // restore the active likelihoods vector
     for (size_t index = 0; index < changed_nodes.size(); ++index)
@@ -3356,13 +3363,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
         // we have to restore, that means if we have changed the active likelihood vector
         // then we need to revert this change
         if ( changed_nodes[index] == true )
-        {
             active_node_likelihood[index] = (active_node_likelihood[index] == 0 ? 1 : 0);
-        }
 
         // set all flags to false
         changed_nodes[index] = false;
     }
+
     for (size_t index = 0; index < changed_branches.size(); ++index)
     {
         // we have to restore, that means if we have changed the active likelihood vector
@@ -3375,24 +3381,22 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
         // set all flags to false
         changed_branches[index] = false;
     }
-    
-    for (std::vector<bool>::iterator it = pmat_dirty_branches.begin(); it != pmat_dirty_branches.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
+
+    // reset the flags
+    pmat_dirty_branches = *prev_pmat_dirty_branches;
+    prev_pmat_dirty_branches = {};
+
     // restore the active transition probability matrices vector
     for (size_t index = 0; index < pmat_changed_nodes.size(); ++index)
     {
         // we have to restore, that means if we have changed the active transition probability matrices vector
         // then we need to revert this change
         if ( pmat_changed_nodes[index] == true )
-        {
             active_pmatrices[index] = (active_pmatrices[index] == 0 ? 1 : 0);
-            pmat_changed_nodes[index] = false;
-        }
-    }
 
+        // set all flags to false
+        pmat_changed_nodes[index] = false;
+    }
 }
 
 
@@ -3834,7 +3838,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
             else
             {
                 // get the ancestral character for this site
-                unsigned long parentState = parent.getCharacter( i ).getStateIndex();
+                std::uint64_t parentState = parent.getCharacter( i ).getStateIndex();
 
                 double *freqs = transition_prob_matrices[ perSiteMixtures[i] ][ parentState ];
 
@@ -5064,11 +5068,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecialization( const DagNode* affecter, bool touch_all )
 {
-
     if ( touched == false )
     {
         touched = true;
         this->storedLnProb = this->lnProb;
+
+        prev_dirty_nodes = dirty_nodes;
+        prev_dirty_branches = dirty_branches;
+        prev_pmat_dirty_branches = pmat_dirty_branches;
     }
 
 
@@ -5567,7 +5574,7 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::initializeBeagleTips( 
             b_tipIndex                                  = (*it)->getIndex();
             size_t data_tip_index                       = this->taxon_name_2_tip_index_map[(*it)->getName()];
             const std::vector<bool> &gap_node           = this->gap_matrix[data_tip_index];
-            const std::vector<unsigned long> &char_node = this->char_matrix[data_tip_index];
+            const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
             const std::vector<RbBitSet> &amb_char_node  = this->ambiguous_char_matrix[data_tip_index];
 
             // iterate over all sites

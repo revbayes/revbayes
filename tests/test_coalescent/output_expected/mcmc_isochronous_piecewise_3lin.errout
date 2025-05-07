@@ -1,0 +1,107 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 22 different moves in a random move schedule with 169.6 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  pop_size[1]              2.0000         15         12      0.8000 lambda = 0.1000
+Scaling                                  pop_size[2]              2.0000         17         15      0.8824 lambda = 0.1000
+Scaling                                  pop_size[3]              2.0000         18         18      1.0000 lambda = 0.1000
+Scaling                                  pop_size[4]              2.0000         17         16      0.9412 lambda = 0.1000
+Sliding                                  change_points[1]         2.0000         24         24      1.0000 delta = 0.1000
+Sliding                                  change_points[2]         2.0000         20         20      1.0000 delta = 0.1000
+Sliding                                  change_points[3]         2.0000         19         19      1.0000 delta = 0.1000
+NarrowExchange                           psi                     36.0000        399        101      0.2531 
+NNI                                      psi                     36.0000        363         68      0.1873 
+FNPR                                     psi                      9.0000         76         15      0.1974 
+SubtreeScale                             psi                      7.2000         80         30      0.3750 
+NodeTimeSlideUniform                     psi                     36.0000        350        161      0.4600 
+RootTimeScaleBactrian                    psi                      7.2000         75          1      0.0133 
+TreeScale                                psi                      7.2000         70          3      0.0429 delta = 1.0000
+BetaSimplex                              er                       3.0000         28         10      0.3571 alpha = 1.0000
+DirichletSimplex                         er                       1.0000         10          4      0.4000 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         25          5      0.2000 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000          8          1      0.1250 alpha = 1.0000
+Scaling                                  alpha                    2.0000         12          6      0.5000 lambda = 1.0000
+Sliding                                  p_inv                    1.0000          8          2      0.2500 delta = 1.0000
+Scaling                                  clock                    2.0000         14          5      0.3571 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         52          4      0.0769 lambda = 1.0000
+

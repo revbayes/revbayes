@@ -463,7 +463,7 @@ void HillClimber::initializeMonitors(void)
 }
 
 
-void HillClimber::monitor(unsigned long g)
+void HillClimber::monitor(std::uint64_t g)
 {
 
     if ( process_active == true )

@@ -22,8 +22,7 @@ using namespace RevBayesCore;
  */
 ContinuousEventBirthDeathProposal::ContinuousEventBirthDeathProposal( StochasticNode<Tree> *n) : EventBirthDeathProposal( n )
 {
-    
-    
+    initialize();
 }
 
 
@@ -42,9 +41,9 @@ ContinuousEventBirthDeathProposal* ContinuousEventBirthDeathProposal::clone( voi
 
 
 /**
- * Get Proposals' name of object
+ * Get name of proposal object
  *
- * \return The Proposals' name.
+ * \return The Proposal's name.
  */
 const std::string& ContinuousEventBirthDeathProposal::getProposalName( void ) const
 {

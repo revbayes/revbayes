@@ -55,7 +55,7 @@ namespace RevLanguage {
 
         // Type conversion functions
         RevObject*                                  convertTo(const TypeSpec& type) const;                              //!< Convert to requested type
-        virtual double                              isConvertibleTo(const TypeSpec& type, bool once) const;             //!< Is this object convertible to the requested type?
+        virtual double                              isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;             //!< Is this object convertible to the requested type?
 
         // Container functions provided here
         virtual rlType*                             getElement(size_t idx) const;                                       //!< Get element variable (single index)
@@ -221,7 +221,7 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     else if ( name == "append" )
@@ -332,7 +332,7 @@ void WorkspaceVector<rlType>::initMethods( void )
  * of Real, for example.
  */
 template <typename rlType>
-double WorkspaceVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) const
+double WorkspaceVector<rlType>::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
     
@@ -350,7 +350,7 @@ double WorkspaceVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once
         return 0.0;
     }
     
-    return WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::isConvertibleTo( type, once );
+    return WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::isConvertibleTo( type, convert_by_value );
 }
 
 

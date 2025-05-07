@@ -124,8 +124,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
     const std::vector<bool>&            left_gap_node   = this->gap_matrix [(left_is_tip  ? left  : 0)];
     const std::vector<bool>&            right_gap_node  = this->gap_matrix [(right_is_tip ? right : 0)];
-    const std::vector<unsigned long>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
-    const std::vector<unsigned long>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
+    const std::vector<std::uint64_t>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
+    const std::vector<std::uint64_t>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
     
     if ( left_branch_dirty == true && right_branch_dirty == true )
     {
@@ -559,8 +559,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
     const std::vector<bool>&            left_gap_node   = this->gap_matrix [(left_is_tip  ? left  : 0)];
     const std::vector<bool>&            right_gap_node  = this->gap_matrix [(right_is_tip ? right : 0)];
-    const std::vector<unsigned long>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
-    const std::vector<unsigned long>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
+    const std::vector<std::uint64_t>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
+    const std::vector<std::uint64_t>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
     
     
     // iterate over all mixture categories
@@ -695,8 +695,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
 
     const std::vector<bool>&            left_gap_node    = this->gap_matrix [(left_is_tip   ? left   : 0)];
     const std::vector<bool>&            right_gap_node   = this->gap_matrix [(right_is_tip  ? right  : 0)];
-    const std::vector<unsigned long>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
-    const std::vector<unsigned long>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
+    const std::vector<std::uint64_t>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
+    const std::vector<std::uint64_t>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -887,9 +887,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihoodBran
     const std::vector<bool>&            left_gap_node    = this->gap_matrix [(left_is_tip   ? left   : 0)];
     const std::vector<bool>&            right_gap_node   = this->gap_matrix [(right_is_tip  ? right  : 0)];
     const std::vector<bool>&            middle_gap_node  = this->gap_matrix [(middle_is_tip ? middle : 0)];
-    const std::vector<unsigned long>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
-    const std::vector<unsigned long>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
-    const std::vector<unsigned long>&   middle_char_node = this->char_matrix[(middle_is_tip ? middle : 0)];
+    const std::vector<std::uint64_t>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
+    const std::vector<std::uint64_t>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
+    const std::vector<std::uint64_t>&   middle_char_node = this->char_matrix[(middle_is_tip ? middle : 0)];
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1497,7 +1497,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool>&            gap_node        = this->gap_matrix[data_tip_index];
-    const std::vector<unsigned long>&   char_node       = this->char_matrix[data_tip_index];
+    const std::vector<std::uint64_t>&   char_node       = this->char_matrix[data_tip_index];
     const std::vector<RbBitSet>&        amb_char_node   = this->ambiguous_char_matrix[data_tip_index];
 
     size_t char_data_node_index = this->value->indexOfTaxonWithName(node.getName());
@@ -1604,7 +1604,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                     }
                     else // no ambiguous characters in use
                     {
-                        unsigned long org_val = char_node[site];
+                        std::uint64_t org_val = char_node[site];
 
                         // store the likelihood
                         p_site_mixture[c1] = tp_begin[c1*this->num_states+org_val];

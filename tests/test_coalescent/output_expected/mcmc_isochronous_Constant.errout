@@ -1,0 +1,96 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 16 different moves in a random move schedule with 157.6 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  pop_size                 2.0000         17         15      0.8824 lambda = 0.1000
+NarrowExchange                           psi                     36.0000        352         86      0.2443 
+NNI                                      psi                     36.0000        372         63      0.1694 
+FNPR                                     psi                      9.0000         68         16      0.2353 
+SubtreeScale                             psi                      7.2000         71         21      0.2958 
+NodeTimeSlideUniform                     psi                     36.0000        376        172      0.4574 
+RootTimeScaleBactrian                    psi                      7.2000         82          0      0.0000 
+TreeScale                                psi                      7.2000         63          8      0.1270 delta = 1.0000
+BetaSimplex                              er                       3.0000         33         12      0.3636 alpha = 1.0000
+DirichletSimplex                         er                       1.0000          8          2      0.2500 alpha = 1.0000
+BetaSimplex                              pi                       2.0000         19          5      0.2632 alpha = 1.0000
+DirichletSimplex                         pi                       1.0000         14          0      0.0000 alpha = 1.0000
+Scaling                                  alpha                    2.0000         16         11      0.6875 lambda = 1.0000
+Sliding                                  p_inv                    1.0000         12          5      0.4167 delta = 1.0000
+Scaling                                  clock                    2.0000         27          3      0.1111 lambda = 1.0000
+UpDownScaling                            clock                    5.0000         50          7      0.1400 lambda = 1.0000
+

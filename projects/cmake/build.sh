@@ -14,7 +14,7 @@
 # 2. Generate cmake variables from command-line flags.
 # 3. Create the build/ directory (if missing).
 # 4. Update the version number            --> src/revlanguage/utils/GitVersion.cpp
-# 5. Update the help database (if asked)  --> src/core/help/RbHelpDatabase.cpp
+# 5. Update the help database --> src/core/help/RbHelpDatabase.cpp
 # 6. Run ./regenerate.sh
 # 7. Run cmake <--- This is where the configuration actually happens
 # 8. Run make or ninja to do the build.
@@ -31,10 +31,8 @@ all_args="$@"
 # command line options
 # set default values
 debug="false"
-travis="false"
 mpi="false"
 cmd="false"
-help2yml="false"
 beagle="false"
 beagle_root=""
 eigen="false"
@@ -61,7 +59,6 @@ while echo $1 | grep ^- > /dev/null; do
 -beagle_root    string          : specify directory where BEAGLE-lib is located. Defaults to unset.
 -eigen          <true|false>    : set to true if you want to build with Eigen3 support. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 -boost_include  string          : specify directory containing Boost libraries. (e.g. `/usr/include`). Defaults to unset.
@@ -77,7 +74,7 @@ Examples:
   ./build.sh -boost_root /home/santa/installed-boost-1.72
   ./build.sh -boost_include /home/santa/boost_1_72_0/ -boost_lib /home/santa/boost_1_72_0/stage/lib
   ./build.sh -DBOOST_ROOT=/home/santa/installed-boost_1.72
-  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/installed-boost_1.72'
+  ./build.sh -mpi true -DBOOST_ROOT=/home/santa/installed-boost_1.72'
         exit
     fi
 
@@ -98,16 +95,18 @@ Examples:
     shift
 done
 
-if [ "$mpi" = "true" ] ; then
-    BUILD_DIR="build-mpi"
+if [ -z "${BUILD_DIR}" ] ; then
+    if [ "$mpi" = "true" ] ; then
+        BUILD_DIR="build-mpi"
 elif [ "$beagle" = "true" ] ; then
     if [ "$eigen" = "true" ] ; then
         BUILD_DIR="build-beagle-eigen"
     else
         BUILD_DIR="build-beagle-transition"
     fi
-else
-    BUILD_DIR="build"
+    else
+        BUILD_DIR="build"
+    fi
 fi
 
 if [ -z "${exec_name}" ] ; then
@@ -118,14 +117,6 @@ if [ -z "${exec_name}" ] ; then
     else
         exec_name=rb
     fi
-fi
-
-if [ "$travis" = "true" ]; then
-    BUILD_DIR="build"
-    export CC=${C_COMPILER}
-    export CXX=${CXX_COMPILER}
-    exec_name=rb
-    help2yml=true
 fi
 
 if [ "$debug" = "true" ] ; then
@@ -154,10 +145,6 @@ fi
 
 if [ "$cmd" = "true" ] ; then
     cmake_args="-DCMD_GTK=ON $cmake_args"
-fi
-
-if [ "$travis" = "true" ] ; then
-    cmake_args="-DCONTINUOUS_INTEGRATION=TRUE $cmake_args"
 fi
 
 if [ -n "$jupyter" ] ; then
@@ -197,9 +184,9 @@ if [ "$static_boost" = "true" ] ; then
     cmake_args="-DSTATIC_BOOST=ON $cmake_args"
 fi
 
-if [ "$help2yml" = "true" ] ; then
-    cmake_args="-DHELP=ON $cmake_args"
-fi
+# generate rb-help2yml executable
+# manually set DHELP=OFF to avoid
+cmake_args="-DHELP=ON $cmake_args"
 
 echo "RevBayes executable is '${exec_name}'"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
@@ -225,14 +212,8 @@ mv GitVersion.cpp ../../src/revlanguage/utils/
 
 
 ######### Generate help database
-if [ "$help2yml" = "true" ]
-then
-    (
-        cd ../../src
-        echo "Generating help database"
-        perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-    )
-fi
+../generate_help.sh
+
 
 ######## Generate some files for cmake
 echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"

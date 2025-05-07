@@ -53,7 +53,7 @@ namespace RevBayesCore {
 
 #include <cmath>
 #include <cstring>
-#if defined (SSE_ENABLED)
+#if defined ( SSE_ENABLED )
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <pmmintrin.h>
@@ -130,8 +130,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
     const std::vector<bool>&            left_gap_node   = this->gap_matrix [(left_is_tip  ? left  : 0)];
     const std::vector<bool>&            right_gap_node  = this->gap_matrix [(right_is_tip ? right : 0)];
-    const std::vector<unsigned long>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
-    const std::vector<unsigned long>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
+    const std::vector<std::uint64_t>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
+    const std::vector<std::uint64_t>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
     
     if ( left_branch_dirty == true && right_branch_dirty == true )
     {
@@ -179,7 +179,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else
                     {
-                        unsigned long this_char_state = left_char_node[site];
+                        std::uint64_t this_char_state = left_char_node[site];
 
                         sum_left_A  = tp_left[this_char_state];
                         tp_left    += this->num_states;
@@ -254,7 +254,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else
                     {
-                        unsigned long this_char_state = right_char_node[site];
+                        std::uint64_t this_char_state = right_char_node[site];
                         sum_right_A  = tp_right[this_char_state];
                         tp_right    += this->num_states;
                         sum_right_C  = tp_right[this_char_state];
@@ -373,7 +373,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else
                     {
-                        unsigned long this_char_state = left_char_node[site];
+                        std::uint64_t this_char_state = left_char_node[site];
                         
                         sum_left_A  = tp_left[this_char_state];
                         tp_left    += this->num_states;
@@ -497,7 +497,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                     }
                     else
                     {
-                        unsigned long this_char_state = right_char_node[site];
+                        std::uint64_t this_char_state = right_char_node[site];
                         sum_right_A  = tp_right[this_char_state];
                         tp_right    += this->num_states;
                         sum_right_C  = tp_right[this_char_state];
@@ -903,8 +903,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 
     const std::vector<bool>&            left_gap_node   = this->gap_matrix [(left_is_tip  ? left  : 0)];
     const std::vector<bool>&            right_gap_node  = this->gap_matrix [(right_is_tip ? right : 0)];
-    const std::vector<unsigned long>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
-    const std::vector<unsigned long>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
+    const std::vector<std::uint64_t>&   left_char_node  = this->char_matrix[(left_is_tip  ? left  : 0)];
+    const std::vector<std::uint64_t>&   right_char_node = this->char_matrix[(right_is_tip ? right : 0)];
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -951,7 +951,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                 }
                 else
                 {
-                    unsigned long this_char = left_char_node[site];
+                    std::uint64_t this_char = left_char_node[site];
                     sum_left_A = tp_left[this_char];
                     tp_left  += this->num_states;
                     sum_left_C = tp_left[this_char];
@@ -1014,7 +1014,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
                 }
                 else
                 {
-                    unsigned long this_char = right_char_node[site];
+                    std::uint64_t this_char = right_char_node[site];
                     sum_right_A = tp_right[this_char];
                     tp_right  += this->num_states;
                     sum_right_C = tp_right[this_char];
@@ -1125,8 +1125,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
 
     const std::vector<bool>&            left_gap_node    = this->gap_matrix [(left_is_tip   ? left   : 0)];
     const std::vector<bool>&            right_gap_node   = this->gap_matrix [(right_is_tip  ? right  : 0)];
-    const std::vector<unsigned long>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
-    const std::vector<unsigned long>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
+    const std::vector<std::uint64_t>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
+    const std::vector<std::uint64_t>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1315,9 +1315,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     const std::vector<bool>&            left_gap_node    = this->gap_matrix [(left_is_tip   ? left   : 0)];
     const std::vector<bool>&            right_gap_node   = this->gap_matrix [(right_is_tip  ? right  : 0)];
     const std::vector<bool>&            middle_gap_node  = this->gap_matrix [(middle_is_tip ? middle : 0)];
-    const std::vector<unsigned long>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
-    const std::vector<unsigned long>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
-    const std::vector<unsigned long>&   middle_char_node = this->char_matrix[(middle_is_tip ? middle : 0)];
+    const std::vector<std::uint64_t>&   left_char_node   = this->char_matrix[(left_is_tip   ? left   : 0)];
+    const std::vector<std::uint64_t>&   right_char_node  = this->char_matrix[(right_is_tip  ? right  : 0)];
+    const std::vector<std::uint64_t>&   middle_char_node = this->char_matrix[(middle_is_tip ? middle : 0)];
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1388,7 +1388,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else
                     {
-                        unsigned long this_char_state = left_char_node[site];
+                        std::uint64_t this_char_state = left_char_node[site];
                         sum_left_A = tp_left[this_char_state];
                         tp_left   += this->num_states;
                         sum_left_C = tp_left[this_char_state];
@@ -1473,7 +1473,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else
                     {
-                        unsigned long this_char_state = right_char_node[site];
+                        std::uint64_t this_char_state = right_char_node[site];
                         sum_right_A = tp_right[this_char_state];
                         tp_right   += this->num_states;
                         sum_right_C = tp_right[this_char_state];
@@ -1557,7 +1557,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
                     }
                     else
                     {
-                        unsigned long this_char_state = middle_char_node[site];
+                        std::uint64_t this_char_state = middle_char_node[site];
                         sum_middle_A = tp_middle[this_char_state];
                         tp_middle   += this->num_states;
                         sum_middle_C = tp_middle[this_char_state];
@@ -2146,7 +2146,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
-    const std::vector<unsigned long> &char_node = this->char_matrix[data_tip_index];
+    const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
@@ -2245,7 +2245,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                 {
                     
                     // get the original character
-                    unsigned long org_val = char_node[site];
+                    std::uint64_t org_val = char_node[site];
                     
                     // store the likelihood
                     p_site_mixture[0] = tp_begin[org_val];

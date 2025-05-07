@@ -16,10 +16,10 @@ template <class valueType> class TypedDagNode;
      *@param  p The probability of success
      * Instances of this class can be associated to stochastic variables.
      */
-    class BinomialDistribution : public TypedDistribution<long> {
+    class BinomialDistribution : public TypedDistribution<std::int64_t> {
         
     public:
-        BinomialDistribution(const TypedDagNode<long> *n, const TypedDagNode<double> *p);
+        BinomialDistribution(const TypedDagNode<std::int64_t> *n, const TypedDagNode<double> *p);
         virtual                                            ~BinomialDistribution(void);                                             //!< Virtual destructor
         
         // public member functions
@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode<long>*                            n;
+        const TypedDagNode<std::int64_t>*                            n;
         const TypedDagNode<double>*                         p;
     };
     

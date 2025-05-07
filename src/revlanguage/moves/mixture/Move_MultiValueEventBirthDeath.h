@@ -29,7 +29,7 @@ namespace RevLanguage {
         
     public:
         
-        Move_MultiValueEventBirthDeath(void);                                                                                                         //!< Default constructor
+        Move_MultiValueEventBirthDeath(void);                                                                                                       //!< Default constructor
         
         // Basic utility functions
         virtual Move_MultiValueEventBirthDeath*         clone(void) const;                                                                          //!< Clone object
@@ -45,8 +45,8 @@ namespace RevLanguage {
         
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);           //!< Set member variable
         
-        RevPtr<const RevVariable>                       x;                                                                                             //!< If autotuning should be used.
-        RevPtr<const RevVariable>                       ac;                                                                                             //!< If autotuning should be used.
+        RevPtr<const RevVariable>                       x;                                                                                          //!< If autotuning should be used.
+        RevPtr<const RevVariable>                       ac;                                                                                         //!< If autotuning should be used.
 
     };
     

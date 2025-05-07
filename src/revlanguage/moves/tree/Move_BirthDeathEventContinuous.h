@@ -26,7 +26,9 @@ namespace RevLanguage {
     public:
         
         Move_BirthDeathEventContinuous(void);                                                                                                                    //!< Default constructor
+
         
+
         // Basic utility functions
         virtual Move_BirthDeathEventContinuous*     clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.

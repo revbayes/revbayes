@@ -1,0 +1,6 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Syntax error while reading characters "sort" at position 572 to 575 in command:
+   events ~ dnAutocorrelatedEvent(eventDistribution = dnPoisson(lambda=10),                                valueDistribution =[dnUniform(1E4,1E8),              
+                                        dnUniform(0.0,MAX_AGE)],                                names=["theta","time"],                               
+   minNumberEvents=[1,0],                                autocorrelationTypes=["NONE","ACLN"],                               
+   autocorrelationDependencies=["none","time"],                                autocorrelationSigmas=[0,ac_sigma]                                sort="time")

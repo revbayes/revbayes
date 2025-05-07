@@ -16,7 +16,7 @@ namespace RevBayesCore { class DagNode; }
  */
 
 
-RevBayesCore::DiscretizeGammaFunction::DiscretizeGammaFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
+RevBayesCore::DiscretizeGammaFunction::DiscretizeGammaFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<std::int64_t> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
     shape( s ),
     rate( r ),
     numCats(nc),
@@ -52,7 +52,7 @@ void RevBayesCore::DiscretizeGammaFunction::swapParameterInternal(const DagNode 
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }
