@@ -644,7 +644,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     {
 	int index = node->getIndex();
 	if (pmat_dirty_branches[index])
-	    assert(dirty_nodes[index]);
+	    assert(dirty_branches[index]);
     }
 }
 
