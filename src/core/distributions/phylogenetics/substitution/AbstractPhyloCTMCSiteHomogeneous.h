@@ -2762,6 +2762,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fireTreeChangeEve
     
     if (m != RevBayesCore::TreeChangeEventMessage::TOPOLOGY)
     {
+        recursivelyFlagBranchDirty( n );
+        recursivelyFlagNodeDirty( n );
         flagNodeDirtyPmatrix(n.getIndex());
     }
 
@@ -2771,7 +2773,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fireTreeChangeEve
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::flagNodeDirtyPmatrix(size_t node_idx)
 {
-    
     pmat_dirty_branches[node_idx] = true;
     if ( pmat_changed_nodes[node_idx] == false )
     {
