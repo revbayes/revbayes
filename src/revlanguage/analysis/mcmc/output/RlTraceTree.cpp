@@ -514,7 +514,7 @@ void TraceTree::initMethods( void )
     ArgumentRules* getTopologyFrequencyArgRules = new ArgumentRules();
     getTopologyFrequencyArgRules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     getTopologyFrequencyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "getTopologyFrequency", Natural::getClassTypeSpec(), getTopologyFrequencyArgRules) );
+    this->methods.addFunction( new MemberProcedure( "getTopologyFrequency", RealPos::getClassTypeSpec(), getTopologyFrequencyArgRules) );
     
     
     ArgumentRules* is_covered_arg_rules = new ArgumentRules();
