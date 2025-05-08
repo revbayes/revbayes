@@ -29,16 +29,21 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	const size_t                                                    num_states_,
 	bool                                                            use_origin_,
 	bool                                                            zero_indexed_,
-	size_t                                                          n_proc_
+	size_t                                                          n_proc_,
+	double                                                          abs_tol_,
+    double                                                          rel_tol_,
+	size_t                                                          n_dense_steps_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
 	n_proc(n_proc_),
+	n_dense_steps(n_dense_steps_),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
 	num_states(num_states_),
 	use_origin(use_origin_),
 	zero_indexed(zero_indexed_),
-	root_frequency(root_frequency_)
+	root_frequency(root_frequency_),
+	dirty_nodes( std::vector<bool>(2 * taxa.size() - 1, true) )
 {
 	try {
 		// create the pointer
@@ -56,6 +61,12 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	// turn on/off debug
 	tp_ptr->setConditionalProbCompatibilityMode(false);
 	tp_ptr->setNumberOfThreads(n_proc);
+	tp_ptr->setAbsoluteTolerance(abs_tol_);
+	tp_ptr->setRelativeTolerance(rel_tol_);
+	tp_ptr->setMaxNumDenseSteps(n_dense_steps);
+//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
+//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
+//	tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
 
 	// add the parameters
 	addParameter(age);
@@ -66,6 +77,9 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 
     // simulate the tree
     simulateTree();
+
+    // resize vectors for this number of nodes
+    resizeVectors(value->getNumberOfNodes());
 
     // update the kernel
     updateRootFrequency(true);
@@ -244,6 +258,9 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 	// tp_ptr->loadStateFromFile("state.dat");
     current_ln_prob = tp_ptr->computeLogLikelihood();
 
+    // we are now able to reset tp approximator
+    tp_can_reset = true;
+
     // flag the likelihood as up-to-date
     probability_dirty = false;
 
@@ -261,12 +278,47 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::dumpModel(std::st
 	tp_ptr->writeStateToFile(file_name);
 }
 
+/**
+ * Resize various vectors depending on the current number of nodes.
+ */
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::resizeVectors(size_t num_nodes)
+{
+    dirty_nodes = std::vector<bool>(num_nodes, true);
+}
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
 {
+
+	// mark tree as dirty
 	tree_dirty = true;
-	updateTree();
+
+	// mark nodes dirty
+    recursivelyFlagNodeDirty( n );
+
 }
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::recursivelyFlagNodeDirty( const RevBayesCore::TopologyNode &n ) {
+
+    // we need to flag this node and all ancestral nodes for recomputation
+    size_t index = n.getIndex();
+
+    // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
+    if ( dirty_nodes[index] == false )
+    {
+
+    	// the root doesn't have an ancestor
+        if ( n.isRoot() == false )
+        {
+            recursivelyFlagNodeDirty( n.getParent() );
+        }
+
+        // set the flag
+        dirty_nodes[index] = true;
+
+    }
+
+}
+
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getCharacterData() const
 {
@@ -277,9 +329,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::redrawValue(void)
 {
 	// just simulate with a uniform tree and all missing data
     simulateTree();
-    
-    // simulate tree under SSE model (implementation in progress)
-    // simulateSSETree();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const TypedDagNode< RbVector<double> >* param)
@@ -691,22 +740,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     	param_taxa.push_back( taxa[i].getName() );
     }
 
-//    // get the taxa names from the input tree
-//    std::vector<Taxon> input_taxa_obj = v->getTaxa();
-//    std::vector<std::string> input_taxa;
-//    for (size_t i = 0; i < input_taxa_obj.size(); ++i)
-//	{
-//    	input_taxa.push_back( input_taxa_obj[i].getSpeciesName() );
-//    }
-//
-//    // get the taxa names from the current tree
-//    std::vector<Taxon> current_taxa_obj = value->getTaxa();
-//    std::vector<std::string> current_taxa;
-//    for (size_t i = 0; i < current_taxa_obj.size(); ++i)
-//	{
-//    	current_taxa.push_back( current_taxa_obj[i].getSpeciesName() );
-//    }
-
     std::vector<std::string> input_taxa   = v->getSpeciesNames();
     std::vector<std::string> current_taxa = value->getSpeciesNames();
 
@@ -739,7 +772,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     // clear memory
-    delete v;
+//    delete v; // MRM 1/31/2024: why are we deleting this? we should never be responsible for deleting a pointer from outside
 
     // set the taxon data
     for(size_t i = 0; i < num_taxa; ++i)
@@ -763,8 +796,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool use_simmap_default)
 {
+
+	// prepare parameters for the pointer
+	prepareParameters(false);
+
 	// draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistory();
 
@@ -774,26 +811,44 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 	{
 		// get the history for the branch
 		std::vector< std::pair<double, size_t> > this_history = it->second;
+        size_t n_events = this_history.size();
 
 		// create the string
         std::string simmap_string = "{";
-        std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
-        first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
-        for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
+        
+        if (use_simmap_default == true)
         {
-            simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
-            if ( jt != first_event )
+            std::vector< std::pair<double, size_t> >::reverse_iterator first_event = this_history.rend();
+            //first_event--; // apparently, this isn't for the reverse_iterator; uncomment to verify for yourself
+            int event_idx = 0;
+            for(std::vector< std::pair<double, size_t> >::reverse_iterator jt = this_history.rbegin(); jt != this_history.rend(); ++jt)
             {
-                simmap_string = simmap_string + ":";
+                simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
+                if ( jt != first_event && event_idx != (n_events - 1))
+                {
+                    simmap_string = simmap_string + ":";
+                }
+                event_idx++;
+            }
+        }
+        else
+        {
+            std::vector< std::pair<double, size_t> >::iterator first_event = this_history.begin();
+            for(std::vector< std::pair<double, size_t> >::iterator jt = this_history.begin(); jt != this_history.end(); ++jt)
+            {
+                if ( jt != first_event)
+                {
+                    simmap_string = simmap_string + ":";
+                }
+                simmap_string = simmap_string + StringUtilities::toString(jt->second) + "," + StringUtilities::toString(jt->first);
             }
         }
         simmap_string = simmap_string + "}";
 
         // add the string to the character histories
         character_histories[it->first - 1] = simmap_string;
-
 	}
-
+    
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<std::int64_t>& num_events_)
@@ -802,6 +857,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
         std::vector<long> num_events;
         for(auto n: num_events_)
             num_events.push_back(n);
+
+	// prepare parameters for the pointer
+	prepareParameters(false);
+
 
         // draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);
@@ -835,6 +894,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates)
 {
+
+	// prepare parameters for the pointer
+	prepareParameters(false);
+
 	// draw the ancestral states
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawAncestralStates();
 
@@ -896,6 +959,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
     }
 
     // clear all flags
+    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
+    {
+        (*it) = false;
+    }
+
     probability_dirty    = false;
     tree_dirty           = false;
     root_frequency_dirty = false;
@@ -911,6 +979,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
     omega_dirty          = false;
     zeta_dirty           = false;
     old_ln_prob          = current_ln_prob; // make sure we don't accidently restore the outdated likelihood
+
+    // tell tp to keep the approximator
+    if (tp_can_reset) {
+    	tp_ptr->keepSchedulerAndApproximator();
+    	tp_can_reset = false;
+    }
 
 }
 
@@ -938,6 +1012,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(const DagNode *restorer)
 {
 
+    // reset the flags
+    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+    {
+        (*it) = false;
+    }
+
     if ( restorer == age )
     {
         if ( use_origin == false)
@@ -947,24 +1027,8 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
         if ( dag_node != NULL )
         {
-            dag_node->touchAffected();
+            dag_node->restoreAffected();
         }
-
-        // update the tree
-        updateTree();
-        tree_dirty = false;
-    }
-    
-    
-    // MJL added 230307
-    if ( restorer == this->dag_node )
-    {
-        // update the tree
-        updateTree();
-        tree_dirty = false;
-
-        // make sure we update the likelihood
-//        probability_dirty = true;
 
     }
 
@@ -1020,6 +1084,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     	}
     }
 
+    // reset scheduler and approximator on tp side
+    if ( tp_can_reset ) {
+    	tp_ptr->resetSchedulerAndApproximator();
+    	tp_can_reset = false;
+    }
+
     // clean the likelihood
     probability_dirty = false;
     current_ln_prob   = old_ln_prob;
@@ -1028,11 +1098,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateSSETree(void) {
     RBOUT("Warning: simulating tree under SSE model (not yet implemented).");
-    
-    // simulating a tree
-    // std::string sim_newick_string = tp_ptr->simulateTree();
-    // this->setValue( static_cast<Tree*>( tp_ptr->getTreeValue() ) );
-    // this->setValue( static_cast<DiscreteCharacterData*>( tp_ptr->getDataValue() ) );
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void)
@@ -1154,7 +1219,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
         // update the tree
         tree_dirty = true;
-//        updateTree();
 
         // make sure we update the likelihood
         probability_dirty = true;
@@ -1172,8 +1236,16 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
     }
 
-    if ( affecter != this->dag_node )
+    if ( affecter != this->dag_node and affecter != age )
     {
+
+    	// mark all nodes as dirty
+        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+        {
+            (*it) = true;
+        }
+
+        // mark the affecting parameter as dirty
         if ( affecter == root_frequency )
 		{
 			root_frequency_dirty = true;
@@ -1311,12 +1383,6 @@ std::vector< std::vector< std::vector<double> > > GeneralizedLineageHeterogeneou
 
 std::vector< std::map< std::vector<unsigned>, double > > GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::RbToStd(const RbVector< CladogeneticProbabilityMatrix > &obj)
 {
-	/* Original
-	std::vector< std::map< std::vector<unsigned >, double >> std_object;
-	for(size_t i = 0; i < obj.size(); ++i)
-	{
-		std_object.push_back( obj[i].getEventMap() );
-	}*/
 	// Copy and convert from 1-indexing to 0-indexing
 	std::vector< std::map< std::vector<unsigned >, double >> std_object(obj.size());
 	for(size_t i = 0; i < obj.size(); ++i)
@@ -1377,22 +1443,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 
 		// get the newick string
 		std::string var = tmp_tree->getNewickRepresentation();
-//		std::string var = this->getValue().getNewickRepresentation();
+		size_t num_chars = var.size();
 
 		if ( use_origin )
 		{
 			// strip out trailing zeros
 			char pattern = ':';
-			while ( true )
-			{
-				// if we found a colon stop
-				if ( var.back() == pattern )
-				{
+            size_t i;
+ 			for(i = num_chars - 1; i >= 0; --i) {
+ 				if (var[i] == pattern) {
 					break;
 				}
-				// otherwise, pop off the last character
-				var.pop_back();
 			}
+			var = var.substr(0, i + 1);
 
 			// now add the tail
 			double origin_age  = age->getValue();
@@ -1402,19 +1465,17 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		}
 		else
 		{
+
 			// strip off the tail
 			// strip out trailing zeros
-            char pattern = ':';
-			while ( true )
-			{
-				// if we found a colon stop
-				if ( var.back() == pattern )
-				{
+			char pattern = ':';
+			size_t i;
+			for(i = num_chars - 1; i >= 0; --i) {
+				if (var[i] == pattern) {
 					break;
 				}
-				// otherwise, pop off the last character
-				var.pop_back();
 			}
+			var = var.substr(0, i + 1);
 
 			// now add the trailing zeros
 			var += "0.00000";
@@ -1424,7 +1485,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 		var += ";";
 
 		// set the tree
-		tp_ptr->setTree(var);
+		tp_ptr->setTree(var, dirty_nodes);
+
+		// mark tree as clean
+		tree_dirty = false;
 
 	}
 }
