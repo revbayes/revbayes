@@ -250,9 +250,9 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         // get the tree which is the only argument for this method
         const RevBayesCore::Tree &current_tree = static_cast<const Tree &>( args[0].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-        int f = this->value->getTopologyFrequency( current_tree, verbose );
+        double f = this->value->getTopologyFrequency( current_tree, verbose );
         
-        return new RevVariable( new Natural( f ) );
+        return new RevVariable( new RealPos( f ) );
     }
     else if ( name == "getUniqueClades" )
     {
