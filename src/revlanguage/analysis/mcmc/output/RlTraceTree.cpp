@@ -250,9 +250,9 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         // get the tree which is the only argument for this method
         const RevBayesCore::Tree &current_tree = static_cast<const Tree &>( args[0].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-        int f = this->value->getTopologyFrequency( current_tree, verbose );
+        double f = this->value->getTopologyFrequency( current_tree, verbose );
         
-        return new RevVariable( new Natural( f ) );
+        return new RevVariable( new RealPos( f ) );
     }
     else if ( name == "getUniqueClades" )
     {
@@ -514,7 +514,7 @@ void TraceTree::initMethods( void )
     ArgumentRules* getTopologyFrequencyArgRules = new ArgumentRules();
     getTopologyFrequencyArgRules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     getTopologyFrequencyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "getTopologyFrequency", Natural::getClassTypeSpec(), getTopologyFrequencyArgRules) );
+    this->methods.addFunction( new MemberProcedure( "getTopologyFrequency", RealPos::getClassTypeSpec(), getTopologyFrequencyArgRules) );
     
     
     ArgumentRules* is_covered_arg_rules = new ArgumentRules();
