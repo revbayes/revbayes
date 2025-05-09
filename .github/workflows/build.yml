@@ -128,6 +128,10 @@ jobs:
     - name: Install (Linux -> Windows [cross])
       if: matrix.name == 'windows'
       run: |
+          cat /etc/apt/sources.list.d/ubuntu.sources
+          sudo sed -i 's/noble/questing/g' /etc/apt/sources.list.d/ubuntu.sources
+          cat /etc/apt/sources.list.d/ubuntu.sources
+
           sudo apt-get update
           sudo apt-get install -y ccache dos2unix zstd
           sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
