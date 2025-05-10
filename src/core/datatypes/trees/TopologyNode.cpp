@@ -1783,9 +1783,9 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         // for each tip, simulate an age between max age and tip age
         double max_age = getAge();
         ages.push_back(max_age);
-        size_t num_ages = children.size() - 1;
+        int num_ages = children.size() - 1;
 
-        for(size_t i = 0; i < num_ages; ++i)
+        for(int i = 0; i < num_ages; ++i)
         {
             // get the age of the tip
             double a = children[i + 1]->getAge();
@@ -1803,7 +1803,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         // The following is adapted from UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree()
         std::vector<TopologyNode*> extinct_children;
                 
-        for (size_t i = 0; i < children.size(); ++i)
+        for (int i = 0; i < children.size(); ++i)
         {
                     
             // we initialize active_children with extant children (if there are any), but will subsequently expand it
@@ -1820,7 +1820,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         // loop backward through ages
         double current_time = 0.0;
                 
-        for (int i = num_ages - 1; i >= 0; i--)        // you actually need int here, not size_t!
+        for (int i = num_ages - 1; i >= 0; i--)
         {
             // get the age of the current child
             current_time = ages[i];
