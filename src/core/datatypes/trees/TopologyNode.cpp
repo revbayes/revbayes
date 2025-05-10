@@ -1768,107 +1768,116 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
 {
     if (children.size() < 3) return;
     
+    // What if the root had 4 children?
     if (isRoot() and not resolve_root) return;
-            
+
+    std::cerr<<"\n\nresolveMultifurcation:  children.size() = "<<children.size()<<"\n";
     RandomNumberGenerator* rng = GLOBAL_RNG;
     // "active" children are those that are younger than the child currently under consideration
     std::vector<TopologyNode*> active_children;
             
     if (use_ages)
     {
-                
         // The following is adapted from UniformSerialSampledTimeTreeDistribution::simulateCoalescentAges()
-        std::vector<double> ages;
+        std::vector<double> coalescence_times;
+
+        std::vector<TopologyNode*> sorted_children = children;
+        std::sort(sorted_children.begin(), sorted_children.end(), [](auto x, auto y) {return x->getAge() < y->getAge();});
 
         // for each tip, simulate an age between max age and tip age
         double max_age = getAge();
-        ages.push_back(max_age);
-        size_t num_ages = children.size() - 1;
 
-        for(size_t i = 0; i < num_ages; ++i)
+        // Skip the youngest child, since it could pick an age that is older than any sibling to coalesce with.
+        // Skip the oldest child, since we only want n-2 coalescence events.
+        for(int i = 1; i < sorted_children.size()-1; ++i)
         {
             // get the age of the tip
-            double a = children[i + 1]->getAge();
+            double a = sorted_children[i]->getAge();
 
             // simulate the age of a node
             double new_age = a + rng->uniform01() * (max_age - a);
 
-            // add the age to the vector of ages
-            ages.push_back(new_age);
+            // add the age to the vector of coalescence_times
+            coalescence_times.push_back(new_age);
         }
 
-        // sort the ages (from youngest to oldest)
-        std::sort(ages.begin(), ages.end(), std::greater<double>());
+        // sort the coalescence_times (from youngest to oldest)
+        std::sort(coalescence_times.begin(), coalescence_times.end());
+
+        active_children.push_back(sorted_children[0]);
+        std::cerr<<"    child ages: ";
+        for(auto& child: sorted_children)
+            std::cerr<<child->getAge()<<"  ";
+        std::cerr<<"\n";
+        std::cerr<<"    parent age: "<<getAge()<<"\n";
+
+        // The sorted_children from index `used_children` to the end have not been seen yet.
+        int used_children = 1;
                 
-        // The following is adapted from UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree()
-        std::vector<TopologyNode*> extinct_children;
-                
-        for (size_t i = 0; i < children.size(); ++i)
+        std::cerr<<"    event=LEAF  time = "<<sorted_children[0]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
+
+        // Apply the coalescence events
+        for (int i=0; i<coalescence_times.size();)
         {
-                    
-            // we initialize active_children with extant children (if there are any), but will subsequently expand it
-            if ( children.at(i)->getAge() == 0.0 )
+            std::cerr<<"i = "<<i<<"/"<<coalescence_times.size()<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
+            // get the age of the current child
+            double next_coal_time = coalescence_times[i];
+
+            // If the next event is adding a leaf instead of a coalescent, then add the next leaf.
+            if (used_children < sorted_children.size() and sorted_children[used_children]->getAge() < next_coal_time)
             {
-                active_children.push_back( children.at(i) );
+                active_children.push_back( sorted_children[used_children] );
+                std::cerr<<"    event=LEAF  time = "<<sorted_children[used_children]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
+                used_children++;
+                continue;
             }
             else
-            {
-                extinct_children.push_back( children.at(i) );
-            }
-        }
-                
-        // loop backward through ages
-        double current_time = 0.0;
-                
-        for (int i = num_ages - 1; i >= 0; i--)        // you actually need int here, not size_t!
-        {
-            // get the age of the current child
-            current_time = ages[i];
-                    
-            // check if any extinct children become active
-            size_t num_extinct = extinct_children.size();
-            for (int j = num_extinct - 1; j >= 0; --j) // ditto
-            {
-                if ( extinct_children.at(j)->getAge() < current_time )
-                {
-                    // add the extinct child to the active children list, remove it from the extinct children list
-                    active_children.push_back( extinct_children.at(j) );
-                    extinct_children.erase( extinct_children.begin() + std::int64_t(j) );
-                }
-            }
-                    
+
+            // Advance to the next coalescent event.
+            i++;
+
+            assert(active_children.size() >= 2);
+
             // randomly draw one child (arbitrarily called left) node from the list of active children
             size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
             TopologyNode* leftChild = active_children.at(left);
-                    
+
             // remove the randomly drawn node from the list
             active_children.erase( active_children.begin() + std::int64_t(left) );
-                    
+
             // randomly draw one child (arbitrarily called right) node from the list of active children
             size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
             TopologyNode* rightChild = active_children.at(right);
-                    
+
             // remove the randomly drawn node from the list
             active_children.erase( active_children.begin() + std::int64_t(right) );
-                    
+
             // remove the two also from the list of the children of the current node
+            int old_size = children.size();
             children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
             children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
-                    
+
             // create a parent for the two
             TopologyNode* prnt = new TopologyNode(); // leave the new node without index
+            prnt->setAge( next_coal_time );
             prnt->addChild( leftChild );
             prnt->addChild( rightChild );
             leftChild->setParent( prnt );
             rightChild->setParent( prnt );
-            prnt->setAge( current_time );
             active_children.push_back( prnt );
-                    
+
             // add the newly created parent to the list of the children of the current node
             addChild( prnt );
             prnt->setParent( this );
+
+            std::cerr<<"    event=COAL  time = "<<next_coal_time<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
+            std::cerr<<"          left = "<<leftChild->getAge()<<"  right = "<<rightChild->getAge()<<"   parent = "<<next_coal_time<<"\n";
+
+            assert(children.size()+1 == old_size);
+            assert(prnt->getAge() > leftChild->getAge());
+            assert(prnt->getAge() > rightChild->getAge());
         }
-                
+        assert(children.size() == 2);
     }
     else // use_ages == false
     {
