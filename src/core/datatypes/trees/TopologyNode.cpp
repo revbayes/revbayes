@@ -1774,6 +1774,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
     // "active" children are those that are younger than the child currently under consideration
     std::vector<TopologyNode*> active_children;
             
+    std::cerr<<"resolveMultifurcation: children.size() = "<<children.size()<<"\n";
+
     if (use_ages)
     {
                 
@@ -1824,36 +1826,48 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         {
             // get the age of the current child
             current_time = ages[i];
+
+            std::cerr<<"resolveMultifurcation: i = "<<i<<"  current_time = "<<ages[i]<<"  active_children.size() = "<<active_children.size()<<"  extinct_children.size() = "<<extinct_children.size()<<"\n";
                     
             // check if any extinct children become active
-            size_t num_extinct = extinct_children.size();
-            for (int j = num_extinct - 1; j >= 0; --j) // ditto
+            int num_extinct = extinct_children.size();
+            for (int j = num_extinct - 1; j >= 0; --j)
             {
+                std::cerr<<"    j = "<<j<<" active_children.size() = "<<active_children.size()<<"  extinct_children.size() = "<<extinct_children.size()<<"\n";
                 if ( extinct_children.at(j)->getAge() < current_time )
                 {
+                    std::cerr<<"moving extinct to active...\n";
                     // add the extinct child to the active children list, remove it from the extinct children list
                     active_children.push_back( extinct_children.at(j) );
                     extinct_children.erase( extinct_children.begin() + std::int64_t(j) );
                 }
+                std::cerr<<"    j = "<<j<<" active_children.size() = "<<active_children.size()<<"  extinct_children.size() = "<<extinct_children.size()<<"\n";
             }
-                    
+            std::cerr<<"  active_children.size() = "<<active_children.size()<<"  extinct_children.size() = "<<extinct_children.size()<<"\n";
+
             // randomly draw one child (arbitrarily called left) node from the list of active children
             size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
             TopologyNode* leftChild = active_children.at(left);
-                    
+
+            std::cerr<<"left = "<<left<<"\n";
             // remove the randomly drawn node from the list
             active_children.erase( active_children.begin() + std::int64_t(left) );
+            std::cerr<<"active_children.size() = "<<active_children.size()<<"\n";
                     
             // randomly draw one child (arbitrarily called right) node from the list of active children
             size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
             TopologyNode* rightChild = active_children.at(right);
                     
             // remove the randomly drawn node from the list
+            std::cerr<<"right = "<<right<<"\n";
             active_children.erase( active_children.begin() + std::int64_t(right) );
+            std::cerr<<"active_children.size() = "<<active_children.size()<<"\n";
                     
+            std::cerr<<"children.size() = "<<children.size()<<"\n";
             // remove the two also from the list of the children of the current node
             children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
             children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
+            std::cerr<<"children.size() = "<<children.size()<<"\n";
                     
             // create a parent for the two
             TopologyNode* prnt = new TopologyNode(); // leave the new node without index
@@ -1868,7 +1882,6 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             addChild( prnt );
             prnt->setParent( this );
         }
-                
     }
     else // use_ages == false
     {
