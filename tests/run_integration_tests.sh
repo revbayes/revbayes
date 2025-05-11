@@ -6,10 +6,15 @@ if [ -z "$1" ] ; then
     printf '  ./run_integration_tests.sh "$(readlink -f ../projects/cmake/build/rb)"\n'
     printf '  ./run_integration_tests.sh "$PWD/../projects/cmake/build/rb"\n'
     printf '  ./run_integration_tests.sh  -mpi true "$PWD/../projects/cmake/build-mpi/rb-mpi"\n'
+    printf '  ./run_integration_tests.sh  -test FBD rb'
 #    printf '  ./run_integration_tests.sh mpirun -np 4 "$(readlink -f ../projects/cmake/rb)"\n'
     exit 101
 fi
 
+
+BOLDRED="\e[1;31m"
+BOLDCYAN="\e[1;36m"
+RESET="\e[0m"
 
 mpi="false"
 
@@ -21,6 +26,7 @@ while echo $1 | grep ^- > /dev/null; do
         echo '
 Command line options are:
 -h                              : print this help and exit.
+-test                           : run only this test
 '
         exit
     fi
@@ -30,6 +36,7 @@ Command line options are:
     shift
     shift
 done
+
 
 if [ $mpi = "true" ]; then
 #    rb_exec="mpirun --oversubscribe -np 4 $@"
@@ -55,7 +62,12 @@ if [ ! -d "revbayes.github.io" ] ; then
 git clone https://github.com/revbayes/revbayes.github.io.git
 fi
 
-for t in revbayes.github.io/tutorials/*/tests.txt; do
+tutorial_tests=$(echo revbayes.github.io/tutorials/*/tests.txt)
+if [ -n "${test}" ] ; then
+    tutorial_tests=""
+fi
+
+for t in ${tutorial_tests} ; do
     testname=`echo $t | cut -d '/' -f 2-3`;
     dirname=`echo $t | cut -d '/' -f 1-3`;
 
@@ -63,13 +75,14 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
     cd $dirname
     tests+=($testname)
 
-    printf "\n\n#### Running test: $testname\n\n"
+    printf "${BOLDRED}\n\n#### Running test: $testname\n${RESET}"
 
     for script in $(cat tests.txt);
     do
+        printf "   ${BOLDCYAN}${script}${RESET}\n"
         (
-        cd scripts
-        sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
+            cd scripts
+            sed 's/generations=[0-9]*/generations=1/g' "$script" | sed 's/checkpointInterval=[0-9]*/checkpointInterval=1/g'  > "cp_$script"
         )
         ${rb_exec} -b scripts/cp_$script
         res="$?"
@@ -95,7 +108,12 @@ for t in revbayes.github.io/tutorials/*/tests.txt; do
     cd -
 done
 
-for t in test_*; do
+all_tests=$(echo test_*)
+if [ -n "${test}" ] ; then
+    all_tests=test_${test}
+fi
+
+for t in ${all_tests} ; do
     testname=`echo $t | cut -d _ -f 2-`
 
     if [ -d $t ]; then
@@ -104,7 +122,7 @@ for t in test_*; do
         continue
     fi
 
-    printf "\n\n#### Running test: $testname\n\n"
+    printf "${BOLDRED}\n\n#### Running test: $testname\n${RESET}"
     cd $t
 
     rm -rf output data
@@ -113,10 +131,11 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
+        printf "   ${BOLDCYAN}${f}${RESET}\n"
         mkdir -p output
         tmp0=${f#scripts/}
         tmp1=${tmp0%.[Rr]ev}
-        ${rb_exec} -b $f &> output/${tmp1}.errout # print output so we can see any error messages
+        ${rb_exec} -b $f 2>&1 | tee output/${tmp1}.errout # print output so we can see any error messages
         res="$?"
         if [ $res = 139 ]; then
             res="segfault: $f"
@@ -137,7 +156,7 @@ for t in test_*; do
     cd ..
 done
 
-printf "\n\n#### Checking output from tests... \n"
+printf "${BOLDRED}\n\n#### Checking output from tests... \n${RESET}"
 xfailed=0
 failed=0
 pass=0
