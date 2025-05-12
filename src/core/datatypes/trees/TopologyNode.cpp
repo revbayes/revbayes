@@ -1817,24 +1817,18 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         std::cerr<<"    event=LEAF  time = "<<sorted_children[0]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
 
         // Apply the coalescence events
-        for (int i=0; i<coalescence_times.size();)
+        for (int i=0; i<coalescence_times.size();i++)
         {
             std::cerr<<"i = "<<i<<"/"<<coalescence_times.size()<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
             // get the age of the current child
             double next_coal_time = coalescence_times[i];
 
             // If the next event is adding a leaf instead of a coalescent, then add the next leaf.
-            if (used_children < sorted_children.size() and sorted_children[used_children]->getAge() < next_coal_time)
+            for(;used_children < sorted_children.size() and sorted_children[used_children]->getAge() < next_coal_time; used_children++)
             {
                 active_children.push_back( sorted_children[used_children] );
                 std::cerr<<"    event=LEAF  time = "<<sorted_children[used_children]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
-                used_children++;
-                continue;
             }
-            else
-
-            // Advance to the next coalescent event.
-            i++;
 
             assert(active_children.size() >= 2);
 
@@ -1888,6 +1882,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         while ( children.size() >= 2 )
         {
             active_children = children;
+            std::cerr<<"    branch-length tree:  active_children.size() = "<<active_children.size()<<"\n";
                     
             // randomly draw one child (arbitrarily called left) node from the list of active children
             size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
@@ -1926,6 +1921,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         children[0]->setBranchLength(brlen);
         setBranchLength(0.0);
     }
+    std::cerr<<"DONE:  children.size() = "<<children.size()<<"\n";
 }
 
 
