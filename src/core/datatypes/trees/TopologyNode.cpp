@@ -1891,7 +1891,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             // remove the randomly drawn node from the list
             active_children.erase( active_children.begin() + std::int64_t(left) );
                     
-            // randomly draw one child (arbitrarily called left) node from the list of active children
+            // randomly draw one child (arbitrarily called right) node from the list of active children
             size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
             TopologyNode* rightChild = active_children.at(right);
                     
@@ -1899,6 +1899,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             active_children.erase( active_children.begin() + std::int64_t(right) );
                     
             // remove the two also from the list of the children of the current node
+            int old_size = children.size();
             children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
             children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
                     
@@ -1914,12 +1915,14 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             // add the newly created parent to the list of the children of the current node
             addChild( prnt );
             prnt->setParent( this );
+            assert(children.size()+1 == old_size);
         }
                 
         // Give my only child my old branch length, and set my new branch length to 0
         // This is to make sure everything is handled properly when we call suppressOutdegreeOneNodes() on myself
         children[0]->setBranchLength(brlen);
         setBranchLength(0.0);
+        assert(children.size() == 1);
     }
     std::cerr<<"DONE:  children.size() = "<<children.size()<<"\n";
 }
