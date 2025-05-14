@@ -1804,7 +1804,6 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         // sort the coalescence_times (from youngest to oldest)
         std::sort(coalescence_times.begin(), coalescence_times.end());
 
-        active_children.push_back(sorted_children[0]);
         std::cerr<<"    child ages: ";
         for(auto& child: sorted_children)
             std::cerr<<child->getAge()<<"  ";
@@ -1812,10 +1811,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         std::cerr<<"    parent age: "<<getAge()<<"\n";
 
         // The sorted_children from index `used_children` to the end have not been seen yet.
-        int used_children = 1;
+        int used_children = 0;
                 
-        std::cerr<<"    event=LEAF  time = "<<sorted_children[0]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
-
         // Apply the coalescence events
         for (int i=0; i<coalescence_times.size();i++)
         {
