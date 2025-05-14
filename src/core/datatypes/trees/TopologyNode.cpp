@@ -1771,7 +1771,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
     // What if the root had 4 children?
     if (isRoot() and not resolve_root) return;
 
-    std::cerr<<"\n\nresolveMultifurcation:  children.size() = "<<children.size()<<"\n";
+    // std::cerr<<"\n\nresolveMultifurcation:  children.size() = "<<children.size()<<"\n";
     RandomNumberGenerator* rng = GLOBAL_RNG;
     // "active" children are those that are younger than the child currently under consideration
     std::vector<TopologyNode*> active_children;
@@ -1876,7 +1876,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         while ( children.size() > 2 )
         {
             active_children = children;
-            std::cerr<<"    branch-length tree:  active_children.size() = "<<active_children.size()<<"\n";
+            // std::cerr<<"    branch-length tree:  active_children.size() = "<<active_children.size()<<"\n";
                     
             // randomly draw one child (arbitrarily called left) node from the list of active children
             size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
@@ -1913,7 +1913,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         }
     }
     assert(children.size() == 2);
-    std::cerr<<"DONE:  children.size() = "<<children.size()<<"\n";
+    // std::cerr<<"DONE:  children.size() = "<<children.size()<<"\n";
 }
 
 
