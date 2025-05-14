@@ -1804,11 +1804,11 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         // sort the coalescence_times (from youngest to oldest)
         std::sort(coalescence_times.begin(), coalescence_times.end());
 
-        std::cerr<<"    child ages: ";
-        for(auto& child: sorted_children)
-            std::cerr<<child->getAge()<<"  ";
-        std::cerr<<"\n";
-        std::cerr<<"    parent age: "<<getAge()<<"\n";
+        // std::cerr<<"    child ages: ";
+        // for(auto& child: sorted_children)
+        //   std::cerr<<child->getAge()<<"  ";
+        // std::cerr<<"\n";
+        // std::cerr<<"    parent age: "<<getAge()<<"\n";
 
         // The sorted_children from index `used_children` to the end have not been seen yet.
         int used_children = 0;
@@ -1816,7 +1816,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
         // Apply the coalescence events
         for (int i=0; i<coalescence_times.size();i++)
         {
-            std::cerr<<"i = "<<i<<"/"<<coalescence_times.size()<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
+            // std::cerr<<"i = "<<i<<"/"<<coalescence_times.size()<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
             // get the age of the current child
             double next_coal_time = coalescence_times[i];
 
@@ -1824,7 +1824,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             for(;used_children < sorted_children.size() and sorted_children[used_children]->getAge() < next_coal_time; used_children++)
             {
                 active_children.push_back( sorted_children[used_children] );
-                std::cerr<<"    event=LEAF  time = "<<sorted_children[used_children]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
+                // std::cerr<<"    event=LEAF  time = "<<sorted_children[used_children]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
             }
 
             assert(active_children.size() >= 2);
@@ -1861,8 +1861,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             addChild( prnt );
             prnt->setParent( this );
 
-            std::cerr<<"    event=COAL  time = "<<next_coal_time<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
-            std::cerr<<"          left = "<<leftChild->getAge()<<"  right = "<<rightChild->getAge()<<"   parent = "<<next_coal_time<<"\n";
+            // std::cerr<<"    event=COAL  time = "<<next_coal_time<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
+            // std::cerr<<"          left = "<<leftChild->getAge()<<"  right = "<<rightChild->getAge()<<"   parent = "<<next_coal_time<<"\n";
 
             assert(children.size()+1 == old_size);
             assert(prnt->getAge() > leftChild->getAge());
