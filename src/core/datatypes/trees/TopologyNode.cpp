@@ -1871,15 +1871,12 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             assert(prnt->getAge() > leftChild->getAge());
             assert(prnt->getAge() > rightChild->getAge());
         }
-        assert(children.size() == 2);
     }
     else // use_ages == false
     {
-        double brlen = getBranchLength();
-                
         // The following is adapted from UniformTopologyDistribution::simulateClade()
                 
-        while ( children.size() >= 2 )
+        while ( children.size() > 2 )
         {
             active_children = children;
             std::cerr<<"    branch-length tree:  active_children.size() = "<<active_children.size()<<"\n";
@@ -1917,13 +1914,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             prnt->setParent( this );
             assert(children.size()+1 == old_size);
         }
-                
-        // Give my only child my old branch length, and set my new branch length to 0
-        // This is to make sure everything is handled properly when we call suppressOutdegreeOneNodes() on myself
-        children[0]->setBranchLength(brlen);
-        setBranchLength(0.0);
-        assert(children.size() == 1);
     }
+    assert(children.size() == 2);
     std::cerr<<"DONE:  children.size() = "<<children.size()<<"\n";
 }
 
