@@ -478,6 +478,9 @@ void Tree::initMethods( void )
 
     ArgumentRules* nnodesArgRules = new ArgumentRules();
     methods.addFunction( new MemberFunction<Tree, Natural>( "nnodes", this, nnodesArgRules ) );
+    
+    ArgumentRules* nbranchesArgRules = new ArgumentRules();
+    methods.addFunction( new MemberFunction<Tree, Natural>( "nbranches", this, nbranchesArgRules ) );
 
     ArgumentRules* ntipsArgRules = new ArgumentRules();
     methods.addFunction( new MemberFunction<Tree, Natural>( "ntips", this, ntipsArgRules ) );
