@@ -1,0 +1,25 @@
+################################################################################
+#
+# RevBayes Test-Script: Parsing a character matrix stored in a Nexus file that
+#                       includes a STATELABELS block
+#
+# authors: David Cerny
+#
+################################################################################
+
+# read in a toy matrix of 5 taxa and 3 characters originally provided by Martin
+# R. Smith (see https://github.com/revbayes/revbayes/issues/731)
+
+# final comma in the STATELABELS block
+chars0 = readDiscreteCharacterData("data/statelabels_end_comma.nex")
+print("   Taxa: " + chars0.size())
+print("   Characters: " + chars0.nchar() + "\n")
+
+# no final comma in the STATELABELS block
+chars1 = readDiscreteCharacterData("data/statelabels_no_end_comma.nex")
+print("   Taxa: " + chars1.size())
+print("   Characters: " + chars1.nchar())
+
+clear()
+
+q()
