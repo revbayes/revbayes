@@ -4549,9 +4549,11 @@ void NxsCharactersBlock::HandleStatelabels(
 	charStates.clear();
 	for (;;)
 		{
-		token.GetNextToken();
-		if (token.Equals(";"))
-			break;
+        if (token.Equals(";"))
+            break;
+        token.GetNextToken();
+        if (token.Equals(";"))
+            break;
         int n = -1;
         try {
             n = token.GetToken().ConvertToInt();
