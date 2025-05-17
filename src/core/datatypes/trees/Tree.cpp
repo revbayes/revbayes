@@ -496,6 +496,10 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     {
         rv = nodes.size();
     }
+    else if (n == "nbranches")
+    {
+        rv = nodes.size() - 1;
+    }
     else if (n == "ntips")
     {
         rv = num_tips;
