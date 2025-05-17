@@ -10,7 +10,7 @@
 
 seed(1234)
 NUM_REPLICATES      = 2
-NUM_MCMC_ITERATIONS = 10
+NUM_MCMC_ITERATIONS = 1
 THINNING            = 1
 
 # create the monitor and moves vectors
@@ -112,7 +112,6 @@ monitors.append( mnFile(filename="output/horses_iso_GMRF_maptreebased_times.log"
 mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPLICATES, combine="mixed")
 mymcmc.run(NUM_MCMC_ITERATIONS, tuning = 100)
 
-mymcmc.operatorSummary()
 
 ################
 

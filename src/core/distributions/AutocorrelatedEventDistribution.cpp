@@ -223,8 +223,6 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             return RbConstants::Double::neginf;
         }
         
-        const std::vector<double> &time_values = this->value->getValues( autocorrelation_time_indeces[j] );
-
         for (int i = 0; i < this_num_values; ++i)
         {
 
@@ -238,6 +236,8 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             // if this variable is correlate via a normal distribution
             else if ( autocorrelation_types[j] == ACN )
             {
+                const std::vector<double> &time_values = this->value->getValues( autocorrelation_time_indeces[j] );
+
                 std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
 
                 double mean = these_values[i-1];
@@ -250,6 +250,8 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
             // if this variable is correlated via a lognormal distribution
             else if ( autocorrelation_types[j] == ACLN )
             {
+                const std::vector<double> &time_values = this->value->getValues( autocorrelation_time_indeces[j] );
+
                 std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean = log( these_values[i-1] );
@@ -382,12 +384,8 @@ void AutocorrelatedEventDistribution::simulate()
         const std::string&          this_name       = names[j];
         TypedDistribution<double>*  this_prior      = value_priors[j];
         
-        const std::vector<double> &time_values      = this->value->getValues( autocorrelation_time_indeces[j] );
-
-
         for (int i = 0; i < this_num_values; ++i)
         {
-        
             // first, if this variable is uncorrelated or the first value
             if ( i == 0 || autocorrelation_types[j] == NONE )
             {
@@ -397,8 +395,9 @@ void AutocorrelatedEventDistribution::simulate()
             // if this variable is correlate via a normal distribution
             else if ( autocorrelation_types[j] == ACN )
             {
-                std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
+                const std::vector<double> &time_values      = this->value->getValues( autocorrelation_time_indeces[j] );
 
+                std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean     = these_values[i-1];
                 double dt       = time_values[time_index] - (time_index > 0 ? time_values[time_index-1] : 0.0);
@@ -409,6 +408,8 @@ void AutocorrelatedEventDistribution::simulate()
             // if this variable is correlated via a lognormal distribution
             else if ( autocorrelation_types[j] == ACLN )
             {
+                const std::vector<double> &time_values      = this->value->getValues( autocorrelation_time_indeces[j] );
+
                 std::int64_t time_index = i - min_events[j] + min_events[autocorrelation_time_indeces[j]];
                 
                 double mean     = log( these_values[i-1] );
