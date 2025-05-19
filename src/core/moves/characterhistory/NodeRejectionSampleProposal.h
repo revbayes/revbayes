@@ -401,20 +401,27 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
         size_t s = static_cast<CharacterEventDiscrete*>(nodeState[site_index])->getState();
         storedNodeState[site_index] = s;
     }
-   
-    if (node->isRoot()) {
-        std::cout << "node = root" << std::endl;
-    }else{
-        std::cout << "node = not root" << std::endl;
-    }
     
     if (node->isRoot()) {
-        storedSubrootState.resize(num_sites,0);
-        const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
-        for (size_t site_index = 0; site_index < num_sites; ++site_index)
-        {
-            size_t s = static_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
-            storedSubrootState[site_index] = s;
+        TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+        // PL comments: change below
+        if ( c->getRootBranchLength() - node->getAge() == 0 ){
+            storedSubrootState.resize(num_sites,0);
+            const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
+            for (size_t site_index = 0; site_index < num_sites; ++site_index)
+            {
+                size_t s = static_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
+                storedSubrootState[site_index] = s;
+            }
+        }
+        else {
+            storedSubrootState.resize(num_sites,0);
+            const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
+            for (size_t site_index = 0; site_index < num_sites; ++site_index)
+            {
+                size_t s = static_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
+                storedSubrootState[site_index] = s;
+            }
         }
     }
 
@@ -492,9 +499,17 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     
     // get parent age
     double parent_age = 0.0;
+    
     if ( node->isRoot() )
     {
-        parent_age = node->getAge() + c->getRootBranchLength();
+        // PL comments: change below
+        if ( c->getRootBranchLength() - node->getAge() == 0 ){
+            parent_age = node->getAge() * 100;
+
+        }
+        else {
+            parent_age = node->getAge() + c->getRootBranchLength();
+        }
     }
     else
     {
@@ -506,33 +521,60 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
     rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
     rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, nodeTpMatrix);
-
+    
     
     std::set<size_t>::iterator it_s;
     
     if ( node->isRoot() )
     {
-//        std::cout << "sampledSubroot ";
-        for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
-        {
-            size_t site_index = *it_s;
-            
-            double u = GLOBAL_RNG->uniform01();
-            std::vector<double> state_probs(numStates, 1.0/numStates);
-            unsigned int s = 0;
-            for ( size_t i=0; i<numStates; ++i )
+        // PL comments: change below
+        if ( c->getRootBranchLength() - node->getAge() == 0 ){
+            //        std::cout << "sampledSubroot ";
+            for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
             {
-                u -= state_probs[i];
-                if ( u <= 0.0 )
+                size_t site_index = *it_s;
+                
+                double u = GLOBAL_RNG->uniform01();
+                std::vector<double> state_probs(numStates, 1.0/numStates);
+                unsigned int s = 0;
+                for ( size_t i=0; i<numStates; ++i )
                 {
-                    break;
+                    u -= state_probs[i];
+                    if ( u <= 0.0 )
+                    {
+                        break;
+                    }
+                    ++s;
                 }
-                ++s;
+                //            std::cout << s;
+                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
             }
-//            std::cout << s;
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            //        std::cout << "\n";
         }
-//        std::cout << "\n";
+        else {
+            //        std::cout << "sampledSubroot ";
+            for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
+            {
+                size_t site_index = *it_s;
+                
+                double u = GLOBAL_RNG->uniform01();
+                std::vector<double> state_probs(numStates, 1.0/numStates);
+                unsigned int s = 0;
+                for ( size_t i=0; i<numStates; ++i )
+                {
+                    u -= state_probs[i];
+                    if ( u <= 0.0 )
+                    {
+                        break;
+                    }
+                    ++s;
+                }
+                //            std::cout << s;
+                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            }
+            //        std::cout << "\n";
+        }
+
     }
 
 //            for (size_t site_index = 0; site_index < num_sites; ++site_index)
