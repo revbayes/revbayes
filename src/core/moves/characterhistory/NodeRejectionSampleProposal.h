@@ -402,6 +402,11 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
         storedNodeState[site_index] = s;
     }
    
+    if (node->isRoot()) {
+        std::cout << "node = root" << std::endl;
+    }else{
+        std::cout << "node = not root" << std::endl;
+    }
     
     if (node->isRoot()) {
         storedSubrootState.resize(num_sites,0);
