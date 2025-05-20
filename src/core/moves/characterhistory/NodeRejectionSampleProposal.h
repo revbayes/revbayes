@@ -505,7 +505,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
         // PL comments: change below
         if ( c->getRootBranchLength() - node->getAge() == 0 ){
             parent_age = node->getAge() * 100;
-
         }
         else {
             parent_age = node->getAge() + c->getRootBranchLength();
@@ -522,32 +521,18 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
     rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, nodeTpMatrix);
     
-    
     std::set<size_t>::iterator it_s;
     
     if ( node->isRoot() )
     {
-        // PL comments: change below
+        // PL comments: what does the block below do?
         if ( c->getRootBranchLength() - node->getAge() == 0 ){
             //        std::cout << "sampledSubroot ";
+            // PL comments: if root branch does not exist, then directly draw root state from stationary distribution; parent state not required
             for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
             {
                 size_t site_index = *it_s;
-                
-                double u = GLOBAL_RNG->uniform01();
-                std::vector<double> state_probs(numStates, 1.0/numStates);
-                unsigned int s = 0;
-                for ( size_t i=0; i<numStates; ++i )
-                {
-                    u -= state_probs[i];
-                    if ( u <= 0.0 )
-                    {
-                        break;
-                    }
-                    ++s;
-                }
-                //            std::cout << s;
-                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(0);
             }
             //        std::cout << "\n";
         }
@@ -611,8 +596,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
         static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
         static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
     }
-
-
 
 }
 
