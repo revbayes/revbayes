@@ -82,8 +82,6 @@ Dist_FBDRP* Dist_FBDRP::clone( void ) const
  */
 RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( void ) const
 {
-    throw RbException("FBD range process currently disabled due to invalid calculations.");
-
     // get the parameters
     
     // sampling condition
@@ -111,8 +109,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
 
     bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
+    bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, false, use_bds);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds);
     
     return d;
 }
@@ -155,7 +154,7 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "FBDRP" );
+    a_names.push_back( "FBDRMatrix" );
     
     return a_names;
 }
