@@ -10,6 +10,7 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
 #include "RlString.h"
+#include "RlBranchLengthTree.h"
 #include "RlTimeTree.h"
 #include "RlTree.h"
 #include "NexusWriter.h"
@@ -90,6 +91,11 @@ RevPtr<RevVariable> Func_writeNexus::execute( void )
         const RevBayesCore::RbVector<RevBayesCore::Tree> &data = static_cast< const ModelVector<TimeTree> & >( args[1].getVariable()->getRevObject() ).getValue();
         fw.writeNexusBlock( data );
     }
+    else if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( ModelVector<BranchLengthTree>::getClassTypeSpec() ) )
+    {
+        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = static_cast< const ModelVector<BranchLengthTree> & >( args[1].getVariable()->getRevObject() ).getValue();
+        fw.writeNexusBlock( data );
+    }
     else
     {
         fw.closeStream();
@@ -126,6 +132,7 @@ const ArgumentRules& Func_writeNexus::getArgumentRules( void ) const
         dataTypes.push_back( Tree::getClassTypeSpec() );
         dataTypes.push_back( ModelVector<Tree>::getClassTypeSpec() );
         dataTypes.push_back( ModelVector<TimeTree>::getClassTypeSpec() );
+        dataTypes.push_back( ModelVector<BranchLengthTree>::getClassTypeSpec() );
 
         argumentRules.push_back( new ArgumentRule( "data", dataTypes, "The character data matrix to print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         rules_set = true;
