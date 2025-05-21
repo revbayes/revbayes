@@ -320,65 +320,97 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
         std::set<CharacterEvent*,CharacterEventCompare> tmpHistory;
         size_t currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
         size_t endState  = static_cast<CharacterEventDiscrete*>(child_states[site_index])->getState();
-        do
+        
+        if ( node->isRoot() && branch_length - node->getAge() == 0 )
         {
-            // delete previously rejected events
-            tmpHistory.clear();
             
-            // proceed with rejection sampling
-            currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
-            double end_age = node->getAge();
-            double age = end_age + branch_length;
-            
-            // repeated rejection sampling
-            do
+            double r = 0.0;
+            size_t nextState = 0;
+            std::vector<double> rates(numStates,0.0); // rates here are stationary distribution (not normalized)
+            double age = node->getAge() * 100;
+            for (size_t i = 0; i < numStates; ++i)
             {
-                double r = 0.0;
-                size_t nextState = 0;
-                std::vector<double> rates(numStates,0.0);
-                for (size_t i = 0; i < numStates; ++i)
+                if (i == currState)
                 {
-                    if (i == currState)
-                    {
-                        continue;
-                    }
-                    double v = rm.getRate(currState, i, age, getBranchRate(node->getIndex()));
-                    rates[i] = v;
-                    r += v;
+                    continue;
                 }
-                double u = GLOBAL_RNG->uniform01() * r;
-                for (size_t i = 0; i < numStates; ++i)
+                double v = rm.getRate(currState, i, age, getBranchRate(node->getIndex()));
+                rates[i] = v;
+                r += v;
+            }
+            double u = GLOBAL_RNG->uniform01() * r;
+            for (size_t i = 0; i < numStates; ++i)
+            {
+                u -= rates[i];
+                if (u <= 0.0)
                 {
-                    u -= rates[i];
-                    if (u <= 0.0)
-                    {
-                        nextState = i;
-                        break;
-                    }
-                }
-                
-                // do not force valid time if event needed
-                age -= RbStatistics::Exponential::rv(r, *GLOBAL_RNG);
-                
-                if (age > end_age)
-                {
-                    currState = nextState;
-                    CharacterEvent* evt = new CharacterEventDiscrete(site_index, nextState, age);
-                    tmpHistory.insert(evt);
-                }
-                else if (currState != endState)
-                {
-                    for (std::set<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h = tmpHistory.rbegin(); it_h != tmpHistory.rend(); it_h++)
-                    {
-                        delete *it_h;
-                    }
-                    
+                    nextState = i;
+                    break;
                 }
             }
-            while(age > end_age);
-            
         }
-        while (currState != endState);
+        else
+        {
+            do
+            {
+                // delete previously rejected events
+                tmpHistory.clear();
+                
+                // proceed with rejection sampling
+                currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
+                double end_age = node->getAge();
+                double age = end_age + branch_length;
+                
+                // repeated rejection sampling
+                do
+                {
+                    double r = 0.0;
+                    size_t nextState = 0;
+                    std::vector<double> rates(numStates,0.0);
+                    for (size_t i = 0; i < numStates; ++i)
+                    {
+                        if (i == currState)
+                        {
+                            continue;
+                        }
+                        double v = rm.getRate(currState, i, age, getBranchRate(node->getIndex()));
+                        rates[i] = v;
+                        r += v;
+                    }
+                    double u = GLOBAL_RNG->uniform01() * r;
+                    for (size_t i = 0; i < numStates; ++i)
+                    {
+                        u -= rates[i];
+                        if (u <= 0.0)
+                        {
+                            nextState = i;
+                            break;
+                        }
+                    }
+                    
+                    // do not force valid time if event needed
+                    age -= RbStatistics::Exponential::rv(r, *GLOBAL_RNG);
+                    
+                    if (age > end_age)
+                    {
+                        currState = nextState;
+                        CharacterEvent* evt = new CharacterEventDiscrete(site_index, nextState, age);
+                        tmpHistory.insert(evt);
+                    }
+                    else if (currState != endState)
+                    {
+                        for (std::set<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h = tmpHistory.rbegin(); it_h != tmpHistory.rend(); it_h++)
+                        {
+                            delete *it_h;
+                        }
+                        
+                    }
+                }
+                while(age > end_age);
+                
+            }
+            while (currState != endState);
+        }
         
         for (std::set<CharacterEvent*,CharacterEventCompare>::iterator it = tmpHistory.begin(); it != tmpHistory.end(); it++)
         {

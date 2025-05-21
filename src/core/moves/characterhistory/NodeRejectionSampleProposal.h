@@ -326,7 +326,6 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     proposedLnProbRatio += leftProposal->doProposal();
     proposedLnProbRatio += rightProposal->doProposal();
 
-    
     return proposedLnProbRatio;
 }
 
@@ -402,6 +401,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
         storedNodeState[site_index] = s;
     }
     
+    
+    // PL comments: what is the block below for?
     if (node->isRoot()) {
         TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
         // PL comments: change below
