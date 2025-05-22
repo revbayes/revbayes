@@ -55,11 +55,25 @@ myHillClimberObject.operatorSummary())");
 	help_strings[string("HillClimber")][string("name")] = string(R"(HillClimber)");
 	help_arrays[string("HillClimber")][string("see_also")].push_back(string(R"(SimulatedAnnealing)"));
 	help_strings[string("HillClimber")][string("title")] = string(R"(Hill-Climber analysis object)");
+	help_strings[string("Integer")][string("description")] = string(R"(Integer Datatype)");
+	help_strings[string("Integer")][string("details")] = string(R"(This datatype includes all whole, positive and negative numbers.)");
+	help_strings[string("Integer")][string("example")] = string(R"(x  = -1
+x ~ dnUniformInteger(1, 10))");
 	help_strings[string("Integer")][string("name")] = string(R"(Integer)");
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(IntegerPos)"));
+	help_strings[string("Integer")][string("title")] = string(R"(Integer)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
 	help_strings[string("MatrixRealSymmetric")][string("name")] = string(R"(MatrixRealSymmetric)");
+	help_strings[string("Natural")][string("details")] = string(R"(All whole numbers greater than or equal to zero.)");
+	help_strings[string("Natural")][string("example")] = string(R"(x = 0
+x = 1
+x ~ dnUniformNatural(0, 2))");
 	help_strings[string("Natural")][string("name")] = string(R"(Natural)");
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Integer)"));
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("Natural")][string("title")] = string(R"(Natural Numbers)");
 	help_arrays[string("Probability")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("Probability")][string("description")] = string(R"(A Probability is a real value between 0.0 and 1.0)");
 	help_strings[string("Probability")][string("example")] = string(R"(# Create a RealPos
@@ -453,8 +467,99 @@ mymcmc.run(generations=200000))");
 	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
+	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shifts in birth and death rates.)");
+	help_strings[string("dnCBDSP")][string("details")] = string(R"(This function simulates a tree under a birth-death process. The initial 
+birth and death rates can be specified with the rootAge and rootLambda arguments.
+The rates at which speciation and extinction shifts is specified by the delta
+argument and the new speciation or extinction rate can be drawn from a prior distribution
+specfied in the lambda and mu arguments. 
+Similar to other birth-death processes in RevBayes, you can specify the stopping condition
+of the simulator (either survival or time) and the sampling probability.)");
+	help_strings[string("dnCBDSP")][string("example")] = string(R"(# set distributions for tree
+root_age ~ dnUniform(0, 2)
+root_lambda ~ dnUniform(0, 1)
+root_mu ~ dnUniform(0, 1)
+sampling_prob := 1/2
+# simulate tree
+tree ~ dnCBDSP( rootAge           = root_age,
+                rootLambda        = root_lambda,
+                rootMu            = root_mu,
+                delta             = .2,
+                rho               = sampling_prob,
+                condition         = "surival"))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article-abstract/56/5/701/1694265 )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna, S., Freyman, W. A., Nolen, Z., Huelsenbeck, J. P., May, M. R., & Moore, B. R. (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. BioRxiv, 555805.)",R"(https://doi.org/10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnSBBDP)"));
+	help_strings[string("dnCBDSP")][string("title")] = string(R"(Conditional birth-death shift process)");
+	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("dnCDBDP")][string("description")] = string(R"(This function simulates a tree under a character-dependent birth-death process.)");
+	help_strings[string("dnCDBDP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models. Specifically,
+dnCDBDP allows for character-dependent birrth-death processes meaning that the speciation/extinction rates
+depend on the character state of the taxon itself.
+ Examples of such models are outlined below:
+
+Multiple State-dependent Speciation Extinction (MuSSE)
+This model uses a state-dependent birth-death process to simulate a tree with only anagentic state changes.
+Using dnCDBDP to implement MuSSE, a vector of speciation rates for each state can be passed to the lambda argument.
+Due to being a vector of rates, dnCDBDP will anly allow anagenetic state changes (along branches), with the
+length of the vector corresponding to the number of states.
+
+Cladogenetic State-dependent Speciation Extinction (ClaSSE)
+This model allows for cladogenetic state changes (at nodes, ie. state change inducing speciation)  during the birth-death process. 
+To implement this, a cladogenetic event map must be passed to the lamda argument which will be a matrix specifiying rates of state changes 
+at nodes which will be a seperate matrix for state changes along branches which is specified in the Q argument. See example for implementation.)");
+	help_strings[string("dnCDBDP")][string("example")] = string(R"(# set up for a two-state ClaSSE model
+# set basic starting parameters
+root_age ~ dnUniform(0, 2)
+rho := Probability(1/2)
+
+# specifying extinction probabilities for each character
+mu_vec[1] := .1
+mu_vec[2] := .1
+
+# set up cladogenetic events, probabilities, and number of states
+# each element in clado_events describes the cladogenetic event
+# for example [0, 0, 1] describes a parent with state 0 and the state of
+# their children, 0 and 1.
+clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
+
+# set probabilities of each cladogenetic event described above
+clado_prob[1] := 1/4
+clado_prob[2] := 1/4
+clado_prob[3] := 1/4
+clado_prob[4] := 1/4
+
+# set total number of states (in this case 0 and 1 are the only states)
+num_states = 2
+
+# create cladogenetic rate matrix
+clado_matrix = fnCladogeneticProbabilityMatrix(clado_events, clado_prob, num_states)
+
+# set up Q-matrix. rates of state changes along branches
+q_matrix <- matrix([[0, .2],
+                    [.2, 0]])
+
+# set pi, root state freq
+pi <- simplex([1, 2])
+
+# basic use of the function
+timetree ~ dnCDBDP( rootAge           = root_age,
+                    speciationRates   = clado_matrix,
+                    extinctionRates   = mu_vec,
+                    Q                 = q_matrix,
+                    pi                = pi,
+                    rho               = rho,
+                    condition         = "time"))");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(FitzJohn, R. G. (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6), 1084-1092.)",R"(https://doi.org/10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg, E. E., & Igić, B. (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12), 3701-3709.)",R"(https://doi.org/10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticSpeciationRateMatrix)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCDCladoBDP)"));
+	help_strings[string("dnCDBDP")][string("title")] = string(R"(Character Dependent Birth Death Process)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
 	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
 	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
@@ -1231,7 +1336,30 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnPoisson")][string("see_also")].push_back(string(R"(dnGeom)"));
 	help_strings[string("dnPoisson")][string("title")] = string(R"(Poisson Distribution)");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
+	help_arrays[string("dnSBBDP")][string("authors")].push_back(string(R"(Michael Landis & Sebastian Hoehna)"));
+	help_strings[string("dnSBBDP")][string("description")] = string(R"(Simulates a tree under a birth-death process with a specified sampling rate.)");
+	help_strings[string("dnSBBDP")][string("details")] = string(R"(dnSBBDP simulates a tree under a birth-death process without a character dependent effect.
+Additionally, the sampling probability of taxa can be specified using the rho argument of the 
+function, allowing for a specfic sampling rate of extinct taxon.
+
+This function is an older version of a birth death process with an explicit sampling rate.
+To see a newer version with more funcitonality see: dnBDSTP)");
+	help_strings[string("dnSBBDP")][string("example")] = string(R"(# set starting paramters for tree
+root_age ~ dnUniform(0, 2)
+lambda ~ dnUniform(0, 1)
+mu ~ dnUniform(0, 1)
+rho := 1/2
+# simulate tree
+tree ~ dnSBBDP( rootAge       = root_age,
+                lambda        = lambda,
+                mu            = mu,
+                rho           = rho))");
 	help_strings[string("dnSBBDP")][string("name")] = string(R"(dnSBBDP)");
+	help_references[string("dnSBBDP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
+	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnBDSTP)"));
+	help_strings[string("dnSBBDP")][string("title")] = string(R"(Serially sampled birth-death process)");
 	help_arrays[string("dnScaledDirichlet")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_strings[string("dnScaledDirichlet")][string("description")] = string(R"(Scaled Dirichlet probability distribution on a simplex.)");
 	help_strings[string("dnScaledDirichlet")][string("details")] = string(R"(The scaled Dirichlet probability distribution is the generalization of the dirichlet distribution. A random variable from a scaled Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1. If b[1]=b[2]=...=b[n], then the scaledDirichlet(alpha,beta) collapses to the Dirichlet with the same alphas.)");
