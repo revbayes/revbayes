@@ -285,7 +285,6 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const path& file_
         
     }
     
-    std::cout << cmv.size() << std::endl;
     return cmv;
 }
 
