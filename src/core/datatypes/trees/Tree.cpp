@@ -1993,10 +1993,6 @@ void Tree::resolveMultifurcations( bool resolve_root )
             reindexNodes();
         }
     }
-    
-    // Remove the outdegree-1 nodes ("knuckles") introduced by the above process of resolving multifurcations.
-    // NOTE: This only works if we assume that trees can contain multifurcations or knuckles, but not both.
-    suppressOutdegreeOneNodes( false );
 }
 
 
