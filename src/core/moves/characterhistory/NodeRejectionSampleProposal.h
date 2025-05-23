@@ -163,12 +163,14 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
 {
 
     addNode( ctmc );
+    addNode( q_map_site );
+    addNode( q_map_sequence );
         
     nodeProposal  = p.nodeProposal->clone();
     leftProposal  = p.leftProposal->clone();
     rightProposal = p.rightProposal->clone();
     
-    sampledCharacters   =   p.sampledCharacters;
+    sampledCharacters   = p.sampledCharacters;
     allCharacters       = p.allCharacters;
 
     storedNodeState     = p.storedNodeState;
@@ -211,6 +213,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         delete rightProposal;
         
         removeNode(ctmc);
+        removeNode( q_map_site );
+        removeNode( q_map_sequence );
         
         ctmc            = p.ctmc;
         q_map_site      = p.q_map_site;
@@ -224,6 +228,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         lambda          = p.lambda;
     
         addNode( ctmc );
+        addNode( q_map_site );
+        addNode( q_map_sequence );
         
         nodeProposal  = p.nodeProposal->clone();
         leftProposal  = p.leftProposal->clone();
@@ -403,7 +409,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     }
    
     
-    if (node->isRoot()) {
+    if (node->isRoot()) 
+    {
         storedSubrootState.resize(num_sites,0);
         const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
@@ -575,6 +582,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
 template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGenerator> *d)
 {
+    
+    removeNode( q_map_site );
+    removeNode( q_map_sequence );
 
     q_map_site = d;
     numStates = q_map_site->getValue().getNumberOfStates();
@@ -586,6 +596,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     nodeTpMatrix = TransitionProbabilityMatrix(numStates);
     leftTpMatrix = TransitionProbabilityMatrix(numStates);
     rightTpMatrix = TransitionProbabilityMatrix(numStates);
+    
+    addNode( q_map_site );
+    q_map_sequence = NULL;
 
 }
 
@@ -593,7 +606,10 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
 template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d)
 {
-
+    
+    removeNode( q_map_site );
+    removeNode( q_map_sequence );
+    
     q_map_sequence = d;
     numStates = q_map_sequence->getValue().getNumberOfStates();
 
@@ -604,6 +620,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     nodeTpMatrix = TransitionProbabilityMatrix(numStates);
     leftTpMatrix = TransitionProbabilityMatrix(numStates);
     rightTpMatrix = TransitionProbabilityMatrix(numStates);
+    
+    addNode( q_map_sequence );
+    q_map_site = NULL;
 
 }
 
@@ -630,6 +649,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::swapNodeInternal(DagNo
     }
     else if (oldN == q_map_site)
     {
+        // @Priscilla: Please add debug here to check if this is ever called before
         q_map_site = static_cast<DeterministicNode<RateGenerator>* >(newN);
     }
     else if (oldN == q_map_sequence)
