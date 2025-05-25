@@ -215,6 +215,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
     
     // get model parameters
     double currAge = 0.0;
+    // PL comments: change here?
     if ( nd.isRoot() )
     {
         currAge = nd.getAge() + p->getRootBranchLength();
@@ -239,7 +240,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
         double idx = (*it_h)->getSiteIndex();
         eventAge = (*it_h)->getAge();
         dt = currAge - eventAge;
-
+        
         // get the new transition rate
         double tr = rm.getRate( static_cast<CharacterEventDiscrete*>(currState[ (*it_h)->getSiteIndex() ])->getState(), static_cast<CharacterEventDiscrete*>(*it_h)->getState(), currAge, branchRate);
         double sr = rm.getSumOfRates(currState, counts, currAge, branchRate);
@@ -256,7 +257,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
         currAge = eventAge;
         
     }
-
+    
     // lnL for final non-event
     double sr = rm.getSumOfRates(currState, counts, currAge, branchRate);
     lnP -= sr * (currAge - endAge);

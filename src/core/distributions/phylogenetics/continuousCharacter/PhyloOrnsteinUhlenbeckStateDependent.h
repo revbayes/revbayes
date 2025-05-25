@@ -40,7 +40,7 @@ namespace RevBayesCore {
         void                                                                setRootTreatment(ROOT_TREATMENT rt) { root_treatment = rt; }
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
         void                                                                setObservationalErrorTreatment(OBS_ERR_TREATMENT oet) { obs_err_treatment = oet; }
-        OBS_ERR_TREATMENT                                                      getObservationalErrorTreatment() const { return obs_err_treatment; }
+        OBS_ERR_TREATMENT                                                   getObservationalErrorTreatment() const { return obs_err_treatment; }
         // non-virtual
 //        void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                             //!< The tree has changed and we want to know which part.
         virtual void                                                        redrawValue(void);

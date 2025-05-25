@@ -136,12 +136,16 @@ std::vector<size_t> RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::compu
 template<class charType>
 double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelihood(const TopologyNode &n)
 {
-
     double lnP = 0.0;
 
     const BranchHistory& bh = this->histories[n.getIndex()];
     const std::vector<CharacterEvent*>& rootState = bh.getChildCharacters();
 
+    // if ( c->getRootBranchLength() - node->getAge() != 0 )
+    // {
+    //
+    // }
+    
     // get counts per state
     std::vector<int> counts(this->num_states, 0);
     for (size_t i = 0; i < rootState.size(); ++i)
@@ -150,9 +154,11 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelih
     }
 
     // get log prob
+    // PL comments: change below such that root frequencies can be obtained from stationary distribution when root branch is absent.
     std::vector<double> rf = getRootFrequencies();
     for (size_t i = 0; i < counts.size(); i++)
     {
+        // if root branch is present
         lnP += counts[i] * log( rf[i] );
     }
 
@@ -312,7 +318,8 @@ bool RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::drawInitValue( void 
 template<class charType>
 std::vector<double> RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::getRootFrequencies( void ) const
 {
-
+    // PL comments: look at here for how to call the analytical function and root frequencies
+    
     if ( branchHeterogeneousSubstitutionMatrices == true || rootFrequencies != NULL )
     {
         return rootFrequencies->getValue();
