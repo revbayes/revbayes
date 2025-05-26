@@ -107,6 +107,7 @@ namespace RevBayesCore {
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
         virtual void                                                        recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates); //!< Simulate the ancestral states for a given node, conditional on its ancestor's state and the tip data
         virtual bool                                                        recursivelyDrawStochasticCharacterMap(const TopologyNode &node, std::vector<std::string>& character_histories, std::vector<std::vector<charType> >& start_states, std::vector<std::vector<charType> >& end_states, size_t site, bool use_simmap_default); //!< Simulate the history of evolution for a given site on a given branch, conditional on start and end states
+        virtual void                                                        redrawValue(SimulationCondition c);
         virtual void                                                        redrawValue(void);
         void                                                                reInitialized(void);
         void                                                                setMcmcMode(bool tf);                                                                       //!< Change the likelihood computation to or from MCMC mode.
@@ -2432,13 +2433,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursiveMarginal
     }
 }
 
-
-
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void )
 {
+    // by default, delegate to the redraw under MCMC conditions
+    this->redrawValue( SimulationCondition::MCMC );
+}
 
-    bool do_mask = this->dag_node != NULL && this->dag_node->isClamped() && gap_match_clamped;
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( SimulationCondition c )
+{
+
+    bool do_mask = this->dag_node != NULL && ( (this->dag_node->isClamped() && gap_match_clamped) || c == SimulationCondition::VALIDATION);
     std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
     std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
     // we cannot use the stored gap matrix because it uses the pattern compression

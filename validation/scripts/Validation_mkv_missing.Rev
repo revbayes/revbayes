@@ -1,0 +1,97 @@
+################################################################################
+#
+# RevBayes Validation Test: Markov k model on a fixed tree
+#
+# Model: Morphology evolve under the Markov k model and the tree is fixed.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 1000
+NUM_MCMC_ITERATIONS       = 10000
+
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+# Import the morphological character matrix #
+# this file contains only the taxa for which morphological characters are available #
+morpho <- readDiscreteCharacterData("data/mkv_missing.nex")
+
+## helpers
+taxa <- morpho.names()
+n_taxa <- taxa.size()
+n_branches <- 2 * n_taxa - 2
+
+
+
+##############
+# Tree model #
+##############
+
+# Obtain a list of names from the Nexus file. We will use this to add tips to the tree
+names <- morpho.names()
+
+# Set up branch length hyperprior with a move
+br_len_lambda ~ dnExp(0.2)
+moves.append( mvScale(br_len_lambda, weight=2) )
+
+# Define the tree parameter.
+# First, we generate the topology.
+# We assume a uniform prior on topology.
+phylogeny ~ dnUniformTopologyBranchLength(names, branchLengthDistribution=dnExponential(br_len_lambda))
+
+# compute the tree length from the phylogeny
+tree_length := phylogeny.treeLength()
+
+moves.append( mvNNI(phylogeny, weight=n_branches/2.0) )
+moves.append( mvSPR(phylogeny, weight=n_branches/10.0) )
+moves.append( mvBranchLengthScale(phylogeny, weight=n_branches) )
+
+
+
+###########################################
+# Binary morphological substitution model #
+###########################################
+
+# Create the Q matrix. These data are binary, so we initialize the Jukes-Cantor matrix with
+# two states
+Q_morpho <- fnJC(2)
+
+#Combine all of our elements into a CTMC. Because we have not observed any invariant sites,
+phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q_morpho, type="Standard", coding="variable")
+phyMorpho.clamp(morpho)
+
+
+
+
+############
+# Analysis #
+############
+
+
+# initialize the model object #
+mymodel = model(phylogeny)
+
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_mkv_missing" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()

@@ -29,7 +29,7 @@ namespace RevBayesCore {
         // public member functions
         PhyloCTMCSiteHomogeneousConditional*                clone(void) const;                                                                        //!< Create an independent clone
         void                                                setValue(AbstractHomologousDiscreteCharacterData *v, bool f=false);
-        virtual void                                        redrawValue(void);
+        virtual void                                        redrawValue(SimulationCondition c);
 
     protected:
 
@@ -1008,13 +1008,33 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::updateCorrecti
 }
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( void ) {
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( SimulationCondition c )
+{
 
     if (coding == AscertainmentBias::ALL)
     {
-        PhyloCTMCSiteHomogeneous<charType>::redrawValue();
+        PhyloCTMCSiteHomogeneous<charType>::redrawValue( c );
         
         return;
+    }
+    
+//    if ( c == SimulationCondition::VALIDATION ) {
+//        std::cerr << "condition validation in condititional" << std::endl;
+//    } else if ( c == SimulationCondition::MCMC ) {
+//        std::cerr << "condition MCMC in condititional" << std::endl;
+//    } else {
+//        std::cerr << "condition UNKNOWN in condititional" << std::endl;
+//    }
+//    
+    bool do_mask = this->dag_node != NULL && ( (this->dag_node->isClamped() && this->gap_match_clamped) || c == SimulationCondition::VALIDATION);
+    std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(this->tau->getValue().getNumberOfTips(), std::vector<bool>());
+    std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(this->tau->getValue().getNumberOfTips(), std::vector<bool>());
+    // we cannot use the stored gap matrix because it uses the pattern compression
+    // therefore we create our own mask
+    if ( do_mask == true )
+    {
+        this->value->fillMissingSitesMask(mask_gap, mask_missing);
+//        std::cerr << "remembering gaps in condititional" << std::endl;
     }
 
     // delete the old value first
@@ -1128,6 +1148,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
     {
         taxa[i].setTaxon( this->tau->getValue().getNode(i).getTaxon() );
         this->value->addTaxonData( taxa[i] );
+    }
+    
+
+    if ( do_mask == true )
+    {
+        this->value->applyMissingSitesMask(mask_gap, mask_missing);
     }
 
     // compress the data and initialize internal variables
