@@ -30,7 +30,7 @@ dnCDCladoBDP
 # set up for a two-state ClaSSE model
 # set basic starting parameters
 root_age ~ dnUniform(0, 2)
-rho := Probability(1/2)
+rho <- Probability(1/2)
 
 # specifying extinction probabilities for each character
 mu_vec[1] := .1

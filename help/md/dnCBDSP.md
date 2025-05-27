@@ -3,13 +3,12 @@ dnCBDSP
 ## title
 Conditional birth-death shift process
 ## description
-Simulates a tree under a birth-death process with shifts in birth and death rates.
+Simulates a tree under a birth-death process with shifts in birth and death rates through time.
 ## details
-This function simulates a tree under a birth-death process. The initial 
-birth and death rates can be specified with the rootAge and rootLambda arguments.
-The rates at which speciation and extinction shifts is specified by the delta
-argument and the new speciation or extinction rate can be drawn from a prior distribution
-specfied in the lambda and mu arguments. 
+This distribution simulates a tree under a birth-death process. The initial 
+birth and death rates can be specified with the rootLambda and rootMu arguments.
+The rate at which speciation and extinction rate shifts take place is specified by the delta argument and the new speciation or extinction rate can be drawn from a prior distribution
+specified in the lambda and mu arguments. 
 Similar to other birth-death processes in RevBayes, you can specify the stopping condition
 of the simulator (either survival or time) and the sampling probability.
 ## authors
@@ -21,7 +20,7 @@ dnSBBDP
 root_age ~ dnUniform(0, 2)
 root_lambda ~ dnUniform(0, 1)
 root_mu ~ dnUniform(0, 1)
-sampling_prob := 1/2
+sampling_prob <- 1
 # simulate tree
 tree ~ dnCBDSP( rootAge           = root_age,
                 rootLambda        = root_lambda,
