@@ -285,10 +285,19 @@ std::vector<double> UniformSerialSampledTimeTreeDistribution::simulateCoalescent
     	num_ages = num_taxa - 1;
     }
 
+    // Its important that we sort the taxon ages, and do not use
+    // the youngest or (if has_root_age) the oldest.
+    // If we do not do this, we can get an age when only one
+    // taxon is active.  Trying to remove two active taxa then leads to a crash.
+    std::vector<double> sorted_taxon_ages;
+    for(auto& taxon: taxa)
+        sorted_taxon_ages.push_back(taxon.getAge());
+    std::sort(sorted_taxon_ages.begin(), sorted_taxon_ages.end());
+
     for(size_t i = 0; i < num_ages; ++i)
     {
     	// get the age of the tip
-    	double a = taxa[i + 1].getAge();
+    	double a = sorted_taxon_ages[i+1];
 
     	// simulate the age of a node
     	double new_age = a + rng->uniform01() * (max_age - a);
