@@ -204,6 +204,10 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const path& file_
                 unsigned int nAssumptions = nexusReader.GetNumAssumptionsBlocks(charBlock);
                 if ( nAssumptions > 0 )
                 {
+                    std::stringstream assmpt_mssg;
+                    assmpt_mssg << "An ASSUMPTIONS block was found and will be ignored.";
+                    RBOUT( assmpt_mssg.str() );
+                    
                     for (unsigned int i = 0; i < nAssumptions; ++i)
                     {
                         NxsAssumptionsBlock *assumption = nexusReader.GetAssumptionsBlock(charBlock,i);
