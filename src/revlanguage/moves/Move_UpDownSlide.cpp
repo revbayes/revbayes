@@ -116,7 +116,7 @@ void Move_UpDownSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new up-down-scale move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
@@ -424,9 +424,9 @@ void Move_UpDownSlide::printValue(std::ostream &o) const
 void Move_UpDownSlide::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "lambda" )
+    if ( name == "delta" )
     {
-        lambda = var;
+        delta = var;
     }
     else if ( name == "tune" )
     {

@@ -9,30 +9,3 @@
    This simulation runs 2 independent replicates.
    The simulator uses 23 different moves in a random move schedule with 170.6 moves per iteration
    
-
-                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
-===============================================================================================================================
-Scaling                                  pop_size[1]              2.0000         12         11      0.9167 lambda = 0.1000
-Scaling                                  pop_size[2]              2.0000         19         14      0.7368 lambda = 0.1000
-Scaling                                  pop_size[3]              2.0000         20         15      0.7500 lambda = 0.1000
-Scaling                                  pop_size[4]              2.0000         22         16      0.7273 lambda = 0.1000
-Scaling                                  pop_size[5]              2.0000         24         22      0.9167 lambda = 0.1000
-Scaling                                  pop_size[6]              2.0000         24         23      0.9583 lambda = 0.1000
-Scaling                                  pop_size[7]              2.0000         17         17      1.0000 lambda = 0.1000
-IndependentPriorMove                     number_events_pi         1.0000         11         11      1.0000 
-NarrowExchange                           psi                     36.0000        342         89      0.2602 
-NNI                                      psi                     36.0000        383         59      0.1540 
-FNPR                                     psi                      9.0000         93         25      0.2688 
-SubtreeScale                             psi                      7.2000         78         22      0.2821 
-NodeTimeSlideUniform                     psi                     36.0000        357        155      0.4342 
-RootTimeScaleBactrian                    psi                      7.2000         68          3      0.0441 
-TreeScale                                psi                      7.2000         61          8      0.1311 delta = 1.0000
-BetaSimplex                              er                       3.0000         26         14      0.5385 alpha = 1.0000
-DirichletSimplex                         er                       1.0000          8          4      0.5000 alpha = 1.0000
-BetaSimplex                              pi                       2.0000         23          3      0.1304 alpha = 1.0000
-DirichletSimplex                         pi                       1.0000         11          1      0.0909 alpha = 1.0000
-Scaling                                  alpha                    2.0000         24         12      0.5000 lambda = 1.0000
-Sliding                                  p_inv                    1.0000         10          3      0.3000 delta = 1.0000
-Scaling                                  clock                    2.0000         21          1      0.0476 lambda = 1.0000
-UpDownScaling                            clock                    5.0000         56          6      0.1071 lambda = 1.0000
-
