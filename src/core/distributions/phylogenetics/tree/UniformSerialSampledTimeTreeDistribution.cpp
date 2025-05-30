@@ -52,6 +52,7 @@ UniformSerialSampledTimeTreeDistribution* UniformSerialSampledTimeTreeDistributi
 
 void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &nodes, const std::vector<double> &ages)
 {
+        // NOTE: See alternative, and possibly simpler implementation in TopologyNode::resolveMultifurcation( )
 
 	// Get the rng
 	RandomNumberGenerator* rng = GLOBAL_RNG;
