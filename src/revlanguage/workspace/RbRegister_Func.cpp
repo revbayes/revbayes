@@ -316,6 +316,7 @@
 #include "Func_decomposedVarianceCovarianceMatrix.h"
 #include "Func_partialToCorrelationMatrix.h"
 
+#include "Func_PseudoObservation.h"
 /* Type conversions */
 #include "Proc_StringToInt.h"
 
@@ -664,6 +665,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_decomposedVarianceCovarianceMatrix( ) );
         addFunction( new Func_partialToCorrelationMatrix( )         );
 
+        addFunction( new Func_PseudoObservation()                   );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
