@@ -70,7 +70,7 @@ for t in test_*; do
         continue
     fi
 
-    printf "\n\n#### Running test: $testname\n\n"
+    printf "\n#### Running test: $testname\n"
     cd $t
 
     rm -rf output data
@@ -79,6 +79,7 @@ for t in test_*; do
     res=0
     # run the test scripts
     for f in scripts/*.[Rr]ev ; do
+        printf "    ${f}: "
         mkdir -p output
         tmp0=${f#scripts/}
         tmp1=${tmp0%.[Rr]ev}
@@ -93,6 +94,7 @@ for t in test_*; do
         if [ $res != 0 ] ; then
             echo ${t}/${rb_exec} -b $f "==> error $res"
         fi
+        printf "done.\n"
     done
 
     # store the exit status
