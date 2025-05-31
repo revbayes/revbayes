@@ -1,0 +1,13 @@
+x ~ dnNormal(0,1)
+y ~ dnNormal(0,1)
+
+o ~ dnRequire(y > x^2)
+o.clamp( pseudoObservation() )
+
+mymodel = model(y)
+
+mymcmc = mcmc(mymodel, moves=[mvSlice(x), mvSlice(y)], monitors=[mnModel(filename="output/require.log")])
+
+mymcmc.run(1000)
+
+q()
