@@ -49,6 +49,13 @@ namespace RevLanguage {
 
     private:
 
+        // tolerances
+        RevPtr<const RevVariable> abs_tol;          //!< The absolute tolerance of the integrator
+        RevPtr<const RevVariable> rel_tol;          //!< The relative tolerance of the integrator
+
+        // number of dense integrator attempts
+        RevPtr<const RevVariable> num_step;         //!< The maximum number of steps before giving up allowed for dense integrators
+
         // number of processors
         RevPtr<const RevVariable>  n_proc;          //!< The number of processors for parallel calculations
 
