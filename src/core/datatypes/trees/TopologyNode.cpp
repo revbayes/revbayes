@@ -1829,24 +1829,35 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
 
             assert(active_children.size() >= 2);
 
-            // randomly draw one child (arbitrarily called left) node from the list of active children
-            size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
-            TopologyNode* leftChild = active_children.at(left);
+            int old_size = children.size();
 
-            // remove the randomly drawn node from the list
-            active_children.erase( active_children.begin() + std::int64_t(left) );
+            // randomly draw one child (arbitrarily called left) node from the list of active children
+            auto left = static_cast<int>( floor( rng->uniform01() * active_children.size() ) );
+            auto leftChild = active_children.at(left);
+
+            // remove the randomly drawn node from the active list and list of children.
+            auto iter_left = std::find(children.begin(), children.end(), leftChild);
+            if (iter_left == children.end())
+            {
+                std::cerr<<"left child not found!";
+                std::abort();
+            }
+            children.erase( iter_left );
+            active_children.erase( active_children.begin() + left );
 
             // randomly draw one child (arbitrarily called right) node from the list of active children
-            size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
-            TopologyNode* rightChild = active_children.at(right);
+            auto right = static_cast<int>( floor( rng->uniform01() * active_children.size() ) );
+            auto rightChild = active_children.at(right);
 
-            // remove the randomly drawn node from the list
-            active_children.erase( active_children.begin() + std::int64_t(right) );
-
-            // remove the two also from the list of the children of the current node
-            int old_size = children.size();
-            children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
-            children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
+            // remove the randomly drawn node from the active list and list of children.
+            auto iter_right = std::find(children.begin(), children.end(), rightChild);
+            if (iter_right == children.end())
+            {
+                std::cerr<<"right child not found!";
+                std::abort();
+            }
+            children.erase( iter_right );
+            active_children.erase( active_children.begin() + right );
 
             // create a parent for the two
             TopologyNode* prnt = new TopologyNode(); // leave the new node without index
