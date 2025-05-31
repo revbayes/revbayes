@@ -18,10 +18,10 @@ namespace RevLanguage {
     public:
         typedef typename RevBayesCore::PseudoData<typename rlType::valueType> valueType;
 
-        PseudoData() {}
-        PseudoData(const valueType& v): ModelObject<valueType>(v.clone()) {}
-        PseudoData(valueType* v): ModelObject<valueType>(v) {}
-        PseudoData(RevBayesCore::TypedDagNode<valueType>* n): ModelObject<valueType>(n) {}
+        PseudoData() { initMethods(); }
+        PseudoData(const valueType& v): ModelObject<valueType>(v.clone()) { initMethods(); }
+        PseudoData(valueType* v): ModelObject<valueType>(v) { initMethods(); }
+        PseudoData(RevBayesCore::TypedDagNode<valueType>* n): ModelObject<valueType>(n) { initMethods(); }
 
         PseudoData<rlType>*         clone(void) const override
         {
@@ -56,11 +56,11 @@ namespace RevLanguage {
 
         RevLanguage::RevPtr<RevLanguage::RevVariable> executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
         {
-            if (name == "getName")
+            if (name == "lnLikelihood")
             {
                 found = true;
         
-                double x = static_cast<const T&>( args[0].getVariable()->getRevObject() ).getValue();
+                double x = static_cast<const Real&>( args[0].getVariable()->getRevObject() ).getValue();
 
                 double l = this->dag_node->getValue()(x);
                 return RevPtr<RevVariable>( new RevVariable( new Real( l ) ) );
@@ -72,8 +72,8 @@ namespace RevLanguage {
         void initMethods( void )
         {
             ArgumentRules* lnLikelihood_rules = new ArgumentRules();
-            lnLikelihood_rules->push_back( new ArgumentRule( "x", T::getClassTypeSpec(), "The likelihood for a parameter value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-            methods.addFunction( new MemberProcedure( "lnLikelihood", Real::getClassTypeSpec(), set_max_age_arg_rules ) );
+            lnLikelihood_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The likelihood for a parameter value.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+            this->methods.addFunction( new MemberProcedure( "lnLikelihood", Real::getClassTypeSpec(), lnLikelihood_rules ) );
         }
 
     };
