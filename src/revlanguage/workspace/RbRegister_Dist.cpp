@@ -287,8 +287,9 @@
 #include "Transform_Vector_Logit.h"
 #include "Transform_Vector_Invlogit.h"
 
-#include "Dist_Pseudo.h"
 #include "RlPseudoObservation.h"
+#include "Dist_Pseudo.h"
+#include "Dist_Require.h"
 
 /// Functions ///
 
@@ -640,6 +641,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
 
         AddDistribution< PseudoObservation          >( new Dist_Pseudo<Real>()      );
+        AddDistribution< PseudoObservation          >( new Dist_Require()           );
 
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
