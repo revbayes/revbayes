@@ -321,6 +321,7 @@
 #include "Func_PseudoDataBelow.h"
 #include "Func_PseudoDataAnd.h"
 #include "Func_PseudoDataNormal.h"
+#include "Func_PseudoDataLogNormal.h"
 
 /* Type conversions */
 #include "Proc_StringToInt.h"
@@ -675,6 +676,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_PseudoDataBelow()                     );
         addFunction( new Func_PseudoDataAnd<Real>()                 );
         addFunction( new Func_PseudoDataNormal()                    );
+        addFunction( new Func_PseudoDataLogNormal()                 );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
