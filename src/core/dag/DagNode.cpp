@@ -1022,18 +1022,28 @@ void DagNode::setHidden(bool tf)
 }
 
 
+void DagNode::setIgnoreData(bool tf)
+{
+    throw RbException()<<"Error: can't ignore data at node '"<<getName()<<"' because it is not a stochastic node!";
+}
+
+
+void DagNode::setIgnoreRedraw(bool tf)
+{
+    // nothing to do in the base class
+}
+
+
 void DagNode::setIntegrationIndex( size_t i )
 {
     // nothing to do in the base class
 }
 
 
-
 void DagNode::setName(std::string const &n)
 {
     // set the internal value
     name = n;
-
 }
 
 
@@ -1054,12 +1064,6 @@ void DagNode::setParentNamePrefix(const std::string &p)
 
 }
 
-
-void DagNode::setIgnoreData(bool tf)
-{
-    throw RbException()<<"Error: can't ignore data at node '"<<getName()<<"' because it is not a stochastic node!";
-
-}
 
 void DagNode::setVisitFlag(bool tf, const size_t flagType)
 {

@@ -131,6 +131,8 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
             
             if ( the_node->isClamped() == true )
             {
+                the_node->setIgnoreRedraw(false);
+                
                 // check if the PP simulation must condition on sampled tip states
                 auto& ptr = the_node->getDistribution();
                 if (condition_on_tips == true && typeid( &ptr ) == typeid(StateDependentSpeciationExtinctionProcess))

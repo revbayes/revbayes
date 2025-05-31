@@ -49,7 +49,7 @@ namespace RevBayesCore {
         void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);                  //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                        reInitializeMe(void);                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
         virtual void                                        setClamped(bool tf);                                                        //!< Set directly the flag whether this node is clamped.
-        void                                                setIgnoreRedraw(bool tf=true);
+        void                                                setIgnoreRedraw(bool tf=true);                                              //!< Set whether we want the node to be redrawable.
         void                                                setIntegratedOut(bool tf=true);
         virtual void                                        setIntegrationIndex( size_t i );
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
@@ -215,7 +215,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         distribution->setStochasticNode( this );
         
         clamped                             = n.clamped;
-        ignore_data                     = n.ignore_data;
+        ignore_data                         = n.ignore_data;
         ignore_redraw                       = n.ignore_redraw;
         integrated_out                      = n.integrated_out;
         lnProb                              = {};
@@ -245,6 +245,7 @@ void RevBayesCore::StochasticNode<valueType>::clamp(valueType *val)
     setValue( val );
     
     clamped = true;
+    ignore_redraw = true;
     
 }
 
@@ -675,10 +676,11 @@ void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
     // draw the value
     if ( ignore_redraw == false )
     {
-        if (this->isClamped()) {
-            throw RbException("Cannot modify the value of a clamped node.");
-        }
         distribution->redrawValue( c );
+    }
+    else if ( ignore_redraw == true and this->isClamped() )
+    {
+        throw RbException("Cannot modify the value of a clamped node.");
     }
     
     // touch this node for probability recalculation
@@ -923,6 +925,7 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::unclamp( void )
 {
     clamped = false;
+    ignore_redraw = false;
 }
 
 

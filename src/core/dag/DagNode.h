@@ -119,10 +119,11 @@ template <class valueType> class RbOrderedSet;
         void                                                        restoreVector(std::vector<DagNode *>& nodes);
         void                                                        setElementVariable(bool tf);                                                                //!< Set if this variable is hidden from printing.
         void                                                        setHidden(bool tf);                                                                         //!< Set if this variable is hidden from printing.
+        virtual void                                                setIgnoreData(bool tf);                                                                     //!< Set whether we want to have the probability of the prior only.
+        virtual void                                                setIgnoreRedraw(bool tf);                                                                    //!< Set whether we want the node to be redrawable (applies only to stochastic nodes).
         virtual void                                                setIntegrationIndex( size_t i );
         void                                                        setName(const std::string &n);                                                              //!< Set the name of this variable for identification purposes.
         void                                                        setParentNamePrefix(const std::string &p);
-        virtual void                                                setIgnoreData(bool tf);                                                                     //!< Set whether we want to have the probability of the prior only.
         void                                                        setVisitFlag(bool tf, const size_t flagType);
         virtual void                                                swapParent(const DagNode *oldP, const DagNode *newP);                                       //!< Exchange the parent node which includes setting myself as a child of the new parent and removing myself from my old parents children list
         void                                                        touch(bool touchAll=false);
