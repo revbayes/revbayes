@@ -1,24 +1,30 @@
 ################################################################################
 #
 # RevBayes Test-Script: Parsing a character matrix stored in a Nexus file that
-#                       includes a STATELABELS block
+#                       includes STATELABELS and ASSUMPTIONS blocks
 #
 # authors: David Cerny
 #
 ################################################################################
 
 # read in a toy matrix of 5 taxa and 3 characters originally provided by Martin
-# R. Smith (see https://github.com/revbayes/revbayes/issues/731)
+# R. Smith (see https://github.com/revbayes/revbayes/issues/731 and
+# https://github.com/revbayes/revbayes/issues/732)
 
 # final comma in the STATELABELS block
-chars0 = readDiscreteCharacterData("data/statelabels_end_comma.nex")
+chars0 = readDiscreteCharacterData("data/nextest_statelabels_end_comma.nex")
 print("   Taxa: " + chars0.size())
 print("   Characters: " + chars0.nchar() + "\n")
 
 # no final comma in the STATELABELS block
-chars1 = readDiscreteCharacterData("data/statelabels_no_end_comma.nex")
+chars1 = readDiscreteCharacterData("data/nextest_statelabels_no_end_comma.nex")
 print("   Taxa: " + chars1.size())
-print("   Characters: " + chars1.nchar())
+print("   Characters: " + chars1.nchar() + "\n")
+
+# ASSUMPTIONS block with a TYPESET option
+chars2 = readDiscreteCharacterData("data/nextest_assumptions.nex")
+print("   Taxa: " + chars2.size())
+print("   Characters: " + chars2.nchar())
 
 clear()
 
