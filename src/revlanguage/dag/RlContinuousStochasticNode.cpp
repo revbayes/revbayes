@@ -190,6 +190,12 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         // we found the corresponding member method
         found = true;
         
+        // manually calling redraw allows value to be set unless the node is clamped
+        if (!this->isClamped())
+        {
+            this->setIgnoreRedraw( false );
+        }
+        
         // redraw the value
         this->redraw();
         
