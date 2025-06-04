@@ -57,8 +57,11 @@ namespace RevBayesCore {
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     means;
         std::vector<std::vector<double> >                                   variances;
+        std::vector<std::vector<std::vector<double> > >                     variances_per_site;
         std::vector<size_t>                                                 active_likelihood;
-        
+
+        bool                                                                use_missing_data;
+
         // convenience variables available for derived classes too
         std::vector<bool>                                                   changed_nodes;
         std::vector<bool>                                                   dirty_nodes;

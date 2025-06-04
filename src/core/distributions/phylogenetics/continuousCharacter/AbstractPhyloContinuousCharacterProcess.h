@@ -72,7 +72,8 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode< double >*                                       homogeneous_site_rate;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_site_rates;
         
-        
+        std::vector< std::vector<bool> >                                    missing_data;
+
     };
     
 }
