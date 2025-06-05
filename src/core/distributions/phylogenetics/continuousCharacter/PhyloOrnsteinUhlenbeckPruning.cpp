@@ -35,8 +35,7 @@ PhyloOrnsteinUhlenbeckPruning::PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<
     variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
-    dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
-    use_missing_data(false)
+    dirty_nodes( std::vector<bool>(this->num_nodes, true) )
 {
     // initialize default parameters
     root_state                  = new ConstantNode<double>("", new double(0.0) );
@@ -387,22 +386,28 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
                     double log_norm_factor = log_nf_left + log_nf_right + a - b;
                     double lnl_node = log_norm_factor;
                     
-                    if ( node.isRoot() == true )
-                    {
-                        // if the assumed root state is equal to the optimum at the root, then
-                        // this pruning algorithm is 100% equivalent to the likelihood obtained
-                        // using generalized least squares with a variance-covariance matrix
-                        // for the residuals (r = y - theta), also called the vcv-method (introduced in Hansen 1997)
-                        double root_state = computeRootState();
-                        lnl_node += RbStatistics::Normal::lnPdf( root_state, stdev, mu_node[i]);
-                    }
-                    
                     // sum up the probabilities of the subtrees
                     p_node[i] = lnl_node + p_left[i] + p_right[i];
                     
-                } // end-if
+                    if ( use_missing_data == true )
+                    {
+                        missing_data[node_index][i] = false;
+                        this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = (var_left*var_right) / (var_left+var_right);
+                    }
+                    
+                } // end-if we had missing states for substrees
                 
-            } // end for-loop over all sites
+                if ( node.isRoot() == true )
+                {
+                    // if the assumed root state is equal to the optimum at the root, then
+                    // this pruning algorithm is 100% equivalent to the likelihood obtained
+                    // using generalized least squares with a variance-covariance matrix
+                    // for the residuals (r = y - theta), also called the vcv-method (introduced in Hansen 1997)
+                    double root_state = computeRootState();
+                    p_node[i] += RbStatistics::Normal::lnPdf( root_state, this->computeSiteRate(i)*stdev, mu_node[i]);
+                }
+                
+            } // end for-loop over all characters
             
         } // end for-loop over all children
         

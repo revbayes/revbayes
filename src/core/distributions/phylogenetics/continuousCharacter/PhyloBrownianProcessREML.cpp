@@ -23,13 +23,12 @@ using namespace RevBayesCore;
 PhyloBrownianProcessREML::PhyloBrownianProcessREML(const TypedDagNode<Tree> *t, size_t ns) :
     AbstractPhyloBrownianProcess( t, ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
-    contrast_uncertainty_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
+    variances_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
-    dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
-    use_missing_data(false)
+    dirty_nodes( std::vector<bool>(this->num_nodes, true) )
 {
     
     
@@ -39,7 +38,7 @@ PhyloBrownianProcessREML::PhyloBrownianProcessREML(const TypedDagNode<Tree> *t, 
     // now we need to reset the value
     this->redrawValue();
     
-    // we need to reset the contrasts
+    // we need to reset the means
     resetValue();
 }
 
@@ -143,7 +142,7 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
     {
 
         std::vector<double> &p_node   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &mu_node  = this->means[this->active_likelihood[node_index]][node_index];
 
         
         // get the number of children
@@ -171,9 +170,9 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
 
-            // get the per node and site contrasts
-            const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &mu_right = this->contrasts[this->active_likelihood[right_index]][right_index];
+            // get the per node and site means
+            const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
             
             // get the scaled branch lengths
             double v_left  = 0;
@@ -186,91 +185,91 @@ void PhyloBrownianProcessREML::recursiveComputeLnProbability( const TopologyNode
             // get the propagated uncertainties
             double delta_left   = 0.0;
             double delta_right  = 0.0;
-            double t_left       = 0.0;
-            double t_right      = 0.0;
+            double var_left     = 0.0;
+            double var_right    = 0.0;
             double stdev        = 0.0;
             if ( use_missing_data == false )
             {
-                delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
-                delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
+                delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
+                delta_right = this->variances[this->active_likelihood[right_index]][right_index];
 
                 // add the propagated uncertainty to the branch lengths
-                t_left  = v_left  + delta_left;
-                t_right = v_right + delta_right;
+                var_left  = v_left  + delta_left;
+                var_right = v_right + delta_right;
 
                 // set delta_node = (t_l*t_r)/(t_l+t_r);
-                this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = (t_left*t_right) / (t_left+t_right);
+                this->variances[this->active_likelihood[node_index]][node_index] = (var_left*var_right) / (var_left+var_right);
 
-                stdev = sqrt(t_left+t_right);
+                stdev = sqrt(var_left+var_right);
             }
 
-            for (int site=0; site<this->num_sites; ++site)
+            for (int i=0; i<this->num_sites; ++i)
             {
 
                 if ( use_missing_data == true )
                 {
-                    delta_left  = this->contrast_uncertainty_per_site[this->active_likelihood[left_index]][left_index][site];
-                    delta_right = this->contrast_uncertainty_per_site[this->active_likelihood[right_index]][right_index][site];
+                    delta_left  = this->variances_per_site[this->active_likelihood[left_index]][left_index][i];
+                    delta_right = this->variances_per_site[this->active_likelihood[right_index]][right_index][i];
 
                     // add the propagated uncertainty to the branch lengths
-                    t_left  = v_left  + delta_left;
-                    t_right = v_right + delta_right;
+                    var_left  = v_left  + delta_left;
+                    var_right = v_right + delta_right;
 
                     // set delta_node = (t_l*t_r)/(t_l+t_r);
-                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = (t_left*t_right) / (t_left+t_right);
+                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = (var_left*var_right) / (var_left+var_right);
                     
-                    stdev = sqrt(t_left+t_right);
+                    stdev = sqrt(var_left+var_right);
                 }
                 
-                if ( use_missing_data == true && missing_data[left_index][site] == true && missing_data[right_index][site] == true )
+                if ( use_missing_data == true && missing_data[left_index][i] == true && missing_data[right_index][i] == true )
                 {
-                    missing_data[node_index][site] = true;
+                    missing_data[node_index][i] = true;
                     
-                    p_node[site]  = p_left[site] + p_right[site];
-                    mu_node[site] = RbConstants::Double::nan;
+                    p_node[i]  = p_left[i] + p_right[i];
+                    mu_node[i] = RbConstants::Double::nan;
 
-                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = 0.0;
+                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = 0.0;
                 }
-                else if ( use_missing_data == true && missing_data[left_index][site] == true && missing_data[right_index][site] == false )
+                else if ( use_missing_data == true && missing_data[left_index][i] == true && missing_data[right_index][i] == false )
                 {
-                    missing_data[node_index][site] = false;
+                    missing_data[node_index][i] = false;
                     
-                    p_node[site]  = p_left[site] + p_right[site];
-                    mu_node[site] = mu_right[site];
+                    p_node[i]  = p_left[i] + p_right[i];
+                    mu_node[i] = mu_right[i];
                     
-                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = t_right;
+                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = var_right;
 
                 }
-                else if ( use_missing_data == true && missing_data[left_index][site] == false && missing_data[right_index][site] == true )
+                else if ( use_missing_data == true && missing_data[left_index][i] == false && missing_data[right_index][i] == true )
                 {
-                    missing_data[node_index][site] = false;
+                    missing_data[node_index][i] = false;
                     
-                    p_node[site]  = p_left[site] + p_right[site];
-                    mu_node[site] = mu_left[site];
+                    p_node[i]  = p_left[i] + p_right[i];
+                    mu_node[i] = mu_left[i];
                     
-                    this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = t_left;
+                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = var_left;
                 }
                 else
                 {
 
                     // get the site specific rate of evolution
-                    double standDev = this->computeSiteRate(site) * stdev;
+                    double standDev = this->computeSiteRate(i) * stdev;
 
-                    // compute the contrasts for this site and node
-                    double contrast = mu_left[site] - mu_right[site];
+                    // compute the means for this site and node
+                    double contrast = mu_left[i] - mu_right[i];
 
-                    // compute the probability for the contrasts at this node
+                    // compute the probability for the means at this node
                     double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
 
-                    // sum up the probabilities of the contrasts
-                    p_node[site] = lnl_node + p_left[site] + p_right[site];
+                    // sum up the probabilities of the means
+                    p_node[i] = lnl_node + p_left[i] + p_right[i];
                     
-                    mu_node[site] = (mu_left[site]*t_right + mu_right[site]*t_left) / (t_left+t_right);
+                    mu_node[i] = (mu_left[i]*var_right + mu_right[i]*var_left) / (var_left+var_right);
                     
                     if ( use_missing_data == true )
                     {
-                        missing_data[node_index][site] = false;
-                        this->contrast_uncertainty_per_site[this->active_likelihood[node_index]][node_index][site] = (t_left*t_right) / (t_left+t_right);
+                        missing_data[node_index][i] = false;
+                        this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = (var_left*var_right) / (var_left+var_right);
                     }
                     
                 }
@@ -321,7 +320,7 @@ void PhyloBrownianProcessREML::resetValue( void )
     
     // check if the vectors need to be resized
     partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrasts               = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    means                   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
 
     // create a vector with the correct site indices
@@ -368,13 +367,13 @@ void PhyloBrownianProcessREML::resetValue( void )
     
     if ( use_missing_data == true )
     {
-        contrast_uncertainty.clear();
-        contrast_uncertainty_per_site   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+        variances.clear();
+        variances_per_site   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     }
     else
     {
-        contrast_uncertainty_per_site.clear();
-        contrast_uncertainty            = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+        variances_per_site.clear();
+        variances            = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
     }
                 
     for (size_t site = 0; site < this->num_sites; ++site)
@@ -390,16 +389,16 @@ void PhyloBrownianProcessREML::resetValue( void )
                 
                 if ( use_missing_data == false )
                 {
-                    contrast_uncertainty[0][(*it)->getIndex()] = 0;
-                    contrast_uncertainty[1][(*it)->getIndex()] = 0;
+                    variances[0][(*it)->getIndex()] = 0;
+                    variances[1][(*it)->getIndex()] = 0;
                 }
                 else
                 {
-                    contrast_uncertainty_per_site[0][(*it)->getIndex()][site] = 0;
-                    contrast_uncertainty_per_site[1][(*it)->getIndex()][site] = 0;
+                    variances_per_site[0][(*it)->getIndex()][site] = 0;
+                    variances_per_site[1][(*it)->getIndex()][site] = 0;
                 }
-                contrasts[0][(*it)->getIndex()][site] = c;
-                contrasts[1][(*it)->getIndex()][site] = c;
+                means[0][(*it)->getIndex()][site] = c;
+                means[1][(*it)->getIndex()][site] = c;
             }
         }
     }

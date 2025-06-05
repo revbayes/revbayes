@@ -51,8 +51,9 @@ namespace RevBayesCore {
         
         // the likelihoods
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
-        std::vector<std::vector<std::vector<double> > >                     contrasts;
-        std::vector<std::vector<double> >                                   contrast_uncertainty;
+        std::vector<std::vector<std::vector<double> > >                     means;
+        std::vector<std::vector<double> >                                   variances;
+        std::vector<std::vector<std::vector<double> > >                     variances_per_site;
         std::vector<size_t>                                                 active_likelihood;
         
         // convenience variables available for derived classes too
@@ -62,7 +63,8 @@ namespace RevBayesCore {
 
         
         std::vector<Taxon>                                                  taxa;
-        
+        std::map<string,size_t>                                             sample_to_species_index;
+
     };
     
 }

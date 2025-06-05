@@ -22,7 +22,8 @@ using namespace RevBayesCore;
 AbstractPhyloContinuousCharacterProcess::AbstractPhyloContinuousCharacterProcess(const TypedDagNode<Tree> *t, size_t ns) : TypedDistribution< ContinuousCharacterData >(  new ContinuousCharacterData() ),
     num_nodes( t->getValue().getNumberOfNodes() ),
     num_sites( ns ),
-    tau( t )
+    tau( t ),
+    use_missing_data(false)
 {
     
     // initialize with default parameters

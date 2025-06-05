@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
         // public member functions
         // pure virtual
-        virtual PhyloOrnsteinUhlenbeckPruning*                                 clone(void) const;                                                                      //!< Create an independent clone
+        virtual PhyloOrnsteinUhlenbeckPruning*                              clone(void) const;                                                                      //!< Create an independent clone
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
         void                                                                setRootState(const TypedDagNode< double >* s);
@@ -59,8 +59,6 @@ namespace RevBayesCore {
         std::vector<std::vector<double> >                                   variances;
         std::vector<std::vector<std::vector<double> > >                     variances_per_site;
         std::vector<size_t>                                                 active_likelihood;
-
-        bool                                                                use_missing_data;
 
         // convenience variables available for derived classes too
         std::vector<bool>                                                   changed_nodes;
