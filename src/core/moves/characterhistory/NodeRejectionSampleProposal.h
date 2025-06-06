@@ -64,8 +64,8 @@ namespace RevBayesCore {
         void                                                        setSampledCharacters(const std::set<size_t>& s);
         void                                                        sampleNodeCharacters(void);                                     //!< Sample the characters at the node
         double                                                      sampleRootCharacters(void);                                     //!< Sample the characters at the root
-        void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);         //!< Set the rate generator.
-        void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d); //!< Set the rate generator.
+        void                                                        setRateGenerator(TypedDagNode<RateGenerator> *d);         //!< Set the rate generator.
+        void                                                        setRateGenerator(TypedDagNode<RateGeneratorSequence> *d); //!< Set the rate generator.
         void                                                        setProposalTuningParameter(double tp);
         void                                                        tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                                        undoProposal(void);                                             //!< Reject the proposal
@@ -76,8 +76,8 @@ namespace RevBayesCore {
 
         // parameters
         StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;
-        const TypedDagNode<RateGenerator>*                          q_map_site;
-        const TypedDagNode<RateGeneratorSequence>*                  q_map_sequence;
+        TypedDagNode<RateGenerator>*                                q_map_site;
+        TypedDagNode<RateGeneratorSequence>*                        q_map_sequence;
 
         // dimensions
         size_t                                                      numCharacters;
@@ -109,6 +109,7 @@ namespace RevBayesCore {
 }
 
 
+#include "RateGenerator.h"
 
 /**
  * Constructor
@@ -130,6 +131,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
 {
 
     addNode( ctmc );
+    addNode( q_map_site );
+    addNode( q_map_sequence );
 
     nodeProposal  = new PathRejectionSampleProposal<charType>(n, l, r);
     leftProposal  = new PathRejectionSampleProposal<charType>(n, l, r);
@@ -212,7 +215,7 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         delete leftProposal;
         delete rightProposal;
         
-        removeNode(ctmc);
+        removeNode( ctmc );
         removeNode( q_map_site );
         removeNode( q_map_sequence );
         
@@ -580,7 +583,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
 
 
 template<class charType>
-void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGenerator> *d)
+void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(TypedDagNode<RateGenerator> *d)
 {
     
     removeNode( q_map_site );
@@ -604,7 +607,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
 
 
 template<class charType>
-void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d)
+void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(TypedDagNode<RateGeneratorSequence> *d)
 {
     
     removeNode( q_map_site );
