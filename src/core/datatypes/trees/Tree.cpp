@@ -496,6 +496,10 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     {
         rv = nodes.size();
     }
+    else if (n == "nbranches")
+    {
+        rv = nodes.size() - 1;
+    }
     else if (n == "ntips")
     {
         rv = num_tips;
@@ -1929,6 +1933,9 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     reverseParentChild( n.getParent() );
     n.getParent().setParent( NULL );
     
+    // set the new root
+    setRoot( &n.getParent(), reindex );
+    
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
     {
@@ -1938,10 +1945,7 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
         // second, we suppress any internal nodes of outdegree 1 ("knuckles" / sampled ancestors)
         suppressOutdegreeOneNodes(true);
         
-    } // end-if we do not want to make the tree bifurcating
-
-    // set the new root
-    setRoot( &n.getParent(), reindex );
+    }
 }
 
 
@@ -1975,24 +1979,21 @@ void Tree::resetTaxonBitSetMap( void )
 
 void Tree::resolveMultifurcations( bool resolve_root )
 {
-    bool does_use_ages = isTimeTree();
-    
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        if ( nodes[i]->getNumberOfChildren() > 2 )
-        {
-            // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
-            nodes[i]->setUseAges( does_use_ages, true );
-            // resolve the multifurcation
-            nodes[i]->resolveMultifurcation( resolve_root );
-            // we need to reindex nodes because we added new ones
-            reindexNodes();
-        }
-    }
-    
-    // Remove the outdegree-1 nodes ("knuckles") introduced by the above process of resolving multifurcations.
-    // NOTE: This only works if we assume that trees can contain multifurcations or knuckles, but not both.
-    suppressOutdegreeOneNodes( false );
+    // Collect the multifurcation nodes.
+    std::vector<TopologyNode*> multifurcating_nodes;
+    for (auto node: nodes)
+        if (node->getNumberOfChildren() > 2)
+            multifurcating_nodes.push_back(node);
+
+    // set the 'use_ages' attribute for all nodes
+    root->setUseAges( isTimeTree(), true );
+
+    // Resolve the multifurcations.
+    for(auto node: multifurcating_nodes)
+        node->resolveMultifurcation( resolve_root );
+
+    // We need to reindex nodes because we added new ones
+    reindexNodes();
 }
 
 

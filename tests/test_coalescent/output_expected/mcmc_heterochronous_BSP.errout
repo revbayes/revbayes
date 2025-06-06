@@ -1,0 +1,37 @@
+   Successfully read one character matrix from file 'data/horses_heterochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+Problem when computing waiting time.
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   850000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 51 different moves in a random move schedule with 754.05 moves per iteration
+   

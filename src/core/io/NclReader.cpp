@@ -204,26 +204,36 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const path& file_
                 unsigned int nAssumptions = nexusReader.GetNumAssumptionsBlocks(charBlock);
                 if ( nAssumptions > 0 )
                 {
+                    std::stringstream assmpt_mssg;
+                    assmpt_mssg << "An ASSUMPTIONS block was found and will be ignored.";
+                    RBOUT( assmpt_mssg.str() );
+                    
                     for (unsigned int i = 0; i < nAssumptions; ++i)
                     {
                         NxsAssumptionsBlock *assumption = nexusReader.GetAssumptionsBlock(charBlock,i);
                         size_t nSets = assumption->GetNumCharSets();
-                        NxsStringVector names;
-                        assumption->GetCharSetNames(names);
-                        for (size_t j = 0; j < nSets; ++j)
+                        if (nSets != 0)
                         {
-                            const NxsUnsignedSet *set = assumption->GetCharSet(names[j]);
-                            HomologousCharacterData *m_tmp = dynamic_cast<HomologousCharacterData *>(m)->clone();
-                            m_tmp->excludeAllCharacters();
-                            for (std::set<unsigned>::iterator k = set->begin(); k != set->end(); k++)
+                            NxsStringVector names;
+                            assumption->GetCharSetNames(names);
+                            for (size_t j = 0; j < nSets; ++j)
                             {
-                                m_tmp->includeCharacter( *k );
+                                const NxsUnsignedSet *set = assumption->GetCharSet(names[j]);
+                                HomologousCharacterData *m_tmp = dynamic_cast<HomologousCharacterData *>(m)->clone();
+                                m_tmp->excludeAllCharacters();
+                                for (std::set<unsigned>::iterator k = set->begin(); k != set->end(); k++)
+                                {
+                                    m_tmp->includeCharacter( *k );
+                                }
+                                m_tmp->removeExcludedCharacters();
+                                cmv.push_back( m_tmp );
+                                
                             }
-                            m_tmp->removeExcludedCharacters();
-                            cmv.push_back( m_tmp );
-                            
                         }
-                        
+                        else
+                        {
+                            cmv.push_back( m );
+                        }
                     }
                 }
                 else

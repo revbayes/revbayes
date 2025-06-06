@@ -1,0 +1,68 @@
+################################################################################
+#
+# RevBayes Test-Script: Rerooting an unrooted, non-clock phylogenetic tree
+#                       (BranchLengthTree) on a single tip or a clade comprising
+#                       multiple tips
+#
+# authors: David Cerny
+#
+################################################################################
+
+t0 = readTrees("data/bears_tree.tre", treetype="non-clock")[1]
+t1 = t0
+t2 = t0
+t3 = t0
+t4 = t0
+t5 = t0
+
+# Reroot on a single tip passed to the method as a string, without making
+# the root bifurcating
+
+print( "\n   Rerooting on '\"Melursus_ursinus\"', makeBifurcating = FALSE" )
+t0.reroot("Melursus_ursinus", makeBifurcating = FALSE)
+writeNexus(filename="output/rerooted_single_string_nonbf.nex", t0)
+print( "   Tips: " + t0.ntips() + ", nodes: " + t0.nnodes() + "\n" )
+
+# Reroot on a single tip passed to the method as a clade, without making
+# the root bifurcating
+
+print( "   Rerooting on 'clade(\"Melursus_ursinus\")', makeBifurcating = FALSE" )
+t1.reroot(clade("Melursus_ursinus"), makeBifurcating = FALSE)
+writeNexus(filename="output/rerooted_single_clade_nonbf.nex", t1)
+print( "   Tips: " + t1.ntips() + ", nodes: " + t1.nnodes() )
+print( "   Does it have the same topology as the previous tree? " + ifelse( t1.hasSameTopology(t0), "TRUE", "FALSE") + "\n" )
+
+# Reroot on a single tip passed to the method as a string, and make the new root
+# bifurcating
+
+print( "   Rerooting on '\"Melursus_ursinus\"', makeBifurcating = TRUE" )
+t2.reroot("Melursus_ursinus", makeBifurcating = TRUE)
+writeNexus(filename="output/rerooted_single_string_bf.nex", t2)
+print( "   Tips: " + t2.ntips() + ", nodes: " + t2.nnodes() + "\n" )
+
+# Reroot on a single tip passed to the method as a clade, and make the new root
+# bifurcating
+
+print( "   Rerooting on 'clade(\"Melursus_ursinus\")', makeBifurcating = TRUE" )
+t3.reroot(clade("Melursus_ursinus"), makeBifurcating = TRUE)
+writeNexus(filename="output/rerooted_single_clade_bf.nex", t3)
+print( "   Tips: " + t3.ntips() + ", nodes: " + t3.nnodes() )
+print( "   Does it have the same topology as the previous tree? " + ifelse( t3.hasSameTopology(t2), "TRUE", "FALSE") + "\n" )
+
+# Reroot on a clade including multiple tips, without making the root bifurcating
+
+print( "   Rerooting on 'clade(\"Melursus_ursinus\", \"Ursus_abstrusus\")', makeBifurcating = FALSE" )
+t4.reroot(clade("Melursus_ursinus", "Ursus_abstrusus"), makeBifurcating = FALSE)
+writeNexus(filename="output/rerooted_multiple_nonbf.nex", t4)
+print( "   Tips: " + t4.ntips() + ", nodes: " + t4.nnodes() + "\n" )
+
+# Reroot on a clade including multiple tips, and make the new root bifurcating
+
+print( "   Rerooting on 'clade(\"Melursus_ursinus\", \"Ursus_abstrusus\")', makeBifurcating = TRUE" )
+t5.reroot(clade("Melursus_ursinus", "Ursus_abstrusus"), makeBifurcating = TRUE)
+writeNexus(filename="output/rerooted_multiple_bf.nex", t5)
+print( "   Tips: " + t5.ntips() + ", nodes: " + t5.nnodes() )
+
+clear()
+
+q()
