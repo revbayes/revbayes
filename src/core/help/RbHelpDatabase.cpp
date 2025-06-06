@@ -466,7 +466,7 @@ mymcmc.run(generations=200000))");
 	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
-	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shifts in birth and death rates through time.)");
+	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shifts in birth and death rates among lineages.)");
 	help_strings[string("dnCBDSP")][string("details")] = string(R"(This distribution simulates a tree under a birth-death process. The initial 
 birth and death rates can be specified with the rootLambda and rootMu arguments.
 The rate at which speciation and extinction rate shifts take place is specified by the delta argument and the new speciation or extinction rate can be drawn from a prior distribution
@@ -484,7 +484,7 @@ tree ~ dnCBDSP( rootAge           = root_age,
                 rootMu            = root_mu,
                 delta             = .2,
                 rho               = sampling_prob,
-                condition         = "surival"))");
+                condition         = "survival"))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
 	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.)",R"(https://doi.org/10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article-abstract/56/5/701/1694265 )"));
 	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna, S., Freyman, W. A., Nolen, Z., Huelsenbeck, J. P., May, M. R., & Moore, B. R. (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. BioRxiv, 555805.)",R"(https://doi.org/10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
@@ -492,30 +492,30 @@ tree ~ dnCBDSP( rootAge           = root_age,
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnSBBDP)"));
 	help_strings[string("dnCBDSP")][string("title")] = string(R"(Conditional birth-death shift process)");
 	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnCDBDP")][string("description")] = string(R"(This function simulates a tree under a character-dependent birth-death process.)");
-	help_strings[string("dnCDBDP")][string("details")] = string(R"(This function is a flexible simulator that can be used for several phylogenetic models. Specifically,
+	help_strings[string("dnCDBDP")][string("description")] = string(R"(This distribution simulates a tree under a character-dependent birth-death process.)");
+	help_strings[string("dnCDBDP")][string("details")] = string(R"(This distribution is a flexible simulator that can be used for several phylogenetic models. Specifically,
 dnCDBDP allows for character-dependent birrth-death processes meaning that the speciation/extinction rates
 depend on the character state of the taxon itself.
- Examples of such models are outlined below:
+Examples of such models are outlined below:
 
 Multiple State-dependent Speciation Extinction (MuSSE)
 This model uses a state-dependent birth-death process to simulate a tree with only anagentic state changes.
 Using dnCDBDP to implement MuSSE, a vector of speciation rates for each state can be passed to the lambda argument.
-Due to being a vector of rates, dnCDBDP will anly allow anagenetic state changes (along branches), with the
+Due to being a vector of rates, dnCDBDP will only allow anagenetic state changes (along branches), with the
 length of the vector corresponding to the number of states.
 
 Cladogenetic State-dependent Speciation Extinction (ClaSSE)
 This model allows for cladogenetic state changes (at nodes, ie. state change inducing speciation)  during the birth-death process. 
-To implement this, a cladogenetic event map must be passed to the lamda argument which will be a matrix specifiying rates of state changes 
-at nodes which will be a seperate matrix for state changes along branches which is specified in the Q argument. See example for implementation.)");
+To implement this, a cladogenetic event map must be passed to the lambda argument which will be a matrix specifiying rates of state changes 
+at nodes. Additonally, a separate matrix for state changes along branch is specified in the Q argument. See example for implementation.)");
 	help_strings[string("dnCDBDP")][string("example")] = string(R"(# set up for a two-state ClaSSE model
 # set basic starting parameters
 root_age ~ dnUniform(0, 2)
 rho <- Probability(1/2)
 
 # specifying extinction probabilities for each character
-mu_vec[1] := .1
-mu_vec[2] := .1
+mu_vec[1] <- .1
+mu_vec[2] <- .1
 
 # set up cladogenetic events, probabilities, and number of states
 # each element in clado_events describes the cladogenetic event
@@ -524,10 +524,10 @@ mu_vec[2] := .1
 clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
 
 # set probabilities of each cladogenetic event described above
-clado_prob[1] := 1/4
-clado_prob[2] := 1/4
-clado_prob[3] := 1/4
-clado_prob[4] := 1/4
+clado_prob[1] <- 1/4
+clado_prob[2] <- 1/4
+clado_prob[3] <- 1/4
+clado_prob[4] <- 1/4
 
 # set total number of states (in this case 0 and 1 are the only states)
 num_states = 2
@@ -1339,10 +1339,12 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnSBBDP")][string("description")] = string(R"(Simulates a tree under a birth-death process with a specified sampling rate.)");
 	help_strings[string("dnSBBDP")][string("details")] = string(R"(dnSBBDP simulates a tree under a birth-death process without a character dependent effect.
 Additionally, the sampling probability of taxa can be specified using the rho argument of the 
-function, allowing for a specfic sampling rate of extinct taxon.
+distribution, allowing for a specfic sampling rate of extinct taxon.
 
-This function is an older version of a birth death process with an explicit sampling rate.
-To see a newer version with more funcitonality see: dnBDSTP)");
+This distribution is an older version of a birth death process with an explicit sampling rate.
+To see a newer version with more functionality see: dnBDSTP. dnBDSTP can allow for probability
+of death after sampling and additional options for rate interval changes in different rates for the
+distribution)");
 	help_strings[string("dnSBBDP")][string("example")] = string(R"(# set starting paramters for tree
 root_age ~ dnUniform(0, 2)
 lambda ~ dnUniform(0, 1)

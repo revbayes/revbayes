@@ -7,10 +7,12 @@ Simulates a tree under a birth-death process with a specified sampling rate.
 ## details
 dnSBBDP simulates a tree under a birth-death process without a character dependent effect.
 Additionally, the sampling probability of taxa can be specified using the rho argument of the 
-function, allowing for a specfic sampling rate of extinct taxon.
+distribution, allowing for a specfic sampling rate of extinct taxon.
 
-This function is an older version of a birth death process with an explicit sampling rate.
-To see a newer version with more funcitonality see: dnBDSTP
+This distribution is an older version of a birth death process with an explicit sampling rate.
+To see a newer version with more functionality see: dnBDSTP. dnBDSTP can allow for probability
+of death after sampling and additional options for rate interval changes in different rates for the
+distribution
 ## authors
 - Michael Landis
 - Sebastian Hoehna

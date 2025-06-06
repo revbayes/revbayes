@@ -3,7 +3,7 @@ dnCBDSP
 ## title
 Conditional birth-death shift process
 ## description
-Simulates a tree under a birth-death process with shifts in birth and death rates through time.
+Simulates a tree under a birth-death process with shifts in birth and death rates among lineages.
 ## details
 This distribution simulates a tree under a birth-death process. The initial 
 birth and death rates can be specified with the rootLambda and rootMu arguments.
@@ -27,7 +27,7 @@ tree ~ dnCBDSP( rootAge           = root_age,
                 rootMu            = root_mu,
                 delta             = .2,
                 rho               = sampling_prob,
-                condition         = "surival")
+                condition         = "survival")
 ## references
 - citation: Maddison, W. P., Midford, P. E., & Otto, S. P. (2007). Estimating a binary character's effect on speciation and extinction. Systematic biology, 56(5), 701-710.
   doi: https://doi.org/10.1080/10635150701607033

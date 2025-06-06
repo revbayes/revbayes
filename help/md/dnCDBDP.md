@@ -3,23 +3,23 @@ dnCDBDP
 ## title
 Character Dependent Birth Death Process
 ## description
-This function simulates a tree under a character-dependent birth-death process.
+This distribution simulates a tree under a character-dependent birth-death process.
 ## details
-This function is a flexible simulator that can be used for several phylogenetic models. Specifically,
+This distribution is a flexible simulator that can be used for several phylogenetic models. Specifically,
 dnCDBDP allows for character-dependent birrth-death processes meaning that the speciation/extinction rates
 depend on the character state of the taxon itself.
- Examples of such models are outlined below:
+Examples of such models are outlined below:
 
 Multiple State-dependent Speciation Extinction (MuSSE)
 This model uses a state-dependent birth-death process to simulate a tree with only anagentic state changes.
 Using dnCDBDP to implement MuSSE, a vector of speciation rates for each state can be passed to the lambda argument.
-Due to being a vector of rates, dnCDBDP will anly allow anagenetic state changes (along branches), with the
+Due to being a vector of rates, dnCDBDP will only allow anagenetic state changes (along branches), with the
 length of the vector corresponding to the number of states.
 
 Cladogenetic State-dependent Speciation Extinction (ClaSSE)
 This model allows for cladogenetic state changes (at nodes, ie. state change inducing speciation)  during the birth-death process. 
-To implement this, a cladogenetic event map must be passed to the lamda argument which will be a matrix specifiying rates of state changes 
-at nodes which will be a seperate matrix for state changes along branches which is specified in the Q argument. See example for implementation.
+To implement this, a cladogenetic event map must be passed to the lambda argument which will be a matrix specifiying rates of state changes 
+at nodes. Additonally, a separate matrix for state changes along branch is specified in the Q argument. See example for implementation.
 ## authors
 Sebastian Hoehna
 ## see_also
@@ -33,8 +33,8 @@ root_age ~ dnUniform(0, 2)
 rho <- Probability(1/2)
 
 # specifying extinction probabilities for each character
-mu_vec[1] := .1
-mu_vec[2] := .1
+mu_vec[1] <- .1
+mu_vec[2] <- .1
 
 # set up cladogenetic events, probabilities, and number of states
 # each element in clado_events describes the cladogenetic event
@@ -43,10 +43,10 @@ mu_vec[2] := .1
 clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
 
 # set probabilities of each cladogenetic event described above
-clado_prob[1] := 1/4
-clado_prob[2] := 1/4
-clado_prob[3] := 1/4
-clado_prob[4] := 1/4
+clado_prob[1] <- 1/4
+clado_prob[2] <- 1/4
+clado_prob[3] <- 1/4
+clado_prob[4] <- 1/4
 
 # set total number of states (in this case 0 and 1 are the only states)
 num_states = 2
