@@ -83,7 +83,8 @@ double SteppingStoneSampler::standardError( void ) const
     
     if ( process_active == true )
     {
-        size_t MAX_LAG = 1000;
+        std::stringstream warnings;
+        size_t warning_counter = 0;
         
         for (size_t i = 1; i < powers.size(); ++i)
         {
@@ -123,6 +124,7 @@ double SteppingStoneSampler::standardError( void ) const
             var_Ls /= (int(samplesPerPath) - 1);
             
             // The following is adapted from TraceNumeric::update()
+            size_t MAX_LAG = 1000;
             size_t maxLag = (samplesPerPath - 1 < MAX_LAG ? samplesPerPath - 1 : MAX_LAG);
             
             double* gammaStat = new double[maxLag];
@@ -162,13 +164,25 @@ double SteppingStoneSampler::standardError( void ) const
             
             if (vzr / (mean_Ls*mean_Ls) > 0.1)
             {
-                // std::stringstream wrng;
-                // wrng << "Unreliable standard error: var(r_k)/r_k^2 = " << vzr / (mean_Ls*mean_Ls) << " > 0.1 for beta = " << powers[i] << ".";
-                // RBOUT( wrng.str() );
+                warning_counter++;
+                if ( warning_counter == 1 )
+                {
+                    warnings << "Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:\n" << powers[i];
+                }
+                else
+                {
+                    warnings << ", " << powers[i];
+                }
             }
             
             vmlnl += vzr / (mean_Ls*mean_Ls);
             
+        }
+        
+        if ( not warnings.str().empty() )
+        {
+            warnings << ".\n";
+            RBOUT( warnings.str() );
         }
     }
     
