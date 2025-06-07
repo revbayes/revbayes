@@ -28,6 +28,9 @@ SteppingStoneSampler::SteppingStoneSampler() : WorkspaceToCoreWrapperObject<RevB
 
     ArgumentRules* marginalArgRules = new ArgumentRules();
     methods.addFunction(new MemberProcedure( "marginal", Real::getClassTypeSpec(), marginalArgRules) );
+    
+    ArgumentRules* stdErrorArgRules = new ArgumentRules();
+    methods.addFunction(new MemberProcedure( "stdError", Real::getClassTypeSpec(), stdErrorArgRules) );
 
 }
 
@@ -72,6 +75,14 @@ RevPtr<RevVariable> SteppingStoneSampler::executeMethod(std::string const &name,
         double ml = value->marginalLikelihood();
         
         return new RevVariable( new Real( ml ) );
+    }
+    else if (name == "stdError")
+    {
+        found = true;
+        
+        double se = value->standardError();
+        
+        return new RevVariable( new Real( se ) );
     }
     
     return RevObject::executeMethod( name, args, found );

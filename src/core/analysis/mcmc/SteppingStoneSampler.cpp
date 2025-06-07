@@ -3,8 +3,10 @@
 #include <cstddef>
 #include <cmath>
 #include <vector>
+#include <iostream>
 
 #include "Cloneable.h"
+#include "RlUserInterface.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -42,7 +44,7 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
     {
         for (size_t i = 1; i < powers.size(); ++i)
         {
-        
+            
             size_t samplesPerPath = likelihoodSamples[i].size();
             double max = likelihoodSamples[i][0];
             for (size_t j = 1; j < samplesPerPath; ++j)
@@ -58,10 +60,10 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
             double mean = 0.0;
             for (size_t j = 0; j < samplesPerPath; ++j)
             {
-                mean += exp( (likelihoodSamples[i][j]-max)*(powers[i-1]-powers[i]) ) / samplesPerPath;
+                mean += exp( (likelihoodSamples[i][j] - max)*(powers[i - 1] - powers[i]) ) / samplesPerPath;
             }
         
-            marginal += log(mean) + (powers[i-1]-powers[i])*max;
+            marginal += log(mean) + (powers[i - 1] - powers[i])*max;
         
         }
 
@@ -77,28 +79,19 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
 
 double SteppingStoneSampler::standardError( void ) const
 {
-    size_t MAX_LAG = 1000;
+    double vmlnl = 0.0;
     
     if ( process_active == true )
     {
-        double vzr = 0.0;
-        double zr = 0.0;
+        size_t MAX_LAG = 1000;
         
         for (size_t i = 1; i < powers.size(); ++i)
         {
             
             size_t samplesPerPath = likelihoodSamples[i].size();
             
-            // compute the mean and maximum of the log likelihood values
-            double mean = 0.0;
+            // compute the maximum of the log likelihood values
             double max = likelihoodSamples[i][0];
-            
-            for (size_t j = 0; j < samplesPerPath; ++j)
-            {
-                mean += likelihoodSamples[i][j];
-            }
-            mean /= samplesPerPath;
-            
             for (size_t j = 1; j < samplesPerPath; ++j)
             {
                 if (max < likelihoodSamples[i][j])
@@ -110,22 +103,39 @@ double SteppingStoneSampler::standardError( void ) const
             std::vector<double> Ls(samplesPerPath);
             for (size_t j = 0; j < samplesPerPath; ++j)
             {
-                Ls[i] = exp(  );
+                Ls[j] = exp( (likelihoodSamples[i][j] - max)*(powers[i - 1] - powers[i]) );
+            }
+            
+            // get the variance and the mean of the resulting values
+            double mean_Ls = 0.0;
+            double var_Ls = 0.0;
+            
+            for (size_t j = 0; j < samplesPerPath; ++j)
+            {
+                mean_Ls += Ls[j];
+            }
+            mean_Ls /= samplesPerPath;
+            
+            for (size_t j = 0; j < samplesPerPath; ++j)
+            {
+                var_Ls += (Ls[j] - mean_Ls)*(Ls[j] - mean_Ls);
+            }
+            var_Ls /= (int(samplesPerPath) - 1);
             
             // The following is adapted from TraceNumeric::update()
             size_t maxLag = (samplesPerPath - 1 < MAX_LAG ? samplesPerPath - 1 : MAX_LAG);
             
             double* gammaStat = new double[maxLag];
-            for (size_t i = 0; i < maxLag; i++)
+            for (size_t j = 0; j < maxLag; j++)
             {
-                gammaStat[i] = 0;
+                gammaStat[j] = 0;
             }
             double varStat = 0.0;
             
             for (size_t lag = 0; lag < maxLag; lag++) {
                 for (size_t j = 0; j < samplesPerPath - lag; j++) {
-                    double del1 = likelihoodSamples[i][j] - mean;
-                    double del2 = likelihoodSamples[i][j + lag] - mean;
+                    double del1 = Ls[j] - mean_Ls;
+                    double del2 = Ls[j + lag] - mean_Ls;
                     gammaStat[lag] += (del1 * del2);
                 }
 
@@ -136,26 +146,34 @@ double SteppingStoneSampler::standardError( void ) const
                 } else if (lag % 2 == 0) {
                     if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
                         varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
-                    }
-                    else {
+                    } else {
                         maxLag = lag;
                     }
                 }
             }
             
-            // auto correlation time
+            // autocorrelation time
             double act = varStat / gammaStat[0];
 
             // effective sample size
             double ess = samplesPerPath / act;
             
-            vzr += var / ess;
+            double vzr = var_Ls / ess;
+            
+            if (vzr / (mean_Ls*mean_Ls) > 0.1)
+            {
+                // std::stringstream wrng;
+                // wrng << "Unreliable standard error: var(r_k)/r_k^2 = " << vzr / (mean_Ls*mean_Ls) << " > 0.1 for beta = " << powers[i] << ".";
+                // RBOUT( wrng.str() );
+            }
+            
+            vmlnl += vzr / (mean_Ls*mean_Ls);
             
         }
     }
     
 #ifdef RB_MPI
-    MPI_Bcast(&marginal, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&vmlnl, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 #endif
     
     return sqrt(vmlnl);
