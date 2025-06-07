@@ -20,4 +20,11 @@ Step  8 / 10		**********
 Step  9 / 10		**********
 Step 10 / 10		**********
    -21440.51
+   Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:
+   0.554929, 0.284628, 0.131687, 0.0529221, 0.0173415, 0.00411523, 0.000541923.
+   
+   2.121036
+   Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:
+   0.554929, 0.284628, 0.131687, 0.0529221, 0.0173415, 0.00411523, 0.000541923.
+   
    -21397.89
