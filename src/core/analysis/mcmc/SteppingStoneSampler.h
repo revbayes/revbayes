@@ -28,6 +28,7 @@ namespace RevBayesCore {
         // public methods
         SteppingStoneSampler*                               clone(void) const;                                                         //!< Create a deep copy
         double                                              marginalLikelihood( void ) const;                                          //!< Compute the marginal likelihood using stepping-stone sampling
+        double                                              getESS(const std::vector<double> values) const;                            //!< Calculate the effective sample size for an arbitrary vector of numeric values
         double                                              standardError( void ) const;                                               //!< Compute the standard error of the marginal likelihood estimate
     };
     

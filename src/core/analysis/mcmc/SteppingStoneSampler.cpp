@@ -77,6 +77,58 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
 }
 
 
+// The following is adapted from TraceNumeric::update()
+double SteppingStoneSampler::getESS(const std::vector<double> values) const
+{
+    size_t MAX_LAG = 1000;
+    size_t samples = values.size();
+    size_t maxLag = (samples - 1 < MAX_LAG ? samples - 1 : MAX_LAG);
+    
+    // get the mean
+    double mean = 0.0;
+    for (size_t i = 0; i < samples; ++i)
+    {
+        mean += values[i];
+    }
+    mean /= samples;
+    
+    double* gammaStat = new double[maxLag];
+    for (size_t j = 0; j < maxLag; j++)
+    {
+        gammaStat[j] = 0;
+    }
+    double varStat = 0.0;
+    
+    for (size_t lag = 0; lag < maxLag; lag++) {
+        for (size_t j = 0; j < samples - lag; j++) {
+            double del1 = values[j] - mean;
+            double del2 = values[j + lag] - mean;
+            gammaStat[lag] += (del1 * del2);
+        }
+
+        gammaStat[lag] /= ((double) (samples - lag));
+
+        if (lag == 0) {
+            varStat = gammaStat[0];
+        } else if (lag % 2 == 0) {
+            if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
+                varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
+            } else {
+                maxLag = lag;
+            }
+        }
+    }
+    
+    // autocorrelation time
+    double act = varStat / gammaStat[0];
+
+    // effective sample size
+    double ess = samples / act;
+    
+    return ess;
+}
+
+
 double SteppingStoneSampler::standardError( void ) const
 {
     double vmlnl = 0.0;
@@ -123,43 +175,8 @@ double SteppingStoneSampler::standardError( void ) const
             }
             var_Ls /= (int(samplesPerPath) - 1);
             
-            // The following is adapted from TraceNumeric::update()
-            size_t MAX_LAG = 1000;
-            size_t maxLag = (samplesPerPath - 1 < MAX_LAG ? samplesPerPath - 1 : MAX_LAG);
-            
-            double* gammaStat = new double[maxLag];
-            for (size_t j = 0; j < maxLag; j++)
-            {
-                gammaStat[j] = 0;
-            }
-            double varStat = 0.0;
-            
-            for (size_t lag = 0; lag < maxLag; lag++) {
-                for (size_t j = 0; j < samplesPerPath - lag; j++) {
-                    double del1 = Ls[j] - mean_Ls;
-                    double del2 = Ls[j + lag] - mean_Ls;
-                    gammaStat[lag] += (del1 * del2);
-                }
-
-                gammaStat[lag] /= ((double) (samplesPerPath - lag));
-
-                if (lag == 0) {
-                    varStat = gammaStat[0];
-                } else if (lag % 2 == 0) {
-                    if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
-                        varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
-                    } else {
-                        maxLag = lag;
-                    }
-                }
-            }
-            
-            // autocorrelation time
-            double act = varStat / gammaStat[0];
-
-            // effective sample size
-            double ess = samplesPerPath / act;
-            
+            // get the effective sample size and divide the variance by it
+            double ess = getESS(Ls);
             double vzr = var_Ls / ess;
             
             if (vzr / (mean_Ls*mean_Ls) > 0.1)
