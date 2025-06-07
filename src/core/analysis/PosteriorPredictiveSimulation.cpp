@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "DagNode.h"
 #include "HomologousDiscreteCharacterData.h"
@@ -85,9 +86,39 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
         }
     }
 
-    
-    std::vector<DagNode*> nodes = model.getDagNodes();
+    // Get the list of variables we have traces for.
+    std::set<std::string> traced_variables;
+    for ( size_t j=0; j<n_traces; ++j )
+    {
+        std::string parameter_name = traces[j].getParameterName();
+        traced_variables.insert(parameter_name);
+    }
 
+    // We make a copy here and make modifications on the copy.
+    // If we make modifications to `model` directly, then we'll forget which nodes were clamped after this function.
+    // We can't look at the original nodes that `model` is made from because they've been deallocated.
+    auto model_copy = model;
+
+    std::vector<DagNode*> nodes = model_copy.getDagNodes();
+
+    std::unordered_set<const DagNode*> was_clamped;
+    for(auto& node: nodes)
+    {
+        // Unclamp stochastic nodes in the model copy and record that they were clamped.
+        if (node->isClamped())
+        {
+            was_clamped.insert(node);
+            auto stoch_node = dynamic_cast<StochasticNodeBase*>(node);
+            stoch_node->unclamp();
+        }
+        // Check that all unclamped nodes have a trace
+        else if (node->isStochastic())
+        {
+            if (not traced_variables.count(node->getName()))
+                std::cerr<<"Warning: posterior predictive simulation has no trace for unclamped variable '"<<node->getName()<<"'";
+        }
+    }
+    
     size_t sim_pid_start = size_t(floor( (double(pid) / num_processes * n_samples ) ) );
     size_t sim_pid_end   = std::max( int(sim_pid_start), int(floor( (double(pid+1) / num_processes * n_samples ) ) - 1) );
     
@@ -95,11 +126,9 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
     while ( index_sample % thinning > 0 ) ++index_sample;
     size_t current_pp_sim = size_t( floor( index_sample / thinning ) );
     
-    
+
     for ( ; index_sample <= sim_pid_end; ++current_pp_sim, index_sample += thinning)
     {
-        
-        
         // create a new directory name for this simulation
         path sim_directory_name = directory / ("posterior_predictive_sim_" + std::to_string(current_pp_sim + 1));
         
@@ -116,16 +145,14 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
                     // set the value for the variable with the i-th sample
                     the_node->setValueFromString( traces[j].objectAt( index_sample ) );
                 }
-            
             }
-        
         }
-        
+
         // next we need to simulate the data and store it
         // iterate over all DAG nodes (variables)
         for ( auto the_node: nodes )
         {
-            if ( not the_node->isClamped() ) continue;
+            if ( not was_clamped.count(the_node) ) continue;
 
             // check if the PP simulation must condition on sampled tip states
             auto& ptr = the_node->getDistribution();
