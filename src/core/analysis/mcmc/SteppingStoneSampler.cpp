@@ -77,7 +77,13 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
 }
 
 
-// The following is adapted from TraceNumeric::update()
+/**
+ * This function is adapted from TraceNumeric::update(): the only difference is that it works directly on a vector of numeric
+ * values representing recorded samples, as opposed to a Trace object. The calculation is equivalent to the one used in
+ * Tracer, and also (except for the choice of the maximum lag value) to convenience:::essTracer.
+ *
+ * @return The effective sample size
+ */
 double SteppingStoneSampler::getESS(const std::vector<double> values) const
 {
     size_t MAX_LAG = 1000;
@@ -129,6 +135,16 @@ double SteppingStoneSampler::getESS(const std::vector<double> values) const
 }
 
 
+/**
+ * Calculate the standard error of the marginal likelihood estimate using delta approximation, as suggested by Xie et al.
+ * (2011; Syst. Biol. 60(2): 150--160). The mathematics follows the equations given by Xie et al. (2011: 153), and the specific
+ * implementation (including some of the variable names) is inspired by -- and tested against -- mcmc3r::stepping.stones()
+ * (see https://github.com/dosreislab/mcmc3r/blob/main/R/marginal-lhd.R), a function written by Mario dos Reis
+ * for his companion R package for MCMCTree. Like the latter, this function displays a warning when the delta approximation
+ * does not work well. We collect these warnings and present them to the user after the calculation has been completed.
+ *
+ * @return The approximate standard error
+ */
 double SteppingStoneSampler::standardError( void ) const
 {
     double vmlnl = 0.0;
@@ -153,6 +169,11 @@ double SteppingStoneSampler::standardError( void ) const
                 }
             }
             
+            /* For numerical stability, we first subtract the maximum sampled log likelihood from the rest.
+             * We then multiply the difference by the difference of successive powers, and exponentiate the result.
+             * This is equivalent to dividing by the largest sampled likelihood term, and raising the result to
+             * the difference of successive powers (Xie et al. 2011: 153).
+             */
             std::vector<double> Ls(samplesPerPath);
             for (size_t j = 0; j < samplesPerPath; ++j)
             {
