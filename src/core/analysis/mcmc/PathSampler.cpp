@@ -37,6 +37,7 @@ double PathSampler::marginalLikelihood( void ) const
 {
     
     double marginal = 0.0;
+    
     if ( process_active == true )
     {
         // create a vector for the mean log-likelihood values per power posterior
@@ -56,7 +57,7 @@ double PathSampler::marginalLikelihood( void ) const
             }
         
             // store the mean
-            pathValues.push_back( mean  / samplesPerPath );
+            pathValues.push_back( mean / samplesPerPath );
         
         }
     
@@ -64,7 +65,7 @@ double PathSampler::marginalLikelihood( void ) const
         // the method uses the trapezoidal rule for numerical integration
         for (size_t i = 0; i+1 < pathValues.size(); ++i)
         {
-            marginal += (pathValues[i] + pathValues[i+1])*(powers[i]-powers[i+1])/2.0;
+            marginal += (pathValues[i] + pathValues[i + 1])*(powers[i] - powers[i + 1])/2.0;
         }
         
     }
@@ -76,3 +77,57 @@ double PathSampler::marginalLikelihood( void ) const
     return marginal;
 }
 
+
+double PathSampler::standardError( void ) const
+{
+    double vmlnl = 0.0;
+    
+    if ( process_active == true )
+    {
+        // create vectors for the variance and effective sample size of log-likelihood values per power posterior
+        std::vector<double> var_vect( powers.size() );
+        std::vector<double> ess_vect( powers.size() );
+        
+        // iterate over all powers
+        for (size_t i = 0; i < powers.size(); ++i)
+        {
+            size_t samplesPerPath = likelihoodSamples[i].size();
+            
+            // get the mean and variance for this power
+            double mean = 0.0;
+            double var = 0.0;
+            
+            for (size_t j = 0; j < samplesPerPath; ++j)
+            {
+                mean += likelihoodSamples[i][j];
+            }
+            mean /= samplesPerPath;
+            
+            for (size_t j = 0; j < samplesPerPath; ++j)
+            {
+                var += (likelihoodSamples[i][j] - mean)*(likelihoodSamples[i][j] - mean);
+            }
+            var /= (int(samplesPerPath) - 1);
+            
+            var_vect[i] = var;
+            
+            // get the effective sample size
+            ess_vect[i] = getESS( likelihoodSamples[i] );
+        }
+        
+        for (size_t i = 0; i+1 < powers.size(); ++i)
+        {
+            // since individual power posteriors are independent of each other, the variance of their sum
+            // is just the sum of their sample variances
+            double vv = (var_vect[i] / ess_vect[i]) + (var_vect[i + 1] / ess_vect[i + 1] );
+            double squared_weight = (powers[i] - powers[i + 1])*(powers[i] - powers[i + 1]) / 4;
+            vmlnl += vv*squared_weight;
+        }
+    }
+    
+#ifdef RB_MPI
+    MPI_Bcast(&vmlnl, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+#endif
+    
+    return sqrt(vmlnl);
+}

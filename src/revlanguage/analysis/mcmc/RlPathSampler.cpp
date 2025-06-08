@@ -28,6 +28,9 @@ PathSampler::PathSampler() : WorkspaceToCoreWrapperObject<RevBayesCore::PathSamp
 
     ArgumentRules* marginalArgRules = new ArgumentRules();
     methods.addFunction(new MemberProcedure( "marginal", Real::getClassTypeSpec(), marginalArgRules) );
+    
+    ArgumentRules* stdErrorArgRules = new ArgumentRules();
+    methods.addFunction(new MemberProcedure( "stdError", Real::getClassTypeSpec(), stdErrorArgRules) );
 
 }
 
@@ -72,6 +75,14 @@ RevPtr<RevVariable> PathSampler::executeMethod(std::string const &name, const st
         double ml = value->marginalLikelihood();
         
         return new RevVariable( new Real( ml ) );
+    }
+    else if (name == "stdError")
+    {
+        found = true;
+        
+        double se = value->standardError();
+        
+        return new RevVariable( new Real( se ) );
     }
     
     return WorkspaceToCoreWrapperObject<RevBayesCore::PathSampler>::executeMethod( name, args, found );

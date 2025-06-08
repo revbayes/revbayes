@@ -27,11 +27,12 @@ namespace RevBayesCore {
         
     public:
         MarginalLikelihoodEstimator(const path &fn, const std::string &pn, const std::string &ln, const std::string &del);
-        virtual                                            ~MarginalLikelihoodEstimator(void);                                                          //!< Virtual destructor
+        virtual                                            ~MarginalLikelihoodEstimator(void);                                         //!< Virtual destructor
         
         // public methods
-        virtual MarginalLikelihoodEstimator*                clone(void) const = 0;                                                                      //!< Create a new deep copy
+        virtual MarginalLikelihoodEstimator*                clone(void) const = 0;                                                     //!< Create a new deep copy
         virtual double                                      marginalLikelihood( void ) const = 0;
+        double                                              getESS(const std::vector<double> values) const;                            //!< Calculate the effective sample size for an arbitrary vector of numeric values
         
     protected:
         

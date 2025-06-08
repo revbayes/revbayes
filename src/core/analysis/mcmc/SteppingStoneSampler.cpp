@@ -78,64 +78,6 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
 
 
 /**
- * This function is adapted from TraceNumeric::update(): the only difference is that it works directly on a vector of numeric
- * values representing recorded samples, as opposed to a Trace object. The calculation is equivalent to the one used in
- * Tracer, and also (except for the choice of the maximum lag value) to convenience:::essTracer.
- *
- * @return The effective sample size
- */
-double SteppingStoneSampler::getESS(const std::vector<double> values) const
-{
-    size_t MAX_LAG = 1000;
-    size_t samples = values.size();
-    size_t maxLag = (samples - 1 < MAX_LAG ? samples - 1 : MAX_LAG);
-    
-    // get the mean
-    double mean = 0.0;
-    for (size_t i = 0; i < samples; ++i)
-    {
-        mean += values[i];
-    }
-    mean /= samples;
-    
-    double* gammaStat = new double[maxLag];
-    for (size_t j = 0; j < maxLag; j++)
-    {
-        gammaStat[j] = 0;
-    }
-    double varStat = 0.0;
-    
-    for (size_t lag = 0; lag < maxLag; lag++) {
-        for (size_t j = 0; j < samples - lag; j++) {
-            double del1 = values[j] - mean;
-            double del2 = values[j + lag] - mean;
-            gammaStat[lag] += (del1 * del2);
-        }
-
-        gammaStat[lag] /= ((double) (samples - lag));
-
-        if (lag == 0) {
-            varStat = gammaStat[0];
-        } else if (lag % 2 == 0) {
-            if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
-                varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
-            } else {
-                maxLag = lag;
-            }
-        }
-    }
-    
-    // autocorrelation time
-    double act = varStat / gammaStat[0];
-
-    // effective sample size
-    double ess = samples / act;
-    
-    return ess;
-}
-
-
-/**
  * Calculate the standard error of the marginal likelihood estimate using delta approximation, as suggested by Xie et al.
  * (2011; Syst. Biol. 60(2): 150--160). The mathematics follows the equations given by Xie et al. (2011: 153), and the specific
  * implementation (including some of the variable names) is inspired by -- and tested against -- mcmc3r::stepping.stones()
