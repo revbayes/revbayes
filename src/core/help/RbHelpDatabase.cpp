@@ -1400,24 +1400,24 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnPoisson")][string("see_also")].push_back(string(R"(dnGeom)"));
 	help_strings[string("dnPoisson")][string("title")] = string(R"(Poisson Distribution)");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
-	help_arrays[string("dnSBBDP")][string("authors")].push_back(string(R"(Michael Landis)"));
-	help_arrays[string("dnSBBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnSBBDP")][string("example")] = string(R"(# set parameters for the process
+	help_arrays[string("dnSSBDP")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("dnSSBDP")][string("example")] = string(R"(# draw basic process parameters
 taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 root_age ~ dnUniform(0, 2)
 lambda ~ dnUniform(0, 1)
 mu ~ dnUniform(0, 1)
 rho <- 1
+
 # simulate tree
 tree ~ dnSBBDP(rootAge = root_age,
                lambda  = lambda,
                mu      = mu,
                rho     = rho,
                taxa    = taxa))");
-	help_strings[string("dnSBBDP")][string("name")] = string(R"(dnSBBDP)");
-	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
-	help_arrays[string("dnSBBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
-	help_strings[string("dnSBBDP")][string("title")] = string(R"(Sampled-speciation birth-death process)");
+	help_strings[string("dnSSBDP")][string("name")] = string(R"(dnSSBDP)");
+	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_strings[string("dnSSBDP")][string("title")] = string(R"(Sampled-speciation birth-death process)");
 	help_arrays[string("dnScaledDirichlet")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_strings[string("dnScaledDirichlet")][string("description")] = string(R"(Scaled Dirichlet probability distribution on a simplex.)");
 	help_strings[string("dnScaledDirichlet")][string("details")] = string(R"(The scaled Dirichlet probability distribution is the generalization of the dirichlet distribution. A random variable from a scaled Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1. If b[1]=b[2]=...=b[n], then the scaledDirichlet(alpha,beta) collapses to the Dirichlet with the same alphas.)");
