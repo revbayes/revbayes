@@ -1,15 +1,16 @@
 ## name
 Integer
 ## title
-Integer
+Integer data type
 ## description
-Integer Datatype
+All whole numbers, whether positive, negative, or zero.
 ## details
-This datatype includes all whole, positive and negative numbers.
 ## authors
 ## see_also
 Natural
+Real
+RealPos
 ## example
-x  = -1
-x ~ dnUniformInteger(1, 10)
+    x = -1
+    y ~ dnUniformInteger(1, 10)
 ## references

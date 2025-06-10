@@ -55,26 +55,28 @@ myHillClimberObject.operatorSummary())");
 	help_strings[string("HillClimber")][string("name")] = string(R"(HillClimber)");
 	help_arrays[string("HillClimber")][string("see_also")].push_back(string(R"(SimulatedAnnealing)"));
 	help_strings[string("HillClimber")][string("title")] = string(R"(Hill-Climber analysis object)");
-	help_strings[string("Integer")][string("description")] = string(R"(Integer Datatype)");
-	help_strings[string("Integer")][string("details")] = string(R"(This datatype includes all whole, positive and negative numbers.)");
-	help_strings[string("Integer")][string("example")] = string(R"(x  = -1
-x ~ dnUniformInteger(1, 10))");
+	help_strings[string("Integer")][string("description")] = string(R"(All whole numbers, whether positive, negative, or zero.)");
+	help_strings[string("Integer")][string("example")] = string(R"(x = -1
+y ~ dnUniformInteger(1, 10))");
 	help_strings[string("Integer")][string("name")] = string(R"(Integer)");
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
-	help_strings[string("Integer")][string("title")] = string(R"(Integer)");
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("Integer")][string("title")] = string(R"(Integer data type)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
 	help_strings[string("MatrixRealSymmetric")][string("name")] = string(R"(MatrixRealSymmetric)");
-	help_strings[string("Natural")][string("details")] = string(R"(All whole numbers greater than or equal to zero.)");
+	help_strings[string("Natural")][string("description")] = string(R"(All whole numbers greater than or equal to zero.)");
 	help_strings[string("Natural")][string("example")] = string(R"(x = 0
-x = 1
-x ~ dnUniformNatural(0, 2))");
+y = 1
+z ~ dnUniformNatural(0, 2))");
 	help_strings[string("Natural")][string("name")] = string(R"(Natural)");
 	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Integer)"));
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Real)"));
 	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(RealPos)"));
-	help_strings[string("Natural")][string("title")] = string(R"(Natural Numbers)");
+	help_strings[string("Natural")][string("title")] = string(R"(Natural number data type)");
 	help_arrays[string("Probability")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("Probability")][string("description")] = string(R"(A Probability is a real value between 0.0 and 1.0)");
+	help_strings[string("Probability")][string("description")] = string(R"(A `Probability` is a real value between 0.0 and 1.0 (inclusive).)");
 	help_strings[string("Probability")][string("example")] = string(R"(# Create a RealPos
 x <- 12/13
 type(x)
@@ -83,6 +85,9 @@ type(x)
 y := Probability(x)
 type(y))");
 	help_strings[string("Probability")][string("name")] = string(R"(Probability)");
+	help_arrays[string("Probability")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("Probability")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("Probability")][string("title")] = string(R"(Probability data type)");
 	help_strings[string("RateGenerator")][string("name")] = string(R"(RateGenerator)");
 	help_strings[string("Real")][string("description")] = string(R"(The real number data type can hold any real number value.
 Not to be confused with integers which are whole numbers, or
@@ -92,7 +97,10 @@ b = 1.3
 c = a + b
 # c will be 2.4)");
 	help_strings[string("Real")][string("name")] = string(R"(Real)");
-	help_arrays[string("Real")][string("see_also")].push_back(string(R"(`RealPos`, `Integer`, `Natural`, `Probability`)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(Integer)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(Natural)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(Probability)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
@@ -486,11 +494,12 @@ onto unobserved (extinct) branches. For an alternative birth-death-shift model
 that relaxes this assumption, see `dnCDBDP` (Höhna et al. 2019), which employs
 a finite number of rate categories instead of drawing rates directly from
 a continuous distribution.)");
-	help_strings[string("dnCBDSP")][string("example")] = string(R"(# set distributions for tree
+	help_strings[string("dnCBDSP")][string("example")] = string(R"(# draw basic process parameters
 root_age ~ dnUniform(0, 2)
 root_lambda ~ dnUniform(0, 1)
 root_mu ~ dnUniform(0, 1)
 sampling_prob <- 1
+
 # simulate tree
 tree ~ dnCBDSP(rootAge    = root_age,
                rootLambda = root_lambda,
@@ -587,7 +596,8 @@ clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
 clado_prob <- rep(1/4, 4)
 
 # create cladogenetic rate matrix
-clado_matrix = fnCladogeneticProbabilityMatrix(clado_events, clado_prob, num_states)
+clado_matrix = fnCladogeneticProbabilityMatrix(clado_events, clado_prob,
+                                               num_states)
 
 # set up Q-matrix to specify rates of state changes along branches
 q_matrix <- matrix([[0, .2],
@@ -611,8 +621,8 @@ timetree ~ dnCDBDP(rootAge   = root_age,
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Maddison WP, Midford PE, Otto SP (2007). Estimating a binary character's effect on speciation and extinction. Systematic Biology, 56(5):701-710.)",R"(10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticProbabilityMatrix)"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticSpeciationRateMatrix)"));
-	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCDCladoBDP)"));
 	help_strings[string("dnCDBDP")][string("title")] = string(R"(Character-dependent birth-death process)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
 	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
