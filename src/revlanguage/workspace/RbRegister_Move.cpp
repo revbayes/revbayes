@@ -485,22 +485,11 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentPriorSampler<Simplex>( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<RealPos> >( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<Real> >( ) );
-//        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
-        addType( new Move_IndependentPriorSampler<Tree>( ) );
-
-        
-        addType( new Move_IndependentPriorSampler<Real>( ) );
-        addType( new Move_IndependentPriorSampler<RealPos>( ) );
-        addType( new Move_IndependentPriorSampler<Natural>( ) );
-        addType( new Move_IndependentPriorSampler<Integer>( ) );
-        addType( new Move_IndependentPriorSampler<Probability>( ) );
-        addType( new Move_IndependentPriorSampler<Simplex>( ) );
-        addType( new Move_IndependentPriorSampler<ModelVector<RealPos> >( ) );
-        addType( new Move_IndependentPriorSampler<ModelVector<Real> >( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<Natural> >( ) );
 //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
 
+        
         addType( new Move_ResampleFBD()                      );
     }
     catch(RbException& rbException)
