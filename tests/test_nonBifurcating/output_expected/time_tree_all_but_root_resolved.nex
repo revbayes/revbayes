@@ -1,0 +1,5 @@
+#NEXUS
+
+Begin trees;
+tree TREE1 = [&R](taxon0[&index=10]:100.000000,taxon1[&index=9]:90.000000,(taxon2[&index=8]:110.000000,((taxon6[&index=7]:130.000000,((taxon3[&index=6]:50.811894,taxon4[&index=5]:5.811894)[&index=11]:54.574994,taxon5[&index=4]:145.386888)[&index=12]:4.613112)[&index=13]:20.000000,(taxon8[&index=3]:115.000000,(taxon9[&index=2]:105.160536,taxon7[&index=1]:60.160536)[&index=14]:39.839464)[&index=15]:20.000000)[&index=16]:10.000000)[&index=17]:10.000000)[&index=18]:0.000000;
+End;

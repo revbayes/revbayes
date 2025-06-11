@@ -1,0 +1,3 @@
+Iteration	Posterior	Likelihood	Prior	population_size[1]	population_size[2]	population_size[3]	population_size[4]	population_size[5]	population_size[6]	population_size[7]	population_size[8]	population_size[9]	population_size[10]
+0	-42618.79	-42146.94	-471.8512	100000	95553.7	89962.5	98595	89443	92785.9	98575.5	99789.4	98651.6	106498
+1	-38480.89	-37956.89	-524.0031	193092	725896	146216	30418.6	6.63488e+06	7.12609e+06	11274.9	7048.68	8916.43	1956.62

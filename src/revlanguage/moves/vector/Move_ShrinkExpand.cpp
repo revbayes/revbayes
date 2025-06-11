@@ -82,7 +82,7 @@ void Move_ShrinkExpand::constructInternalObject( void )
         }
         else
         {
-            throw RbException("Could not create a mvShrinkExpand because the node with name '" + (*it)->getName() + "' isn't a vector of stochastic nodes.");
+            throw RbException() << "Could not create a mvShrinkExpand because the node with name '" <<  (*it)->getName() << "' isn't a vector of stochastic nodes.";
         }
     }
     

@@ -43,6 +43,7 @@ class TypeSpec;
 
         RevPtr<const RevVariable>                   x;                                                                                              //!< The variable holding the real valued vector.
         RevPtr<const RevVariable>                   metropolisHastings;
+
     };
     
 }
@@ -97,6 +98,7 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
 
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn, mh);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
+
 }
 
 
@@ -105,7 +107,6 @@ template <class rlValueType>
 const std::string& RevLanguage::Move_IndependentPriorSampler<rlValueType>::getClassType(void)
 {
     
-//    static std::string rev_type = "Move_IndependentPriorSampler<" + rlValueType::getClassType() + ">";
     static std::string rev_type = "Move_IndependentPriorSampler__" + rlValueType::getClassType();
     
     return rev_type;

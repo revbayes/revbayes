@@ -59,12 +59,12 @@ SyntaxVariable* SyntaxVariable::clone () const
  * clones of themselves (temporary variables) rather than themselves,
  * so that they are not included in the DAG.
  */
-RevPtr<RevVariable> SyntaxVariable::evaluateContent( Environment& env, bool dynamic)
+RevPtr<RevVariable> SyntaxVariable::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic)
 {
     
     RevPtr<RevVariable> the_var;
     
-    Environment *curEnv = &env;
+    std::shared_ptr<Environment> curEnv = env;
     for ( std::vector<std::string>::iterator it = namespaces.begin(); it != namespaces.end(); ++it )
     {
         if ( curEnv->hasChildEnvironment(*it) )
@@ -73,7 +73,7 @@ RevPtr<RevVariable> SyntaxVariable::evaluateContent( Environment& env, bool dyna
         }
         else
         {
-            throw RbException("There is no namespace called '" + *it + "'.");
+            throw RbException() << "There is no namespace called '" <<  *it << "'.";
         }
         
     }
@@ -107,19 +107,19 @@ RevPtr<RevVariable> SyntaxVariable::evaluateContent( Environment& env, bool dyna
  * do not throw an error if the variable does not exist in the
  * frame; instead, we create and return a new null variable.
  */
-RevPtr<RevVariable> SyntaxVariable::evaluateLHSContent( Environment& env, const std::string& elemType )
+RevPtr<RevVariable> SyntaxVariable::evaluateLHSContent( const std::shared_ptr<Environment>& env, const std::string& elemType )
 {
     RevPtr<RevVariable> theVar;
     
     // Find or create the variable
-    if ( env.existsVariable( identifier ) )
+    if ( env->existsVariable( identifier ) )
     {
-        theVar = env.getVariable( identifier );
+        theVar = env->getVariable( identifier );
     }
     else    // add it
     {
         theVar = new RevVariable( NULL, identifier );
-        env.addVariable( identifier, theVar );
+        env->addVariable( identifier, theVar );
     }
     
     // Return the variable for assignment
@@ -188,7 +188,7 @@ bool SyntaxVariable::retrievesExternVar( const Environment& env, std::set<std::s
     if ( !env.existsVariable( identifier ) )
     {
         if ( !inLHS )
-            throw RbException( "No variable named '" + identifier + "'" );
+            throw RbException() << "No variable named '" << identifier << "'" ; 
 
         localVars.insert( identifier );
 

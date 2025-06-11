@@ -25,7 +25,7 @@ RealPos::RealPos( RevBayesCore::TypedDagNode<double> *x ) : Real( x )
     
     if ( x->getValue() < 0.0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }
@@ -37,22 +37,25 @@ RealPos::RealPos( double x ) : Real( x )
 
     if ( x < 0.0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }
 
 
 /** Construct from int */
-RealPos::RealPos( long x ) : Real( double(x) )
+RealPos::RealPos( std::int64_t x ) : Real( double(x) )
 {
 
     if ( x < 0 )
     {
-        throw RbException( "Negative value for " + getClassType() );
+        throw RbException() << "Negative value for " << getClassType() ; 
     }
     
 }
+
+/** Construct from bool */
+RealPos::RealPos( bool x ) : Real( double(x) ) {}
 
 
 /**
@@ -129,15 +132,9 @@ RealPos* RealPos::clone( void ) const
 RevObject* RealPos::convertTo( const TypeSpec& type ) const
 {
     
-    if ( type == Real::getClassTypeSpec() )
-    {
-        return new Real(dag_node->getValue());
-    }
-    else if ( type == Probability::getClassTypeSpec() )
-    {
-        return new Probability(dag_node->getValue());
-    }
-    
+    if ( type == Real::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<RealPos,Real>(this);
+    if ( type == Probability::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<RealPos,Probability>(this);
+
     return Real::convertTo( type );
 }
 
@@ -230,19 +227,19 @@ const TypeSpec& RealPos::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double RealPos::isConvertibleTo(const TypeSpec& type, bool once) const
+double RealPos::isConvertibleTo(const TypeSpec& type, bool convert_by_value) const
 {
     
     if ( type == Real::getClassTypeSpec() )
     {
         return 0.2;
     }
-    else if ( once == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1.0 )
+    else if ( convert_by_value == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1.0 )
     {
         return 0.1;
     }
     
-    double tmp = Real::isConvertibleTo(type, once);
+    double tmp = Real::isConvertibleTo(type, convert_by_value);
     return ( (tmp == -1.0) ? -1.0 : (tmp+0.2));
 }
 

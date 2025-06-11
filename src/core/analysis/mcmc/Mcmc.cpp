@@ -30,6 +30,7 @@
 #include "RbIteratorImpl.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "RbSettings.h" // for logMCMC setting
 #include "StringUtilities.h"
 
 #ifdef RB_MPI
@@ -200,100 +201,107 @@ Mcmc* Mcmc::clone( void ) const
 
 void Mcmc::checkpoint( void ) const
 {
-    // initialize variables
-    std::string separator = "\t";
-    bool flatten = false;
-    
-    createDirectoryForFile( checkpoint_file_name );
-    
-    // open the stream to the file
-    std::ofstream out_stream( checkpoint_file_name.string() );
 
-    // first, we write the names of the variables
-    for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
+    if ( process_active == true )
     {
-        // add a separator before every new element
-        if ( it != variable_nodes.begin() )
-        {
-            out_stream << separator;
-        }
+        // initialize variables
+        std::string separator = "\t";
+        bool flatten = false;
         
-        const DagNode* the_node = *it;
+        createDirectoryForFile( checkpoint_file_name );
+        // the following is useful for ensuring that in MCMCMC analyses, the chain indices in the checkpoint file names are ordered by heat:
+        // std::cout << "Printing file " << checkpoint_file_name << " for chain with a posterior heat of " << getChainPosteriorHeat() << std::endl;
         
-        // print the header
-        if (the_node->getName() != "")
-        {
-            the_node->printName(out_stream,separator, -1, true, flatten);
-        }
-        else
-        {
-            out_stream << "Unnamed";
-        }
-        
-    }
-    out_stream << std::endl;
-    
-    
-    // second, we write the values of the variables
-    for (std::vector<DagNode*>::const_iterator it = variable_nodes.begin(); it != variable_nodes.end(); ++it)
-    {
-        // add a separator before every new element
-        if ( it != variable_nodes.begin() )
-        {
-            out_stream << separator;
-        }
-        
-        // get the node
-        DagNode *node = *it;
-        
-        // print the value
-        node->printValue(out_stream, separator, -1, false, false, false, flatten);
-    }
-    
-    
-    // clean up
-    out_stream.close();
-    
-    
-    /////////
-    // Now we also write the MCMC information into a file
-    /////////
+        // open the stream to the file
+        std::ofstream out_stream( checkpoint_file_name.string() );
 
-    // assemble the new filename
-    path mcmc_checkpoint_file_name = appendToStem(checkpoint_file_name, "_mcmc");
-    
-    // open the stream to the file
-    std::ofstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
-    out_stream_mcmc << "iter = " << generation << std::endl;
-    
-    // clean up
-    out_stream_mcmc.close();
-    
-    
-    /////////
-    // Next we also write the moves information into a file
-    /////////
-    
-    // assemble the new filename
-    path moves_checkpoint_file_name = appendToStem(checkpoint_file_name, "_moves");
-    
-    // open the stream to the file
-    std::ofstream out_stream_moves( moves_checkpoint_file_name.string() );
-    
-    for (size_t i = 0; i < moves.size(); ++i)
-    {
-        out_stream_moves << moves[i].getMoveName();
-        out_stream_moves << "(variable="                << moves[i].getDagNodes()[0]->getName();
-        out_stream_moves << ",num_tried_current="       << moves[i].getNumberTriedCurrentPeriod();
-        out_stream_moves << ",num_tried_total="         << moves[i].getNumberTriedTotal();
-        out_stream_moves << ",num_accepted_current="    << moves[i].getNumberAcceptedCurrentPeriod();
-        out_stream_moves << ",num_accepted_total="      << moves[i].getNumberAcceptedTotal();
-        out_stream_moves << ",tuning_value="            << moves[i].getMoveTuningParameter();
-        out_stream_moves << ")" << std::endl;
+        // first, we write the names of the variables
+        for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
+        {
+            // add a separator before every new element
+            if ( it != variable_nodes.begin() )
+            {
+                out_stream << separator;
+            }
+            
+            const DagNode* the_node = *it;
+            
+            // print the header
+            if (the_node->getName() != "")
+            {
+                the_node->printName(out_stream,separator, -1, true, flatten);
+            }
+            else
+            {
+                out_stream << "Unnamed";
+            }
+            
+        }
+        out_stream << std::endl;
+        
+        
+        // second, we write the values of the variables
+        for (std::vector<DagNode*>::const_iterator it = variable_nodes.begin(); it != variable_nodes.end(); ++it)
+        {
+            // add a separator before every new element
+            if ( it != variable_nodes.begin() )
+            {
+                out_stream << separator;
+            }
+            
+            // get the node
+            DagNode *node = *it;
+            
+            // print the value
+            node->printValue(out_stream, separator, -1, false, false, false, flatten);
+        }
+        
+        
+        // clean up
+        out_stream.close();
+        
+        
+        /////////
+        // Now we also write the MCMC information into a file
+        /////////
+
+        // assemble the new filename
+        path mcmc_checkpoint_file_name = appendToStem(checkpoint_file_name, "_mcmc");
+        
+        // open the stream to the file
+        std::ofstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
+        out_stream_mcmc << "iter = " << generation << std::endl;
+        
+        // clean up
+        out_stream_mcmc.close();
+        
+        
+        /////////
+        // Next we also write the moves information into a file
+        /////////
+        
+        // assemble the new filename
+        path moves_checkpoint_file_name = appendToStem(checkpoint_file_name, "_moves");
+        
+        // open the stream to the file
+        std::ofstream out_stream_moves( moves_checkpoint_file_name.string() );
+        
+        for (size_t i = 0; i < moves.size(); ++i)
+        {
+            out_stream_moves << moves[i].getMoveName();
+            out_stream_moves << "(variable="                << moves[i].getDagNodes()[0]->getName();
+            out_stream_moves << ",num_tried_current="       << moves[i].getNumberTriedCurrentPeriod();
+            out_stream_moves << ",num_tried_total="         << moves[i].getNumberTriedTotal();
+            out_stream_moves << ",num_accepted_current="    << moves[i].getNumberAcceptedCurrentPeriod();
+            out_stream_moves << ",num_accepted_total="      << moves[i].getNumberAcceptedTotal();
+            out_stream_moves << ",tuning_value="            << moves[i].getMoveTuningParameter();
+            out_stream_moves << ")" << std::endl;
+        }
+        
+        // clean up
+        out_stream_moves.close();
     }
     
-    // clean up
-    out_stream_moves.close();
 }
 
 
@@ -314,34 +322,6 @@ void Mcmc::disableScreenMonitor( bool all, size_t rep )
             if ( is == true )
             {
                 monitors[i].disable();
-            }
-            
-        }
-        
-    }
-    
-}
-
-
-/**
- * Finish the monitors which will close the output streams.
- */
-void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
-{
-    
-    // iterate over all monitors
-    for (size_t i=0; i<monitors.size(); ++i)
-    {
-        
-        // if this chain is active, then close the stream
-        if ( chain_active == true && process_active == true )
-        {
-            monitors[i].closeStream();
-            
-            // combine results if we used more than one replicate
-            if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
-            {
-                monitors[i].combineReplicates( n_reps, tc );
             }
             
         }
@@ -384,6 +364,12 @@ double Mcmc::getChainPriorHeat(void) const
 size_t Mcmc::getChainIndex(void) const
 {
     return chain_idx;
+}
+
+
+path Mcmc::getCheckpointFile(void) const
+{
+    return checkpoint_file_name;
 }
 
 
@@ -533,40 +519,32 @@ std::string Mcmc::getStrategyDescription( void ) const
 }
 
 
-void Mcmc::initializeSampler( bool prior_only )
+void Mcmc::initializeSampler()
 {
-    
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
-    
+
     // Get rid of previous move schedule, if any
     if ( schedule != NULL )
     {
         delete schedule;
     }
     schedule = NULL;
-    
+
     // Get initial ln_probability of model
-    
+
     // first we touch all nodes so that the likelihood is dirty
-    for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
+    for (auto the_node: dag_nodes)
     {
-        
-        DagNode *the_node = *i;
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( prior_only );
         the_node->touch();
-        
     }
-    
-    
+
     if ( chain_active == false )
     {
 
-        for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+        for (auto the_node: ordered_stoch_nodes)
         {
-            DagNode *the_node = (*i);
-            
             if ( the_node->isClamped() == false && the_node->isStochastic() == true )
             {
 
@@ -583,23 +561,23 @@ void Mcmc::initializeSampler( bool prior_only )
         }
         
     }
-    
-    
+
+
     int num_tries     = 0;
     double ln_probability = 0.0;
     for ( ; num_tries < num_init_attempts; ++num_tries )
     {
         // a flag if we failed to find a valid starting value
         bool failed = false;
-        
+
         ln_probability = 0.0;
-        for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
-        {
-            DagNode* the_node = (*i);
+        for (auto the_node: dag_nodes)
             the_node->touch();
-            
+
+        for (auto the_node: dag_nodes)
+        {
             double ln_prob = the_node->getLnProbability();
-            
+
             if ( RbMath::isAComputableNumber(ln_prob) == false )
             {
                 std::stringstream ss;
@@ -607,34 +585,29 @@ void Mcmc::initializeSampler( bool prior_only )
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
-                
+
                 ss << std::endl;
                 RBOUT( ss.str() );
-                
+
                 // set the flag
                 failed = true;
-                
-                break;
             }
             ln_probability += ln_prob;
-            
         }
-        
+
         // now we keep all nodes so that the likelihood is stored
-        for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
+        for (auto the_node: dag_nodes)
         {
-            (*i)->keep();
+            the_node->keep();
         }
-        
+
         if ( failed == true )
         {
             RBOUT( "Drawing new initial states ... " );
-            for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+            for (auto the_node: ordered_stoch_nodes)
             {
-                DagNode *the_node = *i;
-                if ( the_node->isClamped() == false && (*i)->isStochastic() == true )
+                if ( the_node->isClamped() == false && the_node->isStochastic() == true )
                 {
-                    
                     the_node->redraw();
                     the_node->reInitialized();
                     
@@ -645,14 +618,17 @@ void Mcmc::initializeSampler( bool prior_only )
                     the_node->reInitialized();
                     the_node->touch();
                 }
-                
             }
+
+            for (auto the_node: ordered_stoch_nodes)
+		if (the_node->isClamped())
+		    the_node->keep();
         }
         else
         {
             break;
         }
-        
+
     }
     
     if ( num_tries == num_init_attempts )
@@ -878,7 +854,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
         StringUtilities::stringSplit( values[0], "=", key_value);
         if ( moves[i].getDagNodes()[0]->getName() != key_value[1] )
         {
-            throw RbException("The order of the moves from the checkpoint file does not match. A move working on node '" + moves[i].getDagNodes()[0]->getName() + "' received a stored counterpart working on node '" + values[0] + "'.");
+            throw RbException() << "The order of the moves from the checkpoint file does not match. A move working on node '" << moves[i].getDagNodes()[0]->getName() << "' received a stored counterpart working on node '" << values[0] << "'.";
         }
         
         key_value.clear();
@@ -920,7 +896,7 @@ void Mcmc::initializeMonitors(void)
 }
 
 
-void Mcmc::monitor(unsigned long g)
+void Mcmc::monitor(std::uint64_t g)
 {
     
     if ( chain_active == true && process_active == true )
@@ -940,6 +916,7 @@ void Mcmc::monitor(unsigned long g)
 
 void Mcmc::nextCycle(bool advance_cycle)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
 
     size_t proposals = size_t( round( schedule->getNumberMovesPerIteration() ) );
     
@@ -948,6 +925,15 @@ void Mcmc::nextCycle(bool advance_cycle)
         
         // Get the move
         Move& the_move = schedule->nextMove( generation );
+
+	if (logMCMC >= 1)
+	{
+	    std::vector<std::string> node_names;
+	    for(auto node: the_move.getDagNodes())
+		node_names.push_back(node->getName());
+
+	    std::cerr<<"\ngeneration = "<<generation<<"    proposal = "<<i+1<<"/"<<proposals<<"    "<<the_move.getMoveName()<<"("<<StringUtilities::join(node_names,",")<<")\n";
+	}
 
         // Perform the move
         the_move.performMcmcStep( chain_prior_heat, chain_likelihood_heat, chain_posterior_heat );
@@ -1007,7 +993,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_node->getName() == "" )
             {
-                throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
+                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
             }
             
             DagNode* the_new_node = NULL;
@@ -1022,7 +1008,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_new_node == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a move working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a move working on it.";
             }
             
             // now swap the node
@@ -1059,7 +1045,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_new_node == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a monitor working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a monitor working on it.";
             }
             
             // now swap the node
@@ -1230,6 +1216,7 @@ void Mcmc::setChainActive(bool tf)
  */
 void Mcmc::setChainLikelihoodHeat(double h)
 {
+    assert(0 <= h);
     chain_likelihood_heat = h;
 }
 
@@ -1248,6 +1235,7 @@ void Mcmc::setCheckpointFile(const path &f)
  */
 void Mcmc::setLikelihoodHeat(double h)
 {
+    assert(0 <= h);
     chain_likelihood_heat = h;
 }
 
@@ -1259,12 +1247,14 @@ void Mcmc::setLikelihoodHeat(double h)
  */
 void Mcmc::setChainPosteriorHeat(double h)
 {
+    assert(0 <= h);
     chain_posterior_heat = h;
 }
 
 
 void Mcmc::setChainPriorHeat(double h)
 {
+    assert(0 <= h);
     chain_prior_heat = h;
 }
 
@@ -1372,6 +1362,28 @@ void Mcmc::startMonitors( size_t num_cycles, bool reopen )
     }
     
 }
+
+/**
+ * Finish the monitors which will close the output streams.
+ */
+void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
+{
+    
+    // iterate over all monitors
+    for (size_t i=0; i<monitors.size(); ++i)
+    {
+        // close filestream for each monitor
+        monitors[i].closeStream();
+            
+        // combine results if we used more than one replicate
+        if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
+        {
+            monitors[i].combineReplicates( n_reps, tc );
+        }
+    }
+    
+}
+
 
 /**
  * Write the header for each of the monitors.

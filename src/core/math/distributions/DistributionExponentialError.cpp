@@ -65,34 +65,20 @@ double RbStatistics::ExponentialError::lnPdf(const AverageDistanceMatrix &avgDis
         return RbConstants::Double::neginf;
     }
     
-    std::vector<std::string> admNames( avgDistMat.getSize() );
-    for(size_t i = 0; i < admNames.size(); i++)
-    {
-        admNames[i] = avgDistMat.getTaxa()[i].getName();
-    }
-    
-    std::vector<std::string> zNames( z.getSize() );
-    for(size_t i = 0; i < zNames.size(); i++)
-    {
-        zNames[i] = z.getTaxa()[i].getName();
-    }
-    
-    std::vector<uint32_t> ix0 = StringUtilities::stringSortIndices(zNames);
-    std::vector<uint32_t> ix1 = StringUtilities::stringSortIndices(admNames);
+    /* AverageDistanceMatrix objects already have their rows and columns alphabetically sorted,
+     * so there is no need to further align them against each other by index matching (like we
+     * do in the overloaded function below)
+     */
 
     double dist = 0;
 
     for (size_t i = 0; i < avgDistMat.getSize(); i++)
     {
-        uint32_t k = ix0[i];
-        uint32_t m = ix1[i];
         for (size_t j = 0; j < i; j++)
         {
-            uint32_t l = ix0[j];
-            uint32_t n = ix1[j];
-            if (z.getMask()[k][l])
+            if (z.getMask()[i][j])
             {
-                double difference = z.getDistanceMatrix()[k][l] - avgDistMat.getDistanceMatrix()[m][n];
+                double difference = z.getDistanceMatrix()[i][j] - avgDistMat.getDistanceMatrix()[i][j];
                 dist += difference * difference;
             }
         }
@@ -131,7 +117,7 @@ AverageDistanceMatrix RbStatistics::ExponentialError::rv(const AverageDistanceMa
     std::vector<double> DirichParams(vect_len, 1);
     std::vector<double> DirichRandomVars = RbStatistics::Dirichlet::rv(DirichParams, rng);
     
-    // get an equally long vector of signs (-1 or 1):
+    // get an equally std::int64_t vector of signs (-1 or 1):
     std::vector<double> Signs(vect_len);
     for (size_t i=0; i<vect_len; i++)
     {
@@ -218,28 +204,19 @@ double RbStatistics::ExponentialError::lnPdf(const DistanceMatrix &distMat, doub
         dmNames[i] = distMat.getTaxa()[i].getName();
     }
 
-    std::vector<std::string> zNames( z.getSize() );
-    for(size_t i = 0; i < zNames.size(); i++)
-    {
-        zNames[i] = z.getTaxa()[i].getName();
-    }
-    
-    std::vector<uint32_t> ix0 = StringUtilities::stringSortIndices(zNames);
-    std::vector<uint32_t> ix1 = StringUtilities::stringSortIndices(dmNames);
+    std::vector<uint32_t> ix = StringUtilities::stringSortIndices(dmNames);
     
     double dist = 0;
     
     for (size_t i = 0; i < distMat.getSize(); i++)
     {
-        uint32_t k = ix0[i];
-        uint32_t m = ix1[i];
+        uint32_t k = ix[i];
         for (size_t j = 0; j < i; j++)
         {
-            uint32_t l = ix0[j];
-            uint32_t n = ix1[j];
-            if (z.getMask()[k][l])
+            uint32_t l = ix[j];
+            if (z.getMask()[i][j])
             {
-                double difference = z.getDistanceMatrix()[k][l] - distMat[m][n];
+                double difference = z.getDistanceMatrix()[i][j] - distMat[k][l];
                 dist += difference * difference;
             }
         }
@@ -278,7 +255,7 @@ AverageDistanceMatrix RbStatistics::ExponentialError::rv(const DistanceMatrix &d
     std::vector<double> DirichParams(vect_len, 1);
     std::vector<double> DirichRandomVars = RbStatistics::Dirichlet::rv(DirichParams, rng);
     
-    // get an equally long vector of signs (-1 or 1):
+    // get an equally std::int64_t vector of signs (-1 or 1):
     std::vector<double> Signs(vect_len);
     for (size_t i=0; i<vect_len; i++)
     {

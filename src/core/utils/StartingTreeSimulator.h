@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <set>
+#include "RbConstants.h"
+
 
 namespace RevBayesCore {
 class Clade;
@@ -15,10 +17,6 @@ class Tree;
      *
      * This class currently has only one functionality,
      * to simulate a tree with given clade and clade age constraints.
-     *
-     * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2013-04-15, version 1.0
      */
     class StartingTreeSimulator {
         
@@ -32,7 +30,7 @@ class Tree;
         
     private:
         
-        void                                    simulateClade( std::set<TopologyNode*> &nodes) const;
+        void                                    simulateClade( std::set<TopologyNode*> &nodes, double max_clade_age = RbConstants::Double::inf) const;
         
     };
     

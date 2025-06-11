@@ -61,11 +61,12 @@ namespace RevLanguage {
         virtual RevObject*                                      convertTo(const TypeSpec& type) const;                                                          //!< Convert to type
         virtual RevPtr<RevVariable>                             executeMethod(const std::string& name, const std::vector<Argument>& args, bool &found);         //!< Execute member method (if applicable)
         virtual RevBayesCore::DagNode*                          getDagNode(void) const;                                                                         //!< Get my internal value node (if applicable)
+        virtual bool                                            hasDagNode(void) const;                                                                         //!< Check if we have an internal value node.
         virtual const MemberRules&                              getParameterRules(void) const;                                                                  //!< Get member rules
         virtual bool                                            isAbstract(void) const;                                                                         //!< Is this an abstract type/object?
         virtual bool                                            isAssignable(void) const;                                                                       //!< Is object or upstream members assignable?
         virtual bool                                            isConstant(void) const;                                                                         //!< Is this variable and the internally stored deterministic node constant?
-        virtual double                                          isConvertibleTo(const TypeSpec& type, bool once) const;                                         //!< Is convertible to type?
+        virtual double                                          isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;                                         //!< Is convertible to type?
         virtual bool                                            isModelObject(void) const;                                                                      //!< Is this a model object (compared with a workspace object)
         virtual void                                            makeConstantValue(void);                                                                        //!< Convert the stored variable to a constant variable (if applicable)
         virtual RevObject*                                      makeIndirectReference(void);                                                                    //!< Make an object referencing the dag node of this object

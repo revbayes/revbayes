@@ -28,7 +28,7 @@
 namespace RevBayesCore {
     
     template<class valueType>
-    class EmpiricalDistribution : public TypedDistribution<valueType>, public MemberObject<long> {
+    class EmpiricalDistribution : public TypedDistribution<valueType>, public MemberObject<std::int64_t> {
         
     public:
 		
@@ -38,7 +38,7 @@ namespace RevBayesCore {
 
 		EmpiricalDistribution*                              clone(void) const;                                          //!< Create an independent clone
 		double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         size_t                                              getBurnin(void) const;
         size_t                                              getCurrentIndex(void) const;
         size_t                                              getNumberOfSamples(void) const;
@@ -87,16 +87,16 @@ RevBayesCore::EmpiricalDistribution<valueType>* RevBayesCore::EmpiricalDistribut
 
 
 template <class valueType>
-void RevBayesCore::EmpiricalDistribution<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void RevBayesCore::EmpiricalDistribution<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
 
     if ( n == "getIndex" )
     {
-        rv = long(current_index) + 1;
+        rv = std::int64_t(current_index) + 1;
     }
     else
     {
-        throw RbException("A empirical distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A empirical distribution does not have a member method called '" << n << "'.";
     }
 
 }

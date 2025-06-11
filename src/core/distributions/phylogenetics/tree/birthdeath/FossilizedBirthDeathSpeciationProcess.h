@@ -43,35 +43,35 @@ namespace RevBayesCore {
                                       bool resampling);  //!< Constructor
         
         // public member functions
-        FossilizedBirthDeathSpeciationProcess*          clone(void) const;                                         //!< Create an independent clone
+        FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone
 
-        void                                            redrawValue(void);
-        void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn);
+        void                                            redrawValue(void) override;
+        void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
 
     protected:
-        void                                            updateStartEndTimes(void);
+        void                                            updateStartEndTimes(void) override;
         int                                             updateStartEndTimes(const TopologyNode & );
 
-        double                                          pSurvival(double start, double end) const;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
+        double                                          pSurvival(double start, double end) const override;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
         // Parameter management functions
-        double                                          computeLnProbabilityTimes(void) const;                            //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityDivergenceTimes(void);                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityTimes(void) const override;                            //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbabilityDivergenceTimes(void);  /* override fail. should be const. */            //!< Compute the log-transformed probability of the current value.
 
-        double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
-        double                                          lnProbTreeShape(void) const;
+        double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
+        double                                          lnProbTreeShape(void) const override;
 
-        double                                          q(size_t i, double t, bool tilde = false) const;
+        double                                          q(size_t i, double t, bool tilde = false) const override;
 
-        double                                          simulateDivergenceTime(double origin, double present) const;    //!< Simulate a speciation event.
-        std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const;                 //!< Simulate n speciation events.
+        double                                          simulateDivergenceTime(double origin, double present) const override;    //!< Simulate a speciation event.
+        std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const override;                 //!< Simulate n speciation events.
 
-        void                                            keepSpecialization(DagNode *toucher);
-        void                                            restoreSpecialization(DagNode *toucher);
-        void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+        void                                            keepSpecialization(const DagNode *toucher) override;
+        void                                            restoreSpecialization(const DagNode *toucher) override;
+        void                                            touchSpecialization(const DagNode *toucher, bool touchAll) override;
 
         // Parameter management functions
-        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+        void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;                //!< Swap a parameter
 
         void                                            prepareProbComputation(void) const override;
 

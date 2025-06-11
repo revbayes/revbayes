@@ -28,9 +28,12 @@ LogUniformDistribution::LogUniformDistribution(const TypedDagNode<double> *mi, c
     addParameter( min );
     addParameter( max );
     
-    double u = GLOBAL_RNG->uniform01();
     double ln_a = log( min->getValue() );
-    *value = exp( u*(log( max->getValue() ) - ln_a) + ln_a);
+    double ln_b = log( max->getValue() );
+
+    double u = ln_a + (ln_b - ln_a) * GLOBAL_RNG->uniform01();
+
+    *value = exp( u );
 }
 
 
@@ -55,13 +58,16 @@ LogUniformDistribution* LogUniformDistribution::clone( void ) const
 double LogUniformDistribution::computeLnProbability( void ) 
 {
     
-    double v = *value; 
-    double mi = min->getValue();
-    double ma = max->getValue();
-    if ( v >= mi && v <= ma ) 
+    double x = *value;
+    double lower = min->getValue();
+    double upper = max->getValue();
+
+    if ( x >= lower && x <= upper ) 
     {
-        double p = 1.0 / ( (log10(max->getValue()) - log10( min->getValue() )) * (*value) );
-        return log(p);
+	// The density is 1/(log(upper)-log(lower)) * 1/x.
+	double a = log(lower);
+	double b = log(upper);
+	return -log(b - a) - log(x);
     }
     else 
     {

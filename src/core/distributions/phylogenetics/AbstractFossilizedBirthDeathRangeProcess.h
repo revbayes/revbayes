@@ -63,9 +63,9 @@ namespace RevBayesCore {
 
         virtual void                                    prepareProbComputation(void) const;
 
-        void                                            keepSpecialization(DagNode *toucher);
-        void                                            restoreSpecialization(DagNode *toucher);
-        void                                            touchSpecialization(DagNode *toucher, bool touchAll);
+        void                                            keepSpecialization(const DagNode *toucher);                  /* NOT VIRTUAL */
+        void                                            restoreSpecialization(const DagNode *toucher);               /* NOT VIRTUAL */
+        void                                            touchSpecialization(const DagNode *toucher, bool touchAll);  /* NOT VIRTUAL */
 
         std::vector<Taxon>                              taxa;                                                  //!< Taxa that will be attached to new simulated trees.
         std::string                                     condition;

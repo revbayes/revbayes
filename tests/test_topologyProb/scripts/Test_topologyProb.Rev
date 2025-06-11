@@ -100,16 +100,16 @@ print(filename = "output/Test_topologyProb.txt", append = TRUE,
 Qmat := fnJC(4)
 seq ~ dnPhyloCTMC(tree=phylogeny1, Q=Qmat, type="DNA")
 mymodel = model(phylogeny1)
+mymodel.ignoreAllData()
 
 # Print just the initial state of the MCMC
 
 monitors = VectorMonitors()
-monitors.append( mnModel(filename = "output/Test_treeProbDensity.log", tree_length,
-                         printgen=10) )
+monitors.append( mnModel(filename = "output/Test_treeProbDensity.log", printgen=10) )
 
 moves = VectorMoves()
 analysis = mcmc(mymodel, monitors, moves)
-analysis.run(generations=1, underPrior=TRUE)
+analysis.run(generations=1)
 clear()
 
 q()

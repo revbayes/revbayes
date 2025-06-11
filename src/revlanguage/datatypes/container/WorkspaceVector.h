@@ -50,8 +50,12 @@ namespace RevLanguage {
         virtual WorkspaceVector<rlType>*            clone(void) const;                                                  //!< Clone object
         static const std::string&                   getClassType(void);                                                 //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                             //!< Get class type spec
-        virtual const TypeSpec&                     getTypeSpec(void) const;                                            //!< Get the object type spec of the instance        
+        virtual const TypeSpec&                     getTypeSpec(void) const;                                            //!< Get the object type spec of the instance
         virtual RevPtr<RevVariable>                 executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found); //!< Map member methods to internal methods
+
+        // Type conversion functions
+        RevObject*                                  convertTo(const TypeSpec& type) const;                              //!< Convert to requested type
+        virtual double                              isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;             //!< Is this object convertible to the requested type?
 
         // Container functions provided here
         virtual rlType*                             getElement(size_t idx) const;                                       //!< Get element variable (single index)
@@ -139,6 +143,63 @@ WorkspaceVector<rlType>* WorkspaceVector<rlType>::clone() const
 
 
 /**
+ * Convert to object of another type. Here we use the setElements function
+ * of the Container base class to do generic type conversion in all cases
+ * where the elements are individually convertible to the desired element
+ * type. This is not done automatically for us because of the templating.
+ * A vector of RealPos, for example, does not inherit from a vector of Real,
+ * which means that a vector of RealPos is not a specialized vector of Real
+ * in the C++ sense (or in the Rev sense).
+ */
+template <typename rlType>
+RevObject* WorkspaceVector<rlType>::convertTo(const TypeSpec &type) const
+{
+    
+    // First check that we are not asked to convert to our own type
+    if ( type == getClassTypeSpec() )
+    {
+        return this->clone();
+    }
+    
+    if ( type.getParentTypeSpec() != NULL &&
+         *type.getParentTypeSpec() == WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::getClassTypeSpec() &&
+         type.getElementTypeSpec() != NULL &&
+         rlType::getClassTypeSpec().isDerivedOf(*type.getElementTypeSpec()) )
+    {
+        
+        // First generate an empty model vector of the desired type
+        RevObject *empty_container = Workspace::userWorkspace().makeNewDefaultObject( type.getType() );
+        Container *the_converted_container = dynamic_cast<Container*>( empty_container );
+        
+        for (size_t i=0; i<size(); ++i)
+        {
+            
+            const rlType& orgElement = (*this->value)[ i ];
+            if ( type.getElementTypeSpec() != NULL  && orgElement.isType( *type.getElementTypeSpec() ) == true )
+            {
+                the_converted_container->push_back( orgElement );
+            }
+//            else
+//            {
+//                RevObject *convObj = orgElement.convertTo( *type.getElementTypeSpec() );
+//                theConvertedContainer->push_back( *convObj );
+//                delete convObj;
+//            }
+        
+        }
+    
+        // return the contain
+        return empty_container;
+    }
+    
+    
+    // Call the base class if all else fails. This will eventually throw an error if the type conversion is not supported.
+    return WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::convertTo( type );
+}
+
+
+
+/**
  * Map calls to member methods.
  *
  * @param name method called
@@ -160,7 +221,7 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     else if ( name == "append" )
@@ -175,29 +236,12 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
     else if ( name == "erase" )
     {
         found = true;
-                
-//        if ( args[0].getVariable()->getRevObject().isType( ModelVector<rlType>::getClassTypeSpec() ) )
-//        {
-//            const ModelVector<rlType> &v_x = static_cast<const ModelVector<rlType>&>( args[0].getVariable()->getRevObject() );
-//            const RevBayesCore::RbVector<typename rlType::valueType> &x = v_x.getValue();
-//            for (size_t i = 0; i < x.size(); ++i )
-//            {
-//                RevBayesCore::RbConstIterator<typename rlType::valueType> pos = this->find( x[i] );
-//                if ( pos != this->end() )
-//                {
-//                    this->erase( pos );
-//                }
-//            }
-//        }
-//        else
-//        {
-            const rlType& x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
-            RevBayesCore::RbConstIterator<rlType> pos = this->find( x );
-            if ( pos != this->end() )
-            {
-                this->erase( pos );
-            }
-//        }
+        const rlType& x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
+        RevBayesCore::RbConstIterator<rlType> pos = this->find( x );
+        if ( pos != this->end() )
+        {
+            this->erase( pos );
+        }
         
         return NULL;
     }
@@ -217,7 +261,7 @@ const std::string& WorkspaceVector<rlType>::getClassType(void)
 {
     static std::string rev_type = rlType::getClassType() + "[]";
     
-	return rev_type;
+    return rev_type;
 }
 
 
@@ -232,7 +276,7 @@ const TypeSpec& WorkspaceVector<rlType>::getClassTypeSpec(void)
 {
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), &WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::getClassTypeSpec(), &rlType::getClassTypeSpec() );
     
-	return rev_type_spec;
+    return rev_type_spec;
 }
 
 
@@ -250,7 +294,7 @@ rlType* WorkspaceVector<rlType>::getElement(size_t idx) const
 /** Get the type spec of this class. */
 template <typename rlType>
 const TypeSpec& WorkspaceVector<rlType>::getTypeSpec(void) const
-{    
+{
     return getClassTypeSpec();  // This should do the trick; there should be a separate version of the function for each template type
 }
 
@@ -277,6 +321,36 @@ void WorkspaceVector<rlType>::initMethods( void )
     erase_arg_rules->push_back( new ArgumentRule( "x", rlType::getClassTypeSpec(), "The element that you want to erase.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     this->methods.addFunction( new MemberProcedure( "erase", RlUtils::Void, erase_arg_rules) );
 
+}
+
+
+/**
+ * In this function we check whether this type is convertible to some other
+ * Rev object type. Here we focus entirely on supporting conversion to
+ * other generic vectors with compatible elements. This is not done automatically
+ * because of the templating: a vector of RealPos does not inherit from a vector
+ * of Real, for example.
+ */
+template <typename rlType>
+double WorkspaceVector<rlType>::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
+{
+
+    
+    if ( type.getParentTypeSpec() != NULL &&
+         *type.getParentTypeSpec() == WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::getClassTypeSpec() &&
+         type.getElementTypeSpec() != NULL &&
+         rlType::getClassTypeSpec().isDerivedOf(*type.getElementTypeSpec()) )
+    {
+        // yes we can
+        return 0.0;
+    }
+    else if ( type == WorkspaceVector<RevObject>::getClassTypeSpec() )
+    {
+        // yes we can
+        return 0.0;
+    }
+    
+    return WorkspaceToCoreWrapperObject<RevBayesCore::RbVector<rlType> >::isConvertibleTo( type, convert_by_value );
 }
 
 
@@ -317,7 +391,7 @@ void WorkspaceVector<rlType>::push_back( const RevObject &x )
     
     if ( x_converted == NULL )
     {
-        throw RbException("Could not append an element of type " + x.getType() + " to a vector of type " + this->getType() );
+        throw RbException() << "Could not append an element of type " << x.getType() << " to a vector of type " << this->getType() ;
     }
     
     // Push it onto the back of the elements vector

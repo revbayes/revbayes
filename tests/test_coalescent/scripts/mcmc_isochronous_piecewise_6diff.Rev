@@ -1,0 +1,141 @@
+################################################################################
+#
+# RevBayes Example: Piecewise coalescent process applied to isochronous horse sequence data
+#
+# authors: Sebastian Hoehna, Ronja Billenstein
+#
+################################################################################
+
+## Global settings
+
+seed(1234)
+NUM_REPLICATES      = 2
+NUM_MCMC_ITERATIONS = 1
+THINNING            = 1
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+# Read in sequence data
+sequences <- readDiscreteCharacterData("data/horses_isochronous_sequences.fasta")
+taxa <- sequences.taxa()
+
+# Get the number of taxa. We need it later on.
+n_taxa <- taxa.size()
+
+
+##############
+# Tree model #
+##############
+
+for (i in 1:5){
+	pop_size[i] ~ dnUniform(0,1E8)
+	pop_size[i].setValue(100000)
+	moves.append( mvScale(pop_size[i], lambda=0.1, tune=true, weight=2.0) )
+}
+
+change_points[1] ~ dnUniform(1E4,2E4)
+change_points[2] ~ dnUniform(3E4,4E4)
+change_points[3] ~ dnUniform(6E4,9E4)
+change_points[4] ~ dnUniform(1.2E5,1.7E5)
+change_points[5] ~ dnUniform(2.2E5,3.2E5)
+for (i in 1:5){
+	moves.append( mvSlide(change_points[i], delta=0.1, tune=true, weight=2.0) )
+}
+
+
+dem_exp_1 = dfExponential(N0 = pop_size[1], N1=pop_size[2], t0=0, t1=change_points[1])
+dem_exp_2 = dfExponential(N0 = pop_size[2], N1=pop_size[3], t0=change_points[1], t1=change_points[2])
+dem_lin_1 = dfLinear(N0 = pop_size[3], N1=pop_size[4], t0=change_points[2], t1=change_points[3])
+dem_const_1 = dfConstant(pop_size[4])
+dem_lin_2 = dfLinear(N0 = pop_size[4], N1=pop_size[5], t0=change_points[4], t1=change_points[5])
+dem_const_2 = dfConstant(pop_size[5])
+
+psi ~ dnCoalescentDemography([dem_exp_1,dem_exp_2,dem_lin_1,dem_const_1,dem_lin_2,dem_const_2], changePoints=change_points, taxa=taxa)
+
+root_age := psi.rootAge()
+
+diff <- (500000 - 250000)/2.0
+# obs_root_age ~ dnNormal(mean = root_age, sd = 60000, min = 250000, max = 500000)
+obs_root_age ~ dnNormal(mean = root_age, sd = 60000, min = root_age - diff, max = root_age + diff)
+obs_root_age.clamp(375000)
+
+### add some moves that change the tree
+moves.append( mvNarrow(psi, weight=n_taxa) )
+moves.append( mvNNI(psi, weight=n_taxa) )
+moves.append( mvFNPR(psi, weight=n_taxa/4.0) )
+moves.append( mvSubtreeScale(psi, weight=n_taxa/5.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=n_taxa) )
+moves.append( mvRootTimeScaleBactrian(psi, weight=n_taxa/5.0) )
+moves.append( mvTreeScale(psi, weight=n_taxa/5.0) )
+
+#############
+# Sequences #
+#############
+
+er_prior <- v(1,1,1,1,1,1)
+pi_prior <- v(1,1,1,1)
+er ~ dnDirichlet(er_prior)
+pi ~ dnDirichlet(pi_prior)
+
+moves.append( mvBetaSimplex(er, weight=3) )
+moves.append( mvDirichletSimplex(er, weight=1) )
+moves.append( mvBetaSimplex(pi, weight=2) )
+moves.append( mvDirichletSimplex(pi, weight=1) )
+
+Q := fnGTR(er,pi)
+
+alpha ~ dnUniform( 0.0, 1E6 )
+alpha.setValue( 1.0 )
+sr := fnDiscretizeGamma( alpha, alpha, 4 )
+moves.append( mvScale(alpha, weight=2.0) )
+
+p_inv ~ dnBeta(1,1)
+moves.append( mvSlide(p_inv) )
+
+clock ~ dnLoguniform(1e-12,1e-4)
+clock.setValue(4.68e-8)
+moves.append( mvScale(clock, weight=2.0) )
+
+up_down_move = mvUpDownScale(weight=5.0)
+up_down_move.addVariable(clock,up=TRUE)
+up_down_move.addVariable(psi,up=FALSE)
+moves.append( up_down_move )
+
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=sr, pInv=p_inv, type="DNA", branchRates=clock)
+seq.clamp(sequences)
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+
+
+################
+# The Analysis #
+################
+
+#add monitors
+monitors.append( mnModel(filename="output/horses_iso_piecewise_6diff.log",printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_iso_piecewise_6diff.trees",psi,printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_iso_piecewise_6diff_NEs.log",pop_size,printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_iso_piecewise_6diff_times.log",change_points,printgen=THINNING) )
+
+mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPLICATES, combine="mixed")
+mymcmc.run(NUM_MCMC_ITERATIONS, tuning = 100)
+
+
+################
+
+# you may want to quit RevBayes now
+q()

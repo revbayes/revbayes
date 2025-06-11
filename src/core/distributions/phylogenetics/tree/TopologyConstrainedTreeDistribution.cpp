@@ -27,8 +27,10 @@
 #include "Tree.h"
 #include "TreeChangeEventHandler.h"
 #include "TreeChangeEventMessage.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -44,7 +46,10 @@ using namespace RevBayesCore;
  *
  * \param[in]    c         Clade constraints.
  */
-TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t) : TypedDistribution<Tree>( NULL ),
+TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist,
+                                                                          const std::vector<Clade> &c,
+                                                                          Tree *t,
+                                                                          std::int64_t age_check_precision) : TypedDistribution<Tree>( NULL ),
 //    active_backbone_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     active_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     backbone_topology(NULL),
@@ -71,6 +76,40 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     }
     
     value = &base_distribution->getValue();
+    
+    // Are there any fossils in the starting tree?
+    if (starting_tree != NULL)
+    {
+        std::vector<bool> fossils;
+        for (size_t i = 0; i < t->getNumberOfTips(); ++i)
+        {
+            TopologyNode* node = &t->getNode(i);
+            fossils.push_back( node->isFossil() );
+        }
+        
+        bool no_fossil = std::none_of(fossils.begin(), fossils.end(), [](bool v) { return v; });
+        
+        if (!no_fossil)
+        {
+            delete value;
+            
+            AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
+            std::vector<Taxon> taxa = tree_base_distribution->getTaxa();
+            
+            try
+            {
+                RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
+                value = my_tree->clone();
+            }
+            catch (RbException &e)
+            {
+                value = nullptr;
+                // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
+                // a nonexistent starting_tree
+                throw RbException( e.getMessage() );
+            }
+        }
+    }
     
     initializeBitSets();
     redrawValue( SimulationCondition::MCMC );
@@ -197,17 +236,19 @@ TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone(
  */
 double TopologyConstrainedTreeDistribution::computeLnProbability( void )
 {
+    using namespace RbConstants;
+
     recursivelyUpdateClades( value->getRoot() );
     
     // first check if the current tree matches the clade constraints
     if ( matchesConstraints() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
     }
     
     if ( matchesBackbone() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
     }
     
     double lnProb = base_distribution->computeLnProbability();
@@ -232,7 +273,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                 std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                 if ( it == taxon_map.end() )
                 {
-                    throw RbException("Could not find taxon with name '" + name + "'.");
+                    throw RbException() << "Could not find taxon with name '" << name << "'.";
                 }
                 size_t k = it->second;
                 
@@ -254,7 +295,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                     std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                     if ( it == taxon_map.end() )
                     {
-                        throw RbException("Could not find taxon with name '" + name + "'.");
+                        throw RbException() << "Could not find taxon with name '" << name << "'.";
                     }
                     size_t s = it->second;
                     
@@ -454,7 +495,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyAddBackboneConstraints(
         std::map<std::string, size_t>::const_iterator it = taxon_map.find(name);
         if (it == taxon_map.end()) {
             
-            throw RbException("Taxon named " + it->first + " not found in tree's taxon map!");
+            throw RbException() << "Taxon named " << it->first << " not found in tree's taxon map!";
         }
         tmp.set( it->second );
     }
@@ -712,6 +753,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
     psi->setRooted( true );
 
     AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
+    if ( tree_base_distribution == NULL )
+    {
+        throw RbException("dnConstrainedTopology cannot simulate from the base distribution. Use the 'initialTree' argument to provide a custom starting tree.");
+    }
     size_t num_taxa = tree_base_distribution->getNumberOfTaxa();
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
 
@@ -942,9 +987,9 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     psi->setRooted( false );
     
     UniformTopologyBranchLengthDistribution* tree_base_distribution = dynamic_cast<UniformTopologyBranchLengthDistribution*>( base_distribution );
-    if (tree_base_distribution == NULL )
+    if ( tree_base_distribution == NULL )
     {
-        throw RbException("Wrong type of base distribution for constrained tree topology distribution.");
+        throw RbException("dnConstrainedTopology cannot simulate from the base distribution. Use the 'initialTree' argument to provide a custom starting tree.");
     }
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
     size_t num_taxa = taxa.size();

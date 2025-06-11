@@ -17,7 +17,7 @@ using namespace RevBayesCore;
 
 
 /** Construct rate matrix with n states */
-RateMatrix_revPoMo2N::RateMatrix_revPoMo2N(long num_states, long in_n ) : TimeReversibleRateMatrix( num_states ),
+RateMatrix_revPoMo2N::RateMatrix_revPoMo2N(std::int64_t num_states, std::int64_t in_n ) : TimeReversibleRateMatrix( num_states ),
     N( in_n ),
     pi( 2, 0.5 ),
     rho( 0.01 ),
@@ -359,7 +359,7 @@ void RateMatrix_revPoMo2N::tiProbsComplexEigens(double t, TransitionProbabilityM
 }
 
 
-void RateMatrix_revPoMo2N::setN( long & ni )
+void RateMatrix_revPoMo2N::setN( std::int64_t & ni )
 {
     N = ni;
     

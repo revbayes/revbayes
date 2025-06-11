@@ -80,16 +80,23 @@ SyntaxFunctionCall& SyntaxFunctionCall::operator=( const SyntaxFunctionCall& x )
         delete base_variable;
         
         for ( std::list<SyntaxLabeledExpr*>::iterator it = arguments->begin(); it != arguments->end(); ++it )
+        {
             delete *it;
-
+        }
+        
         function_name = x.function_name;
 
         if (x.base_variable != NULL)
+        {
             base_variable = x.base_variable->clone();
+        }
         
         arguments->clear();
         for ( std::list<SyntaxLabeledExpr*>::iterator it = x.arguments->begin(); it != x.arguments->end(); ++it )
+        {
             arguments->push_back( (*it)->clone() );
+        }
+        
     }
 
     return ( *this );
@@ -122,7 +129,7 @@ SyntaxFunctionCall* SyntaxFunctionCall::clone( void ) const
  *
  * @todo Support this function call context better
  */
-RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Package arguments
@@ -146,14 +153,15 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         // We can do this first because user-defined variables are not allowed to mask function names
         // Skip if we're not in UserWorkspace, because functions can only be user-defined in UserWorkspace
         bool found = false;
-        if ( env.existsVariable( function_name ) && &env == &Workspace::userWorkspace() )
+        if ( env->existsVariable( function_name ) && env == Workspace::userWorkspacePtr() )
         {
-            RevObject &the_object = env.getRevObject( function_name );
+            RevObject &the_object = env->getRevObject( function_name );
             
             if ( the_object.isType( Function::getClassTypeSpec() ) )
             {
                 func = static_cast<Function*>( the_object.clone() );
-                found = func->checkArguments(args, NULL, !dynamic);
+                std::vector<bool> arg_mapped(args.size(), false);
+                found = func->checkArguments(args, NULL, arg_mapped);
             }
         }
         
@@ -161,14 +169,14 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         // This call will throw a relevant message if the function is not found
         if ( found == false )
         {
-            func = env.getFunction(function_name, args, !dynamic).clone();
+            func = env->getFunction(function_name, args).clone();
         }
         
         // Allow the function to process the arguments
-        func->processArguments( args, !dynamic );
+        func->processArguments( args );
         
         // Set the execution environment of the function
-        func->setExecutionEnviroment( &env );
+        func->setExecutionEnviroment( env );
     }
     else
     {
@@ -182,20 +190,24 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         
         const MethodTable& mt = the_member_object.getMethods();
         
-        const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
+        const Function* the_const_function = mt.findFunction( function_name, args );
 
         Function* the_function;
-        if (the_const_function)
-            the_function = the_const_function->clone();
-        else
-            throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
-
-        the_function->processArguments(args, !dynamic);
-        
-        MemberMethod* theMemberMethod = dynamic_cast<MemberMethod*>( the_function );
-        if ( theMemberMethod != NULL )
+        if ( the_const_function != NULL )
         {
-            theMemberMethod->setMemberObject( the_var );
+            the_function = the_const_function->clone();
+        }
+        else
+        {
+            throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
+        }
+        
+        the_function->processArguments(args );
+        
+        MemberMethod* the_member_method = dynamic_cast<MemberMethod*>( the_function );
+        if ( the_member_method != NULL )
+        {
+            the_member_method->setMemberObject( the_var );
             func = the_function;
         }
         else
@@ -212,7 +224,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
     // free the memory of our copy
     delete func;
     
-    if ( dynamic == false || isConstExpression() == true )
+    if ( isConstExpression() == true )
     {
         // Return the value, which is typically a deterministic variable with the function
         // inside it, although many functions return constant values or NULL (void).

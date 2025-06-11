@@ -344,7 +344,7 @@ double AbstractMove::getUpdateWeight( void ) const
  *
  * @param   generation    Generation number at which to check active status.
  */
-bool AbstractMove::isActive(unsigned long generation) const
+bool AbstractMove::isActive(std::uint64_t generation) const
 {
     return generation >= delay;
 }
@@ -356,7 +356,7 @@ bool AbstractMove::isActive(unsigned long generation) const
 void AbstractMove::performHillClimbingMove(double lHeat, double pHeat)
 {
     
-    throw RbException("A '" + getMoveName() + "' cannot be used for the hill-climbing algorithm." );
+    throw RbException() << "A '" << getMoveName() << "' cannot be used for the hill-climbing algorithm." ;
 }
 
 

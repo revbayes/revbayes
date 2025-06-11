@@ -27,9 +27,9 @@ template <class valueType> class RbVector;
         
     public:
         
-        InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf);
-        InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf);
-        InverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf);
+        InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<std::int64_t>* indf);
+        InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<std::int64_t>* indf);
+        InverseWishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf);
 
         virtual                                            ~InverseWishartDistribution(void) {}
         
@@ -55,8 +55,8 @@ template <class valueType> class RbVector;
         const TypedDagNode<MatrixReal>*                     sigma0;             //!< a scaling matrix
         const TypedDagNode<RbVector<double> >*              kappaVector;        //!< A vector with the values of the diagonal of the scaling matrix
         const TypedDagNode<double>*                         kappa;              //!< A value with the value on the diagonal of the scaling matrix
-        const TypedDagNode<long>*                            df;                //!< The degrees of freedom
-        const TypedDagNode<long>*                            dim;               //!< The number of dimensions on the scaling matrix
+        const TypedDagNode<std::int64_t>*                            df;                //!< The degrees of freedom
+        const TypedDagNode<std::int64_t>*                            dim;               //!< The number of dimensions on the scaling matrix
                 
     };
     

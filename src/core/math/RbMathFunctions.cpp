@@ -15,6 +15,7 @@
  */
 
 #include <cstddef>
+#include <cstdint>
 #include <cmath>
 #include <vector>
 #include <algorithm>
@@ -249,7 +250,7 @@ double RbMath::gamma(double x)
     
     /* If the argument is exactly zero or a negative integer
      * then return NaN. */
-    if (x == 0 || (x < 0 && x == (long)x)) 
+    if (x == 0 || (x < 0 && x == (std::int64_t)x)) 
     {
         std::ostringstream s;
         s << "Cannot compute gamma function for x = " << x;
@@ -733,10 +734,11 @@ double RbMath::incompleteGamma(double x, double alpha, bool regularized, bool lo
  * This function calculates the log of the beta function. The code was adapted from R.
  *
  * \brief Natural log of the beta function.
- * \param alp is the parameter of the beta function. 
+ * \param a is the alpha parameter of the beta function. 
+ * \param b is the beta parameter of the beta function. 
  * \return Returns the log of the beta function. 
  * \throws Does not throw an error.
- * \see R version 2.12.2
+ * \see function lbeta() in R version 2.12.2
  */
 double RbMath::lnBeta(double a, double b)
 {

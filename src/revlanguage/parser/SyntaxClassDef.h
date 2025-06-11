@@ -38,7 +38,7 @@ namespace RevLanguage {
         SyntaxElement*              clone() const;                                                                  //!< Clone object
         
         // Regular functions
-        RevPtr<RevVariable>         evaluateContent(Environment& env, bool dynamic=false);                          //!< Get semantic value
+        RevPtr<RevVariable>         evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);   //!< Get semantic value
 
     protected:
         std::string                 className;                                                                      //!< The name of the class

@@ -66,8 +66,8 @@ void Move_RandomIntegerWalk::constructInternalObject( void )
     // now allocate a new random-integer-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<long>* tmp = static_cast<const Natural &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<long> *n = static_cast<RevBayesCore::StochasticNode<long> *>( tmp );
+    RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Natural &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomIntegerWalkProposal(n);
@@ -113,7 +113,6 @@ std::vector<std::string> Move_RandomIntegerWalk::getMoveAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "RandomNaturalWalk" );
     
     return a_names;
 }
@@ -150,7 +149,7 @@ const MemberRules& Move_RandomIntegerWalk::getParameterRules(void) const
     
     if ( !rules_set ) 
     {
-        move_member_rules.push_back( new ArgumentRule( "x", Natural::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "x", Integer::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();

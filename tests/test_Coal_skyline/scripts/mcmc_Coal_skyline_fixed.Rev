@@ -41,9 +41,30 @@ for (i in 1:NUM_INTERVALS) {
 
 }
 
+# next we specify a prior on the number of events per interval
+# we use a multinomial prior offset to have at least one event per interval
+# first, specify the offset
+num_events_pi <- rep(1, NUM_INTERVALS)
+
+# next, specify the prior for the multinomial distribution
+num_e_simplex_init <- rep(1, NUM_INTERVALS)
+num_e_simplex <- simplex(num_e_simplex_init)
+
+# calculate the number of coalescent events that we distribute over the intervals
+n_multi <- n_taxa-1-NUM_INTERVALS
+
+# draw the coalescent events into intervals
+number_events_pi ~ dnMultinomial(p=num_e_simplex, size=n_multi)
+
+# compute the actual number of events per interval, so the drawn number plus offset
+final_number_events_pi := num_events_pi + number_events_pi
+
+moves.append( mvIidPrior(x=number_events_pi) )
+
+
 
 ### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
-psi ~ dnCoalescentSkyline(theta=pop_size, method="events", taxa=taxa)
+psi ~ dnCoalescentSkyline(theta=pop_size, events_per_interval=final_number_events_pi, method="events", taxa=taxa)
 
 interval_times := psi.getIntervalAges()
 
@@ -58,9 +79,8 @@ root_height := psi.rootAge()
 ### workspace model wrapper ###
 mymodel = model(psi)
 
-### set up the monitors that will output parameter values to file and screen 
+### set up the monitors that will output parameter values to file and screen
 monitors.append( mnModel(filename="output/coal_skyline_fixed.log",printgen=1, separator = TAB) )
-monitors.append( mnScreen(printgen=1, pop_size) )
 
 
 

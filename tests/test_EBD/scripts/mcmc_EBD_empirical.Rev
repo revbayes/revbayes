@@ -1,0 +1,141 @@
+#################################################################################
+#
+# RevBayes Test-Script: Bayesian inference of diversification rates under an
+#                       episodic birth-death model with empirical taxon sampling
+#
+# authors: Sebastian Hoehna, David Cerny
+#
+#################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the data #
+#######################
+
+# Read in the "observed" tree
+T <- readTrees("data/Primates_tree.nex")[1]
+
+# Get some useful variables from the data. We need these later on.
+taxa <- T.taxa()
+
+# set my move index
+mvi = 0
+mni = 0
+
+NUM_INTERVALS = 20
+
+
+####################
+# Create the rates #
+####################
+
+# first we create the standard deviation of the rates between intervals
+# draw the sd from an exponential distribution
+speciation_sd ~ dnExponential(1.0)
+moves[++mvi] = mvScale(speciation_sd,weight=5.0)
+
+extinction_sd ~ dnExponential(1.0)
+moves[++mvi] = mvScale(extinction_sd,weight=5.0)
+
+# create a random variable at the present time
+log_speciation[1] ~ dnUniform(-10.0,10.0)
+log_extinction[1] ~ dnUniform(-10.0,10.0)
+
+# apply moves on the rates
+moves[++mvi] = mvSlide(log_speciation[1], weight=2)
+moves[++mvi] = mvSlide(log_extinction[1], weight=2)
+
+speciation[1] := exp( log_speciation[1] )
+extinction[1] := exp( log_extinction[1] )
+
+for (i in 1:NUM_INTERVALS) {
+    index = i+1
+
+    # specify normal priors (= Brownian motion) on the log of the rates
+    log_speciation[index] ~ dnNormal( mean=log_speciation[i], sd=speciation_sd )
+    log_extinction[index] ~ dnNormal( mean=log_extinction[i], sd=extinction_sd )
+
+    # apply moves on the rates
+    moves[++mvi] = mvSlide(log_speciation[index], weight=2)
+    moves[++mvi] = mvSlide(log_extinction[index], weight=2)
+
+    delta_up_down_move[i] = mvUpDownSlide(weight=5.0, delta=0.01)
+    delta_up_down_move[i].addVariable(log_speciation[i],TRUE)
+    delta_up_down_move[i].addVariable(log_extinction[i],TRUE)
+    moves[++mvi] =  delta_up_down_move[i]
+
+    # transform the log-rate into actual rates
+    speciation[index] := exp( log_speciation[index] )
+    extinction[index] := exp( log_extinction[index] )
+}
+
+moves[++mvi] = mvVectorSlide(log_speciation, weight=10)
+moves[++mvi] = mvVectorSlide(log_extinction, weight=10)
+
+moves[++mvi] = mvShrinkExpand( log_speciation, sd=speciation_sd, weight=10 )
+moves[++mvi] = mvShrinkExpand( log_extinction, sd=extinction_sd, weight=10 )
+
+interval_times <- T.rootAge() * (1:NUM_INTERVALS) / (NUM_INTERVALS) * 0.8
+
+Galagidae        = clade("Galago_senegalensis", "Otolemur_crassicaudatus",
+                         missing= 17)
+Lorisidae        = clade("Perodicticus_potto", "Loris_tardigradus",
+                         "Nycticebus_coucang", missing=6)
+Cheirogaleoidea  = clade("Cheirogaleus_major", "Microcebus_murinus", missing= 19)
+Lemuridae        = clade("Lemur_catta", "Varecia_variegata", missing=17)
+Lemuriformes     = clade(Lemuridae, Cheirogaleoidea, missing=29)
+Atelidae_Aotidae = clade("Alouatta_palliata", "Aotus_trivirgatus", missing=30)
+NWM              = clade(Atelidae_Aotidae, "Callicebus_donacophilus",
+                         "Saimiri_sciureus", "Cebus_albifrons", missing=93)
+Hominoidea       = clade("Pan_paniscus", "Hylobates_lar", missing=19)
+Cercopithecoidea = clade("Colobus_guereza", "Macaca_mulatta",
+                         "Chlorocebus_aethiops", missing=60)
+
+missing_species_per_clade = v(Galagidae, Lorisidae, Cheirogaleoidea, Lemuridae,
+                              Lemuriformes, Atelidae_Aotidae, NWM, Hominoidea,
+                              Cercopithecoidea)
+
+timetree ~ dnEpisodicBirthDeath(rootAge=T.rootAge(), lambdaRates=speciation,
+                                lambdaTimes=interval_times, muRates=extinction,
+                                muTimes=interval_times, rho=1.0, taxa=taxa,
+                                incompleteClades=missing_species_per_clade,
+                                condition="time")
+
+# clamp the model with the "observed" tree
+timetree.clamp(T)
+
+
+#############
+# The model #
+#############
+
+# workspace model wrapper
+mymodel = model(timetree)
+
+# set up the monitors that will output parameter values to files
+monitors[++mni] = mnModel(filename="output/EBD_empirical.log", printgen=10,
+                          separator = TAB)
+monitors[++mni] = mnFile(filename="output/EBD_empirical_speciation_rates.log",
+                         printgen=10, separator = TAB, speciation)
+monitors[++mni] = mnFile(filename="output/EBD_empirical_speciation_times.log",
+                         printgen=10, separator = TAB, interval_times)
+monitors[++mni] = mnFile(filename="output/EBD_empirical_extinction_rates.log",
+                         printgen=10, separator = TAB, extinction)
+monitors[++mni] = mnFile(filename="output/EBD_empirical_extinction_times.log",
+                         printgen=10, separator = TAB, interval_times)
+
+
+################
+# The analysis #
+################
+
+# workspace MCMC object
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# run the MCMC
+mymcmc.run(generations=500)
+
+# clear the workspace and quit
+clear()
+q()

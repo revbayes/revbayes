@@ -28,9 +28,9 @@ class DagNode;
     public:
         
         // inverse Wishart distribution of parameter sigma0 et df degrees of freedom
-        WishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf);
+        WishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<std::int64_t>* indf);
         // specialized version: inverse Wishart of parameter sigma0=kappa*I and df degrees of freedom
-        WishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf);
+        WishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf);
         
         virtual                                            ~WishartDistribution(void) {}
         
@@ -40,7 +40,7 @@ class DagNode;
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
         
-        long                                                getDF() const {return df->getValue();}
+        std::int64_t                                                getDF() const {return df->getValue();}
         
         
     protected:
@@ -53,8 +53,8 @@ class DagNode;
         
         const TypedDagNode<MatrixReal>*                     omega0;     //!<The scaling matrix
         const TypedDagNode<double>*                         kappa;      //!<A value for the diagonal elements of the scaling matrix
-        const TypedDagNode<long>*                           df;         //!<The degrees of freedom
-        const TypedDagNode<long>*                           dim;        //!<The number of dimensions of the scaling matrix
+        const TypedDagNode<std::int64_t>*                           df;         //!<The degrees of freedom
+        const TypedDagNode<std::int64_t>*                           dim;        //!<The number of dimensions of the scaling matrix
         
     };
     

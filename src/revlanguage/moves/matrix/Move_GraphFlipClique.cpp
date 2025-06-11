@@ -75,7 +75,7 @@ void Move_GraphFlipClique::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<long>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::int64_t>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
     
     
     RevBayesCore::Proposal *p = NULL;

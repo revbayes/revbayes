@@ -1,0 +1,42 @@
+#NEXUS
+BEGIN TAXA;
+  DIMENSIONS NTAX=5;
+  TAXLABELS
+    'A'
+    'B'
+    'C'
+    'D'
+    'E'
+  ;
+ENDBLOCK;
+
+BEGIN CHARACTERS;
+  DIMENSIONS NCHAR=3;
+  FORMAT DATATYPE=STANDARD GAP=- MISSING=? SYMBOLS="0123456789";
+  CHARLABELS
+    [1] 'Cephalization'
+    [2] 'Proboscis invaginable'
+    [3] 'Degree to which the introvert can be invaginated'
+  ;
+  STATELABELS
+    1
+    'Proboscis'
+    'Distinct head'
+    ,
+    2
+    'Absent'
+    'Present'
+    ,
+    3
+    'Minimal'
+    'Extensive'
+    ,
+  ;
+  MATRIX
+    'A'	00-
+    'B'	0??
+    'C'	010
+    'D'	011
+    'E'	010
+  ;
+ENDBLOCK;

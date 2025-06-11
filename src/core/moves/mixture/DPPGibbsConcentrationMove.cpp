@@ -1,6 +1,6 @@
 #include "DPPGibbsConcentrationMove.h"
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 #include "DistributionDirichlet.h"
@@ -15,7 +15,7 @@
 namespace RevBayesCore { class DagNode; }
 
 
-RevBayesCore::DPPGibbsConcentrationMove::DPPGibbsConcentrationMove(StochasticNode<double> *n, DeterministicNode<long>* v, TypedDagNode< double >* gS, TypedDagNode< double >* gR, int ne, double w) : AbstractGibbsMove( w ),
+RevBayesCore::DPPGibbsConcentrationMove::DPPGibbsConcentrationMove(StochasticNode<double> *n, DeterministicNode<std::int64_t>* v, TypedDagNode< double >* gS, TypedDagNode< double >* gR, int ne, double w) : AbstractGibbsMove( w ),
     variable( n ),
     numCats(v),
     gammaShape(gS),
@@ -53,7 +53,7 @@ void RevBayesCore::DPPGibbsConcentrationMove::performGibbsMove( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 	double& cpv = variable->getValue();
 	
-	long k = numCats->getValue();
+	std::int64_t k = numCats->getValue();
 	int nV = numElem;
 	
 	// This move is a fully conditional Gibbs move, with a Gamma distribution
@@ -95,7 +95,7 @@ void RevBayesCore::DPPGibbsConcentrationMove::swapNodeInternal(DagNode *oldN, Da
     
     if (oldN == numCats)
     {
-        numCats = static_cast<DeterministicNode<long>* >(newN);
+        numCats = static_cast<DeterministicNode<std::int64_t>* >(newN);
     }
 	
     if (oldN == gammaShape)

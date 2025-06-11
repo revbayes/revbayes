@@ -27,13 +27,13 @@
 using namespace RevLanguage;
 
 /* Default constructor */
-Integer::Integer(void) : ModelObject<long>()
+Integer::Integer(void) : ModelObject<std::int64_t>()
 {
     
 }
 
 
-Integer::Integer( RevBayesCore::TypedDagNode<long> *v ) : ModelObject<long>( v )
+Integer::Integer( RevBayesCore::TypedDagNode<std::int64_t> *v ) : ModelObject<std::int64_t>( v )
 {
     
 }
@@ -41,11 +41,10 @@ Integer::Integer( RevBayesCore::TypedDagNode<long> *v ) : ModelObject<long>( v )
 
 
 /* Construct from int */
-Integer::Integer(long v) : ModelObject<long>( new long(v) )
+Integer::Integer(std::int64_t v) : ModelObject<std::int64_t>( new std::int64_t(v) )
 {
 
 }
-
 
 /**
  * Generic addition operator.
@@ -64,7 +63,7 @@ RevObject* Integer::add( const RevObject& rhs ) const
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
         return add( static_cast<const Integer&>( rhs ) );
     
-    return ModelObject<long>::add( rhs );
+    return ModelObject<std::int64_t>::add( rhs );
 }
 
 
@@ -113,50 +112,28 @@ Integer* RevLanguage::Integer::clone(void) const
 
 
 /** 
- * Convert to type. The caller manages the returned object. 
+ * Convert to type. The caller manages the returned object.
+ * Calls the templated convertTo<> function based on the type to return.
  */
 RevObject* Integer::convertTo( const TypeSpec& type ) const
-{
+{   
+    if ( type == RlBoolean::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,RlBoolean>(this);
+    if ( type == Real::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,Real>(this);
 
-    if ( type == RlBoolean::getClassTypeSpec() )
-    {
-        return new RlBoolean( dag_node->getValue() == 0 );
-    }
-    
-    if ( type == Real::getClassTypeSpec() )
-    {
-        return new Real( dag_node->getValue() );
-    }
-    
-    if ( type == RlString::getClassTypeSpec() ) 
-    {
+    if ( type == RlString::getClassTypeSpec() ) {
         std::ostringstream o;
         printValue( o, true );
         return new RlString( o.str() );
     }
 
-    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 )
-    {
-        return new RealPos( double(dag_node->getValue()) );
-    }
-    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0)
-    {
-        return new IntegerPos( dag_node->getValue() );
-    }
-
-    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0)
-    {
-        return new Natural( dag_node->getValue() );
-    }
+    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 ) return RlUtils::RlTypeConverter::convertTo<Integer,RealPos>(this);
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return RlUtils::RlTypeConverter::convertTo<Integer,IntegerPos>(this);
+    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0) return RlUtils::RlTypeConverter::convertTo<Integer,Natural>(this);
     
-    if ( type == Probability::getClassTypeSpec() )
-    {
-        return new Probability( dag_node->getValue() );
-    }
+    if ( type == Probability::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,Probability>(this);
     
     return RevObject::convertTo( type );
 }
-
 
 /**
   * Specialized decrement operation.
@@ -186,7 +163,7 @@ RevObject* Integer::divide( const RevObject& rhs ) const
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
         return divide( static_cast<const Integer&>( rhs ) );
     
-    return ModelObject<long>::divide( rhs );
+    return ModelObject<std::int64_t>::divide( rhs );
 }
 
 
@@ -274,7 +251,7 @@ void Integer::increment( void )
 /** 
  * Is convertible to language object of type? 
  */
-double Integer::isConvertibleTo( const TypeSpec& type, bool once ) const
+double Integer::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
     if ( type == RlBoolean::getClassTypeSpec() )
@@ -292,26 +269,26 @@ double Integer::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.5;
     }
     
-    if ( once && type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 )
+    if ( convert_by_value && type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 )
     {
         return 0.3;
     }
-    if ( once && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0 )
+    if ( convert_by_value && type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0 )
     {
         return 0.1;
     }
 
-    if ( once && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0 )
+    if ( convert_by_value && type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0 )
     {
         return 0.1;
     }
     
-    if ( once == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 && dag_node->getValue() >= 0)
+    if ( convert_by_value == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 && dag_node->getValue() >= 0)
     {
         return 0.2;
     }
     
-    return RevObject::isConvertibleTo( type, once );
+    return RevObject::isConvertibleTo( type, convert_by_value );
 }
 
 
@@ -336,7 +313,7 @@ RevObject* Integer::multiply( const RevObject& rhs ) const
         return multiply( static_cast<const Integer&>( rhs ) );
     }
     
-    return ModelObject<long>::multiply( rhs );
+    return ModelObject<std::int64_t>::multiply( rhs );
 }
 
 
@@ -395,7 +372,7 @@ RevObject* Integer::subtract( const RevObject& rhs ) const
         return subtract( static_cast<const Integer&>( rhs ) );
     }
     
-    return ModelObject<long>::subtract( rhs );
+    return ModelObject<std::int64_t>::subtract( rhs );
 }
 
 

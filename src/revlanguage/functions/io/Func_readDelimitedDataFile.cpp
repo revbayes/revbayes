@@ -66,16 +66,16 @@ std::string Func_readDelimitedDataFile::bitToState(const std::string &s)
     
     std::stringstream ss;
     char* ptr;
-    long parsed = strtol(s.c_str(), &ptr, 2);
+    std::int64_t parsed = strtol(s.c_str(), &ptr, 2);
     
     if (parsed > RbConstants::Integer::max)
     {
-        throw RbException("ERROR: readTSVBitsetData token " + s + " too large to store as NaturalNumber");
+        throw RbException() << "readTSVBitsetData token " << s << " too large to store as NaturalNumber";
     }
     
     if (s.find_first_not_of("01") != std::string::npos)
     {
-        throw RbException("ERROR: readTSVBitsetData token " + s + " contains non-binary characters");
+        throw RbException() << "readTSVBitsetData token " << s << " contains non-binary characters";
     }
     
     ss << parsed;

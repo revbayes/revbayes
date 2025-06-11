@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -96,11 +96,11 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
     }
     
     const Distribution& rl_ep                                           = static_cast<const Distribution &>( event_number_prior->getRevObject() );
-    RevBayesCore::TypedDistribution<long>* ep                           = static_cast<RevBayesCore::TypedDistribution<long>* >( rl_ep.createDistribution() );
+    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = static_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
 
     const std::vector<std::string>& n = static_cast<const ModelVector<RlString> &>( names->getRevObject() ).getValue();
     // offsets
-    const std::vector<long> & m = static_cast<const ModelVector<Natural> &>( min_elements->getRevObject() ).getValue();
+    const std::vector<std::int64_t> & m = static_cast<const ModelVector<Natural> &>( min_elements->getRevObject() ).getValue();
 
     
     RevBayesCore::MultiValueEventDistribution* d    = new RevBayesCore::MultiValueEventDistribution(ep, vp, n, m);
@@ -132,7 +132,7 @@ const std::string& Dist_MultiValueEvent::getClassType(void)
 const TypeSpec& Dist_MultiValueEvent::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Natural>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<MultiValueEvent>::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }

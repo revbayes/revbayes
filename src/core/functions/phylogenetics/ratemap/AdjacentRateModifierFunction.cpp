@@ -20,7 +20,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-AdjacentRateModifierFunction::AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<long>* w, const TypedDagNode<RbVector<RbVector<long> > >* c, size_t ns, size_t nc) : TypedFunction<CharacterHistoryRateModifier>( new AdjacentRateModifier(ns, nc) ),
+AdjacentRateModifierFunction::AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<std::int64_t>* w, const TypedDagNode<RbVector<RbVector<std::int64_t> > >* c, size_t ns, size_t nc) : TypedFunction<CharacterHistoryRateModifier>( new AdjacentRateModifier(ns, nc) ),
     gainFactor(gf),
     lossFactor(lf),
     width(w),
@@ -41,7 +41,7 @@ AdjacentRateModifierFunction::AdjacentRateModifierFunction(const TypedDagNode<do
     update();
 }
 
-AdjacentRateModifierFunction::AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<long>* w, const TypedDagNode<MatrixReal>* c, size_t ns, size_t nc) : TypedFunction<CharacterHistoryRateModifier>( new AdjacentRateModifier(ns, nc) ),
+AdjacentRateModifierFunction::AdjacentRateModifierFunction(const TypedDagNode<double>* gf, const TypedDagNode<double>* lf, const TypedDagNode<std::int64_t>* w, const TypedDagNode<MatrixReal>* c, size_t ns, size_t nc) : TypedFunction<CharacterHistoryRateModifier>( new AdjacentRateModifier(ns, nc) ),
 gainFactor(gf),
 lossFactor(lf),
 width(w),
@@ -104,7 +104,7 @@ void AdjacentRateModifierFunction::update( void )
     }
     else if (context_type=="array")
     {
-        RbVector<RbVector<long> > c = context_array->getValue();
+        RbVector<RbVector<std::int64_t> > c = context_array->getValue();
         static_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
     }
     else if (context_type=="matrix")
@@ -130,11 +130,11 @@ void AdjacentRateModifierFunction::swapParameterInternal(const DagNode *oldP, co
     }
     else if (oldP == width)
     {
-        width = static_cast<const TypedDagNode<long>* >( newP );
+        width = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     else if (oldP == context_array)
     {
-        context_array = static_cast<const TypedDagNode<RbVector<RbVector<long> > >* >( newP );
+        context_array = static_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >* >( newP );
     }
     else if (oldP == context_matrix)
     {

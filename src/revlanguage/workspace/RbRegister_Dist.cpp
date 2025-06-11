@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 #include <cstdio>
 #include <string>
 
@@ -172,6 +172,7 @@
 #include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
+#include "Dist_CoalescentDemography.h"
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
@@ -187,9 +188,6 @@
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
 #include "Dist_episodicBirthDeath.h"
-#include "Dist_HeterochronousCoalescent.h"
-#include "Dist_HeterochronousConstantCoalescent.h"
-#include "Dist_HeterochronousSkylineCoalescent.h"
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
@@ -221,8 +219,7 @@
 #include "Dist_dirichlet.h"
 #include "Dist_exponential.h"
 #include "Dist_exponentialError.h"
-#include "Dist_exponentialOffset.h"
-#include "Dist_exponentialOffsetPositive.h"
+#include "Dist_exponentialNegativeOffset.h"
 #include "Dist_gamma.h"
 #include "Dist_geom.h"
 #include "Dist_GilbertGraph.h"
@@ -236,8 +233,7 @@
 #include "Dist_LKJ.h"
 #include "Dist_LKJPartial.h"
 #include "Dist_lnorm.h"
-#include "Dist_lnormOffset.h"
-#include "Dist_lnormOffsetPositive.h"
+#include "Dist_lnormNegativeOffset.h"
 #include "Dist_logExponential.h"
 #include "Dist_logUniform.h"
 #include "Dist_multinomial.h"
@@ -263,9 +259,12 @@
 #include "Process_OrnsteinUhlenbeck.h"
 
 /* Mixture distributions (in folder "distributions/mixture") */
+#include "Dist_AutocorrelatedEvent.h"
 #include "Dist_dpp.h"
 #include "Dist_event.h"
 #include "Dist_IID.h"
+#include "Dist_Log.h"
+#include "Dist_MultivariateLog.h"
 #include "Dist_markovTimes.h"
 #include "Dist_markovEvents.h"
 #include "Dist_mixture.h"
@@ -274,6 +273,21 @@
 #include "Dist_MultiValueEvent.h"
 #include "Dist_reversibleJumpMixtureConstant.h"
 #include "Dist_upp.h"
+
+#include "Transform_Exp.h"
+#include "Transform_Log.h"
+#include "Transform_Logit.h"
+#include "Transform_InvLogit.h"
+
+#include "Transform_Add.h"
+#include "Transform_Sub1.h"
+#include "Transform_Sub2.h"
+#include "Transform_Mul.h"
+
+#include "Transform_Vector_Exp.h"
+#include "Transform_Vector_Log.h"
+#include "Transform_Vector_Logit.h"
+#include "Transform_Vector_Invlogit.h"
 
 /// Functions ///
 
@@ -293,6 +307,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         ///////////////////////////////////////////////////
         /* Add distributions (in folder "distributions") */
         ///////////////////////////////////////////////////
+        addType( new WorkspaceVector<Distribution>( ) );
 
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
@@ -373,18 +388,12 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
-
+        
+        // coalescent (population sizes via demography functions)
+        AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
+        
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
-
-        // heterochronously sampled coalescent (constant population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousCoalescent() );
-
-        // heterochronously sampled coalescent (constant population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousConstantCoalescent() );
-
-        // heterochronously sampled coalescent (skyline population sizes)
-        AddDistribution< TimeTree                   >( new Dist_HeterochronousSkylineCoalescent() );
 
         // duplication loss process
         AddDistribution< TimeTree                   >( new Dist_DuplicationLoss() );
@@ -425,8 +434,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // uniform topology with branch lengths distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
 
-		// empirical tree distributions
-		AddDistribution< Tree                       >( new Dist_empiricalTree() );
+        // empirical tree distributions
+        AddDistribution< Tree                       >( new Dist_empiricalTree() );
 
         // ultrametric tree distributions
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
@@ -434,8 +443,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // branch rate tree distributions
         AddDistribution< BranchLengthTree           >( new Dist_BranchRateTree() );
 
-		// Distance Matrix Gamma distribution
-		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
+        // Distance Matrix Gamma distribution
+        AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
 
 
         /* Statistical distributions on simple variables (in folder "distributions/math") */
@@ -509,8 +518,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // exponential distribution
         AddContinuousDistribution< RealPos          >( new Dist_exponential() );
-        AddContinuousDistribution< Real             >( new Dist_exponentialOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_exponentialOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_exponentialNegativeOffset() );
 
         // Laplace distribution
         AddContinuousDistribution< Real             >( new Dist_Laplace() );
@@ -524,8 +532,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // lognormal distribution
         AddContinuousDistribution< RealPos          >( new Dist_lnorm() );
-        AddContinuousDistribution< Real             >( new Dist_lnormOffset() );
-        AddContinuousDistribution< RealPos          >( new Dist_lnormOffsetPositive() );
+        AddContinuousDistribution< Real             >( new Dist_lnormNegativeOffset() );
 
         // LogExponential distribution
         AddContinuousDistribution< Real             >( new Dist_logExponential() );
@@ -585,13 +592,14 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // dirichlet process prior distribution
         AddDistribution< ModelVector<Real>          >( new Dist_dpp<Real>()         );
-		AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
-		AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
-		AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
-		AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
+        AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
+        AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
+        AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
         AddDistribution< ModelVector<Simplex>       >( new Dist_dpp<Simplex>()      );
 
         // event distribution
+        AddDistribution< MultiValueEvent            >( new Dist_AutocorrelatedEvent() );
         AddDistribution< ModelVector<Real>          >( new Dist_event<Real>()         );
         AddDistribution< ModelVector<RealPos>       >( new Dist_event<RealPos>()      );
         AddDistribution< ModelVector<Natural>       >( new Dist_event<Natural>()      );
@@ -606,14 +614,39 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ModelVector<Integer>       >( new Dist_IID<Integer>()      );
         AddDistribution< ModelVector<Probability>   >( new Dist_IID<Probability>()  );
 
+        AddDistribution< RealPos                    >( new Dist_Log()               );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_MultivariateLog()   );
+        AddDistribution< RealPos                    >( new Transform_Exp()          );
+        AddDistribution< Real                       >( new Transform_Log()          );
+        AddDistribution< Real                       >( new Transform_Logit()        );
+        AddDistribution< Probability                >( new Transform_InvLogit()     );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Add<Real       , false>() );
+        AddDistribution< Probability                >( new Transform_Mul<Probability, false>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Mul<Real       , false>() );
+
+        AddDistribution< Real                       >( new Transform_Sub1()        );
+        AddDistribution< Real                       >( new Transform_Sub2()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Add<Real>()        );
+        AddDistribution< Probability                >( new Transform_Mul<Probability>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Mul<Real>()        );
+
+        AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
+        AddDistribution< ModelVector<Real>          >( new Transform_Vector_Logit() );
+        AddDistribution< ModelVector<Probability>   >( new Transform_Vector_InvLogit() );
+
         // uniform partitions prior
         AddDistribution< ModelVector<RealPos>       >( new Dist_upp<RealPos>() );
 
         // mixture distribution
         AddDistribution< Real                       >( new Dist_mixture<Real>() );
-		AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
-		AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
-		AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
+        AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
+        AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
+        AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
         AddDistribution< Probability                >( new Dist_mixture<Probability>() );
         AddDistribution< Simplex                    >( new Dist_mixture<Simplex>() );
         AddDistribution< ModelVector<Real>          >( new Dist_mixture< ModelVector<Real> >() );

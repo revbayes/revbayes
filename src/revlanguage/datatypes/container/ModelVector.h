@@ -41,7 +41,7 @@ namespace RevLanguage {
  
         // Type conversion functions
         RevObject*                                              convertTo(const TypeSpec& type) const;                      //!< Convert to requested type
-        virtual double                                          isConvertibleTo(const TypeSpec& type, bool once) const;     //!< Is this object convertible to the requested type?
+        virtual double                                          isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;     //!< Is this object convertible to the requested type?
 
         // Member object functions
         virtual RevPtr<RevVariable>                             executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found); //!< Map member methods to internal methods
@@ -196,7 +196,7 @@ RevObject* ModelVector<rlType>::convertTo(const TypeSpec &type) const
         // test if the cast succeeded
         if ( theConvertedContainer == NULL )
         {
-            throw RbException("Could not convert a container of type " + this->getClassType() + " to a container of type " + type.getType() );
+            throw RbException() << "Could not convert a container of type " << this->getClassType() << " to a container of type " << type.getType() ;
         }
 
         for ( typename RevBayesCore::RbConstIterator<elementType> i = this->getValue().begin(); i != this->getValue().end(); ++i )
@@ -409,7 +409,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     
@@ -515,10 +515,10 @@ void ModelVector<rlType>::initMethods( void )
  * of Real, for example.
  */
 template <typename rlType>
-double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) const
+double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
-    if ( once == true && type.getParentType() == getClassTypeSpec().getParentType() )
+    if ( convert_by_value == true && type.getParentType() == getClassTypeSpec().getParentType() )
     {
         // We want to convert to another model vector
         if ( getClassType() == "RealPos[]" && type.getType() == "Real[]" )
@@ -549,7 +549,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
             if ( org_element.getTypeSpec() != *type.getElementTypeSpec() )
             {
             
-                double element_penalty = org_element.isConvertibleTo( *type.getElementTypeSpec(), once );
+                double element_penalty = org_element.isConvertibleTo( *type.getElementTypeSpec(), convert_by_value );
                 if ( element_penalty == -1 )
                 {
                     // we cannot convert this element
@@ -580,7 +580,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool once ) c
         return 0.0;
     }
 
-    return ModelObject<RevBayesCore::RbVector<typename rlType::valueType> >::isConvertibleTo( type, once );
+    return ModelObject<RevBayesCore::RbVector<typename rlType::valueType> >::isConvertibleTo( type, convert_by_value );
 }
 
 
@@ -616,7 +616,7 @@ void ModelVector<rlType>::push_back( const RevObject &x )
     
     if ( x_converted == NULL )
     {
-        throw RbException("Could not append an element of type " + x.getType() + " to a vector of type " + this->getType() );
+        throw RbException() << "Could not append an element of type " << x.getType() << " to a vector of type " << this->getType() ;
     }
     
     // Push it onto the back of the elements vector

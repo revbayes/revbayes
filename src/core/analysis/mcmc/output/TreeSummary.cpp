@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <iomanip>
 #include <algorithm>
@@ -183,7 +183,7 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
     // 2-d vectors to keep the data (posteriors and states) of the inputTree nodes: [node][data]
     const std::vector<TopologyNode*> &summary_nodes = tree.getNodes();
     //std::vector<std::map<std::string, Sample<std::string> > > stateAbsencePresence(summary_nodes.size(), std::map<std::string, Sample<std::string> >());
-    std::vector<std::map<std::string, long> > state_counts(summary_nodes.size(), std::map<std::string, long>());
+    std::vector<std::map<std::string, std::int64_t> > state_counts(summary_nodes.size(), std::map<std::string, std::int64_t>());
 
     bool interiorOnly = true;
     bool tipsChecked = false;
@@ -277,7 +277,7 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
                         }
                         else
                         {
-                            throw RbException("Too few parameters for this tree during the tree annotation. Problematic tree: "+ sample_tree.getNewickRepresentation());
+                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
                         }
 
                     }
@@ -553,7 +553,7 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
                     // check if this parameter exists
                     if ( params.size() <= paramIndex )
                     {
-                        throw RbException("Too few parameters for this tree during the tree annotation. Problematic tree: "+ sample_tree.getNewickRepresentation());
+                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
                     }
 
                     std::string tmp = params[paramIndex];
@@ -876,7 +876,7 @@ double TreeSummary::cladeProbability(const Clade &c, bool verbose )
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, long>& cladeCountMap)
+TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
@@ -956,7 +956,7 @@ MatrixReal TreeSummary::computeConnectivity(double credible_interval_size, const
         sample_count.push_back( freq );
 
         Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->makeInternalNodesBifurcating(true, true);
+        current_tree->suppressOutdegreeOneNodes(true);
         unique_trees.push_back( current_tree );
         
 //        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1052,7 +1052,7 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
         sample_count.push_back( freq );
 
         Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->makeInternalNodesBifurcating(true, true);
+        current_tree->suppressOutdegreeOneNodes(true);
         unique_trees.push_back( current_tree );
         
         std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
@@ -1216,7 +1216,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 }
 
 
-long TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
+std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 {
     summarize( verbose );
 
@@ -1248,7 +1248,7 @@ long TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 
 double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
 {
-    return getTopologyCount(tree,verbose)/sampleSize(true);
+    return getTopologyCount(tree,verbose) / (double)sampleSize(true);
 }
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non_trivial_only, bool verbose )
@@ -1303,7 +1303,7 @@ std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bo
         total_prob += p;
 
         Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->makeInternalNodesBifurcating(true, true);
+        current_tree->suppressOutdegreeOneNodes(true);
         unique_trees.push_back( *current_tree );
         delete current_tree;
         if ( total_prob >= credible_interval_size )
@@ -1551,7 +1551,7 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
     std::string bestNewick = tree_samples.rbegin()->first;
     NewickConverter converter;
     Tree* tmp_best_tree = converter.convertFromNewick( bestNewick );
-    tmp_best_tree->makeInternalNodesBifurcating(true,true);
+    tmp_best_tree->suppressOutdegreeOneNodes(true);
 
     Tree* tmp_tree = NULL;
 
@@ -1604,7 +1604,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
 
             NewickConverter converter;
             Tree* tmp_tree = converter.convertFromNewick( newick );
-            tmp_tree->makeInternalNodesBifurcating(true, true);
+            tmp_tree->suppressOutdegreeOneNodes(true);
             if ( clock == true )
             {
                 best_tree = TreeUtilities::convertTree( *tmp_tree );
@@ -1933,9 +1933,9 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
     outgroup = c;
 }
 
-long TreeSummary::sampleSize(bool post) const
+std::int64_t TreeSummary::sampleSize(bool post) const
 {
-    long total = 0;
+    std::int64_t total = 0;
 
     for(auto& trace: traces)
     {
@@ -1946,7 +1946,7 @@ long TreeSummary::sampleSize(bool post) const
 }
 
 
-long TreeSummary::splitCount(const Split &n) const
+std::int64_t TreeSummary::splitCount(const Split &n) const
 {
     auto iter = clade_counts.find(n);
 
