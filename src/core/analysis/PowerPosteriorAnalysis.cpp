@@ -344,7 +344,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         
     }
     
-    // Monitor. Note that if we are running just one stone at a time, only process is allowed to write the monitors.
+    // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
     if (not one_only or (one_only and pid == pid_to_print))
     {
         sampler->startMonitors(gen, false);
