@@ -51,7 +51,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   graph;
         RevPtr<const RevVariable>                   proposal;
         RevPtr<const RevVariable>                   lambda;
-        
+        RevPtr<const RevVariable>                   rootBranch;
+        RevPtr<const RevVariable>                   rootFrequencies;
     };
     
 }

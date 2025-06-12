@@ -14,7 +14,9 @@
 #include "RandomNumberGenerator.h"
 #include "RateGeneratorSequence.h"
 #include "RbException.h"
+#include "Simplex.h"
 #include "StochasticNode.h"
+#include "TransitionProbabilityMatrix.h"
 #include "TreeChangeEventMessage.h"
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
@@ -64,7 +66,7 @@ namespace RevBayesCore {
         std::set<size_t>                                            chooseCharactersToSample(double p);
         void                                                        setSampledCharacters(const std::set<size_t>& s);
         void                                                        sampleNodeCharacters(void);                                     //!< Sample the characters at the node
-        void                                                        sampleRootCharacters(string rt, std::vector<double> rf);                                     //!< Sample the characters at the root
+        void                                                        sampleRootCharacters(void);                                     //!< Sample the characters at the root
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);         //!< Set the rate generator.
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d); //!< Set the rate generator.
         void                                                        setProposalTuningParameter(double tp);
@@ -104,8 +106,8 @@ namespace RevBayesCore {
         std::set<size_t>                                            sampledCharacters;
         std::set<size_t>                                            allCharacters;
         
-        string                                                      rootBranchTreatment;
-        std::vector<double>                                         rootFrequencies;
+        string                                                      rootBranch;
+        const TypedDagNode< Simplex >*                              rootFrequencies;
     };
 
 }
@@ -129,8 +131,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     leftTpMatrix(2),
     rightTpMatrix(2),
     lambda(l),
-    rootBranchTreatment("IMPUTE"),
-    rootFrequencies({0,0,1})
+    rootBranch("INPUT"),
+    rootFrequencies( NULL )
 {
 
     addNode( ctmc );
@@ -164,7 +166,7 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     leftTpMatrix( p.leftTpMatrix ),
     rightTpMatrix( p.rightTpMatrix ),
     lambda( p.lambda ),
-    rootBranchTreatment( p.rootBranchTreatment ),
+    rootBranch( p.rootBranch ),
     rootFrequencies( p.rootFrequencies )
 {
 
@@ -232,7 +234,7 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         leftTpMatrix        = p.leftTpMatrix;
         rightTpMatrix       = p.rightTpMatrix;
         lambda              = p.lambda;
-        rootBranchTreatment = p.rootBranchTreatment;
+        rootBranch          = p.rootBranch;
         rootFrequencies     = p.rootFrequencies;
 
         addNode( ctmc );
@@ -332,12 +334,11 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     
     if ( node->isRoot() )
     {
-        string rt  = rootBranchTreatment;
-        std::vector<double> rf = rootFrequencies;
-        sampleRootCharacters( rt, rf );
+        sampleRootCharacters();
         
-        double root_branch_length = c->getRootBranchLength() - node->getAge();
-        if ( root_branch_length > 0 || rt == "IMPUTE")
+        string rtb  = rootBranch;
+        double root_branch_length = c->getRootBranchLength();
+        if ( rtb == "INPUT")
         {
             // update parent incident path
             proposedLnProbRatio += nodeProposal->doProposal();
@@ -358,8 +359,6 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
 
     // forward proposal probability
 //    proposedLnProbRatio -= computeLnProposal();
-
-    
 
     return proposedLnProbRatio;
 }
@@ -413,8 +412,11 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     } while ( node->isTip() == true );
 
     // prepare the path proposals
-    nodeProposal->assignNode(node);
-    nodeProposal->prepareProposal();
+    string rtb  = rootBranch;
+    if ( not ( node->isRoot() && rtb == "NONE" ) ) {
+        nodeProposal->assignNode(node);
+        nodeProposal->prepareProposal();
+    }
 
     leftProposal->assignNode(&node->getChild(0));
     leftProposal->prepareProposal();
@@ -482,10 +484,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     if ( node->isTip()  )
     {
         return;
-    }
-    else if ( node->isRoot() )
-    {
-        throw RbException("Wrong node.");
     }
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     if ( c == NULL )
@@ -575,21 +573,42 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
 
 
 template<class charType>
-void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( string rt, std::vector<double> rf )
+void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( void )
 {
-    // PL comments: edit this to sample root node
-    if ( not node->isRoot()  )
-    {
-        throw RbException("Wrong node.");
-    }
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     if ( c == NULL )
     {
         throw RbException("Failed cast.");
     }
 
-    CharacterHistoryDiscrete& histories = c->getHistories();
+    string rtb  = rootBranch;
+    double root_branch_length = c->getRootBranchLength();
+    if ( root_branch_length == 0 && rtb == "INPUT" )
+    {
+        rtb = "NONE";
+    }
+    
+    // just for rbr == "NONE"
+    std::vector<double> rf;
+    if ( rootFrequencies != NULL )
+    {
+        rf = rootFrequencies->getValue();
+    }
+    else
+    {
+        const RateMatrix *rm = ( q_map_sequence != NULL ? dynamic_cast<const RateMatrix *>( &q_map_sequence->getValue() ) : dynamic_cast<const RateMatrix *>( &q_map_site->getValue() ) );
+        if ( rm != NULL )
+        {
+            rf = rm->getStationaryFrequencies();
+        }
+        else
+        {
+            throw RbException("You either need to use a rate-matrix or specify root frequencies.");
+        }
+    }
 
+    CharacterHistoryDiscrete& histories = c->getHistories();
+    
     // get local node and branch information
     TopologyNode &left_child  = node->getChild(0);
     TopologyNode &right_child = node->getChild(1);
@@ -602,7 +621,11 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     double left_age   = left_child.getAge();
     double right_age  = right_child.getAge();
 
-    double node_rate  = c->getBranchRate( node_index );
+    double node_rate  = 0.0;
+    if ( rtb == "INPUT" )
+    {
+        double node_rate  = c->getBranchRate( node_index );
+    }
     double left_rate  = c->getBranchRate( left_index );
     double right_rate = c->getBranchRate( right_index );
 
@@ -622,21 +645,16 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     
     // get origin age and root branch length (if present)
     double parent_age         = 0.0;
-    double root_branch_length = c->getRootBranchLength() - node_age;
     if ( root_branch_length > 0 )
     {
         parent_age = node->getAge() + c->getRootBranchLength();
-    }
-    else if ( rt == "IMPUTE")
-    {
-        parent_age = node->getAge() * 100;
     }
 
     // get transition probs
     const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
     rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
     rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
-    if ( root_branch_length > 0 || rt == "IMPUTE")
+    if ( rtb == "INPUT")
     {
         rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, nodeTpMatrix);
     }
@@ -644,57 +662,32 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     
     std::set<size_t>::iterator it_s;
     // sample root/origin state
-    if ( root_branch_length > 0 || rt == "IMPUTE")
+    if ( rtb == "INPUT")
     {
-        if ( root_branch_length > 0 )
+        for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
         {
-            for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
+            size_t site_index = *it_s;
+            
+            double u = GLOBAL_RNG->uniform01();
+            unsigned int s = 0;
+            for ( size_t i=0; i<numStates; ++i )
             {
-                size_t site_index = *it_s;
-                
-                double u = GLOBAL_RNG->uniform01();
-                unsigned int s = 0;
-                for ( size_t i=0; i<numStates; ++i )
+                u -= rf[i];
+                if ( u <= 0.0 )
                 {
-                    u -= rf[i];
-                    if ( u <= 0.0 )
-                    {
-                        break;
-                    }
-                    ++s;
+                    break;
                 }
-                //            std::cout << s;
-                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+                ++s;
             }
+            //            std::cout << s;
+            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
         }
-        else if ( rt == "IMPUTE" )
-        {
-            for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
-            {
-                size_t site_index = *it_s;
-                
-                double u = GLOBAL_RNG->uniform01();
-                std::vector<double> state_probs(numStates, 1.0/numStates);
-                unsigned int s = 0;
-                for ( size_t i=0; i<numStates; ++i )
-                {
-                    u -= state_probs[i];
-                    if ( u <= 0.0 )
-                    {
-                        break;
-                    }
-                    ++s;
-                }
-                //            std::cout << s;
-                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
-            }
-        }
+    
         //  for (size_t site_index = 0; site_index < num_sites; ++site_index)
         for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
         {
             size_t site_index = *it_s;
                 
-
             size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
             size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
             size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
@@ -727,15 +720,23 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
         }
     }
 
-    else if ( rt == "NONE" )
+    else if ( rtb == "NONE" )
     {
         if ( std::accumulate(rf.begin(), rf.end(), 0.0f)  > 0 )
         {
-            rf = rootFrequencies; // PL comments: is this normalized?
+            rf = rootFrequencies->getValue();
         }
         else
         {
-            // PL comments: rf = calculate stationary frequencies
+            const RateMatrix *rm = dynamic_cast<const RateMatrix *>( &q_map_site->getValue() );
+            if ( rm != NULL )
+            {
+                rf = rm->getStationaryFrequencies();
+            }
+            else
+            {
+                throw RbException("You either need to use a rate-matrix or specify root frequencies.");
+            }
         }
 
         for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
