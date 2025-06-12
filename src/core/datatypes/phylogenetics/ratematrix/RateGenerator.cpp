@@ -44,6 +44,17 @@ size_t RateGenerator::getNumberOfStates( void ) const
     return num_states;
 }
 
+RbVector<std::string> RateGenerator::getStateDescriptions( void ) const
+{
+    RbVector<std::string> state_descriptions;
+    for (size_t i = 0; i < num_states; i++) {
+        std::stringstream ss;
+        ss << i;
+        state_descriptions.push_back(ss.str());
+    }
+    return state_descriptions;
+}
+
 double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, const std::vector<size_t> &counts, double age, double rate) const
 {
 

@@ -610,12 +610,12 @@ void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
         value->getTreeChangeEventHandler().removeListener( this );
     }
     new_value->getTreeChangeEventHandler().addListener( this );
-    
+
     // if we don't own the tree, then we just replace the current pointer with the pointer
     // to the new value of the base distribution
     value = new_value;
     base_distribution->setValue( value );
-    
+
     // recompute the active clades
     dirty_nodes = std::vector<bool>( value->getNumberOfNodes(), true );
     active_clades = std::vector<RbBitSet>(value->getNumberOfInteriorNodes(), RbBitSet());
@@ -624,6 +624,7 @@ void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
     
     stored_clades          = active_clades;
     stored_backbone_clades = active_backbone_clades;
+
 }
 
 void TopologyConstrainedTreeDistribution::redrawValue( void )
@@ -1259,6 +1260,7 @@ void TopologyConstrainedTreeDistribution::setValue(Tree *v, bool f )
     
     stored_clades          = active_clades;
     stored_backbone_clades = active_backbone_clades;
+
 }
 
 
@@ -1286,7 +1288,6 @@ void TopologyConstrainedTreeDistribution::swapParameterInternal( const DagNode *
     }
     
 }
-
 
 /**
  * Touch the current value and reset some internal flags.
