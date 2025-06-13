@@ -46,7 +46,8 @@ namespace RevBayesCore {
     class NodeRejectionSampleProposal : public Proposal {
 
     public:
-        NodeRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);                                  //!<  constructor
+        NodeRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);
+        // PL comments: should it be *rf be NULL? //!<  constructor
         NodeRejectionSampleProposal( const NodeRejectionSampleProposal& p );                                                        //!<  constructor
         virtual                                                    ~NodeRejectionSampleProposal(void);                              //!< Destructor
         
@@ -61,15 +62,17 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
+        double                                                      getRootBranchLength(void);                                     //!< get the length of the root branch
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
         std::set<size_t>                                            chooseCharactersToSample(double p);
         void                                                        setSampledCharacters(const std::set<size_t>& s);
         void                                                        sampleNodeCharacters(void);                                     //!< Sample the characters at the node
         void                                                        sampleRootCharacters(void);                                     //!< Sample the characters at the root
+        void                                                        setProposalTuningParameter(double tp);
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);         //!< Set the rate generator.
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d); //!< Set the rate generator.
-        void                                                        setProposalTuningParameter(double tp);
+        // void                                                        setRootFrequencies(const TypedDagNode< Simplex > *rf); //!< Set the root frequencies
         void                                                        tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                                        undoProposal(void);                                             //!< Reject the proposal
 
@@ -106,8 +109,7 @@ namespace RevBayesCore {
         std::set<size_t>                                            sampledCharacters;
         std::set<size_t>                                            allCharacters;
         
-        string                                                      rootBranch;
-        const TypedDagNode< Simplex >*                              rootFrequencies;
+        // const TypedDagNode< Simplex >*                              rootFrequencies;
     };
 
 }
@@ -130,9 +132,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     nodeTpMatrix(2),
     leftTpMatrix(2),
     rightTpMatrix(2),
-    lambda(l),
-    rootBranch("INPUT"),
-    rootFrequencies( NULL )
+    lambda(l)
+    // rootFrequencies(rf)
 {
 
     addNode( ctmc );
@@ -165,9 +166,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     nodeTpMatrix( p.nodeTpMatrix ),
     leftTpMatrix( p.leftTpMatrix ),
     rightTpMatrix( p.rightTpMatrix ),
-    lambda( p.lambda ),
-    rootBranch( p.rootBranch ),
-    rootFrequencies( p.rootFrequencies )
+    lambda( p.lambda )
+    // rootFrequencies( p.rootFrequencies )
 {
 
     addNode( ctmc );
@@ -234,8 +234,7 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         leftTpMatrix        = p.leftTpMatrix;
         rightTpMatrix       = p.rightTpMatrix;
         lambda              = p.lambda;
-        rootBranch          = p.rootBranch;
-        rootFrequencies     = p.rootFrequencies;
+        // rootFrequencies     = p.rootFrequencies;
 
         addNode( ctmc );
         addNode( q_map_site );
@@ -330,15 +329,16 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     // backward proposal probability
     //    proposedLnProbRatio += computeLnProposal();
     
-    TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+    // TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     
     if ( node->isRoot() )
     {
+        std::cout << "Root node." << std::endl;
         sampleRootCharacters();
         
-        string rtb  = rootBranch;
-        double root_branch_length = c->getRootBranchLength();
-        if ( rtb == "INPUT")
+        //  string rtb  = rootBranch;
+        double root_branch_length = getRootBranchLength();
+        if ( root_branch_length > 0 )
         {
             // update parent incident path
             proposedLnProbRatio += nodeProposal->doProposal();
@@ -349,6 +349,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     }
     else
     {
+        std::cout << "Not root node." << std::endl;
         sampleNodeCharacters();
         // update 3x child incident paths
         proposedLnProbRatio += nodeProposal->doProposal();
@@ -385,6 +386,24 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::getProposalTuningPar
 }
 
 
+template<class charType>
+double RevBayesCore::NodeRejectionSampleProposal<charType>::getRootBranchLength( void )
+{
+    // PL comments: this method is here because getRootBranchLength() in TreeHistoryCtmc.h gives a fake root branch length if the true one is 0
+    // PL comments: can be remove if that is fixed
+    
+    TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+    const Tree& tree = c->getTree();
+    std::vector<TopologyNode*> nds = tree.getNodes();
+    node = nds[tree.getRoot().getIndex()];
+    
+    double origin = c->getRootBranchLength();
+    double root_age = node->getAge();
+    
+    double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+}
+
+
 /**
  *
  */
@@ -412,8 +431,10 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     } while ( node->isTip() == true );
 
     // prepare the path proposals
-    string rtb  = rootBranch;
-    if ( not ( node->isRoot() && rtb == "NONE" ) ) {
+
+    TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+    double root_branch_length = getRootBranchLength();
+    if ( not ( node->isRoot() && root_branch_length == 0 ) ) {
         nodeProposal->assignNode(node);
         nodeProposal->prepareProposal();
     }
@@ -580,188 +601,190 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     {
         throw RbException("Failed cast.");
     }
-
-    string rtb  = rootBranch;
-    double root_branch_length = c->getRootBranchLength();
-    if ( root_branch_length == 0 && rtb == "INPUT" )
-    {
-        rtb = "NONE";
-    }
     
-    // just for rbr == "NONE"
-    std::vector<double> rf;
-    if ( rootFrequencies != NULL )
+    // const Simplex rf = c->getRootFrequencies();
+    const Simplex& rf = c->getRootFrequencies();
+    // TypedDagNode< Simplex >*
+    std::cout << "Root frequencies: " << rf << std::endl;
+    
+    double root_branch_length = getRootBranchLength();
+    if ( root_branch_length == 0)
     {
-        rf = rootFrequencies->getValue();
+    //     if ( rf.size() == 0 )
+    //     {
+    //         const RateMatrix *rm = ( q_map_sequence != NULL ? dynamic_cast<const RateMatrix *>( &q_map_sequence->getValue() ) : // dynamic_cast<const RateMatrix *>( &q_map_site->getValue() ) );
+    //         if ( rm != NULL )
+    //         {
+    //             rf = rm->getStationaryFrequencies();
+    //             std::cout << "Root frequencies at stationarity calculated: " << rf << std::endl;
+    //         }
+    //         else
+    //         {
+    //             throw RbException("You either need to use a rate-matrix or specify root frequencies.");
+    //         }
+    //     }
+        
+        CharacterHistoryDiscrete& histories = c->getHistories();
+        
+        // get local node and branch information
+        TopologyNode &left_child  = node->getChild(0);
+        TopologyNode &right_child = node->getChild(1);
+
+        size_t node_index = node->getIndex();
+        size_t left_index = left_child.getIndex();
+        size_t right_index = right_child.getIndex();
+        
+        double node_age   = node->getAge();
+        double left_age   = left_child.getAge();
+        double right_age  = right_child.getAge();
+
+        double node_rate  = 0.0;
+        double left_rate  = c->getBranchRate( left_index );
+        double right_rate = c->getBranchRate( right_index );
+
+        // states for conditional sampling probs
+        const std::vector<CharacterEvent*>& leftChildState  = histories[ left_index ].getChildCharacters();
+        const std::vector<CharacterEvent*>& rightChildState = histories[ right_index ].getChildCharacters();
+
+        // states to update
+        std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index ].getChildCharacters();
+        std::vector<CharacterEvent*>& leftParentState  = histories[ left_index ].getParentCharacters();
+        std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
+
+        
+        // no need when no root branch
+        // std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
+        
+        // get transition probs
+        const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
+        rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
+        rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
+        
+        std::set<size_t>::iterator it_s;
+
+        for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
+        {
+            size_t site_index = *it_s;
+            
+            double u = GLOBAL_RNG->uniform01();
+            unsigned int s = 0;
+            for ( size_t i=0; i<numStates; ++i )
+            {
+                u -= rf[i];
+                if ( u <= 0.0 )
+                {
+                    break;
+                }
+                ++s;
+            }
+            //            std::cout << s;
+            static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+            static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+            static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        }
     }
     else
     {
-        const RateMatrix *rm = ( q_map_sequence != NULL ? dynamic_cast<const RateMatrix *>( &q_map_sequence->getValue() ) : dynamic_cast<const RateMatrix *>( &q_map_site->getValue() ) );
-        if ( rm != NULL )
-        {
-            rf = rm->getStationaryFrequencies();
-        }
-        else
-        {
-            throw RbException("You either need to use a rate-matrix or specify root frequencies.");
-        }
-    }
+        // if ( rtb == "INPUT" )
+        // {
+        //     double node_rate  = c->getBranchRate( node_index );
+        // }
+        // double left_rate  = c->getBranchRate( left_index );
+        // double right_rate = c->getBranchRate( right_index );
+    //
+        // // states for conditional sampling probs
+        // const std::vector<CharacterEvent*>& leftChildState  = histories[ left_index ].getChildCharacters();
+        // const std::vector<CharacterEvent*>& rightChildState = histories[ right_index ].getChildCharacters();
+    //
+        // // states to update
+        // std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index ].getChildCharacters();
+        // std::vector<CharacterEvent*>& leftParentState  = histories[ left_index ].getParentCharacters();
+        // std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
+    //
+        //
+        // // we may also update this if it is the root state (not const)
+        // std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
+        //
+        //
+        // // get origin age and root branch length (if present)
+        // double parent_age         = 0.0;
+        // if ( root_branch_length > 0 )
+        // {
+        //     parent_age = node->getAge() + c->getRootBranchLength();
+        // }
+    //
+        // // get transition probs
+        // const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
+        // rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
+        // rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
+        // if ( rtb == "INPUT")
+        // {
+        //     rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, nodeTpMatrix);
+        // }
+        //
+        //
+        // std::set<size_t>::iterator it_s;
+        // // sample root/origin state
+        // if ( rtb == "INPUT")
+        // {
+        //     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
+        //     {
+        //         size_t site_index = *it_s;
+        //
+        //         double u = GLOBAL_RNG->uniform01();
+        //         unsigned int s = 0;
+        //         for ( size_t i=0; i<numStates; ++i )
+        //         {
+        //             u -= rf[i];
+        //             if ( u <= 0.0 )
+        //             {
+        //                 break;
+        //             }
+        //             ++s;
+        //         }
+        //         //            std::cout << s;
+        //         static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+        //     }
+        //
+        //     //  for (size_t site_index = 0; site_index < num_sites; ++site_index)
+        //     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
+        //     {
+        //         size_t site_index = *it_s;
+        //
+        //         size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        //         size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        //         size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+    //
+        //
+        //         double u = GLOBAL_RNG->uniform01();
+    //
+        //         std::vector<double> state_probs(numStates,0.0);
+        //         double sum = 0.0;
+        //         for ( size_t i=0; i<numStates; ++i )
+        //         {
+        //             double p = nodeTpMatrix[ancS][i] * leftTpMatrix[i][desS1] * rightTpMatrix[i][desS2];
+        //             sum += p;
+        //             state_probs[i] = p;
+        //         }
+    //
+        //         unsigned int s = 0;
+        //         for ( size_t i=0; i<numStates; ++i )
+        //         {
+        //             u -= (state_probs[i]/sum);
+        //             if ( u <= 0.0 )
+        //             {
+        //                 break;
+        //             }
+        //             ++s;
+        //         }
+        //         static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        //         static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+        //         static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        //     }
+        // }
 
-    CharacterHistoryDiscrete& histories = c->getHistories();
-    
-    // get local node and branch information
-    TopologyNode &left_child  = node->getChild(0);
-    TopologyNode &right_child = node->getChild(1);
-
-    size_t node_index = node->getIndex();
-    size_t left_index = left_child.getIndex();
-    size_t right_index = right_child.getIndex();
-    
-    double node_age   = node->getAge();
-    double left_age   = left_child.getAge();
-    double right_age  = right_child.getAge();
-
-    double node_rate  = 0.0;
-    if ( rtb == "INPUT" )
-    {
-        double node_rate  = c->getBranchRate( node_index );
-    }
-    double left_rate  = c->getBranchRate( left_index );
-    double right_rate = c->getBranchRate( right_index );
-
-    // states for conditional sampling probs
-    const std::vector<CharacterEvent*>& leftChildState  = histories[ left_index ].getChildCharacters();
-    const std::vector<CharacterEvent*>& rightChildState = histories[ right_index ].getChildCharacters();
-
-    // states to update
-    std::vector<CharacterEvent*>& nodeChildState   = histories[ node_index ].getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState  = histories[ left_index ].getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
-
-    
-    // we may also update this if it is the root state (not const)
-    std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
-    
-    
-    // get origin age and root branch length (if present)
-    double parent_age         = 0.0;
-    if ( root_branch_length > 0 )
-    {
-        parent_age = node->getAge() + c->getRootBranchLength();
-    }
-
-    // get transition probs
-    const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
-    rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
-    rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
-    if ( rtb == "INPUT")
-    {
-        rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, nodeTpMatrix);
-    }
-    
-    
-    std::set<size_t>::iterator it_s;
-    // sample root/origin state
-    if ( rtb == "INPUT")
-    {
-        for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
-        {
-            size_t site_index = *it_s;
-            
-            double u = GLOBAL_RNG->uniform01();
-            unsigned int s = 0;
-            for ( size_t i=0; i<numStates; ++i )
-            {
-                u -= rf[i];
-                if ( u <= 0.0 )
-                {
-                    break;
-                }
-                ++s;
-            }
-            //            std::cout << s;
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
-        }
-    
-        //  for (size_t site_index = 0; site_index < num_sites; ++site_index)
-        for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
-        {
-            size_t site_index = *it_s;
-                
-            size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-            size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-            size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
-
-                
-            double u = GLOBAL_RNG->uniform01();
-
-            std::vector<double> state_probs(numStates,0.0);
-            double sum = 0.0;
-            for ( size_t i=0; i<numStates; ++i )
-            {
-                double p = nodeTpMatrix[ancS][i] * leftTpMatrix[i][desS1] * rightTpMatrix[i][desS2];
-                sum += p;
-                state_probs[i] = p;
-            }
-
-            unsigned int s = 0;
-            for ( size_t i=0; i<numStates; ++i )
-            {
-                u -= (state_probs[i]/sum);
-                if ( u <= 0.0 )
-                {
-                    break;
-                }
-                ++s;
-            }
-            static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
-        }
-    }
-
-    else if ( rtb == "NONE" )
-    {
-        if ( std::accumulate(rf.begin(), rf.end(), 0.0f)  > 0 )
-        {
-            rf = rootFrequencies->getValue();
-        }
-        else
-        {
-            const RateMatrix *rm = dynamic_cast<const RateMatrix *>( &q_map_site->getValue() );
-            if ( rm != NULL )
-            {
-                rf = rm->getStationaryFrequencies();
-            }
-            else
-            {
-                throw RbException("You either need to use a rate-matrix or specify root frequencies.");
-            }
-        }
-
-        for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
-        {
-            size_t site_index = *it_s;
-            
-            double u = GLOBAL_RNG->uniform01();
-            unsigned int s = 0;
-            for ( size_t i=0; i<numStates; ++i )
-            {
-                u -= rf[i];
-                if ( u <= 0.0 )
-                {
-                    break;
-                }
-                ++s;
-            }
-            //            std::cout << s;
-            static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
-        }
     }
 }
-
 
 
 template<class charType>
@@ -810,6 +833,13 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     // q_map_site = NULL;
     
 }
+
+
+// template<class charType>
+// void RevBayesCore::NodeRejectionSampleProposal<charType>::setRootFrequencies(const TypedDagNode< Simplex > *rf)
+// {
+//     rootFrequencies = rf;
+// }
 
 
 template<class charType>
