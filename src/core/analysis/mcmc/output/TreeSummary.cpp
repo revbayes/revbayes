@@ -670,13 +670,6 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             {
                 tmp_tree->reroot( *outgroup, false, true );
             }
-            else
-            {
-                std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
-                std::sort(tip_names.begin(),tip_names.end());
-                std::string outgrp = tip_names[0];
-                tmp_tree->reroot( outgrp, false, true );
-            }
         }
         else if ( tmp_tree->isRooted() != rooted )
         {
@@ -1966,10 +1959,6 @@ void TreeSummary::summarize( bool verbose )
 {
     if ( not isDirty() ) return;
 
-    std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
-    std::sort(tip_names.begin(),tip_names.end());
-    const std::string& this_outgroup = tip_names[0];
-
     rooted = traces.front()->objectAt(0).isRooted();
 
     clade_samples.clear();
@@ -2011,10 +2000,6 @@ void TreeSummary::summarize( bool verbose )
                 if ( outgroup )
                 {
                     tree.reroot( *outgroup, false, true );
-                }
-                else
-                {
-                    tree.reroot( this_outgroup, false, true );
                 }
             }
 
