@@ -389,10 +389,10 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::getRootBranchLength(
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     const Tree& tree = c->getTree();
     std::vector<TopologyNode*> nds = tree.getNodes();
-    node = nds[tree.getRoot().getIndex()];
+    TopologyNode* root = nds[tree.getRoot().getIndex()];
     
     double origin = c->getRootBranchLength();
-    double root_age = node->getAge();
+    double root_age = root->getAge();
     
     double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
 }
@@ -600,7 +600,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     }
     
     const Simplex& rf = c->getRootFrequencies();
-    
+    std::cout << rf << std::endl;
     double root_branch_length = getRootBranchLength();
     if ( root_branch_length == 0 )
     {
@@ -613,7 +613,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
         size_t node_index = node->getIndex();
         size_t left_index = left_child.getIndex();
         size_t right_index = right_child.getIndex();
-        
+
         double node_age   = node->getAge();
         double left_age   = left_child.getAge();
         double right_age  = right_child.getAge();
@@ -631,15 +631,11 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
         std::vector<CharacterEvent*>& leftParentState  = histories[ left_index ].getParentCharacters();
         std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
 
-        
-        // no need when no root branch
-        // std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
-        
         // get transition probs
         const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
         rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
         rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
-        
+
         std::set<size_t>::iterator it_s;
         for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
         {
@@ -676,6 +672,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     }
     else
     {
+        throw RbException("Temporarily discontinue root branch == TRUE option.");
         // if ( rtb == "INPUT" )
         // {
         //     double node_rate  = c->getBranchRate( node_index );

@@ -158,7 +158,8 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelih
     for (size_t i = 0; i < counts.size(); i++)
     {
         // if root branch is present
-        lnP += counts[i] * log( rf[i] );
+        // lnP += counts[i] * log( rf[i] );
+        lnP += log( rf[i] );
     }
 
     return lnP;
