@@ -61,7 +61,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                                               //!< Perform proposal
         virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
-        double                                                      getRootBranchLength(void);                                     //!< get the length of the root branch
+        const double                                                getRootBranchLength(void);                                     //!< get the length of the root branch
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                                          //!< Prepare the proposal
         std::set<size_t>                                            sampleCharacters(double p);
@@ -446,7 +446,7 @@ const std::string& RevBayesCore::PathRejectionSampleProposal<charType>::getPropo
 }
 
 template<class charType>
-double RevBayesCore::PathRejectionSampleProposal<charType>::getRootBranchLength( void )
+const double RevBayesCore::PathRejectionSampleProposal<charType>::getRootBranchLength( void )
 {
     // PL comments: this method is here because getRootBranchLength() in TreeHistoryCtmc.h gives a fake root branch length if the true one is 0
     // PL comments: can be remove if that is fixed
@@ -459,7 +459,8 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::getRootBranchLength(
     double origin = c->getRootBranchLength();
     double root_age = node->getAge();
     
-    double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+    const double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+    return root_branch_length;
 }
 
 /**
@@ -505,7 +506,7 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         size_t num_nodes = tau.getNumberOfNodes();
         
         size_t node_index = 0;
-        double root_branch_length = getRootBranchLength();
+        const double root_branch_length = getRootBranchLength();
         if ( root_branch_length == 0 )
         {
             do {

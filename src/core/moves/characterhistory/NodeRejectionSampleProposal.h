@@ -62,7 +62,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
-        double                                                      getRootBranchLength(void);                                     //!< get the length of the root branch
+        const double                                                getRootBranchLength(void);                                     //!< get the length of the root branch
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
         std::set<size_t>                                            chooseCharactersToSample(double p);
@@ -332,7 +332,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     if ( node->isRoot() )
     {
         sampleRootCharacters();
-        double root_branch_length = getRootBranchLength();
+        const double root_branch_length = getRootBranchLength();
         if ( root_branch_length > 0 )
         {
             // update parent incident path
@@ -381,7 +381,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::getProposalTuningPar
 
 
 template<class charType>
-double RevBayesCore::NodeRejectionSampleProposal<charType>::getRootBranchLength( void )
+const double RevBayesCore::NodeRejectionSampleProposal<charType>::getRootBranchLength( void )
 {
     // PL comments: this method is here because getRootBranchLength() in TreeHistoryCtmc.h gives a fake root branch length if the true one is 0
     // PL comments: can be remove if that is fixed
@@ -394,7 +394,8 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::getRootBranchLength(
     double origin = c->getRootBranchLength();
     double root_age = root->getAge();
     
-    double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+    const double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+    return root_branch_length;
 }
 
 
@@ -426,7 +427,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     // prepare the path proposals
 
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
-    double root_branch_length = getRootBranchLength();
+    const double root_branch_length = getRootBranchLength();
     
     nodeProposal->assignNode(node);
     if ( not ( node->isRoot() ) || root_branch_length > 0  ) {
@@ -600,8 +601,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     }
     
     const Simplex& rf = c->getRootFrequencies();
-    std::cout << rf << std::endl;
-    double root_branch_length = getRootBranchLength();
+    const double root_branch_length = getRootBranchLength();
     if ( root_branch_length == 0 )
     {
         CharacterHistoryDiscrete& histories = c->getHistories();
