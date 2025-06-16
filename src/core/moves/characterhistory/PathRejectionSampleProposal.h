@@ -312,7 +312,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     std::vector<CharacterEvent*> parent_states = bh->getParentCharacters();
     std::vector<CharacterEvent*> child_states  = bh->getChildCharacters();
     std::multiset<CharacterEvent*,CharacterEventCompare> proposed_histories;
-    
+        
     // update histories for sites in sampledCharacters
     std::set<size_t>::iterator it_s;
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
@@ -321,7 +321,8 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
         std::set<CharacterEvent*,CharacterEventCompare> tmpHistory;
         size_t currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
         size_t endState  = static_cast<CharacterEventDiscrete*>(child_states[site_index])->getState();
-        
+        std::cout << "old start state and end state are " << currState << " and " << endState << std::endl;
+
         
 
         do
@@ -331,6 +332,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
             
             // proceed with rejection sampling
             currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
+            std::cout << "start state is " << currState << std::endl;
             double end_age = node->getAge();
             double age = end_age + branch_length;
             
@@ -360,7 +362,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
                         break;
                     }
                 }
-                
+                std::cout << "next state is " << nextState << std::endl;
                 // do not force valid time if event needed
                 age -= RbStatistics::Exponential::rv(r, *GLOBAL_RNG);
                 
@@ -369,9 +371,12 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
                     currState = nextState;
                     CharacterEvent* evt = new CharacterEventDiscrete(site_index, nextState, age);
                     tmpHistory.insert(evt);
+                    std::cout << "sampling continues." << std::endl;
+
                 }
                 else if (currState != endState)
                 {
+                    std::cout << "sampling rejected. resampling..." << std::endl;
                     for (std::set<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h = tmpHistory.rbegin(); it_h != tmpHistory.rend(); it_h++)
                     {
                         delete *it_h;

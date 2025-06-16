@@ -345,7 +345,9 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
         }
         // update 2x child incident paths
         proposedLnProbRatio += leftProposal->doProposal();
+        std::cout << "proposedLnProbRatio after left branch is " << proposedLnProbRatio << std::endl;
         proposedLnProbRatio += rightProposal->doProposal();
+        std::cout << "proposedLnProbRatio after right branch is " << proposedLnProbRatio << std::endl;
     }
     else
     {
@@ -355,6 +357,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
         proposedLnProbRatio += nodeProposal->doProposal();
         proposedLnProbRatio += leftProposal->doProposal();
         proposedLnProbRatio += rightProposal->doProposal();
+        std::cout << "proposedLnProbRatio is " << proposedLnProbRatio << std::endl;
     }
 
 
@@ -434,8 +437,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
 
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     double root_branch_length = getRootBranchLength();
-    if ( not ( node->isRoot() && root_branch_length == 0 ) ) {
-        nodeProposal->assignNode(node);
+    
+    nodeProposal->assignNode(node);
+    if ( not ( node->isRoot() ) || root_branch_length > 0  ) {
         nodeProposal->prepareProposal();
     }
 
@@ -459,7 +463,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
         storedNodeState[site_index] = s;
     }
     
-    if (node->isRoot()) {
+    if (node->isRoot() && root_branch_length > 0 ) {
         TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
         storedSubrootState.resize(num_sites,0);
         const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
@@ -608,22 +612,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     std::cout << "Root frequencies: " << rf << std::endl;
     
     double root_branch_length = getRootBranchLength();
-    if ( root_branch_length == 0)
+    if ( root_branch_length == 0 )
     {
-    //     if ( rf.size() == 0 )
-    //     {
-    //         const RateMatrix *rm = ( q_map_sequence != NULL ? dynamic_cast<const RateMatrix *>( &q_map_sequence->getValue() ) : // dynamic_cast<const RateMatrix *>( &q_map_site->getValue() ) );
-    //         if ( rm != NULL )
-    //         {
-    //             rf = rm->getStationaryFrequencies();
-    //             std::cout << "Root frequencies at stationarity calculated: " << rf << std::endl;
-    //         }
-    //         else
-    //         {
-    //             throw RbException("You either need to use a rate-matrix or specify root frequencies.");
-    //         }
-    //     }
-        
         CharacterHistoryDiscrete& histories = c->getHistories();
         
         // get local node and branch information
@@ -659,9 +649,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
         const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
         rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
         rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
-        
+                
         std::set<size_t>::iterator it_s;
-
         for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
         {
             size_t site_index = *it_s;
@@ -677,7 +666,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
                 }
                 ++s;
             }
-            //            std::cout << s;
+            std::cout << s << std::endl;
             static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
             static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
             static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);

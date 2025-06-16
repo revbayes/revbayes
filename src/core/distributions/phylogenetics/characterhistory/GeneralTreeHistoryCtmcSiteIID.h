@@ -154,7 +154,6 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelih
     }
 
     // get log prob
-    // PL comments: change below such that root frequencies can be obtained from stationary distribution when root branch is absent.
     std::vector<double> rf = getRootFrequencies();
     for (size_t i = 0; i < counts.size(); i++)
     {
@@ -169,7 +168,7 @@ template<class charType>
 double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNodeLikelihood(const TopologyNode &node)
 {
 
-    if ( node.isRoot() == true )
+    if ( node.isRoot() == true ) // PL comments: and root branch is 0; else...
     {
         return 0.0;
     }
