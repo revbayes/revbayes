@@ -47,7 +47,7 @@ namespace RevBayesCore {
 
     public:
         NodeRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);
-        // PL comments: should it be *rf be NULL? //!<  constructor
+        //!<  constructor
         NodeRejectionSampleProposal( const NodeRejectionSampleProposal& p );                                                        //!<  constructor
         virtual                                                    ~NodeRejectionSampleProposal(void);                              //!< Destructor
         
@@ -72,7 +72,6 @@ namespace RevBayesCore {
         void                                                        setProposalTuningParameter(double tp);
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);         //!< Set the rate generator.
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d); //!< Set the rate generator.
-        // void                                                        setRootFrequencies(const TypedDagNode< Simplex > *rf); //!< Set the root frequencies
         void                                                        tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                                        undoProposal(void);                                             //!< Reject the proposal
 
@@ -133,7 +132,6 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     leftTpMatrix(2),
     rightTpMatrix(2),
     lambda(l)
-    // rootFrequencies(rf)
 {
 
     addNode( ctmc );
@@ -333,10 +331,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     
     if ( node->isRoot() )
     {
-        std::cout << "Root node." << std::endl;
         sampleRootCharacters();
-        
-        //  string rtb  = rootBranch;
         double root_branch_length = getRootBranchLength();
         if ( root_branch_length > 0 )
         {
@@ -345,19 +340,15 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
         }
         // update 2x child incident paths
         proposedLnProbRatio += leftProposal->doProposal();
-        std::cout << "proposedLnProbRatio after left branch is " << proposedLnProbRatio << std::endl;
         proposedLnProbRatio += rightProposal->doProposal();
-        std::cout << "proposedLnProbRatio after right branch is " << proposedLnProbRatio << std::endl;
     }
     else
     {
-        std::cout << "Not root node." << std::endl;
         sampleNodeCharacters();
         // update 3x child incident paths
         proposedLnProbRatio += nodeProposal->doProposal();
         proposedLnProbRatio += leftProposal->doProposal();
         proposedLnProbRatio += rightProposal->doProposal();
-        std::cout << "proposedLnProbRatio is " << proposedLnProbRatio << std::endl;
     }
 
 
@@ -413,7 +404,6 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::getRootBranchLength(
 template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void )
 {
-
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     if ( p == NULL )
     {
@@ -431,8 +421,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     {
         size_t idx = GLOBAL_RNG->uniform01() * nds.size();
         node = nds[idx];
-    } while ( node->isTip() == true );
-
+    } while ( node->isTip() );
+    
     // prepare the path proposals
 
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
@@ -463,7 +453,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
         storedNodeState[site_index] = s;
     }
     
-    if (node->isRoot() && root_branch_length > 0 ) {
+    if ( node->isRoot() && root_branch_length > 0 ) {
         TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
         storedSubrootState.resize(num_sites,0);
         const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
@@ -477,10 +467,12 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     
     // sample characters to be updated and pass to proposals
     sampledCharacters = chooseCharactersToSample(lambda);
-    nodeProposal->setSampledCharacters(sampledCharacters);
+    if ( root_branch_length > 0 )
+    {
+        nodeProposal->setSampledCharacters(sampledCharacters);
+    }
     leftProposal->setSampledCharacters(sampledCharacters);
     rightProposal->setSampledCharacters(sampledCharacters);
-
 }
 
 
@@ -563,6 +555,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
+        
         size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
         size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
         size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
@@ -606,10 +599,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
         throw RbException("Failed cast.");
     }
     
-    // const Simplex rf = c->getRootFrequencies();
     const Simplex& rf = c->getRootFrequencies();
-    // TypedDagNode< Simplex >*
-    std::cout << "Root frequencies: " << rf << std::endl;
     
     double root_branch_length = getRootBranchLength();
     if ( root_branch_length == 0 )
@@ -649,24 +639,36 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
         const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
         rm.calculateTransitionProbabilities(node_age, left_age,  left_rate,  leftTpMatrix);
         rm.calculateTransitionProbabilities(node_age, right_age, right_rate, rightTpMatrix);
-                
+        
         std::set<size_t>::iterator it_s;
         for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
         {
             size_t site_index = *it_s;
-            
+            size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+            size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+
             double u = GLOBAL_RNG->uniform01();
+
+            std::vector<double> state_probs(numStates,0.0);
+            double sum = 0.0;
+            for ( size_t i=0; i<numStates; ++i )
+            {
+                double p = rf[i] * leftTpMatrix[i][desS1] * rightTpMatrix[i][desS2];
+                sum += p;
+                state_probs[i] = p;
+            }
+
             unsigned int s = 0;
             for ( size_t i=0; i<numStates; ++i )
             {
-                u -= rf[i];
+                u -= (state_probs[i]/sum);
                 if ( u <= 0.0 )
                 {
                     break;
                 }
                 ++s;
             }
-            std::cout << s << std::endl;
+
             static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
             static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
             static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
@@ -822,13 +824,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     // q_map_site = NULL;
     
 }
-
-
-// template<class charType>
-// void RevBayesCore::NodeRejectionSampleProposal<charType>::setRootFrequencies(const TypedDagNode< Simplex > *rf)
-// {
-//     rootFrequencies = rf;
-// }
 
 
 template<class charType>

@@ -61,6 +61,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                                               //!< Perform proposal
         virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
+        double                                                      getRootBranchLength(void);                                     //!< get the length of the root branch
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                                          //!< Prepare the proposal
         std::set<size_t>                                            sampleCharacters(double p);
@@ -321,9 +322,6 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
         std::set<CharacterEvent*,CharacterEventCompare> tmpHistory;
         size_t currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
         size_t endState  = static_cast<CharacterEventDiscrete*>(child_states[site_index])->getState();
-        std::cout << "old start state and end state are " << currState << " and " << endState << std::endl;
-
-        
 
         do
         {
@@ -332,7 +330,6 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
             
             // proceed with rejection sampling
             currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
-            std::cout << "start state is " << currState << std::endl;
             double end_age = node->getAge();
             double age = end_age + branch_length;
             
@@ -362,7 +359,6 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
                         break;
                     }
                 }
-                std::cout << "next state is " << nextState << std::endl;
                 // do not force valid time if event needed
                 age -= RbStatistics::Exponential::rv(r, *GLOBAL_RNG);
                 
@@ -371,12 +367,10 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
                     currState = nextState;
                     CharacterEvent* evt = new CharacterEventDiscrete(site_index, nextState, age);
                     tmpHistory.insert(evt);
-                    std::cout << "sampling continues." << std::endl;
 
                 }
                 else if (currState != endState)
                 {
-                    std::cout << "sampling rejected. resampling..." << std::endl;
                     for (std::set<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h = tmpHistory.rbegin(); it_h != tmpHistory.rend(); it_h++)
                     {
                         delete *it_h;
@@ -451,6 +445,22 @@ const std::string& RevBayesCore::PathRejectionSampleProposal<charType>::getPropo
     return name;
 }
 
+template<class charType>
+double RevBayesCore::PathRejectionSampleProposal<charType>::getRootBranchLength( void )
+{
+    // PL comments: this method is here because getRootBranchLength() in TreeHistoryCtmc.h gives a fake root branch length if the true one is 0
+    // PL comments: can be remove if that is fixed
+    
+    TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+    const Tree& tree = c->getTree();
+    std::vector<TopologyNode*> nds = tree.getNodes();
+    node = nds[tree.getRoot().getIndex()];
+    
+    double origin = c->getRootBranchLength();
+    double root_age = node->getAge();
+    
+    double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+}
 
 /**
  *
@@ -495,11 +505,19 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         size_t num_nodes = tau.getNumberOfNodes();
         
         size_t node_index = 0;
-        //        do {
-        node_index = GLOBAL_RNG->uniform01() * num_nodes;
-        node = &tau.getNode(node_index);
-        
-        //        } while ( node->isRoot() == true && !useTail );
+        double root_branch_length = getRootBranchLength();
+        if ( root_branch_length == 0 )
+        {
+            do {
+            node_index = GLOBAL_RNG->uniform01() * num_nodes;
+            node = &tau.getNode(node_index);
+            } while ( node->isRoot() );
+        }
+        else
+        {
+            node_index = GLOBAL_RNG->uniform01() * num_nodes;
+            node = &tau.getNode(node_index);
+        }
     }
     
     
