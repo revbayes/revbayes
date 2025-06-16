@@ -140,11 +140,6 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelih
 
     const BranchHistory& bh = this->histories[n.getIndex()];
     const std::vector<CharacterEvent*>& rootState = bh.getChildCharacters();
-
-    // PL comments: here  if ( c->getRootBranchLength() - node->getAge() != 0 )
-    // {
-    //
-    // }
     
     // get counts per state
     std::vector<int> counts(this->num_states, 0);
