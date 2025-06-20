@@ -9,7 +9,6 @@ All whole numbers, whether positive, negative, or zero.
 ## see_also
 Natural
 Real
-RealPos
 ## example
     x = -1
     y ~ dnUniformInteger(1, 10)

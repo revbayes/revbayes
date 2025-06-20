@@ -33,6 +33,7 @@ mvEventTimeBeta
 mvEventTimeSlide
 ## example
     # draw basic process parameters
+    taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
     root_age ~ dnUniform(0, 2)
     root_lambda ~ dnUniform(0, 1)
     root_mu ~ dnUniform(0, 1)
@@ -44,7 +45,8 @@ mvEventTimeSlide
                    rootMu     = root_mu,
                    delta      = 0.2,
                    rho        = sampling_prob,
-                   condition  = "survival")
+                   condition  = "survival",
+                   taxa       = taxa)
 ## references
 - citation: Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.
   doi: 10.1101/555805

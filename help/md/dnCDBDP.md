@@ -79,22 +79,23 @@ fnCladogeneticSpeciationRateMatrix
     # specify extinction probabilities for each state
     mu_vec <- rep(0.1, 2)
 
-    # Set up cladogenetic events and probabilities. Each element
+    # Set up cladogenetic events and speciation rates. Each element
     # in clado_events describes a state pattern at the cladogenetic
     # event: for example, [0, 0, 1] denotes a parent having state 0
     # and its two children having states 0 and 1.
     clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
 
-    # set probabilities for each cladogenetic event described above
-    clado_prob <- rep(1/4, 4)
+    # set speciation rates for each cladogenetic event described above
+    lambda ~ dnExponential( 10.0 )
+    speciation_rates := rep(lambda, 4)
 
     # create cladogenetic rate matrix
-    clado_matrix = fnCladogeneticProbabilityMatrix(clado_events, clado_prob,
-                                                   num_states)
+    clado_matrix = fnCladogeneticSpeciationRateMatrix(clado_events,
+                                                      speciation_rates,
+                                                      num_states)
 
     # set up Q-matrix to specify rates of state changes along branches 
-    q_matrix <- matrix([[0, .2],
-                        [.2, 0]])
+    ana_rate_matrix <- fnFreeK( [[0, .2], [.2, 0]], rescaled=FALSE )
 
     # create vector of state frequencies at the root
     pi <- simplex([1, 2])
@@ -103,7 +104,7 @@ fnCladogeneticSpeciationRateMatrix
     timetree ~ dnCDBDP(rootAge   = root_age,
                        lambda    = clado_matrix,
                        mu        = mu_vec,
-                       Q         = q_matrix,
+                       Q         = ana_rate_matrix,
                        pi        = pi,
                        rho       = rho,
                        condition = "time")
