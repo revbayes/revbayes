@@ -61,7 +61,6 @@ y ~ dnUniformInteger(1, 10))");
 	help_strings[string("Integer")][string("name")] = string(R"(Integer)");
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Real)"));
-	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Integer")][string("title")] = string(R"(Integer data type)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
@@ -72,7 +71,6 @@ y = 1
 z ~ dnUniformNatural(0, 2))");
 	help_strings[string("Natural")][string("name")] = string(R"(Natural)");
 	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Integer)"));
-	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Real)"));
 	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Natural")][string("title")] = string(R"(Natural number data type)");
 	help_arrays[string("Probability")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -495,6 +493,7 @@ that relaxes this assumption, see `dnCDBDP` (Höhna et al. 2019), which employs
 a finite number of rate categories instead of drawing rates directly from
 a continuous distribution.)");
 	help_strings[string("dnCBDSP")][string("example")] = string(R"(# draw basic process parameters
+taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 root_age ~ dnUniform(0, 2)
 root_lambda ~ dnUniform(0, 1)
 root_mu ~ dnUniform(0, 1)
@@ -506,7 +505,8 @@ tree ~ dnCBDSP(rootAge    = root_age,
                rootMu     = root_mu,
                delta      = 0.2,
                rho        = sampling_prob,
-               condition  = "survival"))");
+               condition  = "survival",
+               taxa       = taxa))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
 	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
 	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Moore BR, Höhna S, May MR, Rannala B, Huelsenbeck JP (2016). Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary mixtures. Proceedings of the National Academy of Sciences of the USA, 113(34):9569-9574.)",R"(10.1073/pnas.1518659113)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1518659113 )"));
@@ -586,22 +586,23 @@ rho <- Probability(1/2) # sampling one half of extant lineages
 # specify extinction probabilities for each state
 mu_vec <- rep(0.1, 2)
 
-# Set up cladogenetic events and probabilities. Each element
+# Set up cladogenetic events and speciation rates. Each element
 # in clado_events describes a state pattern at the cladogenetic
 # event: for example, [0, 0, 1] denotes a parent having state 0
 # and its two children having states 0 and 1.
 clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
 
-# set probabilities for each cladogenetic event described above
-clado_prob <- rep(1/4, 4)
+# set speciation rates for each cladogenetic event described above
+lambda ~ dnExponential( 10.0 )
+speciation_rates := rep(lambda, 4)
 
 # create cladogenetic rate matrix
-clado_matrix = fnCladogeneticProbabilityMatrix(clado_events, clado_prob,
-                                               num_states)
+clado_matrix = fnCladogeneticSpeciationRateMatrix(clado_events,
+                                                  speciation_rates,
+                                                  num_states)
 
 # set up Q-matrix to specify rates of state changes along branches
-q_matrix <- matrix([[0, .2],
-                    [.2, 0]])
+ana_rate_matrix <- fnFreeK( [[0, .2], [.2, 0]], rescaled=FALSE )
 
 # create vector of state frequencies at the root
 pi <- simplex([1, 2])
@@ -610,7 +611,7 @@ pi <- simplex([1, 2])
 timetree ~ dnCDBDP(rootAge   = root_age,
                    lambda    = clado_matrix,
                    mu        = mu_vec,
-                   Q         = q_matrix,
+                   Q         = ana_rate_matrix,
                    pi        = pi,
                    rho       = rho,
                    condition = "time"))");
@@ -1401,6 +1402,10 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnPoisson")][string("title")] = string(R"(Poisson Distribution)");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
 	help_arrays[string("dnSSBDP")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("dnSSBDP")][string("description")] = string(R"(Uses a data augmentation approach to sample hidden speciation events on
+a birth-death tree.)");
+	help_strings[string("dnSSBDP")][string("details")] = string(R"(The sampled-speciation process is intended to be used in conjunction with
+dispersal-extinction-cladogenesis (DEC) biogeographic models.)");
 	help_strings[string("dnSSBDP")][string("example")] = string(R"(# draw basic process parameters
 taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 root_age ~ dnUniform(0, 2)
@@ -1409,14 +1414,14 @@ mu ~ dnUniform(0, 1)
 rho <- 1
 
 # simulate tree
-tree ~ dnSBBDP(rootAge = root_age,
+tree ~ dnSSBDP(rootAge = root_age,
                lambda  = lambda,
                mu      = mu,
                rho     = rho,
                taxa    = taxa))");
 	help_strings[string("dnSSBDP")][string("name")] = string(R"(dnSSBDP)");
-	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
 	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnPhyloCTMCClado)"));
 	help_strings[string("dnSSBDP")][string("title")] = string(R"(Sampled-speciation birth-death process)");
 	help_arrays[string("dnScaledDirichlet")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_strings[string("dnScaledDirichlet")][string("description")] = string(R"(Scaled Dirichlet probability distribution on a simplex.)");
