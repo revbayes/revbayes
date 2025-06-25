@@ -165,7 +165,6 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
     leftTpMatrix( p.leftTpMatrix ),
     rightTpMatrix( p.rightTpMatrix ),
     lambda( p.lambda )
-    // rootFrequencies( p.rootFrequencies )
 {
 
     addNode( ctmc );
@@ -232,7 +231,6 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         leftTpMatrix        = p.leftTpMatrix;
         rightTpMatrix       = p.rightTpMatrix;
         lambda              = p.lambda;
-        // rootFrequencies     = p.rootFrequencies;
 
         addNode( ctmc );
         addNode( q_map_site );
@@ -331,6 +329,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     
     if ( node->isRoot() )
     {
+        // std::cout << "is root" << std::endl;
         sampleRootCharacters();
         const double root_branch_length = getRootBranchLength();
         if ( root_branch_length > 0 )
@@ -344,6 +343,7 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     }
     else
     {
+        // std::cout << "not root" << std::endl;
         sampleNodeCharacters();
         // update 3x child incident paths
         proposedLnProbRatio += nodeProposal->doProposal();
@@ -904,7 +904,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
     size_t num_sites = p->getNumberOfSites();
     
     CharacterHistoryDiscrete& histories = p->getHistories();
-    
+
     // restore node state
     std::vector<CharacterEvent*>& nodeChildState = histories[node->getIndex()].getChildCharacters();
     std::vector<CharacterEvent*>& leftParentState = histories[node->getChild(0).getIndex() ].getParentCharacters();
@@ -920,16 +920,20 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
     
     // restore subroot state if needed
     if (node->isRoot()) {
-        //        std::cout << "restore subrootState : ";
-        std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
-        
-        for (size_t site_index = 0; site_index < num_sites; ++site_index)
+        const double root_branch_length = getRootBranchLength();
+        if ( root_branch_length > 0 )
         {
-            size_t s = storedSubrootState[site_index];
-            //            std::cout << s;
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            //        std::cout << "restore subrootState : ";
+            std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
+            
+            for (size_t site_index = 0; site_index < num_sites; ++site_index)
+            {
+                size_t s = storedSubrootState[site_index];
+                //            std::cout << s;
+                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            }
+            //        std::cout << "\n";
         }
-        //        std::cout << "\n";
     }
     
     
