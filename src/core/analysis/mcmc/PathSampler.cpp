@@ -1,6 +1,7 @@
 #include "PathSampler.h"
 
 #include <cstddef>
+#include <cmath>
 #include <vector>
 
 #include "Cloneable.h"
@@ -115,14 +116,21 @@ double PathSampler::standardError( void ) const
             ess_vect[i] = getESS( likelihoodSamples[i] );
         }
         
-        for (size_t i = 0; i+1 < powers.size(); ++i)
+        // for the first sampling variance term (indexed 0), the weight is computed as (beta_1 - beta_0)/2
+        vmlnl += (var_vect[0] / ess_vect[0])*( (powers[1] - powers[0])*(powers[1] - powers[0]) / 4 );
+        
+        // for all sampling variance terms except the first and the last one, the weight is computed as
+        // (beta_(k + 1) - beta_(k - 1))/2
+        size_t K = powers.size() - 1;
+        for (size_t i = 1; i < K; ++i)
         {
-            // since individual power posteriors are independent of each other, the variance of their sum
-            // is just the sum of their sample variances
-            double vv = (var_vect[i] / ess_vect[i]) + (var_vect[i + 1] / ess_vect[i + 1] );
-            double squared_weight = (powers[i] - powers[i + 1])*(powers[i] - powers[i + 1]) / 4;
+            double vv = (var_vect[i] / ess_vect[i]);
+            double squared_weight = (powers[i + 1] - powers[i - 1])*(powers[i + 1] - powers[i - 1]) / 4;
             vmlnl += vv*squared_weight;
         }
+        
+        // for the last sampling variance term (indexed K), the weight is computed as (beta_K - beta_(K - 1))/2
+        vmlnl += (var_vect[K] / ess_vect[K])*( (powers[K] - powers[K - 1])*(powers[K] - powers[K - 1]) / 4 );
     }
     
 #ifdef RB_MPI
