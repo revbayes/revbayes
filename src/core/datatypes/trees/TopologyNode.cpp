@@ -1821,7 +1821,7 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             double next_coal_time = coalescence_times[i];
 
             // If the next event is adding a leaf instead of a coalescent, then add the next leaf.
-            for(;used_children < sorted_children.size() and sorted_children[used_children]->getAge() < next_coal_time; used_children++)
+            for(;used_children < sorted_children.size() and sorted_children[used_children]->getAge() <= next_coal_time; used_children++)
             {
                 active_children.push_back( sorted_children[used_children] );
                 // std::cerr<<"    event=LEAF  time = "<<sorted_children[used_children]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
@@ -1876,8 +1876,8 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
             // std::cerr<<"          left = "<<leftChild->getAge()<<"  right = "<<rightChild->getAge()<<"   parent = "<<next_coal_time<<"\n";
 
             assert(children.size()+1 == old_size);
-            assert(prnt->getAge() > leftChild->getAge());
-            assert(prnt->getAge() > rightChild->getAge());
+            assert(prnt->getAge() >= leftChild->getAge());
+            assert(prnt->getAge() >= rightChild->getAge());
         }
     }
     else // use_ages == false
