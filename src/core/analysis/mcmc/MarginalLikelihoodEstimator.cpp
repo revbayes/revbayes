@@ -197,3 +197,39 @@ double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) con
     
     return ess;
 }
+
+
+size_t MarginalLikelihoodEstimator::offsetModulo(size_t i, size_t n)
+{    
+    return 1 + (i - 1) % n;
+}
+
+
+/**
+ * Get the indices of those elements of the vector of sampled log likelihoods that will be used for a given block bootstrap replicate.
+ * The function is based on mcmc3r:::make.ends() (see https://github.com/dosreislab/mcmc3r/blob/main/R/marginal-lhd.R#L493),
+ * whose code was in turn lifted without modifications from the eponymous function in the package "boot", written by Angelo J. Canty
+ * and corrected by B. D. Ripley (see https://github.com/cran/boot/blob/master/R/bootfuns.q#L3203). It takes
+ * as its argument (1) a pair of integers representing the start index and length of a given block, and (2) the total length of the time
+ * series from which the blocks are to be drawn. The series is treated as circular, i.e., if we reach the end before the number of selected
+ * indices has reached the length of the block, we keep adding indices from the beginning,
+ *
+ * @param a Pair of integers denoting the start index of a block and its length, respectively
+ * @param n Total length of the time series
+ * @return Vector of indices to select from a time series (of sampled log likelihoods)
+ */
+std::vector<size_t> MarginalLikelihoodEstimator::getIndices(std::pair<size_t, size_t> a, size_t n)
+{
+    std::vector<size_t> out;
+    if (a.second != 0)
+    {
+        std::vector<size_t> seq( a.second );
+        for (size_t i = 0; i < a.second; i++)
+        {
+            seq[i] = a.first + i;
+            out.push_back( offsetModulo(seq[i], n) );
+        }
+    }
+    
+    return out;
+}

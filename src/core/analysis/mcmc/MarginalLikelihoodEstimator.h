@@ -34,6 +34,10 @@ namespace RevBayesCore {
         virtual double                                      marginalLikelihood( void ) const = 0;
         double                                              getESS(const std::vector<double> values) const;                            //!< Calculate the effective sample size for an arbitrary vector of numeric values
         
+        // block bootstrap functions
+        size_t                                              offsetModulo(size_t i, size_t n);                                          //!< Helper function
+        std::vector<size_t>                                 getIndices(std::pair<size_t, size_t> a, size_t n);                         //!< Get a vector of indices to select given a start index and vector length
+        
     protected:
         
         // members
