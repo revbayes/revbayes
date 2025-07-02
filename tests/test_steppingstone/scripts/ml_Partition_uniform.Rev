@@ -128,8 +128,12 @@ print(filename="output/uniform_marginal_likelihoods_run_all.out", append=TRUE, "
 ps = pathSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
                  likelihoodColumnName="likelihood")
 ps.marginal()
+ps.stdError()
+
 print(filename="output/uniform_marginal_likelihoods_run_all.out", append=TRUE, "Path-sampling estimate: ",
-      ps.marginal() )
+      ps.marginal(), "\n")
+print(filename="output/uniform_marginal_likelihoods_run_all.out", append=TRUE, "Path-sampling standard error: ",
+      ps.stdError() )
 
 
 # you may want to quit RevBayes now

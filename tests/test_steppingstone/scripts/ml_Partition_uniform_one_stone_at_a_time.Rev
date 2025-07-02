@@ -139,8 +139,12 @@ print(filename="output/uniform_marginal_likelihoods_run_one_stone_at_a_time.out"
 ps = pathSampler(file="output/model_uniform_run_one_stone_at_a_time.out", powerColumnName="power",
                  likelihoodColumnName="likelihood")
 ps.marginal()
+ps.stdError()
+
 print(filename="output/uniform_marginal_likelihoods_run_one_stone_at_a_time.out", append=TRUE,
-      "Path-sampling estimate: ", ps.marginal() )
+      "Path-sampling estimate: ", ps.marginal(), "\n")
+print(filename="output/uniform_marginal_likelihoods_run_one_stone_at_a_time.out", append=TRUE,
+      "Path-sampling standard error: ", ps.stdError() )
 
 
 # you may want to quit RevBayes now
