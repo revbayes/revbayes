@@ -10,6 +10,7 @@
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "RbFileManager.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 
 using namespace RevBayesCore;
@@ -147,6 +148,16 @@ MarginalLikelihoodEstimator::~MarginalLikelihoodEstimator()
 
 
 /**
+ * Apply the general function to the current sampler object.
+ */
+double MarginalLikelihoodEstimator::marginalLikelihood( void ) const
+{
+    double out = marginalLikelihoodGeneral(powers, likelihoodSamples);
+    return out;
+}
+
+
+/**
  * This function is adapted from TraceNumeric::update(): the only difference is that it works directly on a vector of numeric
  * values representing recorded samples, as opposed to a Trace object. The calculation is equivalent to the one used in
  * Tracer, and also (except for the choice of the maximum lag value) to convenience:::essTracer.
@@ -201,16 +212,6 @@ double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) con
     double ess = samples / act;
     
     return ess;
-}
-
-
-/**
- * Apply the general function to the current sampler object.
- */
-double MarginalLikelihoodEstimator::standardError( void ) const
-{
-    double out = standardErrorGeneral(powers, likelihoodSamples);
-    return out;
 }
 
 
@@ -399,9 +400,10 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
 }
 
 
-double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, double prop, bool print) const
+double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, double prop, bool print, bool verbose) const
 {
-    std::vector< std::vector< std::vector<double> > > bootreps = blockBootstrap(repnum, prop, print);
+    std::vector< std::vector< std::vector<double> > > bootreps;
+    bootreps = blockBootstrap(repnum, prop, print);
     std::vector<double> marg_lnl_estimates( repnum + 1 );
     
     for (size_t i = 0; i < repnum + 1; i++)
@@ -413,10 +415,10 @@ double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, d
             boot_rep[j] = bootreps[j][i];
         }
         
-        marg_lnl_estimates[i] = standardErrorGeneral(powers, boot_rep);
+        marg_lnl_estimates[i] = marginalLikelihoodGeneral(powers, boot_rep);
     }
     
-    // calculate the standard deviation of the bootstraped estimates (not including the estimated derived from original samples)
+    // calculate the variance of the bootstraped estimates (not including the estimate derived from original samples)
     double mean_bootreps = 0.0;
     double var_bootreps = 0.0;
     
@@ -432,5 +434,54 @@ double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, d
     }
     var_bootreps /= (int(repnum) - 1);
     
+    if (verbose)
+    {
+        std::stringstream ss;
+        ss << "Bootstrapped marginal likelihood estimates:\n\n" << std::fixed << std::setprecision(3);
+        
+        // print 10 values per line
+        size_t iter_num = floor(repnum / 10);
+        for (size_t i = 1; i <= iter_num; i++)
+        {
+            size_t start_idx = 1 + (i - 1) * 10;
+            size_t end_idx = i * 10;
+            
+            for (size_t j = start_idx; j < end_idx; j++)
+            {
+                ss << marg_lnl_estimates[j] << ", ";
+            }
+            
+            if (end_idx == repnum) {
+                ss << marg_lnl_estimates[end_idx] << "\n\n";
+            }
+            else
+            {
+                ss << marg_lnl_estimates[end_idx] << ",\n";
+            }
+        }
+        
+        if ((double)iter_num != (double)repnum / 10)
+        {
+            for (size_t i = 1 + iter_num * 10; i < repnum; i++)
+            {
+                ss << marg_lnl_estimates[i] << ", ";
+            }
+            
+            ss << marg_lnl_estimates[repnum] << "\n\n";
+        }
+        
+        ss << "Original estimate: " << marg_lnl_estimates[0];
+        
+        // get the 95% credible interval using a crude quantile function
+        std::sort(marg_lnl_estimates.begin(), marg_lnl_estimates.end());
+        size_t idx_lower = round( (marg_lnl_estimates.size() - 1) * 0.025 );
+        size_t idx_upper = round( (marg_lnl_estimates.size() - 1) * 0.975 );
+        
+        ss << "; 95% CI: [" << marg_lnl_estimates[idx_lower] << ", " << marg_lnl_estimates[idx_upper] << "]";
+        
+        RBOUT( ss.str() );
+    }
+    
+    // standard error = standard deviation of bootstrap replicates = square root of their variance
     return sqrt(var_bootreps);
 }
