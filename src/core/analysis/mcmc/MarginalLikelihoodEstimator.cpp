@@ -204,7 +204,7 @@ double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) con
 }
 
 
-std::int64_t MarginalLikelihoodEstimator::offsetModulo(std::int64_t i, std::int64_t n)
+std::int64_t MarginalLikelihoodEstimator::offsetModulo(std::int64_t i, std::int64_t n) const
 {
     return 1 + (i - 1) % n;
 }
@@ -223,7 +223,7 @@ std::int64_t MarginalLikelihoodEstimator::offsetModulo(std::int64_t i, std::int6
  * @param n Total length of the time series
  * @return Vector of indices to select from a time series (of sampled log likelihoods)
  */
-std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std::int64_t, std::int64_t> a, std::int64_t n)
+std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std::int64_t, std::int64_t> a, std::int64_t n) const
 {
     std::vector<std::int64_t> out;
     if (a.second != 0)
@@ -240,7 +240,7 @@ std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std:
 }
 
 
-std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop, bool print_to_file)
+std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop, bool print_to_file) const
 {
     // Get random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
