@@ -35,14 +35,15 @@ namespace RevBayesCore {
         double                                              getESS(const std::vector<double> values) const;                            //!< Calculate the effective sample size for an arbitrary vector of numeric values
         
         // block bootstrap functions
-        size_t                                              offsetModulo(size_t i, size_t n);                                          //!< Helper function
-        std::vector<size_t>                                 getIndices(std::pair<size_t, size_t> a, size_t n);                         //!< Get a vector of indices to select given a start index and vector length
+        std::int64_t                                        offsetModulo(std::int64_t i, std::int64_t n);                              //!< Helper function
+        std::vector<std::int64_t>                           getIndices(std::pair<std::int64_t, std::int64_t> a, std::int64_t n);       //!< Get a vector of indices to select given a start index and vector length
+        std::vector< std::vector< std::vector<double> > >   blockBootstrap(size_t repnum, double prop);                                //!< Generate block bootstrap replicates
         
     protected:
         
         // members
-        std::vector< double >                               powers;
-        std::vector< std::vector< double> >                 likelihoodSamples;
+        std::vector<double>                                 powers;
+        std::vector< std::vector<double> >                  likelihoodSamples;
     };
     
 }

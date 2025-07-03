@@ -1,9 +1,13 @@
 #include "MarginalLikelihoodEstimator.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <ostream>
 #include <string>
 
+#include "DistributionGeometric.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
@@ -199,8 +203,8 @@ double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) con
 }
 
 
-size_t MarginalLikelihoodEstimator::offsetModulo(size_t i, size_t n)
-{    
+std::int64_t MarginalLikelihoodEstimator::offsetModulo(std::int64_t i, std::int64_t n)
+{
     return 1 + (i - 1) % n;
 }
 
@@ -218,12 +222,12 @@ size_t MarginalLikelihoodEstimator::offsetModulo(size_t i, size_t n)
  * @param n Total length of the time series
  * @return Vector of indices to select from a time series (of sampled log likelihoods)
  */
-std::vector<size_t> MarginalLikelihoodEstimator::getIndices(std::pair<size_t, size_t> a, size_t n)
+std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std::int64_t, std::int64_t> a, std::int64_t n)
 {
-    std::vector<size_t> out;
+    std::vector<std::int64_t> out;
     if (a.second != 0)
     {
-        std::vector<size_t> seq( a.second );
+        std::vector<std::int64_t> seq( a.second );
         for (size_t i = 0; i < a.second; i++)
         {
             seq[i] = a.first + i;
@@ -232,4 +236,120 @@ std::vector<size_t> MarginalLikelihoodEstimator::getIndices(std::pair<size_t, si
     }
     
     return out;
+}
+
+
+std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop)
+{
+    // Get random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    
+    // vector to be returned (repnum replicates for each of the k powers)
+    std::vector< std::vector< std::vector<double> > > res( powers.size() );
+    
+    for (size_t i = 0; i < powers.size(); i++)
+    {
+        // vector of bootstrap replicates
+        std::vector< std::vector<double> > res_inner( repnum );
+        
+        // we keep n and n_sim distinct for conceptual reasons: technically, the simulated time series could contain a different
+        // number of samples than the original time series
+        size_t n = likelihoodSamples[i].size();
+        std::int64_t n_sim = n;
+        
+        for (size_t j = 0; j < repnum; j++)
+        {
+            // vector of resampled likelihood values to be returned for this bootstrap replicate
+            std::vector<double> res_innermost( n );
+            
+            // we always use end correction, so the endpoint is once again equal to n rather than n - (n * prop) + 1
+            size_t endpt = n;
+            bool cont = true;
+            
+            std::vector<std::int64_t> len_tot(repnum, 0);
+            std::vector< std::vector<std::int64_t> > lens;
+            
+            while (cont)
+            {
+                std::vector<std::int64_t> temp0( repnum );
+                std::vector<std::int64_t> temp1( repnum );
+                std::vector<bool> test( repnum );
+                
+                for (size_t k = 0; k < repnum; k++)
+                {
+                    temp0[k] = 1 + RbStatistics::Geometric::rv( 1/(n * prop), *rng );
+                    temp1[k] = std::min( temp0[k], n_sim - len_tot[k] );
+                }
+                
+                lens.push_back( temp1 );
+                
+                for (size_t k = 0; k < repnum; k++)
+                {
+                    len_tot[k] = len_tot[k] + temp1[k];
+                    test[k] = len_tot[k] < n_sim;
+                }
+                
+                cont = std::any_of(test.begin(), test.end(), [](bool x) { return x; });
+            }
+            
+            size_t nn = lens.size();
+            std::vector< std::vector<std::int64_t> > st;
+            
+            for (size_t k = 0; k < nn; k++)
+            {
+                std::vector<std::int64_t> elem( repnum );
+                for(size_t l = 0; l < repnum; l++)
+                {
+                    // transform uniform01() to integer in range [1, endpt]
+                    elem[l] = static_cast<std::int64_t>( std::floor(rng->uniform01() * endpt) ) + 1;
+                }
+                
+                st.push_back(elem);
+            }
+            
+            std::vector< std::pair<std::int64_t, std::int64_t> > ends;
+            std::vector< std::vector<std::int64_t> > inds;
+            
+            for (size_t k = 0; k < nn; k++)
+            {
+                // paranoid pair constructor syntax compatible with C++14 and earlier
+                std::pair<std::int64_t, std::int64_t> tmp0( st[k][0], lens[k][0] );
+                ends.push_back( tmp0 );
+            }
+            
+            for (size_t k = 0; k < nn; k++)
+            {
+                std::vector<std::int64_t> tmp1 = getIndices( ends[k], static_cast<std::int64_t>(n) );
+                inds.push_back( tmp1 );
+            }
+            
+            // flatten the nested vector of indices
+            size_t total_size = 0;
+            for (const auto& inner : inds)
+            {
+                total_size += inner.size();
+            }
+            
+            std::vector<std::int64_t> inds_flattened;
+            inds_flattened.reserve(total_size);
+            
+            for (const auto& inner : inds)
+            {
+                inds_flattened.insert(inds_flattened.end(), inner.begin(), inner.end());
+            }
+            
+            // fill in the output vector; if the total length of the flattened index vector exceeds n_sim, truncate
+            for (size_t k = 0; k < n_sim; k++)
+            {
+                size_t idx = inds_flattened[k];
+                res_innermost[k] = likelihoodSamples[i][idx];
+            }
+            
+            res_inner[j] = res_innermost;
+        }
+        
+        res[i] = res_inner;
+    }
+    
+    return res;
 }
