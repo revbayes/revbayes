@@ -240,7 +240,7 @@ std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std:
 }
 
 
-std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop)
+std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop, bool print_to_file)
 {
     // Get random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -350,6 +350,36 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
         }
         
         res[i] = res_inner;
+    }
+    
+    if (print_to_file)
+    {
+        path parent_dir = filename.parent_path();
+        
+        for (size_t i = 0; i < powers.size(); i++)
+        {
+            // create stone-specific directory
+            std::string stone_dir_name = "stone_" + std::to_string(i + 1); // number the stones from 1 to n, not from 0 to (n - 1)
+            path target_dir = parent_dir / stone_dir_name;
+            create_directory(target_dir);
+            
+            for (size_t j = 0; j < repnum; j++)
+            {
+                // create bootstrap replicate file
+                std::string rep_name = "bootrep_" + std::to_string(j + 1) + filename.extension().string();
+                path rep_file_path = target_dir / rep_name;
+                
+                std::ofstream outStream( rep_file_path.string() );
+                outStream << "power\t" << "likelihood" << std::endl;
+                
+                for (size_t k = 0; k < res[i][j].size(); k++)
+                {
+                    outStream << powers[i] << "\t" << res[i][j][k] << std::endl;
+                }
+                
+                outStream.close();
+            }
+        }
     }
     
     return res;
