@@ -16,6 +16,7 @@ using namespace RevBayesCore;
 
 
 MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const std::string &pn, const std::string &ln, const std::string &del) :
+    filename( fn ),
     powers(),
     likelihoodSamples()
 {
@@ -29,26 +30,26 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
         /* read in the file */
         /********************/
     
-        if ( not is_regular_file(fn) )
+        if ( not is_regular_file(filename) )
         {
-            throw RbException()<< "Could not not file " << fn;
+            throw RbException() << "Could not not file " << filename;
         }
     
     
         bool hasHeaderBeenRead = false;
         
         // Open file
-        std::ifstream inFile( fn.string() );
+        std::ifstream inFile( filename.string() );
         
         if ( !inFile )
         {
-            throw RbException()<<"Could not open file "<<fn;
+            throw RbException() << "Could not open file " << filename;
         }
     
         // Initialize
         std::string commandLine;
     
-        //    RBOUT("Processing file \"" + fn + "\"");
+        //    RBOUT("Processing file \"" + filename + "\"");
     
         int powerColumnIndex = -1;
         int likelihoodColumnIndex = -1;
@@ -104,7 +105,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
 
             // check for broken lines
             if( columns.size() <= powerColumnIndex || columns.size() <= likelihoodColumnIndex ) 
-                throw RbException() << "Please check format of file " << fn << ", missing power and likelihood columns in some lines";
+                throw RbException() << "Please check format of file " << filename << ", missing power and likelihood columns in some lines";
 
             double p, l;
             // get the power entry
@@ -112,7 +113,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
             try {
                 p = std::stod(tmp);
             } catch (std::invalid_argument&) {
-                throw RbException() << "Please check format of file " << fn << ", non-numeric input in power column";
+                throw RbException() << "Please check format of file " << filename << ", non-numeric input in power column";
             }
             if ( p != previousPower )
             {
@@ -127,7 +128,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
             try {
                 l = std::stod(tmp);
             } catch (std::invalid_argument&) {
-                throw RbException() << "Please check format of file " << fn << ", non-numeric input in likelihood column";
+                throw RbException() << "Please check format of file " << filename << ", non-numeric input in likelihood column";
 }
             likelihoodSamples[index-1].push_back( l );
 

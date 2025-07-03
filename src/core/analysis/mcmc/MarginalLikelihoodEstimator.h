@@ -42,6 +42,7 @@ namespace RevBayesCore {
     protected:
         
         // members
+        path                                                filename;
         std::vector<double>                                 powers;
         std::vector< std::vector<double> >                  likelihoodSamples;
     };
