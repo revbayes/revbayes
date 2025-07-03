@@ -33,11 +33,14 @@ namespace RevBayesCore {
         virtual MarginalLikelihoodEstimator*                clone(void) const = 0;                                                     //!< Create a new deep copy
         virtual double                                      marginalLikelihood( void ) const = 0;
         double                                              getESS(const std::vector<double> values) const;                            //!< Calculate the effective sample size for an arbitrary vector of numeric values
+        virtual double                                      standardErrorGeneral(std::vector<double> power_vec, std::vector< std::vector<double> > lnl_vec) const = 0;
+        double                                              standardError( void ) const;                                               //!< Compute the standard error for this analysis
         
         // block bootstrap functions
         std::int64_t                                        offsetModulo(std::int64_t i, std::int64_t n) const;                        //!< Helper function
         std::vector<std::int64_t>                           getIndices(std::pair<std::int64_t, std::int64_t> a, std::int64_t n) const; //!< Get a vector of indices to select given a start index and vector length
         std::vector< std::vector< std::vector<double> > >   blockBootstrap(size_t repnum, double prop, bool print_to_file) const;      //!< Generate block bootstrap replicates
+        double                                              standardErrorBlockBootstrap(size_t repnum, double prop, bool print) const; //!< Compute the standard error from block bootstrap replicates
         
     protected:
         

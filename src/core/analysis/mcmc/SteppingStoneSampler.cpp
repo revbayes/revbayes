@@ -174,13 +174,3 @@ double SteppingStoneSampler::standardErrorGeneral(std::vector<double> power_vec,
     
     return sqrt(vmlnl);
 }
-
-
-/**
- * Apply the above function to the current SteppingStoneSampler object.
- */
-double SteppingStoneSampler::standardError( void ) const
-{
-    double out = standardErrorGeneral(powers, likelihoodSamples);
-    return out;
-}

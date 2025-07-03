@@ -29,7 +29,6 @@ namespace RevBayesCore {
         SteppingStoneSampler*                               clone(void) const;                                                         //!< Create a deep copy
         double                                              marginalLikelihood( void ) const;                                          //!< Compute the marginal likelihood using stepping-stone sampling
         double                                              standardErrorGeneral(std::vector<double> power_vec, std::vector< std::vector<double> > lnl_vec) const; //!< Compute the stepping-stone standard error for arbitrary values
-        double                                              standardError( void ) const;                                               //!< Compute the stepping-stone standard error for this analysis
     };
     
 }

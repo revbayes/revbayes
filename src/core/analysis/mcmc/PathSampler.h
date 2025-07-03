@@ -29,7 +29,6 @@ namespace RevBayesCore {
         PathSampler*                                        clone(void) const;                                                         //!< Create a deep copy
         double                                              marginalLikelihood( void ) const;                                          //!< Compute the marginal likelihood using path-Sampler
         double                                              standardErrorGeneral(std::vector<double> power_vec, std::vector< std::vector<double> > lnl_vec) const; //!< Compute the path-sampling standard error for arbitrary values
-        double                                              standardError( void ) const;                                               //!< Compute the path-sampling standard error for this analysis
     };
     
 }

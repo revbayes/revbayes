@@ -139,13 +139,3 @@ double PathSampler::standardErrorGeneral(std::vector<double> power_vec, std::vec
     
     return sqrt(vmlnl);
 }
-
-
-/**
- * Apply the above function to the current PathSampler object.
- */
-double PathSampler::standardError( void ) const
-{
-    double out = standardErrorGeneral(powers, likelihoodSamples);
-    return out;
-}

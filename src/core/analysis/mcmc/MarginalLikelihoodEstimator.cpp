@@ -204,6 +204,16 @@ double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) con
 }
 
 
+/**
+ * Apply the general function to the current sampler object.
+ */
+double MarginalLikelihoodEstimator::standardError( void ) const
+{
+    double out = standardErrorGeneral(powers, likelihoodSamples);
+    return out;
+}
+
+
 std::int64_t MarginalLikelihoodEstimator::offsetModulo(std::int64_t i, std::int64_t n) const
 {
     return 1 + (i - 1) % n;
@@ -386,4 +396,41 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
     }
     
     return res;
+}
+
+
+double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, double prop, bool print) const
+{
+    std::vector< std::vector< std::vector<double> > > bootreps = blockBootstrap(repnum, prop, print);
+    std::vector<double> marg_lnl_estimates( repnum + 1 );
+    
+    for (size_t i = 0; i < repnum + 1; i++)
+    {
+        std::vector< std::vector<double> > boot_rep( bootreps.size() );
+        
+        for (size_t j = 0; j < bootreps.size(); j++)
+        {
+            boot_rep[j] = bootreps[j][i];
+        }
+        
+        marg_lnl_estimates[i] = standardErrorGeneral(powers, boot_rep);
+    }
+    
+    // calculate the standard deviation of the bootstraped estimates (not including the estimated derived from original samples)
+    double mean_bootreps = 0.0;
+    double var_bootreps = 0.0;
+    
+    for (size_t i = 1; i < repnum + 1; i++)
+    {
+        mean_bootreps += marg_lnl_estimates[i];
+    }
+    mean_bootreps /= repnum;
+    
+    for (size_t i = 1; i < repnum + 1; i++)
+    {
+        var_bootreps += (marg_lnl_estimates[i] - mean_bootreps)*(marg_lnl_estimates[i] - mean_bootreps);
+    }
+    var_bootreps /= (int(repnum) - 1);
+    
+    return sqrt(var_bootreps);
 }
