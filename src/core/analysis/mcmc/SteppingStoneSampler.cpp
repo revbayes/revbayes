@@ -15,7 +15,7 @@
 using namespace RevBayesCore;
 
 
-SteppingStoneSampler::SteppingStoneSampler(const std::string &fn, const std::string &pn, const std::string &ln,  const std::string &del) : MarginalLikelihoodEstimator(fn, pn, ln, del)
+SteppingStoneSampler::SteppingStoneSampler(const std::string &fn, const std::string &pn, const std::string &ln, const std::string &del) : MarginalLikelihoodEstimator(fn, pn, ln, del)
 {
     
 }
@@ -85,9 +85,11 @@ double SteppingStoneSampler::marginalLikelihood( void ) const
  * for his companion R package for MCMCTree. Like the latter, this function displays a warning when the delta approximation
  * does not work well. We collect these warnings and present them to the user after the calculation has been completed.
  *
+ * @param power_vec Vector of k powers used in the power posterior analysis that generated the samples
+ * @param lnl_vec Nested vector of n log likelihoods sampled by the power posterior analysis for each of the k powers
  * @return The approximate standard error
  */
-double SteppingStoneSampler::standardError( void ) const
+double SteppingStoneSampler::standardErrorGeneral(std::vector<double> power_vec, std::vector< std::vector<double> > lnl_vec) const
 {
     double vmlnl = 0.0;
     
@@ -96,18 +98,18 @@ double SteppingStoneSampler::standardError( void ) const
         std::stringstream warnings;
         size_t warning_counter = 0;
         
-        for (size_t i = 1; i < powers.size(); ++i)
+        for (size_t i = 1; i < power_vec.size(); ++i)
         {
             
-            size_t samplesPerPath = likelihoodSamples[i].size();
+            size_t samplesPerPath = lnl_vec[i].size();
             
             // compute the maximum of the log likelihood values
-            double max = likelihoodSamples[i][0];
+            double max = lnl_vec[i][0];
             for (size_t j = 1; j < samplesPerPath; ++j)
             {
-                if (max < likelihoodSamples[i][j])
+                if (max < lnl_vec[i][j])
                 {
-                    max = likelihoodSamples[i][j];
+                    max = lnl_vec[i][j];
                 }
             }
             
@@ -119,7 +121,7 @@ double SteppingStoneSampler::standardError( void ) const
             std::vector<double> Ls(samplesPerPath);
             for (size_t j = 0; j < samplesPerPath; ++j)
             {
-                Ls[j] = exp( (likelihoodSamples[i][j] - max)*(powers[i - 1] - powers[i]) );
+                Ls[j] = exp( (lnl_vec[i][j] - max)*(power_vec[i - 1] - power_vec[i]) );
             }
             
             // get the variance and the mean of the resulting values
@@ -147,11 +149,11 @@ double SteppingStoneSampler::standardError( void ) const
                 warning_counter++;
                 if ( warning_counter == 1 )
                 {
-                    warnings << "Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:\n" << powers[i];
+                    warnings << "Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:\n" << power_vec[i];
                 }
                 else
                 {
-                    warnings << ", " << powers[i];
+                    warnings << ", " << power_vec[i];
                 }
             }
             
@@ -171,4 +173,14 @@ double SteppingStoneSampler::standardError( void ) const
 #endif
     
     return sqrt(vmlnl);
+}
+
+
+/**
+ * Apply the above function to the current SteppingStoneSampler object.
+ */
+double SteppingStoneSampler::standardError( void ) const
+{
+    double out = standardErrorGeneral(powers, likelihoodSamples);
+    return out;
 }
