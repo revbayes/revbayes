@@ -251,14 +251,17 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
     for (size_t i = 0; i < powers.size(); i++)
     {
         // vector of bootstrap replicates
-        std::vector< std::vector<double> > res_inner( repnum );
+        std::vector< std::vector<double> > res_inner( repnum + 1 );
+        
+        // the first element just corresponds to the original (non-resampled) vector of log likelihoods
+        res_inner[0] = likelihoodSamples[i];
         
         // we keep n and n_sim distinct for conceptual reasons: technically, the simulated time series could contain a different
         // number of samples than the original time series
         size_t n = likelihoodSamples[i].size();
         std::int64_t n_sim = n;
         
-        for (size_t j = 0; j < repnum; j++)
+        for (size_t j = 1; j < repnum + 1; j++)
         {
             // vector of resampled likelihood values to be returned for this bootstrap replicate
             std::vector<double> res_innermost( n );
@@ -363,10 +366,10 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
             path target_dir = parent_dir / stone_dir_name;
             create_directory(target_dir);
             
-            for (size_t j = 0; j < repnum; j++)
+            for (size_t j = 0; j < repnum + 1; j++)
             {
                 // create bootstrap replicate file
-                std::string rep_name = "bootrep_" + std::to_string(j + 1) + filename.extension().string();
+                std::string rep_name = "bootrep_" + std::to_string(j) + filename.extension().string();
                 path rep_file_path = target_dir / rep_name;
                 
                 std::ofstream outStream( rep_file_path.string() );
