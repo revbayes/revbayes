@@ -7,15 +7,17 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Delimiter.h"
-#include "RevObject.h"
-#include "Real.h"
-#include "RlString.h"
-#include "TypeSpec.h"
 #include "MemberProcedure.h"
 #include "MethodTable.h"
+#include "Natural.h"
+#include "Probability.h"
+#include "Real.h"
+#include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RlString.h"
 #include "SteppingStoneSampler.h"
+#include "TypeSpec.h"
 #include "WorkspaceToCoreWrapperObject.h"
 
 namespace RevLanguage { class Argument; }
@@ -30,6 +32,11 @@ SteppingStoneSampler::SteppingStoneSampler() : WorkspaceToCoreWrapperObject<RevB
     methods.addFunction(new MemberProcedure( "marginal", Real::getClassTypeSpec(), marginalArgRules) );
     
     ArgumentRules* stdErrorArgRules = new ArgumentRules();
+    stdErrorArgRules->push_back( new ArgumentRule( "bootstrap", RlBoolean::getClassTypeSpec(), "Should we use the block bootstrap method to calculate the standard error?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
+    stdErrorArgRules->push_back( new ArgumentRule( "replicates", Natural::getClassTypeSpec(), "How many block bootstrap replicates to generate. (Has effect only if bootstrap=TRUE)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ));
+    stdErrorArgRules->push_back( new ArgumentRule( "blockLength", Probability::getClassTypeSpec(), "Average block length, given as a fraction of the total chain length. (Has effect only if bootstrap=TRUE)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.1) ));
+    stdErrorArgRules->push_back( new ArgumentRule( "printFiles", RlBoolean::getClassTypeSpec(), "Should we save the bootstrap replicates as text files? (Has effect only if bootstrap=TRUE)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
+    stdErrorArgRules->push_back( new ArgumentRule( "verbose", RlBoolean::getClassTypeSpec(), "Should we print the marginal likelihoods and 95% CI calculated from the bootstrap replicates? (Has effect only if bootstrap=TRUE)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ));
     methods.addFunction(new MemberProcedure( "stdError", Real::getClassTypeSpec(), stdErrorArgRules) );
 
 }
@@ -80,9 +87,23 @@ RevPtr<RevVariable> SteppingStoneSampler::executeMethod(std::string const &name,
     {
         found = true;
         
-        double se = value->standardError();
+        bool use_bootstrap = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        size_t repnum = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
+        double block_length = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool print_to_file = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+        bool verbose = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
         
-        return new RevVariable( new Real( se ) );
+        double se;
+        
+        if (use_bootstrap) {
+            se = value->standardErrorBlockBootstrap(repnum, block_length, print_to_file, verbose);
+        }
+        else
+        {
+            se = value->standardError();
+        }
+        
+        return new RevVariable( new RealPos( se ) );
     }
     
     return RevObject::executeMethod( name, args, found );
