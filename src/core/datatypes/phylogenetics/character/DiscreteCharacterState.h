@@ -54,9 +54,9 @@ namespace RevBayesCore {
 
         // Discrete character observation functions
         virtual std::string                     getStateLabels(void) const = 0;                 //!< Get labels for all possible states
-        const std::vector<double>&              getWeights() const;                             //!< Get the weights of each state
-        bool                                    isWeighted() const;                             //!< Is the state weighted?
-        void                                    setWeighted( bool tf );                         //!< Sets whether the state is weighted or not
+        virtual const std::vector<double>&      getWeights() const;                             //!< Get the weights of each state
+        virtual bool                            isWeighted() const;                             //!< Is the state weighted?
+        virtual void                            setWeighted( bool tf );                         //!< Sets whether the state is weighted or not
 
     protected:
                                                 DiscreteCharacterState(size_t n);               //!< Constructor
