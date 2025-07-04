@@ -379,7 +379,8 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
             // fill in the output vector; if the total length of the flattened index vector exceeds n_sim, truncate
             for (size_t k = 0; k < n_sim; k++)
             {
-                size_t idx = inds_flattened[k];
+                // adjust for the fact that we are using 0-based indexing, not 1-based indexing like in R
+                size_t idx = inds_flattened[k] - 1;
                 res_innermost[k] = likelihoodSamples[i][idx];
             }
             
@@ -435,8 +436,7 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
  */
 double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, double prop, bool print, bool verbose) const
 {
-    std::vector< std::vector< std::vector<double> > > bootreps;
-    bootreps = blockBootstrap(repnum, prop, print);
+    std::vector< std::vector< std::vector<double> > > bootreps = blockBootstrap(repnum, prop, print);
     std::vector<double> marg_lnl_estimates( repnum + 1 );
     
     for (size_t i = 0; i < repnum + 1; i++)
