@@ -84,6 +84,17 @@ double PathSampler::marginalLikelihoodGeneral(std::vector<double> power_vec, std
 }
 
 
+/**
+ * Calculate the standard error of the marginal likelihood estimate. The formula used below represents a generalization of Eqs. 51 and 52
+ * of Lartillot & Philippe (2006; Syst. Biol. 55(2): 195--207), in that it still employs the trapezoidal rule for numerical integration but no longer
+ * assumes the powers (temperatures) to be evenly spaced between 0 and 1. The general formula (i.e., one half of the square root of the
+ * sum of the ratios of temperature-specific sample variances and their corresponding effective sample sizes, with each ratio weighted by
+ * a squared weight term) also corresponds to the last equation in Appendix 2 of dos Reis et al. (2018; Syst. Biol. 67(4): 594--615), but the
+ * choice of weights is different here due to the use of a different numerical integration technique (trapezoidal rule instead of Gaussian
+ * quadrature).
+ *
+ * @return The approximate standard error
+ */
 double PathSampler::standardError( void ) const
 {
     double vmlnl = 0.0;

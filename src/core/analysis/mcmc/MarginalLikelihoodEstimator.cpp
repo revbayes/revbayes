@@ -161,8 +161,9 @@ double MarginalLikelihoodEstimator::marginalLikelihood( void ) const
 /**
  * This function is adapted from TraceNumeric::update(): the only difference is that it works directly on a vector of numeric
  * values representing recorded samples, as opposed to a Trace object. The calculation is equivalent to the one used in
- * Tracer, and also (except for the choice of the maximum lag value) to convenience:::essTracer.
+ * Tracer, and also (except for the choice of the maximum lag value) to convenience:::essTracer().
  *
+ * @param values Vector of numeric parameter values
  * @return The effective sample size
  */
 double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) const
@@ -252,6 +253,27 @@ std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std:
 }
 
 
+/**
+ * Generate block bootstrap replicates of log likelihoods sampled by the power posterior analysis. This is done using the stationary
+ * boostrap method of Politis & Romano (1994; J. Am. Stat. Assoc. 89(428): 1303--1313). The code below combines the functions
+ * mcmc3r::block.boot() and mcmc3r:::ts.array() from Mario dos Reis' companion R package for MCMCTree (see
+ * https://github.com/dosreislab/mcmc3r/blob/main/R/marginal-lhd.R), the latter of which was in turn lifted without
+ * modifications from the eponymous function in the package "boot", written by Angelo J. Canty and corrected by B. D. Ripley (see
+ * https://github.com/cran/boot/blob/master/R/bootfuns.q#L3160). Combining these two functions means that some
+ * of the variables that were user-defined in ts.array() are here hardcoded to fixed values: specifically, n_sim (length of simulated
+ * time series) is always equal to n (length of original time series), l (mean block length) is set to n * prop, the actual block length is
+ * never fixed but rather always drawn from a geometric distribution with mean l, and end correction is always used.
+ *
+ * When print_to_file = true, new directories are created in the parent directory of the file storing the original log likelihoods for each
+ * of the K powers / temperatures, called stone_1, stone_2, ..., stone_K. In each directory, text files are created for each of the
+ * R = repnum bootstrap replicates, with basenames bootrep_1, bootrep_2, ..., bootrep_R, and the same extension as the file
+ * storing the original log likelihoods. In addition, a file with basename bootrep_0 stores a copy of the original log-likelihood samples.
+ *
+ * @param repnum Number of bootstrap replicates
+ * @param prop Mean block length, given as a proportion of the MCMC chain length n
+ * @param print_to_file Should we create text files recording the resampled log likelihood values?
+ * @return Nested vector of n log-likelihood samples (innermost) for each of the R replicates (inner) for each of the K powers (outer)
+ */
 std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop, bool print_to_file) const
 {
     // Get random number generator
@@ -401,6 +423,16 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
 }
 
 
+/**
+ * Generate block bootstrap replicates using blockBootstrap() (see above), estimate marginal likelihood on them, and use the
+ * resulting values to place a standard error (and optionally, a credible interval) on the original estimate.
+ *
+ * @param repnum Number of bootstrap replicates
+ * @param prop Mean block length, given as a proportion of the MCMC chain length n
+ * @param print Should we create text files recording the resampled log likelihood values?
+ * @param verbose Should we print the following the screen? (1) Vector of marginal likelihood estimates on the boostrap replicates and (2) 95% credible interval calculated from these replicates
+ * @return Standard error of the marginal likelihood estimate calculated from the boostrap replicates
+ */
 double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, double prop, bool print, bool verbose) const
 {
     std::vector< std::vector< std::vector<double> > > bootreps;

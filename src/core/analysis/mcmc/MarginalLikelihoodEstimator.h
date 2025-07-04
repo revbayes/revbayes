@@ -19,7 +19,7 @@ namespace RevBayesCore {
      *
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @author The RevBayes Development Core Team (Sebastian Hoehna, David Cerny)
      * @since Version 1.0, 2014-06-24
      *
      */
