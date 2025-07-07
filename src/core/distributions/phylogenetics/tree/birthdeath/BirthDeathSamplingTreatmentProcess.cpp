@@ -273,11 +273,6 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( 
         return RbConstants::Double::neginf;
     }
 
-    if ( offset > DBL_EPSILON && phi_event[0] > DBL_EPSILON )
-    {
-        throw RbException("Event sampling fraction at the present is non-zero but there are no tips at the present.");
-    }
-
     // precompute A_i, B_i, C_i, E_i(t_i)
     prepareProbComputation();
 
