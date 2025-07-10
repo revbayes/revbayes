@@ -475,11 +475,6 @@ template<class valueType>
 void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
 {
 
-    // store if the state of the variable was dirty (needed an update)
-    bool needed_update = needs_update;
-    bool was_touched = this->touched;
-
-
     // delegate call to base class
     // this will set the touched flag if it wasn't set already
     DynamicNode<valueType>::touchMe( toucher, touchAll );
