@@ -75,7 +75,7 @@ steppingStoneSampler
     # Compute the standard error
     ps.stdError()                                               # default formula
     ps.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
-    ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (save output)
+    ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output)
 ## references
 - citation: Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.
   doi: 10.1038/s41586-021-04341-1

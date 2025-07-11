@@ -34,7 +34,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
     
         if ( not is_regular_file(filename) )
         {
-            throw RbException() << "Could not not file " << filename;
+            throw RbException() << "Could not find file " << filename;
         }
     
     

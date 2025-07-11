@@ -164,9 +164,9 @@ double SteppingStoneSampler::standardError( void ) const
             
         }
         
-        if ( not warnings.str().empty() )
+        if (warning_counter > 0)
         {
-            warnings << ".\n";
+            warnings << ".\n" << "Try setting bootstrap=TRUE.\n";
             RBOUT( warnings.str() );
         }
     }

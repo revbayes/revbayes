@@ -4013,7 +4013,7 @@ ps.marginal()
 # Compute the standard error
 ps.stdError()                                               # default formula
 ps.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
-ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (save output))");
+ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("pathSampler")][string("name")] = string(R"(pathSampler)");
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(dos Reis M, Gunnell GF, Barba-Montoya J, Wilkins A, Yang Z, Yoder AD (2018). Using phylogenomic data to explore the effects of relaxed clocks and calibration strategies on divergence time estimation: primates as a test case. Systematic Biology, 67(4):594-615.)",R"(10.1093/sysbio/syy001)",R"(https://academic.oup.com/sysbio/article/67/4/594/4802240 )"));
@@ -4716,7 +4716,7 @@ ss.marginal()
 # Compute the standard error
 ss.stdError()                                               # delta approximation
 ss.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
-ss.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (save output))");
+ss.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Fan Y, Wu R, Chen M-H, Kuo L, Lewis PO (2011). Choosing among partition models in Bayesian phylogenetics. Molecular Biology and Evolution, 28(1):523-532.)",R"(10.1093/molbev/msq224)",R"(https://academic.oup.com/mbe/article/28/1/523/983866 )"));
