@@ -154,6 +154,16 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
 }
 
 
+const std::vector<std::string>& TopologyNode::branchComments() const
+{
+    return branch_comments;
+}
+
+std::vector<std::string>& TopologyNode::branchComments()
+{
+    return branch_comments;
+}
+
 void TopologyNode::addBranchParameter(const std::string &n, double p)
 {
 
@@ -220,6 +230,16 @@ void TopologyNode::addBranchParameters(std::string const &n, const std::vector<s
 
 }
 
+
+const std::vector<std::string>& TopologyNode::nodeComments() const
+{
+    return node_comments;
+}
+
+std::vector<std::string>& TopologyNode::nodeComments()
+{
+    return node_comments;
+}
 
 bool TopologyNode::hasNodeComment(const std::string& comment) const
 {

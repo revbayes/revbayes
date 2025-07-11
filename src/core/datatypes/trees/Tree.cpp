@@ -1572,14 +1572,45 @@ json Tree::toJSON() const
     return this->getNewickRepresentation(false);
 }
 
+std::string get_key(const std::string& comment)
+{
+    int loc = comment.find('=');
+    if (loc == std::string::npos)
+        return comment;
+    else
+        return comment.substr(0,loc);
+}
+
+std::vector<std::string> merge_comments(const std::vector<std::string>& comments1, const std::vector<std::string>& comments2)
+{
+    // Add comments from comments2 to comments1 if the key is not already present in comments1.
+    std::set<std::string> keys1;
+    for(auto& comment1: comments1)
+        keys1.insert(get_key(comment1));
+
+    std::vector<std::string> comments;
+
+    for(auto& comment2: comments2)
+    {
+        // If comments1 already sets this key then skip the comment.
+        if (not keys1.count(get_key(comment2)))
+            comments.push_back(comment2);
+    }
+    
+    return comments;
+}
+
+
 void Tree::collapseSampledAncestors()
 {
     for(auto& node: nodes)
     {
         if (node->isSampledAncestorTip())
         {
-            node->getParent().setTaxon(node->getTaxon());
-            node->getParent().removeChild(node);
+            auto& p = node->getParent();
+            p.setTaxon(node->getTaxon());
+            p.nodeComments() = merge_comments(p.nodeComments(), node->nodeComments());
+            p.removeChild(node);
         }
     }
     setRoot(root, true);

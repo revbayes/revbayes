@@ -75,6 +75,8 @@ namespace RevBayesCore {
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
+        const std::vector<std::string>&             branchComments() const;
+              std::vector<std::string>&             branchComments();
 
         void                                        addNodeParameter(const std::string &n, double p);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
@@ -82,6 +84,8 @@ namespace RevBayesCore {
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addNodeParameters(const std::string &n, const std::vector<std::string> &p, bool io);
 
+        const std::vector<std::string>&             nodeComments() const;
+              std::vector<std::string>&             nodeComments();
         bool                                        hasNodeComment(const std::string& comment) const;                                   //!< Checks for a comment -- maybe not of the form key=value.
         bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
         std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
