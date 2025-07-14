@@ -219,7 +219,8 @@ double MarginalLikelihoodEstimator::getESS(const std::vector<double> values) con
 
 std::int64_t MarginalLikelihoodEstimator::offsetModulo(std::int64_t i, std::int64_t n) const
 {
-    return 1 + (i - 1) % n;
+    // we do not add 1 to the result since we are using 0-based indexing, not 1-based indexing like in R
+    return (i - 1) % n;
 }
 
 
@@ -241,11 +242,9 @@ std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std:
     std::vector<std::int64_t> out;
     if (a.second != 0)
     {
-        std::vector<std::int64_t> seq( a.second );
         for (size_t i = 0; i < a.second; i++)
         {
-            seq[i] = a.first + i;
-            out.push_back( offsetModulo(seq[i], n) );
+            out.push_back( offsetModulo(a.first + i, n) );
         }
     }
     
@@ -311,29 +310,23 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
             {
                 std::vector<std::int64_t> temp0( repnum );
                 std::vector<std::int64_t> temp1( repnum );
-                std::vector<bool> test( repnum );
+                bool cond = false;
                 
                 for (size_t k = 0; k < repnum; k++)
                 {
                     temp0[k] = 1 + RbStatistics::Geometric::rv( 1/(n * prop), *rng );
                     temp1[k] = std::min( temp0[k], n_sim - len_tot[k] );
+                    len_tot[k] = len_tot[k] + temp1[k];
+                    cond |= len_tot[k] < n_sim;
                 }
                 
                 lens.push_back( temp1 );
-                
-                for (size_t k = 0; k < repnum; k++)
-                {
-                    len_tot[k] = len_tot[k] + temp1[k];
-                    test[k] = len_tot[k] < n_sim;
-                }
-                
-                cont = std::any_of(test.begin(), test.end(), [](bool x) { return x; });
+                cont = cond;
             }
             
-            size_t nn = lens.size();
-            std::vector< std::vector<std::int64_t> > st;
+            std::vector<std::int64_t> inds_flat; // flat vector of indices
             
-            for (size_t k = 0; k < nn; k++)
+            for (size_t k = 0; k < lens.size(); k++)
             {
                 std::vector<std::int64_t> elem( repnum );
                 for(size_t l = 0; l < repnum; l++)
@@ -342,45 +335,17 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
                     elem[l] = static_cast<std::int64_t>( std::floor(rng->uniform01() * endpt) ) + 1;
                 }
                 
-                st.push_back(elem);
+                std::pair<std::int64_t, std::int64_t> ends( elem[0], lens[k][0] );
+                std::vector<std::int64_t> inner = getIndices( ends, static_cast<std::int64_t>(n) );
+                
+                // add the vector resulting from this iteration (whose size is stochastic, and therefore unknown in advance) to our indices
+                inds_flat.insert(inds_flat.end(), inner.begin(), inner.end());
             }
             
-            std::vector< std::pair<std::int64_t, std::int64_t> > ends;
-            std::vector< std::vector<std::int64_t> > inds;
-            
-            for (size_t k = 0; k < nn; k++)
-            {
-                // paranoid pair constructor syntax compatible with C++14 and earlier
-                std::pair<std::int64_t, std::int64_t> tmp0( st[k][0], lens[k][0] );
-                ends.push_back( tmp0 );
-            }
-            
-            for (size_t k = 0; k < nn; k++)
-            {
-                std::vector<std::int64_t> tmp1 = getIndices( ends[k], static_cast<std::int64_t>(n) );
-                inds.push_back( tmp1 );
-            }
-            
-            // flatten the nested vector of indices
-            size_t total_size = 0;
-            for (const auto& inner : inds)
-            {
-                total_size += inner.size();
-            }
-            
-            std::vector<std::int64_t> inds_flattened;
-            inds_flattened.reserve(total_size);
-            
-            for (const auto& inner : inds)
-            {
-                inds_flattened.insert(inds_flattened.end(), inner.begin(), inner.end());
-            }
-            
-            // fill in the output vector; if the total length of the flattened index vector exceeds n_sim, truncate
+            // fill in the output vector; if the total length of the flat index vector exceeds n_sim, truncate
             for (size_t k = 0; k < n_sim; k++)
             {
-                // adjust for the fact that we are using 0-based indexing, not 1-based indexing like in R
-                size_t idx = inds_flattened[k] - 1;
+                size_t idx = inds_flat[k];
                 res_innermost[k] = likelihoodSamples[i][idx];
             }
             
