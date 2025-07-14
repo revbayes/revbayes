@@ -271,32 +271,32 @@ std::vector<std::int64_t> MarginalLikelihoodEstimator::getIndices(std::pair<std:
  * @param repnum Number of bootstrap replicates
  * @param prop Mean block length, given as a proportion of the MCMC chain length n
  * @param print_to_file Should we create text files recording the resampled log likelihood values?
- * @return Nested vector of n log-likelihood samples (innermost) for each of the R replicates (inner) for each of the K powers (outer)
+ * @return Nested vector of n log-likelihood samples (innermost) for each of the K powers (inner) from the original analysis and each of the R replicates (outer)
  */
 std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::blockBootstrap(size_t repnum, double prop, bool print_to_file) const
 {
     // Get random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    // vector to be returned (repnum replicates for each of the k powers)
-    std::vector< std::vector< std::vector<double> > > res( powers.size() );
+    // vector of bootstrapped replicates to be returned
+    std::vector< std::vector< std::vector<double> > > res( repnum + 1 );
     
-    for (size_t i = 0; i < powers.size(); i++)
+    // the first element just corresponds to the original (non-resampled) vector of log likelihoods
+    res[0] = likelihoodSamples;
+    
+    for (size_t i = 1; i < repnum + 1; i++)
     {
-        // vector of bootstrap replicates
-        std::vector< std::vector<double> > res_inner( repnum + 1 );
+        // create a vector of k powers for each of the repnum replicates
+        std::vector< std::vector<double> > res_inner( powers.size() );
         
-        // the first element just corresponds to the original (non-resampled) vector of log likelihoods
-        res_inner[0] = likelihoodSamples[i];
-        
-        // we keep n and n_sim distinct for conceptual reasons: technically, the simulated time series could contain a different
-        // number of samples than the original time series
-        size_t n = likelihoodSamples[i].size();
-        std::int64_t n_sim = n;
-        
-        for (size_t j = 1; j < repnum + 1; j++)
+        for (size_t j = 0; j < powers.size(); j++)
         {
-            // vector of resampled likelihood values to be returned for this bootstrap replicate
+            // we keep n and n_sim distinct for conceptual reasons: technically, the simulated time series could contain a different
+            // number of samples than the original time series
+            size_t n = likelihoodSamples[j].size();
+            std::int64_t n_sim = n;
+            
+            // vector of resampled likelihood values to be returned for this power and bootstrap replicate
             std::vector<double> res_innermost( n );
             
             // we always use end correction, so the endpoint is once again equal to n rather than n - (n * prop) + 1
@@ -346,7 +346,7 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
             for (size_t k = 0; k < n_sim; k++)
             {
                 size_t idx = inds_flat[k];
-                res_innermost[k] = likelihoodSamples[i][idx];
+                res_innermost[k] = likelihoodSamples[j][idx];
             }
             
             res_inner[j] = res_innermost;
@@ -375,9 +375,9 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
                 std::ofstream outStream( rep_file_path.string() );
                 outStream << "power\t" << "likelihood" << std::endl;
                 
-                for (size_t k = 0; k < res[i][j].size(); k++)
+                for (size_t k = 0; k < res[j][i].size(); k++)
                 {
-                    outStream << powers[i] << "\t" << res[i][j][k] << std::endl;
+                    outStream << powers[i] << "\t" << res[j][i][k] << std::endl;
                 }
                 
                 outStream.close();
@@ -406,14 +406,7 @@ double MarginalLikelihoodEstimator::standardErrorBlockBootstrap(size_t repnum, d
     
     for (size_t i = 0; i < repnum + 1; i++)
     {
-        std::vector< std::vector<double> > boot_rep( bootreps.size() );
-        
-        for (size_t j = 0; j < bootreps.size(); j++)
-        {
-            boot_rep[j] = bootreps[j][i];
-        }
-        
-        marg_lnl_estimates[i] = marginalLikelihoodGeneral(powers, boot_rep);
+        marg_lnl_estimates[i] = marginalLikelihoodGeneral(powers, bootreps[i]);
     }
     
     // calculate the variance of the bootstraped estimates (not including the estimate derived from original samples)
