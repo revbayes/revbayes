@@ -1,0 +1,107 @@
+# RevBayes example: Bayesian inference of phylogeny using polymorphism-aware models (PoMoThree)  
+
+# Authors: Rui Borges and Carolin Kosiol
+
+seed(123456)
+# CODING="none"
+# CODING="all"
+CODING="variable" # nan
+# CODING="informative"
+
+# reading the PoMo alignment to use with virtual PoMo 3
+
+N <- 3
+
+allele_counts <- readPoMoCountFile(countFile="data/sim.cf", virtualPopulationSize=N, format="PoMo", samplingCorrection="Binomial")
+
+allele_counts
+
+n_taxa     <- allele_counts.ntaxa()
+
+n_branches <- 2*n_taxa-3
+
+taxa       <- allele_counts.taxa()
+
+
+# setting up a vector variable that holds all the moves and monitors
+
+moves    = VectorMoves()  
+
+monitors = VectorMonitors()
+
+
+# setting the model of evolution
+
+
+# allele frequencies
+
+pi_prior <- [1,1,1,1]
+
+pi ~ dnDirichlet(pi_prior)
+
+moves.append( mvBetaSimplex(pi, weight=2) )
+
+
+# exchangeabilities
+
+for (i in 1:6){
+
+  rho[i] ~ dnExponential(10.0)
+
+  moves.append(mvScale( rho[i], weight=2 ))
+
+}
+
+
+# fitness coefficients
+phi := [1.0,1.0,1.0,1.0]
+
+
+# mutation rates
+
+K <- 4
+
+mu := fnPoMoReversibleMutationRates(K,pi,rho)
+
+
+# rate matrix
+
+Q := fnPoMoKN(K,N,N,mu,phi)
+
+
+
+
+# defining the tree
+
+# topology
+
+topology ~ dnUniformTopology(taxa)
+
+moves.append( mvNNI(topology, weight=2*n_taxa) )
+
+
+# branch lengths
+
+for (i in 1:n_branches) {
+
+   branch_lengths[i] ~ dnExponential(10.0)
+
+   moves.append( mvScale(branch_lengths[i]) )
+
+}
+
+
+psi := treeAssembly(topology, branch_lengths)
+
+
+
+# wrapping the model
+
+sequences ~ dnPhyloCTMC(psi,Q=Q,type="PoMo",coding=CODING)
+
+sequences.clamp(allele_counts)
+
+sequences.lnProbability()
+
+# quitting rb
+q()

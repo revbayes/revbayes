@@ -700,7 +700,7 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
             for (auto site_index: site_indices)
             {
                 DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
-
+                std::cout << "  Is weighted? : " << c.isWeighted() << "\n";
                 if ( c.isWeighted() ) return true;
             }
         }

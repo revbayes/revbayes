@@ -147,13 +147,13 @@ PoMoCountFileReader::PoMoCountFileReader(   const path &fn,
 
             std::vector<double> vec = pState.getWeights();
             
-            // checks the weight
-            std::cout << " Count: " << pState.getStringValue() << "\n";
-            for (int i=0; i < vec.size(); i++)
-            {
-                std::cout << vec[i] << ' ';
-            }
-            std::cout << "\n\n";
+            // // checks the weight
+            // std::cout << " Count: " << pState.getStringValue() << "\n";
+            // for (int i=0; i < vec.size(); i++)
+            // {
+            //     std::cout << vec[i] << ' ';
+            // }
+            // std::cout << "\n\n";
 		}
 	}
 
