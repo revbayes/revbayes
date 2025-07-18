@@ -173,24 +173,18 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 //    }
     
     const Tree& tau = character_histories->getValue().getTree();
-    
     // compute the ln probability by recursively calling the probability calculation for each node
     const TopologyNode &root = tau.getRoot();
-    
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
-        
     // only necessary if the root is actually dirty
     if ( this->dirty_nodes[root_index] )
     {
                 
         recursiveComputeLnProbability( root, root_index );
-        
         // sum the partials up
         this->ln_prob = sumRootLikelihood();
-        
     }
-    
     return this->ln_prob;
 }
 

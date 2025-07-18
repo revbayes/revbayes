@@ -34,6 +34,7 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlMove.h"
+#include "Simplex.h"
 #include "StochasticNode.h"
 #include "RnaState.h" // IWYU pragma: keep
 #include "AminoAcidState.h" // IWYU pragma: keep
@@ -86,12 +87,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     delete value;
     
     // move/proposal arguments
-    double w        = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double l        = static_cast<const Probability &>( lambda->getRevObject() ).getValue();
-    std::string gt  = static_cast<const RlString &>( graph->getRevObject() ).getValue();
-    std::string pt  = static_cast<const RlString &>( proposal->getRevObject() ).getValue();
-    double r        = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    
+    double w                 = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l                 = static_cast<const Probability &>( lambda->getRevObject() ).getValue();
+    std::string gt           = static_cast<const RlString &>( graph->getRevObject() ).getValue();
+    std::string pt           = static_cast<const RlString &>( proposal->getRevObject() ).getValue();
+    double r                 = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+
     // move/proposal parameters
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
@@ -116,6 +117,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     {
         throw RbException("qmap_site or qmap_seq must be provided!");
     }
+    
     
     // get data type
     std::string mt  = ctmc_tdn->getValue().getDataType();

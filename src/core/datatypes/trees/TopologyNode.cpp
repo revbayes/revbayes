@@ -578,7 +578,7 @@ std::ostream& TopologyNode::buildNewickSimmap( std::ostream& o, const CharacterH
         o << parent_chars[0]->getStateStr() << "," << (total_branch_length - used_branch_length) << "}";
         
     }
-    
+    // PL comments: edit?
 
     // 5. Write ";" if we're done with the tree.
     if ( isRoot() )

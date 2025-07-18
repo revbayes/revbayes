@@ -614,7 +614,7 @@ const MemberRules& Dist_phyloCTMCDASiteIID::getParameterRules(void) const
         options.push_back( "NaturalNumbers" );
         options.push_back( "Restriction" );
         distMemberRules.push_back( new OptionRule( "type", new RlString("DNA"), options, "The data type, used for simulation and initialization." ) );
-
+        
         distMemberRules.push_back( new ArgumentRule( "treatAmbiguousAsGap", RlBoolean::getClassTypeSpec(), "Should we treat ambiguous characters as gaps/missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         distMemberRules.push_back( new ArgumentRule("coding", RlString::getClassTypeSpec(), "", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("all") ) );
@@ -676,7 +676,6 @@ void Dist_phyloCTMCDASiteIID::printValue(std::ostream& o) const
         o << "?";
     }
     o << ")";
-
 }
 
 

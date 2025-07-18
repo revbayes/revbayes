@@ -361,7 +361,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             throw e;
         }
     }
-
     // Identify nodes that proposal touches
     std::vector<DagNode*> touched_nodes = nodes; //proposal->identifyNodesToTouch();
 
@@ -458,7 +457,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     if ( rejected )
     {
         proposal->undoProposal();
-
         // call restore for each node
         for (auto node: touched_nodes)
             node->restore();
