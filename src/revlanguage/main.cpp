@@ -1,11 +1,7 @@
 #include <cstdlib>
-#include <boost/program_options.hpp> // IWYU pragma: keep
 #include <string>
 #include <vector>
 #include <iostream>
-
-namespace po = boost::program_options;
-using po::variables_map;
 
 #include "MpiUtilities.h"
 #include "Parser.h"
@@ -19,6 +15,7 @@ using po::variables_map;
 #include "StringUtilities.h"
 #include "TerminalFormatter.h"
 #include "Workspace.h"
+#include "CLI11.hpp" // CLI11 command-line parsing library.
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -28,7 +25,7 @@ using po::variables_map;
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]\n";
+    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] file [args]\n       rb [options] -e expr [-e expr2 ...] [args]\n";
     // Other usages not mentioned
 }
 
@@ -38,100 +35,93 @@ std::string short_description()
     return "Bayesian phylogenetic inference using probabilistic graphical models and an interpreted language";
 }
 
-//
-variables_map parse_cmd_line(int argc, char* argv[])
+struct ParsedOptions
 {
-    using namespace po;
+    bool help = false;
+    bool version = false;
+    bool batch = false;
+    bool no_header = false;
+    bool jupyter = false;
+    std::vector<std::string> options;
+    std::vector<std::string> expressions;
+    std::optional<std::string> filename;
+    std::vector<std::string> args;
+};
 
-    // Put all options in one group for now.
-    options_description general("Options");
-    general.add_options()
-	("help,h","Show information on flags.")
-	("version,v","Show version and exit.")
+void show_help(const CLI::App& app)
+{
+    int rank = 0;
 
-	// implicit_value(1) means that -V => -V1
-    // RevBayes doesn't use a global verbose_logging flag.
-    // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
+#ifdef RB_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
 
-	("batch,b","Run in batch mode.")
-	("no-header","Suppress header.")
-    ("jupyter,j","Run in jupyter mode.")
-    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
-    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-    ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
-	// composing means that --file can occur multiple times
-    ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
-    ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
-	;
+    if (rank == 0)
+    {
+        std::cerr << short_description() << std::endl;
+        std::cerr << usage() << std::endl;
+//        std::cerr << std::endl;
+        std::cerr << app.help() << std::endl;
+        std::cerr << "See http://revbayes.github.io for more information." << std::endl;
+    }
+}
 
-    // Treat all positional options as "file" options.
-    positional_options_description p;
-    p.add("file", -1);
+//
+ParsedOptions parse_cmd_line(int argc, char* argv[])
+{
+    CLI::App stage1(short_description());
 
-    // Parse the command line into variables_map 'args'
-    variables_map args;
+    ParsedOptions options;
+
+//    stage1.add_option("-h,--help",    options.help,      "Show information on flags");
+    
+    stage1.add_flag("-v,--version",  options.version,    "Show version and exit");
+    stage1.add_flag("-b,--batch",    options.batch,      "Run in batch mode");
+    stage1.add_flag("--no-header",   options.no_header,  "Suppress header");
+    stage1.add_flag("-j,--jupyter",  options.jupyter,    "Run in jupyter mode");
+
+    stage1.add_option("--setOption",  options.options,   "Set an option key=value.  See ?setOption for the list of available keys and their associated values.");
 
     try {
-        store(command_line_parser(argc, argv).options(general).positional(p).run(), args);
+        stage1.parse(argc, argv);
     }
-    catch(po::error& e)
+    catch (const CLI::ParseError &e)
     {
-        std::cout << "ERROR: " << e.what() << std::endl;
-        std::cout << std::endl;
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        std::cerr << std::endl;
         
-        int rank = 0;
-#ifdef RB_MPI
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
-        if (rank == 0)
-        {
-            std::cout << usage() << std::endl;
-            std::cout << short_description() << std::endl;
-            std::cout << std::endl;
-            std::cout << general << std::endl;
-            std::cout << "See http://revbayes.github.io for more information." << std::endl;
-        }
+        show_help(stage1);
+
 #ifdef RB_MPI
         MPI_Finalize();
 #endif
-        std::exit(0);
-        
+
+        std::exit(e.get_exit_code());
     }
-    notify(args);
 
     // Print flags and usage info in this function since we know the flags here.
-    if ( args.count("help") > 0 )
+    if ( options.help )
     {
 	// Do we want to avoid displaying --file here, since its a positional option also?
 
-        int rank = 0;
-#ifdef RB_MPI
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
-        if (rank == 0)
-        {
-            std::cout << usage() << std::endl;
-            std::cout << short_description() << std::endl;
-            std::cout << std::endl;
-            std::cout << general << std::endl;
-            std::cout << "See http://revbayes.github.io for more information." << std::endl;
-        }
+        show_help(stage1);
+
 #ifdef RB_MPI
         MPI_Finalize();
 #endif
+
         std::exit(0);
     }
 
-    return args;
+    
+    
+    return options;
 }
 
 #ifndef MAC_GUI // don't include main for the Mac GUI written in Swift
 
-int main(int argc, char* argv[]) {
-
-    using namespace po;
-
+int main(int argc, char* argv[])
+{
     // If we aren't using MPI, this will be zero.
     // If we are using MPI, it will be zero for the first process.
     int process_id = 0;
@@ -145,7 +135,6 @@ int main(int argc, char* argv[]) {
         MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
         RevBayesCore::MpiUtilities::synchronizeRNG( MPI_COMM_WORLD );
-
     }
     catch (char* str)
     {
@@ -156,78 +145,50 @@ int main(int argc, char* argv[]) {
 #endif
 
     /* Parse argv to get the command line arguments */
-    variables_map args = parse_cmd_line(argc, argv);
+    auto options = parse_cmd_line(argc, argv);
 
-    if ( args.count("version") > 0 )
+    if ( options.version )
     {
         std::cout << RbVersion().getVersion() << std::endl;
         exit(0);
     }
 
-    if ( args.count("setOption") > 0 )
+    for(auto& option: options.options)
     {
-        std::vector<std::string> options = args["setOption"].as<std::vector<std::string> >();
-        for(int i=0;i<options.size();i++)
+        std::vector<std::string> tokens;
+        StringUtilities::stringSplit(option, "=", tokens);
+        if (tokens.size() != 2)
         {
-            std::vector<std::string> tokens;
-            StringUtilities::stringSplit(options[i], "=", tokens);
-            if (tokens.size() != 2)
-            {
-                throw RbException() << "Option '" << options[i] << "' must have the form key=value"; 
-            }
-            else
-            {
-                RbSettings::userSettings().setOption( tokens[0], tokens[1], false );
-            }
+            throw RbException() << "Option '" << option << "' must have the form key=value"; 
+        }
+        else
+        {
+            RbSettings::userSettings().setOption( tokens[0], tokens[1], false );
         }
     }
-    
+
     /*default to interactive mode*/
-    bool batch_mode = (args.count("batch") > 0);
+    bool batch_mode = options.batch;
     // FIXME -- the batch_mode variable appears to have no effect if true.
 
     /* seek out files from command line */
     std::vector<std::string> source_files;
-    if ( args.count("file") > 0 )
+    if ( options.filename )
     {
-        source_files = args["file"].as<std::vector<std::string> >();
+        source_files = { *options.filename };
     }
 
-
-    if ( args.count("args") && args.count("cmd"))
-    {
-        throw RbException("command line: received both --args and --cmd");
-    }
-    
-    std::vector<std::string> rb_args;
-    if ( args.count("args") > 0 )
-    {
-        rb_args = args["args"].as<std::vector<std::string> >();
-    }
-    else if ( args.count("cmd") > 0)
-    {
-        rb_args = args["cmd"].as<std::vector<std::string> >();
-        source_files.push_back(rb_args[0]);
-        rb_args.erase(rb_args.begin());
-
-        // Let's make batch mode default to true for scripts.
-        if ( args.count("batch") == 0 )
-        {
-            batch_mode = true;
-        }
-    }
+    std::vector<std::string> rb_args = options.args;;
 
     /* initialize environment */
-    bool show_header=true;
-    if (args.count("no-header"))
-        show_header = false;
+    bool show_header = not options.no_header;
     RevLanguageMain rl = RevLanguageMain(batch_mode, show_header);
 
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
     rl.startRevLanguageEnvironment(rb_args, source_files);
 
-    if (args.count("jupyter"))
+    if ( options.jupyter )
     {
         RevClient::startJupyterInterpreter();
     }
