@@ -22,17 +22,16 @@
 namespace RevBayesCore { class BranchHistory; }
 namespace RevBayesCore { class DagNode; }
 
-
 using namespace RevBayesCore;
 
-
-//TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
-BiogeographyCladogeneticBirthDeathFunction::BiogeographyCladogeneticBirthDeathFunction( const TypedDagNode< RbVector< double > >* sr,
-                                                                                        TypedDagNode< RbVector<double> >* wf,
-                                                                                        TypedDagNode< RbVector< RbVector<double> > >* bf,
-                                                                                        unsigned mrs,
-                                                                                        unsigned msss,
-                                                                                        std::string ct ):
+BiogeographyCladogeneticBirthDeathFunction::BiogeographyCladogeneticBirthDeathFunction(
+    const TypedDagNode< RbVector< double > >* sr,
+    TypedDagNode< RbVector<double> >* wf,
+    TypedDagNode< RbVector< RbVector<double> > >* bf,
+    unsigned mrs,
+    unsigned msss,
+    bool nss,
+    std::string ct) :
 TypedFunction<CladogeneticSpeciationRateMatrix>( new CladogeneticSpeciationRateMatrix(  pow(2,mrs)-1) ),
 speciationRates( sr ),
 withinRegionFeatures( wf ),
@@ -45,22 +44,21 @@ maxSubrangeSplitSize(msss),
 numEventTypes( (unsigned)sr->getValue().size() ),
 use_hidden_rate(false),
 use_cutset_mean(true),
+normalize_split_scores(nss),
 connectivityType( ct )
 {
     addParameter( speciationRates );
     addParameter( withinRegionFeatures );
     addParameter( betweenRegionFeatures );
     
-    if (numCharacters > 10)
-    {
-        throw RbException(">10 characters currently unsupported");
+    if (numCharacters > 8) {
+        std::cout << "Warning: analyses may be prohibitively slow for >8 regions.\n";
     }
     
     buildBits();
     buildRanges(ranges, betweenRegionFeatures, true);
     
     numRanges = (unsigned)ranges.size();
-//    numRanges++; // add one for the null range
     
     buildEventMap();
     if (connectivityType == "none")
@@ -70,11 +68,9 @@ connectivityType( ct )
     else if (connectivityType == "cutset")
     {
         buildCutsets();
-//        buildCutsetFactors();
     }
     buildBuddingRegions();
     buildEventMapFactors();
-//    updateEventMapWeights();
     
     update();
     
@@ -632,10 +628,12 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
         {
             max_value[event_type] = v;
         }
-        sum_value[event_type] += v;
-        ln_sum_value[event_type] += std::log(v);
-        prod_value[event_type] *= v;
-        n_value[event_type] += 1;
+        if (v > 0.0) {
+            sum_value[event_type] += v;
+            ln_sum_value[event_type] += std::log(v);
+            prod_value[event_type] *= v;
+            n_value[event_type] += 1;
+        }
 
     }
     
@@ -657,7 +655,9 @@ void BiogeographyCladogeneticBirthDeathFunction::buildEventMapFactors(void)
         std::vector<unsigned> idx = it->first;
         unsigned event_type = it->second;
 
-        eventMapFactors[ idx ] = eventMapFactors[ idx ] / geomean_value[ event_type ];
+        if (normalize_split_scores) {
+            eventMapFactors[ idx ] = eventMapFactors[ idx ] / geomean_value[ event_type ];
+        }
         eventMapWeights[ idx ] = eventMapFactors[ idx ];
     }
         
@@ -789,7 +789,8 @@ double BiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vect
         for (size_t i = 0; i < cutset.size(); i++) {
             size_t v1 = cutset[i][0];
             size_t v2 = cutset[i][1];
-            cost += (1.0 / bf[v1][v2]);
+            double mean_bf = (bf[v1][v2] + bf[v2][v1]) / 2.0;
+            cost += (1.0 / mean_bf);
 //            std::cout << "\t" << v1 << " -- " << v2 << " : " << bf[v1][v2] << "\n";
         }
         
@@ -799,109 +800,7 @@ double BiogeographyCladogeneticBirthDeathFunction::computeCutsetScore( std::vect
     }
     return cost;
 }
-//
-///*
-// * This function computes the modularity score for a cladogenetic outcome
-// */
-//
-//double BiogeographyCladogeneticBirthDeathFunction::computeModularityScore(std::vector<unsigned> idx, unsigned event_type)
-//{
-//    // return value
-//    double Q = 0.0;
-//    
-//    // get value for connectivity mtx
-//    const RbVector<RbVector<double> >& mtx = betweenRegionFeatures->getValue();
-//    size_t n = mtx.size();
-//    
-//    // get left/right area sets
-//    std::vector< std::set<unsigned> > daughter_ranges;
-//    daughter_ranges.push_back( statesToBitsetsByNumOn[ idx[0] ] );
-//    daughter_ranges.push_back( statesToBitsetsByNumOn[ idx[1] ] );
-//    
-//    // compute modularity score depending on event type
-//    if (event_type == SYMPATRY)
-//    {
-//        
-//        if (daughter_ranges[0].size() == 1 && daughter_ranges[1].size() == 1)
-//        {
-//            return 0.0;
-//        }
-//        
-//        std::vector<double> z(n, 0.0);
-//        
-//        // get trunk range (larger range)
-//        const std::set<unsigned>& s = ( daughter_ranges[0].size() > daughter_ranges[1].size() ? daughter_ranges[0] : daughter_ranges[1] );
-//        
-//        // compute z, the sum of ranges for the trunk range
-//        std::set<unsigned>::iterator it1, it2;
-//        for (it1 = s.begin(); it1 != s.end(); it1++)
-//        {
-//            for (it2 = s.begin(); it2 != s.end(); it2++)
-//            {
-//                if ( (*it1) != (*it2) ) {
-//                    z[ *it1 ] += mtx[ *it1 ][ *it2 ];
-//                }
-//            }
-//        }
-//        
-//        double z_sum = 0.0;
-//        for (size_t i = 0; i < z.size(); i++) {
-//            z_sum += z[i];
-//        }
-//        
-//        for (size_t i = 0; i < n; i++)
-//        {
-//            for (size_t j = 0; j < n; j++)
-//            {
-//                if (i != j) {
-//                    Q += mtx[i][j] - (z[i] * z[j] / (2 * z_sum));
-//                }
-//            }
-//        }
-//        
-//    }
-//    else if (event_type == ALLOPATRY)
-//    {
-//        std::vector<double> z(n, 0.0);
-//        
-//        // compute z, the sum of edges across daughter ranges
-//        for (size_t i = 0; i < daughter_ranges.size(); i++) {
-//            
-//            // get one daughter range
-//            const std::set<unsigned>& s = daughter_ranges[i];
-//            
-//            // sum connectivity scores
-//            std::set<unsigned>::iterator it1, it2;
-//            for (it1 = s.begin(); it1 != s.end(); it1++)
-//            {
-//                for (it2 = s.begin(); it2 != s.end(); it2++)
-//                {
-//                    if ( (*it1) != (*it2) ) {
-//                        z[ *it1 ] += mtx[ *it1 ][ *it2 ];
-//                    }
-//                }
-//            }
-//        }
-//        
-//        double z_sum = 0.0;
-//        for (size_t i = 0; i < z.size(); i++) {
-//            z_sum += z[i];
-//        }
-//        
-//        for (size_t i = 0; i < n; i++)
-//        {
-//            for (size_t j = 0; j < n; j++)
-//            {
-//                if (i != j) {
-//                    Q += mtx[i][j] - (z[i] * z[j] / (2 * z_sum));
-//                }
-//            }
-//        }
-//        
-//    }
-//    
-//    return Q;
-//}
+
 
 /*
  * Returns the eventMap container
@@ -1106,7 +1005,24 @@ void BiogeographyCladogeneticBirthDeathFunction::update( void )
     std::map<std::vector<unsigned>, double> clado_prob_event_map = cladogenetic_probability_matrix.getEventMap();
     for (std::map<std::vector<unsigned>, double>::iterator jt = eventMap.begin(); jt != eventMap.end(); jt++) {
         const std::vector<unsigned>& idx = jt->first;
-        clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
+        // if the speciation rate for the state is zero
+        // and does not involve state change, set outcome prob
+        // equal to 1.0 (no change only)
+        if (speciation_rate_sum_per_state[ idx[0] ] == 0 && (idx[0] == idx[1]) && (idx[0]==idx[2])) {
+            clado_prob_event_map[ idx ] = 1.0;
+        }
+        // otherwise if speciation rate is zero but
+        // does involve state change, set outcome prob
+        // equal to 0.0 (change impossible)
+        else if (speciation_rate_sum_per_state[ idx[0] ] == 0) {
+            clado_prob_event_map[ idx ] = 0.0;
+        }
+        // lastly, if speciation rate for state is non-zero
+        // compute the probability as the rate of the particular
+        // event divided by the sum of rates departing the state
+        else {
+            clado_prob_event_map[ idx ] = eventMap[ idx ] / speciation_rate_sum_per_state[ idx[0] ];
+        }
     }
     cladogenetic_probability_matrix.setEventMap(clado_prob_event_map);
     

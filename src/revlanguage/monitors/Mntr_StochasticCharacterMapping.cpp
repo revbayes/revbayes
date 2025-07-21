@@ -227,7 +227,7 @@ const MemberRules& Mntr_StochasticCharacterMapping::getParameterRules(void) cons
         monitor_rules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(),  "The character dependent birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         monitor_rules.push_back( new ArgumentRule("glhbdsp"        , TimeTree::getClassTypeSpec(),  "The lineage-heterogeneous birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL) );
         monitor_rules.push_back( new ArgumentRule("include_simmap" , RlBoolean::getClassTypeSpec(), "Should we log SIMMAP/phytools compatible newick strings? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
-        monitor_rules.push_back( new ArgumentRule("use_simmap_default" , RlBoolean::getClassTypeSpec(), "Should we use the default SIMMAP/phytools event ordering? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
+        monitor_rules.push_back( new ArgumentRule("use_simmap_default" , RlBoolean::getClassTypeSpec(), "Should we use the default SIMMAP/phytools event ordering (i.e., young/left -> old/right)? True by default.",    ArgumentRule::BY_VALUE,     ArgumentRule::ANY, new RlBoolean(true) ) );
         monitor_rules.push_back( new ArgumentRule("index"          , Natural::getClassTypeSpec(), "The index of the character to be monitored.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         // add the rules from the base class

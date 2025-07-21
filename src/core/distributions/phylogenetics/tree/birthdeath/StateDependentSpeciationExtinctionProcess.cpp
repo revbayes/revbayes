@@ -1023,7 +1023,7 @@ void StateDependentSpeciationExtinctionProcess::recursivelyFlagNodeDirty( const 
 }
 
 
-void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool set_amb_char_data)
+void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool set_amb_char_data, bool use_simmap_default)
 {
     // first populate partial likelihood vectors along all the branches
     sample_character_history = true;
@@ -1128,8 +1128,8 @@ void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::
             character_histories[node_index] = simmap_string;
             
             // recurse towards tips
-            bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
-            bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data);
+            bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data, use_simmap_default);
+            bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data, use_simmap_default);
             success = success_l && success_r;
         }
         
@@ -1147,7 +1147,7 @@ void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::
 }
 
 
-bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data)
+bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data, bool use_simmap_default)
 {
     size_t node_index = node.getIndex();
     std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState();
@@ -1321,12 +1321,27 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         
         // make SIMMAP string
         std::string simmap_string = "{";
-        for (size_t i = transition_times.size(); i > 0; i--)
+
+        if (use_simmap_default == true)
         {
-            simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
-            if (i != 1)
+            for (size_t i = transition_times.size(); i > 0; i--)
             {
-                simmap_string = simmap_string + ":";
+                simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
+                if (i != 1)
+                {
+                    simmap_string = simmap_string + ":";
+                }
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < transition_times.size(); i++)
+            {
+                if (i != 0)
+                {
+                    simmap_string = simmap_string + ":";
+                }
+                simmap_string = simmap_string + StringUtilities::toString(transition_states[i]) + "," + StringUtilities::toString(transition_times[i]);
             }
         }
         simmap_string = simmap_string + "}";
@@ -1473,8 +1488,8 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         average_extinction[node_index] = total_extinction_rate / num_dts;
         
         // recurse towards tips
-        bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
-        bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data);
+        bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data, use_simmap_default);
+        bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data, use_simmap_default);
         return success_l && success_r;
     }
     return true;
