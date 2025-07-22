@@ -153,11 +153,13 @@ while [  $i -lt ${#tests[@]} ]; do
             fi
         done
 
-        for f in $(ls ${exp_out_dir}); do
-            if [ ! -e output/$f ]; then
-                errs+=("missing:  $f")
-            elif ! diff output/$f ${exp_out_dir}/$f > /dev/null; then
-                errs+=("mismatch: $f")
+        for expected in $(find output_expected -type f); do
+            filename=${expected#output_expected/}
+            output=output/${filename}
+            if [ ! -e "${expected}" ]; then
+                errs+=("missing:  ${filename}")
+            elif ! diff "${output}" "${expected}" > /dev/null; then
+                errs+=("mismatch: ${filename}")
             fi
         done
 
