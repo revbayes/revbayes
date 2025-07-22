@@ -1931,11 +1931,10 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
     // reset parent/child relationships
     reverseParentChild( n.getParent() );
-    n.getParent().setParent( NULL );
     
     // set the new root
-    setRoot( &n.getParent(), reindex );
-    
+    root = &n.getParent();
+
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
     {
