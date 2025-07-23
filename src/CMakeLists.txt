@@ -174,7 +174,7 @@ endif()
 
 message("Searching for BOOST:")
 find_package(Boost
-1.71.0
+1.74.0
 COMPONENTS regex
 program_options
 thread

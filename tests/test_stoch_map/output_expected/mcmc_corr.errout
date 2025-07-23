@@ -1,0 +1,36 @@
+   Successfully read one character matrix from file 'data/primates_solitariness.nex'
+   Successfully read one character matrix from file 'data/primates_terrestrially.nex'
+   Attempting to read the contents of file "Primates_tree.nex"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves in a random move schedule with 20 moves per iteration
+   
+   Processing file 'output/solitariness_terrestrially_corr.states.txt'
+   Compiling MAP ancestral states from 11 samples in the ancestral state trace, using a burnin of 2 samples.
+   
+   Calculating ancestral state posteriors...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Processing file 'output/solitariness_terrestrially_corr_stoch_char_map.log'
+   Compiling stochastic character maps from 11 samples in the character map trace, using a burnin of 2 samples.
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Calculating maximum a posteriori character map from 11 samples in the character map trace, using a burnin of 2 samples.
+   
+   Compiling character maps...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
