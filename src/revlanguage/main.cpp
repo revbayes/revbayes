@@ -43,8 +43,11 @@ struct ParsedOptions
     bool no_header = false;
     bool jupyter = false;
     std::vector<std::string> options;
+
     std::vector<std::string> expressions;
+
     std::optional<std::string> filename;
+
     std::vector<std::string> args;
 };
 
@@ -69,12 +72,11 @@ void show_help(const CLI::App& app)
 //
 ParsedOptions parse_cmd_line(int argc, char* argv[])
 {
-    CLI::App stage1(short_description());
-
     ParsedOptions options;
 
-//    stage1.add_option("-h,--help",    options.help,      "Show information on flags");
-    
+    // Stage 1: Parse options until we see something we don't recognize.
+    CLI::App stage1(short_description());
+
     stage1.add_flag("-v,--version",  options.version,    "Show version and exit");
     stage1.add_flag("-b,--batch",    options.batch,      "Run in batch mode");
     stage1.add_flag("--no-header",   options.no_header,  "Suppress header");
@@ -84,6 +86,20 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
 
     try {
         stage1.parse(argc, argv);
+    }
+    catch (const CLI::ExtrasError &e)
+    {
+        // Extra arguments are fine.
+    }
+    catch (const CLI::CallForHelp &e)
+    {
+        show_help(stage1);
+
+#ifdef RB_MPI
+        MPI_Finalize();
+#endif
+
+        std::exit(0);
     }
     catch (const CLI::ParseError &e)
     {
@@ -99,22 +115,31 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
         std::exit(e.get_exit_code());
     }
 
-    // Print flags and usage info in this function since we know the flags here.
-    if ( options.help )
     {
-	// Do we want to avoid displaying --file here, since its a positional option also?
+        auto remaining = stage1.remaining();
 
-        show_help(stage1);
+        // Stage 2: Parse a sequence of "-e expr" until we find something that isn't "-e".
+        int i = 0;
+        for(; i<remaining.size() and remaining[i] == "-e"; i+=2)
+        {
+            if (i+1 < remaining.size())
+                options.expressions.push_back(remaining[i+1]);
+            else
+                throw RbException()<<"-e not followed by expression";
+        }
 
-#ifdef RB_MPI
-        MPI_Finalize();
-#endif
-
-        std::exit(0);
+        // Stage 3: Put everything else into the args vector.
+        for(; i<remaining.size(); i++)
+            options.args.push_back(remaining[i]);
     }
 
-    
-    
+    // Fixup: if there are no expressions, the first positional argument is a filename.
+    if (options.expressions.empty() and not options.args.empty())
+    {
+        options.filename = options.args[0];
+        options.args.erase(options.args.begin());
+    }
+
     return options;
 }
 
