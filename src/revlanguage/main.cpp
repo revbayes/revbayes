@@ -196,22 +196,13 @@ int main(int argc, char* argv[])
     bool batch_mode = cmd_line.batch;
     // FIXME -- the batch_mode variable appears to have no effect if true.
 
-    /* seek out files from command line */
-    std::vector<std::string> source_files;
-    if ( cmd_line.filename )
-    {
-        source_files = { *cmd_line.filename };
-    }
-
-    std::vector<std::string> rb_args = cmd_line.args;;
-
     /* initialize environment */
     bool show_header = not cmd_line.no_header;
     RevLanguageMain rl = RevLanguageMain(batch_mode, show_header);
 
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
-    rl.startRevLanguageEnvironment(rb_args, source_files);
+    rl.startRevLanguageEnvironment(cmd_line.expressions, cmd_line.filename, cmd_line.args);
 
     if ( cmd_line.jupyter )
     {

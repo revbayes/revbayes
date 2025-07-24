@@ -24,7 +24,7 @@ RevLanguageMain::RevLanguageMain(bool b, bool b2) : batch_mode(b), show_header(b
 }
 
 
-void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &args, const std::vector<std::string> &source_files)
+void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args)
 {
     
     int pid = 0;
@@ -32,7 +32,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 #endif
     
-    // load the modules
+    // 1. Load the modules
     try
     {
         RevLanguage::ModuleSystem::getModuleSystem().loadModules( RbSettings::userSettings().getModuleDir() );
@@ -43,6 +43,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     }
 
 
+    // 2. Maybe show a header
     if (show_header)
     {
         // Print a nifty message
@@ -51,12 +52,16 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         RevLanguage::UserInterface::userInterface().output("", false);
     }
     
+    // 3. Initialize the global workspace
     RevLanguage::Workspace::globalWorkspace().initializeGlobalWorkspace();
 
     // process the command line arguments as source file names    
     std::string line;
     std::string command_line;
     int result = 0;
+
+    
+    // 4. Set the args vector.
 
     // Ensure that args exists and has size 0.
     command_line = "args = [\"\"]; args.erase(\"\")";
@@ -88,12 +93,30 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         }
     }
 
+    // 5. Evaluate any expressions given with -e expr
+    for (auto expression: expressions)
+    {
+        result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
+        
+        // We just hope for better input next time
+        if (result == 2)
+        {
+            result = 0;
+            
+            if( batch_mode == true )
+            {
+                RevClient::shutdown();
+                
+                exit(1);
+            }
+        }
+    }
+
+    // 6. Evaluate a filename if given.
     try
     {
-        for (unsigned int i =0 ; i < source_files.size(); ++i)
-        {
-            RevClient::execute_file(source_files[i], false, true);
-        }
+        if (filename)
+            RevClient::execute_file(*filename, false, true);
     }
     catch (const RbException& e)
     {
