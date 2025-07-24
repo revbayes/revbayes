@@ -26,14 +26,16 @@ class RevLanguageMain {
     
 public:
     
-    RevLanguageMain(bool batch = false, bool show_header = true);
+    RevLanguageMain(bool interactive, bool echo, bool error_exit, bool quiet);
     
     void startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args);
 
 private:
     
-    bool batch_mode;
-    bool show_header;
+    bool interactive;           // keep asking stdin for commands until q()
+    bool echo;                  // print commands to the screen
+    bool error_exit;            // quit on the first error
+    bool quiet;                 // suppress header
 };
 
 #endif

@@ -18,7 +18,8 @@
 #include <mpi.h>
 #endif
 
-RevLanguageMain::RevLanguageMain(bool b, bool b2) : batch_mode(b), show_header(b2)
+RevLanguageMain::RevLanguageMain(bool i, bool e, bool ee, bool q)
+    : interactive(i), echo(e), error_exit(ee), quiet(q)
 {
 
 }
@@ -27,9 +28,9 @@ RevLanguageMain::RevLanguageMain(bool b, bool b2) : batch_mode(b), show_header(b
 void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args)
 {
     
-    int pid = 0;
+    int rank = 0;
 #ifdef RB_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
     
     // 1. Load the modules
@@ -39,12 +40,12 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     }    
     catch (RbException &e)
     {
-        std::cout << e.getMessage() << std::endl;
+        if (rank == 0) std::cout << e.getMessage() << std::endl;
     }
 
 
     // 2. Maybe show a header
-    if (show_header)
+    if (interactive and not quiet)
     {
         // Print a nifty message
         RbVersion version = RbVersion();
@@ -58,7 +59,6 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     // process the command line arguments as source file names    
     std::string line;
     std::string command_line;
-    int result = 0;
 
     
     // 4. Set the args vector.
@@ -77,38 +77,32 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         {
             command_line = "args[" + StringUtilities::to_string(i+1) + "] = \"" + args[i] + "\"";
         }
-        result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
-        
+        int result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
+
         // We just hope for better input next time
-        if (result == 2)
+        if (result == 2 and error_exit )
         {
-            result = 0;
-            
-            if( batch_mode == true )
-            {
-                RevClient::shutdown();
+            RevClient::shutdown();
                 
-                exit(1);
-            }
+            exit(1);
         }
     }
 
     // 5. Evaluate any expressions given with -e expr
     for (auto expression: expressions)
     {
-        result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
+        // Should we be using RBOUT here?  It looks weird with the 2 spaces of padding.
+        if (echo and rank == 0)
+            std::cerr<<"> "<<expression;
+
+        int result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
         
         // We just hope for better input next time
-        if (result == 2)
+        if (result == 2 and error_exit )
         {
-            result = 0;
-            
-            if( batch_mode == true )
-            {
-                RevClient::shutdown();
+            RevClient::shutdown();
                 
-                exit(1);
-            }
+            exit(1);
         }
     }
 
@@ -116,7 +110,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     try
     {
         if (filename)
-            RevClient::execute_file(*filename, false, true);
+            RevClient::execute_file(*filename, echo, error_exit);
     }
     catch (const RbException& e)
     {

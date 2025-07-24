@@ -39,8 +39,10 @@ struct ParsedOptions
 {
     bool help = false;
     bool version = false;
-    bool batch = false;
-    bool no_header = false;
+    bool error_exit = false;
+    bool echo = true;
+    bool interactive = false;
+    bool quiet = false;
     bool jupyter = false;
     std::vector<std::string> options;
 
@@ -69,7 +71,7 @@ void show_help(const CLI::App& app)
     }
 }
 
-//
+
 ParsedOptions parse_cmd_line(int argc, char* argv[])
 {
     ParsedOptions options;
@@ -77,10 +79,16 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     // Stage 1: Parse options until we see something we don't recognize.
     CLI::App stage1(short_description());
 
-    stage1.add_flag("-v,--version",  options.version,    "Show version and exit");
-    stage1.add_flag("-b,--batch",    options.batch,      "Run in batch mode");
-    stage1.add_flag("--no-header",   options.no_header,  "Suppress header");
-    stage1.add_flag("-j,--jupyter",  options.jupyter,    "Run in jupyter mode");
+    stage1.add_flag("-v,--version",          options.version,   "Show version and exit");
+    std::optional<bool> interactive;
+    stage1.add_flag("-i,--interactive",      interactive,       "Force interactive with expressions or file");
+    stage1.add_flag("-q,--quiet",            options.quiet,     "Don't print startup message");
+    stage1.add_flag("-j,--jupyter",          options.jupyter,   "Run in jupyter mode");
+
+    std::optional<bool> echo;
+    stage1.add_option("--echo",              echo,              "Echo commands to the screen");
+    std::optional<bool> error_exit;
+    stage1.add_option("-x,--error-exit",     error_exit,        "Exit on the first error.");
 
     stage1.add_option("--setOption",  options.options,   "Set an option key=value.  See ?setOption for the list of available keys and their associated values.");
 
@@ -140,6 +148,12 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
         options.args.erase(options.args.begin());
     }
 
+    options.interactive = interactive ? (interactive.value()) : (options.expressions.empty() and not options.filename);
+
+    options.error_exit = error_exit ? (error_exit.value()) : not options.interactive;
+
+    options.echo = echo ? (echo.value()) : options.interactive;
+    
     return options;
 }
 
@@ -192,13 +206,16 @@ int main(int argc, char* argv[])
         }
     }
 
+
     /*default to interactive mode*/
-    bool batch_mode = cmd_line.batch;
+    bool batch_mode = (not cmd_line.expressions.empty() or cmd_line.filename) and not cmd_line.interactive;
     // FIXME -- the batch_mode variable appears to have no effect if true.
 
     /* initialize environment */
-    bool show_header = not cmd_line.no_header;
-    RevLanguageMain rl = RevLanguageMain(batch_mode, show_header);
+    RevLanguageMain rl = RevLanguageMain(cmd_line.interactive,
+                                         cmd_line.echo,
+                                         cmd_line.error_exit,
+                                         cmd_line.quiet);
 
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
@@ -208,7 +225,7 @@ int main(int argc, char* argv[])
     {
         RevClient::startJupyterInterpreter();
     }
-    else
+    else if ( cmd_line.interactive )
     {
         enableTermAnsi();
 
