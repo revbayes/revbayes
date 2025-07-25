@@ -7,6 +7,7 @@
 //
 
 #include <cmath>
+#include <cstdint>
 #include <sstream> // IWYU pragma: keep
 
 #include "DistributionNormal.h"

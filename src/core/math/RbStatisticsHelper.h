@@ -17,7 +17,9 @@
 #ifndef RbStatisticsHelper_H
 #define RbStatisticsHelper_H
 
+#include <cstdint>
 #include <vector>
+
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
 
