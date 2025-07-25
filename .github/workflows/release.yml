@@ -161,7 +161,7 @@ jobs:
           curl -O -L https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz
           tar -xzvf boost_1_88_0.tar.gz
           cd boost_1_88_0
-          ./bootstrap.sh --with-libraries=atomic,chrono,system,regex,thread,date_time,program_options,math,serialization --prefix=../installed-boost-1.88.0
+          ./bootstrap.sh --with-libraries=atomic,chrono,system,regex,thread,date_time,math,serialization --prefix=../installed-boost-1.88.0
           ./b2 link=static install
           echo -e "\n    BOOST root is at $(cd ../installed-boost-1.88.0; pwd)\n"
           echo BOOST_ROOT=$(cd ../installed-boost-1.88.0; pwd) >> $GITHUB_ENV
