@@ -25,7 +25,7 @@
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] file [args]\n       rb [options] -e expr [-e expr2 ...] [args]\n";
+    return "Usage: rb [options]\n       rb [options] file [args]\n       rb [options] -e expr [-e expr2 ...] [args]\n";
     // Other usages not mentioned
 }
 
@@ -63,14 +63,21 @@ void show_help(const CLI::App& app)
 
     if (rank == 0)
     {
-        std::cerr << short_description() << std::endl;
-        std::cerr << usage() << std::endl;
-//        std::cerr << std::endl;
         std::cerr << app.help() << std::endl;
-        std::cerr << "See http://revbayes.github.io for more information." << std::endl;
     }
 }
 
+class RBFormatter : public CLI::Formatter {
+  public:
+    std::string make_usage(const CLI::App *app, std::string name) const override
+        {
+            return usage();
+        }
+    std::string make_footer(const CLI::App *app) const override
+        {
+            return "\nExpressions (one or more '-e <expr>') may be used *instead* of 'file'.\nSee http://revbayes.github.io for more information.";
+        }
+};
 
 ParsedOptions parse_cmd_line(int argc, char* argv[])
 {
@@ -78,19 +85,23 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
 
     // Stage 1: Parse options until we see something we don't recognize.
     CLI::App stage1(short_description());
+    stage1.formatter(std::make_shared<RBFormatter>());
+    stage1.get_formatter()->column_width(35);
+    stage1.get_formatter()->right_column_width(45);
 
     stage1.add_flag("-v,--version",          options.version,   "Show version and exit");
     std::optional<bool> interactive;
     stage1.add_flag("-i,--interactive",      interactive,       "Force interactive with expressions or file");
     stage1.add_flag("-q,--quiet",            options.quiet,     "Don't print startup message");
+    stage1.add_flag("-b,--batch",            "Deprecated");
     stage1.add_flag("-j,--jupyter",          options.jupyter,   "Run in jupyter mode");
 
-    std::optional<bool> echo;
-    stage1.add_option("--echo",              echo,              "Echo commands to the screen");
     std::optional<bool> error_exit;
-    stage1.add_option("-x,--error-exit",     error_exit,        "Exit on the first error.");
+    stage1.add_option("-x,--error-exit",     error_exit,        "Exit on the first error");
+    std::optional<bool> echo;
+    stage1.add_option("-p,--echo",              echo,              "Echo commands to the screen");
 
-    stage1.add_option("--setOption",  options.options,   "Set an option key=value.  See ?setOption for the list of available keys and their associated values.");
+    stage1.add_option("-o,--setOption",  options.options,   "Set an option key=value  (See ?setOption for the list of available keys and their associated values)");
 
     try {
         stage1.parse(argc, argv);
