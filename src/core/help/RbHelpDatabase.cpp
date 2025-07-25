@@ -2069,7 +2069,7 @@ map_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_strings[string("mcmc")][string("description")] = string(R"(The MCMC analysis object keeps a model and the associated moves and monitors. The object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.)");
 	help_strings[string("mcmc")][string("details")] = string(R"(The MCMC analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The MCMC analysis object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
-The `mcmc.run()` method begins or continues an MCMC analysis. 
+The `mcmc.run()` method begins or continues an MCMC analysis.
 
 During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Höhna et al. (2017) for details.
 
@@ -2116,7 +2116,7 @@ mymcmcObject.run( rules = [ srMaxIteration(400) ] ))");
 	help_strings[string("mcmcmc")][string("description")] = string(R"(The Mcmcmc analysis object keeps a model and the associated moves and monitors. The object is used to run Metropolis Couped Markov chain Monte Carlo (Mcmcmc) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.)");
 	help_strings[string("mcmcmc")][string("details")] = string(R"(The Mcmcmc analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The Mcmcmc analysis object is used to run Markov chain Monte Carlo (Mcmcmc) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
-An MCMCMC analysis is initiated using the `mcmcmc.run()` method.  
+An MCMCMC analysis is initiated using the `mcmcmc.run()` method.
 The `StoppingRule[]` argument provides a mechanism to automatically terminate a run once a set of rules are met: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
 The parameters `checkpointFile` and `checkpointInterval` generate snapshots of the current state of the MCMCMC run from which the run can be continued if interrupted using the `mcmc.initializeFromCheckpoint()` method. An example is given on the documentation page for [`mcmc()`].)");
 	help_strings[string("mcmcmc")][string("example")] = string(R"(# Create a simple model (unclamped)
@@ -2186,7 +2186,7 @@ min(a)
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
 	help_strings[string("mnStochasticVariable")][string("name")] = string(R"(mnStochasticVariable)");
 	help_strings[string("model")][string("description")] = string(R"(Creates a model object that can be graphed or subjected to Bayesian inference.)");
-	help_strings[string("model")][string("details")] = string(R"(`model(x)` creates a model object by creating a copy of all elements and 
+	help_strings[string("model")][string("details")] = string(R"(`model(x)` creates a model object by creating a copy of all elements and
 parameters that influence or are influenced by the likelihood of `x`.
 
 Because `model` works with copies of objects, conducting an mcmc(mc) analysis
@@ -3038,47 +3038,47 @@ a # this will be the same as above!)");
 The currently available keys and their associated values are as follows:
 
     lineWidth=<integer>          Screen width when printing (in characters).
-        
+
         DEFAULT: 160
-    
+
     outputPrecision=<integer>    How many significant digits to print for the values of model graph nodes.
-        
+
         DEFAULT: 7
-    
+
     printNodeIndex=<true,false>  Print the node indices of a tree as annotations?
-        
+
         DEFAULT: true
-    
+
     useScaling=<true,false>      Should the partial likelihoods in continuous-time Markov chain (CTMC) models be scaled
                                  to avoid underflow?
         DEFAULT: true
-    
+
     scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).
-        
+
         DEFAULT: 1
-    
+
     tolerance=<numeric>          Tolerance for comparing doubles.
-        
+
         DEFAULT: 10e-10
-    
+
     debugMCMC=<0,1>              How much work to perform to check MCMC?
-        
+
         0: MCMC run without checks.
         1: MCMC run with additional checks at extra CPU time cost.
-        
+
         DEFAULT: 0
-    
+
     logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC? NOTE: This option serves for debugging and
                                  should be considered experimental. The exact meaning of individual values may be subject
                                  to frequent changes.
-        
+
         0: No information on individual moves written out.
         1 or higher: Writes out the generation, within-generation position, and name for each move.
         2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN,
                      writes out why this is the case.
         3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.
         4: Writes out additional details about the mvSlice move (if present).
-        
+
         DEFAULT: 0)");
 	help_strings[string("setOption")][string("example")] = string(R"(# compute the absolute value of a real number
 getOption("linewidth")
@@ -3435,7 +3435,7 @@ phy.taxa())");
 
 "day" returns the index of the day in the year (e.g. Jan 1 = 1; Feb 1 = 32).
 
-"(milli)seconds" returns the number of (milli)seconds that have elapsed since midnight.
+"(milli/nano)seconds" returns the number of (milli/nano)seconds that have elapsed since midnight.
 
 "fromBeginning", the default, returns the number of milliseconds that have elapsed since 1400-Jan-01 00:00:00, the earliest representable date in the boost library's implementation of the Gregorian date system.)");
 	help_strings[string("time")][string("example")] = string(R"(time()
@@ -3611,7 +3611,7 @@ z[0])");
 	help_strings[string("vectorFlatten")][string("name")] = string(R"(vectorFlatten)");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
-	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
+	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given
 data of class `AbstractHomologousDiscreteCharacterData`.
 Filename is specified using the `fn` argument.)");
 	help_strings[string("writeFasta")][string("example")] = string(R"(# let's make up some taxa
@@ -3635,7 +3635,7 @@ writeFasta(filename="test.fasta", full_model))");
 	help_strings[string("writeFasta")][string("title")] = string(R"(FASTA file writing function)");
 	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a nexus file.)");
 	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename  to write to and this must be a string.
-The second argument is a data object that must be some character matrix. 
+The second argument is a data object that must be some character matrix.
 This data matrix could be a morphological matrix, a molecular matrix, or a tree.)");
 	help_strings[string("writeNexus")][string("example")] = string(R"(# let's make up some taxa
 taxa = v("horse", "whale", "unicorn", "narwhal")
