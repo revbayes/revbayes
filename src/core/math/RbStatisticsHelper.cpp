@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <optional>
 #include <sstream> // IWYU pragma: keep
 
 #include "DistributionNormal.h"
@@ -116,17 +117,10 @@ double RbStatistics::Helper::dppExpectNumTableFromConcParam(double conp, double 
  * @param end Pointer to end index
  * @return The effective sample size
  */
-double RbStatistics::Helper::getACT(const std::vector<double> values, std::int64_t* begin, std::int64_t* end)
+double RbStatistics::Helper::getACT(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
 {
-    if (begin == NULL)
-    {
-        begin = new std::int64_t(0);
-    }
-    
-    if (end == NULL)
-    {
-        end = new std::int64_t( values.size() );
-    }
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
     
     size_t samples = *end - *begin;
     double mean = getRangeMean(values, begin, end);
@@ -154,17 +148,10 @@ double RbStatistics::Helper::getACT(const std::vector<double> values, std::int64
  * @param end Pointer to end index
  * @return The effective sample size
  */
-double RbStatistics::Helper::getESS(const std::vector<double> values, std::int64_t* begin, std::int64_t* end)
+double RbStatistics::Helper::getESS(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
 {
-    if (begin == NULL)
-    {
-        begin = new std::int64_t(0);
-    }
-    
-    if (end == NULL)
-    {
-        end = new std::int64_t( values.size() );
-    }
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
     
     size_t samples = *end - *begin;
     double act = getACT(values, begin, end);
@@ -184,17 +171,10 @@ double RbStatistics::Helper::getESS(const std::vector<double> values, std::int64
  * @param end Pointer to end index
  * @return The effective sample size
  */
-double RbStatistics::Helper::getRangeMean(const std::vector<double> values, std::int64_t* begin, std::int64_t* end)
+double RbStatistics::Helper::getRangeMean(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
 {
-    if (begin == NULL)
-    {
-        begin = new std::int64_t(0);
-    }
-    
-    if (end == NULL)
-    {
-        end = new std::int64_t( values.size() );
-    }
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
     
     size_t samples = *end - *begin;
     double mean = 0.0;
@@ -219,17 +199,10 @@ double RbStatistics::Helper::getRangeMean(const std::vector<double> values, std:
  * @param end Pointer to end index
  * @return The effective sample size
  */
-double RbStatistics::Helper::getSEM(const std::vector<double> values, std::int64_t* begin, std::int64_t* end)
+double RbStatistics::Helper::getSEM(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
 {
-    if (begin == NULL)
-    {
-        begin = new std::int64_t(0);
-    }
-    
-    if (end == NULL)
-    {
-        end = new std::int64_t( values.size() );
-    }
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
     
     size_t samples = *end - *begin;
     double varStat = getVarStat(values, begin, end);
@@ -239,17 +212,10 @@ double RbStatistics::Helper::getSEM(const std::vector<double> values, std::int64
 }
     
 
-double RbStatistics::Helper::getVarStat(const std::vector<double> values, std::int64_t* begin, std::int64_t* end)
+double RbStatistics::Helper::getVarStat(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
 {
-    if (begin == NULL)
-    {
-        begin = new std::int64_t(0);
-    }
-    
-    if (end == NULL)
-    {
-        end = new std::int64_t( values.size() );
-    }
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
     
     size_t MAX_LAG = 1000;
     size_t samples = *end - *begin;

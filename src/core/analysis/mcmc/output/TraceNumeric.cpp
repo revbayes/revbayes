@@ -87,8 +87,7 @@ double TraceNumeric::getMean() const
         return mean;
     }
     
-    std::int64_t start = burnin;
-    mean = RbStatistics::Helper::getRangeMean(values, &start);
+    mean = RbStatistics::Helper::getRangeMean(values, burnin);
 
     dirty = false;
     stats_dirty = true;
@@ -103,7 +102,7 @@ double TraceNumeric::getMean(std::int64_t inbegin, std::int64_t inend) const
     {
         begin = inbegin;
         end = inend;
-        meanw = RbStatistics::Helper::getRangeMean(values, &inbegin, &inend);
+        meanw = RbStatistics::Helper::getRangeMean(values, inbegin, inend);
         statsw_dirty = true;
     }
 
@@ -176,9 +175,8 @@ void TraceNumeric::update() const
 
     if (stats_dirty == false) return;
 
-    std::int64_t start = burnin;
-    sem = RbStatistics::Helper::getSEM(values, &start);
-    ess = RbStatistics::Helper::getESS(values, &start);
+    sem = RbStatistics::Helper::getSEM(values, burnin);
+    ess = RbStatistics::Helper::getESS(values, burnin);
 
     stats_dirty = false;
 }
@@ -194,8 +192,8 @@ void TraceNumeric::update(std::int64_t inbegin, std::int64_t inend) const
 
     if (statsw_dirty == false) return;
 
-    semw = RbStatistics::Helper::getSEM(values, &inbegin, &inend);
-    essw = RbStatistics::Helper::getESS(values, &inbegin, &inend);
+    semw = RbStatistics::Helper::getSEM(values, inbegin, inend);
+    essw = RbStatistics::Helper::getESS(values, inbegin, inend);
 
     statsw_dirty = false;
 }
