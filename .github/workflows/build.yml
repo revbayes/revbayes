@@ -19,6 +19,7 @@ jobs:
                ubuntu-gcc-13,
                ubuntu-gcc-14,
                ubuntu-gcc-15,
+               ubuntu-gcc-15-debugoptimized,
                ubuntu-clang-15,
                macos-xcode-15-intel,
                macos-xcode-16-arm,
@@ -77,6 +78,17 @@ jobs:
             mpi: false
             arch: linux64
             image: ubuntu:25.04
+            project: meson
+
+          - name: ubuntu-gcc-15-debugoptimized
+            os: ubuntu-latest
+            compiler: gcc
+            version: "15"
+            mpi: false
+            arch: linux64
+            image: ubuntu:25.04
+            project: meson
+            buildtype: debugoptimized
 
           - name: ubuntu-clang-15
             os: ubuntu-latest
@@ -220,8 +232,13 @@ jobs:
 
         # Check meson setup (but not build)
         echo ::group::Test meson setup
+        MESON_ARGS=""
+
+        if [ -n "${{ matrix.buildtype || '' }}" ] ; then
+           MESON_ARGS="${MESON_ARGS} -Dbuildtype=${{ matrix.buildtype }}"
+        fi
         ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dmpi=${{ matrix.mpi }}
-        meson setup build
+        meson setup build ${MESON_ARGS}
         echo ::endgroup::
 
         if [ "${{ matrix.project }}" = "meson" ] ; then
