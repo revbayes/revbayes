@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Cloneable.h"
+#include "RbStatisticsHelper.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -129,7 +130,7 @@ double PathSampler::standardError( void ) const
             var_vect[i] = var;
             
             // get the effective sample size
-            ess_vect[i] = getESS( likelihoodSamples[i] );
+            ess_vect[i] = RbStatistics::Helper::getESS( likelihoodSamples[i] );
         }
         
         // for the first sampling variance term (indexed 0), the weight is computed as (beta_1 - beta_0)/2

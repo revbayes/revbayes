@@ -33,7 +33,6 @@ namespace RevBayesCore {
         virtual MarginalLikelihoodEstimator*                clone(void) const = 0;                                                     //!< Create a new deep copy
         virtual double                                      marginalLikelihoodGeneral(std::vector<double> power_vec, std::vector< std::vector<double> > lnl_vec) const = 0;
         double                                              marginalLikelihood( void ) const;                                          //!< Compute the marginal likelihood for this analysis
-        double                                              getESS(const std::vector<double> values) const;                            //!< Calculate the effective sample size for an arbitrary vector of numeric values
         virtual double                                      standardError( void ) const = 0;                                           //!< Compute the standard error for this analysis
         
         // block bootstrap functions

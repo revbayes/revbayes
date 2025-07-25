@@ -10,6 +10,7 @@
 #include "StationarityTest.h"
 #include "Cloner.h"
 #include "RbConstants.h" // IWYU pragma: keep
+#include "RbStatisticsHelper.h"
 
 using namespace RevBayesCore;
 using namespace std;
@@ -86,17 +87,10 @@ double TraceNumeric::getMean() const
         return mean;
     }
     
-    double m = 0;
-    size_t size = values.size();
-    for (size_t i=burnin; i<size; i++)
-    {
-        m += values.at(i);
-    }
-    
-    mean = m/double(size-burnin);
+    std::int64_t start = burnin;
+    mean = RbStatistics::Helper::getRangeMean(values, &start);
 
     dirty = false;
-
     stats_dirty = true;
 
     return mean;
@@ -105,19 +99,11 @@ double TraceNumeric::getMean() const
 
 double TraceNumeric::getMean(std::int64_t inbegin, std::int64_t inend) const
 {
-    if( begin != inbegin || end != inend)
+    if (begin != inbegin || end != inend)
     {
         begin = inbegin;
         end = inend;
-
-        double m = 0;
-        for (size_t i=begin; i<end; i++)
-        {
-            m += values.at(i);
-        }
-
-        meanw = m/(end-begin);
-
+        meanw = RbStatistics::Helper::getRangeMean(values, &inbegin, &inend);
         statsw_dirty = true;
     }
 
@@ -186,56 +172,15 @@ double TraceNumeric::getSEM() const
 void TraceNumeric::update() const
 {
     // if we have not yet calculated the mean, do this now
-
     getMean();
 
-    if( stats_dirty == false ) return;
+    if (stats_dirty == false) return;
 
-    size_t samples = values.size() - burnin;
-    size_t maxLag = (samples - 1 < MAX_LAG ? samples - 1 : MAX_LAG);
-
-    double* gammaStat = new double[maxLag];
-    // setting values to 0
-    for (size_t i=0; i<maxLag; i++)
-    {
-        gammaStat[i] = 0;
-    }
-    double varStat = 0.0;
-
-    for (size_t lag = 0; lag < maxLag; lag++) {
-        for (size_t j = 0; j < samples - lag; j++) {
-            double del1 = values.at(burnin + j) - mean;
-            double del2 = values.at(burnin + j + lag) - mean;
-            gammaStat[lag] += (del1 * del2);
-        }
-
-        gammaStat[lag] /= ((double) (samples - lag));
-
-        if (lag == 0) {
-            varStat = gammaStat[0];
-        } else if (lag % 2 == 0) {
-            // fancy stopping criterion :)
-            if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
-                varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
-            }
-            // stop
-            else
-                maxLag = lag;
-        }
-    }
-
-    // standard error of mean
-    sem = sqrt(varStat / samples);
-
-    // auto correlation time
-    double act = varStat / gammaStat[0];
-
-    // effective sample size
-    ess = samples / act;
+    std::int64_t start = burnin;
+    sem = RbStatistics::Helper::getSEM(values, &start);
+    ess = RbStatistics::Helper::getESS(values, &start);
 
     stats_dirty = false;
-
-    delete[] gammaStat;
 }
 
 /**
@@ -247,50 +192,10 @@ void TraceNumeric::update(std::int64_t inbegin, std::int64_t inend) const
     // if we have not yet calculated the mean, do this now
     getMean(inbegin, inend);
 
-    if( statsw_dirty == false ) return;
+    if (statsw_dirty == false) return;
 
-    size_t samples = end - begin;
-    size_t maxLag = (samples - 1 < MAX_LAG ? samples - 1 : MAX_LAG);
-
-    double* gammaStat = new double[maxLag];
-    // setting values to 0
-    for (size_t i=0; i<maxLag; i++) {
-        gammaStat[i] = 0;
-    }
-    double varStat = 0.0;
-
-    for (size_t lag = 0; lag < maxLag; lag++) {
-        for (size_t j = 0; j < samples - lag; j++) {
-            double del1 = values.at(begin + j) - meanw;
-            double del2 = values.at(begin + j + lag) - meanw;
-            gammaStat[lag] += (del1 * del2);
-        }
-
-        gammaStat[lag] /= ((double) (samples - lag));
-
-        if (lag == 0) {
-            varStat = gammaStat[0];
-        } else if (lag % 2 == 0) {
-            // fancy stopping criterion :)
-            if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
-                varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
-            }
-            // stop
-            else
-                maxLag = lag;
-        }
-    }
-
-    // standard error of mean
-    semw = sqrt(varStat / samples);
-
-    // auto correlation time
-    double act = varStat / gammaStat[0];
-
-    // effective sample size
-    essw = samples / act;
-
-    delete[] gammaStat;
+    semw = RbStatistics::Helper::getSEM(values, &inbegin, &inend);
+    essw = RbStatistics::Helper::getESS(values, &inbegin, &inend);
 
     statsw_dirty = false;
 }

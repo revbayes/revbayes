@@ -7,6 +7,7 @@
 
 #include "Cloneable.h"
 #include "RlUserInterface.h"
+#include "RbStatisticsHelper.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -144,7 +145,7 @@ double SteppingStoneSampler::standardError( void ) const
             var_Ls /= (int(samplesPerPath) - 1);
             
             // get the effective sample size and divide the variance by it
-            double ess = getESS(Ls);
+            double ess = RbStatistics::Helper::getESS(Ls);
             double vzr = var_Ls / ess;
             
             if (vzr / (mean_Ls*mean_Ls) > 0.1)
