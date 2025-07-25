@@ -407,7 +407,7 @@ std::string newickEscape(const std::string in_label)
         char c = in_label[i];
 
         // first check for any illegal characters
-        if (c == '\'' || c == ' ' || c == '(' || c == ')' ||
+        if (c == '\'' || c == '(' || c == ')' ||
             c == '[' || c ==']' || c == ':' || c == ';' || c ==',') {
             needs_quoting = true;
             // check for single quote
