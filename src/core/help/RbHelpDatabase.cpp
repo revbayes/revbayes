@@ -768,6 +768,7 @@ root_height := psi.rootAge()
 	help_strings[string("dnConstrainedNodeAge")][string("name")] = string(R"(dnConstrainedNodeAge)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
 	help_strings[string("dnConstrainedTopology")][string("name")] = string(R"(dnConstrainedTopology)");
+	help_strings[string("dnConstrainedTopologySSE")][string("name")] = string(R"(dnConstrainedTopologySSE)");
 	help_strings[string("dnCppNormal")][string("name")] = string(R"(dnCppNormal)");
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
@@ -4786,7 +4787,7 @@ phy.taxa())");
 
 "day" returns the index of the day in the year (e.g. Jan 1 = 1; Feb 1 = 32).
 
-"(milli)seconds" returns the number of (milli)seconds that have elapsed since midnight.
+"(milli/nano)seconds" returns the number of (milli/nano)seconds that have elapsed since midnight.
 
 "fromBeginning", the default, returns the number of milliseconds that have elapsed since 1400-Jan-01 00:00:00, the earliest representable date in the boost library's implementation of the Gregorian date system.)");
 	help_strings[string("time")][string("example")] = string(R"(time()
