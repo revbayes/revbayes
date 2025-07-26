@@ -1,0 +1,35 @@
+################################################################################
+#
+# RevBayes Test-Script: Use the stationary block bootstrap to calculate the
+#                       standard error for marginal likelihood estimates
+#                       obtained from pre-computed power posteriors with path
+#                       and stepping-stone samplers
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+# first read in the output file from a power posterior analysis (128 powers;
+# each with 3000 iterations, 50% burnin fraction, and a sampling period of
+# 50 iterations, i.e., 30 samples) of an unpublished matrix (Madzia & Cerny
+# in prep.) of 153 taxa and 270 characters, testing the hypothesis that
+# Plesiosauroidea and Pliosauridae form a clade excluding Rhomaleosauridae
+
+print("Stepping-stone sampling:")
+ss = steppingStoneSampler(file="data/plesio_plio.out", powerColumnName="power",
+                          likelihoodColumnName="likelihood")
+
+ss.stdError(bootstrap=TRUE)
+
+print("\nPath sampling:")
+ps = pathSampler(file="data/plesio_plio.out", powerColumnName="power",
+                 likelihoodColumnName="likelihood")
+
+ps.stdError(bootstrap=TRUE)
+
+clear()
+
+q()
