@@ -118,28 +118,44 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
     Tree& tau = speciesTree->getValue();
+
+    // Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
+    // First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
+    TopologyNode* node = NULL;
+    int counter = 0;
     
-    // check that there is at least one node which is not the root, a tip, or the parent of a SA
-    std::vector<TopologyNode*> eligible_nodes;
+    do {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
+        node = &tau.getNode(node_idx);
+        counter++;
+    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 10);
     
-    for (auto& to_check: tau.getNodes())
+    if (node == NULL)
     {
-        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        // check that there is at least one node which is not the root, a tip, or the parent of a SA
+        std::vector<TopologyNode*> eligible_nodes;
+        
+        for (auto& to_check: tau.getNodes())
         {
-            eligible_nodes.push_back( to_check );
+            if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+            {
+                eligible_nodes.push_back( to_check );
+            }
+        }
+        
+        if (eligible_nodes.size() == 0)
+        {
+            std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+            return RbConstants::Double::neginf;
+        }
+        else
+        {
+            double u = rng->uniform01();
+            size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+            node = eligible_nodes[node_idx];
         }
     }
-    
-    if (eligible_nodes.size() == 0)
-    {
-        std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
-        return RbConstants::Double::neginf;
-    }
-
-    // pick a random node which is not the root, a tip, or the parent of a SA
-    double u = rng->uniform01();
-    size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
-    TopologyNode* node = eligible_nodes[node_idx];
 
     TopologyNode& parent = node->getParent();
 
