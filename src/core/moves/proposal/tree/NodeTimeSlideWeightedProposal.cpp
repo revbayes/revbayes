@@ -103,7 +103,7 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
     
     // Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
     // First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
-    TopologyNode* node = NULL;
+    TopologyNode* node;
     int counter = 0;
     
     do {
@@ -111,9 +111,9 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
         size_t node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_idx);
         counter++;
-    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 20);
+    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 10);
     
-    if (node == NULL)
+    if (counter == 10)
     {
         // check that there is at least one node which is not the root, a tip, or the parent of a SA
         std::vector<TopologyNode*> eligible_nodes;
