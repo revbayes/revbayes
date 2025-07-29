@@ -185,13 +185,9 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
 
     // 1. pick a random node which is not the root, a tip, or a sampled ancestor
-    TopologyNode* node;
-    size_t node_idx = 0;
-    do {
-        double u = rng->uniform01();
-        node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(node_idx);
-    } while ( node->isRoot() || node->isTip() || node->isSampledAncestorParent() );
+    double u = rng->uniform01();
+    size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+    TopologyNode* node = eligible_nodes[node_idx];
     
     TopologyNode& parent = node->getParent();
 
