@@ -118,6 +118,23 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
     Tree& tau = speciesTree->getValue();
+    
+    // check that there is at least one node which is not the root, a tip, or the parent of a SA
+    std::vector<TopologyNode*> eligible_nodes;
+    
+    for (auto& to_check: tau.getNodes())
+    {
+        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        {
+            eligible_nodes.push_back( to_check );
+        }
+    }
+    
+    if (eligible_nodes.size() == 0)
+    {
+        std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        return RbConstants::Double::neginf;
+    }
 
     // pick a random node which is not the root, a tip, or the parent of a SA
     TopologyNode* node;
@@ -125,7 +142,7 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() || node -> isSampledAncestorParent() );
+    } while ( node->isRoot() || node->isTip() || node->isSampledAncestorParent() );
 
     TopologyNode& parent = node->getParent();
 

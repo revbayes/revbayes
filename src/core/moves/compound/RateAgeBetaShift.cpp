@@ -166,6 +166,23 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     {
         return;
     }
+    
+    // check that there is at least one node which is not the root, a tip, or the parent of a SA
+    std::vector<TopologyNode*> eligible_nodes;
+    
+    for (auto& to_check: tau.getNodes())
+    {
+        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        {
+            eligible_nodes.push_back( to_check );
+        }
+    }
+    
+    if (eligible_nodes.size() == 0)
+    {
+        std::cerr << "mvRateAgeBetaShift has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        return;
+    }
 
     // 1. pick a random node which is not the root, a tip, or a sampled ancestor
     TopologyNode* node;
