@@ -1,4 +1,4 @@
-# RevBayes 1.3.1 (unreleased)
+# RevBayes 1.3.2 (unreleased)
 
 ## Backwards-incompatible changes
 
@@ -9,6 +9,40 @@
 ## Documentation improvements
 
 ## Infrastructure
+
+# RevBayes 1.3.1 (August 2, 2025)
+
+## Backwards-incompatible changes
+
+## Features
+
+## Bug fixes
+
+## Documentation improvements
+
+## Infrastructure
+
+- Fix `TraceTree.getTopologyFrequency()` (#750)
+- Make sure `writeNexus()` can handle `BranchLengthTree` vectors (#758)
+- Fix parsing of the `STATELABELS` block in Nexus files (#760)
+- Add an `.nbranches()` method to `Tree` (#759)
+- Fix segfault in MPI + MC^3 (#763)
+- Fix updownslidemove (#766)
+- Don't print operator summary in coalescent tests, and only do 1 generation. (#770)
+- Fix resolve multifurcations crash (#771)
+- Allow reading Nexus files with an `ASSUMPTIONS` block (#764)
+- Update dlls (#751)
+- Patch for `.resolveMultifurcations()` (#780)
+- Fix logging and progress monitoring for `.runOneStone()` + MPI (#782)
+- Help files for birth death processes and data types (#714)
+- Allow nonzero rho values in FBD analyses without extant tips (#788)
+- DRAFT Stochmap tp dirty merge (#693)
+- Fix pps (#778)
+- Add a method for calculating the standard error of marginal likelihood estimates (#779)
+- added nanoseconds option in time() (#796)
+
+## New contributors
+  * @prilau made their first contribution in #796.
 
 # RevBayes 1.3.0 (May 2, 2025)
 
