@@ -188,7 +188,7 @@ while [  $i -lt ${#tests[@]} ]; do
         for expected in $(find output_expected -type f 2>/dev/null); do
             filename=${expected#output_expected/}
             output=output/${filename}
-            if [ ! -e "${expected}" ]; then
+            if [ ! -e "${output}" ]; then
                 errs+=("missing:  ${filename}")
             elif ! diff "${output}" "${expected}" > /dev/null; then
                 errs+=("mismatch: ${filename}")
