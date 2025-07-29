@@ -689,10 +689,9 @@ void FunctionTable::printValue(std::ostream& o, bool env) const
         i->second->printValue( s, true );
         
         // nice printing with arguments aligned
-        size_t offset = i->first.size() + 2;
+        size_t offset = i->first.size() + 3;
         std::string temp = "";
-        std::string repl0 = "";
-        std::string repl1 = " ";
+        std::string repl = "";
         
         // remove the whitespace *before* the left parenthesis (look backward, while constructing the string)
         for (size_t i = 0; i < s.str().size(); ++i)
@@ -701,7 +700,7 @@ void FunctionTable::printValue(std::ostream& o, bool env) const
             
             if (s.str()[i] == '(')
             {
-                temp[i - 1] = *repl0.c_str();
+                temp[i - 1] = *repl.c_str();
             }
         }
         
@@ -710,11 +709,9 @@ void FunctionTable::printValue(std::ostream& o, bool env) const
         {
             if (s.str()[i] == ',')
             {
-                temp[i + 1] = *repl1.c_str();
-                
-                for (size_t j = 2; j < offset + 2; ++j)
+                for (size_t j = 1; j < offset; ++j)
                 {
-                    temp[i + j] = *repl0.c_str();
+                    temp[i + j] = *repl.c_str();
                 }
             }
         }
