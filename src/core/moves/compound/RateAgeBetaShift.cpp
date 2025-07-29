@@ -171,13 +171,14 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
     TopologyNode* node = NULL;
     int counter = 0;
+    size_t node_idx = 0;
     
     do {
         double u = rng->uniform01();
-        size_t node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
+        node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_idx);
         counter++;
-    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 10);
+    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 20);
     
     if (node == NULL)
     {

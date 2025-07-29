@@ -127,7 +127,7 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
         size_t node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(node_idx);
         counter++;
-    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 10);
+    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 20);
     
     if (node == NULL)
     {
