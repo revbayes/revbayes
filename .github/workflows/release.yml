@@ -166,7 +166,7 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
+        ${GITHUB_WORKSPACE}/projects/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
     - name: Configure and build
