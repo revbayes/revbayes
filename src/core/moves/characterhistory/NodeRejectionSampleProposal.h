@@ -168,8 +168,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>::NodeRejectionSampleProposal
 {
 
     addNode( ctmc );
-    // addNode( q_map_site );
-    // addNode( q_map_sequence );
+    addNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    addNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
 
     nodeProposal  = p.nodeProposal->clone();
     leftProposal  = p.leftProposal->clone();
@@ -769,9 +769,15 @@ template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGenerator> *d)
 {
 
-    // removeNode( q_map_site );
-    // removeNode( q_map_sequence );
-
+    if ( q_map_site != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    }
+    if ( q_map_sequence != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    }
+    
     q_map_site = d;
     numStates = q_map_site->getValue().getNumberOfStates();
 
@@ -783,8 +789,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     leftTpMatrix = TransitionProbabilityMatrix(numStates);
     rightTpMatrix = TransitionProbabilityMatrix(numStates);
 
-    // addNode( q_map_site );
-    // q_map_sequence = NULL;
+    addNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    q_map_sequence = NULL;
 
 }
 
@@ -793,8 +799,14 @@ template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d)
 {
 
-    // removeNode( q_map_site );
-    // removeNode( q_map_sequence );
+    if ( q_map_site != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    }
+    if ( q_map_sequence != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    }
 
     q_map_sequence = d;
     numStates = q_map_sequence->getValue().getNumberOfStates();
@@ -807,8 +819,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     leftTpMatrix = TransitionProbabilityMatrix(numStates);
     rightTpMatrix = TransitionProbabilityMatrix(numStates);
 
-    // addNode( q_map_sequence );
-    // q_map_site = NULL;
+    addNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    q_map_site = NULL;
 
 }
 

@@ -595,9 +595,20 @@ template<class charType>
 void RevBayesCore::PathRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGenerator> *d)
 {
 
+    if ( q_map_site != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    }
+    if ( q_map_sequence != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    }
+    
     q_map_site = d;
     numStates = q_map_site->getValue().getNumberOfStates();
 
+    addNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    q_map_sequence = NULL;
 }
 
 
@@ -605,9 +616,21 @@ template<class charType>
 void RevBayesCore::PathRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d)
 {
 
+    if ( q_map_site != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    }
+    if ( q_map_sequence != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    }
+    
     q_map_sequence = d;
     numStates = q_map_sequence->getValue().getNumberOfStates();
 
+    
+    addNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    q_map_site = NULL;
 }
 
 
