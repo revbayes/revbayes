@@ -1931,10 +1931,10 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
     // reset parent/child relationships
     reverseParentChild( n.getParent() );
-    
-    // set the new root
-    root = &n.getParent();
 
+    // set the root
+    root = &n.getParent();
+    
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
     {
@@ -2010,10 +2010,24 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         TopologyNode &p = n.getParent();
         ret = &(reverseParentChild(p));
 
+        // save p values
+        size_t idx_p = p.getIndex();
+        double brlen_p = p.getBranchLength();
+        std::__1::vector<std::__1::string> ncomm_p = p.node_comments;
+        std::__1::vector<std::__1::string> bcomm_p = p.branch_comments;
+
         // we need to re-orient the branches/indices so that
         // nodes remain associated with the same parameters
         p.setIndex(n.getIndex());
         p.setBranchLength(n.getBranchLength());
+        p.node_comments = n.node_comments;
+        p.branch_comments = n.branch_comments;
+
+        // set n values
+        n.setIndex(idx_p);
+        n.setBranchLength(brlen_p);
+        n.node_comments = ncomm_p;
+        n.branch_comments = bcomm_p;
 
         p.removeChild( &n );
         n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n
