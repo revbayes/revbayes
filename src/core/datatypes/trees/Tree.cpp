@@ -2013,8 +2013,8 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         // save p values
         size_t idx_p = p.getIndex();
         double brlen_p = p.getBranchLength();
-        std::__1::vector<std::__1::string> ncomm_p = p.node_comments;
-        std::__1::vector<std::__1::string> bcomm_p = p.branch_comments;
+        std::vector<std::string> ncomm_p = p.node_comments;
+        std::vector<std::string> bcomm_p = p.branch_comments;
 
         // we need to re-orient the branches/indices so that
         // nodes remain associated with the same parameters
