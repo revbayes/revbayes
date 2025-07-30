@@ -8,7 +8,7 @@
 #
 ################################################################################
 
-seed(1597417491)
+seed(2026311283)
 
 # read in a simulated dataset that favors trees with no regular (i.e., degree-3)
 # internal nodes, originally provided by Niklas Hohmann (see

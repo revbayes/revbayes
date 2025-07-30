@@ -1592,38 +1592,34 @@ void Tree::collapseSampledAncestors()
 TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
 {
     TopologyNode* node;
-    int counter = 0;
+    double u = rng->uniform01();
     
-    do {
-        double u = rng->uniform01();
+    for (size_t i = 0; i < 10; i++)
+    {
         size_t node_idx = size_t( std::floor(getNumberOfNodes() * u) );
         node = (TopologyNode*)&getNode(node_idx);
-        counter++;
-    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 10);
+        if ( !node->isRoot() && !node->isTip() && !node->isSampledAncestorParent() ) return node;
+    }
     
-    if (counter == 10)
+    // check that there is at least one node which is not the root, a tip, or the parent of a SA
+    std::vector<TopologyNode*> eligible_nodes;
+        
+    for (auto& to_check: getNodes())
     {
-        // check that there is at least one node which is not the root, a tip, or the parent of a SA
-        std::vector<TopologyNode*> eligible_nodes;
+        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        {
+            eligible_nodes.push_back( to_check );
+        }
+    }
         
-        for (auto& to_check: getNodes())
-        {
-            if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
-            {
-                eligible_nodes.push_back( to_check );
-            }
-        }
-        
-        if (eligible_nodes.size() == 0)
-        {
-            node = NULL;
-        }
-        else
-        {
-            double u = rng->uniform01();
-            size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
-            node = eligible_nodes[node_idx];
-        }
+    if (eligible_nodes.size() == 0)
+    {
+        node = NULL;
+    }
+    else
+    {
+        size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+        node = eligible_nodes[node_idx];
     }
     
     return node;
