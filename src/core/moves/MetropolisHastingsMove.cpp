@@ -32,7 +32,7 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-MetropolisHastingsMove::MetropolisHastingsMove( Proposal *p, double w, bool t ) : AbstractMove(p->getNodes(), w, t),
+MetropolisHastingsMove::MetropolisHastingsMove( Proposal *p, double w, size_t d, bool t ) : AbstractMove(p->getNodes(), w, d, t),
     num_accepted_current_period( 0 ),
     num_accepted_total( 0 ),
     proposal( p )

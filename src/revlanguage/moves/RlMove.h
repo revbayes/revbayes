@@ -35,8 +35,9 @@ namespace RevLanguage {
         
         virtual void                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
         
+        RevPtr<const RevVariable>                   delay;
         RevPtr<const RevVariable>                   weight;
-        RevPtr<const RevVariable>                   tuneTarget;
+        RevPtr<const RevVariable>                   tune_target;
 
     };
     

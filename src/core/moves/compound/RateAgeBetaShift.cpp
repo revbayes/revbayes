@@ -24,7 +24,7 @@ namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
-RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, bool t, double w) : AbstractMove( w, t),
+RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, double w, size_t del, bool t) : AbstractMove( w, del, t),
     tree( tr ),
     rates_vec( v ),
     rates( sv ),
@@ -161,6 +161,42 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
     Tree& tau = tree->getValue();
+    size_t num_nodes = tau.getNumberOfNodes();
+    
+    RbOrderedSet<DagNode*> affected;
+    tree->initiateGetAffectedNodes( affected );
+    
+    // for safety, remove the rates from the affected nodes
+    // for example, if we assume a BM or OU model of autocorrelated rates
+    // then the rates depend on the tree
+    if ( rates == NULL )
+    {
+        size_t num_rates = rates_vec.size();
+        for ( size_t i=0; i<num_rates; ++i )
+        {
+            DagNode* the_rates_node = rates_vec[i];
+            affected.erase( the_rates_node );
+        }
+    }
+    else
+    {
+        affected.erase( rates );
+    }
+    
+    double oldLnLike = 0.0;
+    bool check_likelihood_shortcuts = rng->uniform01() < 0.001;
+    // Sebastian: This line below is a debug for always checking the likelihood shortcuts
+//    check_likelihood_shortcuts = true;
+    if ( check_likelihood_shortcuts == true )
+    {
+        for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
+        {
+            (*it)->touch();
+            oldLnLike += (*it)->getLnProbability();
+        }
+    }
+    
+    // pick a random node which is not the root and neithor the direct descendant of the root
 
     if (tau.getNumberOfTips() <= 2)
     {
@@ -172,7 +208,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     size_t node_idx = 0;
     do {
         double u = rng->uniform01();
-        node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
+        node_idx = size_t( std::floor(num_nodes * u) );
         node = &tau.getNode(node_idx);
     } while ( node->isRoot() || node->isTip() || node->isSampledAncestorParent() );
     

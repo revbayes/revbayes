@@ -58,6 +58,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
 
     // now allocate a new vector-scale move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = static_cast<const ModelVector<RealPos> &>( sigmas->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();
@@ -95,7 +96,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *prop = new RevBayesCore::HSRFIntervalSwapProposal(d,s);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
 
 }
 

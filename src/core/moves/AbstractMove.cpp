@@ -18,11 +18,12 @@ using namespace RevBayesCore;
  * \param[in]    weight   The weight how often the proposal will be used (per iteration).
  * \param[in]    tuning   If auto tuning should be used.
  */
-AbstractMove::AbstractMove( double weight, bool tuning ) :
+AbstractMove::AbstractMove( double weight, size_t d, bool tuning ) :
     nodes(  ),
     affected_nodes(  ),
     weight( weight ),
     auto_tuning( tuning ),
+    delay( d ),
     num_tried_current_period( 0 ),
     num_tried_total( 0 )
 {
@@ -39,11 +40,12 @@ AbstractMove::AbstractMove( double weight, bool tuning ) :
  * \param[in]    weight   The weight how often the proposal will be used (per iteration).
  * \param[in]    tuning   If auto tuning should be used.
  */
-AbstractMove::AbstractMove( const std::vector<DagNode*> &nodes, double weight, bool tuning ) :
+AbstractMove::AbstractMove( const std::vector<DagNode*> &nodes, double weight, size_t d, bool tuning ) :
     nodes( nodes ),
     affected_nodes( ),
     weight( weight ),
     auto_tuning( tuning ),
+    delay( d ),
     num_tried_current_period( 0 ),
     num_tried_total( 0 )
 {
@@ -89,6 +91,7 @@ AbstractMove::AbstractMove( const AbstractMove &move ) : Move( move ),
     affected_nodes( move.affected_nodes ),
     weight( move.weight ),
     auto_tuning( move.auto_tuning  ),
+    delay( move.delay ),
     num_tried_current_period( move.num_tried_current_period ),
     num_tried_total( move.num_tried_total )
 {
@@ -166,6 +169,7 @@ AbstractMove& AbstractMove::operator=(const RevBayesCore::AbstractMove &move)
         
         affected_nodes              = move.affected_nodes;
         nodes                       = move.nodes;
+        delay                       = move.delay;
         num_tried_current_period    = move.num_tried_current_period;
         num_tried_total             = move.num_tried_total;
         
@@ -342,7 +346,7 @@ double AbstractMove::getUpdateWeight( void ) const
  */
 bool AbstractMove::isActive(std::uint64_t generation) const
 {
-    return true;
+    return generation >= delay;
 }
 
 
@@ -513,6 +517,12 @@ void AbstractMove::swapNode(DagNode *old_node, DagNode *new_node)
     
     swapNodeInternal(old_node, new_node);
     
+}
+
+
+void AbstractMove::setDelay( size_t d )
+{
+    delay = d;
 }
 
 

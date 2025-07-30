@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_MultiValueEventBirthDeath.h"
 #include "MultiValueEventBirthDeathProposal.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -65,6 +66,7 @@ void Move_MultiValueEventBirthDeath::constructInternalObject( void )
     
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = static_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
     bool use_ac = static_cast<const RlBoolean &>( ac->getRevObject() ).getValue();
@@ -73,7 +75,7 @@ void Move_MultiValueEventBirthDeath::constructInternalObject( void )
 
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventBirthDeathProposal(n,use_ac);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 

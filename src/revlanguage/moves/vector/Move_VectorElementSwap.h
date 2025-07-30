@@ -107,9 +107,10 @@ void RevLanguage::Move_VectorElementSwap<rlValueType>::constructInternalObject( 
 
     // now allocate a new vector-scale move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
+
     RevBayesCore::VectorElementSwapProposal< typename rlValueType::valueType > *p = new RevBayesCore::VectorElementSwapProposal< typename rlValueType::valueType >(n, nei);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 
 }
 

@@ -25,7 +25,7 @@ namespace RevBayesCore {
     class MetropolisHastingsMove : public AbstractMove {
         
     public:
-        MetropolisHastingsMove(Proposal *p, double w, bool autoTune = false);                                           //!< Constructor
+        MetropolisHastingsMove(Proposal *p, double w, size_t d, bool autoTune);                                           //!< Constructor
         MetropolisHastingsMove(const MetropolisHastingsMove &m);                                                        //!< Copy constructor
         virtual                                                ~MetropolisHastingsMove(void);                           //!< Destructor
 

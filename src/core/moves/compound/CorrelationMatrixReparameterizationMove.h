@@ -17,7 +17,7 @@ template <class variableType> class StochasticNode;
     class CorrelationMatrixReparameterizationMove : public AbstractMove {
         
     public:
-        CorrelationMatrixReparameterizationMove( StochasticNode<MatrixReal> *cm, TypedDagNode<RbVector<double> > *v, StochasticNode<ContinuousCharacterData>* mv, bool t, double w);                                                         //!<  constructor
+        CorrelationMatrixReparameterizationMove( StochasticNode<MatrixReal> *cm, TypedDagNode<RbVector<double> > *v, StochasticNode<ContinuousCharacterData>* mv, double w, size_t d, bool t);                                                         //!<  constructor
         virtual                                ~CorrelationMatrixReparameterizationMove(void);                                                             //!< Destructor
         
         // Basic utility functions

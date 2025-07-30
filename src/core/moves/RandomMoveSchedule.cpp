@@ -15,10 +15,10 @@ using namespace RevBayesCore;
 RandomMoveSchedule::RandomMoveSchedule(RbVector<Move> *s) : MoveSchedule( s )
 {
     
-    movesPerIteration = 0.0;
+    moves_per_iteration = 0.0;
     for (RbIterator<Move> it = moves->begin(); it != moves->end(); ++it)
     {
-        movesPerIteration += it->getUpdateWeight();
+        moves_per_iteration += it->getUpdateWeight();
         weights.push_back( it->getUpdateWeight() );
     }
 }
@@ -38,25 +38,25 @@ RandomMoveSchedule* RandomMoveSchedule::clone( void ) const
 
 double RandomMoveSchedule::getNumberMovesPerIteration( void ) const
 {
-    return movesPerIteration;
+    return moves_per_iteration;
 }
 
 
 Move& RandomMoveSchedule::nextMove( std::uint64_t gen )
 {
     
-    movesPerIteration = 0.0;
+    moves_per_iteration = 0.0;
     for (size_t i = 0; i < weights.size(); ++i)
     {
         if ( (*moves)[i].isActive( gen ) )
         {
-            movesPerIteration += weights[i];
+            moves_per_iteration += weights[i];
         }
     }
     
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
-    double u = movesPerIteration * rng->uniform01();
+    double u = moves_per_iteration * rng->uniform01();
     
     size_t index = 0;
     // only if the move is inactive or the weight of the move is smaller than u

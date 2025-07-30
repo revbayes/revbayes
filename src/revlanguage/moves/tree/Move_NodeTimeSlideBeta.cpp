@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_NodeTimeSlideBeta.h"
 #include "NodeTimeSlideBetaProposal.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -57,9 +58,10 @@ void Move_NodeTimeSlideBeta::constructInternalObject( void )
     double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideBetaProposal(t, d, o);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tu);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,tu);
     
 }
 

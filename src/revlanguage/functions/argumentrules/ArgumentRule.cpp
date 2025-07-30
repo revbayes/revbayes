@@ -206,7 +206,6 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
                 return Argument( valueVar, arg.getLabel(), true );
             }
-//<<<<<<< HEAD
 //            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1 )
 //            {
 //                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
@@ -260,8 +259,6 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
 //                    return Argument( the_new_var, arg.getLabel(), false );
 //                }
 //            }
-//=======
-//>>>>>>> bec51c4a9f3581046b7c8af121197e7ef0dae9d4
             else
             {
                 // For now, change the required type of the incoming variable wrapper

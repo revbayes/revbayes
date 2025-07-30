@@ -37,4 +37,4 @@ namespace RevLanguage {
     };
 }
 
-#endif /* defined(__revbayes_proj__Move_LevyJump__) */
+#endif

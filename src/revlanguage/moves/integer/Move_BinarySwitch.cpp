@@ -56,7 +56,6 @@ Move_BinarySwitch* Move_BinarySwitch::clone(void) const
  * constructor and passing the move-parameters (the variable and other parameters) as arguments of the 
  * constructor. The move constructor takes care of the proper hook-ups.
  *
- * \return A new internal distribution object.
  */
 void Move_BinarySwitch::constructInternalObject( void ) 
 {
@@ -65,12 +64,13 @@ void Move_BinarySwitch::constructInternalObject( void )
     
     // now allocate a new binary-switch move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::BinarySwitchProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,false);
     
 }
 

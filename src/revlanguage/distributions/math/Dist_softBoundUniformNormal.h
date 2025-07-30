@@ -48,7 +48,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                       max;
         RevPtr<const RevVariable>                       sd;
         RevPtr<const RevVariable>                       prob;
-        
+        RevPtr<const RevVariable>                       boundary;
+
     };
     
 }

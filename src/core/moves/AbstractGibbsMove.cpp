@@ -22,7 +22,7 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-AbstractGibbsMove::AbstractGibbsMove( double w  ) : AbstractMove( w, false )
+AbstractGibbsMove::AbstractGibbsMove( double w, size_t d  ) : AbstractMove( w, d, false )
 {
 
 }

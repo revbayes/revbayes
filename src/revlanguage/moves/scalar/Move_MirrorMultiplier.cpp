@@ -71,7 +71,8 @@ void Move_MirrorMultiplier::constructInternalObject( void )
     // now allocate a new sliding move
     double d  = static_cast<const RealPos &>( sigma->getRevObject() ).getValue();
     double w  = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r  = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double m0 = static_cast<const Probability &>( mu0->getRevObject() ).getValue();
     int n0    = static_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
     int c0    = static_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
@@ -85,7 +86,7 @@ void Move_MirrorMultiplier::constructInternalObject( void )
     // finally create the internal move object
     //    value = new RevBayesCore::Move_MirrorMultiplier(n, d, t, w);
 
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
 
 }
 

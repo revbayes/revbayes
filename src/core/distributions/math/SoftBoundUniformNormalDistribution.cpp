@@ -24,11 +24,12 @@ using namespace RevBayesCore;
  * \param[in]   sd    The standard deviation of the normal distribution.
  * \param[in]   p     The probability that the realization came from the uniform distribution.
  */
-SoftBoundUniformNormalDistribution::SoftBoundUniformNormalDistribution(const TypedDagNode<double> *mi, const TypedDagNode<double> *ma, const TypedDagNode<double> *sd, const TypedDagNode<double> *p) : ContinuousDistribution( new double( 0.0 ) ),
+SoftBoundUniformNormalDistribution::SoftBoundUniformNormalDistribution(const TypedDagNode<double> *mi, const TypedDagNode<double> *ma, const TypedDagNode<double> *sd, const TypedDagNode<double> *p, BOUNDS b) : ContinuousDistribution( new double( 0.0 ) ),
     min( mi ),
     max( ma ),
     stDev( sd ),
-    prob( p )
+    prob( p ),
+    soft_bound( b )
 {
     
     // add the parameters to our set (in the base class)
@@ -39,23 +40,7 @@ SoftBoundUniformNormalDistribution::SoftBoundUniformNormalDistribution(const Typ
     addParameter( stDev );
     addParameter( prob );
     
-    double u = GLOBAL_RNG->uniform01();
-    if ( u < prob->getValue() )
-    {
-        *value = RbStatistics::Uniform::rv(min->getValue(), max->getValue(), *GLOBAL_RNG);
-    }
-    else
-    {
-        double x = RbStatistics::Normal::rv(0.0, stDev->getValue(), *GLOBAL_RNG);
-        if ( x > 0.0 )
-        {
-            *value = max->getValue() + x;
-        }
-        else
-        {
-            *value = min->getValue() + x;
-        }
-    }
+    redrawValue();
 }
 
 
@@ -91,17 +76,68 @@ SoftBoundUniformNormalDistribution* SoftBoundUniformNormalDistribution::clone( v
  */
 double SoftBoundUniformNormalDistribution::computeLnProbability( void )
 {
-    if ( *value < min->getValue() )
+    double side_factor = ( soft_bound == BOTH ? 2.0 : 1.0 );       // This is used for the computation of the sd or p if only one is provided.
+
+    double min_val  = min->getValue();
+    double max_val  = max->getValue();
+    double sd       = 1.0;
+    double p        = 0.95;
+    
+    if ( stDev == NULL && prob == NULL )
     {
-        return log((1-prob->getValue()/2.0)) + RbStatistics::Normal::lnPdf( 0.0, stDev->getValue(), *value - min->getValue() );
+        throw RbException( "Cannot compute sd and prob in SoftBoundUniformNormal distribution if neither is provided." );
     }
-    else if ( *value > max->getValue() )
+    else if ( stDev == NULL )
     {
-        return log((1-prob->getValue()/2.0)) + RbStatistics::Normal::lnPdf( 0.0, stDev->getValue(), *value - max->getValue() );
+        p   = prob->getValue();
+        sd  = (1-p) * (max_val-min_val) / (side_factor*p*RbConstants::SQRT_2PI);
+    }
+    else if ( prob == NULL )
+    {
+        sd  = stDev->getValue();
+        p   = 1 / ( side_factor/(max_val-min_val) * RbConstants::SQRT_2PI * sd + 1 );
     }
     else
     {
-        return log(prob->getValue()) + RbStatistics::Uniform::lnPdf( min->getValue(), max->getValue(), *value);
+        p   = prob->getValue();
+        sd  = stDev->getValue();
+    }
+    
+    if ( *value < min_val )
+    {
+        if ( soft_bound == BOTH )
+        {
+            return log((1-p)/2.0) + RbStatistics::Normal::lnPdf( 0.0, sd, *value - min_val );
+        }
+        else if ( soft_bound == LOWER )
+        {
+            return log(1-p) + RbStatistics::Normal::lnPdf( 0.0, sd, *value - min_val );
+        }
+        else
+        {
+            return RbConstants::Double::neginf;
+        }
+    }
+    else if ( *value > max_val )
+    {
+        
+        if ( soft_bound == BOTH )
+        {
+            return log((1-p)/2.0) + RbStatistics::Normal::lnPdf( 0.0, sd, *value - max_val );
+        }
+        else if ( soft_bound == UPPER )
+        {
+            return log(1-p) + RbStatistics::Normal::lnPdf( 0.0, sd, *value - max_val );
+        }
+        else
+        {
+            return RbConstants::Double::neginf;
+        }
+
+    }
+    else
+    {
+        return log( p ) + RbStatistics::Uniform::lnPdf( min_val, max_val, *value);
     }
 
 }
@@ -147,22 +183,56 @@ double SoftBoundUniformNormalDistribution::quantile(double p) const
  */
 void SoftBoundUniformNormalDistribution::redrawValue( void )
 {
+    double side_factor = ( soft_bound == BOTH ? 2.0 : 1.0 );       // This is used for the computation of the sd or p if only one is provided.
+
+    double min_val  = min->getValue();
+    double max_val  = max->getValue();
+    double sd       = 1.0;
+    double p        = 0.95;
     
-    double u = GLOBAL_RNG->uniform01();
-    if ( u < prob->getValue() )
+    if ( stDev == NULL && prob == NULL )
     {
-        *value = RbStatistics::Uniform::rv(min->getValue(), max->getValue(), *GLOBAL_RNG);
+        throw RbException( "Cannot compute sd and prob in SoftBoundUniformNormal distribution if neither is provided." );
+    }
+    else if ( stDev == NULL )
+    {
+        p   = prob->getValue();
+        sd  = (1-p) * (max_val-min_val) / (side_factor*p*RbConstants::SQRT_2PI);
+    }
+    else if ( prob == NULL )
+    {
+        sd  = stDev->getValue();
+        p   = 1 / ( side_factor/(max_val-min_val) * RbConstants::SQRT_2PI * sd + 1 );
     }
     else
     {
-        double x = RbStatistics::Normal::rv(0.0, stDev->getValue(), *GLOBAL_RNG);
+        p   = prob->getValue();
+        sd  = stDev->getValue();
+    }
+    
+    double u = GLOBAL_RNG->uniform01();
+    if ( u < p )
+    {
+        *value = RbStatistics::Uniform::rv(min_val, max_val, *GLOBAL_RNG);
+    }
+    else
+    {
+        double x = RbStatistics::Normal::rv(0.0, sd, *GLOBAL_RNG);
+        if ( soft_bound == LOWER )
+        {
+            x = fmin(x,-x);
+        }
+        else if ( soft_bound == UPPER )
+        {
+            x = fmax(x,-x);
+        }
         if ( x > 0.0 )
         {
-            *value = max->getValue() + x;
+            *value = max_val + x;
         }
         else
         {
-            *value = min->getValue() + x;
+            *value = min_val + x;
         }
         
     }

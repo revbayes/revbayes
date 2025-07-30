@@ -61,6 +61,7 @@ void Move_IndependentTopology::constructInternalObject( void )
     
     // now allocate a new empirical tree move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
@@ -108,7 +109,7 @@ void Move_IndependentTopology::constructInternalObject( void )
         p = new RevBayesCore::IndependentTopologyProposal(t, prop, NULL, c);
     }
 
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
     
 }
 

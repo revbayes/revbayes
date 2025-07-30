@@ -15,10 +15,10 @@ using namespace RevBayesCore;
 SingleRandomMoveSchedule::SingleRandomMoveSchedule(RbVector<Move> *s) : MoveSchedule( s )
 {
     
-    sumOfWeights = 0.0;
+    sum_of_weights = 0.0;
     for (RbIterator<Move> it = moves->begin(); it != moves->end(); ++it)
     {
-        sumOfWeights+= it->getUpdateWeight();
+        sum_of_weights+= it->getUpdateWeight();
         weights.push_back( it->getUpdateWeight() );
     }
 }
@@ -46,7 +46,7 @@ Move& SingleRandomMoveSchedule::nextMove( std::uint64_t gen )
 {
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
-    double u = sumOfWeights * rng->uniform01();
+    double u = sum_of_weights * rng->uniform01();
     
     size_t index = 0;
     while ( weights[index] < u || !(*moves)[index].isActive( gen ) )

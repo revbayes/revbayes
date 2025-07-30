@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_MultiValueEventSlide.h"
 #include "MultiValueEventSlideProposal.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -67,6 +68,7 @@ void Move_MultiValueEventSlide::constructInternalObject( void )
     
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = static_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
     
@@ -77,7 +79,7 @@ void Move_MultiValueEventSlide::constructInternalObject( void )
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventSlideProposal(n, v_name, l);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,tuning);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,tuning);
     
 }
 

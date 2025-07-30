@@ -8,6 +8,7 @@
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_BetaProbability.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "Probability.h"
@@ -54,12 +55,13 @@ void Move_BetaProbability::constructInternalObject( void )
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< double >* tmp = static_cast<const Probability &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< double > *n = static_cast<RevBayesCore::StochasticNode< double > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::BetaProbabilityProposal(n,d,o);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 

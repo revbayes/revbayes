@@ -8,6 +8,7 @@
 #include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_LevyJumpSum.h"
+#include "Natural.h"
 #include "LevyJumpSumProposal.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -52,6 +53,7 @@ void Move_LevyJumpSum::constructInternalObject( void )
     // now allocate a new sliding move
     double sf = static_cast<const RealPos &>( slideFactor->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<double>* tmpsv1 = static_cast<const Real &>( slideUp->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *sv1 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv1 );
@@ -63,7 +65,7 @@ void Move_LevyJumpSum::constructInternalObject( void )
     bool tv = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpSumProposal(sv1, sv2,sf);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tv);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,tv);
     
 }
 

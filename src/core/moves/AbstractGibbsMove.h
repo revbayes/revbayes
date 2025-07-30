@@ -35,7 +35,7 @@ namespace RevBayesCore {
         virtual void                                            setMoveTuningParameter(double tp);
 
     protected:
-        AbstractGibbsMove(double w);                                                         //!< Constructor
+        AbstractGibbsMove(double w, size_t d=0);                                                         //!< Constructor
 
         void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);            //!< Perform the move.
         void                                                    tune(void);                                     //!< Specific tuning of the move
