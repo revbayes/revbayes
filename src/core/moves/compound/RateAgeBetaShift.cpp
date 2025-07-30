@@ -167,14 +167,17 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         return;
     }
 
-    // 1. pick a random node which is not the root, a tip, or a sampled ancestor
-    TopologyNode* node;
-    size_t node_idx = 0;
-    do {
-        double u = rng->uniform01();
-        node_idx = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(node_idx);
-    } while ( node->isRoot() || node->isTip() || node->isSampledAncestorParent() );
+    // 1. pick a random node which is not the root, a tip, or the parent of a sampled ancestor
+    TopologyNode* node = tau.pickRandomInternalNode(rng);
+    if (node == NULL)
+    {
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvRateAgeBetaShift has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
+        return;
+    }
+    size_t node_idx = node->getIndex();
     
     TopologyNode& parent = node->getParent();
 

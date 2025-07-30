@@ -2,11 +2,13 @@
 #include <cmath>
 #include <iostream>
 
+#include "DebugMove.h"
 #include "DistributionUniform.h"
 #include "NodeTimeScaleProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
@@ -88,19 +90,24 @@ double NodeTimeScaleProposal::getProposalTuningParameter( void ) const
  */
 double NodeTimeScaleProposal::doProposal( void )
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     
-    // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    // get random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = variable->getValue();
     
-    // pick a random node which is not the root, a tip, or the parent of a SA
-    TopologyNode* node;
-    do {
-        double u = rng->uniform01();
-        size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() || node -> isSampledAncestorParent() );
+    // pick a random node which is not the root, a tip, or the parent of a sampled ancestor
+    TopologyNode* node = tau.pickRandomInternalNode(rng);
+    if (node == NULL)
+    {
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvNodeTimeScale has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
+        return RbConstants::Double::neginf;
+    }
     
     TopologyNode& parent = node->getParent();
     
