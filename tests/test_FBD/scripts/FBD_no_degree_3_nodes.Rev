@@ -8,7 +8,9 @@
 #
 ################################################################################
 
-seed(2026311283)
+# seed(1379847536)
+seed(220830457)
+setOption("debugMCMC", 1)
 
 # read in a simulated dataset that favors trees with no regular (i.e., degree-3)
 # internal nodes, originally provided by Niklas Hohmann (see

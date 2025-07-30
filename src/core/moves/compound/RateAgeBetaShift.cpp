@@ -171,7 +171,10 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     TopologyNode* node = tau.pickRandomInternalNode(rng);
     if (node == NULL)
     {
-        std::cerr << "mvRateAgeBetaShift has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvRateAgeBetaShift has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
         return;
     }
     size_t node_idx = node->getIndex();

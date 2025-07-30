@@ -2,10 +2,12 @@
 #include <cmath>
 #include <iostream>
 
+#include "DebugMove.h"
 #include "DistributionBeta.h"
 #include "NodeTimeSlideBetaProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
@@ -87,9 +89,11 @@ double NodeTimeSlideBetaProposal::getProposalTuningParameter( void ) const
  */
 double NodeTimeSlideBetaProposal::doProposal( void )
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     
     // get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = variable->getValue();
     
@@ -97,7 +101,10 @@ double NodeTimeSlideBetaProposal::doProposal( void )
     TopologyNode* node = tau.pickRandomInternalNode(rng);
     if (node == NULL)
     {
-        std::cerr << "mvNodeTimeSlideBeta has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvNodeTimeSlideBeta has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
         return RbConstants::Double::neginf;
     }
     

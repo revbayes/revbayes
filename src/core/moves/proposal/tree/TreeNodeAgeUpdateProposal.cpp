@@ -4,8 +4,10 @@
 #include <cmath>
 #include <set>
 
+#include "DebugMove.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "TreeUtilities.h"
 #include "Cloneable.h"
 #include "StochasticNode.h"
@@ -113,9 +115,11 @@ double TreeNodeAgeUpdateProposal::getProposalTuningParameter( void ) const
  */
 double TreeNodeAgeUpdateProposal::doProposal( void )
 {
-
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+    
     // get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
 
     Tree& tau = speciesTree->getValue();
 
@@ -123,7 +127,10 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
     TopologyNode* node = tau.pickRandomInternalNode(rng);
     if (node == NULL)
     {
-        std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
         return RbConstants::Double::neginf;
     }
 

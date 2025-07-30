@@ -4,10 +4,12 @@
 #include <algorithm>
 #include <vector>
 
+#include "DebugMove.h"
 #include "DistributionUniform.h"
 #include "NodeRateTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "Proposal.h"
 #include "RbVector.h"
 #include "StochasticNode.h"
@@ -107,9 +109,11 @@ double NodeRateTimeSlideUniformProposal::getProposalTuningParameter( void ) cons
  */
 double NodeRateTimeSlideUniformProposal::doProposal( void )
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     
     // get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = variable->getValue();
     
@@ -122,7 +126,10 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
     TopologyNode* node = tau.pickRandomInternalNode(rng);
     if (node == NULL)
     {
-        std::cerr << "mvNodeRateTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvNodeRateTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
         return RbConstants::Double::neginf;
     }
     
