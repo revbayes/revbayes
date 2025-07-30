@@ -51,7 +51,7 @@ events ~ dnAutocorrelatedEvent(eventDistribution = dnPoisson(lambda=10),
                                minNumberEvents=[1,0],
                                autocorrelationTypes=["NONE","ACLN"],
                                autocorrelationDependencies=["none","time"],
-                               autocorrelationSigmas=[0,ac_sigma]
+                               autocorrelationSigmas=[0,ac_sigma],
                                sort="time")
 
 # apply a move that adds and removes pairs of theta+time
