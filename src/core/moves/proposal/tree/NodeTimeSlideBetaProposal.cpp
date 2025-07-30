@@ -97,7 +97,7 @@ double NodeTimeSlideBetaProposal::doProposal( void )
     TopologyNode* node = tau.pickRandomInternalNode(rng);
     if (node == NULL)
     {
-        std::cerr << "mvNodeTimeScale has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        std::cerr << "mvNodeTimeSlideBeta has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         return RbConstants::Double::neginf;
     }
     
