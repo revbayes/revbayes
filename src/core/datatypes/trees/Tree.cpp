@@ -17,6 +17,8 @@
 #include "TreeUtilities.h"
 #include "Clade.h"
 #include "DagNode.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
@@ -1583,6 +1585,48 @@ void Tree::collapseSampledAncestors()
         }
     }
     setRoot(root, true);
+}
+
+// Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
+// First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
+TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
+{
+    TopologyNode* node;
+    int counter = 0;
+    
+    do {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(getNumberOfNodes() * u) );
+        node = (TopologyNode*)&getNode(node_idx);
+        counter++;
+    } while ( (node->isRoot() || node->isTip() || node->isSampledAncestorParent() ) && counter < 10);
+    
+    if (counter == 10)
+    {
+        // check that there is at least one node which is not the root, a tip, or the parent of a SA
+        std::vector<TopologyNode*> eligible_nodes;
+        
+        for (auto& to_check: getNodes())
+        {
+            if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+            {
+                eligible_nodes.push_back( to_check );
+            }
+        }
+        
+        if (eligible_nodes.size() == 0)
+        {
+            node = NULL;
+        }
+        else
+        {
+            double u = rng->uniform01();
+            size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+            node = eligible_nodes[node_idx];
+        }
+    }
+    
+    return node;
 }
 
 void Tree::pruneTaxa(const RbBitSet& prune_map )
