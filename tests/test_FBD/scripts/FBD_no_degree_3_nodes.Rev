@@ -8,8 +8,7 @@
 #
 ################################################################################
 
-# seed(1379847536)
-seed(220830457)
+seed(1912414797)
 setOption("debugMCMC", 1)
 
 # read in a simulated dataset that favors trees with no regular (i.e., degree-3)
