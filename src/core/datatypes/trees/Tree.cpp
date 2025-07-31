@@ -1592,10 +1592,10 @@ void Tree::collapseSampledAncestors()
 TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
 {
     TopologyNode* node;
-    double u = rng->uniform01();
     
     for (size_t i = 0; i < 10; i++)
     {
+        double u = rng->uniform01();
         size_t node_idx = size_t( std::floor(getNumberOfNodes() * u) );
         node = (TopologyNode*)&getNode(node_idx);
         if ( !node->isRoot() && !node->isTip() && !node->isSampledAncestorParent() ) return node;
@@ -1618,6 +1618,7 @@ TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
     }
     else
     {
+        double u = rng->uniform01();
         size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
         node = eligible_nodes[node_idx];
     }
