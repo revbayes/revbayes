@@ -144,7 +144,10 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
             if (i+1 < remaining.size())
                 options.expressions.push_back(remaining[i+1]);
             else
-                throw RbException()<<"-e not followed by expression";
+            {
+                std::cerr<<"-e not followed by expression\n";
+                std::exit(1);
+            }
         }
 
         // Stage 3: Put everything else into the args vector.
@@ -209,7 +212,8 @@ int main(int argc, char* argv[])
         StringUtilities::stringSplit(option, "=", tokens);
         if (tokens.size() != 2)
         {
-            throw RbException() << "Option '" << option << "' must have the form key=value"; 
+            std::cerr << "Option '" << option << "' must have the form key=value\n";
+            std::exit(1);
         }
         else
         {
