@@ -115,6 +115,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     catch (const RbException& e)
     {
         RBOUT(e.getMessage());
+        std::exit(1);
     }
     catch (const std::exception& e)
     {
@@ -122,10 +123,12 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         {
             RBOUT(e.what());
         }
+        std::exit(1);
     }
     catch (...)
     {
         RBOUT("Error: unknown exception!");
+        std::exit(1);
     }
     
 }
