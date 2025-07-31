@@ -101,7 +101,7 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     std::optional<bool> echo;
     stage1.add_option("-p,--echo",              echo,              "Echo commands to the screen");
 
-    stage1.add_option("-o,--setOption",  options.options,   "Set an option key=value  (See ?setOption for the list of available keys and their associated values)");
+    stage1.add_option("-o,--setOption",  options.options,   "Set an option key=value  (See ?setOption for the list of available keys and their associated values)")->allow_extra_args(false);
 
     try {
         stage1.parse(argc, argv);
