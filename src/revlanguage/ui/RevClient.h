@@ -21,7 +21,7 @@ namespace RevClient
 
     void  execute_file(const boost::filesystem::path& filename, bool echo_on, bool error_exit);
     void  shutdown();
-    void  startInterpreter(void);
+    void  startInterpreter(bool error_exit);
     void  startJupyterInterpreter(void);
 }
     

@@ -217,21 +217,20 @@ int main(int argc, char* argv[])
         }
     }
 
-
-    /*default to interactive mode*/
-    bool batch_mode = (not cmd_line.expressions.empty() or cmd_line.filename) and not cmd_line.interactive;
-    // FIXME -- the batch_mode variable appears to have no effect if true.
-
     /* initialize environment */
     RevLanguageMain rl = RevLanguageMain(cmd_line.interactive,
                                          cmd_line.echo,
                                          cmd_line.error_exit,
                                          cmd_line.quiet);
 
+    /* Set output stream */
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
+
+    /* Any script or expressions from `-e expr` are executed here. */
     rl.startRevLanguageEnvironment(cmd_line.expressions, cmd_line.filename, cmd_line.args);
 
+    /* Interactive or jupyter commands are executed here. */
     if ( cmd_line.jupyter )
     {
         RevClient::startJupyterInterpreter();
@@ -240,7 +239,7 @@ int main(int argc, char* argv[])
     {
         enableTermAnsi();
 
-        RevClient::startInterpreter();
+        RevClient::startInterpreter(cmd_line.error_exit);
     }
 
 #   ifdef RB_MPI

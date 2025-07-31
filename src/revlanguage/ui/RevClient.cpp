@@ -389,7 +389,7 @@ void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
  * Main application loop.
  * 
  */
-void startInterpreter( void )
+void startInterpreter( bool error_exit )
 {
     // If we aren't using MPI, this will be zero.
     // If we are using MPI, it will be zero for the first process.
@@ -479,7 +479,12 @@ void startInterpreter( void )
         
         result = interpret(commandLine);
 
-        /* The typed string is returned as a malloc() allocated string by
+        if (result == 2 and error_exit)
+        {
+            std::exit(1);
+        }
+
+/* The typed string is returned as a malloc() allocated string by
          * linenoise, so the user needs to free() it. */
         
         if ( pid == 0 )
