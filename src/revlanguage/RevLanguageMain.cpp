@@ -114,7 +114,13 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     }
     catch (const RbException& e)
     {
-        RBOUT(e.getMessage());
+        // Try to give the same error messages as in RevLanguage::Parser::Execute( ) in revlanguage/parser/Parser.cpp
+        if (rank == 0)
+        {
+            std::ostringstream msg;
+            e.print(msg);
+            RBOUT(msg.str());
+        }
         std::exit(1);
     }
     catch (const std::exception& e)
@@ -127,7 +133,10 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     }
     catch (...)
     {
-        RBOUT("Error: unknown exception!");
+        if (rank == 0)
+        {
+            RBOUT("Error:\tunknown exception!");
+        }
         std::exit(1);
     }
     
