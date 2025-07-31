@@ -71,6 +71,8 @@ if [ "$(${rb_exec[@]} -e '1+2' 2>/dev/null)" != "   3" ] ; then
     exit 102
 fi
 
+echo "RevBayes command: ${rb_exec[@]}"
+
 if [ ! -d "revbayes.github.io" ] ; then
     echo "No revbayes.github.io directory, cloning it"
     git clone https://github.com/revbayes/revbayes.github.io.git

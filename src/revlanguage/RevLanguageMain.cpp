@@ -52,7 +52,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         RevLanguage::UserInterface::userInterface().output(version.getHeader(), false);
         RevLanguage::UserInterface::userInterface().output("", false);
     }
-    
+
     // 3. Initialize the global workspace
     RevLanguage::Workspace::globalWorkspace().initializeGlobalWorkspace();
 
