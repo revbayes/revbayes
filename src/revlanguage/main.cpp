@@ -16,6 +16,8 @@
 #include "TerminalFormatter.h"
 #include "Workspace.h"
 #include "CLI11.hpp" // CLI11 command-line parsing library.
+#include "RandomNumberGenerator.h" // for setting the seed.
+#include "RandomNumberFactory.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -45,6 +47,8 @@ struct ParsedOptions
     bool quiet = false;
     bool jupyter = false;
     std::vector<std::string> options;
+
+    std::optional<std::uint64_t> seed;
 
     std::vector<std::string> expressions;
 
@@ -93,13 +97,14 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     std::optional<bool> interactive;
     stage1.add_flag("-i,--interactive",      interactive,       "Force interactive with expressions or file");
     stage1.add_flag("-q,--quiet",            options.quiet,     "Don't print startup message");
-    stage1.add_flag("-b,--batch",            "Deprecated");
+    stage1.add_flag("-b,--batch",                               "Deprecated");
     stage1.add_flag("-j,--jupyter",          options.jupyter,   "Run in jupyter mode");
 
     std::optional<bool> error_exit;
     stage1.add_option("-x,--error-exit",     error_exit,        "Exit on the first error");
     std::optional<bool> echo;
-    stage1.add_option("-p,--echo",              echo,              "Echo commands to the screen");
+    stage1.add_option("-p,--echo",           echo,              "Echo commands to the screen");
+    stage1.add_option("-s,--seed",           options.seed,      "Random seed");
 
     stage1.add_option("-o,--setOption",  options.options,   "Set an option key=value  (See ?setOption for the list of available keys and their associated values)")->allow_extra_args(false);
 
@@ -206,6 +211,7 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
+    /* Set user options from cmd line */
     for(auto& option: cmd_line.options)
     {
         std::vector<std::string> tokens;
@@ -219,6 +225,13 @@ int main(int argc, char* argv[])
         {
             RbSettings::userSettings().setOption( tokens[0], tokens[1], false );
         }
+    }
+
+    /* Set seed from command line */
+    if (cmd_line.seed)
+    {
+        RevBayesCore::RandomNumberGenerator *rng = RevBayesCore::GLOBAL_RNG;
+        rng->setSeed( cmd_line.seed.value() );
     }
 
     /* initialize environment */
