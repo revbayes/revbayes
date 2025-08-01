@@ -54,12 +54,10 @@ RevPtr<RevVariable> Func_source::execute( void )
     /* Open file */
     fs::path fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
 
-    bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-    
     // Initialize
     RBOUT("Processing file \"" + fname.string() + "\"");
 
-    RevClient::execute_file(fname, echo_on, true);
+    RevClient::execute_file(fname);
     
     // Return control 
     RBOUT("Processing of file \"" + fname.string() + "\" completed");
@@ -79,7 +77,6 @@ const ArgumentRules& Func_source::getArgumentRules( void ) const
     {
         
         argumentRules.push_back( new ArgumentRule( "file"   , RlString::getClassTypeSpec() , "The name of the file to read-in.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "echo.on", RlBoolean::getClassTypeSpec(), "Should we print the commands from the file on the screen?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         rules_set = true;
     
     }

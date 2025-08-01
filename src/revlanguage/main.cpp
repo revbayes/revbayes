@@ -211,6 +211,12 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
+    /* Set default session properties from cmd line flags */
+    auto& settings = RbSettings::userSettings();
+    settings.setInteractive( cmd_line.interactive );
+    settings.setEcho( cmd_line.echo );
+    settings.setErrorExit( cmd_line.error_exit );
+
     /* Set user options from cmd line */
     for(auto& option: cmd_line.options)
     {
@@ -223,7 +229,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            RbSettings::userSettings().setOption( tokens[0], tokens[1], false );
+            settings.setOption( tokens[0], tokens[1], false );
         }
     }
 
@@ -235,10 +241,7 @@ int main(int argc, char* argv[])
     }
 
     /* initialize environment */
-    RevLanguageMain rl = RevLanguageMain(cmd_line.interactive,
-                                         cmd_line.echo,
-                                         cmd_line.error_exit,
-                                         cmd_line.quiet);
+    RevLanguageMain rl = RevLanguageMain(cmd_line.quiet);
 
     /* Set output stream */
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
@@ -252,11 +255,11 @@ int main(int argc, char* argv[])
     {
         RevClient::startJupyterInterpreter();
     }
-    else if ( cmd_line.interactive )
+    else if ( settings.getInteractive() )
     {
         enableTermAnsi();
 
-        RevClient::startInterpreter(cmd_line.error_exit);
+        RevClient::startInterpreter();
     }
 
 #   ifdef RB_MPI

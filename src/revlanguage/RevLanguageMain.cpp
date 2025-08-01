@@ -13,13 +13,14 @@
 #include "RbVersion.h"
 #include "StringUtilities.h"
 #include "RevClient.h"        // for RevClient::shutdown()
+#include "RbSettings.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
 #endif
 
-RevLanguageMain::RevLanguageMain(bool i, bool e, bool ee, bool q)
-    : interactive(i), echo(e), error_exit(ee), quiet(q)
+RevLanguageMain::RevLanguageMain(bool q)
+    : quiet(q)
 {
 
 }
@@ -27,7 +28,8 @@ RevLanguageMain::RevLanguageMain(bool i, bool e, bool ee, bool q)
 
 void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args)
 {
-    
+    auto& settings = RbSettings::userSettings();
+
     int rank = 0;
 #ifdef RB_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -36,7 +38,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     // 1. Load the modules
     try
     {
-        RevLanguage::ModuleSystem::getModuleSystem().loadModules( RbSettings::userSettings().getModuleDir() );
+        RevLanguage::ModuleSystem::getModuleSystem().loadModules( settings.getModuleDir() );
     }    
     catch (RbException &e)
     {
@@ -45,7 +47,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
 
 
     // 2. Maybe show a header
-    if (interactive and not quiet)
+    if (settings.getInteractive() and not quiet)
     {
         // Print a nifty message
         RbVersion version = RbVersion();
@@ -80,7 +82,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         int result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
 
         // We just hope for better input next time
-        if (result == 2 and error_exit )
+        if ( result == 2 and settings.getErrorExit() )
         {
             RevClient::shutdown();
                 
@@ -92,13 +94,13 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     for (auto expression: expressions)
     {
         // Should we be using RBOUT here?  It looks weird with the 2 spaces of padding.
-        if (echo and rank == 0)
+        if (settings.getEcho() and rank == 0)
             std::cerr<<"> "<<expression;
 
         int result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
         
         // We just hope for better input next time
-        if (result == 2 and error_exit )
+        if (result == 2 and settings.getErrorExit())
         {
             RevClient::shutdown();
                 
@@ -110,7 +112,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     try
     {
         if (filename)
-            RevClient::execute_file(*filename, echo, error_exit);
+            RevClient::execute_file(*filename);
     }
     catch (const RbException& e)
     {

@@ -26,7 +26,7 @@ class RevLanguageMain {
     
 public:
     
-    RevLanguageMain(bool interactive, bool echo, bool error_exit, bool quiet);
+    RevLanguageMain(bool quiet);
     
     void startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args);
 

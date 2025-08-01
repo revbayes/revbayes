@@ -2,6 +2,7 @@
 #include "RbFileManager.h"
 #include "RevClient.h"
 #include "RlFunction.h"
+#include "RlUserInterface.h"
 #include "Parser.h"
 #include "Workspace.h"
 #include "RbSettings.h"
@@ -336,8 +337,9 @@ void shutdown()
 }
 
 
-void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
+void execute_file(const fs::path& filename)
 {
+    auto& settings = RbSettings::userSettings();
     std::stringstream inFile = RevBayesCore::readFileAsStringStream(filename);
 
     // Command-processing loop
@@ -351,7 +353,7 @@ void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
         RevBayesCore::safeGetline(inFile, line);
         lineNumber++;
         
-        if ( echo_on )
+        if ( settings.getEcho() )
         {
             if ( result == 1 )
             {
@@ -377,10 +379,14 @@ void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
         result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
         if ( result == 2 )
         {
-            if (error_exit)
+            if (settings.getErrorExit())
                 throw RbException() << "Problem processing line " << lineNumber << " in file " << filename;
             else
-                std::cerr<< "Error: Problem processing line " << lineNumber << " in file " << filename;
+            {
+                std::ostringstream err;
+                err<<"Error:\tProblem processing line " << lineNumber << " in file " << filename;
+                RBOUT(err.str());
+            }
         }
     }
 }
@@ -389,8 +395,10 @@ void execute_file(const fs::path& filename, bool echo_on, bool error_exit)
  * Main application loop.
  * 
  */
-void startInterpreter( bool error_exit )
+void startInterpreter()
 {
+    auto& settings = RbSettings::userSettings();
+
     // If we aren't using MPI, this will be zero.
     // If we are using MPI, it will be zero for the first process.
     int pid = 0;
@@ -479,7 +487,7 @@ void startInterpreter( bool error_exit )
         
         result = interpret(commandLine);
 
-        if (result == 2 and error_exit)
+        if (result == 2 and settings.getErrorExit())
         {
             std::exit(1);
         }
@@ -497,7 +505,7 @@ void startInterpreter( bool error_exit )
     
 }
 
-void startJupyterInterpreter( void )
+void startJupyterInterpreter()
 {
     // If we aren't using MPI, this will be zero.
     // If we are using MPI, it will be zero for the first process.
