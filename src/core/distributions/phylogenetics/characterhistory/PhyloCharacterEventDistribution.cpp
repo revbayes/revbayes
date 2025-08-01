@@ -32,7 +32,7 @@ namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
-PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const std::vector<const TypedDagNode<double>* >& root, const std::vector<TypedDistribution<double>* >& bd, const TypedDagNode<Tree>* t, const TypedDagNode<double> *s, const std::vector< std::string >& n) : TypedDistribution< CharacterHistoryDiscrete >( new CharacterHistoryDiscrete() ),
+PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const TypedDagNode<RbVector<double> >* root, const std::vector<TypedDistribution<double>* >& bd, const TypedDagNode<Tree>* t, const TypedDagNode<double> *s, const std::vector< std::string >& n) : TypedDistribution< CharacterHistoryDiscrete >( new CharacterHistoryDiscrete() ),
     root_values( root ),
     base_distribution( bd ),
     shift_rate( s ),
@@ -47,7 +47,7 @@ PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const std::vec
         throw RbException("You need to provide the same number of base distributions as names in PhyloCharacterEventDistribution.");
     }
 
-    if ( num_values_per_event != root_values.size() )
+    if ( num_values_per_event != root_values->getValue().size() )
     {
         throw RbException("You need to provide the same number of root values as names in PhyloCharacterEventDistribution.");
     }
@@ -60,10 +60,7 @@ PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const std::vec
     addParameter( tree );
     
     // add all the root values
-    for (size_t i=0; i<num_values_per_event; ++i)
-    {
-        addParameter( root_values[i] );
-    }
+    addParameter( root_values );
     
     // add all the base distribution parameters
     for (size_t i=0; i<num_values_per_event; ++i)
@@ -87,7 +84,7 @@ PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const std::vec
     event_values = RbVector< RbVector<double> >( num_values_per_event, RbVector<double>(1,0.0) );
     for (size_t i=0; i<num_values_per_event; ++i)
     {
-        event_values[i][0] = root_values[i]->getValue();
+        event_values[i][0] = root_values->getValue()[i];
     }
 
 }
@@ -175,7 +172,7 @@ double PhyloCharacterEventDistribution::computeNodeProbability(const RevBayesCor
                 TypedDistribution<double>* this_base_distribution = base_distribution[i];
                 if ( this_base_distribution == NULL )
                 {
-                    if ( current_value != root_values[i]->getValue() )
+                    if ( current_value != root_values->getValue()[i] )
                     {
                         ln_prob_node = RbConstants::Double::neginf;
                     }
@@ -230,7 +227,7 @@ double PhyloCharacterEventDistribution::computeStartValue(size_t i, size_t value
     }
     else
     {
-        return root_values[value_index]->getValue();
+        return root_values->getValue()[value_index];
 
         // this should be the same as
         // return event_values[value_index][0];
@@ -253,7 +250,7 @@ double PhyloCharacterEventDistribution::computeStateValue(size_t i, size_t value
         if ( tree->getValue().getNode(node_index).isRoot() == true )
         {
 
-            event_value = root_values[value_index]->getValue();
+            event_value = root_values->getValue()[value_index];
             found = true;
         }
         else if ( branch_histories[node_index].getNumberEvents() > 0 )
@@ -503,12 +500,9 @@ void PhyloCharacterEventDistribution::getAffected(RbOrderedSet<DagNode *> &affec
     }
     
     // if one of the root values has changed (marked as dirty), then we need to pass down this message
-    for (size_t i=0; i<num_values_per_event; ++i)
+    if ( affecter == root_values && this->dag_node != NULL )
     {
-        if ( affecter == root_values[i] && this->dag_node != NULL )
-        {
-            dag_node->initiateGetAffectedNodes( affected );
-        }
+        dag_node->initiateGetAffectedNodes( affected );
     }
 
     
@@ -528,12 +522,9 @@ void PhyloCharacterEventDistribution::keepSpecialization(const DagNode *affecter
     }
     
     // if one of the root values has changed and is now called to be kept (accepted), then we need to pass down this message
-    for (size_t i=0; i<num_values_per_event; ++i)
+    if ( affecter == root_values && this->dag_node != NULL )
     {
-        if ( affecter == root_values[i] && this->dag_node != NULL )
-        {
-            dag_node->keepAffected();
-        }
+        dag_node->keepAffected();
     }
 
     
@@ -554,11 +545,12 @@ void PhyloCharacterEventDistribution::restoreSpecialization(const DagNode *affec
     }
     
     // if one of the root values has changed, then we need to change the first element in the value vectors too
-    for (size_t i=0; i<num_values_per_event; ++i)
+    
+    if ( affecter == root_values )
     {
-        if ( affecter == root_values[i] )
+        for (size_t i=0; i<num_values_per_event; ++i)
         {
-            event_values[i][0] = root_values[i]->getValue();
+            event_values[i][0] = root_values->getValue()[i];
         }
     }
     
@@ -583,12 +575,9 @@ void PhyloCharacterEventDistribution::swapParameterInternal( const DagNode *oldP
     }
     
     // if one of the root values has changed
-    for (size_t i=0; i<num_values_per_event; ++i)
+    if ( oldP == root_values )
     {
-        if ( oldP == root_values[i] )
-        {
-            root_values[i] = static_cast<const TypedDagNode<double>* >( newP );
-        }
+        root_values = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
     
     // if one of the base distribution parameters has changed
@@ -630,11 +619,11 @@ void PhyloCharacterEventDistribution::touchSpecialization(const DagNode *affecte
     }
     
     // if one of the root values has changed, then we need to change the first element in the value vectors too
-    for (size_t i=0; i<num_values_per_event; ++i)
+    if ( affecter == root_values )
     {
-        if ( affecter == root_values[i] )
+        for (size_t i=0; i<num_values_per_event; ++i)
         {
-            event_values[i][0] = root_values[i]->getValue();
+            event_values[i][0] = root_values->getValue()[i];
         }
     }
     

@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class PhyloCharacterEventDistribution : public TypedDistribution< CharacterHistoryDiscrete >, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
         
     public:
-        PhyloCharacterEventDistribution(const std::vector<const TypedDagNode<double>* >& root,
+        PhyloCharacterEventDistribution(const TypedDagNode<RbVector<double> >* root,
                                         const std::vector<TypedDistribution<double>* >& bd,
                                         const TypedDagNode<Tree>* t,
                                         const TypedDagNode<double> *s,
@@ -56,7 +56,7 @@ namespace RevBayesCore {
         void                                                initializeBranchHistories(const TopologyNode &n, size_t nIdx);
         
         // members
-        std::vector<const TypedDagNode<double>* >           root_values;
+        const TypedDagNode<RbVector<double> >*              root_values;
         std::vector<TypedDistribution<double>* >            base_distribution;
         const TypedDagNode<Tree>*                           tree;
         const TypedDagNode<double>*                         shift_rate;
