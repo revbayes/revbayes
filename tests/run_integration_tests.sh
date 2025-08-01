@@ -36,6 +36,8 @@ while echo $1 | grep ^- > /dev/null; do
 Command line options are:
 -h, --help                              : print this help and exit.
 -t, --tests test1 [test2 ...]           : only run these tests
+-mpi BOOLEAN                            : run with mpi (currently disabled)
+-windows BOOLEAN                        : run under windows
 "
         exit
     fi
@@ -66,7 +68,13 @@ done
 #    rb_exec="mpirun -np 4 ${rb_exec}"
 # fi
 
-if [ "$(${rb_exec[@]} -e '1+2' 2>/dev/null)" != "   3" ] ; then
+if [ "$windows" = "true" ] ; then
+    OUTPUT="$(${rb_exec[@]} -e '1+2' 2>/dev/null | dos2unix)"
+else
+    OUTPUT="$(${rb_exec[@]} -e '1+2' 2>/dev/null)"
+fi
+
+if [ "$OUTPUT" != "   3" ] ; then
     echo "RevBayes command '${rb_exec[@]}' seems not to work!"
     exit 102
 fi
@@ -184,8 +192,8 @@ while [  $i -lt ${#tests[@]} ]; do
     #            exp_out_dir="output_expected_mpi"
     #        fi
     #    fi
-    if [ "$windows" = "true" ]; then
-        find output -type f -exec dos2unix {} \;
+    if [ "$windows" = "true" ] && [ -d output ] ; then
+        find output -type f -exec dos2unix {} \; 2>/dev/null
         find output -type f -exec sed -i 's/e-00/e-0/g' {} \;
         find output -type f -exec sed -i 's/e+00/e+0/g' {} \;
     fi

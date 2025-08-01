@@ -277,10 +277,20 @@ jobs:
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'
           echo 'export WINEDEBUG=-all'
-          echo 'if [ "$#" -gt "1" ]; then'
-          echo '  wine ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo 'expr=false'
+          echo 'for arg in "$@" ; do'
+          echo '    if [ "$arg" = "-e" ] ; then'
+          echo '        expr=true'
+          echo '    fi'
+          echo 'done'
+          echo '# Dont do any filepath translation if we are doing "-e"' or there are no arguments
+          echo 'if [ "$expr" = true ] || [ "$#" = 0 ] ; then'
+          echo '  wine ~/local/bin/rb.exe "$@"'
+          echo '# Otherwise use winepath to translate the last argument'
+          echo 'elif [ "$#" -gt "1" ]; then'
+          echo '  wine ~/local/bin/rb.exe "${@:1:$#-1}" "$(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")"'
           echo 'else'
-          echo '  wine ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
+          echo '  wine ~/local/bin/rb.exe "$(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")"'
           echo 'fi' ) > $HOME/wrapper/rb
         chmod +x ${HOME}/wrapper/rb
 
