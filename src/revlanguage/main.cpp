@@ -127,10 +127,13 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     }
     catch (const CLI::ParseError &e)
     {
-        std::cerr << "ERROR: " << e.what() << std::endl;
-        std::cerr << std::endl;
-        
-        show_help(stage1);
+        int rank = 0;
+
+#ifdef RB_MPI
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+
+        if (rank == 0) stage1.exit(e);
 
 #ifdef RB_MPI
         MPI_Finalize();
@@ -166,7 +169,7 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
         if (options.args[0].size() > 0 and options.args[0][0] == '-')
         {
             std::cerr<<"Error: unrecognized option '"<<options.args[0]<<"'\n";
-            std::cerr<<"See --help for more info.\n";
+            std::cerr<<"Run with --help for more information.\n";
             std::exit(1);
         }
         options.filename = options.args[0];
