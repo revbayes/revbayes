@@ -483,7 +483,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     for(auto node: tree_nodes)
     {
 	int index = node->getIndex();
-	if (pmat_dirty_nodes[index])
+	if (pmat_dirty_nodes[index] and not node->isRoot())
 	    assert(dirty_nodes[index]);
     }
 }
@@ -2138,9 +2138,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
     // check for recomputation
     if ( dirty_nodes[node_index] == true )
     {
-        // mark as computed
-        dirty_nodes[node_index] = false;
-
         if ( node.isTip() == true )
         {
             // this is a tip node
@@ -2167,6 +2164,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
             scale(node_index,left_index,right_index);
         }
 
+        // mark as computed
+        assert(not pmat_dirty_nodes[node_index]);
+        dirty_nodes[node_index] = false;
     }
 
 }
@@ -4235,6 +4235,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         rate = this->homogeneous_clock_rate->getValue();
     }
 
+    pmat_dirty_nodes[node_idx] = false;
+
     // 2. Handle the mixture model object case.
     if (mixture_model)
     {
@@ -4346,6 +4348,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         rate = this->homogeneous_clock_rate->getValue();
     }
 
+    pmat_dirty_nodes[node_idx] = false;
+
     // 2. Handle the mixture model object case.
     if (mixture_model)
     {
@@ -4440,10 +4444,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             if ((*it)->isRoot() == false)
             {
                 updateTransitionProbabilityMatrix(node_index);
+                assert(not pmat_dirty_nodes[node_index]);
             }
-
-            // mark as computed
-            pmat_dirty_nodes[node_index] = false;
         }
     }
     
