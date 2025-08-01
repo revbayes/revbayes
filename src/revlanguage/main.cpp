@@ -163,6 +163,12 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     // Fixup: if there are no expressions, the first positional argument is a filename.
     if (options.expressions.empty() and not options.args.empty())
     {
+        if (options.args[0].size() > 0 and options.args[0][0] == '-')
+        {
+            std::cerr<<"Error: unrecognized option '"<<options.args[0]<<"'\n";
+            std::cerr<<"See --help for more info.\n";
+            std::exit(1);
+        }
         options.filename = options.args[0];
         options.args.erase(options.args.begin());
     }
