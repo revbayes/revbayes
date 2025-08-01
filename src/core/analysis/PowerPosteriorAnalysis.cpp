@@ -229,7 +229,7 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, bool one_only)
 {
     // create the directory if necessary
-    if (filename.filename().empty() or filename.filename_is_dot() or filename.filename_is_dot_dot())
+    if (filename.filename().empty() or filename.filename() == "." or filename.filename() == "..")
     {
         throw RbException("Please provide a filename with an extension");
     }
