@@ -32,12 +32,11 @@ namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
-PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const RbVector<const TypedDagNode<double>* >& root, const std::vector<TypedDistribution<double>* >& bd, const TypedDagNode<Tree>* t, const TypedDagNode<double> *s, const std::vector< std::string >& n) : TypedDistribution< CharacterHistoryDiscrete >( NULL ),
+PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const std::vector<const TypedDagNode<double>* >& root, const std::vector<TypedDistribution<double>* >& bd, const TypedDagNode<Tree>* t, const TypedDagNode<double> *s, const std::vector< std::string >& n) : TypedDistribution< CharacterHistoryDiscrete >( new CharacterHistoryDiscrete() ),
     root_values( root ),
     base_distribution( bd ),
     shift_rate( s ),
     tree( t ),
-//    branch_histories( NULL, 1 ),
     names( n )
 {
     
@@ -80,7 +79,16 @@ PhyloCharacterEventDistribution::PhyloCharacterEventDistribution( const RbVector
         }
     }
     
-    event_prior_only = false;
+    // connect the tree to the character history object
+    value->setTree( &tree->getValue() );
+    initializeBranchHistories( tree->getValue().getRoot(), tree->getValue().getRoot().getIndex() );
+    
+    // we also now initialize our value vectors with one element, which is the root category
+    event_values = RbVector< RbVector<double> >( num_values_per_event, RbVector<double>(1,0.0) );
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        event_values[i][0] = root_values[i]->getValue();
+    }
 
 }
 
@@ -466,7 +474,7 @@ void PhyloCharacterEventDistribution::initializeBranchHistories(const TopologyNo
 
 void PhyloCharacterEventDistribution::redrawValue( void )
 {
-//    simulateTree();
+    // this code should be written (TODO: @Priscilla)
 }
 
 
@@ -487,10 +495,22 @@ void PhyloCharacterEventDistribution::setValue(CharacterHistoryDiscrete *v, bool
 void PhyloCharacterEventDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
 {
     
-//    if ( affecter == root_age && this->dag_node != NULL )
-//    {
-//        dag_node->initiateGetAffectedNodes( affected );
-//    }
+    // if the tree has changed, so will have the character history object (which includes the tree)
+    // thus, the value of this distribution has changed and we keep flaggin downstream DAG nodes
+    if ( affecter == tree && this->dag_node != NULL )
+    {
+        dag_node->initiateGetAffectedNodes( affected );
+    }
+    
+    // if one of the root values has changed (marked as dirty), then we need to pass down this message
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        if ( affecter == root_values[i] && this->dag_node != NULL )
+        {
+            dag_node->initiateGetAffectedNodes( affected );
+        }
+    }
+
     
 }
 
@@ -500,10 +520,22 @@ void PhyloCharacterEventDistribution::getAffected(RbOrderedSet<DagNode *> &affec
 void PhyloCharacterEventDistribution::keepSpecialization(const DagNode *affecter)
 {
     
-//    if ( affecter == root_age && this->dag_node != NULL )
-//    {
-//        dag_node->keepAffected();
-//    }
+    // if the tree was marked to be kept (not dirty anymore), so should the character history object as well (which includes the tree)
+    // thus, we keep flagging downstream DAG nodes
+    if ( affecter == tree && this->dag_node != NULL )
+    {
+        dag_node->keepAffected();
+    }
+    
+    // if one of the root values has changed and is now called to be kept (accepted), then we need to pass down this message
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        if ( affecter == root_values[i] && this->dag_node != NULL )
+        {
+            dag_node->keepAffected();
+        }
+    }
+
     
 }
 
@@ -514,49 +546,21 @@ void PhyloCharacterEventDistribution::keepSpecialization(const DagNode *affecter
 void PhyloCharacterEventDistribution::restoreSpecialization(const DagNode *affecter)
 {
     
-////    if ( affecter == root_age && this->dag_node != NULL )
-////    {
-////        value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-////        dag_node->restoreAffected();
-////    }
-//    
-//    if ( affecter == root_speciation && isSpeciationRateConstant() == true )
-//    {
-//        CharacterHistoryContinuous& ch = branch_histories;
-//        size_t num_branches = ch.getNumberBranches();
-//        
-//        double lambda = root_speciation->getValue();
-//        
-//        for (size_t i=0; i<num_branches; ++i)
-//        {
-//            BranchHistoryContinuous& bh = ch[i];
-//            for ( size_t j=0; j<bh.getNumberEvents(); ++j )
-//            {
-//                bh.getEvent(j)->setState(lambda,0);
-//            }
-//            
-//        }
-//        
-//    }
-//    
-//    if ( affecter == root_extinction && isExtinctionRateConstant() == true )
-//    {
-//        CharacterHistoryContinuous& ch = branch_histories;
-//        size_t num_branches = ch.getNumberBranches();
-//        
-//        double mu = root_extinction->getValue();
-//        
-//        for (size_t i=0; i<num_branches; ++i)
-//        {
-//            BranchHistoryContinuous& bh = ch[i];
-//            for ( size_t j=0; j<bh.getNumberEvents(); ++j )
-//            {
-//                bh.getEvent(j)->setState(mu,1);
-//            }
-//            
-//        }
-//        
-//    }
+    // if the tree was marked to be restored, so should the character history object as well (which includes the tree)
+    // thus, we keep sending this message to downstream DAG nodes
+    if ( affecter == tree && this->dag_node != NULL )
+    {
+        dag_node->restoreAffected();
+    }
+    
+    // if one of the root values has changed, then we need to change the first element in the value vectors too
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        if ( affecter == root_values[i] )
+        {
+            event_values[i][0] = root_values[i]->getValue();
+        }
+    }
     
 }
 
@@ -564,45 +568,50 @@ void PhyloCharacterEventDistribution::restoreSpecialization(const DagNode *affec
 /** Swap a parameter of the distribution */
 void PhyloCharacterEventDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
-//    if (oldP == root_age)
-//    {
-//        root_age = static_cast<const TypedDagNode<double>* >( newP );
-//    }
-//    else if (oldP == root_speciation)
-//    {
-//        root_speciation = static_cast<const TypedDagNode<double>* >( newP );
-//    }
-//    else if (oldP == root_extinction)
-//    {
-//        root_extinction = static_cast<const TypedDagNode<double>* >( newP );
-//    }
-//    else if (oldP == shift_rate)
-//    {
-//        shift_rate = static_cast<const TypedDagNode<double>* >( newP );
-//    }
-//    else if (oldP == rho)
-//    {
-//        rho = static_cast<const TypedDagNode<double>* >( newP );
-//    }
-//    
-//    if ( base_distribution_speciation != NULL )
-//    {
-//        const std::vector<const DagNode*>& sp_pars = base_distribution_speciation->getParameters();
-//        bool is_speciation_par = false;
-//        for (std::vector<const DagNode*>::const_iterator it = sp_pars.begin(); it != sp_pars.end(); ++it)
-//        {
-//            if ( *it == oldP )
-//            {
-//                is_speciation_par = true;
-//                break;
-//            }
-//        }
-//        if ( is_speciation_par == true )
-//        {
-//            base_distribution_speciation->swapParameter(oldP,newP);
-//        }
-//        
-//    }
+    if (oldP == tree)
+    {
+        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        
+        // connect the tree to the character history object
+        value->setTree( &tree->getValue() );
+        initializeBranchHistories( tree->getValue().getRoot(), tree->getValue().getRoot().getIndex() );
+    }
+    
+    if (oldP == shift_rate)
+    {
+        shift_rate = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    
+    // if one of the root values has changed
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        if ( oldP == root_values[i] )
+        {
+            root_values[i] = static_cast<const TypedDagNode<double>* >( newP );
+        }
+    }
+    
+    // if one of the base distribution parameters has changed
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        if ( base_distribution[i] != NULL )
+        {
+            const std::vector<const DagNode*>& this_dist_pars = base_distribution[i]->getParameters();
+            bool is_this_dist_par = false;
+            for (std::vector<const DagNode*>::const_iterator it = this_dist_pars.begin(); it != this_dist_pars.end(); ++it)
+            {
+                if ( *it == oldP )
+                {
+                    is_this_dist_par = true;
+                    break;
+                }
+            }
+            if ( is_this_dist_par == true )
+            {
+                base_distribution[i]->swapParameter(oldP,newP);
+            }
+        }
+    }
     
 }
 
@@ -613,53 +622,20 @@ void PhyloCharacterEventDistribution::swapParameterInternal( const DagNode *oldP
 void PhyloCharacterEventDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
-////    if ( affecter == root_age )
-////    {
-////        value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-////        
-////        if ( this->dag_node != NULL )
-////        {
-////            dag_node->touchAffected();
-////        }
-////        
-////    }
-//    
-//    if ( affecter == root_speciation && isSpeciationRateConstant() == true )
-//    {
-//        CharacterHistoryContinuous& ch = branch_histories;
-//        size_t num_branches = ch.getNumberBranches();
-//        
-//        double lambda = root_speciation->getValue();
-//        
-//        for (size_t i=0; i<num_branches; ++i)
-//        {
-//            BranchHistoryContinuous& bh = ch[i];
-//            for ( size_t j=0; j<bh.getNumberEvents(); ++j )
-//            {
-//                bh.getEvent(j)->setState(lambda,0);
-//            }
-//            
-//        }
-//        
-//    }
-//    
-//    if ( affecter == root_extinction && isExtinctionRateConstant() == true )
-//    {
-//        CharacterHistoryContinuous& ch = branch_histories;
-//        size_t num_branches = ch.getNumberBranches();
-//        
-//        double mu = root_extinction->getValue();
-//        
-//        for (size_t i=0; i<num_branches; ++i)
-//        {
-//            BranchHistoryContinuous& bh = ch[i];
-//            for ( size_t j=0; j<bh.getNumberEvents(); ++j )
-//            {
-//                bh.getEvent(j)->setState(mu,1);
-//            }
-//            
-//        }
-//        
-//    }
+    // if the tree has changed and touched/fladded as dirty, so should the character history object as well (which includes the tree)
+    // thus, we keep sending this message to downstream DAG nodes
+    if ( affecter == tree && this->dag_node != NULL )
+    {
+        dag_node->restoreAffected();
+    }
+    
+    // if one of the root values has changed, then we need to change the first element in the value vectors too
+    for (size_t i=0; i<num_values_per_event; ++i)
+    {
+        if ( affecter == root_values[i] )
+        {
+            event_values[i][0] = root_values[i]->getValue();
+        }
+    }
     
 }

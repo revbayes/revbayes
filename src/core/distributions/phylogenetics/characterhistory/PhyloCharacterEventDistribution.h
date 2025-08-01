@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class PhyloCharacterEventDistribution : public TypedDistribution< CharacterHistoryDiscrete >, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
         
     public:
-        PhyloCharacterEventDistribution(const RbVector<const TypedDagNode<double>* >& root,
+        PhyloCharacterEventDistribution(const std::vector<const TypedDagNode<double>* >& root,
                                         const std::vector<TypedDistribution<double>* >& bd,
                                         const TypedDagNode<Tree>* t,
                                         const TypedDagNode<double> *s,
@@ -56,7 +56,7 @@ namespace RevBayesCore {
         void                                                initializeBranchHistories(const TopologyNode &n, size_t nIdx);
         
         // members
-        RbVector<const TypedDagNode<double>* >              root_values;
+        std::vector<const TypedDagNode<double>* >           root_values;
         std::vector<TypedDistribution<double>* >            base_distribution;
         const TypedDagNode<Tree>*                           tree;
         const TypedDagNode<double>*                         shift_rate;
@@ -65,12 +65,7 @@ namespace RevBayesCore {
         size_t                                              num_values_per_event;
 
         RbVector< RbVector<double> >                        event_values;
-//        CharacterHistoryDiscrete                            branch_histories;
-                
-//        double                                              log_tree_topology_prob;                                                                                         //!< Log-transformed tree topology probability (combinatorial constant).
         
-        // only for testing
-        bool                                                event_prior_only;
         
     };
     
