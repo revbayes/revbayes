@@ -8,6 +8,8 @@
 #ifndef REVBAYES_LOADER_H_
 #define REVBAYES_LOADER_H_
 
+#define BOOST_DLL_USE_STD_FS
+
 #include "DistributionHandler.h"
 
 #include <string>
