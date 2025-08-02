@@ -85,7 +85,6 @@ TreeSummary::TreeSummary( std::vector<TraceTree* > t, bool c ) :
  *
  * \return A new copy of the process.
  */
-
 TreeSummary* TreeSummary::clone(void) const
 {
 
@@ -171,7 +170,6 @@ void TreeSummary::mapParameters( Tree &tree, bool verbose ) const
     }
 
 }
-
 
 
 /*
@@ -277,7 +275,7 @@ void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramInde
                         }
                         else
                         {
-                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
+                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation();
                         }
 
                     }
@@ -553,7 +551,7 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
                     // check if this parameter exists
                     if ( params.size() <= paramIndex )
                     {
-                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation(); 
+                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation();
                     }
 
                     std::string tmp = params[paramIndex];
@@ -864,8 +862,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 }
 
 
-
-double TreeSummary::cladeProbability(const Clade &c, bool verbose )
+double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 {
     summarize(verbose);
 
@@ -938,96 +935,40 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 }
 
 
-MatrixReal TreeSummary::computeConnectivity(double credible_interval_size, const std::string &m, bool verbose)
+MatrixReal TreeSummary::computeConnectivity( double credible_interval_size, const std::string &m, bool verbose )
 {
-    summarize( verbose );
-    std::vector<Tree*> unique_trees;
-//    std::vector< std::vector<RbBitSet>* > unique_trees_bs;
-    std::vector<size_t> sample_count;
-    NewickConverter converter;
-    double total_prob = 0;
-    double total_samples = sampleSize(true);
-    for (auto& [newick, count]: tree_samples | views::reverse)
-    {
-        double freq = count;
-        double p = freq/total_samples;
-        total_prob += p;
-
-        sample_count.push_back( freq );
-
-        Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->suppressOutdegreeOneNodes(true);
-        unique_trees.push_back( current_tree );
-        
-//        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
-//        current_tree->getRoot().getAllClades(*this_clade_bs, current_tree->getNumberOfTips(), true);
-//        unique_trees_bs.push_back( this_clade_bs );
-        
-        if ( total_prob >= credible_interval_size )
-        {
-            break;
-        }
-
-    }
+    std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, verbose);
+    MatrixReal connectivity_matrix = MatrixReal( unique_trees.size(), unique_trees.size(), 0.0 );
     
-    size_t num_trees = unique_trees.size();
-    MatrixReal connectivity_matrix = MatrixReal(num_trees, num_trees, 0.0);
-    for (size_t i=0; i<num_trees; ++i)
+    for (size_t i = 0; i < unique_trees.size(); ++i)
     {
-        
-        Tree* a = unique_trees[i];
-        
-        for (size_t j=i+1; j<num_trees; ++j)
+        for (size_t j = i+1; j < unique_trees.size(); ++j)
         {
-            
-            Tree* b = unique_trees[j];
-            
-//            std::vector<RbBitSet>* a = unique_trees_bs[i];
-//            std::vector<RbBitSet>* b = unique_trees_bs[j];
-            bool con = TreeUtilities::isConnectedNNI(*a, *b);
-
+            bool con = TreeUtilities::isConnectedNNI( unique_trees[i], unique_trees[j] );
             connectivity_matrix[i][j] = (con ? 1 : 2);
             connectivity_matrix[j][i] = (con ? 1 : 2);
         }
-    }
-    for (size_t i=0; i<unique_trees.size(); ++i)
-    {
-        Tree* tmp = unique_trees[i];
-//        std::vector<RbBitSet>* this_clade_bs = unique_trees_bs[i];
-
-        delete tmp;
-//        delete this_clade_bs;
     }
 
     return connectivity_matrix;
 }
 
 
-
 double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa, bool verbose )
 {
-    summarize( verbose );
-    NewickConverter converter;
-    double total_prob = 0;
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
     double total_samples = sampleSize(true);
     double entropy = 0.0;
-    /*double tree_count = 0.0;*/
-    for (auto& [newick, count]: tree_samples | views::reverse )
+    
+    for (size_t i = 0; i < credible_set.size(); ++i)
     {
-        double freq = count;
-        double p = freq/total_samples;
-        /*double p = freq/(total_samples);*/
-        total_prob += p;
+        double freq = credible_set[i].second;
+        double p = freq / total_samples;
         entropy += (p * log(p));
-        if ( total_prob >= credible_interval_size )
-        {
-            break;
-        }
-
     }
 
     /* This calculation is directly from AMP / Jeremy's paper. */
-    double ln_ntopologies = RbMath::lnFactorial(2*num_taxa - 5) - RbMath::lnFactorial(num_taxa - 3) - (num_taxa-3)*RbConstants::LN2;
+    double ln_ntopologies = RbMath::lnFactorial(2 * num_taxa - 5) - RbMath::lnFactorial(num_taxa - 3) - (num_taxa - 3) * RbConstants::LN2;
     entropy += ln_ntopologies;
 
     return entropy;
@@ -1036,69 +977,48 @@ double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa,
 
 std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_interval_size, bool verbose )
 {
-    summarize( verbose );
-    std::vector<Tree*> unique_trees;
-    std::vector< std::vector<RbBitSet>* > unique_trees_bs;
-    std::vector<size_t> sample_count;
-    NewickConverter converter;
-    double total_prob = 0;
-    double total_samples = sampleSize(true);
-    for (auto& [newick, count]: tree_samples | views::reverse)
-    {
-        double freq = count;
-        double p = freq/total_samples;
-        total_prob += p;
-
-        sample_count.push_back( freq );
-
-        Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->suppressOutdegreeOneNodes(true);
-        unique_trees.push_back( current_tree );
-        
-        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
-        current_tree->getRoot().getAllClades(*this_clade_bs, current_tree->getNumberOfTips(), true);
-        unique_trees_bs.push_back( this_clade_bs );
-        
-        if ( total_prob >= credible_interval_size )
-        {
-            break;
-        }
-
-    }
-    
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
+    std::vector< std::vector<RbBitSet>* > unique_trees_bs( credible_set.size() );
+    std::vector<size_t> sample_count( credible_set.size() );
     std::vector<double> rf_distances;
-    for (size_t i=0; i<unique_trees.size(); ++i)
+    
+    for (size_t i = 0; i < credible_set.size(); ++i)
     {
+        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
+        credible_set[i].first.getRoot().getAllClades(*this_clade_bs, credible_set[i].first.getNumberOfTips(), true);
+        unique_trees_bs[i] = this_clade_bs;
+        sample_count[i] = credible_set[i].second;
+        
         // The unique tree occurs sample_count[i] times.
         // Here we are treating them as coming in one continuous block, which is annoying.
-
-        for(int rep = 0;rep<sample_count[i];rep++)
+        
+        for (size_t rep = 0; rep < sample_count[i]; rep++)
         {
             // first we need to compare the tree to subsequent copies of itself
-            for (size_t k=rep+1; k<sample_count[i]; ++k )
+            for (size_t k = rep+1; k < sample_count[i]; ++k)
             {
                 rf_distances.push_back( 0.0 );
             }
-
+            
             // then we compare it to copies of other trees
-            for (size_t j=i+1; j<unique_trees.size(); ++j)
+            for (size_t j = i+1; j < credible_set.size(); ++j)
             {
                 std::vector<RbBitSet>* a = unique_trees_bs[i];
                 std::vector<RbBitSet>* b = unique_trees_bs[j];
                 double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
-
-                for (size_t k=0; k<sample_count[j]; ++k )
+                
+                for (size_t k = 0; k < sample_count[j]; ++k)
+                {
                     rf_distances.push_back( rf );
+                }
             }
         }
     }
-
-    for (size_t i=0; i<unique_trees.size(); ++i)
+    
+    // delete the pointers
+    for (size_t i = 0; i < credible_set.size(); ++i)
     {
-        Tree* tmp = unique_trees[i];
         std::vector<RbBitSet>* this_clade_bs = unique_trees_bs[i];
-
-        delete tmp;
         delete this_clade_bs;
     }
 
@@ -1108,7 +1028,6 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
 
 std::vector<double> TreeSummary::computeTreeLengths( void )
 {
-
     std::vector<double> tree_lengths;
 
     for(auto& trace: traces)
@@ -1216,6 +1135,43 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 }
 
 
+std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees( double credible_interval_size, bool verbose )
+{
+    summarize( verbose );
+
+    std::vector< std::pair<Tree, std::int64_t> > unique_trees;
+    NewickConverter converter;
+    double total_prob = 0;
+    double total_samples = sampleSize(true);
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    
+    for (auto& [newick, count]: tree_samples | views::reverse)
+    {
+        double freq = count;
+        double p = freq/total_samples;
+        double include_prob = (credible_interval_size - total_prob) / p;
+        
+        if ( include_prob > rng->uniform01() )
+        {
+            Tree* current_tree = converter.convertFromNewick( newick );
+            current_tree->suppressOutdegreeOneNodes(true);
+            std::pair<Tree, std::int64_t> tree_to_add( *current_tree, count );
+            unique_trees.push_back( tree_to_add );
+            delete current_tree;
+        }
+        
+        total_prob += p;
+        
+        if ( total_prob > credible_interval_size )
+        {
+            break;
+        }
+    }
+
+    return unique_trees;
+}
+
+
 std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 {
     summarize( verbose );
@@ -1246,10 +1202,12 @@ std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool 
         return iter->second;
 }
 
+
 double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
 {
     return getTopologyCount(tree,verbose) / (double)sampleSize(true);
 }
+
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non_trivial_only, bool verbose )
 {
@@ -1266,7 +1224,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non
     {
 
         double freq = count;
-        double p    = freq/total_samples;
+        double p = freq/total_samples;
 
         // first we check if this clade is above the minimum level
         if ( p < min_clade_prob )
@@ -1274,7 +1232,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non
             break;
         }
 
-        // now lets actually construct the clade
+        // now let's actually construct the clade
         Clade current_clade(clade.first, ordered_taxa);
         current_clade.setMrca(clade.second);
 
@@ -1290,27 +1248,12 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non
 
 std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bool verbose )
 {
-    summarize( verbose );
-
-    std::vector<Tree> unique_trees;
-    NewickConverter converter;
-    double total_prob = 0;
-    double total_samples = sampleSize(true);
-    for (auto& [newick, count]: tree_samples | views::reverse)
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
+    std::vector<Tree> unique_trees( credible_set.size() );
+    
+    for (size_t i = 0; i < credible_set.size(); i++)
     {
-        double freq = count;
-        double p =freq/total_samples;
-        total_prob += p;
-
-        Tree* current_tree = converter.convertFromNewick( newick );
-        current_tree->suppressOutdegreeOneNodes(true);
-        unique_trees.push_back( *current_tree );
-        delete current_tree;
-        if ( total_prob >= credible_interval_size )
-        {
-            break;
-        }
-
+        unique_trees[i] = credible_set[i].first;
     }
 
     return unique_trees;
@@ -1342,25 +1285,22 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 
 
 
-bool TreeSummary::isCoveredInInterval(const Tree &tree, double ci_size, bool verbose)
+bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval_size, bool verbose)
 {
-
     summarize( verbose );
 
-
-    RandomNumberGenerator *rng = GLOBAL_RNG;
-
     std::string newick = tree.getPlainNewickRepresentation();
-
-    double totalSamples = sampleSize(true);
-    double totalProb = 0.0;
+    double total_prob = 0.0;
+    double total_samples = sampleSize(true);
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    
     for (auto& [current_sample, count]: tree_samples | views::reverse)
     {
-
-        double p = count/totalSamples;
-//        double include_prob = p / (1.0-totalProb) * (ci_size - totalProb) / (1.0-totalProb);
-        double include_prob = (ci_size-totalProb)/p;
-//        double include_prob = p * ci_size;
+        double freq = count;
+        double p = freq/total_samples;
+        // double include_prob = p / (1.0 - total_prob) * (credible_interval_size - total_prob) / (1.0 - total_prob);
+        double include_prob = (credible_interval_size - total_prob) / p;
+        // double include_prob = p * credible_interval_size;
 
         if ( include_prob > rng->uniform01() )
         {
@@ -1371,14 +1311,12 @@ bool TreeSummary::isCoveredInInterval(const Tree &tree, double ci_size, bool ver
 
         }
 
-        totalProb += p;
+        total_prob += p;
 
-
-        if ( totalProb >= ci_size )
+        if ( total_prob >= credible_interval_size )
         {
             break;
         }
-
     }
 
     return false;
@@ -1402,7 +1340,6 @@ bool TreeSummary::isDirty(void) const
 
     return false;
 }
-
 
 
 double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose )
@@ -1480,8 +1417,6 @@ double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose
         }
     }
 
-
-
     // finish progress bar
     if ( verbose )
     {
@@ -1490,6 +1425,7 @@ double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose
 
     return num_matches / double(count);
 }
+
 
 double TreeSummary::maxdiff( bool verbose )
 {
@@ -1847,8 +1783,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double minCladeProbability,
 }
 
 
-
-void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize, bool verbose)
+void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_size, bool verbose)
 {
     summarize( verbose );
 
@@ -1880,51 +1815,57 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credibleIntervalSize,
     o << s;
     o << std::endl;
     o << "----------------------------------------------------------------" << std::endl;
-    double totalSamples = sampleSize(true);
-    double totalProb = 0.0;
+    
+    double total_prob = 0;
+    double total_samples = sampleSize(true);
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    
     for (auto& [newick, count]: tree_samples | views::reverse)
     {
         double freq = count;
-        double p = freq/totalSamples;
-        totalProb += p;
+        double p = freq/total_samples;
+        double include_prob = (credible_interval_size - total_prob) / p;
+        
+        if ( include_prob > rng->uniform01() )
+        {
+            ss.str(std::string());
+            ss << total_prob;
+            s = ss.str();
+            StringUtilities::fillWithSpaces(s, 16, true);
+            o << s;
 
-        ss.str(std::string());
-        ss << totalProb;
-        s = ss.str();
-        StringUtilities::fillWithSpaces(s, 16, true);
-        o << s;
+            ss.str(std::string());
+            ss << freq;
+            s = ss.str();
+            StringUtilities::fillWithSpaces(s, 16, true);
+            o << s;
 
-        ss.str(std::string());
-        ss << freq;
-        s = ss.str();
-        StringUtilities::fillWithSpaces(s, 16, true);
-        o << s;
+            ss.str(std::string());
+            ss << p;
+            s = ss.str();
+            StringUtilities::fillWithSpaces(s, 16, true);
+            o << s;
 
-        ss.str(std::string());
-        ss << p;
-        s = ss.str();
-        StringUtilities::fillWithSpaces(s, 16, true);
-        o << s;
+            /* ss.str(std::string());
+             ss << it->getEss();
+             s = ss.str();
+             StringUtilities::fillWithSpaces(s, 16, true);
+             o << s; */
 
-        /*ss.str(std::string());
-         ss << it->getEss();
-         s = ss.str();
-         StringUtilities::fillWithSpaces(s, 16, true);
-         o << s;*/
+            o << newick;
+            o << std::endl;
+        }
+        
+        total_prob += p;
 
-        o << newick;
-        o << std::endl;
-
-        if ( totalProb >= credibleIntervalSize )
+        if ( total_prob >= credible_interval_size )
         {
             break;
         }
-
     }
 
     o << std::endl;
     o << std::endl;
-
 }
 
 
@@ -1932,6 +1873,7 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 {
     outgroup = c;
 }
+
 
 std::int64_t TreeSummary::sampleSize(bool post) const
 {
@@ -1955,6 +1897,7 @@ std::int64_t TreeSummary::splitCount(const Split &n) const
     else
         return iter->second;
 }
+
 
 double TreeSummary::splitFrequency(const Split &n) const
 {
