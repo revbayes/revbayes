@@ -1,4 +1,4 @@
-# RevBayes 1.3.2 (unreleased)
+# RevBayes 1.4.0 (unreleased)
 
 ## Backwards-incompatible changes
 
@@ -10,36 +10,56 @@
 
 ## Infrastructure
 
-# RevBayes 1.3.1 (August 2, 2025)
+# RevBayes 1.3.1 (Aug 7, 2025)
 
 ## Backwards-incompatible changes
+  * Change the distribution name of the sampled-speciation birth-death model from `dnSBBDP` to `dnSSBDP` (#714).
 
 ## Features
+  * Methods / arguments
+      - Add an `.nbranches( )` method to `Tree` (#759).
+      - Add a method for calculating the standard error of marginal likelihood estimates (#779).
+      - Add a nanoseconds option to `time( )` (#796).
+  * Distributions
+      - Add a topologically constrained distribution for the state-dependent speciation and extinction process (#693).
+      - Allow nonzero `rho` values in FBD analyses without extant tips (#788).
 
 ## Bug fixes
+  * Member procedures
+      - Fix `.getTopologyFrequency( )` behavior for tree traces (#750).
+      - Fix `.resolveMultifurcations( )` behavior in edge cases (#771, #780).
+  * Nexus I/O
+      - Make sure `writeNexus()` can handle `BranchLengthTree` vectors (#758).
+      - Fix parsing of the `STATELABELS` block in Nexus files (#760).
+      - Allow reading Nexus files with an `ASSUMPTIONS` block (#764).
+  * MPI / MC^3
+      - Fix segfault in MPI + MC^3 (#763).
+      - Fix logging and progress monitoring for `.runOneStone()` + MPI (#782).
+  * Moves
+      - Fix argument name mismatch in `mvUpDownSlide` (#766).
+      - Fix `mvEllipticalSliceSamplingSimple` to not require strict equality of likelihoods (#773).
+      - Reject tree moves if there are no nodes for them to operate on (#798, #802).
+  * Misc
+      - Fix and extend TensorPhylo, stochastic mapping, and biogeography models (#693).
+      - Synchronize dirty flagging for nodes and transition probability matrices (#773).
+      - Fix caching to avoid crashes when using `dnReversibleJumpMixture` (#773).
+      - Fix posterior predictive simulations (#778).
+  * Partial
+      - Avoid subscripting by `-1` in `dnAutocorrelatedEvent` (#773).
 
 ## Documentation improvements
+  * Basic data types: `Integer`, `Natural`, `Probability`, `Real` (#714).
+  * Birth-death models: `dnCBDSP`, `dnCDBDP`, `dnSSBDP` (#714).
+  * Marginal likelihood estimators: `pathSampler`, `steppingStoneSampler` (#779).
 
 ## Infrastructure
-
-- Fix `TraceTree.getTopologyFrequency()` (#750)
-- Make sure `writeNexus()` can handle `BranchLengthTree` vectors (#758)
-- Fix parsing of the `STATELABELS` block in Nexus files (#760)
-- Add an `.nbranches()` method to `Tree` (#759)
-- Fix segfault in MPI + MC^3 (#763)
-- Fix updownslidemove (#766)
-- Don't print operator summary in coalescent tests, and only do 1 generation. (#770)
-- Fix resolve multifurcations crash (#771)
-- Allow reading Nexus files with an `ASSUMPTIONS` block (#764)
-- Update dlls (#751)
-- Patch for `.resolveMultifurcations()` (#780)
-- Fix logging and progress monitoring for `.runOneStone()` + MPI (#782)
-- Help files for birth death processes and data types (#714)
-- Allow nonzero rho values in FBD analyses without extant tips (#788)
-- DRAFT Stochmap tp dirty merge (#693)
-- Fix pps (#778)
-- Add a method for calculating the standard error of marginal likelihood estimates (#779)
-- added nanoseconds option in time() (#796)
+  * Update DLLs to allow running RevStudio on Windows (#751).
+  * Don't print operator summaries in coalescent tests, and only run 1 generation (#770).
+  * Enable testing with assertions to detect out-of-bounds indices in `std::vector` (#773).
+  * Don't skip remaining scripts in a test if one fails, and combine error message from multiple failing scripts in a test (#773).
+  * Allow specifying a required exit code to allow/require failure (#773).
+  * Fix check for missing output files (#773).
+  * Make test runner output clearer and more informative (#773).
 
 ## New contributors
   * @prilau made their first contribution in #796.
