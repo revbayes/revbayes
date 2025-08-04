@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include "Argument.h"
 #include "ArgumentRule.h"
@@ -21,11 +22,10 @@
 #include "RevVariable.h"
 #include "RlBoolean.h"
 #include "RlFunction.h"
-#include <boost/filesystem/path.hpp>
 
 using namespace RevLanguage;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 /** Default constructor */
 Func_source::Func_source( void ) : Procedure()
