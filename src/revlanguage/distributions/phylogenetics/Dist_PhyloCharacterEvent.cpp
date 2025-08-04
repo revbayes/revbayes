@@ -174,9 +174,9 @@ const MemberRules& Dist_PhyloCharacterEvent::getParameterRules(void) const
         member_rules.push_back( new ArgumentRule( "tree"                , Tree::getClassTypeSpec()                                          , "The tree on which we let the character events occur."    , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "eventRate"           , RealPos::getClassTypeSpec()                                       , "The rate of character events."                           , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "rootValues"          , ModelVector<Real>::getClassTypeSpec()                             , "The values at the root (also for character 0)."          , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
-        member_rules.push_back( new ArgumentRule( "baseDistributions"   , WorkspaceVector<TypedDistribution<Real> >::getClassTypeSpec()     , "The prior distribution for the speciation rates."        , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "baseDistributions"   , WorkspaceVector<Distribution>::getClassTypeSpec()                 , "The prior distribution for the speciation rates."        , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "names"               , ModelVector<RlString>::getClassTypeSpec()                         , "The names of the variables used for retrieval."          , ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
+        
         rules_set = true;
     }
     
