@@ -433,19 +433,28 @@ void PhyloCharacterEventDistribution::initializeBranchHistories(const TopologyNo
     if ( node.isRoot() == false )
     {
         CharacterHistoryDiscrete& ch = branch_histories;
-        const BranchHistoryDiscrete& bh = ch[nIdx];
-        const std::vector<CharacterEvent*>& parents = bh.getParentCharacters();
-        const std::vector<CharacterEvent*>& children = bh.getParentCharacters();
+        BranchHistoryDiscrete& bh = ch[nIdx];
+        std::vector<CharacterEvent*>& parents = bh.getParentCharacters();
+        std::vector<CharacterEvent*>& children = bh.getParentCharacters();
     
         if ( parents.size() > 0 )
         {
             CharacterEvent *ce = parents[0];
             static_cast<CharacterEventDiscrete*>( ce )->setState( 0 );
         }
+        else
+        {
+            parents.push_back( new CharacterEventDiscrete(0, 0, node.getParent().getAge() ) );
+        }
+        
         if ( children.size() > 0 )
         {
             CharacterEvent *ce = children[0];
             static_cast<CharacterEventDiscrete*>( ce )->setState( 0 );
+        }
+        else
+        {
+            children.push_back( new CharacterEventDiscrete(0, 0, node.getAge() ) );
         }
     }
     
@@ -461,8 +470,7 @@ void PhyloCharacterEventDistribution::initializeBranchHistories(const TopologyNo
         initializeBranchHistories( left, left_index );
         const TopologyNode &right = node.getChild(1);
         size_t right_index = right.getIndex();
-        initializeBranchHistories( right, right_index );
-        
+        initializeBranchHistories( right, right_index );        
         
     }
     
