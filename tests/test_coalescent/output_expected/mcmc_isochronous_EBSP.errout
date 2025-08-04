@@ -24,4 +24,3 @@
    This simulation runs 2 independent replicates.
    The simulator uses 84 different moves in a random move schedule with 500.6 moves per iteration
    
-   Error:	getPrevLnProbability: no previous probability!

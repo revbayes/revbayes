@@ -1260,7 +1260,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &fn)
     
     // are we reading a single file or are we reading the contents of a directory?
     bool readingDirectory = false;
-    if ( fn.filename().empty() or fn.filename_is_dot() or fn.filename_is_dot_dot())
+    if ( fn.filename().empty() or fn.filename() == "." or fn.filename() == "..")
         readingDirectory = true;
     if (readingDirectory == true)
         RBOUT( "Recursively reading the contents of a directory\n" );
@@ -1634,7 +1634,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
     
     // are we reading a single file or are we reading the contents of a directory?
     bool readingDirectory = false;
-    if ( fn.filename().empty() or fn.filename_is_dot() or fn.filename_is_dot_dot())
+    if ( fn.filename().empty() or fn.filename() == "." or fn.filename() == "..")
     {
         readingDirectory = true;
     }

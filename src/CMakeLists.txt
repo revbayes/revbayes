@@ -179,7 +179,6 @@ COMPONENTS regex
 program_options
 thread
 system
-filesystem
 date_time
 serialization REQUIRED)
 message("Boost configuration results:")
