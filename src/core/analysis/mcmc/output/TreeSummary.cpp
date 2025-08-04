@@ -717,7 +717,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             double saFreq = sampled_ancestor_counts[n->getTaxon()];
 
             // annotate sampled ancestor prob
-            if ( ((n->isTip() && n->isFossil()) || saFreq > 0) && report.sampled_ancestor_probs )
+            if ( (n->isFossil() || saFreq > 0) && report.sampled_ancestor_probs )
             {
                 n->addNodeParameter("sampled_ancestor", saFreq / totalSamples);
             }
@@ -836,7 +836,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
             if ( clock == true )
             {
-                if ( n->isTip() == false || ( ( n->isFossil() || upper != lower) && !n->isSampledAncestorTip() ) )
+                if ( n->isTip() == false || n->isFossil() || upper != lower )
                 {
                     std::string label = "age_" + StringUtilities::toString( (int)(report.node_ages_HPD * 100) ) + "%_HPD";
                     n->addNodeParameter(label, interval);
