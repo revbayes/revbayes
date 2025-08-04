@@ -16,25 +16,27 @@
   * Change the distribution name of the sampled-speciation birth-death model from `dnSBBDP` to `dnSSBDP` (#714).
 
 ## Features
+  * Distributions
+      - Add a topologically constrained distribution for the state-dependent speciation and extinction process (#693).
+      - Allow nonzero `rho` values in FBD analyses without extant tips (#788).
   * Methods / arguments
       - Add an `.nbranches( )` method to `Tree` (#759).
       - Add a method for calculating the standard error of marginal likelihood estimates (#779).
       - Add a nanoseconds option to `time( )` (#796).
-  * Distributions
-      - Add a topologically constrained distribution for the state-dependent speciation and extinction process (#693).
-      - Allow nonzero `rho` values in FBD analyses without extant tips (#788).
+  * Interface
+      - Nicer printing of member method lists (#800).
 
 ## Bug fixes
   * Member procedures
       - Fix `.getTopologyFrequency( )` behavior for tree traces (#750).
       - Fix `.resolveMultifurcations( )` behavior in edge cases (#771, #780).
   * Nexus I/O
-      - Make sure `writeNexus()` can handle `BranchLengthTree` vectors (#758).
+      - Make sure `writeNexus( )` can handle `BranchLengthTree` vectors (#758).
       - Fix parsing of the `STATELABELS` block in Nexus files (#760).
       - Allow reading Nexus files with an `ASSUMPTIONS` block (#764).
   * MPI / MC^3
       - Fix segfault in MPI + MC^3 (#763).
-      - Fix logging and progress monitoring for `.runOneStone()` + MPI (#782).
+      - Fix logging and progress monitoring for `.runOneStone( )` + MPI (#782).
   * Moves
       - Fix argument name mismatch in `mvUpDownSlide` (#766).
       - Fix `mvEllipticalSliceSamplingSimple` to not require strict equality of likelihoods (#773).
@@ -51,6 +53,7 @@
   * Basic data types: `Integer`, `Natural`, `Probability`, `Real` (#714).
   * Birth-death models: `dnCBDSP`, `dnCDBDP`, `dnSSBDP` (#714).
   * Marginal likelihood estimators: `pathSampler`, `steppingStoneSampler` (#779).
+  * Expand documentation for `TraceTree` (#800).
 
 ## Infrastructure
   * Update DLLs to allow running RevStudio on Windows (#751).
