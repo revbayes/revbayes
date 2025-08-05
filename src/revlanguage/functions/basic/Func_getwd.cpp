@@ -1,5 +1,6 @@
 #include <fstream>
 #include <vector>
+#include <filesystem>
 
 #include "Func_getwd.h"
 #include "RbSettings.h"
@@ -12,12 +13,9 @@
 #include "RevVariable.h"
 #include "RlFunction.h"
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-
 using namespace RevLanguage;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 /** Default constructor */
 Func_getwd::Func_getwd( void ) : Procedure()
