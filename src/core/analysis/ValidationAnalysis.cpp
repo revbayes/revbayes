@@ -25,6 +25,7 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StoppingRule.h"
+#include "StochasticNode.h"
 #include "StringUtilities.h"
 
 
@@ -74,23 +75,27 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
         
             // get the model of the analysis
             Model* current_model = current_analysis->getModel().clone();
-        
+            
             // get the DAG nodes of the model
             std::vector<DagNode *> current_ordered_nodes = current_model->getOrderedStochasticNodes();
-        
-            for (size_t j = 0; j < current_ordered_nodes.size(); ++j)
+            
+            for (auto& node: current_ordered_nodes)
             {
-                DagNode *the_node = current_ordered_nodes[j];
-                            
-                if ( the_node->isStochastic() == true )
+                if ( node->isClamped() )
                 {
-                    the_node->redraw( SimulationCondition::VALIDATION );
+                    // unclamp stochastic nodes in the model copy and hide them to prevent StochasticVariableMonitor from logging them
+                    node->setHidden(true);
+                    auto stoch_node = dynamic_cast<StochasticNodeBase *>(node);
+                    stoch_node->unclamp();
+                }
+                
+                if ( node->isStochastic() == true )
+                {
+                    node->redraw( SimulationCondition::VALIDATION );
                     
                     // we need to store the new simulated data
-                    the_node->writeToFile(sim_directory_name);
-                    
+                    node->writeToFile(sim_directory_name);
                 }
-            
             }
         
             // now set the model of the current analysis
