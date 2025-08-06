@@ -41,6 +41,7 @@ ValidationAnalysis::ValidationAnalysis( const MonteCarloAnalysis &m, size_t n, c
     sampler->removeMonitors();
     
     StochasticVariableMonitor mntr = StochasticVariableMonitor(10, output_directory / "posterior_samples.var", "\t");
+    mntr.setPrintVersion( false );
     sampler->addMonitor( mntr );
     
     size_t run_block_start = size_t(floor( (double(pid)   / num_processes ) * num_runs) );
