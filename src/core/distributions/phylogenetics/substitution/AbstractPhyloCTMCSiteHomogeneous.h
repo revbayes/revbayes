@@ -43,7 +43,7 @@ namespace RevBayesCore {
      * - updateTransitionProbabilities()
      *
      *
-     * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) 
+     * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >)
      * and can be compressed.
      *
      * The partial likelihoods are stored in a c-style array called partialLikelihoods. The dimension are
@@ -64,7 +64,7 @@ namespace RevBayesCore {
      *
      * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node,
      * but not for site rates.
-     * We also use twice as much memory because we store the partial likelihood along each branch and not only 
+     * We also use twice as much memory because we store the partial likelihood along each branch and not only
      * for each internal node.
      * This gives us a speed improvement during MCMC proposal in the order of a factor 2.
      *
@@ -107,6 +107,7 @@ namespace RevBayesCore {
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
         virtual void                                                        recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates); //!< Simulate the ancestral states for a given node, conditional on its ancestor's state and the tip data
         virtual bool                                                        recursivelyDrawStochasticCharacterMap(const TopologyNode &node, std::vector<std::string>& character_histories, std::vector<std::vector<charType> >& start_states, std::vector<std::vector<charType> >& end_states, size_t site, bool use_simmap_default); //!< Simulate the history of evolution for a given site on a given branch, conditional on start and end states
+        virtual void                                                        redrawValue(SimulationCondition c);
         virtual void                                                        redrawValue(void);
         void                                                                reInitialized(void);
         void                                                                setMcmcMode(bool tf);                                                                       //!< Change the likelihood computation to or from MCMC mode.
@@ -184,14 +185,14 @@ namespace RevBayesCore {
         size_t                                                              num_site_mixtures;
         size_t                                                              num_matrices = 1;
         const TypedDagNode<Tree>*                                           tau;
-        
+
         std::vector<TransitionProbabilityMatrix>                            transition_prob_matrices;
         std::vector<TransitionProbabilityMatrix>                            pmatrices;
         std::vector<size_t>                                                 active_pmatrices;
         std::vector<bool>                                                   pmat_changed_nodes;
         mutable std::vector<bool>                                           pmat_dirty_nodes;
         std::optional<std::vector<bool>>                                    prev_pmat_dirty_nodes;
-        
+
         // offsets for nodes
         size_t                                                              activePmatrixOffset;
         size_t                                                              pmatNodeOffset;
@@ -281,9 +282,9 @@ namespace RevBayesCore {
         virtual void                                                        scale(size_t i, size_t l, size_t r, size_t m);
         virtual void                                                        simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
         virtual void                                                        updateTransitionProbabilityMatrix(size_t node_idx);
-        
-        
-        
+
+
+
     };
 
 }
@@ -341,7 +342,7 @@ gap_match_clamped( gapmatch )
     nodeOffset                  =  num_site_mixtures*pattern_block_size*num_chars;
     mixtureOffset               =  pattern_block_size*num_chars;
     siteOffset                  =  num_chars;
-    
+
     activePmatrixOffset         =  num_nodes * num_site_mixtures;
     pmatNodeOffset              =  num_site_mixtures;
     active_pmatrices            =  std::vector<size_t>(num_nodes, 0);
@@ -437,7 +438,7 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     nodeOffset                  =  n.nodeOffset;
     mixtureOffset               =  n.mixtureOffset;
     siteOffset                  =  n.siteOffset;
-    
+
     activePmatrixOffset         =  n.activePmatrixOffset;
     pmatNodeOffset              =  n.pmatNodeOffset;
     active_pmatrices            =  n.active_pmatrices;
@@ -654,12 +655,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     {
         mark_ambiguous_and_missing_as_gap(*value, site_indices, nodes);
     }
-    
+
     if (treatUnknownAsGap)
     {
         mark_unknown_as_gap(*value, site_indices, nodes);
     }
-    
+
     // set the global variable if we use ambiguous characters (besides gaps)
     using_ambiguous_characters = has_ambiguous_nongap_characters(*value, site_indices, nodes);
 
@@ -689,7 +690,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     pattern += c.getStringValue();
                 }
             }
-            
+
             // only add this pattern if not all are missing
             if ( all_missing == false )
             {
@@ -711,19 +712,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 {
                     // create a new pattern frequency counter for this pattern
                     pattern_counts.push_back(1);
-                    
+
                     // insert this pattern with the corresponding index in the map
                     patterns.insert( std::pair<std::string,size_t>(pattern,num_patterns) );
-                    
+
                     // remember which pattern this site uses
                     site_pattern[site] = num_patterns;
-                    
+
                     // increase the pattern counter
                     num_patterns++;
-                    
+
                     // add the index of the site to our pattern-index vector
                     indexOfSitePattern.push_back( site );
-                    
+
                     // flag that this site is unique (or the first occurence of this pattern)
                     unique[site] = true;
                 }
@@ -791,7 +792,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                     {
                         throw RbException("Problem with state index in PhyloCTMC!");
                     }
-                    
+
                 }
                 else
                 {
@@ -815,7 +816,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     invariant_site_index.clear();
     invariant_site_index.resize( pattern_block_size );
     size_t length = char_matrix.size();
-        
+
     for (size_t i=0; i<pattern_block_size; ++i)
     {
         bool inv = true;
@@ -860,7 +861,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         else
         {
             std::uint64_t c = char_matrix[taxon_index][i];
-            
+
             if ( c < 0 || c >= this->num_chars )
             {
                 throw RbException() << "Possible bug: Invar sites with ambiguous chars at site " << i << " out of bounds! Site was " << (gap_matrix[taxon_index][i] ? "Gap" : "No Gap");
@@ -879,9 +880,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
         }
 
         site_invariant[i] = inv;
-        
+
     }
-    
+
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
 
@@ -896,7 +897,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     // That means we should probabily call this function as a job,
     // where a job is defined as computing the lnProbability for a subset of the data (block)
     // Sebastian: this call is very slow; a lot of work happens in nextCycle()
-    
+
 
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us
@@ -1215,13 +1216,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
 {
 
 	// if we already have ancestral states, don't make new ones
-    
+
     // MJL 181028: Disabling this flag to allow multiple monitors to work for same dnPhyloCTMC (e.g. ancestral states + stochastic mapping)
 //	if ( has_ancestral_states == true )
 //    {
 //		return;
 //    }
-    
+
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
     // get working variables
@@ -1241,7 +1242,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
 
     // clear the container for sampling the site-rates
     sampled_site_mixtures.resize(this->num_sites);
-    
+
     for (size_t i = 0; i < this->num_sites; ++i)
 //    for (size_t i = pattern_block_start; i < this->pattern_block_end; ++i)
     {
@@ -2057,7 +2058,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
     // for now, always sample the clamped character
-    
+
     // create a vector with the correct site indices
     // some of the sites may have been excluded
     std::vector<size_t> site_indices = getIncludedSiteIndices();
@@ -2177,7 +2178,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fireTreeChangeEve
 
     // call a recursive flagging of all node above (closer to the root) and including this node
     recursivelyFlagNodeDirty( n );
-    
+
     if (m != RevBayesCore::TreeChangeEventMessage::TOPOLOGY)
     {
         flagNodeDirtyPmatrix(n.getIndex());
@@ -2189,14 +2190,14 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fireTreeChangeEve
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::flagNodeDirtyPmatrix(size_t node_idx)
 {
-    
+
     pmat_dirty_nodes[node_idx] = true;
     if ( pmat_changed_nodes[node_idx] == false )
     {
         active_pmatrices[node_idx] = (active_pmatrices[node_idx] == 0 ? 1 : 0);
         pmat_changed_nodes[node_idx] = true;
     }
-    
+
 }
 
 
@@ -2354,7 +2355,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
     {
         (*it) = false;
     }
-    
+
     for (std::vector<bool>::iterator it = this->pmat_changed_nodes.begin(); it != this->pmat_changed_nodes.end(); ++it)
     {
         (*it) = false;
@@ -2427,13 +2428,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursiveMarginal
     }
 }
 
-
-
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void )
 {
+    // by default, delegate to the redraw under MCMC conditions
+    this->redrawValue( SimulationCondition::MCMC );
+}
 
-    bool do_mask = this->dag_node != NULL && this->dag_node->isClamped() && gap_match_clamped;
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( SimulationCondition c )
+{
+
+    bool do_mask = this->dag_node != NULL && ( ( this->dag_node->isClamped() && gap_match_clamped ) || c == SimulationCondition::VALIDATION);
     std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
     std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(tau->getValue().getNumberOfTips(), std::vector<bool>());
     // we cannot use the stored gap matrix because it uses the pattern compression
@@ -2584,12 +2591,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
             changed_nodes[index] = true;
         }
     }
-    
+
     for (std::vector<bool>::iterator it = pmat_dirty_nodes.begin(); it != pmat_dirty_nodes.end(); ++it)
     {
         (*it) = true;
     }
-    
+
     for (size_t index = 0; index < pmat_changed_nodes.size(); ++index)
     {
         if ( pmat_changed_nodes[index] == false )
@@ -2671,7 +2678,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     }
 
     perNodeSiteLogScalingFactors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(pattern_block_size, 0.0) ) );
-    
+
     activePmatrixOffset         =  num_nodes * num_site_mixtures;
     pmatNodeOffset              =  num_site_mixtures;
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
@@ -3555,7 +3562,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
     } // end-for over all mixtures
 
     double prob_invariant = getPInv();
-    
+
     double oneMinusPInv = 1.0 - prob_invariant;
     std::vector< size_t >::const_iterator patterns = this->pattern_counts.begin();
     if ( prob_invariant > 0.0 )
@@ -3595,7 +3602,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
         for (size_t site = 0; site < pattern_block_size; ++site, ++patterns)
         {
 
-           
+
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
                 if ( this->site_invariant[site] == true )
@@ -3625,7 +3632,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                     {
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
-                    
+
                     rv[site] = log( prob_invariant * ftotal  + oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
                 }
                 else
@@ -3636,7 +3643,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
             }
 
         }
-        
+
     }
     else
     {
@@ -4175,12 +4182,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
                 changed_nodes[index] = true;
             }
         }
-        
+
         for (std::vector<bool>::iterator it = pmat_dirty_nodes.begin(); it != pmat_dirty_nodes.end(); ++it)
         {
             (*it) = true;
         }
-        
+
         // flip the active transition probability matrices pointers
         for (size_t index = 0; index < pmat_changed_nodes.size(); ++index)
         {
@@ -4332,9 +4339,9 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionProbabilityMatrix(size_t node_idx)
 {
     const TopologyNode* node = tau->getValue().getNodes()[node_idx];
-    
+
     if (node->isRoot()) throw RbException("dnPhyloCTMC called updateTransitionProbabilityMatrix for the root node\n");
-    
+
     size_t pmat_offset = this->active_pmatrices[node_idx] * this->activePmatrixOffset + node_idx * this->pmatNodeOffset;
 
     // 1. Get the clock rate for the branch
@@ -4393,7 +4400,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
                 {
                     r = this->site_rates->getValue()[j];
                 }
-                
+
                 rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->pmatrices[pmat_offset + j * this->num_matrices + matrix] );
             }
         }
@@ -4420,7 +4427,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             {
                 r = this->site_rates->getValue()[j];
             }
-            
+
             rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->pmatrices[pmat_offset + j] );
         }
     }
@@ -4433,9 +4440,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionProbabilityMatrices( void )
 {
-    
+
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
-        
+
     for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
     {
         size_t node_index = (*it)->getIndex();
@@ -4448,7 +4455,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             }
         }
     }
-    
+
 }
 
 #endif
