@@ -49,7 +49,6 @@ endif
 
 boost_modules = [ 'program_options',
                   'thread',
-                  'filesystem',
                   'date_time',
                   'serialization']
 

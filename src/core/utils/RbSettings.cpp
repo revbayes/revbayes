@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 #include <boost/lexical_cast.hpp>
+#include <cassert>
 
 #include "RbException.h"
 #include "RbFileManager.h"
