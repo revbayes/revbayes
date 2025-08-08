@@ -261,7 +261,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacte
   bool internal = static_cast<const RlBoolean &>(storeInternalNodes->getRevObject()).getValue();
   bool gapmatch = static_cast<const RlBoolean &>(gapMatchClamped->getRevObject()).getValue();
 
-  if (!(dt == "Binary" || dt == "Restriction" || dt == "Standard" || dt == "ExpandedStandard") && code != "all")
+  if (!(dt == "Binary" || dt == "Restriction" || dt == "Standard" || dt == "ExpandedStandardState") && code != "all")
   {
     throw RbException("Ascertainment bias correction only supported with Standard, Expanded Standard and Binary/Restriction datatypes");
   }
@@ -341,7 +341,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::AbstractHomologousDiscreteCharacte
 
     return setDistParameters(dist);
   }
-  else if (dt == "ExpandedStandard")
+  else if (dt == "ExpandedStandardState")
   {
     // we get the number of states from the rates matrix
     int nChars = computeNumberOfStates();
@@ -567,6 +567,7 @@ const MemberRules &Dist_phyloCTMC::getParameterRules(void) const
     options.push_back("PoMo");
     options.push_back("Protein");
     options.push_back("Standard");
+    options.push_back("ExpandedStandardState");
     options.push_back("NaturalNumbers");
     options.push_back("Binary");
     options.push_back("Restriction");
