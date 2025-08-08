@@ -406,8 +406,8 @@ std::string newickEscape(const std::string in_label)
     for (size_t i = 0; i < in_label.size(); ++i) {
         char c = in_label[i];
 
-        // first check for any illegal characters
-        if (c == '\'' || c == '(' || c == ')' ||
+        // first check for any illegal characters or underscore
+        if (c == '\'' || c == '(' || c == ')' || c =='_' ||
             c == '[' || c ==']' || c == ':' || c == ';' || c ==',') {
             needs_quoting = true;
             // check for single quote

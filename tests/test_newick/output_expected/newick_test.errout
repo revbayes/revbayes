@@ -1,0 +1,15 @@
+
+RevBayes version (1.3.0)
+Build from newick_escaping (rapture-4177-ga16f53) on Fri Aug  8 11:51:49 CDT 2025
+
+Visit the website www.RevBayes.com for more information about RevBayes.
+
+RevBayes is free software released under the GPL license, version 3. Type 'license()' for details.
+
+To quit RevBayes type 'quit()' or 'q()'.
+
+
+> source("scripts/newick_test.Rev")
+   Processing file "scripts/newick_test.Rev"
+   (('a_b'[&index=3],('a''b'[&index=6],abc[&index=1])[&index=8])[&index=9],('a()[],; :'[&index=5],(a_b[&index=2],'a''''b'[&index=7])[&index=10])[&index=11],'a
+   (b'[&index=4])[&index=12];
