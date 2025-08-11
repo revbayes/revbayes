@@ -366,17 +366,20 @@ double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa,
 std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_interval_size, bool verbose )
 {
     std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
-    std::vector< std::vector<RbBitSet>* > unique_trees_bs( credible_set.size() );
+    std::vector< std::unique_ptr<std::vector<RbBitSet>> > unique_trees_bs(credible_set.size());
     std::vector<size_t> sample_count( credible_set.size() );
     std::vector<double> rf_distances;
     
+    // populate the vector of clade bitsets for all trees
     for (size_t i = 0; i < credible_set.size(); ++i)
     {
-        std::vector<RbBitSet>* this_clade_bs = new std::vector<RbBitSet>();
-        credible_set[i].first.getRoot().getAllClades(*this_clade_bs, credible_set[i].first.getNumberOfTips(), true);
-        unique_trees_bs[i] = this_clade_bs;
+        unique_trees_bs[i] = std::make_unique<std::vector<RbBitSet>>();
+        credible_set[i].first.getRoot().getAllClades(*(unique_trees_bs[i]), credible_set[i].first.getNumberOfTips(), true);
         sample_count[i] = credible_set[i].second;
-        
+    }
+    
+    for (size_t i = 0; i < credible_set.size(); ++i)
+    {
         // The unique tree occurs sample_count[i] times.
         // Here we are treating them as coming in one continuous block, which is annoying.
         
@@ -391,9 +394,7 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
             // then we compare it to copies of other trees
             for (size_t j = i+1; j < credible_set.size(); ++j)
             {
-                std::vector<RbBitSet>* a = unique_trees_bs[i];
-                std::vector<RbBitSet>* b = unique_trees_bs[j];
-                double rf = TreeUtilities::computeRobinsonFouldDistance(*a, *b, true);
+                double rf = TreeUtilities::computeRobinsonFouldDistance(*(unique_trees_bs[i]), *(unique_trees_bs[j]), true);
                 
                 for (size_t k = 0; k < sample_count[j]; ++k)
                 {
@@ -401,13 +402,6 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
                 }
             }
         }
-    }
-    
-    // delete the pointers
-    for (size_t i = 0; i < credible_set.size(); ++i)
-    {
-        std::vector<RbBitSet>* this_clade_bs = unique_trees_bs[i];
-        delete this_clade_bs;
     }
 
     return rf_distances;
