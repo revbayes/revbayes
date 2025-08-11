@@ -258,11 +258,11 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double clade_CI       = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool non_trivial_only  = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        double min_clade_prob = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool non_trivial_only = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
-        std::vector<RevBayesCore::Clade> clades = this->value->getUniqueClades(clade_CI, non_trivial_only, verbose);
+        std::vector<RevBayesCore::Clade> clades = this->value->getUniqueClades(min_clade_prob, non_trivial_only, verbose);
         
         ModelVector<Clade> *rl_clades = new ModelVector<Clade>;
         for (size_t i=0; i<clades.size(); ++i)
@@ -276,7 +276,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double tree_CI       = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         std::vector<RevBayesCore::Tree> trees = this->value->getUniqueTrees(tree_CI, verbose);
@@ -464,7 +464,7 @@ void TraceTree::initMethods( void )
 
     ArgumentRules* summarizeArgRules = new ArgumentRules();
     summarizeArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set to print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
-    summarizeArgRules->push_back( new ArgumentRule("minCladeProbability", Probability::getClassTypeSpec(), "The minimum clade probability used when printing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.05)) );
+    summarizeArgRules->push_back( new ArgumentRule("minCladeProbability", Probability::getClassTypeSpec(), "Print only clades with a posterior probability above this threshold.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.05)) );
     summarizeArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "summarize", RlUtils::Void, summarizeArgRules) );
     
@@ -506,9 +506,9 @@ void TraceTree::initMethods( void )
     this->methods.addFunction( new MemberProcedure( "getTrees", ModelVector<Tree>::getClassTypeSpec(), get_trees_arg_rules) );
     
     ArgumentRules* get_unique_clades_arg_rules = new ArgumentRules();
-    get_unique_clades_arg_rules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    get_unique_clades_arg_rules->push_back( new ArgumentRule("minCladeProbability", Probability::getClassTypeSpec(), "List only clades with a posterior probability above this threshold.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.05)) );
     get_unique_clades_arg_rules->push_back( new ArgumentRule("nonTrivial", RlBoolean::getClassTypeSpec(), "Retrieve only the non-trivial clades.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    get_unique_clades_arg_rules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Inlcude only non-trivial clades.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    get_unique_clades_arg_rules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "getUniqueClades", ModelVector<Clade>::getClassTypeSpec(), get_unique_clades_arg_rules) );
     
     ArgumentRules* getTopologyFrequencyArgRules = new ArgumentRules();

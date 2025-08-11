@@ -80,7 +80,7 @@ namespace RevBayesCore {
         std::vector< std::pair<Tree, std::int64_t> >   getCredibleSetOfTrees(double credible_interval_size, bool verbose=true);
         std::int64_t                                   getTopologyCount(const Tree &t, bool verbose);
         double                                         getTopologyFrequency(const Tree &t, bool verbose);
-        std::vector<Clade>                             getUniqueClades(double ci=0.95, bool non_trivial_only=true, bool verbose=true);
+        std::vector<Clade>                             getUniqueClades(double min_clade_probability=0.05, bool non_trivial_only=true, bool verbose=true);
         std::vector<Tree>                              getUniqueTrees(double credible_interval_size=0.95, bool verbose=true);
         bool                                           isClock(void) const;
         bool                                           isCoveredInInterval(const std::string &v, double credible_interval_size, bool verbose);
@@ -91,7 +91,7 @@ namespace RevBayesCore {
         Tree*                                          mapTree(AnnotationReport report, bool verbose);
         Tree*                                          mccTree(AnnotationReport report, bool verbose);
         Tree*                                          mrTree(AnnotationReport report, double cutoff, bool verbose);
-        void                                           printCladeSummary(std::ostream& o, double minP=0.05, bool verbose=true);
+        void                                           printCladeSummary(std::ostream& o, double min_clade_probability=0.05, bool verbose=true);
         void                                           printTreeSummary(std::ostream& o, double credible_interval_size=0.95, bool verbose=true);
         std::int64_t                                   sampleSize(bool post = false) const;
         void                                           setOutgroup(const Clade &c);
