@@ -366,14 +366,14 @@ double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa,
 std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_interval_size, bool verbose )
 {
     std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
-    std::vector< std::unique_ptr<std::vector<RbBitSet>> > unique_trees_bs(credible_set.size());
+    std::vector< std::unique_ptr< std::vector<RbBitSet> > > unique_trees_bs(credible_set.size());
     std::vector<size_t> sample_count( credible_set.size() );
     std::vector<double> rf_distances;
     
     // populate the vector of clade bitsets for all trees
     for (size_t i = 0; i < credible_set.size(); ++i)
     {
-        unique_trees_bs[i] = std::make_unique<std::vector<RbBitSet>>();
+        unique_trees_bs[i] = std::make_unique< std::vector<RbBitSet> >();
         credible_set[i].first.getRoot().getAllClades(*(unique_trees_bs[i]), credible_set[i].first.getNumberOfTips(), true);
         sample_count[i] = credible_set[i].second;
     }
@@ -1120,7 +1120,7 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_siz
         if ( include_prob > rng->uniform01() )
         {
             ss.str(std::string());
-            ss << total_prob;
+            ss << total_prob + p;
             s = ss.str();
             StringUtilities::fillWithSpaces(s, 16, true);
             o << s;
