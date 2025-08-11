@@ -500,7 +500,7 @@ double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool ve
 }
 
 
-std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non_trivial_only, bool verbose )
+std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, bool non_trivial_only, bool verbose )
 {
     summarize( verbose );
 
@@ -518,7 +518,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non
         double p = freq/total_samples;
 
         // first we check if this clade is above the minimum level
-        if ( p < min_clade_prob )
+        if ( p < min_clade_probability )
         {
             break;
         }
@@ -986,7 +986,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 }
 
 
-void TreeSummary::printCladeSummary(std::ostream &o, double minCladeProbability, bool verbose)
+void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probability, bool verbose)
 {
     summarize( verbose );
 
@@ -1032,7 +1032,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double minCladeProbability,
         double p = freq/totalSamples;
 
 
-        if ( p < minCladeProbability )
+        if ( p < min_clade_probability )
         {
             break;
         }
