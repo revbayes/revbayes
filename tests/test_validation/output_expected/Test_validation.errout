@@ -1,0 +1,45 @@
+   Successfully read one character matrix from file 'data/bears_morphology.nex'
+   
+   Running burn-in phase of 10 Monte Carlo samplers each for 100 iterations.
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Running validation analysis ...
+Sim 1 / 10		
+Sim 2 / 10		
+Sim 3 / 10		
+Sim 4 / 10		
+Sim 5 / 10		
+Sim 6 / 10		
+Sim 7 / 10		
+Sim 8 / 10		
+Sim 9 / 10		
+Sim 10 / 10		
+
+Summarizing analysis ...
+
+The validation analysis ran 10 simulations to validate the implementation.
+This analysis used a 0.9 credible interval.
+Coverage frequencies should be between 0.7 and 1 in 95% of the simulations.
+
+Coverage frequencies of parameters in validation analysis:
+==========================================================
+br_len_lambda       		0.8
+phylogeny           		0
+
+
+Summarizing analysis ...
+
+The validation analysis ran 10 simulations to validate the implementation.
+This analysis used a 0.5 credible interval.
+Coverage frequencies should be between 0.2 and 0.8 in 95% of the simulations.
+
+Coverage frequencies of parameters in validation analysis:
+==========================================================
+br_len_lambda       		0.6
+phylogeny           		0
+
