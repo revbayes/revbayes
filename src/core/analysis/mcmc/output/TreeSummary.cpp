@@ -323,25 +323,6 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 }
 
 
-MatrixReal TreeSummary::computeConnectivity( double credible_interval_size, const std::string &m, bool verbose )
-{
-    std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, verbose);
-    MatrixReal connectivity_matrix = MatrixReal( unique_trees.size(), unique_trees.size(), 0.0 );
-    
-    for (size_t i = 0; i < unique_trees.size(); ++i)
-    {
-        for (size_t j = i+1; j < unique_trees.size(); ++j)
-        {
-            bool con = TreeUtilities::isConnectedNNI( unique_trees[i], unique_trees[j] );
-            connectivity_matrix[i][j] = (con ? 1 : 2);
-            connectivity_matrix[j][i] = (con ? 1 : 2);
-        }
-    }
-
-    return connectivity_matrix;
-}
-
-
 double TreeSummary::computeEntropy( double credible_interval_size, bool verbose )
 {
     std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, false);
