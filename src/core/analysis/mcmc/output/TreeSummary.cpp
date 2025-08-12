@@ -342,9 +342,10 @@ MatrixReal TreeSummary::computeConnectivity( double credible_interval_size, cons
 }
 
 
-double TreeSummary::computeEntropy( double credible_interval_size, int num_taxa, bool verbose )
+double TreeSummary::computeEntropy( double credible_interval_size, bool verbose )
 {
     std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
+    size_t num_taxa = traces.front()->objectAt(0).getTaxa().size();
     double total_samples = sampleSize(true);
     double entropy = 0.0;
     

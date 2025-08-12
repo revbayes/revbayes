@@ -135,11 +135,7 @@ print("\n#######################################################################
 print("# Test .computeEntropy(), .computePairwiseRFDistances(), .computeTreeLengths() #")
 print("################################################################################\n")
 
-tax_num = treetrace.getTree(1).ntips()
-print("Entropy of the entire post-burnin sample: " + treetrace.computeEntropy(1, tax_num) + "\n")
-
-###### It makes no sense to require a `num_taxa` argument. The method should
-###### automatically extract this variable from the trace.
+print("Entropy of the entire post-burnin sample: " + treetrace.computeEntropy(1) + "\n")
 
 print("Extract all unique trees, coerce the resulting vector to a new tree")
 print("trace, and compute pairwise RF distances between its elements:\n")
