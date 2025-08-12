@@ -173,6 +173,10 @@ TRUE
 Unique clades with a posterior probability of at least 0.05:
    [ {B, Hm, Hp, N, S}, {Hm, Hp}, {B, S}, {Hm, Hp, N}, {B, Hm, Hp, S}, {Hm, Hp, S}, {N, S}, {B, N}, {Hm, Hp, N, S}, {B, N, S}, {B, Hm, Hp}, {B, Hm, Hp, N} ]
 
+List the trivial clades as well:
+   [ {B, Hm, Hp, N, O, S}, {S}, {O}, {N}, {Hp}, {Hm}, {B}, {B, Hm, Hp, N, S}, {Hm, Hp}, {B, S}, {Hm, Hp, N}, {B, Hm, Hp, S}, {Hm, Hp, S}, {N, S}, {B, N}, {Hm,
+   Hp, N, S}, {B, N, S}, {B, Hm, Hp}, {B, Hm, Hp, N} ]
+
 Unique topologies in this trace: 59
 
 ################################################################################
