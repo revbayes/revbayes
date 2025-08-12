@@ -347,23 +347,18 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         for (size_t i=this->value->getBurnin(); i<trees.size(); ++i)
         {
-            // default age
-            double age = -1;
-            
             const RevBayesCore::TopologyNode* mrca = trees[i].getRoot().getMrca( this_clade, strict );
             if ( mrca != NULL )
             {
                 if ( stem == false )
                 {
-                    age = mrca->getAge();
+                    ages.push_back( mrca->getAge() );
                 }
                 else if ( mrca->isRoot() == false )
                 {
-                    age = mrca->getParent().getAge();
+                    ages.push_back( mrca->getParent().getAge() );
                 }
             }
-            
-            ages.push_back( age );
         }
         
         return new RevVariable( new ModelVector<Real>( ages ) );
