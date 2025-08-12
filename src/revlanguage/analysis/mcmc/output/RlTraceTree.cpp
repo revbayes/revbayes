@@ -404,6 +404,7 @@ const std::string& TraceTree::getClassType(void)
     return rev_type;
 }
 
+
 /** Get class type spec describing type of object */
 
 const TypeSpec& TraceTree::getClassTypeSpec(void)
@@ -413,7 +414,6 @@ const TypeSpec& TraceTree::getClassTypeSpec(void)
     
     return rev_type_spec;
 }
-
 
 
 /** Return member rules (no members) */
@@ -453,11 +453,8 @@ void TraceTree::initMethods( void )
     std::vector<TypeSpec> burninTypes;
     burninTypes.push_back( Probability::getClassTypeSpec() );
     burninTypes.push_back( Integer::getClassTypeSpec() );
-    burninArgRules->push_back( new ArgumentRule("burnin",      burninTypes, "The fraction/number of samples to disregard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    burninArgRules->push_back( new ArgumentRule("burnin", burninTypes, "The fraction/number of samples to disregard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     this->methods.addFunction( new MemberProcedure( "setBurnin", RlUtils::Void, burninArgRules) );
-    
-    ArgumentRules* getBurninArgRules = new ArgumentRules();
-    this->methods.addFunction( new MemberProcedure( "getBurnin", Natural::getClassTypeSpec(), getBurninArgRules) );
     
     ArgumentRules* outgroupArgRules = new ArgumentRules();
     outgroupArgRules->push_back( new ArgumentRule("clade", Clade::getClassTypeSpec(), "The (monophyletic) outgroup.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
@@ -478,52 +475,11 @@ void TraceTree::initMethods( void )
     jointCladeProbArgRules->push_back( new ArgumentRule("clades", ModelVector<Clade>::getClassTypeSpec(), "The set of clades whose joint probability is to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     jointCladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "jointCladeProbability", Probability::getClassTypeSpec(), jointCladeProbArgRules) );
-   
-    ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();
-    getNumberSamplesArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
-    this->methods.addFunction( new MemberProcedure( "getNumberSamples", Natural::getClassTypeSpec(), getNumberSamplesArgRules) );
     
-    ArgumentRules* getSizeArgRules = new ArgumentRules();
-    getSizeArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
-    this->methods.addFunction( new MemberProcedure( "size", Natural::getClassTypeSpec(), getSizeArgRules) );
-    
-    ArgumentRules* getTreeArgRules = new ArgumentRules();
-    getTreeArgRules->push_back( new ArgumentRule("index", Natural::getClassTypeSpec(), "The index of the tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    getTreeArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Use post-burnin indices?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
-    this->methods.addFunction( new MemberProcedure( "getTree", Tree::getClassTypeSpec(), getTreeArgRules) );
-    
-    ArgumentRules* getUniqueTreesArgRules = new ArgumentRules();
-    getUniqueTreesArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
-    getUniqueTreesArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "getUniqueTrees", ModelVector<Tree>::getClassTypeSpec(), getUniqueTreesArgRules) );
-    
-    ArgumentRules* get_tmrca_arg_rules = new ArgumentRules();
-    get_tmrca_arg_rules->push_back( new ArgumentRule("clade",  Clade::getClassTypeSpec(), "A clade object containing the taxa whose TMRCA (time to the most recent common ancestor) is to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    get_tmrca_arg_rules->push_back( new ArgumentRule("strict", RlBoolean::getClassTypeSpec(), "Do not report the TMRCA of given taxa for those trees in which the taxa do not form an exclusive clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    get_tmrca_arg_rules->push_back( new ArgumentRule("stem",   RlBoolean::getClassTypeSpec(), "Do we want the age of the stem or crown of this clade?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
-    this->methods.addFunction( new MemberProcedure("getTMRCA", ModelVector<Real>::getClassTypeSpec(), get_tmrca_arg_rules) );
-    
-    ArgumentRules* get_trees_arg_rules = new ArgumentRules();
-    this->methods.addFunction( new MemberProcedure( "getTrees", ModelVector<Tree>::getClassTypeSpec(), get_trees_arg_rules) );
-    
-    ArgumentRules* get_unique_clades_arg_rules = new ArgumentRules();
-    get_unique_clades_arg_rules->push_back( new ArgumentRule("minCladeProbability", Probability::getClassTypeSpec(), "List only clades with a probability above this threshold.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.05)) );
-    get_unique_clades_arg_rules->push_back( new ArgumentRule("nonTrivial", RlBoolean::getClassTypeSpec(), "Retrieve only the non-trivial clades.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    get_unique_clades_arg_rules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "getUniqueClades", ModelVector<Clade>::getClassTypeSpec(), get_unique_clades_arg_rules) );
-    
-    ArgumentRules* getTopologyFrequencyArgRules = new ArgumentRules();
-    getTopologyFrequencyArgRules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    getTopologyFrequencyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "getTopologyFrequency", RealPos::getClassTypeSpec(), getTopologyFrequencyArgRules) );
-    
-    
-    ArgumentRules* is_covered_arg_rules = new ArgumentRules();
-    is_covered_arg_rules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    is_covered_arg_rules->push_back( new ArgumentRule("ci_size", Probability::getClassTypeSpec(), "The size of the credible interval.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
-    is_covered_arg_rules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "isTreeCovered", RlBoolean::getClassTypeSpec(), is_covered_arg_rules) );
-    
+    ArgumentRules* computeEntropyArgRules = new ArgumentRules();
+    computeEntropyArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    computeEntropyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "computeEntropy", RealPos::getClassTypeSpec(), computeEntropyArgRules) );
     
     ArgumentRules* computePairwiseRFDistanceArgRules = new ArgumentRules();
     computePairwiseRFDistanceArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
@@ -533,10 +489,52 @@ void TraceTree::initMethods( void )
     ArgumentRules* computeTreeLengthsArgRules = new ArgumentRules();
     this->methods.addFunction( new MemberProcedure( "computeTreeLengths", ModelVector<RealPos>::getClassTypeSpec(), computeTreeLengthsArgRules) );
     
-    ArgumentRules* computeEntropyArgRules = new ArgumentRules();
-    computeEntropyArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
-    computeEntropyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
-    this->methods.addFunction( new MemberProcedure( "computeEntropy", RealPos::getClassTypeSpec(), computeEntropyArgRules) );
+    ArgumentRules* getSizeArgRules = new ArgumentRules();
+    getSizeArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure( "size", Natural::getClassTypeSpec(), getSizeArgRules) );
+   
+    ArgumentRules* getNumberSamplesArgRules = new ArgumentRules();
+    getNumberSamplesArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Get the post-burnin number of samples?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure( "getNumberSamples", Natural::getClassTypeSpec(), getNumberSamplesArgRules) );
+    
+    ArgumentRules* getBurninArgRules = new ArgumentRules();
+    this->methods.addFunction( new MemberProcedure( "getBurnin", Natural::getClassTypeSpec(), getBurninArgRules) );
+    
+    ArgumentRules* getTreeArgRules = new ArgumentRules();
+    getTreeArgRules->push_back( new ArgumentRule("index", Natural::getClassTypeSpec(), "The index of the tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    getTreeArgRules->push_back( new ArgumentRule("post", RlBoolean::getClassTypeSpec(), "Use post-burnin indices?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure( "getTree", Tree::getClassTypeSpec(), getTreeArgRules) );
+    
+    ArgumentRules* getTopologyFrequencyArgRules = new ArgumentRules();
+    getTopologyFrequencyArgRules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    getTopologyFrequencyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "getTopologyFrequency", RealPos::getClassTypeSpec(), getTopologyFrequencyArgRules) );
+    
+    ArgumentRules* getUniqueCladesArgRules = new ArgumentRules();
+    getUniqueCladesArgRules->push_back( new ArgumentRule("minCladeProbability", Probability::getClassTypeSpec(), "List only clades with a probability above this threshold.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.05)) );
+    getUniqueCladesArgRules->push_back( new ArgumentRule("nonTrivial", RlBoolean::getClassTypeSpec(), "Retrieve only the non-trivial clades.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    getUniqueCladesArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "getUniqueClades", ModelVector<Clade>::getClassTypeSpec(), getUniqueCladesArgRules) );
+    
+    ArgumentRules* getUniqueTreesArgRules = new ArgumentRules();
+    getUniqueTreesArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    getUniqueTreesArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "getUniqueTrees", ModelVector<Tree>::getClassTypeSpec(), getUniqueTreesArgRules) );
+    
+    ArgumentRules* isCoveredArgRules = new ArgumentRules();
+    isCoveredArgRules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    isCoveredArgRules->push_back( new ArgumentRule("ci_size", Probability::getClassTypeSpec(), "The size of the credible interval.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    isCoveredArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    this->methods.addFunction( new MemberProcedure( "isTreeCovered", RlBoolean::getClassTypeSpec(), isCoveredArgRules) );
+    
+    ArgumentRules* getTmrcaArgRules = new ArgumentRules();
+    getTmrcaArgRules->push_back( new ArgumentRule("clade",  Clade::getClassTypeSpec(), "A clade object containing the taxa whose TMRCA (time to the most recent common ancestor) is to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    getTmrcaArgRules->push_back( new ArgumentRule("strict", RlBoolean::getClassTypeSpec(), "Do not report the TMRCA of given taxa for those trees in which the taxa do not form an exclusive clade.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    getTmrcaArgRules->push_back( new ArgumentRule("stem",   RlBoolean::getClassTypeSpec(), "Do we want the age of the stem or crown of this clade?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    this->methods.addFunction( new MemberProcedure("getTMRCA", ModelVector<Real>::getClassTypeSpec(), getTmrcaArgRules) );
+    
+    ArgumentRules* getTreesArgRules = new ArgumentRules();
+    this->methods.addFunction( new MemberProcedure( "getTrees", ModelVector<Tree>::getClassTypeSpec(), getTreesArgRules) );
     
 }
 
@@ -547,20 +545,4 @@ void TraceTree::printValue(std::ostream &o, bool user) const
 {
     
     o << "TreeTrace (" << getValue().getFileName() << ")";
-}
-
-
-/** Set a member variable */
-
-void TraceTree::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
-{
-    
-    if ( name == "xxx")
-    {
-        
-    }
-    else
-    {
-        RevObject::setConstParameter(name, var);
-    }
 }
