@@ -130,10 +130,12 @@ print("# Test .getUniqueClades() and .getUniqueTrees() #")
 print("#################################################\n")
 
 print("Unique clades with a posterior probability of at least 0.05:")
-treetrace.getUniqueClades(0.05, verbose=FALSE)
+treetrace.getUniqueClades(0.05, nonTrivial=TRUE, verbose=FALSE)
 print("")
 
-###### The `nonTrivial` argument is broken!
+print("List the trivial clades as well:")
+treetrace.getUniqueClades(0.05, nonTrivial=FALSE, verbose=FALSE)
+print("")
 
 print("Unique topologies in this trace: " + treetrace.getUniqueTrees(1).size())
 

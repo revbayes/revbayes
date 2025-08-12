@@ -115,7 +115,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
 
-        const RevBayesCore::Clade &c    = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::Clade &c = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
 
         this->value->setOutgroup(c);
 
@@ -126,7 +126,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double treeCI       = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        double treeCI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
         double minCladeProb = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
@@ -139,7 +139,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        const RevBayesCore::Clade &c    = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::Clade &c = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         double p = this->value->cladeProbability( c, verbose );
@@ -151,7 +151,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        const RevBayesCore::RbVector<RevBayesCore::Clade> &c    = static_cast<const ModelVector<Clade> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<RevBayesCore::Clade> &c = static_cast<const ModelVector<Clade> &>( args[0].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         double p = this->value->jointCladeProbability( c, verbose );
@@ -163,9 +163,9 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double tree_CI  = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        int num_taxa    = (int)static_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool verbose    = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+        double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        int num_taxa   = (int)static_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool verbose   = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
         double entropy = this->value->computeEntropy(tree_CI, num_taxa, verbose);
         
@@ -175,8 +175,8 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double tree_CI         = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool verbose           = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool verbose   = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         std::vector<double> distances = this->value->computePairwiseRFDistance(tree_CI, verbose);
         
@@ -216,7 +216,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        int n = this->value->getBurnin();
+        size_t n = this->value->getBurnin();
         
         return new RevVariable( new Natural( n ) );
     }
@@ -225,7 +225,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         found = true;
         
         // get the index which is the only argument for this method
-        std::int64_t i    = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t i = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         
         bool post = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         i += post * this->value->getBurnin();

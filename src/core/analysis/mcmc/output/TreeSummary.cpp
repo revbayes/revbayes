@@ -526,8 +526,11 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
         // now let's actually construct the clade
         Clade current_clade(clade.first, ordered_taxa);
         current_clade.setMrca(clade.second);
-
-        if ( current_clade.size() <= 1 || current_clade.size() >= ( rooted ? num_taxa : (num_taxa-1) ) ) continue;
+        
+        if (non_trivial_only)
+        {
+            if ( current_clade.size() == 1 || current_clade.size() == ( rooted ? num_taxa : (num_taxa-1) ) ) continue;
+        }
 
         unique_clades.push_back( current_clade );
 
