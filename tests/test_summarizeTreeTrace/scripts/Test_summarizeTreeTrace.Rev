@@ -7,8 +7,10 @@
 #
 ################################################################################
 
-# No random seed: if we set the credibleTreeSetSize argument to 1 wherever
-# applicable, the output should be deterministic.
+# No random seed should be needed: while the output of the methods relying
+# on calculating credible sets is not guaranteed to be deterministic unless
+# alpha = 1, this script does not explore the edge cases in which the inclusion
+# of a given tree in the credible set becomes probabilistic.
 
 # Read in a trace of 6-taxon trees originally provided by Wenjie Zhu (see
 # https://github.com/revbayes/revbayes/issues/753)
@@ -79,10 +81,14 @@ print("#####################################################\n")
 ###### we explicitly set `verbose=TRUE`.
 
 print("Frequency of trees that are topologically identical to the 5th tree in the trace: " + treetrace.getTopologyFrequency(topo_0, verbose=FALSE))
-print("Is this tree part of the 50% credible set?")
-print( treetrace.isTreeCovered(topo_0, 0.5, verbose=FALSE) )
+print("Is this tree part of the 90% credible set?")
+print( treetrace.isTreeCovered(topo_0, 0.9, verbose=FALSE) )
+print("")
 
-###### Note that .isTreeCovered() is broken: it returns FALSE even when ci_size is 1.                                                                 
+topo_3 = treetrace.getTrees()[6]
+print("Frequency of trees that are topologically identical to the 6th tree in the trace: " + treetrace.getTopologyFrequency(topo_3, verbose=FALSE))
+print("Is this tree part of the 90% credible set?")
+print( treetrace.isTreeCovered(topo_3, 0.9, verbose=FALSE) )                                                               
 
 print("\n###################################################################")
 print("# Test .cladeProbability(), .getTMRCA(), .jointCladeProbability() #")
@@ -127,12 +133,7 @@ print("Unique clades with a posterior probability of at least 0.05:")
 treetrace.getUniqueClades(0.05, verbose=FALSE)
 print("")
 
-###### In both TreeSummary.h (though not TreeSummary.cpp) and more importantly
-###### ?TraceTree.getUniqueClades, we say that the first argument of the method
-###### sets the credible set size. That's not at all what it does -- it sets
-###### the minimum probability a clade has to have to be included.
-
-###### Also, the `nonTrivial` argument is broken!
+###### The `nonTrivial` argument is broken!
 
 print("Unique topologies in this trace: " + treetrace.getUniqueTrees(1).size())
 

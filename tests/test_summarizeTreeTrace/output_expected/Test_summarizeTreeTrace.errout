@@ -46,7 +46,11 @@ TRUE
 #####################################################
 
 Frequency of trees that are topologically identical to the 5th tree in the trace: 0.12
-Is this tree part of the 50% credible set?
+Is this tree part of the 90% credible set?
+TRUE
+
+Frequency of trees that are topologically identical to the 6th tree in the trace: 0.00222222
+Is this tree part of the 90% credible set?
 FALSE
 
 ###################################################################

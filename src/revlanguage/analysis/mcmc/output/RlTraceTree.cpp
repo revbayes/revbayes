@@ -305,19 +305,26 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        // get the tree which is the only argument for this method
         const RevBayesCore::Tree &current_tree = static_cast<const Tree &>( args[0].getVariable()->getRevObject() ).getValue();
         double ci_size = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
-        bool cov = this->value->isCoveredInInterval(current_tree, ci_size, verbose);
+        int coverage_code = this->value->isCoveredInInterval(current_tree.getPlainNewickRepresentation(), ci_size, verbose);
         
-        return new RevVariable( new RlBoolean( cov ) );
+        /* TraceTree::isCoveredInInterval() actually returns 0 for TRUE and -1 for FALSE, which is a hacky solution that
+         * makes it play nice with validation analyses. The ultimate reason for this is that when we are dealing with
+         * scalars rather than trees, we can use the integer to indicate not just whether a given value is excluded
+         * from the credible interval, but also whether it is excluded because it is too large, or too small. For trees,
+         * this doesn't work, but ValidationAnalysis has to be able to treat a TraceTree and a scalar Trace the same way.
+         */
+        
+        bool covered = coverage_code == 0 ? true : false;
+        
+        return new RevVariable( new RlBoolean( covered ) );
     }
     else if ( name == "getTMRCA" )
     {
         found = true;
         
-        // get the tree which is the only argument for this method
         RevBayesCore::Clade this_clade = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
         bool strict = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         bool stem   = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
