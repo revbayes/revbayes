@@ -864,7 +864,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
 double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 {
-    summarize(verbose);
+    summarize( verbose );
 
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
@@ -956,17 +956,30 @@ MatrixReal TreeSummary::computeConnectivity( double credible_interval_size, cons
 
 double TreeSummary::computeEntropy( double credible_interval_size, bool verbose )
 {
-    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
-    size_t num_taxa = traces.front()->objectAt(0).getTaxa().size();
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, false);
+    int num_taxa = (int)traces.front()->objectAt(0).getTaxa().size();
     double total_samples = sampleSize(true);
     double entropy = 0.0;
+
+    ProgressBar progress = ProgressBar(sampleSize(true));
+    
+    if (verbose)
+    {
+        std::stringstream ss;
+        ss << "Calculating entropy for a sample of " << credible_set.size() << " unique topologies ..." << std::endl;
+        RBOUT( ss.str() );
+        progress.start();
+    }
     
     for (size_t i = 0; i < credible_set.size(); ++i)
     {
         double freq = credible_set[i].second;
         double p = freq / total_samples;
         entropy += (p * log(p));
+        if (verbose) progress.update(i);
     }
+    
+    if (verbose) progress.finish();
 
     /* This calculation is directly from AMP / Jeremy's paper. */
     double ln_ntopologies = RbMath::lnFactorial(2 * num_taxa - 5) - RbMath::lnFactorial(num_taxa - 3) - (num_taxa - 3) * RbConstants::LN2;
@@ -978,10 +991,20 @@ double TreeSummary::computeEntropy( double credible_interval_size, bool verbose 
 
 std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_interval_size, bool verbose )
 {
-    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, false);
     std::vector< std::unique_ptr< std::vector<RbBitSet> > > unique_trees_bs(credible_set.size());
     std::vector<size_t> sample_count( credible_set.size() );
     std::vector<double> rf_distances;
+    
+    ProgressBar progress = ProgressBar(sampleSize(true));
+    
+    if (verbose)
+    {
+        std::stringstream ss;
+        ss << "Calculating pairwise Robinson-Foulds distances among " << credible_set.size() << " unique topologies ..." << std::endl;
+        RBOUT( ss.str() );
+        progress.start();
+    }
     
     // populate the vector of clade bitsets for all trees
     for (size_t i = 0; i < credible_set.size(); ++i)
@@ -1015,7 +1038,11 @@ std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_inte
                 }
             }
         }
+        
+        if (verbose) progress.update(i);
     }
+    
+    if (verbose) progress.finish();
 
     return rf_distances;
 }
@@ -1132,7 +1159,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 
 std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees( double credible_interval_size, bool verbose )
 {
-    summarize( verbose );
+    summarize( false );
 
     std::vector< std::pair<Tree, std::int64_t> > unique_trees;
     NewickConverter converter;
@@ -1140,8 +1167,22 @@ std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees(
     double total_samples = sampleSize(true);
     RandomNumberGenerator *rng = GLOBAL_RNG;
     
+    ProgressBar progress = ProgressBar(sampleSize(true));
+    size_t counter = 0;
+    
+    if (verbose)
+    {
+        std::stringstream ss;
+        ss << "Constructing a " << 100 * credible_interval_size << "% credible set of trees ..." << std::endl;
+        RBOUT( ss.str() );
+        progress.start();
+    }
+    
     for (auto& [newick, count]: tree_samples | views::reverse)
     {
+        if (verbose) progress.update(counter);
+        counter++;
+        
         double freq = count;
         double p = freq/total_samples;
         double include_prob = (credible_interval_size - total_prob) / p;
@@ -1162,6 +1203,8 @@ std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees(
             break;
         }
     }
+    
+    if (verbose) progress.finish();
 
     return unique_trees;
 }
@@ -1200,13 +1243,13 @@ std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool 
 
 double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
 {
-    return getTopologyCount(tree,verbose) / (double)sampleSize(true);
+    return getTopologyCount(tree, verbose) / (double)sampleSize(true);
 }
 
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, bool non_trivial_only, bool verbose )
 {
-    summarize( verbose );
+    summarize( false );
 
     std::vector<Clade> unique_clades;
     double total_samples = sampleSize(true);
@@ -1214,10 +1257,21 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
     std::vector<Taxon> ordered_taxa = traces.front()->objectAt(0).getTaxa();
     VectorUtilities::sort( ordered_taxa );
     size_t num_taxa = ordered_taxa.size();
+    
+    ProgressBar progress = ProgressBar(sampleSize(true));
+    size_t counter = 0;
+    
+    if (verbose)
+    {
+        RBOUT("Extracting unique clades ...\n");
+        progress.start();
+    }
 
     for (auto& [clade, count]: clade_samples | views::reverse)
     {
-
+        if (verbose) progress.update(counter);
+        counter++;
+        
         double freq = count;
         double p = freq/total_samples;
 
@@ -1237,8 +1291,9 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
         }
 
         unique_clades.push_back( current_clade );
-
     }
+    
+    if (verbose) progress.finish();
 
     return unique_clades;
 }
@@ -1284,7 +1339,7 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 
 bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval_size, bool verbose)
 {
-    summarize( verbose );
+    summarize( false );
     
     std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, verbose);
     bool out = false;
@@ -1320,7 +1375,7 @@ bool TreeSummary::isDirty(void) const
 
 double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose )
 {
-    summarize(verbose);
+    summarize( false );
     
     RbVector<Clade> ref_clades = c;
 
@@ -1339,9 +1394,11 @@ double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose
 
     ProgressBar progress = ProgressBar(sampleSize(true));
 
-    if ( verbose )
+    if (verbose)
     {
-        RBOUT("Summarizing clades ...\n");
+        std::stringstream ss;
+        ss << "Calculating the joint probability of " << c.size() << " clades from " << sampleSize(true) << " trees ..." << std::endl;
+        RBOUT( ss.str() );
         progress.start();
     }
 
@@ -1352,10 +1409,7 @@ double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose
     {
         for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
         {
-            if ( verbose )
-            {
-                progress.update(count);
-            }
+            if (verbose) progress.update(count);
             count++;
 
             Tree tree = trace->objectAt(i);
@@ -1393,11 +1447,7 @@ double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose
         }
     }
 
-    // finish progress bar
-    if ( verbose )
-    {
-        progress.finish();
-    }
+    if (verbose) progress.finish();
 
     return num_matches / double(count);
 }
@@ -1483,7 +1533,7 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
 
     report.MAP_parameters = true;
     report.node_ages      = true;
-    annotateTree(*tmp_tree, report, verbose );
+    annotateTree(*tmp_tree, report, false);
 
     return tmp_tree;
 }
@@ -1534,7 +1584,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     }
 
     report.node_ages = true;
-    annotateTree(*best_tree, report, verbose );
+    annotateTree(*best_tree, report, false);
 
     return best_tree;
 }
@@ -1665,7 +1715,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
     report.conditional_clade_probs = false;
     report.conditional_tree_ages   = false;
     report.node_ages               = true;
-    annotateTree(*consensusTree, report, verbose );
+    annotateTree(*consensusTree, report, false);
 
     return consensusTree;
 }
@@ -1883,7 +1933,11 @@ double TreeSummary::splitFrequency(const Split &n) const
 
 void TreeSummary::summarize( bool verbose )
 {
-    if ( not isDirty() ) return;
+    if ( not isDirty() )
+    {
+        if (verbose) RBOUT("Skipping the clade summarization step, as a summary was already produced by a previous method call ...\n");
+        return;
+    }
 
     std::vector<std::string> tip_names = traces.front()->objectAt(0).getTipNames();
     std::sort(tip_names.begin(),tip_names.end());
@@ -1905,7 +1959,7 @@ void TreeSummary::summarize( bool verbose )
 
     ProgressBar progress = ProgressBar(sampleSize(true));
 
-    if ( verbose )
+    if (verbose)
     {
         RBOUT("Summarizing clades ...\n");
         progress.start();
@@ -1917,11 +1971,8 @@ void TreeSummary::summarize( bool verbose )
     {
         for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
         {
-            if ( verbose )
-            {
-                progress.update(count);
-                count++;
-            }
+            if (verbose) progress.update(count);
+            count++;
 
             Tree tree = trace->objectAt(i);
 
@@ -1975,10 +2026,7 @@ void TreeSummary::summarize( bool verbose )
     }
 
     // finish progress bar
-    if ( verbose )
-    {
-        progress.finish();
-    }
+    if (verbose) progress.finish();
 
     // Mark all the traces clean.
     for (auto& trace: traces)

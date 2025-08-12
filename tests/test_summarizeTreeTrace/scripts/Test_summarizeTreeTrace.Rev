@@ -71,15 +71,6 @@ print("\n#####################################################")
 print("# Test .getTopologyFrequency() and .isTreeCovered() #")
 print("#####################################################\n")
 
-###### Note that in all methods that have it -- .cladeProbability(),
-###### .computeEntropy(), .computePairwiseRFDistances(), .getTopologyFrequency(),
-###### .getUniqueClades(), .getUniqueTrees(), .isTreeCovered(),
-###### .jointCladeProbability(), and .summarize() -- the `verbose`
-###### argument just displays a progress bar. However, even this is only
-###### true of the first method we call on a given TraceTree object.
-###### For subsequent method calls, we do not get a progress bar even if
-###### we explicitly set `verbose=TRUE`.
-
 print("Frequency of trees that are topologically identical to the 5th tree in the trace: " + treetrace.getTopologyFrequency(topo_0, verbose=FALSE))
 print("Is this tree part of the 90% credible set?")
 print( treetrace.isTreeCovered(topo_0, 0.9, verbose=FALSE) )
@@ -129,18 +120,18 @@ print("List the trivial clades as well:")
 treetrace.getUniqueClades(0.05, nonTrivial=FALSE, verbose=FALSE)
 print("")
 
-print("Unique topologies in this trace: " + treetrace.getUniqueTrees(1).size())
+print("Unique topologies in this trace: " + treetrace.getUniqueTrees(1, verbose=FALSE).size())
 
 print("\n################################################################################")
 print("# Test .computeEntropy(), .computePairwiseRFDistances(), .computeTreeLengths() #")
 print("################################################################################\n")
 
-print("Entropy of the entire post-burnin sample: " + treetrace.computeEntropy(1) + "\n")
+print("Entropy of the entire post-burnin sample: " + treetrace.computeEntropy(1, verbose=FALSE) + "\n")
 
 print("Extract all unique trees, coerce the resulting vector to a new tree")
 print("trace, and compute pairwise RF distances between its elements:\n")
 
-unique_topo = treetrace.getUniqueTrees(1)
+unique_topo = treetrace.getUniqueTrees(1, verbose=FALSE)
 sub_trace = treeTrace(unique_topo, burnin = 0)
 RF_dist = sub_trace.computePairwiseRFDistances(1, verbose=FALSE)
 RF_dist
@@ -172,7 +163,7 @@ print("#####################\n")
 
 print("Generate a summary of the trace, including all post-burnin trees and")
 print("all clades with a posterior probability of at least 0.05:")
-treetrace.summarize(1, 0.05)
+treetrace.summarize(1, 0.05, verbose=FALSE)
 
 ###################
 # Test .methods() #
@@ -182,7 +173,7 @@ treetrace.summarize(1, 0.05)
 # treetrace.methods()
 
 ###### THIS TEST IS FAILING ON WINDOWS.
-###### Possibly due to ea166b8?
+###### Possibly due to #ea166b8?
 
 clear()
 
