@@ -575,42 +575,20 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
 }
 
 
-
 bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval_size, bool verbose)
 {
     summarize( verbose );
-
-    std::string newick = tree.getPlainNewickRepresentation();
-    double total_prob = 0.0;
-    double total_samples = sampleSize(true);
-    RandomNumberGenerator *rng = GLOBAL_RNG;
     
-    for (auto& [current_sample, count]: tree_samples | views::reverse)
+    std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, verbose);
+    bool out = false;
+    
+    for (size_t i = 0; i < unique_trees.size(); i++)
     {
-        double freq = count;
-        double p = freq/total_samples;
-        // double include_prob = p / (1.0 - total_prob) * (credible_interval_size - total_prob) / (1.0 - total_prob);
-        double include_prob = (credible_interval_size - total_prob) / p;
-        // double include_prob = p * credible_interval_size;
-
-        if ( include_prob > rng->uniform01() )
-        {
-            if ( newick == current_sample )
-            {
-                return true;
-            }
-
-        }
-
-        total_prob += p;
-
-        if ( total_prob >= credible_interval_size )
-        {
-            break;
-        }
+        // comparison of trees compares the strings storing their plain Newick representations
+        out |= (unique_trees[i] == tree);
     }
 
-    return false;
+    return out;
 }
 
 
