@@ -141,14 +141,13 @@ print("Extract all unique trees, coerce the resulting vector to a new tree")
 print("trace, and compute pairwise RF distances between its elements:\n")
 
 unique_topo = treetrace.getUniqueTrees(1)
-sub_trace = treeTrace(unique_topo)
-sub_trace.computePairwiseRFDistances(1, verbose=FALSE)
+sub_trace = treeTrace(unique_topo, burnin = 0)
+RF_dist = sub_trace.computePairwiseRFDistances(1, verbose=FALSE)
+RF_dist
 
 print("\nAre we getting the expected number of distances, i.e, n*(n - 1)/2 for n trees?")
-print( unique_topo.size() * ( unique_topo.size() - 1 ) / 2 == sub_trace.computePairwiseRFDistances(1, verbose = FALSE).size() )
+print( unique_topo.size() * ( unique_topo.size() - 1 ) / 2 == RF_dist.size() )
 print("")
-
-###### THIS TEST IS CURRENTLY FAILING.
 
 print("Tree lengths:\n")
 treetrace.computeTreeLengths()
