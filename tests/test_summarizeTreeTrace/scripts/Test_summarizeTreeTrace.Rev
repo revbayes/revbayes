@@ -113,14 +113,6 @@ print("Stem ages of the clade originating with the MRCA of B and S:\n")
 treetrace.getTMRCA(clade_0, strict=FALSE, stem=FALSE)
 print("")
 
-###### Returning an age of -1 when the taxa in question do not form an exclusive
-###### clade is ugly. It means we can't get a meaningful estimate of the clade's
-###### age by calling mean() on the result.
-
-###### Also, when calling ?TraceTree.getTMRCA, the description of the argument
-###### `strict` says "Return -1 if the clade is non-monophyletic". That makes no
-###### sense; clades are monophyletic by definition.
-
 print("When we do not require the group (B+S) to be strictly monophyletic,")
 print("do we get as many ages for it as there are post-burnin samples?")
 print( treetrace.size(post = TRUE) == treetrace.getTMRCA(clade_0, strict=FALSE).size() )
