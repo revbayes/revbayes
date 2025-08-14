@@ -34,7 +34,7 @@ std::string RbVersion::getGitCommit( void ) const
 
 std::string RbVersion::getVersion( void ) const
 {
-    return "1.3.1";
+    return "1.4.0-preview";
 }
 
 
