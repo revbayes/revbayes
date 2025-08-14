@@ -10,7 +10,7 @@
 
 ## Infrastructure
 
-# RevBayes 1.3.1 (Aug 7, 2025)
+# RevBayes 1.3.1 (Aug 14, 2025)
 
 ## Backwards-incompatible changes
   * Change the distribution name of the sampled-speciation birth-death model from `dnSBBDP` to `dnSSBDP` (#714).
@@ -19,14 +19,20 @@
   * Distributions
       - Add a topologically constrained distribution for the state-dependent speciation and extinction process (#693).
       - Allow nonzero `rho` values in FBD analyses without extant tips (#788).
+      - Make dnGLHBDSP faster and allow reporting stochastic mappings (#693)
   * Methods / arguments
       - Add an `.nbranches( )` method to `Tree` (#759).
       - Add a method for calculating the standard error of marginal likelihood estimates (#779).
       - Add a nanoseconds option to `time( )` (#796).
   * Interface
       - Nicer printing of member method lists (#800).
+  * Misc
+      - Biogeography: allow regional features and non-existant regions (#693).
 
 ## Bug fixes
+  * **Regression fixes**
+      - **Fix posterior predictive simulations that were broken in 1.3.0 (#778).**
+      - **Fix validation analyses that were broken in 1.3.0 (#814).**
   * Member procedures
       - Fix `.getTopologyFrequency( )` behavior for tree traces (#750).
       - Fix `.resolveMultifurcations( )` behavior in edge cases (#771, #780).
@@ -42,10 +48,8 @@
       - Fix `mvEllipticalSliceSamplingSimple` to not require strict equality of likelihoods (#773).
       - Reject tree moves if there are no nodes for them to operate on (#798, #802).
   * Misc
-      - Fix and extend TensorPhylo, stochastic mapping, and biogeography models (#693).
       - Synchronize dirty flagging for nodes and transition probability matrices (#773).
       - Fix caching to avoid crashes when using `dnReversibleJumpMixture` (#773).
-      - Fix posterior predictive simulations (#778).
   * Partial
       - Avoid subscripting by `-1` in `dnAutocorrelatedEvent` (#773).
 
@@ -63,6 +67,8 @@
   * Allow specifying a required exit code to allow/require failure (#773).
   * Fix check for missing output files (#773).
   * Make test runner output clearer and more informative (#773).
+  * Replace boost::filesystem with std::filesystem (#807).
+
 
 ## New contributors
   * @prilau made their first contribution in #796.
