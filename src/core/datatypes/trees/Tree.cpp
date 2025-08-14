@@ -953,33 +953,32 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
     {
         if ( !node->isTip() ) continue;
         Taxon taxon = node->getTaxon();
+        double old_age = node->getAge();
         
-        if ( node->getAge() < taxon.getMinAge() )
+        if ( old_age < taxon.getMinAge() )
         {
-            double diff = taxon.getMinAge() - node->getAge();
             if (forceAdjust)
             {
-                node->setAge(taxon.getMinAge());
+                node->setAge( taxon.getMinAge() );
                 
                 // only notify the user if we are making a non-trivial adjustment
-                if ( diff > RbSettings::userSettings().getTolerance() )
-                    RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
+                if ( taxon.getMinAge() - old_age > RbSettings::userSettings().getTolerance() )
+                    RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted from " + std::to_string(old_age) + " to " + std::to_string( taxon.getMinAge() ) + ".");
             }
             else
             {
                 throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
             }
         }
-        if ( node->getAge() > taxon.getMaxAge() )
+        if ( old_age > taxon.getMaxAge() )
         {
-            double diff = node->getAge() - taxon.getMaxAge();
             if (forceAdjust)
             {
-                node->setAge(taxon.getMaxAge());
+                node->setAge( taxon.getMaxAge() );
                 
                 // only notify the user if we are making a non-trivial adjustment
-                if ( diff > RbSettings::userSettings().getTolerance() )
-                    RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
+                if ( old_age - taxon.getMaxAge() > RbSettings::userSettings().getTolerance() )
+                    RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted from " + std::to_string(old_age) + " to " + std::to_string( taxon.getMaxAge() ) + ".");
             }
             else
             {
