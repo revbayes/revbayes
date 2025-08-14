@@ -84,6 +84,8 @@ jobs:
 
 
     runs-on: ${{ matrix.os }}
+    container:
+      image: ${{ matrix.image || '' }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -93,6 +95,11 @@ jobs:
     - name: Install (Linux)
       if: runner.os == 'Linux' && matrix.name != 'windows'
       run: |
+        # If we're running in a docker image, we are already root
+        if [ -n "${{ matrix.image }}" ]  ; then
+          apt-get update && apt-get install -y sudo build-essential git cmake
+        fi 
+
         sudo apt-get update
         sudo apt-get install -y ccache meson
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
@@ -154,7 +161,7 @@ jobs:
           curl -O -L https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz
           tar -xzvf boost_1_88_0.tar.gz
           cd boost_1_88_0
-          ./bootstrap.sh --with-libraries=atomic,chrono,filesystem,system,regex,thread,date_time,program_options,math,serialization --prefix=../installed-boost-1.88.0
+          ./bootstrap.sh --with-libraries=atomic,chrono,system,regex,thread,date_time,program_options,math,serialization --prefix=../installed-boost-1.88.0
           ./b2 link=static install
           echo -e "\n    BOOST root is at $(cd ../installed-boost-1.88.0; pwd)\n"
           echo BOOST_ROOT=$(cd ../installed-boost-1.88.0; pwd) >> $GITHUB_ENV
@@ -166,7 +173,7 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
+        ${GITHUB_WORKSPACE}/projects/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
     - name: Configure and build
@@ -187,15 +194,26 @@ jobs:
         ccache -p
         ccache -s
 
-        # Check meson setup (but not build).
+        # Check meson setup (but not build)
         echo ::group::Test meson setup
+        MESON_ARGS=""
+        
+        if [ -n "${{ matrix.buildtype || '' }}" ] ; then
+           MESON_ARGS="${MESON_ARGS} -Dbuildtype=${{ matrix.buildtype }}"
+        fi
         ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dmpi=${{ matrix.mpi }}
-        meson setup build
+        meson setup build ${MESON_ARGS}
         echo ::endgroup::
 
-        cd projects/cmake
-        BUILD_DIR=build exec_name=rb ./build.sh -DCMAKE_INSTALL_PREFIX=$HOME/local
-        cmake --install build
+        if [ "${{ matrix.project }}" = "meson" ] ; then
+           meson install -C build
+        else
+           (
+              cd projects/cmake
+              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+              cmake --install build
+           )
+        fi
 
         ccache -s
 

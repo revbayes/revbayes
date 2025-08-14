@@ -1,0 +1,57 @@
+===================
+Time tree treatment
+===================
+
+   Attempting to read the contents of file "initial_tree.newick"
+   Successfully read file
+   The tree has 164 tips and 142 internal nodes.
+   Is the tree binary? FALSE
+
+Resolve multifurcations first, suppress outdegree-1 nodes second
+
+Resolving multifurcations...
+   The modified tree has 164 tips and 164 internal nodes.
+   Is the modified tree binary? FALSE
+
+Suppressing outdegree-1 nodes...
+   The final tree has 164 tips and 163 internal nodes.
+   Is the final tree binary? TRUE
+
+Suppress outdegree-1 nodes first, resolve multifurcations second
+
+Suppressing outdegree-1 nodes...
+   The modified tree has 164 tips and 141 internal nodes.
+   Is the modified tree binary? FALSE
+
+Resolving multifurcations...
+   The final tree has 164 tips and 163 internal nodes.
+   Is the final tree binary? TRUE
+
+============================
+Branch length tree treatment
+============================
+
+   Attempting to read the contents of file "initial_tree.newick"
+   Successfully read file
+   The tree has 164 tips and 141 internal nodes.
+   Is the tree binary? FALSE
+
+Resolve multifurcations first, suppress outdegree-1 nodes second
+
+Resolving multifurcations...
+   The modified tree has 164 tips and 164 internal nodes.
+   Is the modified tree binary? FALSE
+
+Suppressing outdegree-1 nodes...
+   The final tree has 164 tips and 163 internal nodes.
+   Is the final tree binary? TRUE
+
+Suppress outdegree-1 nodes first, resolve multifurcations second
+
+Suppressing outdegree-1 nodes...
+   The modified tree has 164 tips and 140 internal nodes.
+   Is the modified tree binary? FALSE
+
+Resolving multifurcations...
+   The final tree has 164 tips and 162 internal nodes.
+   Is the final tree binary? TRUE

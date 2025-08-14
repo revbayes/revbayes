@@ -1,0 +1,36 @@
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cox2.nex'
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cytb.nex'
+
+Running burn-in phase of Power Posterior sampler for 100 iterations.
+The simulator uses 50 different moves in a random move schedule with 60 moves per iteration
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+
+Running power posterior analysis ...
+Step  1 / 10		**********
+Step  2 / 10		**********
+Step  3 / 10		**********
+Step  4 / 10		**********
+Step  5 / 10		**********
+Step  6 / 10		**********
+Step  7 / 10		**********
+Step  8 / 10		**********
+Step  9 / 10		**********
+Step 10 / 10		**********
+
+Marginal likelihood estimates when running the stones all at once:
+
+Stepping-stone estimate: 	-21440.51	
+
+   Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:
+   0.554929, 0.284628, 0.131687, 0.0529221, 0.0173415, 0.00411523, 0.000541923.
+   Try setting bootstrap=TRUE.
+   
+Stepping-stone standard error: 	2.121036	
+
+Path-sampling estimate: 	-21397.89
+Path-sampling standard error: 	3.136933

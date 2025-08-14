@@ -1,5 +1,5 @@
 #NEXUS
 
 Begin trees;
-tree TREE1 = [&U](taxon0[&index=10]:0.000000,taxon1[&index=9]:0.000000,(taxon2[&index=8]:0.000000,((((taxon5[&index=7]:0.000000,taxon6[&index=6]:0.000000)[&index=11]:0.000000,taxon3[&index=5]:0.000000)[&index=12]:0.000000,taxon4[&index=4]:0.000000)[&index=13]:0.000000,(taxon7[&index=3]:0.000000,(taxon9[&index=2]:0.000000,taxon8[&index=1]:0.000000)[&index=14]:0.000000)[&index=15]:0.000000)[&index=16]:0.000000)[&index=17]:0.000000)[&index=18]:0.000000;
+tree TREE1 = [&U](taxon0[&index=10]:0.000000,taxon1[&index=9]:0.000000,(taxon2[&index=8]:0.000000,((taxon3[&index=7]:0.000000,(taxon5[&index=6]:0.000000,(taxon6[&index=5]:0.000000,taxon4[&index=4]:0.000000)[&index=11]:0.000000)[&index=12]:0.000000)[&index=13]:0.000000,(taxon7[&index=3]:0.000000,(taxon9[&index=2]:0.000000,taxon8[&index=1]:0.000000)[&index=14]:0.000000)[&index=15]:0.000000)[&index=16]:0.000000)[&index=17]:0.000000)[&index=18]:0.000000;
 End;

@@ -55,13 +55,26 @@ myHillClimberObject.operatorSummary())");
 	help_strings[string("HillClimber")][string("name")] = string(R"(HillClimber)");
 	help_arrays[string("HillClimber")][string("see_also")].push_back(string(R"(SimulatedAnnealing)"));
 	help_strings[string("HillClimber")][string("title")] = string(R"(Hill-Climber analysis object)");
+	help_strings[string("Integer")][string("description")] = string(R"(All whole numbers, whether positive, negative, or zero.)");
+	help_strings[string("Integer")][string("example")] = string(R"(x = -1
+y ~ dnUniformInteger(1, 10))");
 	help_strings[string("Integer")][string("name")] = string(R"(Integer)");
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
+	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Real)"));
+	help_strings[string("Integer")][string("title")] = string(R"(Integer data type)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
 	help_strings[string("MatrixRealSymmetric")][string("name")] = string(R"(MatrixRealSymmetric)");
+	help_strings[string("Natural")][string("description")] = string(R"(All whole numbers greater than or equal to zero.)");
+	help_strings[string("Natural")][string("example")] = string(R"(x = 0
+y = 1
+z ~ dnUniformNatural(0, 2))");
 	help_strings[string("Natural")][string("name")] = string(R"(Natural)");
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(Integer)"));
+	help_arrays[string("Natural")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("Natural")][string("title")] = string(R"(Natural number data type)");
 	help_arrays[string("Probability")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("Probability")][string("description")] = string(R"(A Probability is a real value between 0.0 and 1.0)");
+	help_strings[string("Probability")][string("description")] = string(R"(A `Probability` is a real value between 0.0 and 1.0 (inclusive).)");
 	help_strings[string("Probability")][string("example")] = string(R"(# Create a RealPos
 x <- 12/13
 type(x)
@@ -70,6 +83,9 @@ type(x)
 y := Probability(x)
 type(y))");
 	help_strings[string("Probability")][string("name")] = string(R"(Probability)");
+	help_arrays[string("Probability")][string("see_also")].push_back(string(R"(Real)"));
+	help_arrays[string("Probability")][string("see_also")].push_back(string(R"(RealPos)"));
+	help_strings[string("Probability")][string("title")] = string(R"(Probability data type)");
 	help_strings[string("RateGenerator")][string("name")] = string(R"(RateGenerator)");
 	help_strings[string("Real")][string("description")] = string(R"(The real number data type can hold any real number value.
 Not to be confused with integers which are whole numbers, or
@@ -79,7 +95,10 @@ b = 1.3
 c = a + b
 # c will be 2.4)");
 	help_strings[string("Real")][string("name")] = string(R"(Real)");
-	help_arrays[string("Real")][string("see_also")].push_back(string(R"(`RealPos`, `Integer`, `Natural`, `Probability`)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(Integer)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(Natural)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(Probability)"));
+	help_arrays[string("Real")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
@@ -147,11 +166,19 @@ posterior.summarize())");
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(readTrace)"));
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(TraceTree)"));
 	help_strings[string("Trace")][string("title")] = string(R"(Trace of numeric parameter values.)");
-	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `mnFile` monitor in an MCMC or MCMCMC run.)");
+	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to
+the `mnFile` monitor in an MCMC or MCMCMC run.)");
 	help_strings[string("TraceTree")][string("details")] = string(R"(Important methods include:
 
 - `getTree(n)`: returns the `n`th entry of the `TraceTree` object.
-- `getTrees()`: returns a vector of trees from the `TraceTree` object, after excluding the burnin.)");
+- `getTrees()`: returns a vector of trees from the `TraceTree` object, after
+      excluding the burnin.
+- `getUniqueTrees(alpha)`: constructs an alpha credible set of trees, i.e.,
+      orders all trees in the trace by their posterior probability and adds
+      them to the set one by one until the included trees accumulate fraction
+      alpha of the probability mass (Huelsenbeck & Rannala 2004). By default,
+      the 95% credible set is constructed (alpha = 0.95). To extract all unique
+      trees from a given trace, set the argument to 1.)");
 	help_strings[string("TraceTree")][string("example")] = string(R"(# read a tree trace and ignore the first 10 samples
 thinned_trees = readTreeTrace("my_filename.tree", offset = 10, thinning = 10, burnin = 0.5)
 
@@ -160,6 +187,7 @@ thinned_trees.getTree(2) # Returns the 21st tree (offset + 1 + thinning) in the 
 
 thinned_trees.getTrees()[1] # Returns the first sampled tree after excluding the burnin fraction)");
 	help_strings[string("TraceTree")][string("name")] = string(R"(TraceTree)");
+	help_references[string("TraceTree")].push_back(RbHelpReference(R"(Huelsenbeck JP, Rannala B (2004). Frequentist properties of Bayesian posterior probabilities of phylogenetic trees under simple and complex substitution models. Systematic Biology, 53(6):904-913.)",R"(10.1080/10635150490522629)",R"(https://academic.oup.com/sysbio/article-abstract/53/6/904/1651356 )"));
 	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(mnFile)"));
 	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(readAncestralStateTreeTrace)"));
 	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
@@ -453,8 +481,159 @@ mymcmc.run(generations=200000))");
 	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
+	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shifts in birth and death
+rates among lineages, conditioned on the assumption that no shifts take place
+along extinct lineages.)");
+	help_strings[string("dnCBDSP")][string("details")] = string(R"(The initial birth and death rates can be specified with the `rootLambda` and
+`rootMu` arguments, respectively. The rate at which speciation and extinction
+rate shifts take place is specified by the `delta` argument, and the new
+speciation or extinction rates are drawn from prior distributions specified in
+the `lambda` and `mu` arguments. Similar to other birth-death processes in
+RevBayes, `dnCBDSP` also takes arguments specifying the stopping `condition`
+of the simulator (either survival or time) and the extant sampling probability
+`rho`.
+
+`dnCBDSP` is very similar to the model implemented in Bayesian Analysis
+of Macroevolutionary Mixtures (BAMM; Rabosky 2014), particularly in making
+a strong and potentially problematic assumption that all rate-shift events
+have been observed (Moore et al. 2016) -- i.e., that no rate shifts are mapped
+onto unobserved (extinct) branches. For an alternative birth-death-shift model
+that relaxes this assumption, see `dnCDBDP` (Höhna et al. 2019), which employs
+a finite number of rate categories instead of drawing rates directly from
+a continuous distribution.)");
+	help_strings[string("dnCBDSP")][string("example")] = string(R"(# draw basic process parameters
+taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
+root_age ~ dnUniform(0, 2)
+root_lambda ~ dnUniform(0, 1)
+root_mu ~ dnUniform(0, 1)
+sampling_prob <- 1
+
+# simulate tree
+tree ~ dnCBDSP(rootAge    = root_age,
+               rootLambda = root_lambda,
+               rootMu     = root_mu,
+               delta      = 0.2,
+               rho        = sampling_prob,
+               condition  = "survival",
+               taxa       = taxa))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Moore BR, Höhna S, May MR, Rannala B, Huelsenbeck JP (2016). Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary mixtures. Proceedings of the National Academy of Sciences of the USA, 113(34):9569-9574.)",R"(10.1073/pnas.1518659113)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1518659113 )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Rabosky DL (2014). Automatic detection of key innovations, rate shifts, and diversity-dependence on phylogenetic trees. PLoS ONE, 9(2):e89543.)",R"(10.1371/journal.pone.0089543)",R"(https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543 )"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvBirthDeathEventContinuous)"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvContinuousEventScale)"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvEventTimeBeta)"));
+	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvEventTimeSlide)"));
+	help_strings[string("dnCBDSP")][string("title")] = string(R"(Conditioned birth-death-shift process)");
+	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_strings[string("dnCDBDP")][string("description")] = string(R"(Simulates a tree under a multi-type birth-death process.)");
+	help_strings[string("dnCDBDP")][string("details")] = string(R"(This distribution is a flexible simulator that can be used for several
+lineage-heterogeneous diversification models. Specifically, `dnCDBDP` allows
+the tree to be divided into multiple segments (also referred to as "regimes"
+or "types"; Barido-Sottani et al. 2020) separated by discrete shifts in birth
+and death rates, such that each segment draws its rate vector from a finite
+number of categories. These categories can (but need not) correspond to the
+states of an observed discrete character, in which case the shifts correspond
+to inferred state transitions: hence the characterization of `dnCDBDP` as
+a "character-dependent" model.
+
+Applications of this multi-type model include:
+
+1. Multiple State-dependent Speciation Extinction (MuSSE) (Maddison et al.
+   2007; FitzJohn 2012)
+
+This model uses a state-dependent birth-death process to simulate a tree with
+only anagenetic state changes, i.e., changes taking place along the branches
+of the tree. When `dnCDBDP` is used to implement MuSSE, the `lambda` argument
+represents a vector of speciation rates for each state, and its length is
+therefore equal to the number of states. The rates at which the character
+transitions from one state to another are specified by the matrix `Q` (with as
+many rows and columns as there are states), and the extinction rates for each
+state are specified using the vector `mu` (with as many elements as there are
+states). A draw from the distribution needs to be fixed both to a previously
+inferred tree (using `.clamp()`), and to a matrix recording which state is
+observed at a given tip (using `.clampCharData()`).
+
+2. Cladogenetic State-dependent Speciation Extinction (ClaSSE) (Goldberg &
+   Igić 2012)
+
+This model additionally allows for cladogenetic state changes, i.e., changes
+that take place at nodes, corresponding to the assumption that state change
+either induces or immediately follows speciation. When `dnCDBDP` is used to
+implement ClaSSE, the `lambda` argument corresponds to a cladogenetic event
+map. A cladogenetic event map is a matrix specifying the speciation rates
+associated with the different character state triplets that can be observed
+for the parent and its two children at a given node (= cladogenetic event).
+As before, anagenetic state change is still allowed, with its rates described
+by the `Q` matrix, and each state is associated with a distinct extinction
+rate specified in the `mu` vector. A draw from the distribution again has to 
+be clamped both to a tree and to a character matrix. See the example below
+for implementation.
+
+3. Branch-specific Diversification Rate Estimation (Höhna et al. 2019)
+
+`dnCDBDP` can also be used to estimate the number and placement of events 
+at which the rates of speciation and extinction shift from one category
+to another, without the assumption that such rate shifts correspond to state
+transitions in an observed character. While the number of shifts is inferred,
+the number of categories N has to be specified by the user, and relates
+to the length of the `lambda` and `mu` vectors. If only one of the two rates
+is allowed to shift, both vectors have to be of length N (with one containing
+N distinct and the other N identical elements); if both rates are allowed to
+shift independently of each other, the vectors have to be of length N^2. The
+`Q` matrix gives the rates of shifts between any two individual categories.
+In this case, a draw from the distribution is only fixed to a tree using 
+`.clamp()`.)");
+	help_strings[string("dnCDBDP")][string("example")] = string(R"(# setup for a two-state ClaSSE model
+num_states = 2          # 0 and 1 are the only states
+
+# set basic process parameters
+root_age ~ dnUniform(0, 2)
+rho <- Probability(1/2) # sampling one half of extant lineages
+
+# specify extinction probabilities for each state
+mu_vec <- rep(0.1, 2)
+
+# Set up cladogenetic events and speciation rates. Each element
+# in clado_events describes a state pattern at the cladogenetic
+# event: for example, [0, 0, 1] denotes a parent having state 0
+# and its two children having states 0 and 1.
+clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
+
+# set speciation rates for each cladogenetic event described above
+lambda ~ dnExponential( 10.0 )
+speciation_rates := rep(lambda, 4)
+
+# create cladogenetic rate matrix
+clado_matrix = fnCladogeneticSpeciationRateMatrix(clado_events,
+                                                  speciation_rates,
+                                                  num_states)
+
+# set up Q-matrix to specify rates of state changes along branches
+ana_rate_matrix <- fnFreeK( [[0, .2], [.2, 0]], rescaled=FALSE )
+
+# create vector of state frequencies at the root
+pi <- simplex([1, 2])
+
+# basic use of the function
+timetree ~ dnCDBDP(rootAge   = root_age,
+                   lambda    = clado_matrix,
+                   mu        = mu_vec,
+                   Q         = ana_rate_matrix,
+                   pi        = pi,
+                   rho       = rho,
+                   condition = "time"))");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth–death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973–986.)",R"(10.1093/sysbio/syaa016)",R"(https://academic.oup.com/sysbio/article/69/5/973/5762626 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.)",R"(10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg EE, Igić B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.)",R"(10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Maddison WP, Midford PE, Otto SP (2007). Estimating a binary character's effect on speciation and extinction. Systematic Biology, 56(5):701-710.)",R"(10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticProbabilityMatrix)"));
+	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticSpeciationRateMatrix)"));
+	help_strings[string("dnCDBDP")][string("title")] = string(R"(Character-dependent birth-death process)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
 	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
 	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
@@ -598,6 +777,7 @@ root_height := psi.rootAge()
 	help_strings[string("dnConstrainedNodeAge")][string("name")] = string(R"(dnConstrainedNodeAge)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
 	help_strings[string("dnConstrainedTopology")][string("name")] = string(R"(dnConstrainedTopology)");
+	help_strings[string("dnConstrainedTopologySSE")][string("name")] = string(R"(dnConstrainedTopologySSE)");
 	help_strings[string("dnCppNormal")][string("name")] = string(R"(dnCppNormal)");
 	help_strings[string("dnDPP")][string("name")] = string(R"(dnDPP)");
 	help_strings[string("dnDecomposedInvWishart")][string("name")] = string(R"(dnDecomposedInvWishart)");
@@ -1231,7 +1411,28 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnPoisson")][string("see_also")].push_back(string(R"(dnGeom)"));
 	help_strings[string("dnPoisson")][string("title")] = string(R"(Poisson Distribution)");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
-	help_strings[string("dnSBBDP")][string("name")] = string(R"(dnSBBDP)");
+	help_arrays[string("dnSSBDP")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("dnSSBDP")][string("description")] = string(R"(Uses a data augmentation approach to sample hidden speciation events on
+a birth-death tree.)");
+	help_strings[string("dnSSBDP")][string("details")] = string(R"(The sampled-speciation process is intended to be used in conjunction with
+dispersal-extinction-cladogenesis (DEC) biogeographic models.)");
+	help_strings[string("dnSSBDP")][string("example")] = string(R"(# draw basic process parameters
+taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
+root_age ~ dnUniform(0, 2)
+lambda ~ dnUniform(0, 1)
+mu ~ dnUniform(0, 1)
+rho <- 1
+
+# simulate tree
+tree ~ dnSSBDP(rootAge = root_age,
+               lambda  = lambda,
+               mu      = mu,
+               rho     = rho,
+               taxa    = taxa))");
+	help_strings[string("dnSSBDP")][string("name")] = string(R"(dnSSBDP)");
+	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
+	help_arrays[string("dnSSBDP")][string("see_also")].push_back(string(R"(dnPhyloCTMCClado)"));
+	help_strings[string("dnSSBDP")][string("title")] = string(R"(Sampled-speciation birth-death process)");
 	help_arrays[string("dnScaledDirichlet")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_strings[string("dnScaledDirichlet")][string("description")] = string(R"(Scaled Dirichlet probability distribution on a simplex.)");
 	help_strings[string("dnScaledDirichlet")][string("details")] = string(R"(The scaled Dirichlet probability distribution is the generalization of the dirichlet distribution. A random variable from a scaled Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1. If b[1]=b[2]=...=b[n], then the scaledDirichlet(alpha,beta) collapses to the Dirichlet with the same alphas.)");
@@ -3756,7 +3957,83 @@ moves.append( delta_up_down_move ))");
 	help_strings[string("mvVectorSlideRecenter")][string("name")] = string(R"(mvVectorSlideRecenter)");
 	help_strings[string("nodeAgeByID")][string("name")] = string(R"(nodeAgeByID)");
 	help_strings[string("normalize")][string("name")] = string(R"(normalize)");
+	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(David Černý)"));
+	help_strings[string("pathSampler")][string("description")] = string(R"(Applies the path-sampling technique (Gelman & Meng 1998), also known as
+thermodynamic integration (Ogata 1989; Lartillot & Philippe 2006), to estimate
+the marginal likelihood of a model from a series of unnormalized "power
+posterior" densities in which the likelihood term is raised to a power B
+between 0 and 1.)");
+	help_strings[string("pathSampler")][string("details")] = string(R"(The RevBayes implementation of path sampling allows for an arbitrary choice of
+the powers B, and uses the trapezoidal rule for numerical integration. For K
+power posteriors starting with the posterior proper (B_1 = 1) and ending with
+the prior (B_K = 0), the path-sampling log marginal likelihood estimate r_PS is
+therefore equal to:
+
+    r_PS = \sum_{k=1}^{K-1} ( (\sum{i=1}^n L_{k,i} / n) + (\sum{i=1}^n L_{k+1,i} / n) ) * (B_k - B{k+1})/2
+
+where n denotes the number of MCMC samples from each power posterior, and
+L_{k,i} denotes the log likelihood of the i-th MCMC sample from the k-th power
+posterior. The estimate is returned by calling the `.marginal()` method on the
+sampler object. We can also compute the standard error of this estimate in two
+different ways using the `.stdError()` method. By default, RevBayes uses the
+formula:
+
+    SE = sqrt( \sum_{k=1}^K w_k^2/4 Var(L_k)/N_{eff,k} )
+    
+where w_k is the k-th weight, Var(L_k) is the variance of the log likelihoods
+from the k-th power posterior, and N_{eff,k} is the effective sample size for
+the k-th power posterior. This is the formula given by dos Reis et al. (2018;
+Appendix 2), but RevBayes uses a different numerical integration technique,
+and therefore a different set of weights:
+
+           | B_2 - B_1         if k = 1
+    w_k = <  B_{k+1} - B_{k-1} if 1 < k < K
+           | B_K - B_{K-1}     if k = K
+           
+These weights generalize Eqs. 51 and 52 of Lartillot & Philippe (2006) to cases
+in which the powers B are not evenly spaced between 0 and 1. The standard error
+can also be derived using the stationary bootstrap method (Politis & Romano
+1994), which divides the log likelihood values from each power posterior into
+consecutive blocks of random size (drawn from a geometric distribution) and
+resamples them with replacement. The RevBayes implementation of the stationary
+block bootstrap method is based on the mcmc3r R package (Álvarez-Carretero et
+al. 2022), and can be accessed by calling `.stdError(bootstrap=TRUE)`.)");
+	help_strings[string("pathSampler")][string("example")] = string(R"(# Create a simple model (unclamped)
+a ~ dnExponential(1)
+mymodel = model(a)
+
+# Create a move vector and a monitor vector
+moves[1] = mvScale(a, lambda = 1.0, weight = 1.0)
+monitors[1] = mnFile(a, filename = "output/out.log")
+
+# Run 64 power posterior analyses, each with 100 samples
+pow_p = powerPosterior(mymodel, monitors, moves, "output/out.pp", cats=64, sampleFreq=1)
+pow_p.run(generations=200, burninFraction=0.5)
+
+# Create a path sampler object from a file that RevBayes
+# automatically generated by concatenating the likelihoods from
+# individual power posteriors
+ps = pathSampler(file="output/out.pp", powerColumnName="power",
+                 likelihoodColumnName="likelihood")
+
+# Compute the marginal likelihood
+ps.marginal()
+
+# Compute the standard error
+ps.stdError()                                               # default formula
+ps.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
+ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("pathSampler")][string("name")] = string(R"(pathSampler)");
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(dos Reis M, Gunnell GF, Barba-Montoya J, Wilkins A, Yang Z, Yoder AD (2018). Using phylogenomic data to explore the effects of relaxed clocks and calibration strategies on divergence time estimation: primates as a test case. Systematic Biology, 67(4):594-615.)",R"(10.1093/sysbio/syy001)",R"(https://academic.oup.com/sysbio/article/67/4/594/4802240 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.)",R"(10.1214/ss/1028905934)",R"(https://www.jstor.org/stable/2676756 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195–207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Ogata Y (1989). A Monte Carlo method for high dimensional integration. Numerische Mathematik, 55:137-157.)",R"(10.1007/BF01406511)",R"(https://link.springer.com/article/10.1007/BF01406511 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Politis DN, Romano JP (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428):1303-1313.)",R"(10.1080/01621459.1994.10476870)",R"(https://www.tandfonline.com/doi/abs/10.1080/01621459.1994.10476870 )"));
+	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(powerPosterior)"));
+	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
+	help_strings[string("pathSampler")][string("title")] = string(R"(Path-sampling marginal likelihood estimation)");
 	help_strings[string("pomoRF")][string("name")] = string(R"(pomoRF)");
 	help_strings[string("pomoState4Convert")][string("name")] = string(R"(pomoState4Convert)");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
@@ -4381,7 +4658,83 @@ s := stdev(x))");
 	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(Real)"));
 	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(mean)"));
 	help_strings[string("stdev")][string("title")] = string(R"(Standard Deviation)");
+	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(David Černý)"));
+	help_strings[string("steppingStoneSampler")][string("description")] = string(R"(Applies the stepping-stone technique (Fan et al. 2011; Xie et al. 2011) to
+estimate the marginal likelihood of a model from a series of unnormalized
+"power posterior" densities in which the likelihood term is raised to a power
+B between 0 and 1.)");
+	help_strings[string("steppingStoneSampler")][string("details")] = string(R"(For K power posteriors starting with the posterior proper (B_1 = 1) and ending
+with the prior (B_K = 0), the stepping-stone marginal likelihood estimate r_SS
+is equal to:
+
+    r_SS = \prod_{k=1}^K r_{SS,k}
+    
+where
+
+    r_{SS,k} = (1/n) * L_{max,k}^(B_{k-1} - B_k) * \sum_{i=1}^n (L_{i,k - 1} / L_{max,k})^(B_{k-1} - B_k)
+    
+where n denotes the number of MCMC samples from each power posterior,
+L_{max,k} denotes the highest likelihood sampled for the k-th power posterior,
+and L_{k,i} denotes the likelihood of the i-th MCMC sample from the k-th power
+posterior (Xie et al. 2011: 153). If we instead assume that L_{max,k} and
+L_{i,k} are given on the log scale, and that r_SS is to be expressed on the
+log scale as well, this yields:
+
+    r_SS = \sum_{k=1}^K L_{max,k} * (B_k - B_{k-1}) + log( \sum_{i=1}^n exp( (L_{i,k-1} - L_{max,k}) * (B_{k-1} - B_k) ) / n )
+    
+which is how the method is implemented in RevBayes. The estimate is returned by
+calling the `.marginal()` method on the sampler object. We can also compute the
+standard error of this estimate in two different ways using the `.stdError()`
+method. By default, the method uses the delta approximation suggested by Xie et 
+al. (2011: 153):
+
+    SE = sqrt( \sum_{k=1}^K 1/r_{SS,k}^2 * Var( r_{SS,k} )/N_{eff,k} )
+    
+where N_{eff,k} is the effective sample size for the k-th power posterior. The
+approximation may be unreliable if any individual summand exceeds ~0.1, which
+may occur when the sample size for a given power posterior is too low. This is
+common in analyses employing a large number of relatively short power posterior
+runs. In these cases, it may be preferable to derive the standard error using
+the stationary bootstrap method (Politis & Romano 1994), which divides the log
+likelihood values from each power posterior into consecutive blocks of random
+size (drawn from a geometric distribution) and resamples them with replacement.
+The RevBayes implementation of the stationary block bootstrap method is based
+on the mcmc3r R package (Álvarez-Carretero et al. 2022), and can be accessed by
+calling `.stdError(bootstrap=TRUE)`.)");
+	help_strings[string("steppingStoneSampler")][string("example")] = string(R"(# Create a simple model (unclamped)
+a ~ dnExponential(1)
+mymodel = model(a)
+
+# Create a move vector and a monitor vector
+moves[1] = mvScale(a, lambda = 1.0, weight = 1.0)
+monitors[1] = mnFile(a, filename = "output/out.log")
+
+# Run 64 power posterior analyses, each with 100 samples
+pow_p = powerPosterior(mymodel, monitors, moves, "output/out.pp", cats=64, sampleFreq=1)
+pow_p.run(generations=200, burninFraction=0.5)
+
+# Create a stepping-stone sampler object from a file that RevBayes
+# automatically generated by concatenating the likelihoods from
+# individual power posteriors
+ss = steppingStoneSampler(file="output/out.pp", powerColumnName="power",
+                          likelihoodColumnName="likelihood")
+
+# Compute the marginal likelihood
+ss.marginal()
+
+# Compute the standard error
+ss.stdError()                                               # delta approximation
+ss.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
+ss.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
+	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
+	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Fan Y, Wu R, Chen M-H, Kuo L, Lewis PO (2011). Choosing among partition models in Bayesian phylogenetics. Molecular Biology and Evolution, 28(1):523-532.)",R"(10.1093/molbev/msq224)",R"(https://academic.oup.com/mbe/article/28/1/523/983866 )"));
+	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Politis DN, Romano JP (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428):1303-1313.)",R"(10.1080/01621459.1994.10476870)",R"(https://www.tandfonline.com/doi/abs/10.1080/01621459.1994.10476870 )"));
+	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Xie W, Lewis PO, Fan Y, Kuo L, Chen M-H (2010). Improving marginal likelihood estimation for Bayesian phylogenetic model selection. Systematic Biology, 60(2):150-160.)",R"(10.1093/sysbio/syq085)",R"(https://academic.oup.com/sysbio/article-abstract/60/2/150/2461669 )"));
+	help_arrays[string("steppingStoneSampler")][string("see_also")].push_back(string(R"(pathSampler)"));
+	help_arrays[string("steppingStoneSampler")][string("see_also")].push_back(string(R"(powerPosterior)"));
+	help_strings[string("steppingStoneSampler")][string("title")] = string(R"(Stepping-stone marginal likelihood estimation)");
 	help_arrays[string("stochasticMatrix")][string("authors")].push_back(string(R"(Michael R. May)"));
 	help_strings[string("stochasticMatrix")][string("description")] = string(R"(A stochastic matrix is a matrix (not necessarily square) with rows that sum to 1.)");
 	help_strings[string("stochasticMatrix")][string("example")] = string(R"(vec[1] ~ dnDirichlet( [1,1,1,1] )
@@ -4443,7 +4796,7 @@ phy.taxa())");
 
 "day" returns the index of the day in the year (e.g. Jan 1 = 1; Feb 1 = 32).
 
-"(milli)seconds" returns the number of (milli)seconds that have elapsed since midnight.
+"(milli/nano)seconds" returns the number of (milli/nano)seconds that have elapsed since midnight.
 
 "fromBeginning", the default, returns the number of milliseconds that have elapsed since 1400-Jan-01 00:00:00, the earliest representable date in the boost library's implementation of the Gregorian date system.)");
 	help_strings[string("time")][string("example")] = string(R"(time()

@@ -18,6 +18,8 @@ jobs:
                ubuntu-22.04-gcc-12,
                ubuntu-gcc-13,
                ubuntu-gcc-14,
+               ubuntu-gcc-15,
+               ubuntu-gcc-15-debugoptimized,
                ubuntu-clang-15,
                macos-xcode-15-intel,
                macos-xcode-16-arm,
@@ -60,6 +62,7 @@ jobs:
             version: "13"
             mpi: false
             arch: linux64
+            project: meson
 
           - name: ubuntu-gcc-14
             os: ubuntu-latest
@@ -67,6 +70,25 @@ jobs:
             version: "14"
             mpi: false
             arch: linux64
+
+          - name: ubuntu-gcc-15
+            os: ubuntu-latest
+            compiler: gcc
+            version: "15"
+            mpi: false
+            arch: linux64
+            image: ubuntu:25.04
+            project: meson
+
+          - name: ubuntu-gcc-15-debugoptimized
+            os: ubuntu-latest
+            compiler: gcc
+            version: "15"
+            mpi: false
+            arch: linux64
+            image: ubuntu:25.04
+            project: meson
+            buildtype: debugoptimized
 
           - name: ubuntu-clang-15
             os: ubuntu-latest
@@ -98,6 +120,8 @@ jobs:
 
 
     runs-on: ${{ matrix.os }}
+    container:
+      image: ${{ matrix.image || '' }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
@@ -107,6 +131,11 @@ jobs:
     - name: Install (Linux)
       if: runner.os == 'Linux' && matrix.name != 'windows'
       run: |
+        # If we're running in a docker image, we are already root
+        if [ -n "${{ matrix.image }}" ]  ; then
+          apt-get update && apt-get install -y sudo build-essential git cmake
+        fi 
+
         sudo apt-get update
         sudo apt-get install -y ccache meson
         if [ "${{ matrix.compiler }}" = "gcc" ]; then
@@ -178,7 +207,7 @@ jobs:
       env:
         USE_MPI: ${{ matrix.mpi }}
       run: |
-        ${GITHUB_WORKSPACE}/projects/meson/make_winroot.sh -ccache true -gtk true
+        ${GITHUB_WORKSPACE}/projects/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
     - name: Configure and build
@@ -201,15 +230,26 @@ jobs:
         ccache -p
         ccache -s
 
-        # Check meson setup (but not build).
+        # Check meson setup (but not build)
         echo ::group::Test meson setup
+        MESON_ARGS=""
+
+        if [ -n "${{ matrix.buildtype || '' }}" ] ; then
+           MESON_ARGS="${MESON_ARGS} -Dbuildtype=${{ matrix.buildtype }}"
+        fi
         ./projects/meson/generate.sh -Dprefix=$HOME/local/ -Dmpi=${{ matrix.mpi }}
-        meson setup build
+        meson setup build ${MESON_ARGS}
         echo ::endgroup::
 
-        cd projects/cmake
-        BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
-        cmake --install build
+        if [ "${{ matrix.project }}" = "meson" ] ; then
+           meson install -C build
+        else
+           (
+              cd projects/cmake
+              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+              cmake --install build
+           )
+        fi
 
         ccache -s
 

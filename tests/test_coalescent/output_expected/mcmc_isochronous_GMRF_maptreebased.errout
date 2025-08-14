@@ -4,7 +4,7 @@ Progress:
 0---------------25---------------50---------------75--------------100
 ********************************************************************
 
-   Compiling maximum a posteriori tree from 20 trees.
+   Compiling maximum a posteriori tree from 4 trees.
    
    Summarizing clades ...
    
@@ -14,34 +14,9 @@ Progress:
 ********************************************************************
 
    Annotating tree ...
-max age: 	252802.1
+max age: 	356378.2
    
    Running MCMC simulation
    This simulation runs 2 independent replicates.
    The simulator uses 17 different moves in a random move schedule with 100 moves per iteration
    
-
-                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
-===============================================================================================================================
-ScalingBactrian                          population_size_at_present     5.0000         60          4      0.0667 sigma = 1.0000
-MirrorMultiplier                         population_size_at_present     5.0000         57          0      0.0000 sigma = 1.0000
-HalfRandomDive                           population_size_at_present     5.0000         61         15      0.2459 delta = 1.0000
-ScalingBactrian                          population_size_global_scale     5.0000         55          2      0.0364 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[1]     5.0000         44          3      0.0682 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[2]     5.0000         40          6      0.1500 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[3]     5.0000         52          3      0.0577 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[4]     5.0000         54         10      0.1852 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[5]     5.0000         57         11      0.1930 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[6]     5.0000         44         10      0.2273 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[7]     5.0000         50          7      0.1400 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[8]     5.0000         50         10      0.2000 sigma = 1.0000
-SlidingBactrian                          delta_log_population_size[9]     5.0000         46         11      0.2391 sigma = 1.0000
-EllipticalSliceSamplingSimpleMove        delta_log_population_size[1]     5.0000         62 
-  Ave. cos(angle(x1,x2)) = 0.7849
-  Ave. # of Pr evals = 3.6774
-  window = 6.2832
-
-VectorSlide                              delta_log_population_size[1]    10.0000         84         10      0.1190 lambda = 1.0000
-UpDownScaling                            population_size_at_present    10.0000         96         32      0.3333 lambda = 1.0000
-ShrinkExpand                             delta_log_population_size[1]    10.0000         88         66      0.7500 lambda = 1.0000
-

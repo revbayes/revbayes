@@ -1,0 +1,169 @@
+################################################################################
+#
+# RevBayes Example: Inferring ancestral states and rates of morphological evolution using a hidden rates model.
+#
+# authors:  Sebastian Höhna
+#
+################################################################################
+
+seed(0)
+
+#######################
+# Reading in the Data #
+#######################
+
+CHARACTER_A = "solitariness"
+CHARACTER_B = "terrestrially"
+NUM_STATES_A = 2
+NUM_STATES_B = 2
+
+# Import the morphological character matrix #
+morpho_A <- readDiscreteCharacterData("data/primates_"+CHARACTER_A+".nex")
+morpho_B <- readDiscreteCharacterData("data/primates_"+CHARACTER_B+".nex")
+
+morpho = combineCharacter( morpho_A, morpho_B )
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+##############
+# Tree model #
+##############
+
+# Here we use a fixed tree topology of primates
+# Note that the readTrees function always returns a vector of trees,
+# so we simple take the first tree
+phylogeny <- readTrees("data/Primates_tree.nex")[1]
+
+
+#########################
+# Set up the rate model #
+#########################
+
+# we assume every rate i <-> j to be independent and exponentially distributed
+rate_pr := phylogeny.treeLength() / 10
+for (i in 1:4) {
+    for (j in 1:4) {
+        rates[i][j] <- 0.0
+    }
+}
+
+rate_gain_A_when_B0 ~ dnExponential( rate_pr )
+rate_gain_A_when_B1 ~ dnExponential( rate_pr )
+rate_loss_A_when_B0 ~ dnExponential( rate_pr )
+rate_loss_A_when_B1 ~ dnExponential( rate_pr )
+rate_gain_B_when_A0 ~ dnExponential( rate_pr )
+rate_gain_B_when_A1 ~ dnExponential( rate_pr )
+rate_loss_B_when_A0 ~ dnExponential( rate_pr )
+rate_loss_B_when_A1 ~ dnExponential( rate_pr )
+
+prob_gain_A_indep := ifelse( rate_gain_A_when_B0 > rate_gain_A_when_B1, 1.0, 0.0 )
+prob_loss_A_indep := ifelse( rate_loss_A_when_B0 > rate_loss_A_when_B1, 1.0, 0.0 )
+prob_gain_B_indep := ifelse( rate_gain_B_when_A0 > rate_gain_B_when_A1, 1.0, 0.0 )
+prob_loss_B_indep := ifelse( rate_loss_B_when_A0 > rate_loss_B_when_A1, 1.0, 0.0 )
+
+moves.append( mvScale( rate_gain_A_when_B0, weight=2 ) )
+moves.append( mvScale( rate_gain_A_when_B1, weight=2 ) )
+moves.append( mvScale( rate_loss_A_when_B0, weight=2 ) )
+moves.append( mvScale( rate_loss_A_when_B1, weight=2 ) )
+moves.append( mvScale( rate_gain_B_when_A0, weight=2 ) )
+moves.append( mvScale( rate_gain_B_when_A1, weight=2 ) )
+moves.append( mvScale( rate_loss_B_when_A0, weight=2 ) )
+moves.append( mvScale( rate_loss_B_when_A1, weight=2 ) )
+
+rates[1][2] := rate_gain_A_when_B0 # 00->10
+rates[1][3] := rate_gain_B_when_A0 # 00->01
+rates[2][1] := rate_loss_A_when_B0 # 10->00
+rates[2][4] := rate_gain_B_when_A1 # 10->11
+rates[3][1] := rate_loss_B_when_A0 # 01->00
+rates[3][4] := rate_gain_A_when_B1 # 01->11
+rates[4][2] := rate_loss_B_when_A1 # 11->10
+rates[4][3] := rate_loss_A_when_B1 # 11->01
+
+Q_morpho := fnFreeK(rates, rescaled=FALSE)
+
+#####################################
+# Set up the root state frequencies #
+#####################################
+
+rf_prior <- rep(1,NUM_STATES_A*NUM_STATES_B)
+rf ~ dnDirichlet( rf_prior )
+moves.append( mvBetaSimplex( rf, weight=2 ) )
+moves.append( mvDirichletSimplex( rf, weight=2 ) )
+
+
+
+###################
+# Set up the CTMC #
+###################
+
+# Combine all of our elements into a CTMC.
+
+phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q_morpho, rootFrequencies=rf, type="NaturalNumbers")
+phyMorpho.clamp( morpho )
+
+
+########
+# MCMC #
+########
+
+# initialize the model object #
+mymodel = model(phylogeny)
+
+
+# Create a vector of monitors #
+# 1. for the full model #
+monitors.append( mnModel(filename="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr.log", printgen=1) )
+# 2. and a few select parameters to be printed to the screen #
+# monitors.append( mnScreen(printgen=1) )
+# 3. add an ancestral state monitor
+monitors.append( mnJointConditionalAncestralState(tree=phylogeny,
+                                                  ctmc=phyMorpho,
+                                                  filename="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr.states.txt",
+                                                  type="NaturalNumbers",
+                                                  printgen=1,
+                                                  withTips=true,
+                                                  withStartStates=false) )
+# 4. add an stochastic character map monitor
+monitors.append( mnStochasticCharacterMap(ctmc=phyMorpho,
+                                          filename="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr_stoch_char_map.log",
+                                          printgen=1,
+                                          include_simmap=true) )
+
+
+# Initialize the MCMC object #
+mymcmc = mcmc(mymodel, monitors, moves, combine="mixed")
+
+# Run the MCMC #
+mymcmc.run(generations=10)
+
+
+# Read in the tree trace and construct the ancestral states (ASE) #
+anc_states = readAncestralStateTrace("output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr.states.txt")
+anc_tree = ancestralStateTree(tree=phylogeny,
+                              ancestral_state_trace_vector=anc_states,
+                              include_start_states=false, file="output/"+CHARACTER_A+"_"+CHARACTER_B+"_ase_corr.tree",
+                              burnin=0.25,
+                              summary_statistic="MAP",
+                              site=1,
+                              nStates=NUM_STATES_A*NUM_STATES_B)
+
+
+
+# read in the sampled character histories
+anc_states_stoch_map = readAncestralStateTrace("output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr_stoch_char_map.log")
+
+summarizeCharacterMaps(anc_states_stoch_map, phylogeny, file="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr.events.tsv", burnin=0.25)
+
+
+# make summary tree
+char_map_tree = characterMapTree(tree=phylogeny,
+                 ancestral_state_trace_vector=anc_states_stoch_map,
+                 character_file="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr_marginal_character.tree",
+                 posterior_file="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr_marginal_posterior.tree",
+                 burnin=0.25,
+                 num_time_slices=500)
+
+# Quit RevBayes #
+q()
