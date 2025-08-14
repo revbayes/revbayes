@@ -1,0 +1,87 @@
+################################################################################
+#
+# RevBayes Test-Script: Integration test for validation analysis
+#
+# authors: Sebastian Hoehna, David Cerny
+#
+################################################################################
+
+seed(12345)
+
+NUM_VALIDATION_REPLICATES = 10
+NUM_MCMC_ITERATIONS       = 1000
+
+# Create the monitor and move vectors
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+#######################
+# Reading in the data #
+#######################
+
+# Import the morphological character matrix. This file contains only the taxa for
+# which morphological characters are available.
+
+morpho <- readDiscreteCharacterData("data/bears_morphology.nex")
+
+# Helper variables
+taxa <- morpho.names()
+n_taxa <- taxa.size()
+n_branches <- 2 * n_taxa - 2
+
+##############
+# Tree model #
+##############
+
+# Obtain a list of names from the Nexus file. We will use this to add tips to the tree.
+names <- morpho.names()
+
+# Set up branch length hyperprior with a move
+br_len_lambda ~ dnExp(0.2)
+moves.append( mvScale(br_len_lambda, weight=2) )
+
+# Draw a tree with a uniformly distributed topology and exponentially distributed
+# branch lengths.
+
+phylogeny ~ dnUniformTopologyBranchLength(names,
+                                          branchLengthDistribution=dnExp(br_len_lambda))
+# Compute the tree length
+tree_length := phylogeny.treeLength()
+
+moves.append( mvNNI(phylogeny, weight=n_branches/2.0) )
+moves.append( mvSPR(phylogeny, weight=n_branches/10.0) )
+moves.append( mvBranchLengthScale(phylogeny, weight=n_branches) )
+
+###########################################
+# Binary morphological substitution model #
+###########################################
+
+# Create the Q matrix. These data are binary, so we initialize the Jukes-Cantor matrix
+# with two states.
+
+Q_morpho <- fnJC(2)
+
+# Combine all our elements into a CTMC. No ascertainment bias correction will be used.
+phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q_morpho, type="Standard")
+phyMorpho.clamp(morpho)
+
+############
+# Analysis #
+############
+
+# Initialize the model object 
+mymodel = model(phylogeny)
+
+# Initialize the analysis objects
+mymcmc = mcmc(mymodel, monitors, moves)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output" )
+
+# Run the validation analysis
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS, tuningInterval=10)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+clear()
+
+q()
