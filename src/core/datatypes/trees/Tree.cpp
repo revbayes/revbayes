@@ -956,15 +956,14 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
         
         if ( node->getAge() < taxon.getMinAge() )
         {
+            double diff = taxon.getMinAge() - node->getAge();
             if (forceAdjust)
             {
                 node->setAge(taxon.getMinAge());
                 
                 // only notify the user if we are making a non-trivial adjustment
-                if ( taxon.getMinAge() - node->getAge() > RbSettings::userSettings().getTolerance() )
-                {
+                if ( diff > RbSettings::userSettings().getTolerance() )
                     RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
-                }
             }
             else
             {
@@ -973,15 +972,14 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
         }
         if ( node->getAge() > taxon.getMaxAge() )
         {
+            double diff = node->getAge() - taxon.getMaxAge();
             if (forceAdjust)
             {
                 node->setAge(taxon.getMaxAge());
                 
                 // only notify the user if we are making a non-trivial adjustment
-                if ( node->getAge() - taxon.getMaxAge() > RbSettings::userSettings().getTolerance() )
-                {
+                if ( diff > RbSettings::userSettings().getTolerance() )
                     RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
-                }
             }
             else
             {
