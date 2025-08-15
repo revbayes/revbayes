@@ -25,6 +25,7 @@
 #include "RevObject.h"
 #include "RlFunction.h"
 #include "SyntaxFormal.h" // IWYU pragma: keep
+#include "RevClient.h"    // for RevClient::shutdown()
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -164,14 +165,8 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
         {
             delete( root);
             
-            Workspace::userWorkspace().clear();
-            Workspace::globalWorkspace().clear();
-            
-#ifdef RB_MPI
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Finalize();
-#endif
-            
+            RevClient::shutdown();
+
             exit(0);
         }
 
@@ -444,13 +439,7 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
             // Catch a quit request in case it was not caught before
             if (rbException.getExceptionType() == RbException::QUIT)
             {
-                Workspace::userWorkspace().clear();
-                Workspace::globalWorkspace().clear();
-                
-#ifdef RB_MPI
-                MPI_Finalize();
-#endif
-                
+                RevClient::shutdown();
                 exit(0);
             }
             // All other uncaught exceptions

@@ -32,6 +32,9 @@ public:
     bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
     int                         getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
     int                         getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
+    bool                        getEcho() const;                                    //!< Should we print user commands to the screen.
+    bool                        getInteractive() const;                             //!< Should we run an interactive interpreter.
+    bool                        getErrorExit() const;                               //!< Should we exit on the first error.
 
     // setters
     void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
@@ -44,6 +47,9 @@ public:
     void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
     void                        setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
     void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
+    void                        setEcho(bool b);                                    //!< Should we print user commands to the screen.
+    void                        setInteractive(bool b);                             //!< Should we run an interactive interpreter.
+    void                        setErrorExit(bool b);                               //!< Should we exit on the first error.
     
 private:
     RbSettings(void);                                   //!< Default constructor
@@ -61,6 +67,10 @@ private:
     bool                        useScaling=true;
     int                         debugMCMC = 0;
     int                         logMCMC = 0;
+
+    bool                        echo=true;
+    bool                        interactive=true;
+    bool                        error_exit=false;
 };
 
 void showDebug(const std::string& s, int level=1);
