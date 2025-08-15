@@ -285,7 +285,7 @@ jobs:
           echo 'wineserver --kill --wait'   # Avoid connecting to an old wineserver from a previous job.
           echo 'wine ~/local/bin/rb.exe "$@"' ) > $HOME/wrapper/rb
         chmod +x ${HOME}/wrapper/rb
-        
+
     - name: Test
       env:
         USE_MPI: ${{ matrix.mpi }}
@@ -320,14 +320,14 @@ jobs:
            rm -rf test_propose_bad_index/output_expected/
         fi
 
-        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
            rm -f test_coalescent/output_expected/horses_het_BSP*
            rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
            rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
            rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
         fi
 
-        if [ ${{ matrix.arch }} == "win64" ] ; then
+        if [ ${{ matrix.arch }} = "win64" ] ; then
            rm -f test_coalescent/output_expected/horses_iso_EBSP_*
            rm -f test_coalescent/output_expected/mcmc_isochronous_EBSP.errout
         fi
