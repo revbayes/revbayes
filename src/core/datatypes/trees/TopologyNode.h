@@ -53,6 +53,8 @@ namespace RevBayesCore {
     class Tree;
     
     class TopologyNode  {
+
+    friend Tree;
         
     public:
         TopologyNode();                                                                                                                 //!< Default constructor with no index
