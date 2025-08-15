@@ -111,7 +111,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousBinary::sumRootLikelihood( void )
     // get the index of the root node
     size_t node_index = root.getIndex();
     
-    std::vector<double>::const_iterator p_node = correctionLikelihoods.begin() + this->activeLikelihood[node_index] * activeCorrectionOffset  + node_index*correctionNodeOffset;
+    std::vector<double>::const_iterator p_node = getCorrectionLikelihoodsForNode(node_index);
     
     std::vector<double> perMaskCorrections = std::vector<double>(numCorrectionMasks, 0.0);
     
