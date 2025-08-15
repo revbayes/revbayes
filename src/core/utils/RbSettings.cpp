@@ -68,10 +68,7 @@ int RbSettings::getLogMCMC( void ) const
 
 std::string bool_to_string(bool b)
 {
-    if (b)
-        return "TRUE";
-    else
-        return "FALSE";
+    return b ? "TRUE" : "FALSE";
 }
 
 std::string RbSettings::getOption(const std::string &key) const
