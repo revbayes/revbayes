@@ -20,10 +20,21 @@ namespace RevBayesCore {
         virtual ~TraceTree(){}
 
         TraceTree*                                 clone(void) const;
-
-        int                                        isCoveredInInterval(const std::string &v, double size, bool stochastic, bool verbose){ return (TreeSummary::isCoveredInInterval(v, size, stochastic, verbose) ? 0 : -1); }; // hacky solution to make validation analyses work
         bool                                       isDirty(void) const { return Trace<Tree>::isDirty(); };
         void                                       setDirty(bool d) { Trace<Tree>::setDirty(d); };
+        
+        int isCoveredInInterval(const std::string &v, double size, bool verbose, std::optional<bool> stochastic)
+        {
+            if ( not stochastic.has_value() )
+            {
+                return (TreeSummary::isCoveredInInterval(v, size, true, verbose) ? 0 : -1);
+            }
+            else
+            {
+                return (TreeSummary::isCoveredInInterval(v, size, stochastic.value(), verbose) ? 0 : -1);
+            }
+            
+        }; // hacky solution to make validation analyses work
     };
 
 }
