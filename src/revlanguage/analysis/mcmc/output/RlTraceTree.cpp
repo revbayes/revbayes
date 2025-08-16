@@ -126,11 +126,12 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double treeCI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        double treeCI       = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
         double minCladeProb = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool verbose = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool stochastic     = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool verbose        = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
         
-        this->value->printTreeSummary(std::cout, treeCI, verbose);
+        this->value->printTreeSummary(std::cout, treeCI, stochastic, verbose);
         this->value->printCladeSummary(std::cout, minCladeProb, verbose);
         
         return NULL;
@@ -163,10 +164,11 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool verbose   = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        double tree_CI  = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool stochastic = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool verbose    = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
-        double entropy = this->value->computeEntropy(tree_CI, verbose);
+        double entropy = this->value->computeEntropy(tree_CI, stochastic, verbose);
         
         return new RevVariable( new RealPos(entropy) );
     }
@@ -174,13 +176,14 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool verbose   = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        double tree_CI  = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool stochastic = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool verbose    = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
-        std::vector<double> distances = this->value->computePairwiseRFDistance(tree_CI, verbose);
+        std::vector<double> distances = this->value->computePairwiseRFDistance(tree_CI, stochastic, verbose);
         
         ModelVector<RealPos> *rl_dist = new ModelVector<RealPos>;
-        for (size_t i=0; i<distances.size(); ++i)
+        for (size_t i = 0; i < distances.size(); ++i)
         {
             rl_dist->push_back( distances[i] );
         }
@@ -275,10 +278,11 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
     {
         found = true;
         
-        double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        double tree_CI  = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool stochastic = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool verbose    = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
-        std::vector<RevBayesCore::Tree> trees = this->value->getUniqueTrees(tree_CI, verbose);
+        std::vector<RevBayesCore::Tree> trees = this->value->getUniqueTrees(tree_CI, stochastic, verbose);
         
         if ( this->value->isClock() == true )
         {
@@ -306,8 +310,9 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         const RevBayesCore::Tree &current_tree = static_cast<const Tree &>( args[0].getVariable()->getRevObject() ).getValue();
         double ci_size = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool verbose = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
-        int coverage_code = this->value->isCoveredInInterval(current_tree.getPlainNewickRepresentation(), ci_size, verbose);
+        bool stochastic = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+        bool verbose = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+        int coverage_code = this->value->isCoveredInInterval(current_tree.getPlainNewickRepresentation(), ci_size, stochastic, verbose);
         
         /* TraceTree::isCoveredInInterval() actually returns 0 for TRUE and -1 for FALSE, which is a hacky solution that
          * makes it play nice with validation analyses. The ultimate reason for this is that when we are dealing with
@@ -461,8 +466,9 @@ void TraceTree::initMethods( void )
     this->methods.addFunction( new MemberProcedure( "setOutgroup", RlUtils::Void, outgroupArgRules) );
 
     ArgumentRules* summarizeArgRules = new ArgumentRules();
-    summarizeArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set to print.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    summarizeArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The cumulative probability of trees to be included in the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
     summarizeArgRules->push_back( new ArgumentRule("minCladeProbability", Probability::getClassTypeSpec(), "Print only clades with a probability above this threshold.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.05)) );
+    summarizeArgRules->push_back( new ArgumentRule("probabilistic", RlBoolean::getClassTypeSpec(), "Should we construct the credible set probabilistically if we cannot obtain a cumulative probability precisely equal to credibleTreeSetSize?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     summarizeArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "summarize", RlUtils::Void, summarizeArgRules) );
     
@@ -477,12 +483,14 @@ void TraceTree::initMethods( void )
     this->methods.addFunction( new MemberProcedure( "jointCladeProbability", Probability::getClassTypeSpec(), jointCladeProbArgRules) );
     
     ArgumentRules* computeEntropyArgRules = new ArgumentRules();
-    computeEntropyArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    computeEntropyArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The cumulative probability of trees to be included in the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    computeEntropyArgRules->push_back( new ArgumentRule("probabilistic", RlBoolean::getClassTypeSpec(), "Should we construct the credible set probabilistically if we cannot obtain a cumulative probability precisely equal to credibleTreeSetSize?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     computeEntropyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "computeEntropy", RealPos::getClassTypeSpec(), computeEntropyArgRules) );
     
     ArgumentRules* computePairwiseRFDistanceArgRules = new ArgumentRules();
-    computePairwiseRFDistanceArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    computePairwiseRFDistanceArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The cumulative probability of trees to be included in the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    computePairwiseRFDistanceArgRules->push_back( new ArgumentRule("probabilistic", RlBoolean::getClassTypeSpec(), "Should we construct the credible set probabilistically if we cannot obtain a cumulative probability precisely equal to credibleTreeSetSize?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     computePairwiseRFDistanceArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "computePairwiseRFDistances", ModelVector<RealPos>::getClassTypeSpec(), computePairwiseRFDistanceArgRules) );
     
@@ -517,13 +525,15 @@ void TraceTree::initMethods( void )
     this->methods.addFunction( new MemberProcedure( "getUniqueClades", ModelVector<Clade>::getClassTypeSpec(), getUniqueCladesArgRules) );
     
     ArgumentRules* getUniqueTreesArgRules = new ArgumentRules();
-    getUniqueTreesArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    getUniqueTreesArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The cumulative probability of trees to be included in the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    getUniqueTreesArgRules->push_back( new ArgumentRule("probabilistic", RlBoolean::getClassTypeSpec(), "Should we construct the credible set probabilistically if we cannot obtain a cumulative probability precisely equal to credibleTreeSetSize?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     getUniqueTreesArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "getUniqueTrees", ModelVector<Tree>::getClassTypeSpec(), getUniqueTreesArgRules) );
     
     ArgumentRules* isCoveredArgRules = new ArgumentRules();
     isCoveredArgRules->push_back( new ArgumentRule("tree", Tree::getClassTypeSpec(), "The tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    isCoveredArgRules->push_back( new ArgumentRule("ci_size", Probability::getClassTypeSpec(), "The size of the credible interval.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    isCoveredArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
+    isCoveredArgRules->push_back( new ArgumentRule("probabilistic", RlBoolean::getClassTypeSpec(), "Should we construct the credible set probabilistically if we cannot obtain a cumulative probability precisely equal to credibleTreeSetSize?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     isCoveredArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "isTreeCovered", RlBoolean::getClassTypeSpec(), isCoveredArgRules) );
     

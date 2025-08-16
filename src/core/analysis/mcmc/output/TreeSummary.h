@@ -73,17 +73,17 @@ namespace RevBayesCore {
         TreeSummary*                                   clone(void) const;
         void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose);
         double                                         cladeProbability(const Clade &c, bool verbose);
-        double                                         computeEntropy(double credible_interval_size, bool verbose);
-        std::vector<double>                            computePairwiseRFDistance(double credible_interval_size, bool verbose);
+        double                                         computeEntropy(double credible_interval_size, bool stochastic, bool verbose);
+        std::vector<double>                            computePairwiseRFDistance(double credible_interval_size, bool stochastic, bool verbose);
         std::vector<double>                            computeTreeLengths(void);
-        std::vector< std::pair<Tree, std::int64_t> >   getCredibleSetOfTrees(double credible_interval_size, bool verbose=true);
+        std::vector< std::pair<Tree, std::int64_t> >   getCredibleSetOfTrees(double credible_interval_size, bool stochastic, bool verbose=true);
         std::int64_t                                   getTopologyCount(const Tree &t, bool verbose);
         double                                         getTopologyFrequency(const Tree &t, bool verbose);
         std::vector<Clade>                             getUniqueClades(double min_clade_probability=0.05, bool non_trivial_only=true, bool verbose=true);
-        std::vector<Tree>                              getUniqueTrees(double credible_interval_size=0.95, bool verbose=true);
+        std::vector<Tree>                              getUniqueTrees(double credible_interval_size=0.95, bool stochastic=true, bool verbose=true);
         bool                                           isClock(void) const;
-        bool                                           isCoveredInInterval(const std::string &v, double credible_interval_size, bool verbose);
-        bool                                           isCoveredInInterval(const Tree &t, double credible_interval_size, bool verbose);
+        bool                                           isCoveredInInterval(const std::string &v, double credible_interval_size, bool stochastic, bool verbose);
+        bool                                           isCoveredInInterval(const Tree &t, double credible_interval_size, bool stochastic, bool verbose);
         bool                                           isDirty(void) const;
         double                                         jointCladeProbability(const RbVector<Clade> &c, bool verbose);
         double                                         maxdiff(bool verbose);
@@ -91,7 +91,7 @@ namespace RevBayesCore {
         Tree*                                          mccTree(AnnotationReport report, bool verbose);
         Tree*                                          mrTree(AnnotationReport report, double cutoff, bool verbose);
         void                                           printCladeSummary(std::ostream& o, double min_clade_probability=0.05, bool verbose=true);
-        void                                           printTreeSummary(std::ostream& o, double credible_interval_size=0.95, bool verbose=true);
+        void                                           printTreeSummary(std::ostream& o, double credible_interval_size=0.95, bool stochastic=true, bool verbose=true);
         std::int64_t                                   sampleSize(bool post = false) const;
         void                                           setOutgroup(const Clade &c);
 

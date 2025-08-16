@@ -323,9 +323,9 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 }
 
 
-double TreeSummary::computeEntropy( double credible_interval_size, bool verbose )
+double TreeSummary::computeEntropy( double credible_interval_size, bool stochastic, bool verbose )
 {
-    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, false);
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, stochastic, false);
     int num_taxa = (int)traces.front()->objectAt(0).getTaxa().size();
     double total_samples = sampleSize(true);
     double entropy = 0.0;
@@ -358,9 +358,9 @@ double TreeSummary::computeEntropy( double credible_interval_size, bool verbose 
 }
 
 
-std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_interval_size, bool verbose )
+std::vector<double> TreeSummary::computePairwiseRFDistance( double credible_interval_size, bool stochastic, bool verbose )
 {
-    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, false);
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, stochastic, false);
     std::vector< std::unique_ptr< std::vector<RbBitSet> > > unique_trees_bs(credible_set.size());
     std::vector<size_t> sample_count( credible_set.size() );
     std::vector<double> rf_distances;
@@ -435,7 +435,16 @@ std::vector<double> TreeSummary::computeTreeLengths( void )
 }
 
 
-std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees( double credible_interval_size, bool verbose )
+/* This function, and all other functions that call it, takes a "stochastic" argument that determines what we should do
+ * when we cannot obtain a cumulative probability precisely equal to the value passed via the "credible_interval_size"
+ * argument. Consider the example worked out by Huelsenbeck & Rannala (2004; Syst. Biol. 53(6): 904--913): the cumulative
+ * posterior probability of the first n trees is 0.90, and the probability of the (n+1)-th tree is 0.07. If "stochastic"
+ * is true, we will include this tree with include_prob = (0.95 - 0.90) / 0.07 = 0.714. If "stochastic" is false, we will
+ * always include it. Note that setting "stochastic" to true can produce an empty credible set if the probability of the
+ * most probable tree exceeds "credible_interval_size". E.g., if a single tree accounts for 98% of the total probability
+ * mass, we will produce an empty credible set with a probability of 1 - 0.95 / 0.98 = 0.031.
+ */
+std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees( double credible_interval_size, bool stochastic, bool verbose )
 {
     summarize( false );
 
@@ -465,7 +474,7 @@ std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees(
         double p = freq/total_samples;
         double include_prob = (credible_interval_size - total_prob) / p;
         
-        if ( include_prob > rng->uniform01() )
+        if ( not stochastic or include_prob > rng->uniform01() )
         {
             Tree* current_tree = converter.convertFromNewick( newick );
             current_tree->suppressOutdegreeOneNodes(true);
@@ -476,7 +485,7 @@ std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees(
         
         total_prob += p;
         
-        if ( total_prob > credible_interval_size )
+        if ( total_prob >= credible_interval_size )
         {
             break;
         }
@@ -577,9 +586,9 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
 }
 
 
-std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bool verbose )
+std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bool stochastic, bool verbose )
 {
-    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, verbose);
+    std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, stochastic, verbose);
     std::vector<Tree> unique_trees( credible_set.size() );
     
     for (size_t i = 0; i < credible_set.size(); i++)
@@ -591,7 +600,7 @@ std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bo
 }
 
 
-bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool verbose)
+bool TreeSummary::isCoveredInInterval(const std::string &v, double credible_interval_size, bool stochastic, bool verbose)
 {
     Tree tree;
     tree.initFromString(v);
@@ -611,15 +620,15 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double ci_size, bool
         }
     }
 
-    return isCoveredInInterval(tree, ci_size, verbose);
+    return isCoveredInInterval(tree, credible_interval_size, stochastic, verbose);
 }
 
 
-bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval_size, bool verbose)
+bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval_size, bool stochastic, bool verbose)
 {
     summarize( false );
     
-    std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, verbose);
+    std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, stochastic, verbose);
     bool out = false;
     
     for (size_t i = 0; i < unique_trees.size(); i++)
@@ -1087,7 +1096,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probabilit
 }
 
 
-void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_size, bool verbose)
+void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_size, bool stochastic, bool verbose)
 {
     summarize( verbose );
 
@@ -1130,7 +1139,7 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_siz
         double p = freq/total_samples;
         double include_prob = (credible_interval_size - total_prob) / p;
         
-        if ( include_prob > rng->uniform01() )
+        if ( not stochastic or include_prob > rng->uniform01() )
         {
             ss.str(std::string());
             ss << total_prob + p;
