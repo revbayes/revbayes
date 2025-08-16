@@ -309,10 +309,10 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         found = true;
         
         const RevBayesCore::Tree &current_tree = static_cast<const Tree &>( args[0].getVariable()->getRevObject() ).getValue();
-        double ci_size = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool stochastic = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
-        bool verbose = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
-        int coverage_code = this->value->isCoveredInInterval(current_tree.getPlainNewickRepresentation(), ci_size, stochastic, verbose);
+        double ci_size    = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool stochastic   = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool verbose      = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+        int coverage_code = this->value->isCoveredInInterval(current_tree.getPlainNewickRepresentation(), ci_size, verbose, stochastic);
         
         /* TraceTree::isCoveredInInterval() actually returns 0 for TRUE and -1 for FALSE, which is a hacky solution that
          * makes it play nice with validation analyses. The ultimate reason for this is that when we are dealing with
