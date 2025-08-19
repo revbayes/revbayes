@@ -80,8 +80,12 @@ public:
 	virtual void setConditionalProbabilityType(conditionalProbability_t condProb) = 0;
 	virtual void setIntegrationScheme(integrationScheme_t aIntScheme) = 0;
 	virtual void setNumberOfThreads(size_t nThreads) = 0;
+	virtual void setMaxNumStochMapTries(size_t aNumTries) = 0;
 
+	virtual void setAbsoluteTolerance(double anAbsoluteTolerance) = 0;
+	virtual void setRelativeTolerance(double aRelativeTolerance) = 0;
 	virtual void setInitialDeltaT(double initDeltaT) = 0;
+	virtual void setMaxNumDenseSteps(size_t aMaxNumSteps) = 0;
 
 	virtual void setRootPrior(const stdVectorXd &rootPrior) = 0;
 
@@ -102,6 +106,8 @@ public:
 	virtual void setSyncMonitors(const std::vector< double > &synchMonitoring) = 0;
 
 	virtual double computeLogLikelihood() = 0;
+	virtual void keepSchedulerAndApproximator() = 0;
+	virtual void resetSchedulerAndApproximator() = 0;
 
 	virtual mapHistories_t drawHistory() = 0;
 	virtual std::string    drawHistoryJSON() = 0;
@@ -120,11 +126,6 @@ public:
 	virtual size_t getVersion() const = 0;
 
 	virtual void setSeed(size_t aSeed) const = 0;
-
-	// MJL: new pure virtual to test interface, to remove
-	// virtual int testPass(int x) = 0;
-	// virtual std::string testText(std::string s) = 0;
-	// virtual std::string simulateTree(void) = 0;
 
 };
 
