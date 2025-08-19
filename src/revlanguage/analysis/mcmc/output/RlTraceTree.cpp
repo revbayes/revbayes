@@ -28,7 +28,9 @@
 #include "Integer.h"
 #include "ModelObject.h"
 #include "RbBoolean.h"
+#include "RbConstants.h"
 #include "RbException.h"
+#include "RbMathCombinatorialFunctions.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RealPos.h"
@@ -131,6 +133,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         bool stochastic     = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         bool verbose        = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
         
+        // no special handling needed here when the credible set is empty
         this->value->printTreeSummary(std::cout, treeCI, stochastic, verbose);
         this->value->printCladeSummary(std::cout, minCladeProb, verbose);
         
@@ -170,7 +173,19 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         double entropy = this->value->computeEntropy(tree_CI, stochastic, verbose);
         
-        return new RevVariable( new RealPos(entropy) );
+        // Make sure we are not attempting to calculate entropy from an empty credible set, and throw an exception if we are.
+        // This will be the case if the only contributing term is the logarithm of the number of topologies.
+        int num_taxa = (int)this->value->objectAt( 0 ).getTaxa().size();
+        double ln_ntopologies = RevBayesCore::RbMath::lnFactorial(2 * num_taxa - 5) - RevBayesCore::RbMath::lnFactorial(num_taxa - 3) - (num_taxa - 3) * RbConstants::LN2;
+        
+        if (entropy == ln_ntopologies)
+        {
+            throw RbException() << "No trees included in the " << 100 * tree_CI << "% credible set. Try setting probabilistic=FALSE.";
+        }
+        else
+        {
+            return new RevVariable( new RealPos(entropy) );
+        }
     }
     else if ( name == "computePairwiseRFDistances" )
     {
@@ -188,7 +203,14 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
             rl_dist->push_back( distances[i] );
         }
         
-        return new RevVariable( rl_dist );
+        if ( rl_dist->size() == 0 )
+        {
+            throw RbException() << "No trees included in the " << 100 * tree_CI << "% credible set. Try setting probabilistic=FALSE.";
+        }
+        else
+        {
+            return new RevVariable( rl_dist );
+        }
     }
     else if ( name == "computeTreeLengths" )
     {
@@ -284,6 +306,11 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         std::vector<RevBayesCore::Tree> trees = this->value->getUniqueTrees(tree_CI, stochastic, verbose);
         
+        if ( trees.size() == 0 )
+        {
+            throw RbException() << "No trees included in the " << 100 * tree_CI << "% credible set. Try setting probabilistic=FALSE.";
+        }
+        
         if ( this->value->isClock() == true )
         {
             ModelVector<TimeTree> *rl_trees = new ModelVector<TimeTree>;
@@ -323,6 +350,7 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         bool covered = coverage_code == 0 ? true : false;
         
+        // no special handling needed here when the credible set is empty
         return new RevVariable( new RlBoolean( covered ) );
     }
     else if ( name == "getTMRCA" )
