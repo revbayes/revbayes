@@ -7,7 +7,6 @@
 #include "VariableMonitor.h"
 #include "TypedDagNode.h"
 #include "StochasticNode.h"
-#include "RbException.h"
 
 #include <fstream>
 #include <string>
@@ -125,6 +124,7 @@ template<class characterType>
 void StochasticCharacterMappingJSONMonitor<characterType>::monitorVariables(unsigned long gen)
 {
 
+    auto& separator = to<SeparatorFormat>(format)->separator;
     size_t num_nodes;
 
     // get the distribution for the character
@@ -153,6 +153,7 @@ template<class characterType>
 void StochasticCharacterMappingJSONMonitor<characterType>::printFileHeader()
 {
 
+    auto& separator = to<SeparatorFormat>(format)->separator;
 	out_stream << separator;
 	out_stream << "stoch_map";
 
