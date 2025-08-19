@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 
@@ -62,7 +62,7 @@ void Move_NodeTimeSlideUniform::constructInternalObject( void )
     }
     else
     {
-        throw RbException("Wrong tree type '" + tree->getRevObject().getType() + "'.");
+        throw RbException() << "Wrong tree type '" << tree->getRevObject().getType() << "'.";
     }
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();

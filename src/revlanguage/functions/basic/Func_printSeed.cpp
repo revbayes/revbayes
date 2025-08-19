@@ -1,6 +1,6 @@
 #include "Func_printSeed.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "RandomNumberGenerator.h"

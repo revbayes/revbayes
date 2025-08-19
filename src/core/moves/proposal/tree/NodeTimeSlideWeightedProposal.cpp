@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -101,14 +101,13 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
     
     Tree& tau = variable->getValue();
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
+    // pick a random node which is not the root, a tip, or the parent of a SA
     TopologyNode* node;
-    do
-    {
+    do {
         double u = rng->uniform01();
         size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
         node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() );
+    } while ( node->isRoot() || node->isTip() || node -> isSampledAncestorParent() );
     
     TopologyNode& parent = node->getParent();
     

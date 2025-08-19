@@ -1,7 +1,7 @@
 #ifndef CorrelationMatrixSpecificElementBetaProposal_H
 #define CorrelationMatrixSpecificElementBetaProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

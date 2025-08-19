@@ -2,11 +2,13 @@
 #
 # RevBayes Validation Test: Average distance matrix with exponential error model
 #
-# Model: Pairwise distance matrices are calculated from two 3-tip ultrametric
-#        time trees with partially overlapping tip sets. We take the unweighted
-#        average of the two matrices such that one distance remains missing, and
-#        use the exponential error model to estimate a time tree on the union of
-#        their tip sets (4 tips).
+# Model: We draw a time tree from the birth-death process and deterministically
+#        convert it to an "average" distance matrix. (We thus assume this matrix
+#        to be known without error, as we obtain it directly from the true tree
+#        rather than by averaging multiple potentially conflicting time trees.)
+#        For inference, we keep drawing time trees from the same birth-death
+#        prior and use an exponential error model to calculate their likelihoods
+#        when clamping them to the average distance matrix.
 #
 # authors: David Cerny
 #
@@ -23,101 +25,64 @@ moves     = VectorMoves()
 monitors  = VectorMonitors()
 
 
-#######################
-# Reading in the Data #
-#######################
-
-# Read in the two incomplete time trees
-
-sourceTrees[1] <- readTrees("data/no_sp1.tre")
-sourceTrees[2] <- readTrees("data/no_sp2.tre")
-
-# Calculate the corresponding distance matrices
-
-distMatrices[1] := fnTreePairwiseDistances(sourceTrees[1][1])
-distMatrices[2] := fnTreePairwiseDistances(sourceTrees[2][1])
-
-# Calculate the (unweighted) average distance matrix
-
-ADM := fnAverageDistanceMatrix(distMatrices)
-
-# Get some useful variables from the data
-
-species_names <- ADM.distanceMatrix().names()
-n_species <- ADM.distanceMatrix().size()
-
-# Get the names of the taxa in the average distance matrix. We will use this to add
-# tips to the tree
-
-for (i in 1:n_species) {
-    species[i] <- taxon(taxonName=species_names[i])
-}
-
 ##############
-# Tree Model #
+# Simulation #
 ##############
 
-# The tree is drawn from a constant-rate birth-death process. Speciation and extinction
-# are fixed; root height is drawn from an exponential hyperprior
+# Simulate a time tree from a constant-rate birth-death process. Speciation and
+# extinction are fixed; root height is drawn from an exponential prior
 
 speciation <- 0.1
 extinction <- 0.09
-tree_height ~ dnExp(1.0)
+tree_height <- 1.0
+species <- simTree(4).taxa()
 
-# Construct a variable for the tree drawn from the birth-death process specified above.
-# Its taxon set is the union of the taxon sets of sourceTrees[1] and sourceTrees[2]
+#############
+# Inference #
+#############
 
-tree ~ dnBDP(lambda=speciation, mu=extinction, rootAge=tree_height, condition="nTaxa", taxa=species)
+est_tree ~ dnBDP(lambda=speciation, mu=extinction, rootAge=tree_height, condition="nTaxa", taxa=species)
 
-# Create some moves that operate on the stochastic variables
+# Create some moves that operate on the inferred tree
 
-moves.append( mvScale(tree_height, weight=2.0) )
-moves.append( mvNarrow(tree, weight=10.0) )
-moves.append( mvNNI(tree, weight=10.0) )
-moves.append( mvFNPR(tree, weight=10.0) )
-moves.append( mvSubtreeScale(tree, weight=10.0) )
-moves.append( mvNodeTimeSlideUniform(tree, weight=15.0) )
+moves.append( mvNarrow(est_tree, weight=10.0) )
+moves.append( mvNNI(est_tree, weight=10.0) )
+moves.append( mvFNPR(est_tree, weight=10.0) )
+moves.append( mvSubtreeScale(est_tree, weight=10.0) )
+moves.append( mvNodeTimeSlideUniform(est_tree, weight=15.0) )
 
-###########################
-# Exponential Error Model #
-###########################
+# Calculate the distance matrix of the inferred tree
 
-# Calculate the distance matrix of the time tree drawn from the birth-death process
-
-mat := fnTreePairwiseDistances(tree)
+mat := fnTreePairwiseDistances(est_tree)
 
 # Have it follow the exponential error distribution with a rate of 0.005
 
-exp_error_dist ~ dnExponentialError(distMat=mat, lambda=0.005)
+exp_error_dist ~ dnExponentialError(distMat=mat, lambda=1.0)
 
-# Attach the data
+# Clamp to the data
 
-exp_error_dist.clamp(ADM)
+exp_error_dist.clamp( exp_error_dist )
 
-#############
-# THE Model #
-#############
+#########
+# Model #
+#########
 
 # We define our model. We can use any node of our model as a handle;
 # here we chose to use the phylogeny.
 
-mymodel = model(tree)
+mymodel = model(est_tree)
 
-
-
-################
-# The Analysis #
-################
+############
+# Analysis #
+############
 
 mymcmc = mcmc(mymodel, monitors, moves)
 
-
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_AvgDistMat_ExpErr" )
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output_AvgDistMat_ExpError" )
 validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize(coverageProbability=0.9)
 validation.summarize(coverageProbability=0.5)
-
 
 # you may want to quit RevBayes now
 q()

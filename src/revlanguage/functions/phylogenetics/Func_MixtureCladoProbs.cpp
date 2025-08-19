@@ -8,7 +8,7 @@
 
 #include "Func_MixtureCladoProbs.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "MixtureCladogeneticStateFunction.h"
 #include "ModelVector.h"

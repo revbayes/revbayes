@@ -1,0 +1,3 @@
+trees = readTreeTrace("data/trees1.trees")
+print(filename = "output/Test_read_trees.txt", append = FALSE, trees.size())
+q()

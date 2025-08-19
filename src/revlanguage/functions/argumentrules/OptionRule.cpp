@@ -16,7 +16,7 @@
 
 #include "OptionRule.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <string>
 

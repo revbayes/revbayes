@@ -24,7 +24,7 @@ extern "C" {
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -128,7 +128,7 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
     std::vector<std::string> completions;
 
     // parse command
-    RevLanguage::ParserInfo pi = RevLanguage::Parser::getParser().checkCommand(cmd, &RevLanguage::Workspace::userWorkspace());
+    RevLanguage::ParserInfo pi = RevLanguage::Parser::getParser().checkCommand(cmd, RevLanguage::Workspace::userWorkspacePtr());
 
     if (pi.inComment)
     {
@@ -271,7 +271,7 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
 int printFunctionParameters(const char *buf, size_t len, char c)
 {
     std::string cmd = buf;
-    RevLanguage::ParserInfo pi = RevLanguage::Parser::getParser().checkCommand(cmd, &RevLanguage::Workspace::userWorkspace());
+    RevLanguage::ParserInfo pi = RevLanguage::Parser::getParser().checkCommand(cmd, RevLanguage::Workspace::userWorkspacePtr());
     if ( Workspace::globalWorkspace().existsFunction(pi.function_name) )
     {
 
@@ -322,7 +322,7 @@ int interpret(const std::string& command)
 
     std::string tmp = std::string( buffer );
 
-    return RevLanguage::Parser::getParser().processCommand(tmp, &RevLanguage::Workspace::userWorkspace());
+    return RevLanguage::Parser::getParser().processCommand(tmp, RevLanguage::Workspace::userWorkspacePtr());
 }
 
 /**

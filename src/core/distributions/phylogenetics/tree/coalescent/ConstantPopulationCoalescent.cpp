@@ -1,22 +1,22 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <vector>
 #include "ConstantPopulationCoalescent.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
+#include "RbConstants.h"
 #include "TopologyNode.h"
 #include "AbstractCoalescent.h"
+#include "Taxon.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class Clade; }
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { class RandomNumberGenerator; }
-namespace RevBayesCore { class Taxon; }
 
 using namespace RevBayesCore;
-
 
 /**
  * Default Constructor
@@ -26,7 +26,8 @@ using namespace RevBayesCore;
  * @param c a vector of clade constraints
  *
  */
-ConstantPopulationCoalescent::ConstantPopulationCoalescent(const TypedDagNode<double> *N, const std::vector<Taxon> &tn, const std::vector<Clade> &c) : AbstractCoalescent( tn, c ),
+ConstantPopulationCoalescent::ConstantPopulationCoalescent(const TypedDagNode<double> *N, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
+    AbstractCoalescent( tn, c ),
     Ne( N )
 {
     // add the parameters to our set (in the base class)
@@ -69,53 +70,118 @@ double ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization
-    double ln_prob_times = 0;
+    double ln_prob = 0;
+    double this_ne = Ne->getValue();
     
-    
-    // retrieved the speciation times
+    // retrieve the coalescence times
     std::vector<double> ages;
-    for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i) 
+    for (size_t i = 0; i < value->getNumberOfInteriorNodes()+1; ++i)
     {
         const TopologyNode& n = value->getInteriorNode( i );
         double a = n.getAge();
         ages.push_back(a);
     }
-    // sort the vector of times in ascending order
+    // sort the vector of coalescence times in ascending order
     std::sort(ages.begin(), ages.end());
     
-    for (size_t i = 0; i < ages.size(); ++i) 
+    // retrieve the times of any serially sampled tips
+    std::vector<double> serial_tip_ages;
+    size_t num_taxa_at_present = value->getNumberOfTips();
+    for (size_t i = 0; i < value->getNumberOfTips(); ++i)
     {
-//        size_t j = num_taxa - i;
-//        double theta = 1.0 / (2.0*Ne->getValue());
-//        double nPairs = j * (j-1) / 2.0;
-//        lnProbTimes += log( nPairs * 2.0 / theta ) - nPairs * 2.0 / theta * ages[i] ;
-        
-        
-        size_t j = num_taxa - i;
-        double theta = Ne->getValue();
-        double nPairs = j * (j-1) / 2.0;
-        
-        double prevCoalescentTime = 0.0;
-        if ( i > 0 )
+        double a = value->getNode(i).getAge();
+        // check if the tip is not contemporaneous
+        if ( a > 0.0 )
         {
-            prevCoalescentTime = ages[i-1];
+            serial_tip_ages.push_back(a);
+            // remember to decrease the count for the number of taxa at present
+            --num_taxa_at_present;
         }
-        
-        double deltaAge = ages[i] - prevCoalescentTime;
-
-        // CoalescentMCMC
-//        lnProbTimes += log( nPairs / theta ) - 2 * nPairs * deltaAge / theta;
-        // BEAST:
-//        lnProbTimes += log( 1.0 / theta ) - nPairs * deltaAge / theta ;
-        // RevBayes"
-//        lnProbTimes += log( nPairs / theta ) - nPairs * deltaAge / theta;
-        
-        
-        ln_prob_times += log( 1.0 / theta ) - nPairs * deltaAge / theta;
     }
     
-    return ln_prob_times;
+    std::vector<double> combined_event_ages;
+    std::vector<EVENT_TYPE> combined_event_types;
+
+    // if we have any serially sampled tips
+    if (num_taxa_at_present < num_taxa)
+    {
+
+        // sort the vector of serial sampling times in ascending order
+        std::sort(serial_tip_ages.begin(), serial_tip_ages.end());
+        
+        size_t at_age = 0;
+        size_t at_serial_age = 0;
+        double next_age = ages[at_age];
+        double next_serial_age = serial_tip_ages[at_serial_age];
+        
+        // create master list of event times and types
+        // events are either a sample (lineage size up), coalescence (lineage size down)
+        do
+        {
+            next_age = ages[at_age];
+            if (next_serial_age <= next_age)
+            {
+                // serial sample
+                combined_event_ages.push_back(next_serial_age);
+                combined_event_types.push_back( SERIAL_SAMPLE );
+                ++at_serial_age;
+                if (at_serial_age < serial_tip_ages.size())
+                {
+                    next_serial_age = serial_tip_ages[at_serial_age];
+                }
+                else
+                {
+                    next_serial_age = RbConstants::Double::inf;
+                }
+            }
+            else
+            {
+                // coalescence
+                combined_event_ages.push_back( next_age );
+                combined_event_types.push_back( COALESCENT );
+                ++at_age;
+            }
+        } while (at_age < ages.size());
+        
+    }
+    else
+    {
+        combined_event_ages = ages;
+        combined_event_types = std::vector<EVENT_TYPE>(ages.size(),COALESCENT);
+    }
     
+    
+    size_t current_num_lineages = num_taxa_at_present;
+    // initialize last event age
+    double last_event_age = 0.0;
+    
+    for (size_t i = 0; i < combined_event_ages.size(); ++i)
+    {
+        double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+        
+        double delta_age = combined_event_ages[i] - last_event_age;
+        
+        if (combined_event_types[i] == SERIAL_SAMPLE)
+        {
+            // sampled ancestor
+            ln_prob -= n_pairs * delta_age / this_ne ;
+            ++current_num_lineages;
+        }
+        else if (combined_event_types[i] == COALESCENT)
+        {
+            // coalescence probability
+            ln_prob += log( 1.0 / this_ne ) - n_pairs * delta_age / this_ne;
+            --current_num_lineages;
+        }
+        else
+        {
+            throw RbException("Unexpected event type in constant population size coalescent process.");
+        }
+        
+        last_event_age = combined_event_ages[i];
+    }
+    
+    return ln_prob;
 }
 
 /**
@@ -130,42 +196,84 @@ std::vector<double> ConstantPopulationCoalescent::simulateCoalescentAges( size_t
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    // allocate the vector for the times
-    std::vector<double> coalescent_times = std::vector<double>(n,0.0);
-    
-//    double theta = 1.0 / (2.0*Ne->getValue());
-    double theta = 1.0 / (Ne->getValue());
-    // draw a time for each speciation event condition on the time of the process
-	for (size_t i = 0; i < n; ++i)
+    // retrieve the times of any serially sampled tips
+    std::vector<double> serial_ages;
+    size_t num_taxa_at_present = 0;
+    for (size_t i = 0; i < num_taxa; ++i)
     {
-        double prev_coalescent_time = 0.0;
-        if ( i > 0 ) 
+        double a = taxa[i].getAge();
+        if ( a > 0.0 )
         {
-            prev_coalescent_time = coalescent_times[i-1];
+            serial_ages.push_back(a);
         }
+        else
+        {
+            ++num_taxa_at_present;
+        }
+    }
+    
+    size_t at_serial_age = 0;
+    if (num_taxa_at_present < num_taxa)
+    {
+        std::sort(serial_ages.begin(), serial_ages.end());
+    }
+    
+    // now simulate the ages
+    
+    // allocate the vector for the ages
+    std::vector<double> coalescent_ages = std::vector<double>(n,0.0);
+    
+    // j is the number of active lineages at the current time
+    size_t current_num_lineages = num_taxa_at_present;
+    double this_ne = Ne->getValue();
+    
+    // the current age of the process
+    double sim_age = 0.0;
+    
+    // draw a time for each event conditioned on the time of the process
+    for (size_t i = 0; i < n; ++i)
+    {
+        bool is_coalescent_event = false;
+        do
+        {
+            double n_pairs = current_num_lineages * (current_num_lineages-1) / 2.0;
+            double lambda = n_pairs / this_ne;
+            double u = RbStatistics::Exponential::rv( lambda, *rng);
+            sim_age += u;
+            is_coalescent_event = (at_serial_age >= serial_ages.size() || sim_age < serial_ages[at_serial_age]) && current_num_lineages > 1;
+            if ( is_coalescent_event == false )
+            {
+                // If current_num_lineages is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
+                // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
+                // Alternately, when we cross a serial sampling time, the number of active lineages changes
+                // it is necessary to discard any "excess" time, which is drawn from an incorrect distribution
+                // then we can draw a new time according to the correct number of active lineages.
+                // Either we advance or go back, but in both situations we set the time to the current serial sample.
+                sim_age = serial_ages[at_serial_age];
+                ++at_serial_age;
+                ++current_num_lineages;
+            }
+        } while ( is_coalescent_event == false );
+    
+        coalescent_ages[i] = sim_age;
+        --current_num_lineages;
         
-        size_t j = num_taxa - i;
-        double nPairs = j * (j-1) / 2.0;
-        double lambda = nPairs * theta;
-        double u = RbStatistics::Exponential::rv( lambda, *rng);
-		coalescent_times[i] = prev_coalescent_time + u;
-	}
-
-    return coalescent_times;
+    }
+        
+    return coalescent_ages;
 }
-
 
 /**
  * Swap the parameters held by this distribution.
  *
  *
- * \param[in]    oldP      Pointer to the old parameter.
- * \param[in]    newP      Pointer to the new parameter.
+ * \param[in]    old_p      Pointer to the old parameter.
+ * \param[in]    new_p      Pointer to the new parameter.
  */
-void ConstantPopulationCoalescent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void ConstantPopulationCoalescent::swapParameterInternal(const DagNode *old_p, const DagNode *new_p)
 {
-    if (oldP == Ne)
+    if (old_p == Ne)
     {
-        Ne = static_cast<const TypedDagNode<double>* >( newP );
+        Ne = static_cast<const TypedDagNode<double>* >( new_p );
     }
 }

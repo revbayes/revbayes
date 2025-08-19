@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -123,7 +123,7 @@ SyntaxIndexOperation* SyntaxIndexOperation::clone () const
  * frame; instead, we return a NULL pointer and set theSlot pointer
  * to NULL as well.
  */
-RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, const std::string &varType)
+RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( const std::shared_ptr<Environment>& env, const std::string &varType)
 {
 
     RevPtr<RevVariable> indexVar     = index->evaluateContent(env);
@@ -151,7 +151,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
             }
             else if ( c->allowsModificationToCompositeContainer() == false )
             {
-                throw RbException("An object of type '" + theParentObj.getType() + "' does not allow transformation into a composite container.");
+                throw RbException() << "An object of type '" << theParentObj.getType() << "' does not allow transformation into a composite container.";
             }
             else
             {
@@ -163,16 +163,16 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
                     std::string elementIdentifier = theParentVar->getName() + "[" + std::to_string(i) + "]";
                 
                     // first ensure that the environment has a slot named `elementIdentifier`
-                    if ( !env.existsVariable( elementIdentifier ) )
+                    if ( !env->existsVariable( elementIdentifier ) )
                     {
                         // create a new variable for environment slot `elementIdentifier`
                         RevPtr<RevVariable> theElementVar = RevPtr<RevVariable>( new RevVariable( c->getElement(i-1) ) );
-                        env.addVariable( elementIdentifier, theElementVar );
+                        env->addVariable( elementIdentifier, theElementVar );
                         theElementVar->setName( elementIdentifier );
                     }
 
                     // then look up the element variable in the environment by its identifier
-                    RevPtr<RevVariable> theElementVar  = env.getVariable( elementIdentifier );
+                    RevPtr<RevVariable> theElementVar  = env->getVariable( elementIdentifier );
                 
                     // set the element variable as a hidden variable so that it doesn't show in ls()
                     theElementVar->setElementVariableState( true );
@@ -183,7 +183,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
         }
         else
         {
-            throw RbException("We cannot make a composite container from variable of type '" + theParentObj.getType() + "'.");
+            throw RbException() << "We cannot make a composite container from variable of type '" << theParentObj.getType() << "'.";
         }
     }
 
@@ -192,16 +192,16 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
     std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
 
     // first ensure that we've got an entry with name `identifier` in the environment
-    if ( not env.existsVariable( identifier ) )
+    if ( not env->existsVariable( identifier ) )
     {
         // create a new variable called `identifier` if the environment doesn't have one.
         RevPtr<RevVariable> the_var = RevPtr<RevVariable>( new RevVariable( NULL ) );
-        env.addVariable( identifier, the_var );
+        env->addVariable( identifier, the_var );
         the_var->setName( identifier );
     }
 
     // then look up the variable in the environment by its identifier
-    RevPtr<RevVariable> the_var  = env.getVariable( identifier );
+    RevPtr<RevVariable> the_var  = env->getVariable( identifier );
     
     // set this variable as an element variable; which is by default a hidden variable so that it doesn't show in ls()
     the_var->setElementVariableState( true );
@@ -228,7 +228,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( Environment& env, 
  * from dynamic evaluation of the index variables. These need to be put
  * in a dynamic lookup variable.
  */
-RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( Environment& env, bool dynamic)
+RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic)
 {
 
     RevPtr<RevVariable> indexVar     = index->evaluateContent(env,dynamic);
@@ -239,10 +239,10 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateContent( Environment& env, boo
 
     // test whether we want to directly assess the variable or if we want to assess subelement of this container
     // if this variable already exists in the workspace
-    if ( env.existsVariable( identifier ) )
+    if ( env->existsVariable( identifier ) )
     {
         // get the from the workspace
-        the_var = env.getVariable( identifier );
+        the_var = env->getVariable( identifier );
 
     }
     else
@@ -334,7 +334,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
 //            const std::set<int>& indices = parentVariable->getElementIndices();
 //            if ( indices.empty() )
 //            {
-//                throw RbException("Cannot create a vector variable with name '" + parentName + "' because it doesn't have elements.");
+//                throw RbException() << "Cannot create a vector variable with name '" << parentName << "' because it doesn't have elements.";
 //            }
             size_t max_index = parentVariable->getMaxElementIndex();
             std::vector<Argument> args;
@@ -345,7 +345,7 @@ void SyntaxIndexOperation::updateVariable( Environment& env, const std::string &
                 // check that the element is not NULL
                 if ( elementVar == NULL || elementVar->getRevObject() == RevNullObject::getInstance() )
                 {
-                    throw RbException("Cannot create vector variable with name '" + parentName + "' because element with name '" + element_identifier + "' is NULL." );
+                    throw RbException() << "Cannot create vector variable with name '" << parentName << "' because element with name '" << element_identifier << "' is NULL." ;
                 }
                 args.push_back( Argument( elementVar ) );
             }

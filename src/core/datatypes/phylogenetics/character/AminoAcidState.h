@@ -1,7 +1,7 @@
 #ifndef AminoAcidState_H
 #define AminoAcidState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "DiscreteCharacterState.h"

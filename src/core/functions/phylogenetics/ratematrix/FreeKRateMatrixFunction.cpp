@@ -1,7 +1,7 @@
 #include "FreeKRateMatrixFunction.h"
 
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <vector>
 
 #include "RateMatrix_FreeK.h"

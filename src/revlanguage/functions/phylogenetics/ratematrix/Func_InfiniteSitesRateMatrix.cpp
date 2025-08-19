@@ -1,6 +1,6 @@
 #include "Func_InfiniteSitesRateMatrix.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "InfiniteSitesRateMatrixFunction.h"
 #include "Natural.h"

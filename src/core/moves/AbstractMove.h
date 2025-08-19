@@ -1,7 +1,7 @@
 #ifndef AbstractMove_H
 #define AbstractMove_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 
@@ -46,7 +46,7 @@ namespace RevBayesCore {
         size_t                                                  getNumberTriedCurrentPeriod(void) const;                            //!< Get the number of tries for this move since the last reset
         size_t                                                  getNumberTriedTotal(void) const;                                    //!< Get the number of tries for this move since the last reset
         double                                                  getUpdateWeight(void) const;                                        //!< Get update weight of move
-        bool                                                    isActive(unsigned long gen) const;                                  //!< Is the move active at the generation 'gen'?
+        bool                                                    isActive(std::uint64_t gen) const;                                  //!< Is the move active at the generation 'gen'?
         void                                                    performMcmcStep(double prHeat, double lHeat, double pHeat);         //!< Perform the move.
         void                                                    performHillClimbingStep(double lHeat, double pHeat);                //!< Perform the move.
         void                                                    removeNode(DagNode* p);                                             //!< remove a node from the proposal

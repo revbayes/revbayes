@@ -8,7 +8,7 @@
 
 #include "Func_DECCladoProbs.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <utility>
 
@@ -107,7 +107,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
             et.push_back( it->second );
         }
         else {
-            throw RbException( "\"" + s + "\" is not a valid element for eventTypes." );
+            throw RbException() << "\"" << s << "\" is not a valid element for eventTypes." ; 
         }
     }
     
@@ -164,7 +164,7 @@ const ArgumentRules& Func_DECCladoProbs::getArgumentRules( void ) const
         
         argumentRules.push_back( new ArgumentRule( "eventProbs", Simplex::getClassTypeSpec(), "The probabilities of the different event types.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "numCharacters", Natural::getClassTypeSpec(), "The number of characters.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "maxRangeSize", Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
+        argumentRules.push_back( new ArgumentRule( "maxRangeSize", Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
 
         std::vector<std::string> options;
         options.push_back( "pattern" );

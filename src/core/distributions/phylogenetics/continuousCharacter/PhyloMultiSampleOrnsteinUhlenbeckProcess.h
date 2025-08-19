@@ -1,7 +1,7 @@
 #ifndef PhyloMultiSampleOrnsteinUhlenbeckProcess_H
 #define PhyloMultiSampleOrnsteinUhlenbeckProcess_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 #include <set>

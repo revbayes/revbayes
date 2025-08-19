@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -526,7 +526,7 @@ void MultispeciesCoalescentMigration::simulateTree( void )
         
         if ( species_node == NULL )
         {
-            throw RbException("Could not match a taxon with name" + species_name + " to any of the tips in the species tree.");
+            throw RbException() << "Could not match a taxon with name" << species_name << " to any of the tips in the species tree.";
         }
         
         // initialize the age to be the present time

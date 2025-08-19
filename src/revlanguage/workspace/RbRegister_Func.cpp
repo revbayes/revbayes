@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 
 /* Files including helper classes */
 #include "RbException.h"
@@ -97,6 +97,7 @@
 #include "Func_formatDiscreteCharacterData.h"
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
+#include "Func_MinBLTimeScaling.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
 #include "Func_phyloDiversity.h"
@@ -132,6 +133,15 @@
 #include "Func_biogeographyRateMatrix.h"
 #include "Func_chromosomes.h"
 #include "Func_chromosomesPloidy.h"
+
+#include "Func_GammaRateModel.h"
+#include "Func_InvModel.h"
+#include "Func_MixtureModel.h"
+#include "Func_ScaleSiteMixtureModel.h"
+#include "Func_ScaleVectorSiteMixtureModel.h"
+#include "Func_UnitMixture.h"
+#include "Func_ConvertRateMatrix.h"
+#include "Func_ConvertVectorRateMatrix.h"
 
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
@@ -244,10 +254,12 @@
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
 #include "Func_geometricMean.h"
+#include "Func_cos.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
 #include "Func_log.h"
+#include "Func_logit.h"
 #include "Func_logistic.h"
 #include "Func_matrix.h"
 #include "Func_max.h"
@@ -264,6 +276,7 @@
 #include "Func_shortestDistance.h"
 #include "Func_sigmoid.h"
 #include "Func_sigmoidVector.h"
+#include "Func_SmoothTimeLine.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
 #include "Func_sumPositive.h"
@@ -271,6 +284,7 @@
 #include "Func_sumNatural.h"
 #include "Func_standardDeviation.h"
 #include "Func_sqrt.h"
+#include "Func_sin.h"
 #include "Func_trunc.h"
 #include "Func_upperTriangle.h"
 #include "Func_variance.h"
@@ -289,6 +303,7 @@
 #include "Func_discretizeLognormalQuadrature.h"
 #include "Func_discretizeDistribution.h"
 #include "Func_discretizePositiveDistribution.h"
+#include "Func_discretizeProbabilityDistribution.h"
 #include "Func_dppConcFromMean.h"
 #include "Func_dppMeanFromConc.h"
 #include "Func_fnNormalizedQuantile.h"
@@ -306,7 +321,6 @@
 /** Initialize global workspace */
 void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 {
-
     try
     {
         ///////////////////////////////////////////
@@ -322,6 +336,16 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_biogeographyRateMatrix()                      );
         addFunction( new Func_chromosomes()                                 );
         addFunction( new Func_chromosomesPloidy()                           );
+
+        addFunction( new Func_ConvertRateMatrix()                           );
+        addFunction( new Func_ConvertVectorRateMatrix()                     );
+
+        addFunction( new Func_GammaRateModel()                              );
+        addFunction( new Func_InvModel()                                    );
+        addFunction( new Func_MixtureModel()                                );
+        addFunction( new Func_UnitMixture()                                 );
+        addFunction( new Func_ScaleSiteMixtureModel()                       );
+        addFunction( new Func_ScaleVectorSiteMixtureModel()                 );
 
         addFunction( new Func_codonSynonymousNonsynonymousRateMatrix()      );
         addFunction( new Func_codonSynonymousNonsynonymousHKYRateMatrix()   );
@@ -427,6 +451,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_extantTree()                                      );
         addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
+        addFunction( new Func_MinBLTimeScaling()                                );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
         addFunction( new Func_phyloDiversity()                                  );
@@ -507,6 +532,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // log function
         addFunction( new Func_log()  );
 
+        // logit function
+        addFunction( new Func_logit()  );
+
         // matrix function (converts into MatrixReal)
         addFunction( new Func_matrix() );
 
@@ -558,7 +586,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_geographicalDistance() );
         addFunction( new Func_shortestDistance() );
 
-                // hyperbolic tangent function
+        // trigonometric functions
+        addFunction( new Func_sin());
+        addFunction( new Func_cos()  );
+
+        // hyperbolic tangent function
         addFunction( new Func_hyperbolicTangent() );
 
         // hyperbolic sine function
@@ -575,7 +607,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_variance()  );
 
         // vector flatten
-        addFunction( new Func_vectorFlatten() );
+        addFunction( new Func_vectorFlatten<Real>() );
+        addFunction( new Func_vectorFlatten<RealPos>() );
+        addFunction( new Func_vectorFlatten<Probability>() );
+        addFunction( new Func_vectorFlatten<Integer>() );
+        addFunction( new Func_vectorFlatten<Natural>() );
 
         // get ln Probability function
         addFunction( new Func_lnProbability() );
@@ -584,10 +620,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_posteriorPredictiveProbability()  );
 
 
- 		/* Statistics functions (in folder "functions/statistics") */
+        /* Statistics functions (in folder "functions/statistics") */
 
-    // helpers for Markov Random Field models
+        // helpers for Markov Random Field models
         addFunction( new Func_assembleContinuousMRF( )     );
+        addFunction( new Func_SmoothTimeLine( )     );
 
 		// some helper statistics for the DPP distribution
         addFunction( new Func_dppConcFromMean( )     );
@@ -605,9 +642,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // return a distcretized (by quantile) and normalized vector from a continuous distribution
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
         addFunction( new Func_fnNormalizedQuantile<RealPos>()    );
-
-        addFunction( new Func_discretizeDistribution( )         );
-        addFunction( new Func_discretizePositiveDistribution( ) );
+        addFunction( new Func_discretizeDistribution( )            );
+        addFunction( new Func_discretizePositiveDistribution( )    );
+        addFunction( new Func_discretizeProbabilityDistribution( ) );
 
         // return a discretized gamma distribution (for gamma-dist rates)
         addFunction( new Func_discretizeBeta( )    );

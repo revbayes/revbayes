@@ -1,6 +1,6 @@
 #include "SynchronizedVectorFixedSingleElementSlideProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -17,7 +17,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-SynchronizedVectorFixedSingleElementSlideProposal::SynchronizedVectorFixedSingleElementSlideProposal( const std::vector< StochasticNode< RbVector<double> > *> &n, double l, const std::vector<long> &i) : Proposal(),
+SynchronizedVectorFixedSingleElementSlideProposal::SynchronizedVectorFixedSingleElementSlideProposal( const std::vector< StochasticNode< RbVector<double> > *> &n, double l, const std::vector<std::int64_t> &i) : Proposal(),
     variables( n ),
     lambda( l ),
     indices( i ),

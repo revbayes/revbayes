@@ -29,7 +29,7 @@ namespace RevBayesCore {
     class DiscretizeGammaFromBetaQuantilesFunction : public TypedFunction< RbVector<double> >{
 
     public:
-        DiscretizeGammaFromBetaQuantilesFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc, bool med);
+        DiscretizeGammaFromBetaQuantilesFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<std::int64_t> *nc, bool med);
 
         DiscretizeGammaFromBetaQuantilesFunction*            clone(void) const;                                                  //!< Create a clon.
         void                                update(void);                                                       //!< Recompute the value
@@ -42,7 +42,7 @@ namespace RevBayesCore {
         const TypedDagNode<double>*         beta;
         const TypedDagNode<double>*         shape;
         const TypedDagNode<double>*         rate;
-        const TypedDagNode<long>*           numCats;
+        const TypedDagNode<std::int64_t>*           numCats;
         bool                                median;
     };
 }

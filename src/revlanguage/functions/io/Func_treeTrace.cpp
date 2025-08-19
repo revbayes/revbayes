@@ -10,8 +10,8 @@
 
 #include "Func_treeTrace.h"
 
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "ModelVector.h"

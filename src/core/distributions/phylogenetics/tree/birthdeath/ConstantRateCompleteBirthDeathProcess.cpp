@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iosfwd>
 #include <vector>
@@ -26,7 +26,7 @@ ConstantRateCompleteBirthDeathProcess::ConstantRateCompleteBirthDeathProcess(con
     addParameter( speciation );
     addParameter( extinction );
 
-    simulateTree();
+    simulateTree(true);
 }
 
 

@@ -6,7 +6,7 @@
 #include "TypedDagNode.h"
 
 #include <cmath>
-#include <stddef.h>
+#include <cstddef>
 
 namespace RevBayesCore { class DagNode; }
 
@@ -15,7 +15,7 @@ using namespace RevBayesCore;
 
 
 FeatureInformedRateFunction::FeatureInformedRateFunction(
-    const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* cf,
+    const TypedDagNode< RbVector<RbVector<RbVector<std::int64_t> > > >* cf,
     const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* qf,
     const TypedDagNode< RbVector<double> >* cp,
     const TypedDagNode< RbVector<double> >* qp) :
@@ -57,7 +57,7 @@ void FeatureInformedRateFunction::update( void )
 {
     
     // get all parent node values
-    const RbVector<RbVector<RbVector<long> > >& cf = categorical_features->getValue();
+    const RbVector<RbVector<RbVector<std::int64_t> > >& cf = categorical_features->getValue();
     const RbVector<RbVector<RbVector<double> > >& qf = quantitative_features->getValue();
     const RbVector<double>& cp = categorical_params->getValue();
     const RbVector<double>& qp = quantitative_params->getValue();
@@ -98,7 +98,7 @@ void FeatureInformedRateFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == categorical_features)
     {
-        categorical_features = static_cast<const TypedDagNode< RbVector<RbVector<RbVector<long> > > >* >( newP );
+        categorical_features = static_cast<const TypedDagNode< RbVector<RbVector<RbVector<std::int64_t> > > >* >( newP );
     }
     if (oldP == quantitative_features)
     {

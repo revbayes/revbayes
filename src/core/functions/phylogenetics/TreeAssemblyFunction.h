@@ -1,7 +1,7 @@
 #ifndef TreeAssemblyFunction_H
 #define TreeAssemblyFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 
 #include "Tree.h"
@@ -36,10 +36,10 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode<Tree>*                           tau;
-        const TypedDagNode< RbVector<double> >*             brlen;
+        const TypedDagNode<Tree>*                           tau = nullptr;
+        const TypedDagNode< RbVector<double> >*             brlen = nullptr;
         std::set<size_t>                                    touchedNodeIndices;
-        bool                                                touchedTopology;
+        bool                                                brlenFlagDirty = true;
     };
     
 }

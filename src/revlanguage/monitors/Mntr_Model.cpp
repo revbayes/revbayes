@@ -54,6 +54,7 @@ void Mntr_Model::constructInternalObject( void )
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                so      = static_cast<const RlBoolean &>( stochOnly->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    const std::string&                 fmt      = static_cast<const RlString &>( format->getRevObject() ).getValue();
 
     ModelVector<RlString> excl = static_cast<const ModelVector<RlString> &>(exclude->getRevObject());
     std::set<std::string> exclude_list;
@@ -61,7 +62,8 @@ void Mntr_Model::constructInternalObject( void )
         exclude_list.insert(excl[i]);
     }
 
-    RevBayesCore::ModelMonitor *m = new RevBayesCore::ModelMonitor((unsigned long)g, fn, sep, exclude_list);
+    SampleFormat Format = (fmt == "json") ? SampleFormat(JSONFormat()) : SampleFormat(SeparatorFormat(sep));
+    RevBayesCore::ModelMonitor *m = new RevBayesCore::ModelMonitor((std::uint64_t)g, fn, Format, exclude_list);
     
     // now set the flags
     m->setAppend( ap );
@@ -124,6 +126,7 @@ const MemberRules& Mntr_Model::getParameterRules(void) const
         memberRules.push_back( new ArgumentRule("prior"         , RlBoolean::getClassTypeSpec(), "Should we print the joint prior probability?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("stochasticOnly", RlBoolean::getClassTypeSpec(), "Should we monitor stochastic variables only?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         memberRules.push_back( new ArgumentRule{"exclude", ModelVector<RlString>::getClassTypeSpec(), "Variables to exclude from the monitor", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<RlString>()});
+        memberRules.push_back( new ArgumentRule("format"        , RlString::getClassTypeSpec(),  "Output format", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("separator") ) );
         
         // add the rules from the base class
         const MemberRules &parentRules = FileMonitor::getParameterRules();
@@ -176,6 +179,10 @@ void Mntr_Model::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "exclude" )
     {
         exclude = var;
+    }
+    else if ( name == "format" )
+    {
+        format = var;
     }
     else 
     {

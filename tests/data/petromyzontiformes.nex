@@ -1,0 +1,27 @@
+#NEXUS
+BEGIN DATA;
+	DIMENSIONS  NTAX=18 NCHAR=31;
+	FORMAT datatype=standard SYMBOLS= "012345" MISSING=? GAP=-;
+
+MATRIX
+Mordacia_mordax_0.0            12343315211112212233{12}3123122232
+Mordacia_lapicidia_0.0         123433152111122132?3133?3?????2
+Geotria_australis_0.0          3231433412214312112323321322322
+Ichthyomyzon_bdellium_0.0      122213111111111111?11122212???2
+Ichthyomyzon_castaneus_0.0     122213211111111111?111222122??2
+Ichthyomyzon_unicuspis_0.0     1221131111111111111111222122??2
+Petromyzon_marinus_0.0         1222131121111111111213222222112
+Caspiomyzon_wagneri_0.0        222112211212121111?212222112??2
+Tetrapleurodon_spadiceus_0.0   12222322122232111??212?2211???2
+Entosphenus_macrostomus_0.0    13232222122232111???12?2212???2
+Entosphenus_minimus_0.0        132322221121221111?21222211???2
+Entosphenus_similis_0.0        13232222122222111???1212212???2
+Entosphenus_tridentatus_0.0    1323222212223211111212222122?12
+Lethenteron_camtschaticum_0.0  1212233312222211111213122112??2
+Eudontomyzon_danfordi_0.0      121223333222321111?21212211???2
+Eudontomyzon_morii_0.0         12122333322222111???13?2211???2
+Lampetra_ayresii_0.0           131323333212121111?21212211???2
+Lampetra_fluviatilis_0.0       1313233332122211111212122122112
+;
+END;
+

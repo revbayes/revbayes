@@ -24,7 +24,7 @@ for (i in 51:num_taxa) {
   taxa[i] = taxon("t" + i)
 }
 
-psi <- rHeterochronousCoalescent(theta=100,taxa=taxa)[1]
+psi <- rCoalescent(theta=100,taxa=taxa)[1]
 
 # Coalescent tree model
 
@@ -53,13 +53,12 @@ for (i in 1:(NUM_INTERVALS-1)) {
 moves[++mvi] = mvGMRFHyperpriorGibbs(skygrid_sd,delta_log_Ne,skygrid_zeta,weight=5)
 moves[++mvi] = mvEllipticalSliceSamplingSimple(delta_log_Ne,weight=5)
 
-timetree ~ dnHeterochronousCoalescentSkyline(theta=Ne,times=interval_times,taxa=taxa)
+timetree ~ dnCoalescentSkyline(theta=Ne,times=interval_times,method="specified",taxa=taxa)
 timetree.clamp(psi)
 
 mymodel = model(timetree)
 
-monitors[1] = mnScreen(printgen=10)
-monitors[2] = mnModel(printgen=5,file="output/skygrid.log")
+monitors[1] = mnModel(printgen=5,file="output/skygrid.log")
 
 mymcmc = mcmc(mymodel,monitors,moves)
 

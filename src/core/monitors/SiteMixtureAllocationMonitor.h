@@ -32,14 +32,14 @@ namespace RevBayesCore {
         
     public:
         // Constructors and Destructors
-		SiteMixtureAllocationMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, const std::string &del);                                  //!< Constructor
-		SiteMixtureAllocationMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, const std::string &del, bool wt, bool wss);
+		SiteMixtureAllocationMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, const std::string &del);                                  //!< Constructor
+		SiteMixtureAllocationMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, const std::string &del, bool wt, bool wss);
         virtual ~SiteMixtureAllocationMonitor(void);
         
         SiteMixtureAllocationMonitor*          clone(void) const;                                                  //!< Clone the object
         
         // functions you may want to overwrite
-        virtual void                                    monitorVariables(unsigned long gen);                                //!< Monitor at generation gen
+        virtual void                                    monitorVariables(std::uint64_t gen);                                //!< Monitor at generation gen
         virtual void                                    printFileHeader(void);                                              //!< Print header
         virtual void                                    swapNode(DagNode *oldN, DagNode *newN);
 
@@ -69,7 +69,7 @@ using namespace RevBayesCore;
 
 /* Constructor for CTMC */
 template<class characterType>
-SiteMixtureAllocationMonitor<characterType>::SiteMixtureAllocationMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, const std::string &del) :
+SiteMixtureAllocationMonitor<characterType>::SiteMixtureAllocationMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, const std::string &del) :
     VariableMonitor(ch, g, fname, del, false, false, false),
     ctmc( ch ),
 	has_site_rate_mixture(false),
@@ -118,8 +118,9 @@ SiteMixtureAllocationMonitor<characterType>* SiteMixtureAllocationMonitor<charac
  * \param[in]   gen    The current generation.
  */
 template<class characterType>
-void SiteMixtureAllocationMonitor<characterType>::monitorVariables(unsigned long gen)
+void SiteMixtureAllocationMonitor<characterType>::monitorVariables(std::uint64_t gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
 	// make sure the CTMC has been already sampled mixture components
 	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
@@ -175,7 +176,9 @@ void SiteMixtureAllocationMonitor<characterType>::monitorVariables(unsigned long
 template<class characterType>
 void SiteMixtureAllocationMonitor<characterType>::printFileHeader()
 {
-	// get the number of sites
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
+        // get the number of sites
 	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
 	const TypedDagNode<Tree> *tree = dist_ctmc->getTree();
 	size_t num_sites = dist_ctmc->getValue().getNumberOfCharacters();

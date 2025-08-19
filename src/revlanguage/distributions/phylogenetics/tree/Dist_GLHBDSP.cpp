@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -87,14 +87,14 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
         {
         	if ( cond != "survival" && cond != "sampled" && cond != "sampledExtant" && cond != "tree" && cond != "treeExtant" )
         	{
-        		throw RbException( "Cannot condition on " + cond + " when starting from the origin." );
+        		throw RbException() << "Cannot condition on " << cond << " when starting from the origin." ; 
         	}
         }
         else if ( start_type == "rootAge" )
         {
         	if ( cond != "survival" && cond != "sampled" && cond != "sampledExtant" && cond != "sampledMRCA" )
         	{
-        		throw RbException( "Cannot condition on " + cond + " when starting from the root." );
+        		throw RbException() << "Cannot condition on " << cond << " when starting from the root." ; 
         	}
         }
         else

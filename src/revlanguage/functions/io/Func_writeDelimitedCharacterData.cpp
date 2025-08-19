@@ -1,6 +1,6 @@
 #include "Func_writeDelimitedCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

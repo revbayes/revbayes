@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <set>
@@ -106,7 +106,7 @@ SyntaxElement* SyntaxBinaryExpr::clone () const
  *
  * @todo Support this evaluation context better
  */
-RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Package the arguments
@@ -135,7 +135,7 @@ RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( Environment& env, bool dy
     // Free the memory of our copy
     delete the_function;
     
-    if ( dynamic == false || isConstExpression() == true )
+    if ( isConstExpression() == true )
     {
         // Return the return value of the function after making it constant
         if ( the_return_value != NULL )

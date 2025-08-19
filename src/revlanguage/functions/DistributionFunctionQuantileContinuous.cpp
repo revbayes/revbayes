@@ -8,7 +8,7 @@
 
 #include "DistributionFunctionQuantileContinuous.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ArgumentRule.h"
 #include "DeterministicNode.h"

@@ -1,6 +1,6 @@
 #include "Func_diagonalMatrix.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "Natural.h"
 #include "RlMatrixRealSymmetric.h"

@@ -10,7 +10,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "TypedDagNode.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "Simplex.h"
@@ -32,19 +31,6 @@ RateGenerator::~RateGenerator(void)
     ; // do nothing
 }
 
-
-RateGenerator& RateGenerator::assign(const Assignable &m)
-{
-    const RateGenerator *rm = dynamic_cast<const RateGenerator*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
 
 void RateGenerator::calculateTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const
 {
@@ -181,7 +167,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
         //    rv.resize(n_states);
         rv.clear();
         
-        size_t from_idx = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         
         for (size_t to_idx = 0; to_idx < n_states; to_idx++)
         {
@@ -219,7 +205,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 ////    rv.resize(n_states);
 //    rv.clear();
 //
-//    size_t from_idx = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+//    size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
 //
 //    for (size_t to_idx = 0; to_idx < n_states; to_idx++)
 //    {
@@ -234,13 +220,29 @@ size_t RateGenerator::size( void ) const
 
 }
 
-bool RateGenerator::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times)
+bool RateGenerator::simulateStochasticMapping(double startAge, double endAge, double rate, std::vector<size_t>& transition_states, std::vector<double>& transition_times) const
 {
     throw RbException("simulateStochasticMapping not defined for abstract RateGenerator objects");
     return false;
 }
 
 
+
+json RateGenerator::toJSON() const
+{
+    json matrix;
+    
+    // print the RbMatrix with each column of equal width and each column centered on the decimal
+    for (size_t i=0; i < size(); i++)
+    {
+	json row;
+        for (size_t j = 0; j < size(); ++j)
+	    row.push_back( getRate( i, j, 1e-6, 1.0) );
+	matrix.push_back(row);
+    }
+
+    return matrix;
+}
 
 void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l, bool left) const
 {

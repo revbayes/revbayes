@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-GraphFlipEdgeProposal::GraphFlipEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<RbVector<long> >& e, double l, bool s) : Proposal(),
+GraphFlipEdgeProposal::GraphFlipEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<RbVector<std::int64_t> >& e, double l, bool s) : Proposal(),
 array(NULL),
 matrix( n ),
 edges( e ),
@@ -33,7 +33,7 @@ symmetric( s )
         
         for (size_t i = 0; i < n->getValue().size(); i++) {
             for (size_t j = i+1; j < n->getValue().size(); j++) {
-                std::vector<long> tmp;
+                std::vector<std::int64_t> tmp;
                 tmp.push_back(i+1);
                 tmp.push_back(j+1);
                 edges.push_back( tmp );

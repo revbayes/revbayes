@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -62,7 +62,7 @@ void UniformTimeTreeDistribution::attachTimes(Tree* psi, std::vector<TopologyNod
         psi->getNode( parent->getIndex() ).setAge( originTime - interiorNodeTimes[index] );
         
         // Remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(node_index));
+        nodes.erase(nodes.begin()+std::int64_t(node_index));
         
         // Add the left child if an interior node
         TopologyNode* leftChild = &parent->getChild(0);
@@ -101,7 +101,7 @@ void UniformTimeTreeDistribution::buildRandomBinaryHistory(std::vector<TopologyN
         TopologyNode* parent = tips.at(index);
         
         // Remove the randomly drawn node from the list
-        tips.erase(tips.begin()+long(index));
+        tips.erase(tips.begin()+std::int64_t(index));
         
         // Add a left child
         TopologyNode* leftChild = new TopologyNode();
@@ -154,11 +154,11 @@ double UniformTimeTreeDistribution::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -172,7 +172,7 @@ double UniformTimeTreeDistribution::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -236,7 +236,7 @@ void UniformTimeTreeDistribution::simulateTree( void )
         TopologyNode* node = nodes.at(index);
         
         // Remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(index) );
+        nodes.erase(nodes.begin()+std::int64_t(index) );
         
         // Set taxon
         node->setTaxon( taxa[i] );

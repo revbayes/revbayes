@@ -1,7 +1,7 @@
 #ifndef JointAncestralStateTrace_H
 #define JointAncestralStateTrace_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <utility>
 #include <vector>

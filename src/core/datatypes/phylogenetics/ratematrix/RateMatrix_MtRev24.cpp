@@ -19,7 +19,7 @@
 
 #include "RateMatrix_MtRev24.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVectorUtilities.h"

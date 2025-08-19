@@ -1,0 +1,14 @@
+   Attempting to read the contents of file "primates.tree"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 1 different moves in a random move schedule with 10 moves per iteration
+   
+   Attempting to read the contents of file "primates.tree"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 2 different moves in a random move schedule with 20 moves per iteration
+   

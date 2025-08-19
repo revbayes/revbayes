@@ -1,7 +1,7 @@
 #ifndef ShrinkExpandProposal_H
 #define ShrinkExpandProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

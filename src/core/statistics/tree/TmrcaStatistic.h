@@ -18,7 +18,7 @@
 #ifndef TmrcaStatistic_H
 #define TmrcaStatistic_H
 
-#include <stddef.h>
+#include <cstddef>
 
 //#include "Statistic.h"
 #include "Clade.h"

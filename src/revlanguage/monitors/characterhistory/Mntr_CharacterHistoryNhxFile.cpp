@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <set>
 #include <string>
@@ -94,7 +94,7 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
     if (mt == "std")
         ; // value = XXXXXX
     else if (mt == "biogeo")
-        value = new RevBayesCore::TreeCharacterHistoryNhxMonitor<RevBayesCore::StandardState>(ctmc_sn, t, atl, size_t(g), (unsigned long)(mg), burn, fn, sep, pp, l, pr, ap, sm, sr);
+        value = new RevBayesCore::TreeCharacterHistoryNhxMonitor<RevBayesCore::StandardState>(ctmc_sn, t, atl, size_t(g), (std::uint64_t)(mg), burn, fn, sep, pp, l, pr, ap, sm, sr);
 }
 
 

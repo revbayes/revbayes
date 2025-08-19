@@ -21,7 +21,6 @@ namespace RevBayesCore
         AdjacentRateModifier(const AdjacentRateModifier& g);
         
         
-        AdjacentRateModifier&               assign(const Assignable &m);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, CharacterEventDiscrete* currState, CharacterEventDiscrete* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, unsigned currState, unsigned newState, unsigned charIdx=0, double age=0.0);
@@ -31,7 +30,7 @@ namespace RevBayesCore
         virtual std::set<size_t>            getAffectedSites(CharacterEventDiscrete* newState) const;
 
         
-        void                                setContextMatrix(const RbVector<RbVector<long> >& c);
+        void                                setContextMatrix(const RbVector<RbVector<std::int64_t> >& c);
         void                                setContextMatrix(const MatrixReal& c);
         void                                setGainFactor(double f);
         void                                setLossFactor(double f);
@@ -45,7 +44,7 @@ namespace RevBayesCore
        
         
     private:
-        void                                initializeContexts(RbVector<RbVector<long> > c);
+        void                                initializeContexts(RbVector<RbVector<std::int64_t> > c);
         
         struct adjacency {
             size_t                          from;

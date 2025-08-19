@@ -35,7 +35,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                   likelihood;
         RevPtr<const RevVariable>                   stochOnly;
         RevPtr<const RevVariable>                   exclude;  //!< Vector of variable names to exclude from logging
-        
+        RevPtr<const RevVariable>                   format;
     };
     
 }

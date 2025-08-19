@@ -89,7 +89,7 @@ StateDependentSpeciationExtinctionProcess::StateDependentSpeciationExtinctionPro
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
     average_extinction( std::vector<double>(5, 0.0) ),
-    num_shift_events( std::vector<long>(5, 0.0) ),
+    num_shift_events( std::vector<std::int64_t>(5, 0.0) ),
     time_in_states( std::vector<double>(ext->getValue().size(), 0.0) ),    
     simmap( "" ),
     cladogenesis_matrix( NULL ),
@@ -227,11 +227,11 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -245,7 +245,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -271,7 +271,7 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
         num_initial_lineages = 1;
     }
     // if conditioning on root, root node must be a "true" bifurcation event
-    else if (root.getChild(0).isSampledAncestor() || root.getChild(1).isSampledAncestor())
+    else if (root.getChild(0).isSampledAncestorTip() || root.getChild(1).isSampledAncestorTip())
     {
         return RbConstants::Double::neginf;
     }
@@ -363,7 +363,8 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 extinction = pExtinction(0.0, node.getAge());
             }
             
-            RbBitSet obs_state(num_states, true);
+            RbBitSet obs_state(num_states);
+            obs_state.set();
             bool gap = true;
 
             if ( tree->hasCharacterData() == true )
@@ -424,7 +425,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
             }
             
             bool speciation_node = true;
-            if ( left.isSampledAncestor() || right.isSampledAncestor() )
+            if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
             {
                 speciation_node = (phi == NULL);
             }
@@ -464,7 +465,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         double begin_age = node.getAge();
         double end_age = node.getParent().getAge();
         
-        if ( node.isSampledAncestor() == false )
+        if ( node.isSampledAncestorTip() == false )
         {
             // calculate likelihoods for this branch
             if ( sample_character_history == false )
@@ -575,7 +576,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
     }
 
     bool speciation_node = true;
-    if ( left.isSampledAncestor() || right.isSampledAncestor() )
+    if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
     {
         speciation_node = (phi == NULL);
     }
@@ -1541,7 +1542,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
 }
 
 
-void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
    
     if ( name == "numberEvents" )
@@ -1550,7 +1551,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1573,7 +1574,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1649,7 +1650,7 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::getAverageSpeciat
 }
 
 
-std::vector<long> StateDependentSpeciationExtinctionProcess::getNumberOfShiftEventsPerBranch( void ) const
+std::vector<std::int64_t> StateDependentSpeciationExtinctionProcess::getNumberOfShiftEventsPerBranch( void ) const
 {
     return num_shift_events;
 }
@@ -3280,6 +3281,6 @@ void StateDependentSpeciationExtinctionProcess::resizeVectors(size_t num_nodes)
     scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);
-    num_shift_events = std::vector<long>(num_nodes, 0.0);
+    num_shift_events = std::vector<std::int64_t>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);    
 }

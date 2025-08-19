@@ -1,6 +1,6 @@
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloOrnsteinUhlenbeckProcessEVE.h"

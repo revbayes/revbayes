@@ -15,7 +15,7 @@
 #ifndef MultivariateNormalDistribution_H
 #define MultivariateNormalDistribution_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

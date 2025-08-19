@@ -56,12 +56,14 @@ namespace RevBayesCore {
         std::vector<double>     getPSSP(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t state_index);           //!< calculate the Parsimoniously Same State Paths
         void                    getTaxaInSubtree(TopologyNode& n, std::vector<TopologyNode*>& taxa );                                   //!< get taxa below specified node
         bool                    isConnectedNNI(const Tree& a, const Tree& b);                                                           //!< Check if the two trees are connected by a single NNI move
-        void                    offsetTree(TopologyNode& n, double factor);                                                             //!< offset node and its children by a factor
         void                    makeUltrametric(Tree& t);                                                                               //!< make the tree ultrametric by extending terminal branches
+        Tree*                   minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen);             //!< time-scale a tree using the minimum branch length method
+        void                    offsetTree(TopologyNode& n, double factor);                                                             //!< offset node and its children by a factor
         void                    rescaleSubtree(TopologyNode& n, double factor, bool v=false);                                           //!< rescale tree ages below a node by a factor, except tips
         void                    rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor
         void                    setAges(TopologyNode& n, const std::vector<double>& ages);                                              //!< set ages of a node and children from a vector
         void                    setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children
+        Tree*                   startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision);         //!< make sure starting tree satisfies age constraints, and assign min/max ages to its tips
         
         // internal helper functions
         void                    constructTimeTreeRecursively(TopologyNode& tn, const TopologyNode &n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth); //!< helper function for time tree conversion

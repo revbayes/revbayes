@@ -7,13 +7,12 @@
 #include <string>
 
 
-
 namespace RevLanguage {
 
     class RealPos;
 
     /**
-     * Primitive type for Natural numbers (including 0).
+     * Primitive type for Natural numbers (positive integers including 0).
      *
      * Note that we derive this from Integer. To make
      * sure inheritance is safe, we restrict the range
@@ -23,9 +22,10 @@ namespace RevLanguage {
 
         public:
         Natural(void);                                                                                      //!< Default constructor (value is 0)
-        Natural(RevBayesCore::TypedDagNode<long> *v);                                                       //!< Constructor with DAG node
-        Natural(long x);                                                                                    //!< Constructor from int
-//        Natural(unsigned long x);                                                                           //!< Constructor from size_t
+        Natural(RevBayesCore::TypedDagNode<std::int64_t> *v);                                               //!< Constructor with DAG node
+        Natural(std::int64_t x);                                                                            //!< Constructor from int
+        template <typename T, typename U=std::enable_if_t<std::is_integral_v<T>,T>> Natural(T v):           //!< Constructor from T
+            Natural(std::int64_t(v)) {}
 
         // Basic operator functions
         RevObject*                  add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements

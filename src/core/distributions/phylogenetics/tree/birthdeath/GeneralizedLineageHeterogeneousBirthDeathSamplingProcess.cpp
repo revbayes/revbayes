@@ -194,7 +194,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 			{
 				// add the extinct node to the active nodes list, remove it from the extinct nodes list
 				active_nodes.push_back( extinct_nodes.at(j) );
-				extinct_nodes.erase( extinct_nodes.begin() + long(j) );
+				extinct_nodes.erase( extinct_nodes.begin() + std::int64_t(j) );
 			}
 		}
 
@@ -203,14 +203,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 		TopologyNode* leftChild = active_nodes.at(left);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(left) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(left) );
 
 		// randomly draw one child (arbitrarily called left) node from the list of active nodes
 		size_t right = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
 		TopologyNode* rightChild = active_nodes.at(right);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(right) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(right) );
 
 		// add the parent
 		size_t num_taxa = taxa.size();
@@ -717,7 +717,11 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
 {
-	// check that tree is binary
+
+    // Suppress outdegree-1 internal nodes (= sampled ancestors)
+    v->suppressOutdegreeOneNodes(true);
+
+	// Check that tree is binary. This may still not be the case if there are multifurcations.
     if (v->isBinary() == false)
     {
         throw RbException("The process is only implemented for binary trees.");
@@ -730,9 +734,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     {
     	param_taxa.push_back( taxa[i].getName() );
     }
+
+//    // get the taxa names from the input tree
+//    std::vector<Taxon> input_taxa_obj = v->getTaxa();
+//    std::vector<std::string> input_taxa;
+//    for (size_t i = 0; i < input_taxa_obj.size(); ++i)
+//	{
+//    	input_taxa.push_back( input_taxa_obj[i].getSpeciesName() );
+//    }
+//
+//    // get the taxa names from the current tree
+//    std::vector<Taxon> current_taxa_obj = value->getTaxa();
+//    std::vector<std::string> current_taxa;
+//    for (size_t i = 0; i < current_taxa_obj.size(); ++i)
+//	{
+//    	current_taxa.push_back( current_taxa_obj[i].getSpeciesName() );
+//    }
+
     std::vector<std::string> input_taxa   = v->getSpeciesNames();
     std::vector<std::string> current_taxa = value->getSpeciesNames();
-//    std::vector<std::string> current_taxa = v->getSpeciesNames();
 
     // check that the number of taxa match
     if ( input_taxa.size() != num_taxa )
@@ -820,9 +840,14 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<long>& num_events)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, std::vector<double>& branch_lambda, std::vector<double>& branch_mu, std::vector<double>& branch_phi, std::vector<double>& branch_delta, std::vector<std::int64_t>& num_events_)
 {
-	// draw the stochastic map
+        // Convert from long to std::int64_t for TensorPhylo
+        std::vector<long> num_events;
+        for(auto n: num_events_)
+            num_events.push_back(n);
+
+        // draw the stochastic map
 	TensorPhylo::Interface::mapHistories_t history = tp_ptr->drawHistoryAndComputeRates(branch_lambda, branch_mu, branch_phi, branch_delta, num_events);
 
 	// translate the map to a vector of strings
@@ -877,7 +902,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawStochasticCha
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, DagNode* affecter)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter)
 {
     if ( affecter == age )
     {
@@ -1409,9 +1434,20 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool f
 	if ( force or tree_dirty )
 	{
 
+		// MRM/BP 7/26/23: Bruno and I made a change here to collapse zero-length branches
+		// into sampled ancestors before getting the newick string. This solves a problem
+		// but may create a new one: might be expensive to traverse entire tree and collapse
+		// ancestors every time we change the tree?
+		// possible alternative: use a different algorithm to make the newick string that
+		// correctly creates sampled ancestor nodes even when the branch has zero length
+
+		// collapse sampled ancestors
+		Tree* tmp_tree = this->getValue().clone();
+		tmp_tree->collapseSampledAncestors();
+
 		// get the newick string
-		std::string var = this->getValue().getNewickRepresentation();
-		size_t num_chars = var.size();
+		std::string var = tmp_tree->getNewickRepresentation();
+//		std::string var = this->getValue().getNewickRepresentation();
 
 		if ( use_origin )
 		{

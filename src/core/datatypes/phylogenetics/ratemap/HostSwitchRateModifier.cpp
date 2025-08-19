@@ -8,7 +8,6 @@
 #include "HostSwitchRateModifier.h"
 #include "Tree.h"
 #include "TreeUtilities.h"
-#include "Assignable.h"
 #include "CharacterHistoryRateModifier.h"
 #include "Cloneable.h"
 #include "RbException.h"
@@ -39,21 +38,6 @@ HostSwitchRateModifier::HostSwitchRateModifier(const HostSwitchRateModifier& g) 
         num_branches = g.num_branches;
     }
 }
-
-HostSwitchRateModifier& HostSwitchRateModifier::assign(const Assignable &m)
-{
-    
-    const HostSwitchRateModifier *crm = dynamic_cast<const HostSwitchRateModifier*>(&m);
-    if ( crm != NULL )
-    {
-        return operator=(*crm);
-    }
-    else
-    {
-        throw RbException("Could not assign character history rate modifier.");
-    }
-}
-
 
 double HostSwitchRateModifier::computeRateMultiplier(std::vector<CharacterEvent*> currState, CharacterEventDiscrete* newState, std::vector<std::set<size_t> > sites_with_states, double age)
 {

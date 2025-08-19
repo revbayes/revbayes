@@ -17,7 +17,7 @@ namespace RevBayesCore {
     class RateMatrix_revPoMo4N : public TimeReversibleRateMatrix {
         
     public:
-        RateMatrix_revPoMo4N(  long num_states, long in_n );                                                                                            //!< Construct rate matrix with n states
+        RateMatrix_revPoMo4N(  std::int64_t num_states, std::int64_t in_n );                                                                                            //!< Construct rate matrix with n states
         RateMatrix_revPoMo4N(const RateMatrix_revPoMo4N& m);                                                                  //!< Copy constructor
         virtual                             ~RateMatrix_revPoMo4N(void);                                                              //!< Destructor
         
@@ -25,11 +25,10 @@ namespace RevBayesCore {
         RateMatrix_revPoMo4N&                                   operator=(const RateMatrix_revPoMo4N& r);
         
         // RateMatrix functions
-        virtual RateMatrix_revPoMo4N&                           assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_revPoMo4N*                                   clone(void) const;
 
-        void                                                    setN( long &ni );
+        void                                                    setN( std::int64_t &ni );
         void                                                    setPi(  const Simplex &bf );
         void                                                    setRho( const std::vector<double> &ex );
         void                                                    setPhi( const std::vector<double> &f );
@@ -49,7 +48,7 @@ namespace RevBayesCore {
         std::vector<double>                                     c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >                      cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
         
-        long                                                    N;
+        std::int64_t                                                    N;
         Simplex                                                 pi; 
         std::vector<double>                                     rho;   
         std::vector<double>                                     phi;                                                                           //!< Vector of precalculated product of eigenvectors and their inverse

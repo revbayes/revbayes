@@ -8,6 +8,7 @@
 #include <ostream>
 #include <string>
 #include <limits>
+#include <type_traits>
 
 namespace RevBayesCore {
     
@@ -25,6 +26,7 @@ namespace RevBayesCore {
         virtual AbstractTrace*                              createTraceObject(void) const;                                                                              //!< Create an empty trace object of the right trace type
         virtual size_t                                      getNumberOfElements(void) const;                                                                            //!< Get the number of elements for this value
         virtual std::string                                 getValueAsString(void) const;
+        virtual nlohmann::json                              getValueAsJSON(void) const;
         virtual bool                                        isSimpleNumeric(void) const;                                                                                //!< Is this variable a simple numeric variable? Currently only integer and real number are.
         virtual void                                        printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const;           //!< Monitor/Print this variable
         virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const;  //!< Monitor/Print this variable
@@ -47,7 +49,7 @@ namespace RevBayesCore {
     // createTraceObject //
     ///////////////////////
     template<>
-    AbstractTrace*                                          TypedDagNode<long>::createTraceObject(void) const;
+    AbstractTrace*                                          TypedDagNode<std::int64_t>::createTraceObject(void) const;
 
     template<>
     AbstractTrace*                                          TypedDagNode<double>::createTraceObject(void) const;
@@ -66,13 +68,13 @@ namespace RevBayesCore {
     // isSimpleNumeric //
     /////////////////////
     template<>
-    bool                                                    TypedDagNode<long>::isSimpleNumeric(void) const;
+    bool                                                    TypedDagNode<std::int64_t>::isSimpleNumeric(void) const;
     
     template<>
     bool                                                    TypedDagNode<double>::isSimpleNumeric(void) const;
 
     template<>
-    bool                                                    TypedDagNode<RbVector<long> >::isSimpleNumeric(void) const;
+    bool                                                    TypedDagNode<RbVector<std::int64_t> >::isSimpleNumeric(void) const;
     
     template<>
     bool                                                    TypedDagNode<RbVector<double> >::isSimpleNumeric(void) const;
@@ -89,7 +91,7 @@ namespace RevBayesCore {
     void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple, bool flatten) const;
 
     template<>
-    void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
+    void TypedDagNode<std::int64_t>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
     
     template<>
     void TypedDagNode<unsigned int>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
@@ -121,7 +123,7 @@ RevBayesCore::TypedDagNode<valueType>::~TypedDagNode( void )
 template<class valueType>
 RevBayesCore::AbstractTrace* RevBayesCore::TypedDagNode<valueType>::createTraceObject(void) const
 {
-    throw RbException("Cannot create a trace for variable '" + this->getName() + "' because there are not trace objects implemented for this value type.");
+    throw RbException() << "Cannot create a trace for variable '" << this->getName() << "' because there are not trace objects implemented for this value type.";
     
     return NULL;
 }
@@ -148,6 +150,16 @@ std::string RevBayesCore::TypedDagNode<valueType>::getValueAsString( void ) cons
     return ss.str();
 }
 
+template <class valueType>
+nlohmann::json RevBayesCore::TypedDagNode<valueType>::getValueAsJSON(void) const
+{
+    if constexpr (std::is_base_of_v<Printable,valueType>)
+	return getValue().toJSON();
+    else if constexpr (std::is_convertible_v<valueType,json>)
+	return getValue();
+    else
+	throw RbException()<<"Can't convert value of type "<<typeid(getValue()).name()<<" to JSON!";
+}
 
 
 template<class valueType>

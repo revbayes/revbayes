@@ -1,6 +1,6 @@
 #include "MinFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbConstants.h"
 #include "Cloneable.h"

@@ -1,6 +1,6 @@
 #include "SteppingStoneSampler.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <vector>
 

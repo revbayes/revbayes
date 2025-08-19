@@ -1,6 +1,6 @@
 #include "AbstractGibbsMove.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iomanip>
 #include <vector>

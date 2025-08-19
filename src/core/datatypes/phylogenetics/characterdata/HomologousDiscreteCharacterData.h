@@ -44,7 +44,7 @@ namespace RevBayesCore {
 
         // CharacterData functions
         double                                              computeMultinomialProfileLikelihood( void ) const;
-        std::vector<long>                                   computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const;
+        std::vector<std::int64_t>                                   computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const;
         MatrixReal                                          computeStateFrequencies(void) const;
         void                                                concatenate(const HomologousDiscreteCharacterData &d, std::string type = "");                       //!< Concatenate data matrices
         void                                                concatenate(const AbstractCharacterData &d, std::string type = "");                                 //!< Concatenate data matrices
@@ -57,6 +57,7 @@ namespace RevBayesCore {
         std::vector<double>                                 getEmpiricalBaseFrequencies(void) const;                                    //!< Compute the empirical base frequencies
         const std::set<size_t>&                             getExcludedCharacters(void) const;                                          //!< Returns the name of the file the data came from
         std::vector<size_t>                                 getIncludedSiteIndices(void) const;
+        std::vector<size_t>                                 getInvariantSiteIndices(bool excl) const;                                   //!< Get the indices of invariant characters in this matrix
         size_t                                              getMaxObservedStateIndex(void) const;                                       //!< Get the number of observed states for the characters in this matrix
         size_t                                              getNumberOfCharacters(void) const;                                          //!< Number of characters
         size_t                                              getNumberOfIncludedCharacters(void) const;                                  //!< Number of characters
@@ -321,21 +322,21 @@ RevBayesCore::MatrixReal RevBayesCore::HomologousDiscreteCharacterData<charType>
  * \return       A vector of occurrences for the site frequency spectrum.
  */
 template<class charType>
-std::vector<long> RevBayesCore::HomologousDiscreteCharacterData<charType>::computeSiteFrequencySpectrum( bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat ) const
+std::vector<std::int64_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::computeSiteFrequencySpectrum( bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat ) const
 {
     
     charType tmp = this->getTaxonData(0)[0];
     size_t num_states = tmp.getNumberOfStates();
     size_t num_sequences = this->taxa.size();
-    std::vector<long> sfs;
+    std::vector<std::int64_t> sfs;
     
     if ( folded == true )
     {
-        sfs = std::vector<long>( int(num_sequences/2)+1,0);
+        sfs = std::vector<std::int64_t>( int(num_sequences/2)+1,0);
     }
     else
     {
-        sfs = std::vector<long>(num_sequences+1,0);
+        sfs = std::vector<std::int64_t>(num_sequences+1,0);
     }
     
     const DiscreteTaxonData<charType>& tmp_seq = this->getTaxonData(0);
@@ -481,7 +482,7 @@ RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>
             else if ( type != "intersection" )
             {
                 to_delete.push_back( n );
-            //                throw RbException("Cannot concatenate two character data objects because first character data object has no taxon with name '" + obsd.getTaxonNameWithIndex(i) + "n'!");
+            //                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
             }
         }
     }
@@ -516,7 +517,7 @@ RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::NaturalNumbersState>
             }
             else
             {
-                throw RbException("Cannot concatenate two character data objects because second character data object has no taxon with name '" + n + "n'!");
+                throw RbException() << "Cannot concatenate two character data objects because second character data object has no taxon with name '" << n << "n'!";
             }
         }
         
@@ -632,7 +633,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::concatenate(const 
 //            else if ( type != "intersection" )
 //            {
 //                toDelete.push_back( n );
-//                throw RbException("Cannot concatenate two character data objects because first character data object has no taxon with name '" + obsd.getTaxonNameWithIndex(i) + "n'!");
+//                throw RbException() << "Cannot concatenate two character data objects because first character data object has no taxon with name '" << obsd.getTaxonNameWithIndex(i) << "n'!";
 //            }
         }
     }
@@ -663,7 +664,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::concatenate(const 
             }
             else
             {
-                throw RbException("Cannot concatenate two character data objects because second character data object has no taxon with name '" + n + "n'!");
+                throw RbException() << "Cannot concatenate two character data objects because second character data object has no taxon with name '" << n << "n'!";
             }
         }
 
@@ -938,6 +939,57 @@ std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::get
 
 
 
+/**
+ * Get the indices of invariant characters in taxon data object.
+ * This is regardless of whether the character are included or excluded.
+ *
+ * \return    The total number of characters
+ */
+template<class charType>
+std::vector<size_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::getInvariantSiteIndices(bool exclude_missing) const
+{
+    // create a vector with the correct site indices
+    // some of the sites may have been excluded
+    std::vector<size_t> inv_site_indices;
+    size_t nt = this->getNumberOfTaxa();
+
+    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
+    size_t nc = firstTaxonData.getNumberOfCharacters();
+    for (size_t j=0; j<nc; j++)
+    {
+        const DiscreteCharacterState* a = &firstTaxonData[j];
+        size_t k = 1;
+        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
+        {
+            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
+            a = &td[j];
+            ++k;
+        }
+        
+        bool invariant = true;
+        for (size_t i=1; i<nt; i++)
+        {
+            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
+            const DiscreteCharacterState& b = secondTaxonData[j];
+            
+            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
+            {
+                invariant &= (*a == b);
+            }
+
+        }
+        
+        if ( invariant == true )
+        {
+            inv_site_indices.push_back( j + 1 );
+        }
+
+    }
+    
+    return inv_site_indices;
+}
+
+
 
 /** 
  * Get the number of characters in taxon data object. 
@@ -1053,49 +1105,15 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfState
 
 
 /**
- * Get the set of excluded character indices.
+ * Get the number of invariant characters.
  *
- * \return    The excluded character indices.
+ * \return    The number of invariant sites.
  */
 template<class charType>
 size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getNumberOfInvariantSites(bool exclude_missing) const
 {
-    size_t invSites = 0;
-    size_t nt = this->getNumberOfTaxa();
-
-    const AbstractDiscreteTaxonData& firstTaxonData = this->getTaxonData(0);
-    size_t nc = firstTaxonData.getNumberOfCharacters();
-    for (size_t j=0; j<nc; j++)
-    {
-        const DiscreteCharacterState* a = &firstTaxonData[j];
-        size_t k = 1;
-        while ( exclude_missing == true && a->isAmbiguous() && k<nt)
-        {
-            const AbstractDiscreteTaxonData& td = this->getTaxonData(k);
-            a = &td[j];
-            ++k;
-        }
-        
-        bool invariant = true;
-        for (size_t i=1; i<nt; i++)
-        {
-            const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(i);
-            const DiscreteCharacterState& b = secondTaxonData[j];
-            
-            if ( exclude_missing == false || (b.isAmbiguous() == false && a->isAmbiguous() == false) )
-            {
-                invariant &= (*a == b);
-            }
-
-        }
-        
-        if ( invariant == true )
-        {
-            ++invSites;
-        }
-
-    }
-    
+    std::vector<size_t> inv_site_indices = this->getInvariantSiteIndices(exclude_missing);
+    size_t invSites = inv_site_indices.size();
     return invSites;
 }
 
@@ -1359,7 +1377,7 @@ const RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscret
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + name + "' in the HomologousDiscreteCharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }
@@ -1388,7 +1406,7 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscreteChara
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + name + "' in the HomologousDiscreteCharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << name << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }
@@ -1416,7 +1434,7 @@ const RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscret
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + tn + "' in the HomologousDiscreteCharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << tn << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }
@@ -1445,7 +1463,7 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscreteChara
     }
     else 
     {
-        throw RbException("Cannot find taxon '" + tn + "' in the HomologousDiscreteCharacterData matrix.");
+        throw RbException() << "Cannot find taxon '" << tn << "' in the HomologousDiscreteCharacterData matrix.";
     }
     
 }

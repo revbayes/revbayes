@@ -1,7 +1,7 @@
 #include "JointAncestralStateTrace.h"
 
 #include <boost/lexical_cast.hpp>
-#include <assert.h>
+#include <cassert>
 #include <numeric>
 #include <algorithm>
 #include <cstddef>

@@ -1,6 +1,6 @@
 #include "CharacterHistoryNodeMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 #include "CharacterEventDiscrete.h"
@@ -20,7 +20,7 @@ namespace RevBayesCore { class CharacterEvent; }
 using namespace RevBayesCore;
 
 /* Constructor */
-CharacterHistoryNodeMonitor::CharacterHistoryNodeMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, unsigned long g, const path& fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr) {
+CharacterHistoryNodeMonitor::CharacterHistoryNodeMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::uint64_t g, const path& fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr) {
     
     nodes.push_back(t);
     for (size_t i = 0; i < branchHistories.size(); i++)
@@ -134,10 +134,10 @@ std::string CharacterHistoryNodeMonitor::buildExtendedNewick( TopologyNode* n ) 
 
 
 /** Monitor value at generation gen */
-void CharacterHistoryNodeMonitor::monitor(unsigned long gen) {
+void CharacterHistoryNodeMonitor::monitor(std::uint64_t gen) {
     
     // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    std::uint64_t samplingFrequency = printgen;
     
     if (gen % samplingFrequency == 0) {
         // print the iteration number first

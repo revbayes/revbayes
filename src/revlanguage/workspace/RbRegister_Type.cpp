@@ -27,8 +27,8 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
 /* Files including helper classes */
 #include "RbException.h"

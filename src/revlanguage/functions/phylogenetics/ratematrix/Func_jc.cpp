@@ -1,6 +1,6 @@
 #include "Func_jc.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "JcRateMatrixFunction.h"
 #include "Natural.h"

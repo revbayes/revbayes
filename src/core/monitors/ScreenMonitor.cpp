@@ -13,7 +13,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-ScreenMonitor::ScreenMonitor(DagNode *n, unsigned long g, bool pp, bool l, bool pr) : Monitor(g,n),
+ScreenMonitor::ScreenMonitor(DagNode *n, std::uint64_t g, bool pp, bool l, bool pr) : Monitor(g,n),
     posterior( pp ),
     prior( pr ),
     likelihood( l ),
@@ -30,7 +30,7 @@ ScreenMonitor::ScreenMonitor(DagNode *n, unsigned long g, bool pp, bool l, bool 
 {}
 
 
-ScreenMonitor::ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, bool pp, bool l, bool pr) : Monitor(g,n),
+ScreenMonitor::ScreenMonitor(const std::vector<DagNode *> &n, std::uint64_t g, bool pp, bool l, bool pr) : Monitor(g,n),
     posterior( pp ),
     prior( pr ),
     likelihood( l ),
@@ -61,7 +61,7 @@ bool ScreenMonitor::isScreenMonitor( void ) const
 }
 
 
-void ScreenMonitor::monitor(unsigned long gen)
+void ScreenMonitor::monitor(std::uint64_t gen)
 {
 
     // only the enabled monitor is allowed to print
@@ -69,7 +69,7 @@ void ScreenMonitor::monitor(unsigned long gen)
     {
         
         // get the printing frequency
-        unsigned long samplingFrequency = printgen;
+        std::uint64_t samplingFrequency = printgen;
         
         if ( gen > 0 && gen % (headerPrintingInterval*samplingFrequency) == 0 )
         {

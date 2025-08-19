@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <complex>
 #include <iosfwd>
@@ -12,7 +12,6 @@
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
 #include "AminoAcidState.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "DiscreteCharacterState.h"
 #include "RbVector.h"
@@ -74,23 +73,6 @@ RateMatrix_CodonSynonymousNonsynonymous& RateMatrix_CodonSynonymousNonsynonymous
     
     return *this;
 }
-
-
-RateMatrix_CodonSynonymousNonsynonymous& RateMatrix_CodonSynonymousNonsynonymous::assign(const Assignable &m)
-{
-    
-    const RateMatrix_CodonSynonymousNonsynonymous *rm = dynamic_cast<const RateMatrix_CodonSynonymousNonsynonymous*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */

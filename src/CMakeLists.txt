@@ -7,6 +7,31 @@ project(RevBayes)
 
 set(CMAKE_CXX_STANDARD 17)
 
+
+
+# Policies relevant to the configuration of Boost libraries
+if(POLICY CMP0111)
+  # Provides clear error if imported library not found
+  cmake_policy(SET CMP0111 NEW)
+endif()
+if(POLICY CMP0144)
+  # Recognize BOOST_ROOT as well as Boost_ROOT
+  cmake_policy(SET CMP0144 NEW)
+endif()
+if(POLICY CMP0167)
+  # FindBoost module not available in cmake 3.30
+  cmake_policy(SET CMP0167 NEW)
+endif()
+
+if(WIN32)
+  # Congifure compiler to support big objects
+  if(MSVC)
+    add_compile_options(/W4 /EHsc /bigobj)
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj")
+  endif()
+endif()
+
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
@@ -25,7 +50,8 @@ else()
    set(OPT_FLAGS "-msse -msse2 -msse3")
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if (BUILD_TYPE_UPPER STREQUAL "DEBUG")
    set(OPT_FLAGS "${OPT_FLAGS} -g -O0 -Wall")
 
    # These just add noise:
@@ -34,10 +60,11 @@ if(CMAKE_BUILD_TYPE MATCHES DEBUG)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reorder")
    # Not necessarily a bug:
    set(OPT_FLAGS "${OPT_FLAGS} -Wno-unused-variable")
-elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
-   set(OPT_FLAGS "${OPT_FLAGS} -O2 -mfpmath=sse -ffp-contract=off")
-   find_library(OPENLIBM openlibm)
-   message("openlibm: ${OPENLIBM}")
+# elseif ("${CONTINUOUS_INTEGRATION}" STREQUAL "TRUE")
+#    set(OPT_FLAGS "${OPT_FLAGS} -O2 -ffp-contract=off")
+#    if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|x64|i686|x32|AMD64")
+#      set(OPT_FLAGS "${OPT_FLAGS} -mfpmath=sse")
+#   endif()
 else()
    set(OPT_FLAGS "${OPT_FLAGS} -O3 -DNDEBUG")
 endif()
@@ -58,6 +85,15 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS}")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
+
+## Prevent the error "Could NOT find Threads" when we search for BOOST.
+IF(APPLE)
+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+    set(CMAKE_HAVE_THREADS_LIBRARY 1)
+    set(CMAKE_USE_WIN32_THREADS_INIT 0)
+    set(CMAKE_USE_PTHREADS_INIT 1)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+ENDIF()
 
 ##### rpath: where to find shared libraries #####
 
@@ -136,7 +172,7 @@ if ("${STATIC_BOOST}" STREQUAL "ON")
 	set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-MESSAGE("Searching for BOOST:")
+message("Searching for BOOST:")
 find_package(Boost
 1.71.0
 COMPONENTS regex
@@ -146,11 +182,11 @@ system
 filesystem
 date_time
 serialization REQUIRED)
-MESSAGE("Boost configuration results:")
-MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIR}")
-MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+message("Boost configuration results:")
+message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
+link_directories(${Boost_LIBRARY_DIRS})
 
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")
@@ -213,11 +249,16 @@ else()
   add_executable(${RB_EXEC_NAME}   ${PROJECT_SOURCE_DIR}/revlanguage/main.cpp)
 endif()
 
-  target_link_libraries(${RB_EXEC_NAME} rb-parser rb-core rb-libs ${Boost_LIBRARIES} ${OPENLIBM} ${CMAKE_DL_LIBS})
-target_link_libraries(${RB_EXEC_NAME}   ${RB_CMD_LIB} rb-parser rb-core rb-libs)
 # Link the target to other libraries.  Some variables can be empty.
-target_link_libraries(${RB_EXEC_NAME}   ${Boost_LIBRARIES} ${OPENLIBM} ${GTK_LIBRARIES} ${MPI_LIBRARIES})
-
-set_target_properties(${RB_EXEC_NAME}   PROPERTIES PREFIX "../")
+target_link_libraries(${RB_EXEC_NAME}
+  ${RB_CMD_LIB}
+  rb-parser
+  rb-core
+  rb-libs
+  ${Boost_LIBRARIES}
+  ${CMAKE_DL_LIBS}
+  ${GTK_LIBRARIES}
+  ${MPI_LIBRARIES}
+)
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

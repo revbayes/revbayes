@@ -28,8 +28,8 @@
 
 #include "EigenSystem.h"
 
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 #include <vector>
 
 #include "MatrixReal.h"

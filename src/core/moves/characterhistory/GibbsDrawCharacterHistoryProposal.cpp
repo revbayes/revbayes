@@ -1,6 +1,6 @@
 #include "GibbsDrawCharacterHistoryProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbException.h"

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <vector>
 
@@ -6,7 +6,6 @@
 #include "RateMatrix_HKY.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -32,27 +31,6 @@ RateMatrix_HKY::~RateMatrix_HKY(void)
 {
     
 }
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_HKY& RateMatrix_HKY::assign(const Assignable &m)
-{
-    
-    const RateMatrix_HKY *rm = dynamic_cast<const RateMatrix_HKY*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 
 /** Calculate the transition probabilities along a branch

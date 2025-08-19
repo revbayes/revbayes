@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -49,10 +49,21 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     run_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
+    
+    ArgumentRules* run_one_stone_arg_rules = new ArgumentRules();
+    run_one_stone_arg_rules->push_back( new ArgumentRule("index", Natural::getClassTypeSpec(), "Index of the stone/power to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("burninFraction", Probability::getClassTypeSpec(), "The fraction of samples to discard.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+    run_one_stone_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+    methods.addFunction( new MemberProcedure( "runOneStone", RlUtils::Void, run_one_stone_arg_rules) );
+    
+    ArgumentRules* summarize_arg_rules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "summarize", RlUtils::Void, summarize_arg_rules) );
 
     ArgumentRules* burnin_arg_rules = new ArgumentRules();
     burnin_arg_rules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency when the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency at which the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burnin_arg_rules) );
 
 }
@@ -108,9 +119,9 @@ void PowerPosteriorAnalysis::constructInternalObject( void )
     else
     {
         int k = (int)static_cast<const Natural &>( cats->getRevObject() ).getValue();
-        for (int i = k; i >= 0; --i)
+        for (int i = k - 1; i >= 0; --i) // subtract 1 to account for the difference between 1-based and 0-based indexing
         {
-            double b = RevBayesCore::RbStatistics::Beta::quantile(alpha,1.0,i / double(k));
+            double b = RevBayesCore::RbStatistics::Beta::quantile(alpha, 1.0, i / double(k - 1));
             beta.push_back( b );
         }
     }
@@ -126,11 +137,10 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
 
     if (name == "run")
     {
-
         found = true;
 
-        // get the member with give index
-        long gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        // get the member with a given index
+        std::int64_t gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
         size_t preburn_gen = gen;
         if ( args[2].getVariable()->getRevObject() != RevNullObject::getInstance() )
@@ -140,6 +150,36 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         size_t tune_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
         value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int );
 
+        return NULL;
+    }
+    else if (name == "runOneStone")
+    {
+        found = true;
+        
+        // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
+        size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        if (ind < 0 or ind > value->getPowers().size() - 1)
+        {
+            throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size();
+        }
+        std::int64_t gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+        size_t preburn_gen = gen;
+        if ( args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )
+        {
+            preburn_gen = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+        }
+        size_t tune_int = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
+        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int );
+        
+        return NULL;
+    }
+    else if (name == "summarize")
+    {
+        found = true;
+        
+        value->summarizeStones();
+        
         return NULL;
     }
     else if (name == "burnin")
@@ -206,7 +246,7 @@ const MemberRules& PowerPosteriorAnalysis::getParameterRules(void) const
         member_rules.push_back( new ArgumentRule("monitors"   , WorkspaceVector<Monitor>::getClassTypeSpec(), "The monitors to call. Do not provide a screen monitor.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule("filename"   , RlString::getClassTypeSpec()                , "The name of the file for the likelihood samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule("powers"     , ModelVector<RealPos>::getClassTypeSpec()    , "A vector of powers.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-        member_rules.push_back( new ArgumentRule("cats"       , Natural::getClassTypeSpec()                 , "The number of categories if no powers are specified.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+        member_rules.push_back( new ArgumentRule("cats"       , Natural::getClassTypeSpec()                 , "Number of power posteriors (categories) to run if no powers are specified.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
         member_rules.push_back( new ArgumentRule("alpha"      , RealPos::getClassTypeSpec()                 , "The alpha parameter of the beta distribution if no powers are specified.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.2) ) );
         member_rules.push_back( new ArgumentRule("sampleFreq" , Natural::getClassTypeSpec()                 , "The sampling frequency of the likelihood values.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
         member_rules.push_back( new ArgumentRule("procPerLikelihood" , Natural::getClassTypeSpec()          , "Number of processors used to compute the likelihood.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );

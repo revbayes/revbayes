@@ -41,7 +41,6 @@ namespace RevBayesCore {
         
         // overloaded operators
         RateMatrix_FreeSymmetric&           operator=(const RateMatrix_FreeSymmetric& r);
-        virtual RateMatrix_FreeSymmetric&   assign(const Assignable &m);
         
         // RateMatrix functions
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix

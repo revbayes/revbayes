@@ -28,7 +28,7 @@ namespace RevBayesCore {
         
     public:
         // constructor(s)
-        VectorMixtureDistribution(std::vector<TypedDistribution< mixtureType > *> base_dist, const TypedDagNode< Simplex > *p, long num_elements);
+        VectorMixtureDistribution(std::vector<TypedDistribution< mixtureType > *> base_dist, const TypedDagNode< Simplex > *p, std::int64_t num_elements);
         VectorMixtureDistribution(const VectorMixtureDistribution<mixtureType> &d);
 
         // public member functions
@@ -55,7 +55,7 @@ namespace RevBayesCore {
         // private members
         std::vector<TypedDistribution< mixtureType >* >         base_distributions;
         const TypedDagNode< Simplex >*                          probabilities;
-        long                                                    num_values;
+        std::int64_t                                                    num_values;
 
         bool                                                    dirty;
         std::vector<double>                                     ln_probabilities;
@@ -63,15 +63,13 @@ namespace RevBayesCore {
     
 }
 
-#include "Assign.h"
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
 
 template <class mixtureType>
-RevBayesCore::VectorMixtureDistribution<mixtureType>::VectorMixtureDistribution(std::vector<TypedDistribution< mixtureType > *> base_dists, const TypedDagNode< Simplex > *p, long num_elements) : TypedDistribution< RbVector<mixtureType> >( new RbVector<mixtureType>(num_elements) ),
+RevBayesCore::VectorMixtureDistribution<mixtureType>::VectorMixtureDistribution(std::vector<TypedDistribution< mixtureType > *> base_dists, const TypedDagNode< Simplex > *p, std::int64_t num_elements) : TypedDistribution< RbVector<mixtureType> >( new RbVector<mixtureType>(num_elements) ),
     base_distributions( base_dists ),
     probabilities( p ),
     num_values( num_elements )
@@ -218,7 +216,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::executeMethod(const s
     }
     else
     {
-        throw RbException("A vector-mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A vector-mixture distribution does not have a member method called '" << n << "'.";
     }
     
 }
@@ -304,7 +302,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::swapParameterInternal
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + old_p->getName() + " to " + new_p->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << old_p->getName() << " to " << new_p->getName(); 
     }
 }
 

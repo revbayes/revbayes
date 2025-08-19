@@ -1,10 +1,9 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <vector>
 
 #include "RateMatrix_F81.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "RbException.h"
 #include "TimeReversibleRateMatrix.h"
 
@@ -25,27 +24,6 @@ RateMatrix_F81::~RateMatrix_F81(void)
 {
     
 }
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_F81& RateMatrix_F81::assign(const Assignable &m)
-{
-    
-    const RateMatrix_F81 *rm = dynamic_cast<const RateMatrix_F81*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 
 /** Calculate the transition probabilities */

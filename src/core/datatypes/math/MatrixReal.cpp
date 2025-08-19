@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <ostream>
@@ -200,7 +200,7 @@ void MatrixReal::executeMethod(const std::string &n, const std::vector<const Dag
     
     if ( n == "[]" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = elements[index];
     }
     else if ( n == "upperTriangle" )
@@ -213,7 +213,7 @@ void MatrixReal::executeMethod(const std::string &n, const std::vector<const Dag
     }
     else
     {
-        throw RbException("A matrix object does not have a member method called '" + n + "'.");
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -227,7 +227,7 @@ void MatrixReal::executeMethod(const std::string &n, const std::vector<const Dag
     }
     else
     {
-        throw RbException("A matrix object does not have a member method called '" + n + "'.");
+        throw RbException() << "A matrix object does not have a member method called '" << n << "'.";
     }
     
 }
@@ -1284,9 +1284,9 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const MatrixReal& x)
     {
         if (i == 0)
             o << "[ ";
-        else 
-            o << "  ";
-        
+        else
+            o << "  [ ";
+            
         for (size_t j = 0; j < x.getNumberOfColumns(); ++j) 
         {
             if (j != 0)

@@ -8,6 +8,7 @@
 #include "DistributionGeometric.h"
 #include "DistributionPoisson.h"
 #include "RandomNumberGenerator.h"
+#include "RandomNumberFactory.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
@@ -25,25 +26,30 @@ using namespace RevBayesCore;
  * \return Returns a double for the cumulative probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::cdf(int n, double p) {
+double RbStatistics::Geometric::cdf(std::int64_t n, double p)
+{
     
     if (p <= 0 || p > 1) 
-        {
+    {
         std::ostringstream s;
         s << "Cannot compute cdf of the Geometric distribution because n = " << n << " is not an integer";
         throw RbException(s.str());
-        }
+    }
     
-    if (n < 0.0) 
+    if (n < 0.0)
+    {
         return 0.0;
+    }
     if (!RbMath::isFinite(double(n)))
+    {
         return 1.0;
-    
+    }
+        
     if (p == 1.0) 
-        { 
+    {
         /* we cannot assume IEEE */
         return n;
-        }
+    }
     n = int( RbMath::log1p(-p) * (n + 1) );
         
     return -RbMath::expm1(n);
@@ -59,7 +65,8 @@ double RbStatistics::Geometric::cdf(int n, double p) {
  * \return Returns a double of the log probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::lnPdf(int n, double p) {
+double RbStatistics::Geometric::lnPdf(std::int64_t n, double p)
+{
 
     return pdf(n, p, true);
 }
@@ -74,7 +81,8 @@ double RbStatistics::Geometric::lnPdf(int n, double p) {
  * \return Returns a double with the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::pdf(int n, double p) {
+double RbStatistics::Geometric::pdf(std::int64_t n, double p)
+{
 
     return pdf(n, p, false);
 }
@@ -100,24 +108,28 @@ double RbStatistics::Geometric::pdf(int n, double p) {
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Geometric::pdf(int n, double p, bool asLog) {
+double RbStatistics::Geometric::pdf(std::int64_t n, double p, bool asLog)
+{
     
     double prob;
     
     if (p <= 0 || p > 1) 
-        {
+    {
         std::ostringstream s;
         s << "Cannot compute pdf of the Geometric distribution because p = " << p << " is not a probability";
         throw RbException(s.str());
-        }
+    }
     
     if (n < 0 || !RbMath::isFinite(double(n)) || p == 0)
+    {
         return ((asLog) ? RbConstants::Double::neginf : 0.0);
+    }
     
-    /* prob = (1-p)^x, stable for small p */
-    prob = RbStatistics::Binomial::pdf(n, p,1-p, 0.0, asLog);
-    
-    return ((asLog) ? log(p) + prob : p*prob);
+    /* prob = (1-p)^n, stable for small p */
+    prob = RbStatistics::Binomial::pdf(n, p, 1-p, 0.0, asLog);
+
+    /* result = p*(1-p)^n */
+    return asLog ? log(p) + prob : p * prob;
 }
 
 /*!
@@ -131,20 +143,23 @@ double RbStatistics::Geometric::pdf(int n, double p, bool asLog) {
  * \return Returns the probability density.
  * \throws Does not throw an error.
  */
-int RbStatistics::Geometric::quantile(double q, double p) {
+std::int64_t RbStatistics::Geometric::quantile(double q, double p)
+{
 
     if (p <= 0 || p > 1) 
-        {
+    {
         std::ostringstream s;
         s << "Cannot compute pdf of the Geometric distribution because q = " << q << " is not an integer";
         throw RbException(s.str());
-        }
+    }
 
-    if (p == 1) 
+    if (p == 1)
+    {
         return 0;
+    }
     
     /* add a fuzz to ensure left continuity */
-    return int(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
+    return std::int64_t(ceil(log(q) / RbMath::log1p(- p) - 1 - 1e-7));
 }
 
 /*!
@@ -167,9 +182,11 @@ int RbStatistics::Geometric::quantile(double q, double p) {
  *    New York: Springer-Verlag.
  *    Page 480.
  */
-int RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng) {
-    if (!RbMath::isFinite(p) || p <= 0 || p > 1) throw RbException("NaN produced in rgeom");
+std::int64_t RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng)
+{
+    if (!RbMath::isFinite(p) || p <= 0 || p > 1) 
+        throw RbException("NaN produced in rgeom");
     
-    return RbStatistics::Poisson::rv(exp(rng.uniform01()) * ((1 - p) / p),rng);
+    return RbStatistics::Poisson::rv(exp(rng.uniform01()) * ((1 - p) / p),rng)+1;
 }
 

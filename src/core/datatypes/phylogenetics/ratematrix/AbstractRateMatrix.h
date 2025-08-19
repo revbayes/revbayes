@@ -1,7 +1,7 @@
 #ifndef AbstractRateMatrix_H
 #define AbstractRateMatrix_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "MatrixReal.h"
@@ -56,9 +56,9 @@ namespace RevBayesCore {
         virtual std::vector<double>         getStationaryFrequencies(void) const = 0;                                                   //!< Return the stationary frequencies
         MatrixReal                          getRateMatrix(void) const;
         virtual void                        update(void) = 0;                                                                           //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
-        virtual MatrixReal                  getStochasticMatrix(size_t n);
+        virtual MatrixReal                  getStochasticMatrix(size_t n) const;
         virtual double                      getDominatingRate(void) const;
-        virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times);
+        virtual bool                        simulateStochasticMapping(double startAge, double endAge, double rate,std::vector<size_t>& transition_states, std::vector<double>& transition_times) const;
         
 
     protected:
@@ -70,8 +70,8 @@ namespace RevBayesCore {
         // protected methods available for derived classes
         std::vector<double>                 calculateStationaryFrequencies(void) const;                                                 //!< Calculate the stationary frequencies for the rate matrix
         bool                                checkTimeReversibity(double tolerance);
-        virtual void                        computeStochasticMatrix(size_t n);
-        virtual void                        computeDominatingRate(void);
+        virtual void                        computeStochasticMatrix(size_t n) const;
+        virtual void                        computeDominatingRate(void) const;
         void                                exponentiateMatrixByScalingAndSquaring(double t,  TransitionProbabilityMatrix& p) const;
         
         // protected members available for derived classes
@@ -79,9 +79,8 @@ namespace RevBayesCore {
         bool                                needs_update;
         
         // stochastic matrix
-        double                              dominating_rate;
-        std::vector<MatrixReal>             stochastic_matrix;                                                                          //!< Stochastic matrix raised to the power of n
-        
+        mutable double                      dominating_rate;
+        mutable std::vector<MatrixReal>     stochastic_matrix;                                                                          //!< Stochastic matrix raised to the power of n
     };
     
 }

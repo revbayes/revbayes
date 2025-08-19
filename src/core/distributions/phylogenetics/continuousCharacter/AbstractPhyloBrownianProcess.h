@@ -1,7 +1,7 @@
 #ifndef AbstractPhyloBrownianProcess_H
 #define AbstractPhyloBrownianProcess_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractPhyloContinuousCharacterProcess.h"

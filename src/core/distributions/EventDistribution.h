@@ -26,7 +26,7 @@ namespace RevBayesCore {
         
     public:
         // constructor(s)
-        EventDistribution(TypedDistribution<long> *ep, TypedDistribution<valueType> *vp);
+        EventDistribution(TypedDistribution<std::int64_t> *ep, TypedDistribution<valueType> *vp);
         EventDistribution(const EventDistribution<valueType> &ep);
 
         // public member functions
@@ -45,22 +45,20 @@ namespace RevBayesCore {
         void                                                simulate();
         
         // private members
-        TypedDistribution<long>*                            event_prior;
+        TypedDistribution<std::int64_t>*                            event_prior;
         TypedDistribution<valueType>*                       value_prior;
 
     };
     
 }
 
-#include "Assign.h"
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
 
 template <class valueType>
-RevBayesCore::EventDistribution<valueType>::EventDistribution(TypedDistribution<long> *ep, TypedDistribution<valueType> *vp) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
+RevBayesCore::EventDistribution<valueType>::EventDistribution(TypedDistribution<std::int64_t> *ep, TypedDistribution<valueType> *vp) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
     event_prior( ep ),
     value_prior( vp )
 {
@@ -124,7 +122,7 @@ template <class valueType>
 double RevBayesCore::EventDistribution<valueType>::computeLnProbability( void )
 {
     size_t num_events = this->value->size();
-    event_prior->setValue( new long(num_events) );
+    event_prior->setValue( new std::int64_t(num_events) );
     
     double ln_prob = event_prior->computeLnProbability();
     
@@ -149,7 +147,7 @@ void RevBayesCore::EventDistribution<valueType>::simulate()
     
     // draw a number of events
     event_prior->redrawValue();
-    long num_events = event_prior->getValue();
+    std::int64_t num_events = event_prior->getValue();
     
     
     for (int i = 0; i < num_events; ++i)

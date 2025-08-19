@@ -7,7 +7,7 @@
 
 #include "CladogeneticSpeciationRateMatrixFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "CladogeneticSpeciationRateMatrix.h"
 #include "RbException.h"
@@ -23,7 +23,7 @@ using namespace RevBayesCore;
 
 
 //TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
-CladogeneticSpeciationRateMatrixFunction::CladogeneticSpeciationRateMatrixFunction(const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates, int n_states):
+CladogeneticSpeciationRateMatrixFunction::CladogeneticSpeciationRateMatrixFunction(const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates, int n_states):
 TypedFunction<CladogeneticSpeciationRateMatrix>( new CladogeneticSpeciationRateMatrix( n_states ) ),
 cladogenetic_events( events ), 
 num_states( n_states ),
@@ -72,7 +72,7 @@ void CladogeneticSpeciationRateMatrixFunction::update( void )
 
     // get speciation rates and the clado events
     const std::vector<double>& sr = speciation_rates->getValue();
-    const RbVector<RbVector<long> >& events = cladogenetic_events->getValue();
+    const RbVector<RbVector<std::int64_t> >& events = cladogenetic_events->getValue();
 
     if (sr.size() != events.size())
     {

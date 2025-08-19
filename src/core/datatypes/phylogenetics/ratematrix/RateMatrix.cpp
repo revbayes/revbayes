@@ -1,7 +1,6 @@
 #include "RateMatrix.h"
 
 #include "RbException.h"
-#include "Assignable.h"
 
 using namespace RevBayesCore;
 
@@ -19,18 +18,4 @@ RateMatrix::RateMatrix(size_t n) : RateGenerator(n)
 RateMatrix::~RateMatrix(void)
 {
     
-}
-
-
-RateMatrix& RateMatrix::assign(const Assignable &m)
-{
-    const RateMatrix *rm = dynamic_cast<const RateMatrix*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
 }

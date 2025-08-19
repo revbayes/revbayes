@@ -15,7 +15,7 @@
 #ifndef Serializer_H
 #define Serializer_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 
 #include "RbException.h"
@@ -30,7 +30,7 @@ namespace RevBayesCore {
         
     public:
         //!< Create a clone of the given object.
-        static void                     ressurectFromString( objType* /*obj*/, const std::string &s ) { throw RbException("Could not resurrect object from string value:\n" + s); }
+        static void                     ressurectFromString( objType* /*obj*/, const std::string &s ) { throw RbException() << "Could not resurrect object from string value:\n" << s; }
         
         static void                     ressurectFromFile( objType* obj, const path &dir, const std::string &fn )
         {
@@ -82,7 +82,7 @@ namespace RevBayesCore {
     inline void Serializer<int,0>::ressurectFromString( int *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
 
     template<>
-    inline void Serializer<long,0>::ressurectFromString( long *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
+    inline void Serializer<std::int64_t,0>::ressurectFromString( std::int64_t *obj, const std::string &s ) { *obj = atoi( s.c_str()); }
 
     
     template <typename objType>

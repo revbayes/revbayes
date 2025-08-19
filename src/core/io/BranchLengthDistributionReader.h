@@ -1,7 +1,7 @@
 #ifndef BranchLengthDistributionReader_H
 #define BranchLengthDistributionReader_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>

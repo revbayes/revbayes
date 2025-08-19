@@ -1,6 +1,6 @@
 #include "RlAbstractNonHomologousDiscreteCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "MemberProcedure.h"
 #include "RlBoolean.h"

@@ -1,7 +1,7 @@
 #ifndef DelimitedDataReader_H
 #define DelimitedDataReader_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 #include <string> // IWYU pragma: keep

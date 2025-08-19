@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <fstream>
 #include <vector>
 
@@ -44,9 +44,10 @@ RevPtr<RevVariable> Func_setOption::execute( void )
     
     const std::string &key = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     const std::string &value = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool write = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
     
     RbSettings& s = RbSettings::userSettings();
-    s.setOption( key, value, true );
+    s.setOption( key, value, write );
     
     return NULL;
 }
@@ -58,12 +59,12 @@ const ArgumentRules& Func_setOption::getArgumentRules( void ) const
     
     static ArgumentRules argumentRules = ArgumentRules();
     static bool rules_set = false;
-    
+
     if ( !rules_set )
     {
-        
-        argumentRules.push_back( new ArgumentRule( "key", RlString::getClassTypeSpec(),   "The key-identifier for which to set a new value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "value", RlString::getClassTypeSpec(), "The new value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "key",   RlString::getClassTypeSpec(),  "The key-identifier for which to set a new value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "value", RlString::getClassTypeSpec(),  "The new value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+	argumentRules.push_back( new ArgumentRule( "save",  RlBoolean::getClassTypeSpec(), "Save option to file", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlBoolean(true) ) );
         rules_set = true;
     }
     

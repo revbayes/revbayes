@@ -1,7 +1,7 @@
 #ifndef ContinuousCharacterDataScaleProposal_H
 #define ContinuousCharacterDataScaleProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

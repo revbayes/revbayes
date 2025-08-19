@@ -1,0 +1,22 @@
+Probability(0)
+Probability(0.5)
+Probability(1)
+
+seed(12345)
+
+x ~ dnBinomial(size=10, p=0.5)
+x
+
+# This fails
+# y ~ dnBinomial(size=10, p=x/10)
+# y
+
+# But this succeeds
+y ~ dnBinomial(size=10, p=Probability(x/10))
+y
+
+# And this succeeds
+z ~ dnBinomial(size=10,p=Probability(1 - (y/10)))
+z
+
+q()

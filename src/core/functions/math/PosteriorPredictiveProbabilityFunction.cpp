@@ -1,6 +1,6 @@
 #include "PosteriorPredictiveProbabilityFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbVector.h"
 #include "RbVectorImpl.h"

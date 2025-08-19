@@ -1,6 +1,6 @@
 #include "Dist_phyloCTMCDASiteIID.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "GeneralTreeHistoryCtmcSiteIID.h"

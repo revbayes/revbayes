@@ -1,6 +1,6 @@
 #include "ComputeWeightedNodeOrderConstraintsScoreFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 
@@ -52,33 +52,9 @@ computeWeightedNodeOrderConstraintsScoreFunction* computeWeightedNodeOrderConstr
 }
 
 
-void computeWeightedNodeOrderConstraintsScoreFunction::keep( const DagNode *affecter)
-{
-    //delegate to base class
-    TypedFunction< double >::keep( affecter );
-
-}
-
-
 void computeWeightedNodeOrderConstraintsScoreFunction::reInitialized( void )
 {
     *value = 0.0;
-}
-
-
-void computeWeightedNodeOrderConstraintsScoreFunction::restore( const DagNode *restorer)
-{
-    //delegate to base class
-    TypedFunction< double >::restore( restorer );
-}
-
-
-void computeWeightedNodeOrderConstraintsScoreFunction::touch(const DagNode *toucher)
-{
-
-    //delegate to base class
-    TypedFunction< double >::touch( toucher );
-
 }
 
 

@@ -17,7 +17,7 @@
 #ifndef NaturalNumbersState_H
 #define NaturalNumbersState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

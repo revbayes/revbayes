@@ -8,7 +8,7 @@
 
 #include "Func_rangeEvolutionRateModifier.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "RangeEvolutionRateModifierFunction.h"

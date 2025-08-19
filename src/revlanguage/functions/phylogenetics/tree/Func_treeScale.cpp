@@ -8,7 +8,7 @@
 
 #include "Func_treeScale.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ModelVector.h"
 #include "RbVector.h"

@@ -1,6 +1,6 @@
 #include "ProbabilityMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <set>
 #include <string>
@@ -14,7 +14,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-ProbabilityMonitor::ProbabilityMonitor(unsigned long g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del)
+ProbabilityMonitor::ProbabilityMonitor(std::uint64_t g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del)
 {
     
     flatten = false;
@@ -46,9 +46,10 @@ ProbabilityMonitor* ProbabilityMonitor::clone(void) const
 /**
  * Monitor value at generation gen
  */
-void ProbabilityMonitor::monitorVariables(unsigned long gen)
+void ProbabilityMonitor::monitorVariables(std::uint64_t gen)
 {
-    
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
     for (std::vector<DagNode*>::iterator i = nodes.begin(); i != nodes.end(); ++i)
     {
         // add a separator before every new element

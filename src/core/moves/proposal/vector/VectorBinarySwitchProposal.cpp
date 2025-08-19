@@ -14,14 +14,14 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-VectorBinarySwitchProposal::VectorBinarySwitchProposal( std::vector< StochasticNode<long> *> n, const std::vector<long> &i, double sp) : Proposal(),
+VectorBinarySwitchProposal::VectorBinarySwitchProposal( std::vector< StochasticNode<std::int64_t> *> n, const std::vector<std::int64_t> &i, double sp) : Proposal(),
 variables( n ),
 indices( i ),
 length( indices.size() ),
 switch_probability( sp )
 {
     // tell the base class to add the node
-    // for (std::vector< StochasticNode<long> *>::const_iterator it = variables.begin(); it != variables.end(); it++)
+    // for (std::vector< StochasticNode<std::int64_t> *>::const_iterator it = variables.begin(); it != variables.end(); it++)
     for (size_t i = 0; i < indices.size(); i++)
     {
         size_t index = indices[i]-1;
@@ -83,13 +83,13 @@ double VectorBinarySwitchProposal::doProposal( void )
     update_set.clear();
     
     // get values to flip
-    //    RbVector<long> &val = variables->getValue();
+    //    RbVector<std::int64_t> &val = variables->getValue();
     
     // choose one value in the vector to flip
     double u = (size_t)(rng->uniform01() * length);
     size_t first_index = indices[u]-1;
-    //    long v = variables[u]->getValue() == 0 ? 1 : 0;
-    variables[first_index]->setValue( new long(variables[first_index]->getValue() == 0 ? 1 : 0) ); //(variables[u]->getValue() == 0 ? 1 : 0) );
+    //    std::int64_t v = variables[u]->getValue() == 0 ? 1 : 0;
+    variables[first_index]->setValue( new std::int64_t(variables[first_index]->getValue() == 0 ? 1 : 0) ); //(variables[u]->getValue() == 0 ? 1 : 0) );
     update_set.insert(first_index);
     
     // flip all remaining values in indices according to switch_probability
@@ -98,7 +98,7 @@ double VectorBinarySwitchProposal::doProposal( void )
         size_t index = ( n_indices == 0 ? i : indices[i]-1 );
         if (rng->uniform01() < switch_probability && index != first_index)
         {
-            variables[index]->setValue( new long(variables[index]->getValue() == 0 ? 1 : 0) );
+            variables[index]->setValue( new std::int64_t(variables[index]->getValue() == 0 ? 1 : 0) );
             //            val[index] = ( val[index]==0 ? 1 : 0 );
             update_set.insert( index );
         }
@@ -185,7 +185,7 @@ void VectorBinarySwitchProposal::undoProposal( void )
     // flip all remaining values in indices according to switch_probability
     for (std::set<size_t>::iterator it = update_set.begin(); it != update_set.end(); it++) {
         size_t index = *it;
-        variables[index]->setValue( new long(variables[index]->getValue() == 0 ? 1 : 0) );
+        variables[index]->setValue( new std::int64_t(variables[index]->getValue() == 0 ? 1 : 0) );
     }
     
     // clear elements in update_set
@@ -206,7 +206,7 @@ void VectorBinarySwitchProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<long> *>(newN);
+            variables[i] = static_cast<StochasticNode<std::int64_t> *>(newN);
         }
     }
 }

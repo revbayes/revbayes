@@ -1,7 +1,7 @@
 #ifndef HomologousCharacterData_H
 #define HomologousCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "AbstractCharacterData.h"

@@ -1,6 +1,6 @@
 #include "SpeciesSubtreeScaleProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <set>

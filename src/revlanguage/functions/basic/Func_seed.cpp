@@ -8,7 +8,7 @@
 
 #include "Func_seed.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "ArgumentRule.h"

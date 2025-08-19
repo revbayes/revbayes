@@ -228,11 +228,11 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbabilit
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -246,7 +246,7 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbabilit
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -272,7 +272,7 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbabilit
         num_initial_lineages = 1;
     }
     // if conditioning on root, root node must be a "true" bifurcation event
-    else if (root.getChild(0).isSampledAncestor() || root.getChild(1).isSampledAncestor())
+    else if (root.getChild(0).isSampledAncestorTip() || root.getChild(1).isSampledAncestorTip())
     {
         return RbConstants::Double::neginf;
     }
@@ -377,7 +377,8 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 extinction = pExtinction(0.0, node.getAge());
             }
             
-            RbBitSet obs_state(num_states, true);
+            RbBitSet obs_state(num_states);
+            obs_state.set();
             bool gap = true;
             
             if ( tree->hasCharacterData() == true )
@@ -439,7 +440,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             }
             
             bool speciation_node = true;
-            if ( left.isSampledAncestor() || right.isSampledAncestor() )
+            if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
             {
                 speciation_node = (phi == NULL);
             }
@@ -479,7 +480,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
         double begin_age = node.getAge();
         double end_age = node.getParent().getAge();
         
-        if ( node.isSampledAncestor() == false )
+        if ( node.isSampledAncestorTip() == false )
         {
             // calculate likelihoods for this branch
             if ( sample_character_history == false )
@@ -589,7 +590,7 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeRootLikeliho
     }
     
     bool speciation_node = false;
-    if ( left.isSampledAncestor() || right.isSampledAncestor() )
+    if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
     {
         speciation_node = (phi == NULL);
     }
@@ -1591,7 +1592,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::executeMethod(const s
     }
     else
     {
-        throw RbException("The character dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The character dependent birth-death process does not have a member method called '" << name << "'.";
     }
     
 }

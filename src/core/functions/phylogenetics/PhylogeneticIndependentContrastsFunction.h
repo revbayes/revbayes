@@ -1,7 +1,7 @@
 #ifndef PhylogeneticIndependentContrastsFunction_H
 #define PhylogeneticIndependentContrastsFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVector.h"
@@ -17,7 +17,7 @@ template <class valueType> class TypedDagNode;
     class PhylogeneticIndependentContrastsFunction : public TypedFunction< RbVector<double> > {
         
     public:
-        PhylogeneticIndependentContrastsFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<long>* s, bool n);
+        PhylogeneticIndependentContrastsFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, bool n);
         virtual                                                ~PhylogeneticIndependentContrastsFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
         // members
         const TypedDagNode<Tree>*                               tau;
         const TypedDagNode<ContinuousCharacterData>*            data;
-        const TypedDagNode<long>*                               site;
+        const TypedDagNode<std::int64_t>*                               site;
         bool                                                    normalized;
         
         std::vector<double>                                     contrasts;

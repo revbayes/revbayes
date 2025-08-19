@@ -1,7 +1,7 @@
 #ifndef InfiniteSitesRateMatrixFunction_H
 #define InfiniteSitesRateMatrixFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedFunction.h"
 #include "RateGenerator.h"

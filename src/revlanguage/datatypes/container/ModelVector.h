@@ -196,7 +196,7 @@ RevObject* ModelVector<rlType>::convertTo(const TypeSpec &type) const
         // test if the cast succeeded
         if ( theConvertedContainer == NULL )
         {
-            throw RbException("Could not convert a container of type " + this->getClassType() + " to a container of type " + type.getType() );
+            throw RbException() << "Could not convert a container of type " << this->getClassType() << " to a container of type " << type.getType() ;
         }
 
         for ( typename RevBayesCore::RbConstIterator<elementType> i = this->getValue().begin(); i != this->getValue().end(); ++i )
@@ -409,7 +409,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     
@@ -616,7 +616,7 @@ void ModelVector<rlType>::push_back( const RevObject &x )
     
     if ( x_converted == NULL )
     {
-        throw RbException("Could not append an element of type " + x.getType() + " to a vector of type " + this->getType() );
+        throw RbException() << "Could not append an element of type " << x.getType() << " to a vector of type " << this->getType() ;
     }
     
     // Push it onto the back of the elements vector

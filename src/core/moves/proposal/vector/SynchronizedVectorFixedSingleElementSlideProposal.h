@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <vector>
+#include <cstdint>
 
 #include "Proposal.h"
 
@@ -30,7 +31,7 @@ template <class variableType> class StochasticNode;
     class SynchronizedVectorFixedSingleElementSlideProposal : public Proposal {
         
     public:
-        SynchronizedVectorFixedSingleElementSlideProposal(const std::vector<StochasticNode<RbVector<double> >* > &n, double l, const std::vector<long> &i);  //!< Constructor
+        SynchronizedVectorFixedSingleElementSlideProposal(const std::vector<StochasticNode<RbVector<double> >* > &n, double l, const std::vector<std::int64_t> &i);  //!< Constructor
         
         void                                                    cleanProposal(void);                                                                //!< Clean up proposal
         SynchronizedVectorFixedSingleElementSlideProposal*      clone(void) const;                                                                  //!< Clone object
@@ -54,7 +55,7 @@ template <class variableType> class StochasticNode;
         std::vector< StochasticNode<RbVector<double> >* >       variables;
         
         double                                                  lambda;                                                                             //!< The Slide parameter of the move (larger lambda -> larger proposals).
-        std::vector<long>                                       indices;                                                                              //!< The index of the last modified element.
+        std::vector<std::int64_t>                                       indices;                                                                              //!< The index of the last modified element.
         double                                                  stored_delta;                                                                        //!< The stored value of the last modified element.
         
         

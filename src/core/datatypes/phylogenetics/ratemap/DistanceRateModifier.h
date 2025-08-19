@@ -16,7 +16,6 @@ namespace RevBayesCore
         DistanceRateModifier( const TimeAtlas* ta,  bool uadj=false, bool uav=false, bool udd=false, int index=0, double dp=10e-6, double threshhold=1e-6, std::string dt="haversine" );
         DistanceRateModifier(const DistanceRateModifier& g);
 
-        DistanceRateModifier&               assign(const Assignable &m);
 //        double                              computeRateMultiplier(std::vector<CharacterEvent*> curState, CharacterEvent* newState);
         double                              computeRateMultiplier(std::vector<CharacterEvent*> curState, CharacterEventDiscrete* newState, double age=0.0);
 //        double                              computeRateMultiplier(const TopologyNode& node, std::vector<CharacterEvent*> curState, CharacterEvent* newState, double age = 0.0);

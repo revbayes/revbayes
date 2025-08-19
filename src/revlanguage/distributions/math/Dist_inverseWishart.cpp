@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -64,8 +64,8 @@ RevBayesCore::InverseWishartDistribution* Dist_inverseWishart::createDistributio
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sg = NULL;
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* dv = NULL;
     RevBayesCore::TypedDagNode<double>* ka = NULL;
-    RevBayesCore::TypedDagNode<long>* deg = NULL;
-    RevBayesCore::TypedDagNode<long>* dm = NULL;
+    RevBayesCore::TypedDagNode<std::int64_t>* deg = NULL;
+    RevBayesCore::TypedDagNode<std::int64_t>* dm = NULL;
     
     if ( sigma->getRevObject() != RevNullObject::getInstance() )
     {

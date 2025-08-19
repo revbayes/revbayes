@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <algorithm>
 #include <string>
 #include <exception>
@@ -1528,7 +1528,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &file_nam
             }
             else
             {
-                throw RbException("Unknown data type '" + data_type + "' for fasta formatted files.");
+                throw RbException() << "Unknown data type '" << data_type << "' for fasta formatted files.";
             }
         }
         else if (file_format == "phylip")
@@ -1812,7 +1812,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
         }
         else if (file_format == "phylip")
         {
-            // phylip file format with long taxon names
+            // phylip file format with std::int64_t taxon names
             nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
         }
         else if (file_format == "newick")

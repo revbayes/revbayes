@@ -61,8 +61,6 @@ namespace RevBayesCore {
     
 }
 
-#include "Assign.h"
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
@@ -212,7 +210,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
     }
     else
     {
-        throw RbException("A Analytical-mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A Analytical-mixture distribution does not have a member method called '" << n << "'.";
     }
     
 }
@@ -255,10 +253,13 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void
     
     TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
     selected_base_dist->redrawValue();
-    (*this->value) = selected_base_dist->getValue();
-    
-    //    Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), simulate() );
-    
+    if constexpr (std::is_base_of_v<Cloneable, mixtureType>)
+    {
+	delete this->value;
+	this->value = selected_base_dist->getValue().clone();
+    }
+    else
+	(*this->value) = selected_base_dist->getValue();
 }
 
 
@@ -295,7 +296,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::swapParameterInte
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + old_p->getName() + " to " + new_p->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << old_p->getName() << " to " << new_p->getName(); 
     }
 }
 

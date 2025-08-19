@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -68,9 +68,9 @@ RevBayesCore::WishartDistribution* Dist_wishart::createDistribution( void ) cons
         ka = static_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
     }
     
-    RevBayesCore::TypedDagNode<long>* deg = static_cast<const Natural &>( df->getRevObject()).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* deg = static_cast<const Natural &>( df->getRevObject()).getDagNode();
 
-    RevBayesCore::TypedDagNode<long>* dm = NULL;
+    RevBayesCore::TypedDagNode<std::int64_t>* dm = NULL;
 //    int dm = -1;
     if (dim != NULL)
     {

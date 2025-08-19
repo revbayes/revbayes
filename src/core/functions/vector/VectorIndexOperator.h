@@ -32,8 +32,8 @@ namespace RevBayesCore {
     class VectorIndexOperator : public TypedFunction<valueType> {
         
     public:
-        VectorIndexOperator(const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long>* idx);
-        VectorIndexOperator(const TypedDagNode< Simplex >* v, const TypedDagNode<long>* idx);
+        VectorIndexOperator(const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<std::int64_t>* idx);
+        VectorIndexOperator(const TypedDagNode< Simplex >* v, const TypedDagNode<std::int64_t>* idx);
         virtual                                            ~VectorIndexOperator(void);                                              //!< Virtual destructor
         
         // public member functions
@@ -46,7 +46,7 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode<long>*                           index;
+        const TypedDagNode<std::int64_t>*                           index;
         const TypedDagNode<RbVector<valueType> >*           value_vector;
         const TypedDagNode< Simplex >*                      value_simplex;
 
@@ -77,7 +77,7 @@ namespace RevBayesCore {
 #include "RbException.h"
 
 template <class valueType>
-RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ),
+RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<std::int64_t> *idx) : TypedFunction<valueType>( NULL ),
     index( idx ),
     value_vector( v ),
     value_simplex( NULL )
@@ -91,7 +91,7 @@ RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDa
 
 
 template <class valueType>
-RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< Simplex >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ),
+RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< Simplex >* v, const TypedDagNode<std::int64_t> *idx) : TypedFunction<valueType>( NULL ),
     index( idx ),
     value_vector( NULL ),
     value_simplex( v )
@@ -153,7 +153,7 @@ void RevBayesCore::VectorIndexOperator<valueType>::swapParameterInternal(const D
     }
     else if (oldP == index)
     {
-        index = static_cast<const TypedDagNode<long>* >( newP );
+        index = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }

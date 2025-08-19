@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -64,7 +64,7 @@ RevBayesCore::MultinomialDistribution* Dist_multinomial::createDistribution( voi
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<long>*                              vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*                              vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*          vp = static_cast<const Simplex &>( p->getRevObject() ).getDagNode();
     RevBayesCore::MultinomialDistribution*                        d  = new RevBayesCore::MultinomialDistribution( vp, vn );
     return d;

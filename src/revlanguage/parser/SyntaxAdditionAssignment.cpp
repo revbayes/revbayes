@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 
 #include "RbException.h"
 #include "SyntaxAdditionAssignment.h"

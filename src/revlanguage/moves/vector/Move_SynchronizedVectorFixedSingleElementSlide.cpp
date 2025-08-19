@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -79,7 +79,7 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
-    std::vector<long> e;
+    std::vector<std::int64_t> e;
     if ( which_element->getRevObject().isType( ModelVector<Natural>::getClassTypeSpec() ) )
     {
         e = static_cast<const ModelVector<Natural> &>( which_element->getRevObject() ).getValue();

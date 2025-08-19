@@ -1,7 +1,7 @@
 #ifndef VectorSingleElementScaleMove_H
 #define VectorSingleElementScaleMove_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

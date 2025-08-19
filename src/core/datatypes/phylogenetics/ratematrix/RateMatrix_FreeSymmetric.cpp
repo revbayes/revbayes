@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <string>
 #include <complex>
@@ -15,7 +15,6 @@
 #include "RbMathMatrix.h"
 #include "RbSettings.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "GeneralRateMatrix.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -180,32 +179,6 @@ RateMatrix_FreeSymmetric& RateMatrix_FreeSymmetric::operator=(const RateMatrix_F
     }
     
     return *this;
-}
-
-
-/** assign constructor
- *
- * @param m
- *
- *
- * assigns a rate matrix
- *
- * @throw RbException if m is NULL
- *
- */
-
-RateMatrix_FreeSymmetric& RateMatrix_FreeSymmetric::assign(const Assignable &m)
-{
-    const RateMatrix_FreeSymmetric *rm = dynamic_cast<const RateMatrix_FreeSymmetric*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
 }
 
 

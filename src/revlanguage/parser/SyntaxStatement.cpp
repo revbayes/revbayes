@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cassert>
 #include <iostream>
 #include <list>
@@ -191,7 +191,7 @@ SyntaxStatement* SyntaxStatement::clone( void ) const
  *       for loops. The return variable is discarded and the loop
  *       just continues.
  */
-RevPtr<RevVariable> SyntaxStatement::evaluateContent(Environment& env, bool dynamic)
+RevPtr<RevVariable> SyntaxStatement::evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic)
 {
 
     RevPtr<RevVariable> result = NULL;
@@ -417,7 +417,7 @@ RevPtr<RevVariable> SyntaxStatement::evaluateContent(Environment& env, bool dyna
  * whether the result is true or false, or can be interpreted as a RlBoolean
  * true or false value.
  */
-bool SyntaxStatement::isTrue( SyntaxElement* expr, Environment& env ) const
+bool SyntaxStatement::isTrue( SyntaxElement* expr, const std::shared_ptr<Environment>& env ) const
 {
     RevPtr<RevVariable> temp = expr->evaluateContent( env );
     

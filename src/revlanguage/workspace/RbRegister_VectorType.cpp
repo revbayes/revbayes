@@ -26,7 +26,7 @@
 
 #include <sstream>
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 /* Files including helper classes */
@@ -63,6 +63,7 @@
 #include "RlConstantNode.h"
 #include "RlDeterministicNode.h"
 #include "RlDistribution.h"
+#include "RlSiteMixtureModel.h"
 #include "RlTypedDistribution.h"
 #include "RlTree.h"
 #include "RlTypedFunction.h"
@@ -125,7 +126,6 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
     
     try
     {
-        
         AddWorkspaceVectorType<Taxon,4>::addTypeToWorkspace( *this, new Taxon() );
         AddWorkspaceVectorType<RateGenerator,3>::addTypeToWorkspace( *this, new RateGenerator() );
         AddWorkspaceVectorType<CladogeneticProbabilityMatrix,3>::addTypeToWorkspace( *this, new CladogeneticProbabilityMatrix() );
@@ -145,21 +145,22 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<BranchLengthTree,3>::addTypeToWorkspace( *this, new BranchLengthTree() );
         AddWorkspaceVectorType<Tree,3>::addTypeToWorkspace( *this, new Tree() );
         AddWorkspaceVectorType<Clade,3>::addTypeToWorkspace( *this, new Clade() );
+        AddWorkspaceVectorType<SiteMixtureModel,3>::addTypeToWorkspace( *this, new SiteMixtureModel() );
 //        AddWorkspaceVectorType<RlRegionalFeatures,3>::addTypeToWorkspace( *this, new RlRegionalFeatures() );
         AddWorkspaceVectorType<RlRegionalFeatureLayer,3>::addTypeToWorkspace( *this, new RlRegionalFeatureLayer() );
         //        AddWorkspaceVectorType<Dist_bdp,3>::addTypeToWorkspace( *this, new Dist_bdp() );
 
 //        AddWorkspaceVectorType<Dist_unif,1>::addTypeToWorkspace( *this, new Dist_unif() );
 //        this->addFunction(new Func_workspaceVector<Dist_unif>() );
-        addFunction(new Func_workspaceVector<Distribution>() );
+        addFunction( new Func_workspaceVector<Distribution>() );
         addFunction( new Func_workspaceVector<TypedDistribution<Natural> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<Real> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<RealPos> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<Probability> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Natural> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Real> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<RealPos> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Probability> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<Real> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<RealPos> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<Probability> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Natural> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Real> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<RealPos> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Probability> > >() );
         addFunction( new Func_workspaceVector<TypedDistribution<TimeTree> >() );
 //        this->addFunction(new Func_workspaceVector<ContinuousDistribution>() );
 //        AddWorkspaceVectorType<Distribution,1>::addTypeToWorkspace( *this, new Distribution() );

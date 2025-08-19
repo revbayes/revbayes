@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <complex>
 #include <vector>
@@ -9,7 +9,6 @@
 #include "RateMatrix_Empirical.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "TimeReversibleRateMatrix.h"
@@ -65,27 +64,6 @@ RateMatrix_Empirical& RateMatrix_Empirical::operator=(const RateMatrix_Empirical
     
     return *this;
 }
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_Empirical& RateMatrix_Empirical::assign(const Assignable &m)
-{
-    
-    const RateMatrix_Empirical *rm = dynamic_cast<const RateMatrix_Empirical*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 
 /** Do precalculations on eigenvectors */

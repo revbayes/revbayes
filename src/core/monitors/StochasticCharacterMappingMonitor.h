@@ -31,16 +31,16 @@ namespace RevBayesCore {
     public:
 
         // Constructors and Destructors
-        StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del);
-//        StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, const std::string &del);
-        StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx);
+        StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del);
+//        StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, const std::string &del);
+        StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx);
         StochasticCharacterMappingMonitor(const StochasticCharacterMappingMonitor &m);
         virtual ~StochasticCharacterMappingMonitor(void);
 
         StochasticCharacterMappingMonitor*              clone(void) const;                                                  //!< Clone the object
 
         // Monitor functions
-        void                                            monitorVariables(unsigned long gen);                                 //!< Monitor at generation gen
+        void                                            monitorVariables(std::uint64_t gen);                                 //!< Monitor at generation gen
         void                                            printFileHeader(void);                                              //!< Print header
 
         // getters and setters
@@ -72,7 +72,7 @@ using namespace RevBayesCore;
 
 /* Constructor for state dependent birth death process */
 template<class characterType>
-StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del) : VariableMonitor(ch, g, fname, del, false, false, false),
+StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del) : VariableMonitor(ch, g, fname, del, false, false, false),
     cdbdp( ch ),
     include_simmaps( is ),
     use_simmap_default( sd ),
@@ -86,10 +86,10 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
 
 }
 
-//StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, const std::string &del) : Monitor(g),
+//StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, const std::string &del) : Monitor(g),
 /* Constructor for CTMC */
 template<class characterType>
-StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx) :
+StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx) :
     VariableMonitor(ch, g, fname, del, false, false, false),
     ctmc( ch ),
     include_simmaps( is ),
@@ -153,8 +153,9 @@ StochasticCharacterMappingMonitor<characterType>* StochasticCharacterMappingMoni
  * \param[in]   gen    The current generation.
  */
 template<class characterType>
-void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned long gen)
+void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uint64_t gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     size_t num_nodes;
 
@@ -228,6 +229,8 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
 template<class characterType>
 void StochasticCharacterMappingMonitor<characterType>::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
     std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
 
     // iterate through all tree nodes and make header with node index

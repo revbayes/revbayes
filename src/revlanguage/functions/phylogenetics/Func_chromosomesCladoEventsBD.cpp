@@ -4,7 +4,7 @@
 //  Created by Will Freyman on 6/22/16.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>

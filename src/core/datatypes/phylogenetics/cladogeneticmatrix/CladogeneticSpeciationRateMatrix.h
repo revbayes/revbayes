@@ -7,12 +7,11 @@
 #ifndef CladogeneticSpeciationRateMatrix_h
 #define CladogeneticSpeciationRateMatrix_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>
 
-#include "Assignable.h"
 #include "CladogeneticProbabilityMatrix.h"
 #include "Cloneable.h"
 #include "DagNode.h"
@@ -23,7 +22,7 @@
 
 namespace RevBayesCore {
     
-    class CladogeneticSpeciationRateMatrix : public Cloneable, public Assignable, public Printable, public Serializable, public MemberObject<double>, public MemberObject<RbVector<double> >, public MemberObject<RbVector<RbVector<long> > >, public MemberObject<CladogeneticProbabilityMatrix> {
+    class CladogeneticSpeciationRateMatrix : public Cloneable, public Printable, public Serializable, public MemberObject<double>, public MemberObject<RbVector<double> >, public MemberObject<RbVector<RbVector<std::int64_t> > >, public MemberObject<CladogeneticProbabilityMatrix> {
         
     public:
 
@@ -37,12 +36,11 @@ namespace RevBayesCore {
         bool                                                    operator<=(const CladogeneticSpeciationRateMatrix &rm) const { return operator<(rm) || operator==(rm); }
         
         // pure virtual methods
-        virtual CladogeneticSpeciationRateMatrix&               assign(const Assignable &m);
         virtual CladogeneticSpeciationRateMatrix*               clone(void) const;
         virtual void                                            initFromString( const std::string &s );
         
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, CladogeneticProbabilityMatrix &rv) const;     //!< Map the member methods to internal function calls
-        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<long> > &rv) const;     //!< Map the member methods to internal function calls
+        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<std::int64_t> > &rv) const;     //!< Map the member methods to internal function calls
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls
         
@@ -66,6 +64,7 @@ namespace RevBayesCore {
         size_t                                                  getNumberOfStates(void) const;      //!< Return the number of states
         size_t                                                  size(void) const;                   //!< Get the size of the rate matrix, same as the number of states
         
+	json                                                    toJSON() const;
         virtual void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;
         virtual void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;
         virtual void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;

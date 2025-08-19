@@ -1,11 +1,10 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 
 #include "MatrixReal.h"
 #include "RateMatrix_Tamura92.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -31,27 +30,6 @@ RateMatrix_Tamura92::~RateMatrix_Tamura92(void)
 {
 
 }
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_Tamura92& RateMatrix_Tamura92::assign(const Assignable &m)
-{
-
-    const RateMatrix_Tamura92 *rm = dynamic_cast<const RateMatrix_Tamura92*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 
 /** Calculate the transition probabilities */

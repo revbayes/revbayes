@@ -10,7 +10,7 @@
 
 #include <cassert>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/filesystem.hpp>
 
 #include <boost/dll.hpp>

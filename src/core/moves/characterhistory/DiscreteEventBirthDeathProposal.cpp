@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 
@@ -24,8 +24,7 @@ using namespace RevBayesCore;
  */
 DiscreteEventBirthDeathProposal::DiscreteEventBirthDeathProposal( StochasticNode<Tree> *n) : EventBirthDeathProposal( n )
 {
-
-
+    initialize();
 }
 
 
@@ -44,9 +43,9 @@ DiscreteEventBirthDeathProposal* DiscreteEventBirthDeathProposal::clone( void ) 
 
 
 /**
- * Get Proposals' name of object
+ * Get name of Proposal object
  *
- * \return The Proposals' name.
+ * \return The Proposal's name.
  */
 const std::string& DiscreteEventBirthDeathProposal::getProposalName( void ) const
 {

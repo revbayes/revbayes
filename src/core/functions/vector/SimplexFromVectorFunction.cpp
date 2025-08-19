@@ -1,6 +1,6 @@
 #include "SimplexFromVectorFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDagNode.h"
 #include "RbVector.h"

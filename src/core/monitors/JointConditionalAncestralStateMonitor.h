@@ -35,14 +35,14 @@ namespace RevBayesCore {
         
     public:
         // Constructors and Destructors
-		JointConditionalAncestralStateMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, const std::string &del, bool wt, bool wss);                                  //!< Constructor
-		JointConditionalAncestralStateMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, const std::string &del, bool wt, bool wss);
+		JointConditionalAncestralStateMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, const std::string &del, bool wt, bool wss);                                  //!< Constructor
+		JointConditionalAncestralStateMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, const std::string &del, bool wt, bool wss);
         virtual ~JointConditionalAncestralStateMonitor(void);
         
         JointConditionalAncestralStateMonitor*          clone(void) const;                                                  //!< Clone the object
         
         // functions you may want to overwrite
-        virtual void                                    monitorVariables(unsigned long gen);                                //!< Monitor at generation gen
+        virtual void                                    monitorVariables(std::uint64_t gen);                                //!< Monitor at generation gen
         virtual void                                    printFileHeader(void);                                              //!< Print header
         virtual void                                    swapNode(DagNode *oldN, DagNode *newN);
 
@@ -71,7 +71,7 @@ using namespace RevBayesCore;
 
 /* Constructor for state dependent birth death process */
 template<class characterType>
-JointConditionalAncestralStateMonitor<characterType>::JointConditionalAncestralStateMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, const std::string &del, bool wt, bool wss) :
+JointConditionalAncestralStateMonitor<characterType>::JointConditionalAncestralStateMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, const std::string &del, bool wt, bool wss) :
     VariableMonitor(ch, g, fname, del, false, false, false),
     cdbdp( ch ),
     withTips( wt ),
@@ -87,7 +87,7 @@ JointConditionalAncestralStateMonitor<characterType>::JointConditionalAncestralS
 
 /* Constructor for CTMC */
 template<class characterType>
-JointConditionalAncestralStateMonitor<characterType>::JointConditionalAncestralStateMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, const std::string &del, bool wt, bool wss) :
+JointConditionalAncestralStateMonitor<characterType>::JointConditionalAncestralStateMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, const std::string &del, bool wt, bool wss) :
     VariableMonitor(ch, g, fname, del, false, false, false),
     tree( t ),
     ctmc( ch ),
@@ -134,8 +134,9 @@ JointConditionalAncestralStateMonitor<characterType>* JointConditionalAncestralS
  * \param[in]   gen    The current generation.
  */
 template<class characterType>
-void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsigned long gen)
+void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(std::uint64_t gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
     size_t num_sites;
     size_t num_nodes;
@@ -180,7 +181,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
         characterType tmp = characterType();
         if ( dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() != tmp.getDataType() )
         {
-            throw RbException("The character type in the ancestral state monitor does not match. \" The data has type " + dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() + "\" but the monitor expected \"" + tmp.getDataType() + "\".");
+            throw RbException() << "The character type in the ancestral state monitor does not match. \" The data has type " << dist_bd->getCharacterData().getTaxonData(0)[0].getDataType() << "\" but the monitor expected \"" << tmp.getDataType() << "\".";
         }
             
         // now give as an object that we can clone.
@@ -211,7 +212,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
         characterType tmp = characterType();
         if ( dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() != tmp.getDataType() )
         {
-            throw RbException("The character type in the ancestral state monitor does not match. \" The data has type " + dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() + "\" but the monitor expected \"" + tmp.getDataType() + "\".");
+            throw RbException() << "The character type in the ancestral state monitor does not match. \" The data has type " << dist_glhbdsp->getCharacterData().getTaxonData(0)[0].getDataType() << "\" but the monitor expected \"" << tmp.getDataType() << "\".";
         }
 
         // now give as an object that we can clone.
@@ -279,6 +280,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(unsi
 template<class characterType>
 void JointConditionalAncestralStateMonitor<characterType>::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
     
 	std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
 	

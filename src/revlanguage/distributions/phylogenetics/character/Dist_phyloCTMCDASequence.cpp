@@ -1,6 +1,6 @@
 #include "Dist_phyloCTMCDASequence.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "GeneralTreeHistoryCtmc.h"
@@ -84,11 +84,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     if ( siteRates != NULL && siteRates->getRevObject() != RevNullObject::getInstance() )
     {
         siteRatesNode = static_cast<const ModelVector<RealPos> &>( siteRates->getRevObject() ).getDagNode();
-    }
-    RevBayesCore::TypedDagNode< double >* pInvNode = NULL;
-    if ( pInv != NULL && pInv->getRevObject() != RevNullObject::getInstance() )
-    {
-        pInvNode = static_cast<const Probability &>( pInv->getRevObject() ).getDagNode();
     }
     
     RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData > *d = NULL;

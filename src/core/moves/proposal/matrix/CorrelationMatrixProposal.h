@@ -1,7 +1,7 @@
 #ifndef CorrelationMatrixProposal_H
 #define CorrelationMatrixProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

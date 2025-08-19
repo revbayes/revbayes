@@ -1,7 +1,7 @@
 #ifndef AbstractHomologousDiscreteCharacterData_H
 #define AbstractHomologousDiscreteCharacterData_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 
@@ -54,7 +54,7 @@ class DiscreteCharacterState;
         virtual void                                            concatenate(const AbstractHomologousDiscreteCharacterData &d, std::string type = "") = 0;   //!< Concatenate data matrices
         virtual AbstractHomologousDiscreteCharacterData*        combineCharacters(const AbstractHomologousDiscreteCharacterData &d) const = 0;              //!< Combine/expand data matrices
         virtual double                                          computeMultinomialProfileLikelihood( void ) const = 0;
-        virtual std::vector<long>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
+        virtual std::vector<std::int64_t>                               computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const = 0;
         virtual MatrixReal                                      computeStateFrequencies(void) const = 0;                                                    //!< Compute the state frequencies for this character data object
         virtual void                                            excludeCharacter(size_t i) = 0;                                                             //!< Exclude character
         void                                                    fillMissingSitesMask( std::vector<std::vector<bool> >& mask_gap, std::vector<std::vector<bool> >& mask_missing ) const;
@@ -62,6 +62,7 @@ class DiscreteCharacterState;
         virtual std::string                                     getDataType(void) const = 0;                                                                //!< Return the data type of this character data matrix
         virtual std::vector<double>                             getEmpiricalBaseFrequencies(void) const = 0;                                                //!< Compute the empirical base frequencies
         virtual std::vector<size_t>                             getIncludedSiteIndices(void) const = 0;
+        virtual std::vector<size_t>                             getInvariantSiteIndices(bool excl) const = 0;                                               //!< Get the indices of invariant characters in this matrix
         virtual size_t                                          getNumberOfCharacters(void) const = 0;                                                      //!< Number of characters
         virtual size_t                                          getMaxObservedStateIndex(void) const = 0;                                                   //!< Get the number of observed states for the characters in this matrix
         virtual size_t                                          getNumberOfSegregatingSites(bool excl) const = 0;                                           //!< Compute the number of segregating sites
@@ -90,7 +91,8 @@ class DiscreteCharacterState;
         virtual double                                          varGcContent(bool excl) const = 0;                                                          //!< Mean GC-content of all sequence
         virtual double                                          varGcContentByCodon(size_t n, bool excl) const = 0;                                         //!< Mean GC-content of all sequences by codon position
         
-        void                                                    removeRandomSites( double p );
+        void                                                    excludeMissingSites( void );
+        void                                                    replaceRandomSitesByMissingData( double p );
         virtual void                                            removeExcludedCharacters(void) = 0;                                                         //!< Remove all the excluded characters
         virtual void                                            restoreCharacter(size_t i) = 0;                                                             //!< Restore character
         

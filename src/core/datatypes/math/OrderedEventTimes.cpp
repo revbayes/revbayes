@@ -92,7 +92,7 @@ bool OrderedEventTimes::changeEventTime(double old_time, double new_time)
 	return true;
 }
 
-void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const
+void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const
 {
     if ( n == "getNumberOfEvents" )
     {
@@ -100,7 +100,7 @@ void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<co
     }
     else
     {
-        throw RbException("An OrderedEventTimes object does not have a member method called '" + n + "'.");
+        throw RbException() << "An OrderedEventTimes object does not have a member method called '" << n << "'.";
     }
 }
 
@@ -123,7 +123,7 @@ void OrderedEventTimes::executeMethod(const std::string &n, const std::vector<co
     }
     else
     {
-        throw RbException("An OrderedEventTimes object does not have a member method called '" + n + "'.");
+        throw RbException() << "An OrderedEventTimes object does not have a member method called '" << n << "'.";
     }
 }
 

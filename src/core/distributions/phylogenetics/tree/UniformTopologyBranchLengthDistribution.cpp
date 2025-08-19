@@ -41,7 +41,7 @@ UniformTopologyBranchLengthDistribution::UniformTopologyBranchLengthDistribution
     
     double branchLnFact = 0.0;
     double nodeLnFact = 0.0;
-    for (size_t i = 2; i < 2*num_taxa - 3 - 2*(!rooted); i++)
+    for (size_t i = 2; i <= 2*num_taxa - 3 - 2*(!rooted); i++)
     {
         branchLnFact += std::log(i);
         if (i <= num_taxa - 2 - !rooted)
@@ -299,10 +299,10 @@ void UniformTopologyBranchLengthDistribution::simulateClade(std::vector<Topology
         // randomly pick two nodes
         size_t index_left = static_cast<size_t>( floor(rng->uniform01()*active_nodes.size()) );
         TopologyNode* left_child = active_nodes[index_left];
-        active_nodes.erase(active_nodes.begin()+long(index_left));
+        active_nodes.erase(active_nodes.begin()+std::int64_t(index_left));
         size_t index_right = static_cast<size_t>( floor(rng->uniform01()*active_nodes.size()) );
         TopologyNode* right_right = active_nodes[index_right];
-        active_nodes.erase(active_nodes.begin()+long(index_right));
+        active_nodes.erase(active_nodes.begin()+std::int64_t(index_right));
         
         // erase the nodes also from the origin nodes vector
         n.erase(std::remove(n.begin(), n.end(), left_child), n.end());

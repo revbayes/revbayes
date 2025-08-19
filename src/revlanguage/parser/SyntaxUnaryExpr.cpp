@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <set>
@@ -102,7 +102,7 @@ SyntaxUnaryExpr* SyntaxUnaryExpr::clone () const
  *
  * @todo Support this evaluation context better
  */
-RevPtr<RevVariable> SyntaxUnaryExpr::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxUnaryExpr::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     // Package the argument
     std::vector<Argument> arg;

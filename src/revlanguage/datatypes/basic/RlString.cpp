@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -122,7 +122,7 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         const std::string &str = getValue();
         std::string letter(1,str[index]);
         return RevPtr<RevVariable>( new RevVariable( new RlString( letter ) ) );
@@ -132,8 +132,8 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
         found = true;
         
         size_t arg_idx = 0;
-        long begin = static_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
-        long end = static_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t begin = static_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t end = static_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
         const std::string &str = getValue();
         std::string substr = str.substr(begin,end-begin+1);
         return RevPtr<RevVariable>( new RevVariable( new RlString( substr ) ) );
@@ -153,7 +153,7 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
     {
         found = true;
         
-        long index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         const std::string &str = getValue();
         std::string letter(1,str[index]);
         return RevPtr<RevVariable>( new RevVariable( new RlString( letter ) ) );

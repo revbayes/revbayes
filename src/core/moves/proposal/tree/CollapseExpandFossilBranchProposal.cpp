@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -32,7 +32,7 @@ CollapseExpandFossilBranchProposal::CollapseExpandFossilBranchProposal( Stochast
     // tell the base class to add the node
     addNode( tau );
     addNode( origin );
-    
+    if(! tau->getDistribution().allowsSA()) throw RbException("Setup includes a move for sampled ancestors but the corresponding tree distribution doesn't allow sampled ancestors");
 }
 
 
@@ -124,7 +124,7 @@ double CollapseExpandFossilBranchProposal::doProposal( void )
     storedNode = fossils[ size_t(u*fossils.size()) ];
     
     double hr = 0;
-    if ( storedNode->isSampledAncestor() == true )
+    if ( storedNode->isSampledAncestorTip() == true )
     {
         hr += expandBranch( *storedNode );
     }
@@ -301,15 +301,15 @@ void CollapseExpandFossilBranchProposal::undoProposal( void )
     // undo the proposal (only if succeeded)
     if ( failed == false)
     {
-        if ( storedNode->isSampledAncestor() == true )
+        if ( storedNode->isSampledAncestorTip() == true )
         {
             storedNode->setSampledAncestor( false );
             storedNode->getParent().setAge( storedAge );
         }
         else
         {
-            storedNode->setSampledAncestor( true );
             storedNode->getParent().setAge( storedAge );
+            storedNode->setSampledAncestor( true );
         }
     }
     

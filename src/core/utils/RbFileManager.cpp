@@ -1,5 +1,5 @@
 #include <sys/stat.h>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h> // IWYU pragma: keep
 #include <iostream>
 #include <string>
@@ -10,6 +10,7 @@
 
 #include "RbFileManager.h"
 #include "RbSettings.h"
+#include "RbException.h"
 #include "StringUtilities.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -248,4 +249,22 @@ bool setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>
     
     return true;
 }
+
+std::stringstream readFileAsStringStream(const path& fname)
+{
+    std::ifstream inFile(fname.string());
+    if ( not inFile )
+        throw RbException()<<"Could not open file "<<fname<<".";
+
+    std::stringstream strStream;
+    strStream << inFile.rdbuf(); //read the file
+    return strStream;
+}
+
+std::string readFileAsString(const path& fname)
+{
+    return readFileAsStringStream(fname).str();
+}
+
+
 }

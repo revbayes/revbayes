@@ -27,7 +27,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 /* Files including helper classes */

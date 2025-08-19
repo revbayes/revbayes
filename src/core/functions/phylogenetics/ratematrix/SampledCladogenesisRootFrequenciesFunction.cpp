@@ -6,7 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iterator>
 #include <map>
@@ -112,7 +112,7 @@ void SampledCladogenesisRootFrequenciesFunction::update( void ) {
         double tp_k1 = tp[numStates-1][1];
         double tp_1k = tp[1][numStates-1];
         
-        // if the branch length is too long, the tp_ij for j!=0 probabilities are too small
+        // if the branch length is too std::int64_t, the tp_ij for j!=0 probabilities are too small
         if (tp_10 > absorptionTolerance ||
             tp_1k < 0.0 ||
             tp_k1 < 0.0)

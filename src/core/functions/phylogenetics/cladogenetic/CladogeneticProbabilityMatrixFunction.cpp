@@ -13,7 +13,7 @@
 #include "RbVectorImpl.h"
 #include "TypedDagNode.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace RevBayesCore { class DagNode; }
 
@@ -22,7 +22,7 @@ using namespace RevBayesCore;
 
 
 //TypedFunction<MatrixReal>( new MatrixReal( mc + 1, (mc + 1) * (mc + 1), 0.0 ) ),
-CladogeneticProbabilityMatrixFunction::CladogeneticProbabilityMatrixFunction(const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<long> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states):
+CladogeneticProbabilityMatrixFunction::CladogeneticProbabilityMatrixFunction(const TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events, const TypedDagNode<RevBayesCore::RbVector<double> >* probs, int n_states):
 TypedFunction<CladogeneticProbabilityMatrix>( new CladogeneticProbabilityMatrix( n_states ) ),
 cladogenetic_events( events ),
 num_states( n_states ),
@@ -67,7 +67,7 @@ void CladogeneticProbabilityMatrixFunction::update( void )
     
     // get speciation rates and the clado events
     const std::vector<double>& sr = probabilities->getValue();
-    const RbVector<RbVector<long> >& events = cladogenetic_events->getValue();
+    const RbVector<RbVector<std::int64_t> >& events = cladogenetic_events->getValue();
     
     if (sr.size() != events.size())
     {

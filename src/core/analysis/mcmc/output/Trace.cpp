@@ -1,6 +1,6 @@
 #include "Trace.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -42,10 +42,10 @@ int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool 
 
 
 template <>
-int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+int Trace<std::int64_t>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
 {
 
-    long sample = atof( v.c_str() );
+    std::int64_t sample = atof( v.c_str() );
 
     double smaller_values_count = 0;
     double equal_values_count   = 0;
@@ -66,7 +66,7 @@ int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool ve
     RandomNumberGenerator *rng = GLOBAL_RNG;
 
     double u = rng->uniform01();
-    double quantile = (smaller_values_count + u*equal_values_count) / double(values.size());
+    double quantile = (smaller_values_count + floor(u*(equal_values_count+1)) ) / double(values.size());
     double lower = (1.0 - alpha) / 2.0;
     double upper = 1.0 - lower;
     bool covered = ( quantile >= lower && quantile <= upper );

@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include <cstddef>
 #include <string>
@@ -133,7 +133,7 @@ std::string Function::callSignature(void) const
  *       Finally, the ellipsis arguments no longer have to be last among the rules, but they
  *       are still the last arguments after processing.
  */
-bool Function::checkArguments( const std::vector<Argument>& passed_args, std::vector<double>* match_score, bool once)
+bool Function::checkArguments( const std::vector<Argument>& passed_args, std::vector<double>* match_score, std::vector<bool>& arg_mapped, bool once)
 {
     
     /*********************  0. Initialization  **********************/
@@ -190,6 +190,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
                     {
                         taken[i]          = true;
                         filled[j]         = true;
+                        arg_mapped[i]     = true;
 
                         if ( match_score != NULL)
                         {
@@ -257,8 +258,9 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
             double penalty = the_rules[match_rule].isArgumentValid(arg, once );
             if ( penalty != -1 )
             {
-                taken[i]                  = true;
-                filled[match_rule]        = true;
+                taken[i]            = true;
+                filled[match_rule]  = true;
+                arg_mapped[i]       = true;
             
                 if ( match_score != NULL)
                 {
@@ -293,7 +295,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
         for (size_t j=0; j<num_rules; j++)
         {
             
-            if ( filled[j] == false ) 
+            if ( filled[j] == false )
             {
                 
                 Argument &arg = const_cast<Argument&>(passed_args[i]);
@@ -301,6 +303,7 @@ bool Function::checkArguments( const std::vector<Argument>& passed_args, std::ve
                 if ( penalty != -1 )
                 {
                     taken[i]          = true;
+                    arg_mapped[i]     = true;
                     if ( the_rules[j].isEllipsis() == false )
                     {
                         filled[j]     = true;
@@ -437,7 +440,7 @@ const TypeSpec& Function::getClassTypeSpec(void)
 
 
 /** Get execution environment of function */
-Environment* Function::getEnvironment(void) const
+std::shared_ptr<Environment> Function::getEnvironment(void) const
 {
     
     return env;
@@ -752,7 +755,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 
                     if ( filled[j] )
                     {
-                        throw RbException( "Duplicate argument labels '" + passed_args[i].getLabel() );
+                        throw RbException() << "Duplicate argument labels '" << passed_args[i].getLabel() ; 
                     }
 
                     p_args[i]               = the_rules[j].fitArgument( p_args[i], once );
@@ -810,11 +813,11 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 
         if (num_matches > 1)
         {
-            throw RbException( "Argument label '" + passed_args[i].getLabel() + "' matches mutliple parameter labels." );
+            throw RbException() << "Argument label '" << passed_args[i].getLabel() << "' matches mutliple parameter labels." ; 
         }
         else if (num_matches < 1)
         {
-            throw RbException( "Argument label '" + passed_args[i].getLabel() + "' matches no untaken parameter labels." );
+            throw RbException() << "Argument label '" << passed_args[i].getLabel() << "' matches no untaken parameter labels." ; 
         }
         
         if ( num_matches == 1)
@@ -874,7 +877,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
         /* Final test if we found a match */
         if ( taken[i] == false )
         {
-            throw RbException("Superfluous argument of type '" + passed_args[i].getVariable()->getRevObject().getType() + "' and name '" + passed_args[i].getLabel() + "' passed to function '" + getType() + "'.");
+            throw RbException() << "Superfluous argument of type '" << passed_args[i].getVariable()->getRevObject().getType() << "' and name '" << passed_args[i].getLabel() << "' passed to function '" << getType() << "'.";
         }
     }
 
@@ -892,7 +895,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
         // we just leave the optional arguments empty
         if ( !the_rules[i].hasDefault() )
         {
-            throw RbException("No argument found for parameter '" + the_rules[i].getArgumentLabel() + "'.");
+            throw RbException() << "No argument found for parameter '" << the_rules[i].getArgumentLabel() << "'.";
         }
         
         const ArgumentRule& theRule = the_rules[i];
@@ -925,7 +928,7 @@ void Function::processArguments( const std::vector<Argument>& passed_args, bool 
 }
 
 
-void Function::setExecutionEnviroment(Environment *e)
+void Function::setExecutionEnviroment(const std::shared_ptr<Environment>& e)
 {
     
     env = e;
