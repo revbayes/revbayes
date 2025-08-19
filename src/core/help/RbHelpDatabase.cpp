@@ -194,7 +194,8 @@ included if `probabilistic=FALSE`. Note that when `probabilistic=TRUE`, the
 methods in question may yield different results under different random seeds,
 and they may even construct an empty credible set a certain fraction of the
 time if the trace is dominated by a particular tree whose probability exceeds
-`credibleTreeSetSize`.)");
+`credibleTreeSetSize`. An exception is thrown when an empty credible set is
+encountered by a method that does not expect one.)");
 	help_strings[string("TraceTree")][string("example")] = string(R"(# read a tree trace and ignore the first 10 samples
 thinned_trees = readTreeTrace("my_filename.tree", offset = 10, thinning = 10, burnin = 0.5)
 
