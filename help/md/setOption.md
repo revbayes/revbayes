@@ -52,17 +52,13 @@ The currently available keys and their associated values are as follows:
 
         DEFAULT: 0
 
-    interactive=<TRUE,FALSE>     Read commands from STDIN and evaluate them until q() is received.
+    echo=<TRUE,FALSE>            Should commands be printed to the screen in a script or -e expr?
 
-        DEFAULT: TRUE if no script or -e expr is given, otherwise FALSE.
+        DEFAULT: FALSE
 
-    echo=<TRUE,FALSE>            Should commands be printed to the screen?
+    continueOnError=<TRUE,FALSE> Should we exit on the first error in a script or -e expr?
 
-        DEFAULT: TRUE if interactive, otherwise FALSE.
-
-    errorExit=<TRUE,FALSE>       Should we exit on the first error?
-
-        DEFAULT: FALSE if interactive, otherwise otherwise TRUE.
+        DEFAULT: FALSE
 
 ## authors
 Sebastian Hoehna

@@ -32,9 +32,8 @@ public:
     bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
     int                         getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
     int                         getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
-    bool                        getEcho() const;                                    //!< Should we print user commands to the screen.
-    bool                        getInteractive() const;                             //!< Should we run an interactive interpreter.
-    bool                        getErrorExit() const;                               //!< Should we exit on the first error.
+    bool                        getEcho() const;                                    //!< Should we print user commands to the screen (in a script or -e expr).
+    bool                        getContinueOnError() const;                         //!< Should we continue after an error (in a script or -e expr).
 
     // setters
     void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
@@ -47,9 +46,8 @@ public:
     void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
     void                        setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
     void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
-    void                        setEcho(bool b);                                    //!< Should we print user commands to the screen.
-    void                        setInteractive(bool b);                             //!< Should we run an interactive interpreter.
-    void                        setErrorExit(bool b);                               //!< Should we exit on the first error.
+    void                        setEcho(bool b);                                    //!< Should we print user commands to the screen (in a script or -e expr)
+    void                        setContinueOnError(bool b);                         //!< Should we continue after an error (int a script or -e expr)
     
 private:
     RbSettings(void);                                   //!< Default constructor
@@ -68,9 +66,8 @@ private:
     int                         debugMCMC = 0;
     int                         logMCMC = 0;
 
-    bool                        echo=true;
-    bool                        interactive=true;
-    bool                        error_exit=false;
+    bool                        echo=false;
+    bool                        continue_on_error=false;
 };
 
 void showDebug(const std::string& s, int level=1);

@@ -379,7 +379,7 @@ void execute_file(const fs::path& filename)
         result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
         if ( result == 2 )
         {
-            if (settings.getErrorExit())
+            if (not settings.getContinueOnError())
                 throw RbException() << "Problem processing line " << lineNumber << " in file " << filename;
             else
             {
@@ -487,7 +487,7 @@ void startInterpreter()
         
         result = interpret(commandLine);
 
-        if (result == 2 and settings.getErrorExit())
+        if (result == 2 and not settings.getContinueOnError())
         {
             std::exit(1);
         }

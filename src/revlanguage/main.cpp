@@ -41,11 +41,16 @@ struct ParsedOptions
 {
     bool help = false;
     bool version = false;
-    bool error_exit = false;
-    bool echo = true;
-    bool interactive = false;
-    bool quiet = false;
+
+    bool script_or_expr() const {return filename or not expressions.empty();}
+
+    bool force_interactive = false;       /* Force interactive if script_or_expr() == true. */
+    bool force_continue_on_error = false; /* Force continue-on-error if script_or_expr() == true. */
+    bool force_echo = false;              /* Force echo if script_or_expr() == true */
+    bool force_quiet = false;             /* Suppress header if script_or_expr() == false */
+
     bool jupyter = false;
+
     std::vector<std::string> options;
 
     std::optional<std::uint64_t> seed;
@@ -93,20 +98,17 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     stage1.get_formatter()->column_width(35);
     stage1.get_formatter()->right_column_width(45);
 
-    stage1.add_flag("-v,--version",          options.version,   "Show version and exit");
-    std::optional<bool> interactive;
-    stage1.add_flag("-i,--interactive",      interactive,       "Force interactive with expressions or file");
-    stage1.add_flag("-q,--quiet",            options.quiet,     "Don't print startup message");
-    stage1.add_flag("-b,--batch",                               "Deprecated");
-    stage1.add_flag("-j,--jupyter",          options.jupyter,   "Run in jupyter mode");
+    stage1.add_flag("-v,--version",          options.version,         "Show version and exit");
+    stage1.add_flag("-b,--batch",                                     "Deprecated");
+    stage1.add_flag("-j,--jupyter",          options.jupyter,         "Run in jupyter mode");
 
-    std::optional<bool> error_exit;
-    stage1.add_option("-x,--error-exit",     error_exit,        "Exit on the first error");
-    std::optional<bool> echo;
-    stage1.add_option("-p,--echo",           echo,              "Echo commands to the screen");
-    stage1.add_option("-s,--seed",           options.seed,      "Random seed");
+    stage1.add_flag("-q,--quiet",            options.force_quiet,             "Hide startup message (if no file or -e expr)");
+    stage1.add_flag("-i,--interactive",      options.force_interactive,       "Force interactive (with file or -e expr)");
+    stage1.add_flag("-p,--echo",             options.force_echo,              "Print commands (with file or -e expr)");
+    stage1.add_flag("-c,--continue",         options.force_continue_on_error, "Continue after error (with file or -e expr)");
 
-    stage1.add_option("-o,--setOption",  options.options,   "Set an option key=value  (See ?setOption for the list of available keys and their associated values)")->allow_extra_args(false);
+    stage1.add_option("-s,--seed",           options.seed,            "Random seed (unsigned integer)");
+    stage1.add_option("-o,--setOption",      options.options,         "Set an option key=value  (See ?setOption for the list of available keys and their associated values)")->allow_extra_args(false);
 
     stage1.prefix_command();
     try {
@@ -177,12 +179,6 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
         options.args.erase(options.args.begin());
     }
 
-    options.interactive = interactive ? (interactive.value()) : (options.expressions.empty() and not options.filename);
-
-    options.error_exit = error_exit ? (error_exit.value()) : not options.interactive;
-
-    options.echo = echo ? (echo.value()) : options.interactive;
-    
     return options;
 }
 
@@ -223,9 +219,8 @@ int main(int argc, char* argv[])
 
     /* Set default session properties from cmd line flags */
     auto& settings = RbSettings::userSettings();
-    settings.setInteractive( cmd_line.interactive );
-    settings.setEcho( cmd_line.echo );
-    settings.setErrorExit( cmd_line.error_exit );
+    settings.setEcho( not cmd_line.script_or_expr() or cmd_line.force_echo );
+    settings.setContinueOnError( not cmd_line.script_or_expr() or cmd_line.force_continue_on_error );
 
     /* Set user options from cmd line */
     for(auto& option: cmd_line.options)
@@ -251,7 +246,7 @@ int main(int argc, char* argv[])
     }
 
     /* initialize environment */
-    RevLanguageMain rl = RevLanguageMain(cmd_line.quiet);
+    RevLanguageMain rl = RevLanguageMain(cmd_line.force_quiet);
 
     /* Set output stream */
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();
@@ -265,7 +260,7 @@ int main(int argc, char* argv[])
     {
         RevClient::startJupyterInterpreter();
     }
-    else if ( settings.getInteractive() )
+    else if ( not cmd_line.script_or_expr() or cmd_line.force_interactive )
     {
         enableTermAnsi();
 

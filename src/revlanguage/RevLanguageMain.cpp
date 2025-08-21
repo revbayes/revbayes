@@ -34,7 +34,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
 #ifdef RB_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif
-    
+
     // 1. Load the modules
     try
     {
@@ -47,7 +47,8 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
 
 
     // 2. Maybe show a header
-    if (settings.getInteractive() and not quiet)
+    bool script_or_expr = filename or not expressions.empty();
+    if (not script_or_expr and not quiet)
     {
         // Print a nifty message
         RbVersion version = RbVersion();
@@ -62,7 +63,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     std::string line;
     std::string command_line;
 
-    
+
     // 4. Set the args vector.
 
     // Ensure that args exists and has size 0.
@@ -82,7 +83,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         int result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
 
         // We just hope for better input next time
-        if ( result == 2 and settings.getErrorExit() )
+        if ( result == 2 and not settings.getContinueOnError() )
         {
             RevClient::shutdown();
                 
@@ -95,12 +96,12 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     {
         // Should we be using RBOUT here?  It looks weird with the 2 spaces of padding.
         if (settings.getEcho() and rank == 0)
-            std::cerr<<"> "<<expression;
+            std::cerr<<"> "<<expression<<"\n";
 
         int result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
         
         // We just hope for better input next time
-        if (result == 2 and settings.getErrorExit())
+        if (result == 2 and not settings.getContinueOnError())
         {
             RevClient::shutdown();
                 

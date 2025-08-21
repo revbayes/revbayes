@@ -113,13 +113,9 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return bool_to_string(echo);
     }
-    else if ( key == "interactive" )
+    else if ( key == "continueOnError" )
     {
-        return bool_to_string(interactive);
-    }
-    else if ( key == "errorExit" )
-    {
-        return bool_to_string(error_exit);
+        return bool_to_string(continue_on_error);
     }
     else
     {
@@ -155,14 +151,9 @@ bool RbSettings::getEcho( void ) const
     return echo;
 }
 
-bool RbSettings::getInteractive( void ) const
+bool RbSettings::getContinueOnError( void ) const
 {
-    return interactive;
-}
-
-bool RbSettings::getErrorExit( void ) const
-{
-    return error_exit;
+    return continue_on_error;
 }
 
 
@@ -208,8 +199,7 @@ void RbSettings::listOptions() const
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
     std::cout << "logMCMC = " << logMCMC << std::endl;
     std::cout << "echo = " << echo << std::endl;
-    std::cout << "interactive = " << interactive << std::endl;
-    std::cout << "errorExit = " << error_exit << std::endl;
+    std::cout << "continueOnError = " << continue_on_error << std::endl;
 }
 
 
@@ -341,19 +331,11 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
         else
             throw RbException()<<"setOption: expected a boolean, but got '"<<value<<"'";
     }
-    else if ( key == "interactive" )
+    else if ( key == "continueOnError" )
     {
         auto b = string_to_bool(value);
         if (b)
-            interactive = *b;
-        else
-            throw RbException()<<"setOption: expected a boolean, but got '"<<value<<"'";
-    }
-    else if ( key == "errorExit" )
-    {
-        auto b = string_to_bool(value);
-        if (b)
-            error_exit = *b;
+            continue_on_error = *b;
         else
             throw RbException()<<"setOption: expected a boolean, but got '"<<value<<"'";
     }
@@ -404,16 +386,9 @@ void RbSettings::setEcho(bool b)
     // This is a per-session setting and so should not persist across sessions.
 }
 
-void RbSettings::setInteractive(bool b)
+void RbSettings::setContinueOnError(bool b)
 {
-    interactive = b;
-
-    // This is a per-session setting and so should not persist across sessions.
-}
-
-void RbSettings::setErrorExit(bool b)
-{
-    error_exit = b;
+    continue_on_error = b;
 
     // This is a per-session setting and so should not persist across sessions.
 }
@@ -437,7 +412,7 @@ void RbSettings::writeUserSettings( void )
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
 
-    // "echo", "interactive", and "errorExit" are per-session settings and so should not persist across sessions.
+    // "echo" and "continueOnError" are per-session settings and so should not persist across sessions.
 
     writeStream.close();
 }
