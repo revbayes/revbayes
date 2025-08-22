@@ -337,7 +337,7 @@ void shutdown()
 }
 
 
-void execute_file(const fs::path& filename)
+void execute_file(const fs::path& filename, bool echo, bool continue_on_error)
 {
     auto& settings = RbSettings::userSettings();
     std::stringstream inFile = RevBayesCore::readFileAsStringStream(filename);
@@ -353,7 +353,7 @@ void execute_file(const fs::path& filename)
         RevBayesCore::safeGetline(inFile, line);
         lineNumber++;
         
-        if ( settings.getEcho() )
+        if ( echo )
         {
             if ( result == 1 )
             {
@@ -379,7 +379,7 @@ void execute_file(const fs::path& filename)
         result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
         if ( result == 2 )
         {
-            if (not settings.getContinueOnError())
+            if (not continue_on_error)
                 throw RbException() << "Problem processing line " << lineNumber << " in file " << filename;
             else
             {
@@ -487,7 +487,7 @@ void startInterpreter()
         
         result = interpret(commandLine);
 
-        if (result == 2 and not settings.getContinueOnError())
+        if (result == 2)
         {
             std::exit(1);
         }

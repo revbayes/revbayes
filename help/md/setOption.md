@@ -52,14 +52,6 @@ The currently available keys and their associated values are as follows:
 
         DEFAULT: 0
 
-    echo=<TRUE,FALSE>            Should commands be printed to the screen in a script or -e expr?
-
-        DEFAULT: FALSE
-
-    continueOnError=<TRUE,FALSE> Should we exit on the first error in a script or -e expr?
-
-        DEFAULT: FALSE
-
 ## authors
 Sebastian Hoehna
 ## see_also

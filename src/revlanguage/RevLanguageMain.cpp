@@ -19,8 +19,8 @@
 #include <mpi.h>
 #endif
 
-RevLanguageMain::RevLanguageMain(bool q)
-    : quiet(q)
+RevLanguageMain::RevLanguageMain(bool c, bool e, bool q)
+    : continue_on_error(c), echo(e), quiet(q)
 {
 
 }
@@ -83,7 +83,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         int result = RevLanguage::Parser::getParser().processCommand(command_line, RevLanguage::Workspace::userWorkspacePtr());
 
         // We just hope for better input next time
-        if ( result == 2 and not settings.getContinueOnError() )
+        if ( result == 2 and not continue_on_error )
         {
             RevClient::shutdown();
                 
@@ -95,13 +95,13 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     for (auto expression: expressions)
     {
         // Should we be using RBOUT here?  It looks weird with the 2 spaces of padding.
-        if (settings.getEcho() and rank == 0)
+        if (echo and rank == 0)
             std::cerr<<"> "<<expression<<"\n";
 
         int result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
         
         // We just hope for better input next time
-        if (result == 2 and not settings.getContinueOnError())
+        if (result == 2 and not continue_on_error)
         {
             RevClient::shutdown();
                 
@@ -113,7 +113,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
     try
     {
         if (filename)
-            RevClient::execute_file(*filename);
+            RevClient::execute_file(*filename, echo, continue_on_error);
     }
     catch (const RbException& e)
     {

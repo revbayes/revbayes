@@ -46,7 +46,6 @@ struct ParsedOptions
 
     bool force_interactive = false;       /* Force interactive if script_or_expr() == true. */
     bool force_continue_on_error = false; /* Force continue-on-error if script_or_expr() == true. */
-    bool force_echo = false;              /* Force echo if script_or_expr() == true */
     bool force_quiet = false;             /* Suppress header if script_or_expr() == false */
 
     bool jupyter = false;
@@ -104,7 +103,6 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
 
     stage1.add_flag("-q,--quiet",            options.force_quiet,             "Hide startup message (if no file or -e expr)");
     stage1.add_flag("-i,--interactive",      options.force_interactive,       "Force interactive (with file or -e expr)");
-    stage1.add_flag("-p,--echo",             options.force_echo,              "Print commands (with file or -e expr)");
     stage1.add_flag("-c,--continue",         options.force_continue_on_error, "Continue after error (with file or -e expr)");
 
     stage1.add_option("-s,--seed",           options.seed,            "Random seed (unsigned integer)");
@@ -219,8 +217,7 @@ int main(int argc, char* argv[])
 
     /* Set default session properties from cmd line flags */
     auto& settings = RbSettings::userSettings();
-    settings.setEcho( not cmd_line.script_or_expr() or cmd_line.force_echo );
-    settings.setContinueOnError( not cmd_line.script_or_expr() or cmd_line.force_continue_on_error );
+    bool continue_on_error = not cmd_line.script_or_expr() or cmd_line.force_continue_on_error;
 
     /* Set user options from cmd line */
     for(auto& option: cmd_line.options)
@@ -246,7 +243,9 @@ int main(int argc, char* argv[])
     }
 
     /* initialize environment */
-    RevLanguageMain rl = RevLanguageMain(cmd_line.force_quiet);
+    RevLanguageMain rl = RevLanguageMain(cmd_line.force_continue_on_error,
+                                         false, /* echo */
+                                         cmd_line.force_quiet);
 
     /* Set output stream */
     CommandLineOutputStream *rev_output = new CommandLineOutputStream();

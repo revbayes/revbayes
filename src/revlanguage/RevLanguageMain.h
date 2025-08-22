@@ -26,15 +26,14 @@ class RevLanguageMain {
     
 public:
     
-    RevLanguageMain(bool quiet);
+    RevLanguageMain(bool e, bool c, bool q);
     
     void startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args);
 
 private:
     
-    bool interactive;           // keep asking stdin for commands until q()
     bool echo;                  // print commands to the screen
-    bool error_exit;            // quit on the first error
+    bool continue_on_error;     // continue after an error
     bool quiet;                 // suppress header
 };
 

@@ -19,7 +19,7 @@ namespace RevClient
 {
     int   interpret(const std::string& command);
 
-    void  execute_file(const std::filesystem::path& filename);
+    void  execute_file(const std::filesystem::path& filename, bool echo, bool continue_on_error);
     void  shutdown();
     void  startInterpreter();
     void  startJupyterInterpreter();

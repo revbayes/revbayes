@@ -68,7 +68,7 @@ gboolean command_on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer us
 
 
 RbGTKGui::RbGTKGui( void ) :
-    rl_interpreter( /* quiet */ false ),
+    rl_interpreter( false, false, /* quiet */ false ),
     command( "" ),
     command_index( 0 ),
     command_result( 0 ),

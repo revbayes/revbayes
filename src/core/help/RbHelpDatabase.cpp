@@ -4339,15 +4339,7 @@ The currently available keys and their associated values are as follows:
         3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.
         4: Writes out additional details about the mvSlice move (if present).
 
-        DEFAULT: 0
-
-    echo=<TRUE,FALSE>            Should commands be printed to the screen in a script or -e expr?
-
-        DEFAULT: FALSE
-
-    continueOnError=<TRUE,FALSE> Should we exit on the first error in a script or -e expr?
-
-        DEFAULT: FALSE)");
+        DEFAULT: 0)");
 	help_strings[string("setOption")][string("example")] = string(R"(# compute the absolute value of a real number
 getOption("linewidth")
 

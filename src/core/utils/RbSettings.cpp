@@ -109,14 +109,6 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return std::to_string(logMCMC);
     }
-    else if ( key == "echo" )
-    {
-        return bool_to_string(echo);
-    }
-    else if ( key == "continueOnError" )
-    {
-        return bool_to_string(continue_on_error);
-    }
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
@@ -145,17 +137,6 @@ double RbSettings::getTolerance( void ) const
     
     return tolerance;
 }
-
-bool RbSettings::getEcho( void ) const
-{
-    return echo;
-}
-
-bool RbSettings::getContinueOnError( void ) const
-{
-    return continue_on_error;
-}
-
 
 /** Initialize the user settings */
 void RbSettings::readUserSettings(void)
@@ -198,8 +179,6 @@ void RbSettings::listOptions() const
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
     std::cout << "logMCMC = " << logMCMC << std::endl;
-    std::cout << "echo = " << echo << std::endl;
-    std::cout << "continueOnError = " << continue_on_error << std::endl;
 }
 
 
@@ -323,22 +302,6 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     {
         logMCMC = boost::lexical_cast<int>(value);
     }
-    else if ( key == "echo" )
-    {
-        auto b = string_to_bool(value);
-        if (b)
-            echo = *b;
-        else
-            throw RbException()<<"setOption: expected a boolean, but got '"<<value<<"'";
-    }
-    else if ( key == "continueOnError" )
-    {
-        auto b = string_to_bool(value);
-        if (b)
-            continue_on_error = *b;
-        else
-            throw RbException()<<"setOption: expected a boolean, but got '"<<value<<"'";
-    }
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
@@ -379,21 +342,6 @@ void RbSettings::setTolerance(double t)
     writeUserSettings();
 }
 
-void RbSettings::setEcho(bool b)
-{
-    echo = b;
-
-    // This is a per-session setting and so should not persist across sessions.
-}
-
-void RbSettings::setContinueOnError(bool b)
-{
-    continue_on_error = b;
-
-    // This is a per-session setting and so should not persist across sessions.
-}
-
-
 void RbSettings::writeUserSettings( void )
 {
     // Does this always work on windows?
@@ -411,8 +359,6 @@ void RbSettings::writeUserSettings( void )
     writeStream << "linewidth=" << lineWidth << std::endl;
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
-
-    // "echo" and "continueOnError" are per-session settings and so should not persist across sessions.
 
     writeStream.close();
 }

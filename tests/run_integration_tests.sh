@@ -127,7 +127,11 @@ for t in ${TESTS}; do
         mkdir -p output
         tmp0=${f#scripts/}
         script_name=${tmp0%.[Rr]ev}
-        ${rb_exec[@]} $f &> output/${script_name}.errout # print output so we can see any error messages
+        rb_options=""
+        if grep "^## continue-on-error" "$f" 2>&1 >/dev/null ; then
+            rb_options="-c"
+        fi
+        ${rb_exec[@]} ${rb_options} $f &> output/${script_name}.errout # print output so we can see any error messages
         script_result="$?"
 
         expected_exit=0
