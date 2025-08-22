@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 
 //struct tabCompletionInfo{
@@ -18,8 +19,10 @@ namespace RevClient
 {
     int   interpret(const std::string& command);
 
-    void  startInterpreter(void);
-    void  startJupyterInterpreter(void);
+    void  execute_file(const std::filesystem::path& filename, bool echo, bool continue_on_error);
+    void  shutdown();
+    void  startInterpreter();
+    void  startJupyterInterpreter();
 }
     
 
