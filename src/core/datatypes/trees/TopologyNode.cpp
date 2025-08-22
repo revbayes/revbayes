@@ -395,6 +395,49 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
     }
 }
 
+/**
+ * This function will convert a raw string to a newick sting with escaped characters.
+ */
+std::string newickEscape(const std::string in_label)
+{
+    bool needs_quoting = false;
+    std::string escaped;
+
+    for (size_t i = 0; i < in_label.size(); ++i) {
+        char c = in_label[i];
+
+        // first check for any illegal characters or underscore
+        if (c == '\'' || c == '(' || c == ')' || c =='_' ||
+            c == '[' || c ==']' || c == ':' || c == ';' || c ==',') {
+            needs_quoting = true;
+            // check for single quote
+            if (c == '\'') {
+                escaped += "''";
+            }
+            else {
+                escaped += c;
+            }
+        }
+
+        else{
+            escaped += c;
+        }
+    }
+
+    //return quoted string
+    if (needs_quoting) {
+        return "'" + escaped + "'";
+    } 
+    // convert blanks to underscores
+    else{
+        for (char& c : escaped) {
+            if (c == ' ') {
+                c = '_';
+            }
+        }
+        return escaped;
+    }
+}
 
 std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 {
@@ -421,7 +464,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 
     // 2. Write out the node name is there is any.
     if (children.size() < 2)
-        o << taxon.getName();
+        o << newickEscape(taxon.getName());
 
     // 3. Write out node comments if there are any and (simmap == false)
     if ( ( node_comments.size() > 0 or RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
@@ -2287,4 +2330,5 @@ std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
 
     return {start_age, end_age};
 }
+
 

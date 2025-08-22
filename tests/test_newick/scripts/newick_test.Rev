@@ -1,0 +1,8 @@
+#####################################
+# Escape and Unescape Newick String #
+#####################################
+seed(1)
+taxa = [taxon("abc"), taxon("a b"), taxon("a_b"), taxon("a (b"), taxon("a()[],; :"), taxon("a'b"), taxon("a''b")]
+tree ~ dnUniformTopology(taxa)
+tree
+quit()
