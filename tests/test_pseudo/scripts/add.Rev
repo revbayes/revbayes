@@ -1,0 +1,17 @@
+seed(1)
+
+x ~ dnExponential(1)
+o ~ dnPseudo(x, pdLogNormal(0,1)+2)
+o.clamp( pseudoObservation() )
+
+pdLogNormal(0,2) - 2
+2 - pdLogNormal(0,3)
+        
+mymodel = model(x)
+mymodel.graph("output/add.dot")
+
+mymcmc = mcmc(mymodel, moves=[mvSlice(x)], monitors=[mnModel(filename="output/add.log")])
+
+mymcmc.run(1000)
+
+q()

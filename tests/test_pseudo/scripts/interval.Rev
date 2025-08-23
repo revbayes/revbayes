@@ -1,0 +1,12 @@
+seed(1)
+
+t ~ dnNormal(0,10)
+fossil ~ dnPseudo(t, pdBetween(-1,3))
+fossil.clamp( pseudoObservation() )
+
+mymodel = model(t)
+mymodel.graph("output/interval.dot")
+
+mymcmc = mcmc(mymodel,moves=[mvSlice(t)],monitors=[mnModel(filename="output/interval.log")])
+mymcmc.run(1000)
+q()

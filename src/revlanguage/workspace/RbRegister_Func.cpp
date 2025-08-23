@@ -314,6 +314,20 @@
 #include "Func_decomposedVarianceCovarianceMatrix.h"
 #include "Func_partialToCorrelationMatrix.h"
 
+/* PseudoData */
+#include "Func_PseudoObservation.h"
+#include "Func_PseudoDataBetween.h"
+#include "Func_PseudoDataAbove.h"
+#include "Func_PseudoDataBelow.h"
+#include "Func_PseudoDataAnd.h"
+#include "Func_PseudoDataOr.h"
+#include "Func_PseudoDataNormal.h"
+#include "Func_PseudoDataLogNormal.h"
+#include "Func_PseudoDataWeight.h"
+#include "Func_PseudoDataAdd.h"
+#include "Func_PseudoDataSub1.h"
+#include "Func_PseudoDataSub2.h"
+
 /* Type conversions */
 #include "Proc_StringToInt.h"
 
@@ -660,10 +674,22 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_decomposedVarianceCovarianceMatrix( ) );
         addFunction( new Func_partialToCorrelationMatrix( )         );
 
+        // Pseudo-data
+        addFunction( new Func_PseudoObservation()                   );
+        addFunction( new Func_PseudoDataBetween()                   );
+        addFunction( new Func_PseudoDataAbove()                     );
+        addFunction( new Func_PseudoDataBelow()                     );
+        addFunction( new Func_PseudoDataAnd<Real>()                 );
+        addFunction( new Func_PseudoDataOr<Real>()                  );
+        addFunction( new Func_PseudoDataNormal()                    );
+        addFunction( new Func_PseudoDataLogNormal()                 );
+        addFunction( new Func_PseudoDataWeight<Real>()              );
+        addFunction( new Func_PseudoDataAdd()                       );
+        addFunction( new Func_PseudoDataSub1()                      );
+        addFunction( new Func_PseudoDataSub2()                      );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
-
     }
     catch(RbException& rbException)
     {

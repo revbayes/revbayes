@@ -1,0 +1,19 @@
+seed(1)
+
+t ~ dnNormal(0,10)
+
+a ~ dnNormal(-1,1)
+b ~ dnExponential(3) + a
+
+fossil ~ dnPseudo(t, pdBetween(a,b))
+fossil.clamp( pseudoObservation() )
+
+fossil2 ~ dnPseudo(t, pdNormal(-5,1))
+fossil2.clamp( pseudoObservation() )
+
+mymodel = model(t,a,b)
+mymodel.graph("output/normal.dot")
+
+mymcmc = mcmc(mymodel,moves=[mvSlice(t),mvSlice(a), mvSlice(b)],monitors=[mnModel(filename="output/normal.log")])
+mymcmc.run(1000)
+q()
