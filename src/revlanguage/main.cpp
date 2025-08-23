@@ -98,7 +98,6 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     stage1.get_formatter()->right_column_width(45);
 
     stage1.add_flag("-v,--version",          options.version,         "Show version and exit");
-    stage1.add_flag("-b,--batch",                                     "Deprecated");
     stage1.add_flag("-j,--jupyter",          options.jupyter,         "Run in jupyter mode");
 
     stage1.add_flag("-q,--quiet",            options.force_quiet,             "Hide startup message (if no file or -e expr)");
