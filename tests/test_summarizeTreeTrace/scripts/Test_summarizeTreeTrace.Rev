@@ -1,37 +1,180 @@
 ################################################################################
 #
-# RevBayes Test-Script: Summarizing tree traces
+# RevBayes Test-Script: Testing all available methods of class TraceTree
 #
 #
 # authors: David Cerny
 #
 ################################################################################
 
-seed(12345)
+# No random seed should be needed: while the output of the methods relying
+# on calculating credible sets is not guaranteed to be deterministic unless
+# alpha = 1, this script does not explore the edge cases in which the inclusion
+# of a given tree in the credible set becomes probabilistic.
 
+# Read in a trace of 6-taxon trees originally provided by Wenjie Zhu (see
+# https://github.com/revbayes/revbayes/issues/753)
 
-# testing the methods for generating MCC, MAP, and consensus trees
+treetrace = readTreeTrace("data/500_ncd.trees", treetype="clock", burnin=0)
 
-# first read in a toy vector of 102 5-tip trees originally provided by Frederik Hartmann
-# (see https://github.com/revbayes/revbayes/issues/361)
+# Extract some useful variables
+clade_0 = clade("B", "S")
+clade_1 = clade("Hm", "Hp")
+clades_to_check = [clade_0, clade_1]
 
-trees = readTrees("data/myposterior.posterior.trees")
+print("###################################################################")
+print("# Test .size(), .getBurnin(), .setBurnin(), .getNumberOfSamples() #")
+print("###################################################################\n")
 
-# convert this vector to a tree trace
+print("Total trees in trace: " + treetrace.size(post = FALSE))
+print("Initial burnin: " + treetrace.getBurnin())
+print("# of post-burnin samples according to .size(): " + treetrace.size(post = TRUE))
+print("# of post-burnin samples according to .getNumberSamples(): " + treetrace.getNumberSamples(post = TRUE) + "\n")
 
-tree_trace = treeTrace(trees, burnin=0)
+print("Since the burnin is 0, the numbers returned by .getNumberSamples()")
+print("should be the same regardless of whether the `post` argument is set")
+print("to TRUE or FALSE. Are they?")
+print( treetrace.getNumberSamples(post = TRUE) == treetrace.getNumberSamples(post = FALSE))
+print("")
 
-# generate the 50% majority-rule consensus tree
+print("Trying to change burnin to 10% of trace length...\n")
+treetrace.setBurnin(0.1)
 
-ct = consensusTree(tree_trace, file = "output/myposterior.con.tre")
+print("Total trees in trace: " + treetrace.size(post = FALSE))
+print("Current burnin: " + treetrace.getBurnin())
+print("# of post-burnin samples according to .size(): " + treetrace.size(post = TRUE))
+print("# of post-burnin samples according to .getNumberSamples(): " + treetrace.getNumberSamples(post = TRUE) + "\n")
 
-# generate the maximum clade credibility (MCC) tree
+print("Since we now have a nonzero burnin, testing the numbers returned by")
+print(".getNumberSamples() with `post` set to TRUE and FALSE for equality")
+print("should yield FALSE:")
+print( treetrace.getNumberSamples(post = TRUE) == treetrace.getNumberSamples(post = FALSE))
 
-mcc = mccTree(tree_trace, file = "output/myposterior.mcc.tre")
+print("\n###################################")
+print("# Test .getTree() and .getTrees() #")
+print("###################################\n")
 
-# generate the maximum a posteriori (MAP) tree
+# Tree 5+x should become tree 5 after we have removed the first x trees as burnin
+topo_0 = treetrace.getTree(5 + treetrace.getBurnin(), post = FALSE)
+topo_1 = treetrace.getTree(5, post = TRUE)
+print("Can we extract the same tree using both regular and post-burnin indices?")
+print( topo_0 == topo_1 )
 
-map = mapTree(tree_trace, file = "output/myposterior.map.tre")
+# Also test a different way of counting trees and accessing a single tree
+topo_2 = treetrace.getTrees()[5]
+print("Can we extract the i-th tree using both .getTree(i) and .getTrees()[i]?")
+print( topo_0 == topo_2 )
+print("Does the .getTrees() method return the number of post-burnin trees only?")
+print( treetrace.getTrees().size() == treetrace.getNumberSamples(post = TRUE) )
 
+print("\n#####################################################")
+print("# Test .getTopologyFrequency() and .isTreeCovered() #")
+print("#####################################################\n")
+
+print("Frequency of trees that are topologically identical to the 5th tree in the trace: " + treetrace.getTopologyFrequency(topo_0, verbose=FALSE))
+print("Is this tree part of the 90% credible set?")
+print( treetrace.isTreeCovered(topo_0, 0.9, verbose=FALSE) )
+print("")
+
+topo_3 = treetrace.getTrees()[6]
+print("Frequency of trees that are topologically identical to the 6th tree in the trace: " + treetrace.getTopologyFrequency(topo_3, verbose=FALSE))
+print("Is this tree part of the 90% credible set?")
+print( treetrace.isTreeCovered(topo_3, 0.9, verbose=FALSE) )                                                               
+
+print("\n###################################################################")
+print("# Test .cladeProbability(), .getTMRCA(), .jointCladeProbability() #")
+print("###################################################################\n")
+
+print("Frequency of the (B+S) clade: " + treetrace.cladeProbability(clade_0, verbose=FALSE))
+print("Joint frequency of the (B+S) and (Hm+Hp) clades: " + treetrace.jointCladeProbability(clades_to_check, verbose=FALSE) + "\n")
+
+print("Crown ages of clade (B+S), calculated only from those trees in which the two form an exclusive clade:\n")
+treetrace.getTMRCA(clade_0, strict=TRUE, stem=FALSE) # default
+print("")
+
+print("Stem ages of clade (B+S), calculated only from those trees in which the two form an exclusive clade:\n")
+treetrace.getTMRCA(clade_0, strict=TRUE, stem=TRUE)
+print("")
+
+print("Crown ages of the clade originating with the MRCA of B and S:\n")
+treetrace.getTMRCA(clade_0, strict=FALSE, stem=FALSE)
+print("")
+
+print("Stem ages of the clade originating with the MRCA of B and S:\n")
+treetrace.getTMRCA(clade_0, strict=FALSE, stem=FALSE)
+print("")
+
+print("When we do not require the group (B+S) to be strictly monophyletic,")
+print("do we get as many ages for it as there are post-burnin samples?")
+print( treetrace.size(post = TRUE) == treetrace.getTMRCA(clade_0, strict=FALSE).size() )
+
+print("\n#################################################")
+print("# Test .getUniqueClades() and .getUniqueTrees() #")
+print("#################################################\n")
+
+print("Unique clades with a posterior probability of at least 0.05:")
+treetrace.getUniqueClades(0.05, nonTrivial=TRUE, verbose=FALSE)
+print("")
+
+print("List the trivial clades as well:")
+treetrace.getUniqueClades(0.05, nonTrivial=FALSE, verbose=FALSE)
+print("")
+
+print("Unique topologies in this trace: " + treetrace.getUniqueTrees(1, verbose=FALSE).size())
+
+print("\n################################################################################")
+print("# Test .computeEntropy(), .computePairwiseRFDistances(), .computeTreeLengths() #")
+print("################################################################################\n")
+
+print("Entropy of the entire post-burnin sample: " + treetrace.computeEntropy(1, verbose=FALSE) + "\n")
+
+print("Extract all unique trees, coerce the resulting vector to a new tree")
+print("trace, and compute pairwise RF distances between its elements:\n")
+
+unique_topo = treetrace.getUniqueTrees(1, verbose=FALSE)
+sub_trace = treeTrace(unique_topo, burnin = 0)
+RF_dist = sub_trace.computePairwiseRFDistances(1, verbose=FALSE)
+RF_dist
+
+print("\nAre we getting the expected number of distances, i.e, n*(n - 1)/2 for n trees?")
+print( unique_topo.size() * ( unique_topo.size() - 1 ) / 2 == RF_dist.size() )
+print("")
+
+print("Tree lengths:\n")
+treetrace.computeTreeLengths()
+print("")
+
+print("Are we calculating tree lengths for the post-burnin sample only?")
+print( treetrace.size(post = TRUE) == treetrace.computeTreeLengths().size() )
+
+#######################
+# Test .setOutgroup() #
+#######################
+
+# There doesn't seem to be a good way to test this method. Ideally, we would
+# like it to determine how the summary trees produced by functions such as
+# mapTree() will be rooted, but since these actually set their own outgroup
+# internally (see https://github.com/revbayes/revbayes/issues/694), calling
+# the method on a trace has no observable effect.
+
+print("\n#####################")
+print("# Test .summarize() #")
+print("#####################\n")
+
+print("Generate a summary of the trace, including all post-burnin trees and")
+print("all clades with a posterior probability of at least 0.05:")
+treetrace.summarize(1, 0.05, verbose=FALSE)
+
+###################
+# Test .methods() #
+###################
+
+# print("Available methods for an object of type " + type(treetrace) + ":\n")
+# treetrace.methods()
+
+###### THIS TEST IS FAILING ON WINDOWS.
+###### Possibly due to #ea166b8?
+
+clear()
 
 q()

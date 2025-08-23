@@ -40,7 +40,7 @@ namespace RevBayesCore {
         virtual void                    addObject(const valueType& d);
         virtual void                    addObject(valueType&& d);
         virtual void                    addObject(valueType* d);
-        virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose);
+        virtual int                     isCoveredInInterval(const std::string &v, double i, bool verbose, std::optional<bool> stochastic);
         bool                            isDirty(void) const                             { return dirty; };
         void                            setDirty(bool d)                                { dirty = d; };
         void                            removeLastObject();
@@ -98,16 +98,16 @@ namespace RevBayesCore {
      * Template specializations
      */
     template <>
-    int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
+    int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose, std::optional<bool> stochastic);
 
     template <>
-    int Trace<std::int64_t>::isCoveredInInterval(const std::string &v, double alpha, bool verbose);
+    int Trace<std::int64_t>::isCoveredInInterval(const std::string &v, double alpha, bool verbose, std::optional<bool> stochastic);
 
     template <>
-    int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose);
+    int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose, std::optional<bool> stochastic);
 
     template <>
-    int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose);
+    int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose, std::optional<bool> stochastic);
 
 }
 
@@ -157,7 +157,7 @@ RevBayesCore::Trace<valueType>* RevBayesCore::Trace<valueType>::clone() const
 
 
 template <class valueType>
-int RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/)
+int RevBayesCore::Trace<valueType>::isCoveredInInterval(const std::string & /*v*/, double /*alpha*/, bool /*verbose*/, std::optional<bool> /*stochastic*/)
 {
     throw RbException() << "Cannot compute interval coverage for '" << parmName << "' because there are not trace objects implemented for this value type.";
 }
