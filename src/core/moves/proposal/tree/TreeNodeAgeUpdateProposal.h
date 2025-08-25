@@ -57,7 +57,7 @@ template <class variableType> class StochasticNode;
         std::vector< StochasticNode<Tree> *>            geneTrees;
         
         // stored objects to undo proposal
-        TopologyNode*                                   storedNode;
+        TopologyNode*                                   storedNode = NULL;
         double                                          storedAge;
                 
     };

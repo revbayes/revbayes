@@ -181,10 +181,11 @@ void NodeTimeScaleProposal::printParameterSummary(std::ostream &o, bool name_onl
  */
 void NodeTimeScaleProposal::undoProposal( void )
 {
-    
-    // undo the proposal
-    variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
-    
+    if (storedNode != NULL)
+    {
+        // undo the proposal
+        variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
+    }
 }
 
 

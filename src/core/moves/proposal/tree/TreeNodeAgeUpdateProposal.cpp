@@ -373,50 +373,50 @@ void TreeNodeAgeUpdateProposal::printParameterSummary(std::ostream &o, bool name
  */
 void TreeNodeAgeUpdateProposal::undoProposal( void )
 {
-
-    // undo the proposal
-
-
-    TopologyNode& parent = storedNode->getParent();
-
-    // we need to work with the times
-    double parent_age  = parent.getAge();
-    double my_new_age      = storedNode->getAge();
-    double child_Age   = storedNode->getChild( 0 ).getAge();
-    if ( child_Age < storedNode->getChild( 1 ).getAge())
+    if (storedNode != NULL)
     {
-        child_Age = storedNode->getChild( 1 ).getAge();
-    }
-
-    for ( size_t i=0; i<geneTrees.size(); ++i )
-    {
-        // get the i-th gene tree
-        Tree& geneTree = geneTrees[i]->getValue();
-
-        std::vector<TopologyNode*> nodes = getNodesInPopulation(geneTree, *storedNode );
-
-        for (size_t j=0; j<nodes.size(); ++j)
+        // undo the proposal
+        TopologyNode& parent = storedNode->getParent();
+        
+        // we need to work with the times
+        double parent_age  = parent.getAge();
+        double my_new_age      = storedNode->getAge();
+        double child_Age   = storedNode->getChild( 0 ).getAge();
+        if ( child_Age < storedNode->getChild( 1 ).getAge())
         {
-
-            double new_a = nodes[j]->getAge();
-            double a = new_a;
-            if ( new_a > my_new_age )
-            {
-                a = parent_age - (parent_age - storedAge)/(parent_age - my_new_age) * (parent_age - new_a);
-            }
-            else
-            {
-                a = child_Age + (storedAge - child_Age)/(my_new_age - child_Age) * (new_a - child_Age);
-            }
-
-            // set the new age of this gene tree node
-            geneTree.getNode( nodes[j]->getIndex() ).setAge( a );
+            child_Age = storedNode->getChild( 1 ).getAge();
         }
-
+        
+        for ( size_t i=0; i<geneTrees.size(); ++i )
+        {
+            // get the i-th gene tree
+            Tree& geneTree = geneTrees[i]->getValue();
+            
+            std::vector<TopologyNode*> nodes = getNodesInPopulation(geneTree, *storedNode );
+            
+            for (size_t j=0; j<nodes.size(); ++j)
+            {
+                
+                double new_a = nodes[j]->getAge();
+                double a = new_a;
+                if ( new_a > my_new_age )
+                {
+                    a = parent_age - (parent_age - storedAge)/(parent_age - my_new_age) * (parent_age - new_a);
+                }
+                else
+                {
+                    a = child_Age + (storedAge - child_Age)/(my_new_age - child_Age) * (new_a - child_Age);
+                }
+                
+                // set the new age of this gene tree node
+                geneTree.getNode( nodes[j]->getIndex() ).setAge( a );
+            }
+            
+        }
+        
+        // set the age of the species tree node
+        speciesTree->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
     }
-
-    // set the age of the species tree node
-    speciesTree->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
 }
 
 

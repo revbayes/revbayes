@@ -45,7 +45,7 @@ namespace RevBayesCore {
         double                                  delta;
         
         // stored objects to undo proposal
-        TopologyNode*                           stored_node;
+        TopologyNode*                           stored_node = NULL;
         double                                  stored_age;
         std::vector<double>                     stored_rates;
 

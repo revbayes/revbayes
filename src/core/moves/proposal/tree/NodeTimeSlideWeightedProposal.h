@@ -52,7 +52,7 @@ namespace RevBayesCore {
         std::vector<double>                     interval;
         
         // stored objects to undo proposal
-        TopologyNode*                           storedNode;
+        TopologyNode*                           storedNode = NULL;
         double                                  storedAge;
         
     };

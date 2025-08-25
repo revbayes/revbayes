@@ -182,10 +182,11 @@ void NodeTimeSlideBetaProposal::printParameterSummary(std::ostream &o, bool name
  */
 void NodeTimeSlideBetaProposal::undoProposal( void )
 {
-    
-    // undo the proposal
-    variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
-    
+    if (storedNode != NULL)
+    {
+        // undo the proposal
+        variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
+    }
 }
 
 
