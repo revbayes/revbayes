@@ -502,43 +502,44 @@ void RateAgeBetaShift::printSummary(std::ostream &o, bool current_period) const
 
 void RateAgeBetaShift::reject( void )
 {
-    
-    // undo the proposal
-    tree->getValue().getNode( stored_node->getIndex() ).setAge( stored_age );
-    
-    // undo the rates
-    size_t node_idx = stored_node->getIndex();
-    if ( rates == NULL )
+    if (stored_node != NULL)
     {
-        rates_vec[node_idx]->setValue(new double(stored_rates[node_idx]));
-    }
-    else
-    {
-        rates->getValue()[ node_idx ] = stored_rates[node_idx];
-        rates->touch();
-    }
-    for (size_t i = 0; i < stored_node->getNumberOfChildren(); i++)
-    {
-        size_t childIdx = stored_node->getChild(i).getIndex();
+        // undo the proposal
+        tree->getValue().getNode( stored_node->getIndex() ).setAge( stored_age );
+        
+        // undo the rates
+        size_t node_idx = stored_node->getIndex();
         if ( rates == NULL )
         {
-            rates_vec[childIdx]->setValue(new double(stored_rates[childIdx]));
+            rates_vec[node_idx]->setValue(new double(stored_rates[node_idx]));
         }
         else
         {
-            rates->getValue()[ childIdx ] = stored_rates[childIdx];
+            rates->getValue()[ node_idx ] = stored_rates[node_idx];
             rates->touch();
         }
-    }
-
-    
+        for (size_t i = 0; i < stored_node->getNumberOfChildren(); i++)
+        {
+            size_t childIdx = stored_node->getChild(i).getIndex();
+            if ( rates == NULL )
+            {
+                rates_vec[childIdx]->setValue(new double(stored_rates[childIdx]));
+            }
+            else
+            {
+                rates->getValue()[ childIdx ] = stored_rates[childIdx];
+                rates->touch();
+            }
+        }
+        
 #ifdef ASSERTIONS_TREE
-    if ( fabs(storedAge - storedNode->getAge()) > 1E-8 )
-    {
-        throw RbException("Error while rejecting RateAgeBetaShift proposal: Node ages were not correctly restored!");
-    }
+        if ( fabs(storedAge - storedNode->getAge()) > 1E-8 )
+        {
+            throw RbException("Error while rejecting RateAgeBetaShift proposal: Node ages were not correctly restored!");
+        }
 #endif
-    
+        
+    }
 }
 
 /**

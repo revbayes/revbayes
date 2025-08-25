@@ -52,7 +52,7 @@ namespace RevBayesCore {
         double                                  offset;
         
         // stored objects to undo proposal
-        TopologyNode*                           storedNode;
+        TopologyNode*                           storedNode = NULL;
         double                                  storedAge;
         
     };

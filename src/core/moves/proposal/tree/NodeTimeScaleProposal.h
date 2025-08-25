@@ -56,7 +56,7 @@ namespace RevBayesCore {
         double                                  lambda;
         
         // stored objects to undo proposal
-        TopologyNode*                           storedNode;
+        TopologyNode*                           storedNode = NULL;
         double                                  storedAge;
         
     };

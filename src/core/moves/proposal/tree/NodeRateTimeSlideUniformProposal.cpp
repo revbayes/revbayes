@@ -232,19 +232,21 @@ void NodeRateTimeSlideUniformProposal::printParameterSummary(std::ostream &o, bo
  */
 void NodeRateTimeSlideUniformProposal::undoProposal( void )
 {
-    
-    // undo the proposal
-    storedNode->setAge( storedAge );
-    
-    if( rates_node != NULL )
+    if (storedNode != NULL)
     {
-        rates_node->getValue() = stored_rates;
-    }
-    else
-    {
-        for(size_t i = 0; i < rates_vector.size(); i++)
+        // undo the proposal
+        storedNode->setAge( storedAge );
+        
+        if( rates_node != NULL )
         {
-            rates_vector[i]->getValue() = stored_rates[i];
+            rates_node->getValue() = stored_rates;
+        }
+        else
+        {
+            for(size_t i = 0; i < rates_vector.size(); i++)
+            {
+                rates_vector[i]->getValue() = stored_rates[i];
+            }
         }
     }
 }

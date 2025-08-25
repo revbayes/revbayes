@@ -30,7 +30,7 @@ namespace RevBayesCore {
         
         // Basic utility functions
         void                                    cleanProposal(void);                                        //!< Clean up proposal
-        NodeRateTimeSlideUniformProposal*              clone(void) const;                                             //!< Clone object
+        NodeRateTimeSlideUniformProposal*       clone(void) const;                                          //!< Clone object
         double                                  doProposal(void);                                           //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
@@ -54,7 +54,7 @@ namespace RevBayesCore {
 
         // stored objects to undo proposal
         double                                  storedAge;
-        TopologyNode*                           storedNode;
+        TopologyNode*                           storedNode = NULL;
         std::vector<double>                     stored_rates;
     };
     

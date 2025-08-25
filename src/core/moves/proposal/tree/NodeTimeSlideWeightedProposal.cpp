@@ -253,10 +253,11 @@ void NodeTimeSlideWeightedProposal::printParameterSummary(std::ostream &o, bool 
  */
 void NodeTimeSlideWeightedProposal::undoProposal( void )
 {
-    
-    // undo the proposal
-    variable->getValue().getNode(storedNode->getIndex()).setAge( storedAge );
-    
+    if (storedNode != NULL)
+    {
+        // undo the proposal
+        variable->getValue().getNode(storedNode->getIndex()).setAge( storedAge );
+    }
 }
 
 
