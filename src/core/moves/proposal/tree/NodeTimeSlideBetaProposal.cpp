@@ -104,6 +104,7 @@ double NodeTimeSlideBetaProposal::doProposal( void )
         if (logMCMC >=1 or debugMCMC >=1)
         {
             std::cerr << "mvNodeTimeSlideBeta has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+            storedNode = nullptr;
         }
         return RbConstants::Double::neginf;
     }
@@ -182,10 +183,10 @@ void NodeTimeSlideBetaProposal::printParameterSummary(std::ostream &o, bool name
  */
 void NodeTimeSlideBetaProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
-    
 }
 
 
