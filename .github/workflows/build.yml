@@ -117,7 +117,7 @@ jobs:
             version: "9000"
             mpi: false
             arch: win64
-
+            image: ubuntu:25.04
 
     runs-on: ${{ matrix.os }}
     container:
@@ -157,9 +157,14 @@ jobs:
     - name: Install (Linux -> Windows [cross])
       if: matrix.name == 'windows'
       run: |
+          # If we're running in a docker image, we are already root
+          if [ -n "${{ matrix.image }}" ]  ; then
+            apt-get update && apt-get install -y sudo build-essential git cmake wget pkgconf
+            echo HOME=/root >> "$GITHUB_ENV"
+          fi
           sudo apt-get update
           sudo apt-get install -y ccache dos2unix zstd
-          sudo apt-get install git python3-setuptools python3-pip g++-mingw-w64 wine64
+          sudo apt-get install -y git python3-setuptools python3-pip g++-mingw-w64 wine64
 
     - name: Select XCode version (macOS)
       if: runner.os == 'macOS'
@@ -261,7 +266,7 @@ jobs:
         PREFIX=${HOME}/local
         meson setup build ${GITHUB_WORKSPACE} --prefix=$PREFIX --cross-file=win64-cross.txt -Dstudio=true
         CXX=x86_64-w64-mingw32-g++-posix
-        WINROOT=/home/runner/win_root
+        WINROOT=${HOME}/win_root
         ccache -p
         ccache -s
         ninja -C build install -j4
@@ -277,11 +282,8 @@ jobs:
         mkdir $HOME/wrapper
         ( echo '#!/bin/bash'
           echo 'export WINEDEBUG=-all'
-          echo 'if [ "$#" -gt "1" ]; then'
-          echo '  wine ~/local/bin/rb.exe ${@:1:$#-1} $(winepath -w ${@: -1} | sed "s,\\\\,\\\\\\\\,g")'
-          echo 'else'
-          echo '  wine ~/local/bin/rb.exe $(winepath -w ${1} | sed "s,\\\\,\\\\\\\\,g")'
-          echo 'fi' ) > $HOME/wrapper/rb
+          echo 'wineserver --kill --wait'   # Avoid connecting to an old wineserver from a previous job.
+          echo 'wine ~/local/bin/rb.exe "$@"' ) > $HOME/wrapper/rb
         chmod +x ${HOME}/wrapper/rb
 
     - name: Test
@@ -318,14 +320,14 @@ jobs:
            rm -rf test_propose_bad_index/output_expected/
         fi
 
-        if [ ${{ matrix.arch }} == "mac-arm64" ] ; then
+        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
            rm -f test_coalescent/output_expected/horses_het_BSP*
            rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
            rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
            rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
         fi
 
-        if [ ${{ matrix.arch }} == "win64" ] ; then
+        if [ ${{ matrix.arch }} = "win64" ] ; then
            rm -f test_coalescent/output_expected/horses_iso_EBSP_*
            rm -f test_coalescent/output_expected/mcmc_isochronous_EBSP.errout
         fi

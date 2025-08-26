@@ -47,8 +47,7 @@ if host_machine.system() == 'windows'
   add_project_arguments(['-Wa,-mbig-obj'], language : 'cpp')
 endif
 
-boost_modules = [ 'program_options',
-                  'thread',
+boost_modules = [ 'thread',
                   'date_time',
                   'serialization']
 
