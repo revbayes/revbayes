@@ -74,7 +74,7 @@ namespace RevBayesCore {
         void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose);
         double                                         cladeProbability(const Clade &c, bool verbose);
         MatrixReal                                     computeConnectivity(double credible_interval_size, const std::string& m, bool verbose);
-        double                                         computeEntropy(double credible_interval_size, int num_taxa, bool verbose);
+        double                                         computeEntropy(double credible_interval_size, bool verbose);
         std::vector<double>                            computePairwiseRFDistance(double credible_interval_size, bool verbose);
         std::vector<double>                            computeTreeLengths(void);
         std::vector< std::pair<Tree, std::int64_t> >   getCredibleSetOfTrees(double credible_interval_size, bool verbose=true);

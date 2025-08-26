@@ -164,10 +164,9 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         found = true;
         
         double tree_CI = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
-        int num_taxa   = (int)static_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool verbose   = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool verbose   = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
-        double entropy = this->value->computeEntropy(tree_CI, num_taxa, verbose);
+        double entropy = this->value->computeEntropy(tree_CI, verbose);
         
         return new RevVariable( new RealPos(entropy) );
     }
@@ -536,7 +535,6 @@ void TraceTree::initMethods( void )
     
     ArgumentRules* computeEntropyArgRules = new ArgumentRules();
     computeEntropyArgRules->push_back( new ArgumentRule("credibleTreeSetSize", Probability::getClassTypeSpec(), "The size of the credible set.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95)) );
-    computeEntropyArgRules->push_back( new ArgumentRule("num_taxa", Natural::getClassTypeSpec(), "The number of taxa in the dataset.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     computeEntropyArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "computeEntropy", RealPos::getClassTypeSpec(), computeEntropyArgRules) );
     
