@@ -548,7 +548,7 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "treatAmbiguousAsGap", RlBoolean::getClassTypeSpec(), "Should we treat ambiguous characters as gaps/missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         std::vector<std::string> codingOptions = {"all", "noabsencesites", "nopresencesites", "informative", "variable", "nosingletonpresence", "nosingletonabsence", "nosingletons"};
-        dist_member_rules.push_back(new OptionRule("coding", new RlString("all"), codingOptions, "Should any type of conditioning be applied?"));
+        dist_member_rules.push_back(new OptionRule("coding", new RlString("all"), codingOptions, "What character patterns have been sampled?"));
 
         dist_member_rules.push_back( new ArgumentRule( "storeInternalNodes", RlBoolean::getClassTypeSpec(), "Should we store internal node states in the character matrix?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         
