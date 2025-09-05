@@ -71,8 +71,8 @@ namespace RevBayesCore {
         virtual ~TreeSummary(){}
 
         TreeSummary*                               clone(void) const;
-        void                                       annotateTree(Tree &inputTree, AnnotationReport report, bool verbose );
-        double                                     cladeProbability(const Clade &c, bool verbose);
+        void                                       annotateTree(Tree &inputTree, AnnotationReport report, bool verbose, bool differentiate_SAs);
+        double                                     cladeProbability(const Clade &c, bool verbose, bool differentiate_SAs);
         MatrixReal                                 computeConnectivity( double credible_interval_size, const std::string& m, bool verbose );
         double                                     computeEntropy( double credible_interval_size, int num_taxa, bool verbose );
         std::vector<double>                        computePairwiseRFDistance( double credible_interval_size, bool verbose );
@@ -87,9 +87,9 @@ namespace RevBayesCore {
         bool                                       isDirty(void) const;
         double                                     jointCladeProbability(const RbVector<Clade> &c, bool verbose);
         double                                     maxdiff(bool verbose);
-        Tree*                                      mapTree(AnnotationReport report, bool verbose);
-        Tree*                                      mccTree(AnnotationReport report, bool verbose);
-        Tree*                                      mrTree(AnnotationReport report, double cutoff, bool verbose);
+        Tree*                                      mapTree(AnnotationReport report, bool verbose, bool differentiate_SAs);
+        Tree*                                      mccTree(AnnotationReport report, bool verbose, bool differentiate_SAs);
+        Tree*                                      mrTree(AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs);
         void                                       printTreeSummary(std::ostream& o, double ci=0.95, bool verbose=true);
         void                                       printCladeSummary(std::ostream& o, double minP=0.05, bool verbose=true);
         std::int64_t                                       sampleSize(bool post = false) const;

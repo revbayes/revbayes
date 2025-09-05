@@ -82,8 +82,8 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
     report.sampled_ancestor_probs        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     report.force_positive_branch_lengths = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     
-    bool verbose = true;
-    RevBayesCore::Tree* tree = summary->mccTree(report, verbose);
+    bool differentiate_samp_anc = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::Tree* tree = summary->mccTree(report, true, differentiate_samp_anc);
     
     
     if ( filename != "" )
@@ -146,6 +146,7 @@ const ArgumentRules& Func_mccTree::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "mean" , RlBoolean::getClassTypeSpec() , "Annotate node ages using the mean age instead of the median?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         argumentRules.push_back( new ArgumentRule( "sampledAncestors" , RlBoolean::getClassTypeSpec() , "Annotate sampled ancestor probs?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         argumentRules.push_back( new ArgumentRule( "positiveBranchLengths" , RlBoolean::getClassTypeSpec() , "Force negative branch lengths to be short but positive?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argumentRules.push_back( new ArgumentRule( "differentiateSAs" , RlBoolean::getClassTypeSpec() , "Should we treat clades as different if a member taxon represents a sampled ancestor rather than a tip?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }

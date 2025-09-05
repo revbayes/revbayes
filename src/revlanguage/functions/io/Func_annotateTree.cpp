@@ -90,8 +90,8 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     // this way we don't need to resummarize every time we annotate a tree
     // RevBayesCore::TreeSummary summary = RevBayesCore::TreeSummary( tt.getValue() );
     
-    bool verbose = true;
-    summary->annotateTree( *tree, report, verbose );
+    bool differentiate_samp_anc = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    summary->annotateTree( *tree, report, true, differentiate_samp_anc );
     
     // return the tree
     if ( filename != "" )
@@ -154,6 +154,7 @@ const ArgumentRules& Func_annotateTree::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "hpd"   ,    Probability::getClassTypeSpec() , "The probability mass of the highest posterior density node age interval.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95) ) );
         argumentRules.push_back( new ArgumentRule( "mean" , RlBoolean::getClassTypeSpec() , "Annotate node ages using the mean age instead of the median?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         argumentRules.push_back( new ArgumentRule( "sampledAncestors" , RlBoolean::getClassTypeSpec() , "Annotate sampled ancestor probs?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argumentRules.push_back( new ArgumentRule( "differentiateSAs" , RlBoolean::getClassTypeSpec() , "Should we treat clades as different if a member taxon represents a sampled ancestor rather than a tip?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }

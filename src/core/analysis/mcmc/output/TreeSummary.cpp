@@ -644,7 +644,7 @@ void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIn
 }
 
 
-void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose )
+void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     summarize( verbose );
 
@@ -707,7 +707,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
-            double pp = cladeProbability( clade, false );
+            double pp = cladeProbability( clade, false, differentiate_SAs );
             n->addNodeParameter("posterior",pp);
         }
 
@@ -865,14 +865,30 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
 
 
-double TreeSummary::cladeProbability(const Clade &c, bool verbose )
+double TreeSummary::cladeProbability(const Clade &c, bool verbose, bool differentiate_SAs)
 {
     summarize(verbose);
 
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+    double prob = 0.0;
+    
+    for (size_t i = 0; i < tmp.getTaxa().size(); i++)
+    {
+        for (auto mrca : tmp.getMrca())
+        {
+            // If one of the member taxa is also the MRCA, add also the frequency of those clades that have the
+            // same composition but in which none of the included taxa is the MRCA.
+            if (tmp.getTaxa()[i] == mrca and not differentiate_SAs)
+            {
+                std::set<Taxon> tax_set;
+                prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
+            }
+        }
+    }
 
-    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+    prob += splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+    return prob;
 }
 
 
@@ -1539,7 +1555,7 @@ double TreeSummary::maxdiff( bool verbose )
 }
 
 
-Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum a posteriori tree from " << sampleSize(true) << " trees.\n";
@@ -1571,13 +1587,13 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
 
     report.MAP_parameters = true;
     report.node_ages      = true;
-    annotateTree(*tmp_tree, report, verbose );
+    annotateTree(*tmp_tree, report, verbose, differentiate_SAs);
 
     return tmp_tree;
 }
 
 
-Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum clade credibility tree from " << sampleSize(true) << " trees.\n";
@@ -1622,13 +1638,13 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     }
 
     report.node_ages = true;
-    annotateTree(*best_tree, report, verbose );
+    annotateTree(*best_tree, report, verbose, differentiate_SAs);
 
     return best_tree;
 }
 
 
-Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
+Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs)
 {
     if (cutoff < 0.0 || cutoff > 1.0) cutoff = 0.5;
 
@@ -1753,7 +1769,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
     report.conditional_clade_probs = false;
     report.conditional_tree_ages   = false;
     report.node_ages               = true;
-    annotateTree(*consensusTree, report, verbose );
+    annotateTree(*consensusTree, report, verbose, differentiate_SAs);
 
     return consensusTree;
 }
