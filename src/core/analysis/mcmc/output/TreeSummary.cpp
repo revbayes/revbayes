@@ -872,22 +872,27 @@ double TreeSummary::cladeProbability(const Clade &c, bool verbose, bool differen
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
     double prob = 0.0;
+    bool any_member_is_ancestor = false;
     
     for (size_t i = 0; i < tmp.getTaxa().size(); i++)
     {
-        for (auto mrca : tmp.getMrca())
+        bool this_member_is_ancestor = tmp.getMrca().find( tmp.getTaxa()[i] ) != tmp.getMrca().end();
+        any_member_is_ancestor |= this_member_is_ancestor;
+        
+        if (not differentiate_SAs or this_member_is_ancestor)
         {
-            // If one of the member taxa is also the MRCA, add also the frequency of those clades that have the
-            // same composition but in which none of the included taxa is the MRCA.
-            if (tmp.getTaxa()[i] == mrca and not differentiate_SAs)
-            {
-                std::set<Taxon> tax_set;
-                prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
-            }
+            std::set<Taxon> tax_set;
+            tax_set.insert( tmp.getTaxa()[i] );
+            prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
         }
     }
+    
+    if (not differentiate_SAs or not any_member_is_ancestor)
+    {
+        std::set<Taxon> tax_set;
+        prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
+    }
 
-    prob += splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
     return prob;
 }
 
