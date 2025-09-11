@@ -176,9 +176,7 @@ message("Searching for BOOST:")
 find_package(Boost
 1.74.0
 COMPONENTS regex
-program_options
 thread
-system
 date_time
 serialization REQUIRED)
 message("Boost configuration results:")

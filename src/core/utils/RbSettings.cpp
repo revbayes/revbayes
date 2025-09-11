@@ -8,6 +8,7 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 #include <cassert>
+#include <optional>
 
 #include "RbException.h"
 #include "RbFileManager.h"
@@ -63,6 +64,11 @@ int RbSettings::getLogMCMC( void ) const
 {
     // return the internal value
     return logMCMC;
+}
+
+std::string bool_to_string(bool b)
+{
+    return b ? "TRUE" : "FALSE";
 }
 
 std::string RbSettings::getOption(const std::string &key) const
@@ -131,7 +137,6 @@ double RbSettings::getTolerance( void ) const
     
     return tolerance;
 }
-
 
 /** Initialize the user settings */
 void RbSettings::readUserSettings(void)
@@ -238,6 +243,16 @@ void RbSettings::setLogMCMC(int d)
     writeUserSettings();
 }
 
+std::optional<bool> string_to_bool(const std::string& option)
+{
+    if (option == "TRUE" or option == "true")
+        return true;
+    else if (option == "FALSE" or option == "false")
+        return false;
+    else
+        return {};
+}
+
 
 void RbSettings::setOption(const std::string &key, const std::string &v, bool write)
 {
@@ -292,6 +307,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
     }
 
+    // Maybe we should just write this particular setting instead of all settings?
     if ( write == true )
     {
         writeUserSettings();
@@ -326,7 +342,6 @@ void RbSettings::setTolerance(double t)
     writeUserSettings();
 }
 
-
 void RbSettings::writeUserSettings( void )
 {
     // Does this always work on windows?
@@ -344,8 +359,8 @@ void RbSettings::writeUserSettings( void )
     writeStream << "linewidth=" << lineWidth << std::endl;
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
-    writeStream.close();
 
+    writeStream.close();
 }
 
 void showDebug(const std::string& s, int level)

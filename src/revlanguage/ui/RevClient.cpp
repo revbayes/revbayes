@@ -2,6 +2,7 @@
 #include "RbFileManager.h"
 #include "RevClient.h"
 #include "RlFunction.h"
+#include "RlUserInterface.h"
 #include "Parser.h"
 #include "Workspace.h"
 #include "RbSettings.h"
@@ -30,6 +31,7 @@ extern "C" {
 #include <string>
 #include <utility>
 #include <vector>
+#include "RbException.h"
 //#define ctrl(C) ((C) - '@')
 
 const char* default_prompt = (char*) "> ";
@@ -323,12 +325,80 @@ int interpret(const std::string& command)
     return RevLanguage::Parser::getParser().processCommand(tmp, RevLanguage::Workspace::userWorkspacePtr());
 }
 
+void shutdown()
+{
+    Workspace::userWorkspace().clear();
+    Workspace::globalWorkspace().clear();
+
+#ifdef RB_MPI
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();
+#endif
+}
+
+
+void execute_file(const fs::path& filename, bool echo, bool continue_on_error)
+{
+    auto& settings = RbSettings::userSettings();
+    std::stringstream inFile = RevBayesCore::readFileAsStringStream(filename);
+
+    // Command-processing loop
+    std::string commandLine;
+    int lineNumber = 0;
+    int result = 0;     // result from processing of last command
+    while ( inFile.good() )
+    {
+        // Read a line
+        std::string line;
+        RevBayesCore::safeGetline(inFile, line);
+        lineNumber++;
+        
+        if ( echo )
+        {
+            if ( result == 1 )
+            {
+                std::cout << "+ " << line << std:: endl;
+            }
+            else
+            {
+                std::cout << "> " << line << std::endl;
+            }
+        }
+        
+        // If previous result was 1 (append to command), we do this
+        if ( result == 1 )
+        {
+            commandLine += line;
+        }
+        else
+        {
+            commandLine = line;
+        }
+
+        // Process the line and record result
+        result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
+        if ( result == 2 )
+        {
+            if (not continue_on_error)
+                throw RbException() << "Problem processing line " << lineNumber << " in file " << filename;
+            else
+            {
+                std::ostringstream err;
+                err<<"Error:\tProblem processing line " << lineNumber << " in file " << filename;
+                RBOUT(err.str());
+            }
+        }
+    }
+}
+
 /**
  * Main application loop.
  * 
  */
-void startInterpreter( void )
+void startInterpreter()
 {
+    auto& settings = RbSettings::userSettings();
+
     // If we aren't using MPI, this will be zero.
     // If we are using MPI, it will be zero for the first process.
     int pid = 0;
@@ -384,11 +454,9 @@ void startInterpreter( void )
                 // [JS, 2015-11-03]
                 // Null input, e.g. if the user entered CTRL-D or CTRL-C.
                 // If not handled here, segmentation fault results. Not a dealbreaker, but annoying.
-                // There might be a more elegant way to do this, but right now, until I get
-                // more familiar with the codebase or somebody else cares to improve it, we are
-                // just going to replace the input with the intention, i.e. to quit, and let
-                // the existing logic handle it.
-                commandLine = "q();";
+                shutdown();
+
+                exit(0);
             }
             else
             {
@@ -419,7 +487,12 @@ void startInterpreter( void )
         
         result = interpret(commandLine);
 
-        /* The typed string is returned as a malloc() allocated string by
+        if (result == 2)
+        {
+            std::exit(1);
+        }
+
+/* The typed string is returned as a malloc() allocated string by
          * linenoise, so the user needs to free() it. */
         
         if ( pid == 0 )
@@ -432,7 +505,7 @@ void startInterpreter( void )
     
 }
 
-void startJupyterInterpreter( void )
+void startJupyterInterpreter()
 {
     // If we aren't using MPI, this will be zero.
     // If we are using MPI, it will be zero for the first process.
