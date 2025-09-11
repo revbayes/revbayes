@@ -876,19 +876,37 @@ double TreeSummary::cladeProbability(const Clade &c, bool verbose, bool differen
     
     for (size_t i = 0; i < tmp.getTaxa().size(); i++)
     {
+        // Check whether a given member of the clade is also its most recent common ancestor (MRCA)
         bool this_member_is_ancestor = tmp.getMrca().find( tmp.getTaxa()[i] ) != tmp.getMrca().end();
         any_member_is_ancestor |= this_member_is_ancestor;
         
+        /* If differentiate_SAs == true (i.e., we consider clades of identical membership to be different
+         * when they differ in their MRCA) and one of the members of the clade is also its MRCA, this
+         * if-statement will only be triggered once, precisely for that taxon which is the MRCA. If
+         * differentiate_SAs == true but the clade does not have a sampled MRCA (i.e., the MRCA is a
+         * speciation node, not any of the member taxa), the if-statement will never be triggered and we
+         * will instead execute the if-statement outside the for-loop. If differentiate_SAs == false, the
+         * if-statement will be triggered on every iteration of the for-loop: in this case, we want to
+         * calculate the probability of _every_ member taxon being the MRCA, and add it to the overall
+         * probability of the clade.
+         */
         if (not differentiate_SAs or this_member_is_ancestor)
         {
             std::set<Taxon> tax_set;
+            // Add the current taxon as the MRCA of the split whose probability we want to calculate
             tax_set.insert( tmp.getTaxa()[i] );
             prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
         }
     }
     
+    /* If differentiate_SAs == true, this if-statement will only be triggered if the clade does not have
+     * a sampled MRCA. If differentiate_SAs == false, the if-statement will always be triggered in order
+     * to calculate the probability that the MRCA is a speciation node rather than any of the member
+     * taxa, and add it to the overall probability of the clade.
+     */
     if (not differentiate_SAs or not any_member_is_ancestor)
     {
+        // Deliberately leaving the tax_set empty to represent a non-sampled MRCA
         std::set<Taxon> tax_set;
         prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
     }

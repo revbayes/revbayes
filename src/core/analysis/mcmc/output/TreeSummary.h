@@ -30,7 +30,10 @@ namespace RevBayesCore {
         };
 
         /*
-         * This struct represents a tree bipartition (split) that can be rooted or unrooted
+         * This struct represents a tree bipartition (split) that can be rooted or unrooted. The first argument represents
+         * the taxa included in the bipartition (b); the middle argument is a taxon-set representation of the most recent
+         * common ancestor (MRCA; m) of the clade in question, which contains the sampled MRCA if there is one and which is
+         * empty for clades without sampled MRCAs; and the last argument indicates whether the bipartition is rooted (r).
          */
         struct Split : public std::pair<RbBitSet, std::set<Taxon> >
         {
