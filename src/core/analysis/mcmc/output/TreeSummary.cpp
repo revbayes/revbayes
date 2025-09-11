@@ -92,556 +92,6 @@ TreeSummary* TreeSummary::clone(void) const
 }
 
 
-// annotate the MAP node/branch parameters
-void TreeSummary::mapParameters( Tree &tree, bool verbose ) const
-{
-
-    const Tree& sample_tree = traces.front()->objectAt( 0 );
-
-    // first we annotate the node parameters
-    // we need an internal node because the root might not have all parameter (e.g. rates)
-    // and the tips might neither have all parameters
-    const TopologyNode *n = &sample_tree.getRoot().getChild( 0 );
-    if ( n->isTip() == true )
-    {
-        n = &sample_tree.getRoot().getChild( 1 );
-    }
-    const std::vector<std::string> &nodeParameters = n->getNodeParameters();
-    for (size_t i = 0; i < nodeParameters.size(); ++i)
-    {
-
-        std::string tmp = nodeParameters[i];
-        if ( tmp[0] == '&')
-        {
-            tmp = tmp.substr(1,tmp.size());
-        }
-        std::vector<std::string> pair;
-        StringUtilities::stringSplit(tmp, "=", pair);
-
-        if ( pair[0] == "index" ) continue;
-
-        if ( StringUtilities::isNumber( pair[1] ) && !StringUtilities::isIntegerNumber( pair[1] ) )
-        {
-            mapContinuous(tree, pair[0], i, 0.95, true, verbose);
-        }
-        else
-        {
-            mapDiscrete(tree, pair[0], i, 3, true, verbose);
-        }
-
-    }
-
-    // then we annotate the branch parameters
-    const std::vector<std::string> &leftBranchParameters = sample_tree.getRoot().getChild(0).getBranchParameters();
-    const std::vector<std::string> &rightBranchParameters = sample_tree.getRoot().getChild(1).getBranchParameters();
-
-    std::vector<std::string> branchParameters;
-    if ( leftBranchParameters.size() > rightBranchParameters.size() )
-    {
-        branchParameters = leftBranchParameters;
-    }
-    else
-    {
-        branchParameters = rightBranchParameters;
-    }
-
-    for (size_t i = 0; i < branchParameters.size(); ++i)
-    {
-
-        std::string tmp = branchParameters[i];
-        if ( tmp[0] == '&')
-        {
-            tmp = tmp.substr(1,tmp.size());
-        }
-        std::vector<std::string> pair;
-        StringUtilities::stringSplit(tmp, "=", pair);
-
-        if ( pair[0] == "index" ) continue;
-
-        if ( StringUtilities::isNumber( pair[1] ) )
-        {
-            mapContinuous(tree, pair[0], i, 0.95, false, verbose);
-        }
-        else
-        {
-            mapDiscrete(tree, pair[0], i, 3, false, verbose);
-        }
-
-    }
-
-}
-
-
-/*
- * this method calculates the MAP ancestral character states for the nodes on the input_tree
- */
-void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramIndex, size_t num, bool isNodeParameter, bool verbose ) const
-{
-
-    // 2-d vectors to keep the data (posteriors and states) of the inputTree nodes: [node][data]
-    const std::vector<TopologyNode*> &summary_nodes = tree.getNodes();
-    //std::vector<std::map<std::string, Sample<std::string> > > stateAbsencePresence(summary_nodes.size(), std::map<std::string, Sample<std::string> >());
-    std::vector<std::map<std::string, std::int64_t> > state_counts(summary_nodes.size(), std::map<std::string, std::int64_t>());
-
-    bool interiorOnly = true;
-    bool tipsChecked = false;
-    //    bool useRoot = true;
-
-    size_t total_size = 0;
-
-    for(auto& trace: traces)
-    {
-        total_size += trace->size(true);
-
-        // loop through all trees in tree trace
-        for (size_t iteration = trace->getBurnin(); iteration < trace->size(); ++iteration)
-        {
-            const Tree &sample_tree = trace->objectAt( iteration );
-            const TopologyNode& sample_root = sample_tree.getRoot();
-
-            // loop through all nodes in inputTree
-            for (size_t node_index = 0; node_index < summary_nodes.size(); ++node_index)
-            {
-                TopologyNode *node = summary_nodes[node_index];
-
-                if ( node->isTip() == true )
-                {
-                    if ( tipsChecked == false )
-                    {
-                        tipsChecked = true;
-                        size_t sample_clade_index = sample_root.getCladeIndex( node );
-
-                        const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
-
-                        std::vector<std::string> params;
-                        if ( isNodeParameter == true )
-                        {
-                            params = sample_node.getNodeParameters();
-                        }
-                        else
-                        {
-                            params = sample_node.getBranchParameters();
-                        }
-
-                        // check if this parameter exists
-                        if ( params.size() > paramIndex )
-                        {
-
-                            std::string tmp = params[paramIndex];
-                            if ( tmp[0] == '&')
-                            {
-                                tmp = tmp.substr(1,tmp.size());
-                            }
-                            std::vector<std::string> pair;
-                            StringUtilities::stringSplit(tmp, "=", pair);
-
-                            // check if this parameter has the correct name
-                            interiorOnly = pair[0] != n;
-                        }
-
-
-                    }
-
-                    if ( interiorOnly == true )
-                    {
-                        continue;
-                    }
-                }
-
-                if ( sample_root.containsClade(node, true) )
-                {
-                    // if the inputTree node is also in the sample tree
-                    // we get the ancestral character state from the ancestral state trace
-                    size_t sample_clade_index = sample_root.getCladeIndex( node );
-
-                    const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
-
-                    std::vector<std::string> params;
-                    if ( isNodeParameter == true )
-                    {
-                        params = sample_node.getNodeParameters();
-                    }
-                    else
-                    {
-                        params = sample_node.getBranchParameters();
-                    }
-
-                    // check if this parameter exists
-                    if ( params.size() <= paramIndex )
-                    {
-                        if ( sample_node.isRoot() == true )
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation();
-                        }
-
-                    }
-
-                    std::string tmp = params[paramIndex];
-                    if ( tmp[0] == '&')
-                    {
-                        tmp = tmp.substr(1,tmp.size());
-                    }
-                    std::vector<std::string> pair;
-                    StringUtilities::stringSplit(tmp, "=", pair);
-
-                    // check if this parameter has the correct name
-                    if ( pair[0] != n )
-                    {
-                        throw RbException("The parameter for this tree doesn't match during the tree annotation.");
-                    }
-
-                    const std::string &state = pair[1];
-
-                    state_counts[node_index][state]++;
-
-                } // end if the sampled tree contained this clade
-
-            } // end loop over all nodes in the tree
-
-        } // end loop over each iteration in the trace
-
-    } // end loop over each trace
-
-
-    std::vector<double> posteriors;
-    for (int i = 0; i < summary_nodes.size(); i++)
-    {
-
-        TopologyNode &node = *summary_nodes[i];
-        if ( node.isTip() && interiorOnly == true )
-        {
-            // make parameter string for this node
-            if ( isNodeParameter == true )
-            {
-                node.addNodeParameter(n,"{}");
-            }
-            else
-            {
-                node.addBranchParameter(n,"{}");
-            }
-        }
-        else
-        {
-
-            // collect the samples
-            std::set<Sample<std::string> > stateSamples;
-            for (auto& [state,count]: state_counts[i])
-            {
-                stateSamples.insert( {state, count} );
-            }
-
-            double total_node_pp = 0.0;
-            std::string final_state = "{";
-            int i=0;
-            for (auto& [state, count]: stateSamples)
-            {
-                if ( total_node_pp > 0.9999 ) continue;
-
-                if (i > 0)
-                    final_state += ",";
-                i++;
-
-                double pp = count / total_size;
-                final_state += state + "=" + StringUtilities::toString(pp);
-                total_node_pp += pp;
-
-            }
-
-            final_state += "}";
-
-            // make parameter string for this node
-            if ( isNodeParameter == true )
-            {
-                node.addNodeParameter(n,final_state);
-            }
-            else
-            {
-                node.addBranchParameter(n,final_state);
-            }
-        }
-    }
-
-}
-
-
-/*
- * this method calculates the MAP ancestral character states for the nodes on the input_tree
- */
-void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIndex, double hpd, bool isNodeParameter, bool verbose  ) const
-{
-
-    // 2-d vectors to keep the data (posteriors and states) of the inputTree nodes: [node][data]
-    const std::vector<TopologyNode*> &summary_nodes = tree.getNodes();
-    std::vector<std::vector<double> > samples(summary_nodes.size(),std::vector<double>());
-
-    // flag if only interior nodes are used
-    bool interior_only  = false;
-    bool tips_checked   = false;
-    bool root_checked   = false;
-    bool use_root       = true;
-
-    // get the reference newick representation
-    std::string reference_newick = tree.getPlainNewickRepresentation();
-
-    // start the progress bar
-    ProgressBar progress = ProgressBar(sampleSize(true));
-    if ( verbose == true )
-    {
-        progress.start();
-    }
-
-    // for fast access, get the newick strings for all clades
-    std::vector<std::string> summary_newick;
-    size_t num_nodes = summary_nodes.size();
-    for (size_t j = 0; j < num_nodes; ++j)
-    {
-        TopologyNode *node = summary_nodes[j];
-        summary_newick.push_back( node->computePlainNewick() );
-    }
-
-    size_t count = 0;
-
-    for(auto& trace: traces)
-    {
-        // loop through all trees in tree trace
-        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
-        {
-            if ( verbose == true )
-            {
-                progress.update( count );
-                count++;
-            }
-
-            const Tree &sample_tree = trace->objectAt( i );
-            const TopologyNode& sample_root = sample_tree.getRoot();
-
-            // create a map from newick strings to clade indices
-            // we also get the newick representation of this sample
-            std::map<std::string,size_t> sample_clade_indices;
-            std::string sample_newick = sample_root.fillCladeIndices(sample_clade_indices);
-
-            // compare if this tree is the same as the reference tree
-            bool same_tree = ( reference_newick == sample_newick );
-
-            // loop through all nodes in inputTree
-            size_t num_nodes = summary_nodes.size();
-            for (size_t j = 0; j < num_nodes; ++j)
-            {
-                TopologyNode *node = summary_nodes[j];
-                if ( node->isTip() == true )
-                {
-                    if ( tips_checked == false )
-                    {
-
-                        tips_checked = true;
-                        size_t sample_clade_index = sample_clade_indices[ summary_newick[j] ];
-
-                        const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
-
-                        std::vector<std::string> params;
-                        if ( isNodeParameter == true )
-                        {
-                            params = sample_node.getNodeParameters();
-                        }
-                        else
-                        {
-                            params = sample_node.getBranchParameters();
-                        }
-
-                        // check if this parameter exists
-                        if ( params.size() > paramIndex )
-                        {
-
-                            std::string tmp = params[paramIndex];
-                            if ( tmp[0] == '&')
-                            {
-                                tmp = tmp.substr(1,tmp.size());
-                            }
-                            std::vector<std::string> pair;
-                            StringUtilities::stringSplit(tmp, "=", pair);
-
-                            // check if this parameter has the correct name
-                            interior_only = (pair[0] != n);
-                        }
-                        else
-                        {
-                            interior_only = true;
-                        }
-
-
-                    }
-
-                    if ( interior_only == true )
-                    {
-                        continue;
-                    }
-                }
-
-                if ( node->isRoot() == true )
-                {
-                    if ( root_checked == false )
-                    {
-
-                        root_checked = true;
-
-                        const TopologyNode &sample_node = sample_tree.getRoot();
-
-                        std::vector<std::string> params;
-                        if ( isNodeParameter == true )
-                        {
-                            params = sample_node.getNodeParameters();
-                        }
-                        else
-                        {
-                            params = sample_node.getBranchParameters();
-                        }
-
-                        // check if this parameter exists
-                        if ( params.size() > paramIndex )
-                        {
-
-                            std::string tmp = params[paramIndex];
-                            if ( tmp[0] == '&')
-                            {
-                                tmp = tmp.substr(1,tmp.size());
-                            }
-                            std::vector<std::string> pair;
-                            StringUtilities::stringSplit(tmp, "=", pair);
-
-                            // check if this parameter has the correct name
-                            use_root = pair[0] == n;
-                        }
-                        else
-                        {
-                            use_root = false;
-                        }
-
-
-                    }
-
-                    if ( use_root == false )
-                    {
-                        continue;
-                    }
-
-                }
-
-
-                if ( same_tree == true || sample_clade_indices.find( summary_newick[j] ) != sample_clade_indices.end() )
-                {
-                    // if the inputTree node is also in the sample tree
-                    // we get the ancestral character state from the ancestral state trace
-                    size_t sample_clade_index = sample_clade_indices[ summary_newick[j] ];
-                    const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
-
-                    std::vector<std::string> params;
-                    if ( isNodeParameter == true )
-                    {
-                        params = sample_node.getNodeParameters();
-                    }
-                    else
-                    {
-                        params = sample_node.getBranchParameters();
-                    }
-
-                    // check if this parameter exists
-                    if ( params.size() <= paramIndex )
-                    {
-                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation();
-                    }
-
-                    std::string tmp = params[paramIndex];
-                    if ( tmp[0] == '&')
-                    {
-                        tmp = tmp.substr(1,tmp.size());
-                    }
-                    std::vector<std::string> pair;
-                    StringUtilities::stringSplit(tmp, "=", pair);
-
-                    // check if this parameter has the correct name
-                    if ( pair[0] != n )
-                    {
-
-                        throw RbException("The parameter for this tree doesn't match during the tree annotation.");
-                    }
-
-                    double state = atof(pair[1].c_str());
-
-                    std::vector<double> &entries = samples[j];
-                    entries.push_back( state );
-
-                } // end if the sampled tree contained this clade
-
-            } // end loop over all nodes in the tree
-
-        } // end loop over each iteration in the trace
-
-    } // end loop over each trace
-
-
-    // end the progress bar
-    if ( verbose == true )
-    {
-        progress.finish();
-    }
-
-    std::vector<double> posteriors;
-    for (int idx = 0; idx < num_nodes; ++idx)
-    {
-
-        TopologyNode &node = *summary_nodes[idx];
-        if ( ( node.isTip() == false || interior_only == false ) && ( node.isRoot() == false || use_root == true ) )
-        {
-
-            // collect the samples
-            std::vector<double> stateSamples = samples[idx];
-
-            // sort the samples by frequency
-            sort(stateSamples.begin(), stateSamples.end());
-
-
-            size_t interval_start = ((1.0-hpd)/2.0) * stateSamples.size();
-            size_t interval_median = 0.5 * stateSamples.size();
-            size_t interval_end = (1.0-(1.0-hpd)/2.0) * stateSamples.size();
-            interval_end = (interval_end >= stateSamples.size() ? stateSamples.size()-1 : interval_end);
-            double lower = stateSamples[interval_start];
-            double median = stateSamples[interval_median];
-            double upper = stateSamples[interval_end];
-
-            // make node age annotation
-            std::string param = "{" + StringUtilities::toString(lower)
-            + "," + StringUtilities::toString(upper) + "}";
-
-            if ( isNodeParameter == true )
-            {
-                // make parameter string for this node
-                node.addNodeParameter(n+"_range",param);
-
-                // make parameter string for this node
-                node.addNodeParameter(n,median);
-            }
-            else
-            {
-
-                // make parameter string for this node
-                node.addBranchParameter(n+"_range",param);
-
-                // make parameter string for this node
-                node.addBranchParameter(n,median);
-
-            }
-
-        }
-
-    }
-
-}
-
-
 void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose )
 {
     summarize( verbose );
@@ -873,68 +323,6 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
-{
-    double age = (clock ? n.getAge() : n.getBranchLength() );
-
-    std::vector<Split> child_splits;
-
-    RbBitSet taxa(intaxa.size());
-    std::set<Taxon> mrca;
-
-    if ( n.isTip() )
-    {
-        n.getTaxa(taxa);
-
-        if ( rooted && n.isSampledAncestorTip() )
-        {
-            sampled_ancestor_counts[n.getTaxon()]++;
-
-            mrca.insert( n.getTaxon() );
-        }
-    }
-    else
-    {
-        for (size_t i = 0; i < n.getNumberOfChildren(); i++)
-        {
-            const TopologyNode &child_node = n.getChild(i);
-
-            child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
-
-            if ( rooted && child_node.isSampledAncestorTip() )
-            {
-                mrca.insert(child_node.getTaxon());
-            }
-        }
-    }
-
-    intaxa |= taxa;
-
-    Split parent_split(taxa, mrca, rooted);
-
-    if ( taxa.size() > 0 )
-    {
-        // store the age for this split
-        clade_ages[parent_split].push_back( age );
-
-        // increment split count
-        cladeCountMap[parent_split]++;
-
-        // add conditional clade ages
-        for (auto& child_split: child_splits)
-        {
-            // inserts new entries if doesn't already exist
-            conditional_clade_ages[parent_split][child_split].push_back( clade_ages[child_split].back() );
-        }
-
-        // store the age for this split, conditional on the tree topology
-        tree_clade_ages[newick][parent_split].push_back( age );
-    }
-
-    return parent_split;
-}
-
-
 double TreeSummary::computeEntropy( double credible_interval_size, bool stochastic, bool verbose )
 {
     std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, stochastic, false);
@@ -1044,97 +432,6 @@ std::vector<double> TreeSummary::computeTreeLengths( void )
     }
 
     return tree_lengths;
-}
-
-
-void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
-{
-    std::vector<TopologyNode*> children = node.getChildren();
-
-    double minimum_branch_length = 1e-6;
-    for (size_t i = 0; i < children.size(); i++)
-    {
-        if (children[i]->getAge() > node.getAge())
-        {
-            children[i]->setAge( node.getAge() - minimum_branch_length );
-        }
-        enforceNonnegativeBranchLengths( *children[i] );
-    }
-}
-
-
-TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
-{
-    size_t num_taxa = child_b.size();
-
-    RbBitSet node( num_taxa );
-    n.getTaxa(node);
-
-    RbBitSet clade = split.first;
-
-    RbBitSet mask  = node | clade;
-
-    bool compatible = (mask == node);
-    bool ischild      = (mask == clade);
-
-    Split c = split;
-    // check if the flipped unrooted split is compatible
-    if ( !rooted && !compatible && !ischild)
-    {
-        RbBitSet clade_flip = ~clade;
-        mask  = node | clade_flip;
-
-        compatible = (mask == node);
-
-        if ( compatible )
-        {
-            c.first = clade_flip;
-        }
-    }
-
-    TopologyNode* parent = NULL;
-
-    if (compatible)
-    {
-        parent = &n;
-
-        std::vector<TopologyNode*> new_children;
-
-        // keep track of which taxa we found in the children
-        RbBitSet child_mask( num_taxa );
-
-        for (auto& old_child: n.getChildren())
-        {
-            RbBitSet child_bset(clade.size());
-
-            TopologyNode* child = findParentNode(*old_child, c, new_children, child_bset );
-
-            // add this child to the mask
-            child_mask = (child_bset | child_mask);
-
-            // check if child is a compatible parent
-            if (child != NULL)
-            {
-                parent = child;
-                break;
-            }
-        }
-
-        children = std::move(new_children);
-
-        // check that we found all the children
-        if ( parent == &n && child_mask != c.first && !n.isTip())
-        {
-            parent = NULL;
-        }
-    }
-    else if (ischild)
-    {
-        child_b = node;
-        children.push_back(&n);
-    }
-
-    return parent;
 }
 
 
@@ -1303,6 +600,12 @@ std::vector<Tree> TreeSummary::getUniqueTrees( double credible_interval_size, bo
 }
 
 
+bool TreeSummary::isClock(void) const
+{
+    return clock;
+}
+
+
 bool TreeSummary::isCoveredInInterval(const std::string &v, double credible_interval_size, bool stochastic, bool verbose)
 {
     Tree tree;
@@ -1341,12 +644,6 @@ bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval
     }
 
     return out;
-}
-
-
-bool TreeSummary::isClock(void) const
-{
-    return clock;
 }
 
 
@@ -1885,12 +1182,6 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_siz
 }
 
 
-void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
-{
-    outgroup = c;
-}
-
-
 std::int64_t TreeSummary::sampleSize(bool post) const
 {
     std::int64_t total = 0;
@@ -1901,6 +1192,715 @@ std::int64_t TreeSummary::sampleSize(bool post) const
     }
 
     return total;
+}
+
+
+void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
+{
+    outgroup = c;
+}
+
+
+TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
+{
+    double age = (clock ? n.getAge() : n.getBranchLength() );
+
+    std::vector<Split> child_splits;
+
+    RbBitSet taxa(intaxa.size());
+    std::set<Taxon> mrca;
+
+    if ( n.isTip() )
+    {
+        n.getTaxa(taxa);
+
+        if ( rooted && n.isSampledAncestorTip() )
+        {
+            sampled_ancestor_counts[n.getTaxon()]++;
+
+            mrca.insert( n.getTaxon() );
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < n.getNumberOfChildren(); i++)
+        {
+            const TopologyNode &child_node = n.getChild(i);
+
+            child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
+
+            if ( rooted && child_node.isSampledAncestorTip() )
+            {
+                mrca.insert(child_node.getTaxon());
+            }
+        }
+    }
+
+    intaxa |= taxa;
+
+    Split parent_split(taxa, mrca, rooted);
+
+    if ( taxa.size() > 0 )
+    {
+        // store the age for this split
+        clade_ages[parent_split].push_back( age );
+
+        // increment split count
+        cladeCountMap[parent_split]++;
+
+        // add conditional clade ages
+        for (auto& child_split: child_splits)
+        {
+            // inserts new entries if doesn't already exist
+            conditional_clade_ages[parent_split][child_split].push_back( clade_ages[child_split].back() );
+        }
+
+        // store the age for this split, conditional on the tree topology
+        tree_clade_ages[newick][parent_split].push_back( age );
+    }
+
+    return parent_split;
+}
+
+
+void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
+{
+    std::vector<TopologyNode*> children = node.getChildren();
+
+    double minimum_branch_length = 1e-6;
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        if (children[i]->getAge() > node.getAge())
+        {
+            children[i]->setAge( node.getAge() - minimum_branch_length );
+        }
+        enforceNonnegativeBranchLengths( *children[i] );
+    }
+}
+
+
+TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
+{
+    size_t num_taxa = child_b.size();
+
+    RbBitSet node( num_taxa );
+    n.getTaxa(node);
+
+    RbBitSet clade = split.first;
+
+    RbBitSet mask  = node | clade;
+
+    bool compatible = (mask == node);
+    bool ischild      = (mask == clade);
+
+    Split c = split;
+    // check if the flipped unrooted split is compatible
+    if ( !rooted && !compatible && !ischild)
+    {
+        RbBitSet clade_flip = ~clade;
+        mask  = node | clade_flip;
+
+        compatible = (mask == node);
+
+        if ( compatible )
+        {
+            c.first = clade_flip;
+        }
+    }
+
+    TopologyNode* parent = NULL;
+
+    if (compatible)
+    {
+        parent = &n;
+
+        std::vector<TopologyNode*> new_children;
+
+        // keep track of which taxa we found in the children
+        RbBitSet child_mask( num_taxa );
+
+        for (auto& old_child: n.getChildren())
+        {
+            RbBitSet child_bset(clade.size());
+
+            TopologyNode* child = findParentNode(*old_child, c, new_children, child_bset );
+
+            // add this child to the mask
+            child_mask = (child_bset | child_mask);
+
+            // check if child is a compatible parent
+            if (child != NULL)
+            {
+                parent = child;
+                break;
+            }
+        }
+
+        children = std::move(new_children);
+
+        // check that we found all the children
+        if ( parent == &n && child_mask != c.first && !n.isTip())
+        {
+            parent = NULL;
+        }
+    }
+    else if (ischild)
+    {
+        child_b = node;
+        children.push_back(&n);
+    }
+
+    return parent;
+}
+
+
+/*
+ * this method calculates the MAP ancestral character states for the nodes on the input_tree
+ */
+void TreeSummary::mapContinuous(Tree &tree, const std::string &n, size_t paramIndex, double hpd, bool isNodeParameter, bool verbose  ) const
+{
+
+    // 2-d vectors to keep the data (posteriors and states) of the inputTree nodes: [node][data]
+    const std::vector<TopologyNode*> &summary_nodes = tree.getNodes();
+    std::vector<std::vector<double> > samples(summary_nodes.size(),std::vector<double>());
+
+    // flag if only interior nodes are used
+    bool interior_only  = false;
+    bool tips_checked   = false;
+    bool root_checked   = false;
+    bool use_root       = true;
+
+    // get the reference newick representation
+    std::string reference_newick = tree.getPlainNewickRepresentation();
+
+    // start the progress bar
+    ProgressBar progress = ProgressBar(sampleSize(true));
+    if ( verbose == true )
+    {
+        progress.start();
+    }
+
+    // for fast access, get the newick strings for all clades
+    std::vector<std::string> summary_newick;
+    size_t num_nodes = summary_nodes.size();
+    for (size_t j = 0; j < num_nodes; ++j)
+    {
+        TopologyNode *node = summary_nodes[j];
+        summary_newick.push_back( node->computePlainNewick() );
+    }
+
+    size_t count = 0;
+
+    for(auto& trace: traces)
+    {
+        // loop through all trees in tree trace
+        for (size_t i = trace->getBurnin(); i < trace->size(); ++i)
+        {
+            if ( verbose == true )
+            {
+                progress.update( count );
+                count++;
+            }
+
+            const Tree &sample_tree = trace->objectAt( i );
+            const TopologyNode& sample_root = sample_tree.getRoot();
+
+            // create a map from newick strings to clade indices
+            // we also get the newick representation of this sample
+            std::map<std::string,size_t> sample_clade_indices;
+            std::string sample_newick = sample_root.fillCladeIndices(sample_clade_indices);
+
+            // compare if this tree is the same as the reference tree
+            bool same_tree = ( reference_newick == sample_newick );
+
+            // loop through all nodes in inputTree
+            size_t num_nodes = summary_nodes.size();
+            for (size_t j = 0; j < num_nodes; ++j)
+            {
+                TopologyNode *node = summary_nodes[j];
+                if ( node->isTip() == true )
+                {
+                    if ( tips_checked == false )
+                    {
+
+                        tips_checked = true;
+                        size_t sample_clade_index = sample_clade_indices[ summary_newick[j] ];
+
+                        const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
+
+                        std::vector<std::string> params;
+                        if ( isNodeParameter == true )
+                        {
+                            params = sample_node.getNodeParameters();
+                        }
+                        else
+                        {
+                            params = sample_node.getBranchParameters();
+                        }
+
+                        // check if this parameter exists
+                        if ( params.size() > paramIndex )
+                        {
+
+                            std::string tmp = params[paramIndex];
+                            if ( tmp[0] == '&')
+                            {
+                                tmp = tmp.substr(1,tmp.size());
+                            }
+                            std::vector<std::string> pair;
+                            StringUtilities::stringSplit(tmp, "=", pair);
+
+                            // check if this parameter has the correct name
+                            interior_only = (pair[0] != n);
+                        }
+                        else
+                        {
+                            interior_only = true;
+                        }
+
+
+                    }
+
+                    if ( interior_only == true )
+                    {
+                        continue;
+                    }
+                }
+
+                if ( node->isRoot() == true )
+                {
+                    if ( root_checked == false )
+                    {
+
+                        root_checked = true;
+
+                        const TopologyNode &sample_node = sample_tree.getRoot();
+
+                        std::vector<std::string> params;
+                        if ( isNodeParameter == true )
+                        {
+                            params = sample_node.getNodeParameters();
+                        }
+                        else
+                        {
+                            params = sample_node.getBranchParameters();
+                        }
+
+                        // check if this parameter exists
+                        if ( params.size() > paramIndex )
+                        {
+
+                            std::string tmp = params[paramIndex];
+                            if ( tmp[0] == '&')
+                            {
+                                tmp = tmp.substr(1,tmp.size());
+                            }
+                            std::vector<std::string> pair;
+                            StringUtilities::stringSplit(tmp, "=", pair);
+
+                            // check if this parameter has the correct name
+                            use_root = pair[0] == n;
+                        }
+                        else
+                        {
+                            use_root = false;
+                        }
+
+
+                    }
+
+                    if ( use_root == false )
+                    {
+                        continue;
+                    }
+
+                }
+
+
+                if ( same_tree == true || sample_clade_indices.find( summary_newick[j] ) != sample_clade_indices.end() )
+                {
+                    // if the inputTree node is also in the sample tree
+                    // we get the ancestral character state from the ancestral state trace
+                    size_t sample_clade_index = sample_clade_indices[ summary_newick[j] ];
+                    const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
+
+                    std::vector<std::string> params;
+                    if ( isNodeParameter == true )
+                    {
+                        params = sample_node.getNodeParameters();
+                    }
+                    else
+                    {
+                        params = sample_node.getBranchParameters();
+                    }
+
+                    // check if this parameter exists
+                    if ( params.size() <= paramIndex )
+                    {
+                        throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation();
+                    }
+
+                    std::string tmp = params[paramIndex];
+                    if ( tmp[0] == '&')
+                    {
+                        tmp = tmp.substr(1,tmp.size());
+                    }
+                    std::vector<std::string> pair;
+                    StringUtilities::stringSplit(tmp, "=", pair);
+
+                    // check if this parameter has the correct name
+                    if ( pair[0] != n )
+                    {
+
+                        throw RbException("The parameter for this tree doesn't match during the tree annotation.");
+                    }
+
+                    double state = atof(pair[1].c_str());
+
+                    std::vector<double> &entries = samples[j];
+                    entries.push_back( state );
+
+                } // end if the sampled tree contained this clade
+
+            } // end loop over all nodes in the tree
+
+        } // end loop over each iteration in the trace
+
+    } // end loop over each trace
+
+
+    // end the progress bar
+    if ( verbose == true )
+    {
+        progress.finish();
+    }
+
+    std::vector<double> posteriors;
+    for (int idx = 0; idx < num_nodes; ++idx)
+    {
+
+        TopologyNode &node = *summary_nodes[idx];
+        if ( ( node.isTip() == false || interior_only == false ) && ( node.isRoot() == false || use_root == true ) )
+        {
+
+            // collect the samples
+            std::vector<double> stateSamples = samples[idx];
+
+            // sort the samples by frequency
+            sort(stateSamples.begin(), stateSamples.end());
+
+
+            size_t interval_start = ((1.0-hpd)/2.0) * stateSamples.size();
+            size_t interval_median = 0.5 * stateSamples.size();
+            size_t interval_end = (1.0-(1.0-hpd)/2.0) * stateSamples.size();
+            interval_end = (interval_end >= stateSamples.size() ? stateSamples.size()-1 : interval_end);
+            double lower = stateSamples[interval_start];
+            double median = stateSamples[interval_median];
+            double upper = stateSamples[interval_end];
+
+            // make node age annotation
+            std::string param = "{" + StringUtilities::toString(lower)
+            + "," + StringUtilities::toString(upper) + "}";
+
+            if ( isNodeParameter == true )
+            {
+                // make parameter string for this node
+                node.addNodeParameter(n+"_range",param);
+
+                // make parameter string for this node
+                node.addNodeParameter(n,median);
+            }
+            else
+            {
+
+                // make parameter string for this node
+                node.addBranchParameter(n+"_range",param);
+
+                // make parameter string for this node
+                node.addBranchParameter(n,median);
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/*
+ * this method calculates the MAP ancestral character states for the nodes on the input_tree
+ */
+void TreeSummary::mapDiscrete(Tree &tree, const std::string &n, size_t paramIndex, size_t num, bool isNodeParameter, bool verbose ) const
+{
+
+    // 2-d vectors to keep the data (posteriors and states) of the inputTree nodes: [node][data]
+    const std::vector<TopologyNode*> &summary_nodes = tree.getNodes();
+    //std::vector<std::map<std::string, Sample<std::string> > > stateAbsencePresence(summary_nodes.size(), std::map<std::string, Sample<std::string> >());
+    std::vector<std::map<std::string, std::int64_t> > state_counts(summary_nodes.size(), std::map<std::string, std::int64_t>());
+
+    bool interiorOnly = true;
+    bool tipsChecked = false;
+    //    bool useRoot = true;
+
+    size_t total_size = 0;
+
+    for(auto& trace: traces)
+    {
+        total_size += trace->size(true);
+
+        // loop through all trees in tree trace
+        for (size_t iteration = trace->getBurnin(); iteration < trace->size(); ++iteration)
+        {
+            const Tree &sample_tree = trace->objectAt( iteration );
+            const TopologyNode& sample_root = sample_tree.getRoot();
+
+            // loop through all nodes in inputTree
+            for (size_t node_index = 0; node_index < summary_nodes.size(); ++node_index)
+            {
+                TopologyNode *node = summary_nodes[node_index];
+
+                if ( node->isTip() == true )
+                {
+                    if ( tipsChecked == false )
+                    {
+                        tipsChecked = true;
+                        size_t sample_clade_index = sample_root.getCladeIndex( node );
+
+                        const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
+
+                        std::vector<std::string> params;
+                        if ( isNodeParameter == true )
+                        {
+                            params = sample_node.getNodeParameters();
+                        }
+                        else
+                        {
+                            params = sample_node.getBranchParameters();
+                        }
+
+                        // check if this parameter exists
+                        if ( params.size() > paramIndex )
+                        {
+
+                            std::string tmp = params[paramIndex];
+                            if ( tmp[0] == '&')
+                            {
+                                tmp = tmp.substr(1,tmp.size());
+                            }
+                            std::vector<std::string> pair;
+                            StringUtilities::stringSplit(tmp, "=", pair);
+
+                            // check if this parameter has the correct name
+                            interiorOnly = pair[0] != n;
+                        }
+
+
+                    }
+
+                    if ( interiorOnly == true )
+                    {
+                        continue;
+                    }
+                }
+
+                if ( sample_root.containsClade(node, true) )
+                {
+                    // if the inputTree node is also in the sample tree
+                    // we get the ancestral character state from the ancestral state trace
+                    size_t sample_clade_index = sample_root.getCladeIndex( node );
+
+                    const TopologyNode &sample_node = sample_tree.getNode( sample_clade_index );
+
+                    std::vector<std::string> params;
+                    if ( isNodeParameter == true )
+                    {
+                        params = sample_node.getNodeParameters();
+                    }
+                    else
+                    {
+                        params = sample_node.getBranchParameters();
+                    }
+
+                    // check if this parameter exists
+                    if ( params.size() <= paramIndex )
+                    {
+                        if ( sample_node.isRoot() == true )
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            throw RbException() << "Too few parameters for this tree during the tree annotation. Problematic tree: " << sample_tree.getNewickRepresentation();
+                        }
+
+                    }
+
+                    std::string tmp = params[paramIndex];
+                    if ( tmp[0] == '&')
+                    {
+                        tmp = tmp.substr(1,tmp.size());
+                    }
+                    std::vector<std::string> pair;
+                    StringUtilities::stringSplit(tmp, "=", pair);
+
+                    // check if this parameter has the correct name
+                    if ( pair[0] != n )
+                    {
+                        throw RbException("The parameter for this tree doesn't match during the tree annotation.");
+                    }
+
+                    const std::string &state = pair[1];
+
+                    state_counts[node_index][state]++;
+
+                } // end if the sampled tree contained this clade
+
+            } // end loop over all nodes in the tree
+
+        } // end loop over each iteration in the trace
+
+    } // end loop over each trace
+
+
+    std::vector<double> posteriors;
+    for (int i = 0; i < summary_nodes.size(); i++)
+    {
+
+        TopologyNode &node = *summary_nodes[i];
+        if ( node.isTip() && interiorOnly == true )
+        {
+            // make parameter string for this node
+            if ( isNodeParameter == true )
+            {
+                node.addNodeParameter(n,"{}");
+            }
+            else
+            {
+                node.addBranchParameter(n,"{}");
+            }
+        }
+        else
+        {
+
+            // collect the samples
+            std::set<Sample<std::string> > stateSamples;
+            for (auto& [state,count]: state_counts[i])
+            {
+                stateSamples.insert( {state, count} );
+            }
+
+            double total_node_pp = 0.0;
+            std::string final_state = "{";
+            int i=0;
+            for (auto& [state, count]: stateSamples)
+            {
+                if ( total_node_pp > 0.9999 ) continue;
+
+                if (i > 0)
+                    final_state += ",";
+                i++;
+
+                double pp = count / total_size;
+                final_state += state + "=" + StringUtilities::toString(pp);
+                total_node_pp += pp;
+
+            }
+
+            final_state += "}";
+
+            // make parameter string for this node
+            if ( isNodeParameter == true )
+            {
+                node.addNodeParameter(n,final_state);
+            }
+            else
+            {
+                node.addBranchParameter(n,final_state);
+            }
+        }
+    }
+
+}
+
+
+// annotate the MAP node/branch parameters
+void TreeSummary::mapParameters( Tree &tree, bool verbose ) const
+{
+
+    const Tree& sample_tree = traces.front()->objectAt( 0 );
+
+    // first we annotate the node parameters
+    // we need an internal node because the root might not have all parameter (e.g. rates)
+    // and the tips might neither have all parameters
+    const TopologyNode *n = &sample_tree.getRoot().getChild( 0 );
+    if ( n->isTip() == true )
+    {
+        n = &sample_tree.getRoot().getChild( 1 );
+    }
+    const std::vector<std::string> &nodeParameters = n->getNodeParameters();
+    for (size_t i = 0; i < nodeParameters.size(); ++i)
+    {
+
+        std::string tmp = nodeParameters[i];
+        if ( tmp[0] == '&')
+        {
+            tmp = tmp.substr(1,tmp.size());
+        }
+        std::vector<std::string> pair;
+        StringUtilities::stringSplit(tmp, "=", pair);
+
+        if ( pair[0] == "index" ) continue;
+
+        if ( StringUtilities::isNumber( pair[1] ) && !StringUtilities::isIntegerNumber( pair[1] ) )
+        {
+            mapContinuous(tree, pair[0], i, 0.95, true, verbose);
+        }
+        else
+        {
+            mapDiscrete(tree, pair[0], i, 3, true, verbose);
+        }
+
+    }
+
+    // then we annotate the branch parameters
+    const std::vector<std::string> &leftBranchParameters = sample_tree.getRoot().getChild(0).getBranchParameters();
+    const std::vector<std::string> &rightBranchParameters = sample_tree.getRoot().getChild(1).getBranchParameters();
+
+    std::vector<std::string> branchParameters;
+    if ( leftBranchParameters.size() > rightBranchParameters.size() )
+    {
+        branchParameters = leftBranchParameters;
+    }
+    else
+    {
+        branchParameters = rightBranchParameters;
+    }
+
+    for (size_t i = 0; i < branchParameters.size(); ++i)
+    {
+
+        std::string tmp = branchParameters[i];
+        if ( tmp[0] == '&')
+        {
+            tmp = tmp.substr(1,tmp.size());
+        }
+        std::vector<std::string> pair;
+        StringUtilities::stringSplit(tmp, "=", pair);
+
+        if ( pair[0] == "index" ) continue;
+
+        if ( StringUtilities::isNumber( pair[1] ) )
+        {
+            mapContinuous(tree, pair[0], i, 0.95, false, verbose);
+        }
+        else
+        {
+            mapDiscrete(tree, pair[0], i, 3, false, verbose);
+        }
+
+    }
+
 }
 
 
