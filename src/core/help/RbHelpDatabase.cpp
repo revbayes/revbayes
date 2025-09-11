@@ -228,6 +228,37 @@ c := append(a,b))");
 	help_strings[string("append")][string("name")] = string(R"(append)");
 	help_arrays[string("append")][string("see_also")].push_back(string(R"(rep)"));
 	help_strings[string("append")][string("title")] = string(R"(Append a value)");
+	help_arrays[string("args")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("args")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("args")][string("description")] = string(R"(When RevBayes is called from the command line, any tokens following the name
+of a script file (or an `-e` expression) are treated as arguments to the script
+(or to the expression) and stored in the `args` vector.)");
+	help_strings[string("args")][string("details")] = string(R"(If no command-line arguments are supplied, `args` is initialized to an empty
+vector. Like regular RevBayes vectors, `args` uses 1-based indexing (i.e., the
+first element is accessed using `args[1]`), but unlike a regular vector, it can
+hold elements of different types.)");
+	help_strings[string("args")][string("example")] = string(R"(# args is initialized to an empty vector if no command-line arguments are supplied.
+# Assume RevBayes was called as follows: ./rb
+args                          # returns [ ]
+args.size()                   # returns 0
+
+# However, args is not a reserved keyword. We can remove it from the workspace or overwrite it:
+clear(args)
+args <- readTrees("primates.tree")[1]  # args is now a tree
+
+# To illustrate how args works, run RevBayes in interactive mode with an empty expression:
+# ./rb -i -e "" 1 5
+args[1] + args[2]             # returns 6
+
+# Unlike regular vectors, args can hold values of different types. Call RevBayes as follows:
+# ./rb -i -e "" 1 5 2 "Hello " "world"
+print(args[4] + args[5])      # prints "Hello world"
+type(args[4])                 # returns String
+
+(args[1] + args[2])^args[3]   # returns 36
+type(args[1])                 # returns Natural)");
+	help_strings[string("args")][string("name")] = string(R"(args)");
+	help_strings[string("args")][string("title")] = string(R"(Vector of command-line arguments)");
 	help_strings[string("beca")][string("name")] = string(R"(beca)");
 	help_strings[string("branchScoreDistance")][string("name")] = string(R"(branchScoreDistance)");
 	help_arrays[string("ceil")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
