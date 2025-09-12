@@ -177,7 +177,6 @@ find_package(Boost
 1.74.0
 COMPONENTS regex
 thread
-system
 date_time
 serialization REQUIRED)
 message("Boost configuration results:")
