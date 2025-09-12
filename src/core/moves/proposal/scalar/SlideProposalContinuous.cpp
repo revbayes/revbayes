@@ -80,7 +80,7 @@ double SlideProposalContinuous::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SlideProposalContinuous::doProposal( void )
+LogDensity SlideProposalContinuous::doProposal( void )
 {
     
     // Get random number generator

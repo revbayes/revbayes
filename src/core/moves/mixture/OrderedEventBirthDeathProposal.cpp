@@ -87,7 +87,7 @@ double OrderedEventBirthDeathProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double OrderedEventBirthDeathProposal::doProposal( void )
+LogDensity OrderedEventBirthDeathProposal::doProposal( void )
 {
     // get the distribution and make sure it is of the right type
     AbstractEventTimesDistribution* dist = dynamic_cast<AbstractEventTimesDistribution *>( &event_var->getDistribution() );

@@ -48,7 +48,7 @@
 //        TipRejectionSampleProposal*     clone(void) const;                                                                  //!< Clone object
 //        void                            cleanProposal(void);
 //        double                          computeLnProposal(const TopologyNode& nd);
-//        double                          doProposal(void);                                                                   //!< Perform proposal
+//        LogDensity                      doProposal(void);                                                                   //!< Perform proposal
 //        const std::set<DagNode*>&       getNodes(void) const;                                                               //!< Get the vector of DAG nodes this proposal is working on
 //        const std::string&              getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
 //        void                            printParameterSummary(std::ostream &o) const;                                       //!< Print the parameter summary
@@ -209,7 +209,7 @@
 // * \return The hastings ratio.
 // */
 //template<class charType>
-//double RevBayesCore::TipRejectionSampleProposal<charType>::doProposal( void )
+//LogDensity RevBayesCore::TipRejectionSampleProposal<charType>::doProposal( void )
 //{
 //    proposedLnProb = 0.0;
 //

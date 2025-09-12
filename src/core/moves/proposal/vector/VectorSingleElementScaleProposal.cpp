@@ -62,7 +62,7 @@ double VectorSingleElementScaleProposal::getProposalTuningParameter( void ) cons
  *
  * \return The log hastings ratio.
  */
-double VectorSingleElementScaleProposal::doProposal( void )
+LogDensity VectorSingleElementScaleProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

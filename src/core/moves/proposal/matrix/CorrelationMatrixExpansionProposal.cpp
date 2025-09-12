@@ -99,7 +99,7 @@ double CorrelationMatrixExpansionProposal::getProposalTuningParameter( void ) co
  *
  * \return The hastings ratio.
  */
-double CorrelationMatrixExpansionProposal::doProposal( void )
+LogDensity CorrelationMatrixExpansionProposal::doProposal( void )
 {
 
     stored_matrix = correlation_matrix->getValue();

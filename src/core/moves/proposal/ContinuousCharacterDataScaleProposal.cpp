@@ -82,7 +82,7 @@ double ContinuousCharacterDataScaleProposal::getProposalTuningParameter( void ) 
  *
  * \return The hastings ratio.
  */
-double ContinuousCharacterDataScaleProposal::doProposal( void )
+LogDensity ContinuousCharacterDataScaleProposal::doProposal( void )
 {
     
     // Get random number generator

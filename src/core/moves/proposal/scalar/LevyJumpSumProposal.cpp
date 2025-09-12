@@ -82,7 +82,7 @@ double LevyJumpSumProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double LevyJumpSumProposal::doProposal( void )
+LogDensity LevyJumpSumProposal::doProposal( void )
 {
     
     double sv1 = variable1->getValue();

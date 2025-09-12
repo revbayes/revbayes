@@ -60,7 +60,7 @@ void RevBayesCore::HomeologPhaseProposal::cleanProposal(void)
  *
  * \return The hastings ratio.
  */
-double RevBayesCore::HomeologPhaseProposal::doProposal( void )
+LogDensity RevBayesCore::HomeologPhaseProposal::doProposal( void )
 {
     ctmc->getValue().switchHomeologPhase(tip1, tip2);
     AbstractPhyloCTMCSiteHomogeneous<DnaState> *ctmc_dist = NULL;

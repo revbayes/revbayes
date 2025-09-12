@@ -390,7 +390,7 @@ std::vector<double> AVMVNProposal::rMVNCholesky( std::vector<double> mu, MatrixR
  *
  * \return The hastings ratio.
  */
-double AVMVNProposal::doProposal( void )
+LogDensity AVMVNProposal::doProposal( void )
 {
     ++nTried;
 

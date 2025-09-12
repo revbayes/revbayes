@@ -81,7 +81,7 @@ double SlideBactrianProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SlideBactrianProposal::doProposal( void )
+LogDensity SlideBactrianProposal::doProposal( void )
 {
     
     // Get random number generator

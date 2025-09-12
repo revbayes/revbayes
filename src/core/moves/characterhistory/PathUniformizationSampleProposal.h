@@ -53,7 +53,7 @@
 ////        virtual double                  computeLnProposal(const TopologyNode& nd, const BranchHistory& bh);
 ////        void                            cleanProposal(void);
 ////        PathUniformizationSampleProposal*    clone(void) const;                                                                  //!< Clone object
-////        double                          doProposal(void);                                                                   //!< Perform proposal
+////        LogDensity                      doProposal(void);                                                                   //!< Perform proposal
 ////        const std::string&              getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
 ////        void                            printParameterSummary(std::ostream &o) const;                                       //!< Print the parameter summary
 ////        void                            prepareProposal(void);                                                              //!< Prepare the proposal
@@ -271,7 +271,7 @@
 //// * \return The hastings ratio.
 //// */
 ////template<class charType>
-////double RevBayesCore::PathUniformizationSampleProposal<charType>::doProposal( void )
+////LogDensity RevBayesCore::PathUniformizationSampleProposal<charType>::doProposal( void )
 ////{
 //=======
 //#ifndef PathUniformizationSampleProposal_H
@@ -328,7 +328,7 @@
 //        virtual double                  computeLnProposal(const TopologyNode& nd, const BranchHistory& bh);
 //        void                            cleanProposal(void);
 //        PathUniformizationSampleProposal*    clone(void) const;                                                                  //!< Clone object
-//        double                          doProposal(void);                                                                   //!< Perform proposal
+//        LogDensity                      doProposal(void);                                                                   //!< Perform proposal
 //        const std::string&              getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
 //        void                            printParameterSummary(std::ostream &o) const;                                       //!< Print the parameter summary
 //        void                            prepareProposal(void);                                                              //!< Prepare the proposal

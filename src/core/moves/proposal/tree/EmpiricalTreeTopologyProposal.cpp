@@ -84,7 +84,7 @@ const std::string& EmpiricalTreeTopologyProposal::getProposalName( void ) const
  *
  * \return The hastings ratio.
  */
-double EmpiricalTreeTopologyProposal::doProposal( void )
+LogDensity EmpiricalTreeTopologyProposal::doProposal( void )
 {
     
     

@@ -87,7 +87,7 @@ double CorrelationMatrixSpecificElementBetaProposal::getProposalTuningParameter(
  *
  * \return The hastings ratio.
  */
-double CorrelationMatrixSpecificElementBetaProposal::doProposal( void )
+LogDensity CorrelationMatrixSpecificElementBetaProposal::doProposal( void )
 {
     
     // Get random number generator

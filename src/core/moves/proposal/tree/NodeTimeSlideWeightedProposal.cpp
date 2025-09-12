@@ -95,7 +95,7 @@ double NodeTimeSlideWeightedProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double NodeTimeSlideWeightedProposal::doProposal( void )
+LogDensity NodeTimeSlideWeightedProposal::doProposal( void )
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();

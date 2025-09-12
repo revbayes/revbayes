@@ -77,7 +77,7 @@ double RandomGeometricWalkProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RandomGeometricWalkProposal::doProposal( void )
+LogDensity RandomGeometricWalkProposal::doProposal( void )
 {
     
     // Get random number generator

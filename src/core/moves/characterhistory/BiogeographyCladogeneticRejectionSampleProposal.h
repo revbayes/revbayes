@@ -54,7 +54,7 @@ namespace RevBayesCore {
         void                                                        assignSiteIndexSet(const std::set<size_t>& s);
         BiogeographicCladogeneticRejectionSampleProposal*           clone(void) const;                                              //!< Clone object
         void                                                        cleanProposal(void);
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
@@ -559,7 +559,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::c
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::doProposal( void )
 {
     
     if (node->isRoot()) {

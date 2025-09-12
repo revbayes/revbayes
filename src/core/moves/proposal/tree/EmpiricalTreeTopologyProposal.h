@@ -33,7 +33,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                    cleanProposal(void);                                        //!< Clean up proposal
         EmpiricalTreeTopologyProposal*          clone(void) const;                                          //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
+        LogDensity                              doProposal(void);                                           //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
         void                                    prepareProposal(void);                                      //!< Prepare the proposal
         void                                    printParameterSummary(std::ostream &o) const;               //!< Print the parameter summary

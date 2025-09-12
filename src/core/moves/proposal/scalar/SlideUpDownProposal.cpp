@@ -83,7 +83,7 @@ double SlideUpDownProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SlideUpDownProposal::doProposal( void )
+LogDensity SlideUpDownProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

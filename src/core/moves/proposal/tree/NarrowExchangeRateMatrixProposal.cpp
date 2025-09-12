@@ -96,7 +96,7 @@ double NarrowExchangeRateMatrixProposal::getProposalTuningParameter( void ) cons
  *
  * \return The hastings ratio.
  */
-double NarrowExchangeRateMatrixProposal::doProposal( void )
+LogDensity NarrowExchangeRateMatrixProposal::doProposal( void )
 {
     
     // Get random number generator

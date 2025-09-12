@@ -117,7 +117,7 @@ double GibbsPruneAndRegraftProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double GibbsPruneAndRegraftProposal::doProposal( void )
+LogDensity GibbsPruneAndRegraftProposal::doProposal( void )
 {
     
     // reset flags

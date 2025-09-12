@@ -121,7 +121,7 @@ double SpeciesTreeNodeSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SpeciesTreeNodeSlideProposal::doProposal( void )
+LogDensity SpeciesTreeNodeSlideProposal::doProposal( void )
 {
 //    double factor = 0.0;
     

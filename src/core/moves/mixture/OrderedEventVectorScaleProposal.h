@@ -19,7 +19,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
         OrderedEventVectorScaleProposal*    clone(void) const;                                                                  //!< Clone object
-        double                              doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                          doProposal(void);                                                                   //!< Perform proposal
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
@@ -134,7 +134,7 @@ double RevBayesCore::OrderedEventVectorScaleProposal<valueType>::getProposalTuni
  * \return The hastings ratio.
  */
 template <class valueType>
-double RevBayesCore::OrderedEventVectorScaleProposal<valueType>::doProposal( void )
+LogDensity RevBayesCore::OrderedEventVectorScaleProposal<valueType>::doProposal( void )
 {
 	// clear abort flag
 	abort = false;

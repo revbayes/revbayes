@@ -49,7 +49,7 @@ namespace RevBayesCore {
         NarrowExchangeCharacterHistoryProposal*                     clone(void) const;                                              //!< Clone object
         double                                                      computeLnProposal( TopologyNode* node );
         double                                                      computeNodeStateProbability( TopologyNode* parent);
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
@@ -437,7 +437,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::getPropos
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposal( void )
 {
     
     // Get random number generator

@@ -90,7 +90,7 @@ double MultiValueEventBirthDeathProposal::getProposalTuningParameter( void ) con
  *
  * \return The hastings ratio.
  */
-double MultiValueEventBirthDeathProposal::doProposal( void )
+LogDensity MultiValueEventBirthDeathProposal::doProposal( void )
 {
     
     double hr = 0.0;

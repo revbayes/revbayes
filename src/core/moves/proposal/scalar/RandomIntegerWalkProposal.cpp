@@ -75,7 +75,7 @@ double RandomIntegerWalkProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RandomIntegerWalkProposal::doProposal( void )
+LogDensity RandomIntegerWalkProposal::doProposal( void )
 {
     
     // Get random number generator

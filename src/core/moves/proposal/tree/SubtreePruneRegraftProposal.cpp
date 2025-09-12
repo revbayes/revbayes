@@ -92,7 +92,7 @@ bool SubtreePruneRegraftProposal::isDescendant(const TopologyNode &n, const Topo
  *
  * \return The hastings ratio.
  */
-double SubtreePruneRegraftProposal::doProposal( void )
+LogDensity SubtreePruneRegraftProposal::doProposal( void )
 {
     // reset flag
     failed = false;

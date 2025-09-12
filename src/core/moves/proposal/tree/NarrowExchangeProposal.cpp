@@ -86,7 +86,7 @@ double NarrowExchangeProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double NarrowExchangeProposal::doProposal( void )
+LogDensity NarrowExchangeProposal::doProposal( void )
 {
     
     // Get random number generator

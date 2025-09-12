@@ -83,7 +83,7 @@ double ScaleUpDownProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double ScaleUpDownProposal::doProposal( void )
+LogDensity ScaleUpDownProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

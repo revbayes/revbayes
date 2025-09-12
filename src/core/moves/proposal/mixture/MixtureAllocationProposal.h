@@ -26,7 +26,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
         MixtureAllocationProposal*          clone(void) const;                                                                  //!< Clone object
-        double                              doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                          doProposal(void);                                                                   //!< Perform proposal
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
@@ -138,7 +138,7 @@ double RevBayesCore::MixtureAllocationProposal<mixtureType>::getProposalTuningPa
  * \return The hastings ratio.
  */
 template <class mixtureType>
-double RevBayesCore::MixtureAllocationProposal<mixtureType>::doProposal( void )
+LogDensity RevBayesCore::MixtureAllocationProposal<mixtureType>::doProposal( void )
 {
     
     // Get random number generator

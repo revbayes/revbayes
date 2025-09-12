@@ -4,6 +4,7 @@
 #include "Cloneable.h"
 
 #include <vector>
+#include "LogDensity.h"
 
 namespace RevBayesCore {
     
@@ -37,7 +38,7 @@ namespace RevBayesCore {
         // pure virtual public methods
         virtual void                                            cleanProposal(void) = 0;                                                                //!< Cleanup proposal
         virtual Proposal*                                       clone(void) const = 0;                                                                  //!< Make a deep copy
-        virtual double                                          doProposal(void) = 0;                                                                   //!< Actually do the proposal.
+        virtual LogDensity                                      doProposal(void) = 0;                                                                   //!< Actually do the proposal.
         virtual const std::string&                              getProposalName(void) const = 0;                                                        //!< Get the name of this proposal used for printing out info.
         virtual std::string                                     getLongProposalName(void) const;                                                        //!< Get the name of this proposal used for printing out info.
         virtual double                                          getProposalTuningParameter(void) const = 0;

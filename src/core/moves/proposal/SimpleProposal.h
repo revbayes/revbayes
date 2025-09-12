@@ -30,7 +30,7 @@ namespace RevBayesCore {
         virtual                                                ~SimpleProposal(void);                                                                   //!< Destructor
         
         // public methods
-        virtual double                                          doProposal(void);                                                                       //!< Actually do the proposal.
+        virtual LogDensity                                      doProposal(void);                                                                       //!< Actually do the proposal.
         
         // pure virtual public methods
         virtual void                                            cleanProposal(void) = 0;                                                                //!< Cleanup proposal
@@ -109,7 +109,7 @@ RevBayesCore::SimpleProposal<valueType>& RevBayesCore::SimpleProposal<valueType>
 
 
 template <class valueType>
-double RevBayesCore::SimpleProposal<valueType>::doProposal( void )
+LogDensity RevBayesCore::SimpleProposal<valueType>::doProposal( void )
 {
     
     valueType &val = variable->getValue();

@@ -80,7 +80,7 @@ double RootTimeSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RootTimeSlideProposal::doProposal( void )
+LogDensity RootTimeSlideProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

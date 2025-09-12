@@ -99,7 +99,7 @@ double AddRemoveTipProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double AddRemoveTipProposal::doProposal( void )
+LogDensity AddRemoveTipProposal::doProposal( void )
 {
     failed = false;
 

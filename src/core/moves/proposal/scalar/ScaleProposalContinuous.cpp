@@ -79,7 +79,7 @@ double ScaleProposalContinuous::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double ScaleProposalContinuous::doProposal( void )
+LogDensity ScaleProposalContinuous::doProposal( void )
 {
     
     // Get random number generator    

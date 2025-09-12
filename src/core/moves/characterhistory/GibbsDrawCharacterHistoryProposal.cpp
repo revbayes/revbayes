@@ -56,7 +56,7 @@ GibbsDrawCharacterHistoryProposal* GibbsDrawCharacterHistoryProposal::clone( voi
  *
  * \return The hastings ratio.
  */
-double GibbsDrawCharacterHistoryProposal::doProposal( void )
+LogDensity GibbsDrawCharacterHistoryProposal::doProposal( void )
 {
 
     size_t num_nodes = distribution->getValue().getNumberOfNodes();

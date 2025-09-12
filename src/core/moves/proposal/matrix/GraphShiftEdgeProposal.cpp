@@ -97,7 +97,7 @@ double GraphShiftEdgeProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double GraphShiftEdgeProposal::doProposal( void )
+LogDensity GraphShiftEdgeProposal::doProposal( void )
 {
     
     // undo not necessarily needed

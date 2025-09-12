@@ -114,7 +114,7 @@ double SpeciesTreeScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SpeciesTreeScaleProposal::doProposal( void )
+LogDensity SpeciesTreeScaleProposal::doProposal( void )
 {
 
     // Get random number generator

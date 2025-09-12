@@ -58,7 +58,7 @@ namespace RevBayesCore {
         virtual double                                              computeLnProposal(const TopologyNode& nd, const BranchHistory& bh);
         void                                                        cleanProposal(void);
         PathRejectionSampleProposal*                                clone(void) const;                                                              //!< Clone object
-        double                                                      doProposal(void);                                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                                               //!< Perform proposal
         virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
@@ -287,7 +287,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::getProposalTuningPar
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
 {
     
 //    if ( node->isRoot() && !useTail )

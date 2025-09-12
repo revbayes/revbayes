@@ -50,7 +50,7 @@
 //        void                                    assignSiteIndexSet(const std::set<size_t>& s);
 //        NodeUniformizationSampleProposal*       clone(void) const;                                                                  //!< Clone object
 //        void                                    cleanProposal(void);
-//        double                                  doProposal(void);                                                                   //!< Perform proposal
+//        LogDensity                              doProposal(void);                                                                   //!< Perform proposal
 //        const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
 //        void                                    printParameterSummary(std::ostream &o) const;                                       //!< Print the parameter summary
 //        void                                    prepareProposal(void);                                                              //!< Prepare the proposal
@@ -234,7 +234,7 @@
 // * \return The hastings ratio.
 // */
 //template<class charType>
-//double RevBayesCore::NodeUniformizationSampleProposal<charType>::doProposal( void )
+//LogDensity RevBayesCore::NodeUniformizationSampleProposal<charType>::doProposal( void )
 //{
 //    proposedLnProb = 0.0;
 //    

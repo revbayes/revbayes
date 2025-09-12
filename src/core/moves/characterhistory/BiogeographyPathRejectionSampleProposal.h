@@ -56,7 +56,7 @@
 ////        virtual void                                prepareProposal(void);
 ////        virtual double                              computeLnProposal(const TopologyNode& nd, const BranchHistory& bh);
 //////        virtual double                              computeLnProposal_test(const TopologyNode& nd, const BranchHistory& bh);
-////        virtual double                              doProposal(void);                                                                   //!< Perform proposal
+////        virtual LogDensity                          doProposal(void);                                                                   //!< Perform proposal
 ////        virtual const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
 ////        
 ////    protected:
@@ -222,7 +222,7 @@
 //// * \return The hastings ratio.
 //// */
 ////template<class charType>
-////double RevBayesCore::BiogeographyPathRejectionSampleProposal<charType>::doProposal( void )
+////LogDensity RevBayesCore::BiogeographyPathRejectionSampleProposal<charType>::doProposal( void )
 ////{
 ////    BiogeographicTreeHistoryCtmc<charType>& p = static_cast< BiogeographicTreeHistoryCtmc<charType>& >(this->ctmc->getDistribution());
 ////    this->proposedHistory.clear();
@@ -417,7 +417,7 @@
 // * \return The hastings ratio.
 // */
 //template<class charType>
-//double RevBayesCore::BiogeographyPathRejectionSampleProposal<charType>::doProposal( void )
+//LogDensity RevBayesCore::BiogeographyPathRejectionSampleProposal<charType>::doProposal( void )
 //{
 //    BiogeographicTreeHistoryCtmc<charType>& p = static_cast< BiogeographicTreeHistoryCtmc<charType>& >(this->ctmc->getDistribution());
 //    this->proposedHistory.clear();

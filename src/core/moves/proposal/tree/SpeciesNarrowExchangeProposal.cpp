@@ -107,7 +107,7 @@ double SpeciesNarrowExchangeProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SpeciesNarrowExchangeProposal::doProposal( void )
+LogDensity SpeciesNarrowExchangeProposal::doProposal( void )
 {
 
     // empty the previous vectors

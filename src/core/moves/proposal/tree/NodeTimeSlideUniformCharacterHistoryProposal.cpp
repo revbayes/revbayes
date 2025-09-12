@@ -64,7 +64,7 @@ using namespace RevBayesCore;
 // *
 // * \return The hastings ratio.
 // */
-//double NodeTimeSlideUniformCharacterHistoryProposal::doProposal( void )
+//LogDensity NodeTimeSlideUniformCharacterHistoryProposal::doProposal( void )
 //{
 //    
 //    // Get random number generator

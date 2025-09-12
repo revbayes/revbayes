@@ -97,7 +97,7 @@ double RateAgeProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RateAgeProposal::doProposal( void )
+LogDensity RateAgeProposal::doProposal( void )
 {
     
     // Get random number generator

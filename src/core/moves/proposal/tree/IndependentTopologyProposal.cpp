@@ -95,7 +95,7 @@ double IndependentTopologyProposal::getProposalTuningParameter( void ) const
 
 
 /** Perform the move */
-double IndependentTopologyProposal::doProposal( void )
+LogDensity IndependentTopologyProposal::doProposal( void )
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
     

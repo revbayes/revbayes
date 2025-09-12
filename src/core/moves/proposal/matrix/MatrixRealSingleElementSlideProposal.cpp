@@ -108,7 +108,7 @@ double MatrixRealSingleElementSlideProposal::getProposalTuningParameter( void ) 
  *
  * \return The hastings ratio.
  */
-double MatrixRealSingleElementSlideProposal::doProposal( void )
+LogDensity MatrixRealSingleElementSlideProposal::doProposal( void )
 {
     
     // Get random number generator

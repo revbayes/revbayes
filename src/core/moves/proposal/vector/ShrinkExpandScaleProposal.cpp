@@ -84,7 +84,7 @@ double ShrinkExpandScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double ShrinkExpandScaleProposal::doProposal( void )
+LogDensity ShrinkExpandScaleProposal::doProposal( void )
 {
     
     // Get random number generator

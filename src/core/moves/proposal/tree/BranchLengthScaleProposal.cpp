@@ -78,7 +78,7 @@ double BranchLengthScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double BranchLengthScaleProposal::doProposal( void )
+LogDensity BranchLengthScaleProposal::doProposal( void )
 {
     
     // Get random number generator
