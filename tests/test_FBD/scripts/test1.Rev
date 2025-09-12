@@ -116,9 +116,9 @@ mymcmc.run(generations=300)
 trace = readTreeTrace("output/test1.trees", treetype="clock")
 
 # Summary trees #
-consensusTree(trace, file="output/test1.con.tre", differentiateSAs=TRUE)
-mapTree(trace, file="output/test1.map.tre", differentiateSAs=TRUE)
-mccTree(trace, file="output/test1.mcc.tre", differentiateSAs=TRUE)
+consensusTree(trace, file="output/test1.con.tre", differentiateMRCAs=TRUE)
+mapTree(trace, file="output/test1.map.tre", differentiateMRCAs=TRUE)
+mccTree(trace, file="output/test1.mcc.tre", differentiateMRCAs=TRUE)
 
 # Quit RevBayes #
 q()

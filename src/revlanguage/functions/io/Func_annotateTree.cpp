@@ -154,7 +154,7 @@ const ArgumentRules& Func_annotateTree::getArgumentRules( void ) const
         argumentRules.push_back( new ArgumentRule( "hpd"   ,    Probability::getClassTypeSpec() , "The probability mass of the highest posterior density node age interval.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.95) ) );
         argumentRules.push_back( new ArgumentRule( "mean" , RlBoolean::getClassTypeSpec() , "Annotate node ages using the mean age instead of the median?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         argumentRules.push_back( new ArgumentRule( "sampledAncestors" , RlBoolean::getClassTypeSpec() , "Annotate sampled ancestor probs?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        argumentRules.push_back( new ArgumentRule( "differentiateSAs" , RlBoolean::getClassTypeSpec() , "Should we treat clades as different if a member taxon represents a sampled ancestor rather than a tip?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argumentRules.push_back( new ArgumentRule( "differentiateMRCAs" , RlBoolean::getClassTypeSpec() , "Should we treat clades of identical composition as different if they differ in their most recent common ancestor?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }
