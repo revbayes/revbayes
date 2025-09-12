@@ -11,6 +11,9 @@
 #include "Tree.h"
 
 using namespace RevBayesCore;
+using std::optional;
+using std::pair;
+using std::string;
 
 NewickConverter::NewickConverter()
 {
@@ -93,20 +96,35 @@ std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseSubTree(const
 }
 
 //
-std::optional<int> NewickConverter::parseChar(const std::string input, int start_pos, char c){
+std::optional<std::pair<char, int>> NewickConverter::parseChar(const std::string input, int start_pos){
     // if reading beyond end of string return null
     if (start_pos >= input.size()){
         return {};
     }
-    else if (input[start_pos] != c) {
+    char c = input[start_pos];
+    return optional<pair<char, int>>(pair<char,int>(c,start_pos+1));
+}
+
+std::optional<int> NewickConverter::checkChar(const std::string input, int start_pos, char c){
+    // if reading beyond end of string return null
+    if (auto check=parseChar(input, start_pos)){
+        auto [c2, new_start_pos] = *check;
+        if (c2 == c){
+            return new_start_pos;
+        }
+        else{
+            return {};
+        }
+    }
+    else{
         return {};
     }
-    else return start_pos+1;
 }
+
 // Internal -> '(' BranchSet ')' Name
 std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseInternal(const std::string& input, int start_pos){
     // Check if we have left parenthesis
-    if (auto check = parseChar(input, start_pos, '('))
+    if (auto check = checkChar(input, start_pos, '('))
         start_pos = check.value();
 
     else
@@ -121,7 +139,7 @@ std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseInternal(cons
         return {};
 
     // Check for right parenthesis
-    if (auto check = parseChar(input, start_pos, ')'))
+    if (auto check = checkChar(input, start_pos, ')'))
         start_pos = check.value();
 
     else
@@ -141,6 +159,59 @@ std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseInternal(cons
     return {{node, start_pos}}; 
 }
 
+// this function is matching not a quote or two quotes
+// 
+std::optional<std::pair<char, int>> NewickConverter::parseQuotedChar(const std::string& input, int start_pos){
+    assert(start_pos>=0);
+    if (auto check = parseChar(input, start_pos)){
+        auto [c, new_start_pos] = check.value();
+        if (c == '\'') {
+            // two quotes returns quote
+            if (auto new_start_pos2 = checkChar(input, new_start_pos, '\'')){
+                // new_start_pos2 will ALWAYS be start_pos + 2
+                return optional<pair<char,int>>(pair<char,int>(c,*new_start_pos2));
+            }
+            // one quote fails
+            else{
+                return {};
+            }
+        }
+        else {
+            //new_start_pos will ALWAYS be start_pos+1
+            return optional<pair<char,int>>(pair<char,int>(c,new_start_pos));
+        }
+    }
+
+    else{
+        return {};
+    }
+}
+
+std::optional<std::pair<std::string, int>> NewickConverter::parseQuotedName(const std::string& input, int start_pos){
+    if (!checkChar(input, start_pos, '\'')){
+        return {};
+    }
+    else{
+        start_pos++;
+    }
+    std::string name; 
+    while (auto check = parseQuotedChar(input, start_pos)){
+        auto [c, new_start_pos] = check.value();
+        name += c;
+        start_pos = new_start_pos;
+    }
+    if (!checkChar(input, start_pos, '\'')){
+        return {};
+    }
+    else{
+        start_pos++;
+    }
+    return optional<pair<std::string, int>>(pair<std::string,int>(name, start_pos));
+}
+
+std::optional<std::pair<std::string, int>> NewickConverter::parseUnquotedName(const std::string& input, int start_pos){
+    return {};
+}
 std::optional<std::pair<std::string, int>> NewickConverter::parseName(const std::string& input, int start_pos){
     //handle newick escaping hear, read newick minus parsing syntax?
     //* skip any whitespace
@@ -167,32 +238,7 @@ std::optional<std::pair<std::string, int>> NewickConverter::parseName(const std:
         return std::nullopt;
     }
 
-    // is name quoted?
-    if (input[pos] == '\'') {          
-        ++pos; // index past quote               
-        std::string out;
-        // need to verify this loop is working as intended
-        // idea is if we seee a single quote it may be an internal quote not the terminal one
-        while (pos < static_cast<int>(input.size())) {
-            char c = input[pos];
-            if (c == '\'') {
-                if (pos + 1 < static_cast<int>(input.size()) && input[pos + 1] == '\'') {
-                    // just learned about push_back may not work
-                    out.push_back('\'');
-                    pos += 2;
-                    continue;
-                } else {
-                    // Closing quote found
-                    ++pos;
-                    return std::make_pair(out, pos);
-                }
-            }
-            out.push_back(c);
-            ++pos;
-        }
 
-        return std::nullopt; // no closing quote found
-    }
     //unquoted case, is character important character
     auto isdelim = [](char c) {
         switch (c) {
