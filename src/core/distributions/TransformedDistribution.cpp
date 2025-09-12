@@ -87,9 +87,9 @@ LogDensity TransformedDistribution::computeLnProbability( void )
 
         // If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
-        double ln_pdf = base_dist->computeLnProbability();
+        LogDensity ln_pdf = base_dist->computeLnProbability();
 
-        double J = log_f_prime(transform_params, *x).value();
+        LogDensity J = log_f_prime(transform_params, *x).value();
 
         ln_pdf -= J;
 
