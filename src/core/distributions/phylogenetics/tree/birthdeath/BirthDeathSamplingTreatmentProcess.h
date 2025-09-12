@@ -64,14 +64,14 @@ namespace RevBayesCore {
 
     protected:
         // Parameter management functions
-        double                                          computeLnProbabilityDivergenceTimes(void) const override;               //!< Compute the log-transformed probability of the current value.
+        LogDensity                                      computeLnProbabilityDivergenceTimes(void) const override;               //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;//!< Swap a parameter
 
         // helper functions
         void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
         void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
-        double                                          computeLnProbabilityTimes(void) const override;                         //!< Compute the log-transformed probability of the current value.
+        LogDensity                                      computeLnProbabilityTimes(void) const override;                         //!< Compute the log-transformed probability of the current value.
         bool                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
         double                                          lnD(size_t i, double t) const;                                          //!< Branch-segment probability at time t with index i, using pre-computed vectors
         double                                          E(size_t i, double t, bool computeSurvival = false) const;                                       //!< Extinction probability at time t with index i, using pre-computed vectors

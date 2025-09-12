@@ -171,7 +171,7 @@ UniformTopologyBranchLengthDistribution* UniformTopologyBranchLengthDistribution
 }
 
 
-double UniformTopologyBranchLengthDistribution::computeLnProbability( void )
+LogDensity UniformTopologyBranchLengthDistribution::computeLnProbability( void )
 {
     
     if ( dirty_topology == true )

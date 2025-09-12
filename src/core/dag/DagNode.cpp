@@ -1111,7 +1111,7 @@ void DagNode::touchAffected(bool touchAll)
     }
 }
 
-double DagNode::getPrevLnProbability(void) const
+LogDensity DagNode::getPrevLnProbability(void) const
 {
     throw RbException()<<"getPrevLnProbability: not a stochastic node!";
 }

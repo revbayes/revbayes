@@ -261,7 +261,7 @@ void BirthDeathSamplingTreatmentProcess::checkVectorSizes(const TypedDagNode<RbV
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( void ) const
+LogDensity BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
     
     // update parameter vectors
@@ -286,7 +286,7 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( 
 /**
  * Compute the log probability of the current value under the current parameter values.
  */
-double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) const
+LogDensity BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization

@@ -98,7 +98,7 @@ void DecomposedInverseWishartDistribution::swapParameterInternal(const DagNode *
 }
 
 
-double DecomposedInverseWishartDistribution::computeLnProbability(void)
+LogDensity DecomposedInverseWishartDistribution::computeLnProbability(void)
 {
     
     double ret = RbStatistics::DecomposedInverseWishart::lnPdf(df->getValue(), getValue());

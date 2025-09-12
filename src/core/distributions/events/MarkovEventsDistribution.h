@@ -23,7 +23,7 @@ namespace RevBayesCore {
 
         // public member functions
         MarkovEventsDistribution<valueType>*                clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
 
         // virtual functions from AbstractEventsDistribution
@@ -122,7 +122,7 @@ RevBayesCore::MarkovEventsDistribution<valueType>* RevBayesCore::MarkovEventsDis
 }
 
 template <class valueType>
-double RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbability( void )
 {
 	// make sure the times and events are one-to-one
 	const std::set<double>& the_event_times = event_times->getValue().getEventTimes();

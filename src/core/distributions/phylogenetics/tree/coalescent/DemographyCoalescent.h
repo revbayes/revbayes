@@ -33,7 +33,7 @@ namespace RevBayesCore {
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                //!< Swap a parameter
         
         // derived helper functions
-        double                                              computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.
         std::vector<double>                                 simulateCoalescentAges(size_t n) const;                                                         //!< Simulate n coalescent events.
         
         

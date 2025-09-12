@@ -66,7 +66,7 @@ ConstantPopulationCoalescent* ConstantPopulationCoalescent::clone( void ) const
  *
  * \return    The log-probability density.
  */
-double ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
+LogDensity ConstantPopulationCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization

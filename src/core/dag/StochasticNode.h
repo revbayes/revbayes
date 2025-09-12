@@ -63,9 +63,9 @@ namespace RevBayesCore {
         virtual TypedDistribution<valueType>&               getDistribution(void);
         virtual const TypedDistribution<valueType>&         getDistribution(void) const;
         void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
-        virtual double                                      getLnProbability(void);
-        virtual double                                      getPrevLnProbability(void) const;
-        virtual double                                      getLnProbabilityRatio(void);
+        virtual LogDensity                                  getLnProbability(void);
+        virtual LogDensity                                  getPrevLnProbability(void) const;
+        virtual LogDensity                                  getLnProbabilityRatio(void);
         virtual std::vector<double>                         getMixtureLikelihoods(bool log=true) const;
         virtual std::vector<double>                         getMixtureProbabilities(void) const;
         virtual size_t                                      getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
@@ -93,7 +93,7 @@ namespace RevBayesCore {
         
     protected:
         
-        virtual double                                      computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& ig, size_t idx);
+        virtual LogDensity                                  computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& ig, size_t idx);
         virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
         virtual void                                        keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
@@ -104,8 +104,8 @@ namespace RevBayesCore {
         bool                                                ignore_data = false;                                                    //!< The PDF for this node is set to 1, removing the effects of the node.  Only for clamped nodes with no children.
         bool                                                ignore_redraw = false;
         mutable bool                                        integrated_out = false;
-        std::optional<double>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
-        std::optional<std::optional<double>>                stored_ln_prob;                                                             //!< Previous log probability if (a) there is a previous state and (b) the log probability for it is computed.
+        std::optional<LogDensity>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
+        std::optional<std::optional<LogDensity>>                stored_ln_prob;                                                             //!< Previous log probability if (a) there is a previous state and (b) the log probability for it is computed.
         TypedDistribution<valueType>*                       distribution;
         
     };
@@ -286,7 +286,7 @@ RevBayesCore::StochasticNode<valueType>* RevBayesCore::StochasticNode<valueType>
 
 
 template<class valueType>
-double RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& integrated_parents, size_t index)
+LogDensity RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& integrated_parents, size_t index)
 {
 
     double ln_prob = 0;
@@ -476,7 +476,7 @@ std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureLikelihoo
 
 
 template<class valueType>
-double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
+LogDensity RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 {
     
     if ( not lnProb )
@@ -497,7 +497,7 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 
 
 template<class valueType>
-double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
+LogDensity RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
     // 1. If the node is not affected/touched, then the probability is the same for the current and previous state.
     if (not stored_ln_prob)
@@ -514,7 +514,7 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 
 
 template<class valueType>
-double RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) const
+LogDensity RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) const
 {
     /*
      * NOTE: If there is no previous probability then we could do a few things:

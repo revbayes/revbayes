@@ -28,7 +28,7 @@ namespace RevBayesCore {
         virtual PopGenInfiniteSites*                                        clone(void) const;                                                                      //!< Create an independent clone
         
         // non-virtual
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
         
         void                                                                redrawValue(void);
 

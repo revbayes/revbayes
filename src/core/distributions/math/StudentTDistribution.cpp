@@ -46,7 +46,7 @@ StudentTDistribution* StudentTDistribution::clone( void ) const
 }
 
 
-double StudentTDistribution::computeLnProbability( void )
+LogDensity StudentTDistribution::computeLnProbability( void )
 {
     double v = *value;
     

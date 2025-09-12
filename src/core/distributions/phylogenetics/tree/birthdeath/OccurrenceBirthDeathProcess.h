@@ -70,8 +70,8 @@ namespace RevBayesCore {
         bool                                                    isConstantRate(void) const;                                             //!< Checks if we have a constant-rate process
         void                                                    sortGlobalTimesAndVectorParameter(void) const;                          //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
 
-        double                                                  computeLnProbabilityDivergenceTimes(void) ;                            //!< Compute the log-transformed probability of the current value.
-        double                                                  computeLnProbabilityTimes(void) const;                                 //!< Compute the log-transformed probability of the current value.
+        LogDensity                                              computeLnProbabilityDivergenceTimes(void) ;                            //!< Compute the log-transformed probability of the current value.
+        LogDensity                                              computeLnProbabilityTimes(void) const;                                 //!< Compute the log-transformed probability of the current value.
         size_t                                                  findIndex(double t) const;                                             //!< Find the index so that times[index-1] < t < times[index]
         size_t                                                  findIndex(double t, const std::vector<double>& timeline) const;
 

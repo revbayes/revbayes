@@ -33,7 +33,7 @@ template <class valueType> class TypedDagNode;
         void                                                redrawValue(SimulationCondition c = SimulationCondition::MCMC);         //!< Draw a new random value from the distribution
 
     protected:
-        double                                              computeLnProbabilityDivergenceTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbabilityDivergenceTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
         
@@ -46,7 +46,7 @@ template <class valueType> class TypedDagNode;
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
         // helper functions
-        double                                              computeLnProbabilityTimes(void) const;                                                //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbabilityTimes(void) const;                                                //!< Compute the log-transformed probability of the current value.
         double                                              lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const { throw RbException("Cannot compute P(nTaxa)."); }
         double                                              lnProbTreeShape(void) const;
         double                                              simulateDivergenceTime(double origin, double present) const;                    //!< Simulate a speciation event.

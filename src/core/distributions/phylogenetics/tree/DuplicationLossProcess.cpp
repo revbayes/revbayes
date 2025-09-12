@@ -135,7 +135,7 @@ DuplicationLossProcess* DuplicationLossProcess::clone(void) const
     return new DuplicationLossProcess(*this);
 }
 
-double DuplicationLossProcess::computeLnProbability( void )
+LogDensity DuplicationLossProcess::computeLnProbability( void )
 {
     resetTipAllocations();
     

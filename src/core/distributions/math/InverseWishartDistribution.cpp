@@ -136,7 +136,7 @@ void InverseWishartDistribution::swapParameterInternal(const DagNode *oldP, cons
 }
 
 
-double InverseWishartDistribution::computeLnProbability(void)
+LogDensity InverseWishartDistribution::computeLnProbability(void)
 {
     
     double ret = 0;

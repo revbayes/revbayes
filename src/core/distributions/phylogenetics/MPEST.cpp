@@ -57,7 +57,7 @@ MPEST* MPEST::clone( void ) const
 }
 
 
-double MPEST::computeLnProbability( void )
+LogDensity MPEST::computeLnProbability( void )
 {
     
     // variable declarations and initialization

@@ -57,7 +57,7 @@ BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const Typed
  *
  * \return   The log-transformed probability density.
  */
-double BirthDeathProcess::computeLnProbabilityTimes( void ) const
+LogDensity BirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization

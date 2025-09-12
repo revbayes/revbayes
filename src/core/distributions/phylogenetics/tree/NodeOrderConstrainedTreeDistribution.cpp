@@ -131,7 +131,7 @@ NodeOrderConstrainedTreeDistribution* NodeOrderConstrainedTreeDistribution::clon
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double NodeOrderConstrainedTreeDistribution::computeLnProbability( void )
+LogDensity NodeOrderConstrainedTreeDistribution::computeLnProbability( void )
 {
 
     // first check if the current tree matches the clade constraints

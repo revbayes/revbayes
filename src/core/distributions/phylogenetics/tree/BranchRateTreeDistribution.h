@@ -27,7 +27,7 @@ class DagNode;
 
         // public member functions
         BranchRateTreeDistribution*                         clone(void) const;                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         virtual void                                        fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                 //!< This node was changed in the tree
         void                                                redrawValue(void);
         virtual void                                        setValue(Tree *v, bool f=false);                                        //!< Set the current value, e.g. attach an observation (clamp)

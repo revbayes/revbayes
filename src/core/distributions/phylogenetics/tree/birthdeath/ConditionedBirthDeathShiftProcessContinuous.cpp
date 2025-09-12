@@ -235,7 +235,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeBranchProbability(dou
 
 
 /* Compute probability */
-double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
+LogDensity ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
 {
     
     // Variable declarations and initialization

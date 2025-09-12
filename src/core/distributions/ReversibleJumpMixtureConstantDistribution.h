@@ -36,7 +36,7 @@ namespace RevBayesCore {
         
         // public member functions
         ReversibleJumpMixtureConstantDistribution*                  clone(void) const;                                                                              //!< Create an independent clone
-        double                                                      computeLnProbability(void);
+        LogDensity                                                  computeLnProbability(void);
         void                                                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;    //!< Map the member methods to internal function calls
         const TypedDistribution<mixtureType>&                       getBaseDistribution(void) const;
         TypedDistribution<mixtureType>&                             getBaseDistribution(void);
@@ -167,7 +167,7 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>* RevBayesCo
 
 
 template <class mixtureType>
-double RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::computeLnProbability( void )
+LogDensity RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::computeLnProbability( void )
 {
     
     double ln_prob;

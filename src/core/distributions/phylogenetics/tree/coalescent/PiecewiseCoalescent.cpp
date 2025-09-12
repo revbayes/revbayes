@@ -90,7 +90,7 @@ PiecewiseCoalescent* PiecewiseCoalescent::clone( void ) const
  *
  * \return    The log-probability density.
  */
-double PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
+LogDensity PiecewiseCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization

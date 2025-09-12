@@ -65,7 +65,7 @@ namespace RevBayesCore {
         
         // pure virtual public methods
         virtual TypedDistribution*                                  clone(void) const = 0;                                                      //!< Clone the distribution
-        virtual double                                              computeLnProbability(void) = 0;                                             //!< Clone the ln probability density
+        virtual LogDensity                                          computeLnProbability(void) = 0;                                             //!< Clone the ln probability density
         virtual void                                                redrawValue(SimulationCondition c);                                         //!< Draw a new random value from the distribution
         virtual void                                                redrawValue(void) = 0;                                                      //!< Draw a new random value from the distribution
 

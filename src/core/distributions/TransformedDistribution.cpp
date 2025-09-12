@@ -75,7 +75,7 @@ TransformedDistribution* TransformedDistribution::clone( void ) const
  * 
  */
 
-double TransformedDistribution::computeLnProbability( void )
+LogDensity TransformedDistribution::computeLnProbability( void )
 {
     // 1. Get value
     double y = *value;

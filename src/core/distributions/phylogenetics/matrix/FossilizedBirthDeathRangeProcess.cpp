@@ -86,7 +86,7 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
+LogDensity FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 {
     double lnProb = 0.0;
 
@@ -116,7 +116,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
+LogDensity FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
 {
     // prepare the probability computation
     prepareProbComputation();

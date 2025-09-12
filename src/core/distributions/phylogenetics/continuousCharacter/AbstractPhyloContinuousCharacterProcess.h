@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
         // public member functions
         // pure virtual
         virtual AbstractPhyloContinuousCharacterProcess*                    clone(void) const = 0;                                                                  //!< Create an independent clone
-        virtual double                                                      computeLnProbability(void) = 0;
+        virtual LogDensity                                                  computeLnProbability(void) = 0;
         
         // non-virtual
         void                                                                setBranchRate(const TypedDagNode< double >* r);

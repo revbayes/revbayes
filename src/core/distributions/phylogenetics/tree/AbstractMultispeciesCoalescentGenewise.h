@@ -18,7 +18,7 @@ namespace RevBayesCore {
         virtual                                            ~AbstractMultispeciesCoalescentGenewise(void);                                                                       //!< Virtual destructor
 
         // public member functions
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         virtual void                                        setValue(RbVector<Tree>* v, bool f=false);   
 

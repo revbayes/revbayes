@@ -29,7 +29,7 @@ namespace RevBayesCore {
         
         
         // public member functions you may want to override
-        double                                              computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
         virtual void                                        redrawValue(SimulationCondition c);                                                                 //!< Draw a new random value from the distribution
         virtual void                                        redrawValue(void);                                                                                  //!< Draw a new random value from the distribution
 
@@ -43,7 +43,7 @@ namespace RevBayesCore {
 
     protected:
         // pure virtual helper functions
-        virtual double                                      computeLnProbabilityDivergenceTimes(void) const = 0;                                                //!< Compute the log-transformed probability of the current value.
+        virtual LogDensity                                  computeLnProbabilityDivergenceTimes(void) const = 0;                                                //!< Compute the log-transformed probability of the current value.
 
         virtual bool                                        isLnProbabilityNonZero(void);
         virtual double                                      simulateDivergenceTime(double origin, double present) const = 0;                                    //!< Simulate n speciation events.

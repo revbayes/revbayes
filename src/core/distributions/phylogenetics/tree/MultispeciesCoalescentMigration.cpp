@@ -151,7 +151,7 @@ MultispeciesCoalescentMigration* MultispeciesCoalescentMigration::clone( void ) 
 }
 
 
-double MultispeciesCoalescentMigration::computeLnProbability( void )
+LogDensity MultispeciesCoalescentMigration::computeLnProbability( void )
 {
     
     const Tree &sp = species_tree->getValue();

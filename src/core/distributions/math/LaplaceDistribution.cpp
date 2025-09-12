@@ -49,7 +49,7 @@ LaplaceDistribution* LaplaceDistribution::clone( void ) const
 }
 
 
-double LaplaceDistribution::computeLnProbability( void ) 
+LogDensity LaplaceDistribution::computeLnProbability( void ) 
 {
     return RbStatistics::Laplace::lnPdf(mean->getValue(), scale->getValue(), *value);
 }

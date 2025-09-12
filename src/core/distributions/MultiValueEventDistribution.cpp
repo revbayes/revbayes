@@ -132,7 +132,7 @@ MultiValueEventDistribution* MultiValueEventDistribution::clone( void ) const
 
 
 
-double MultiValueEventDistribution::computeLnProbability( void )
+LogDensity MultiValueEventDistribution::computeLnProbability( void )
 {
     event_prior->setValue( new std::int64_t( value->getNumberOfEvents() ) );
     

@@ -46,7 +46,7 @@ AbstractBirthDeathProcess::~AbstractBirthDeathProcess(void)
  *
  * @return log-probability
  */
-double AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
+LogDensity AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
     // prepare the probability computation
     prepareProbComputation();

@@ -194,7 +194,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( bool force )
+LogDensity AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( bool force )
 {
     // prepare the probability computation
     prepareProbComputation();

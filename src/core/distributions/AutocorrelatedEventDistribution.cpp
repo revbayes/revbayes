@@ -182,7 +182,7 @@ AutocorrelatedEventDistribution* AutocorrelatedEventDistribution::clone( void ) 
 
 
 
-double AutocorrelatedEventDistribution::computeLnProbability( void )
+LogDensity AutocorrelatedEventDistribution::computeLnProbability( void )
 {
     
     // first, we check the sorting (-1 if we don't sort)

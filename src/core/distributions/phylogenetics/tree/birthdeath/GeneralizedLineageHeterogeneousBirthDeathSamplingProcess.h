@@ -49,7 +49,7 @@ namespace RevBayesCore {
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
         virtual                                                           ~GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(void);                                                              //!< Virtual destructor
         
-        double                                                            computeLnProbability(void);
+        LogDensity                                                        computeLnProbability(void);
         void                                                              fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
         const AbstractHomologousDiscreteCharacterData&                    getCharacterData() const;
         virtual void                                                      redrawValue(void);

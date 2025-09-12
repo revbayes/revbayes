@@ -6,6 +6,7 @@
 #include <string> // IWYU pragma: keep
 #include <sstream>
 
+#include "LogDensity.h"
 #include "RbFileManager.h"
 
 class RbSettings {
@@ -67,7 +68,7 @@ void showDebug(const std::string& s, int level=1);
 
 class withReason
 {
-    double value;
+    LogDensity value;
     int level = 2;
     std::ostringstream reason;
 
@@ -75,10 +76,10 @@ public:
     template <typename T>
     withReason& operator<<(const T& t) {reason<<t; return *this;}
 
-    operator double() const {showDebug(reason.str(), level); return value;}
+    operator LogDensity() const {showDebug(reason.str(), level); return value;}
 
-    withReason(double d):value(d) {}
-    withReason(double d, int l):value(d), level(l) {}
+    withReason(LogDensity d):value(d) {}
+    withReason(LogDensity d, int l):value(d), level(l) {}
 };
 
 #endif

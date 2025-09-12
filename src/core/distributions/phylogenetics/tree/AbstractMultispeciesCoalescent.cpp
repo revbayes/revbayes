@@ -129,7 +129,7 @@ void AbstractMultispeciesCoalescent::buildRandomBinaryTree(std::vector<TopologyN
 }
 
 
-double AbstractMultispeciesCoalescent::computeLnProbability( void )
+LogDensity AbstractMultispeciesCoalescent::computeLnProbability( void )
 {
     resetTipAllocations();
 

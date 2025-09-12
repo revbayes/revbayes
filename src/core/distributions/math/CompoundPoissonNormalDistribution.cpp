@@ -39,7 +39,7 @@ CompoundPoissonNormalDistribution* CompoundPoissonNormalDistribution::clone( voi
 }
 
 
-double CompoundPoissonNormalDistribution::computeLnProbability( void ) {
+LogDensity CompoundPoissonNormalDistribution::computeLnProbability( void ) {
     
     return RbStatistics::CompoundPoissonNormal::lnPdf(rate->getValue(), mu->getValue(), sigma->getValue(), *value);
 

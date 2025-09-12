@@ -51,7 +51,7 @@ namespace RevBayesCore {
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // derived helper functions
-        double                                              computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.
         std::vector<double>                                 simulateCoalescentAges(size_t n) const;
         
         

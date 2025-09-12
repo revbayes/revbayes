@@ -32,7 +32,7 @@ namespace RevBayesCore {
         
         // public member functions
         AnalyticalMixtureDistribution*                          clone(void) const;                                                                      //!< Create an independent clone
-        double                                                  computeLnProbability(void);
+        LogDensity                                              computeLnProbability(void);
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
         void                                                    redrawValue(void);
         //        void                                                    setValue(RbAnalytical<mixtureType> *v, bool f=false);
@@ -128,7 +128,7 @@ RevBayesCore::AnalyticalMixtureDistribution<mixtureType>* RevBayesCore::Analytic
 
 
 template <class mixtureType>
-double RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnProbability( void )
+LogDensity RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnProbability( void )
 {
     dirty = false;
     

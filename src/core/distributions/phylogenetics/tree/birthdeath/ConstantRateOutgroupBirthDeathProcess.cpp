@@ -113,7 +113,7 @@ bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void )
  *
  * \return    The log-probability density.
  */
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) const
+LogDensity ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
 
     // proceed with probabilities
@@ -184,7 +184,7 @@ double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( void ) 
     
 }
 
-double ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const
+LogDensity ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityDiversifiedSampling(std::vector<double> ages, double presentTime, double samplingProb, size_t num_taxa) const
 {
     
     if (ages.size() < 1) {

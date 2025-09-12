@@ -31,7 +31,7 @@ namespace RevBayesCore {
 
         // public member functions
         EventDistribution*                                  clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
 
     protected:
@@ -119,7 +119,7 @@ RevBayesCore::EventDistribution<valueType>* RevBayesCore::EventDistribution<valu
 
 
 template <class valueType>
-double RevBayesCore::EventDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::EventDistribution<valueType>::computeLnProbability( void )
 {
     size_t num_events = this->value->size();
     event_prior->setValue( new std::int64_t(num_events) );

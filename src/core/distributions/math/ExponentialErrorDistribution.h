@@ -34,7 +34,7 @@ template <class valueType> class RbVector;
         // Public member functions
 
         ExponentialErrorDistribution*               clone(void) const;                                               //!< creates an independent clone
-        double                                      computeLnProbability(void);
+        LogDensity                                  computeLnProbability(void);
         void                                        redrawValue(void);
         
     protected:

@@ -53,7 +53,7 @@ namespace RevBayesCore {
         
         
         // helper functions
-        virtual double                                      computeLnProbabilityTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
+        virtual LogDensity                                  computeLnProbabilityTimes(void) const;                                      //!< Compute the log-transformed probability of the current value.
         size_t                                              getNumberOfTaxaAtPresent(void) const;
         double                                              lnP1(double T, double r) const;
         double                                              lnP1(double t, double T, double r) const;

@@ -70,7 +70,7 @@ PhyloBrownianCharacterHistoryProcess* PhyloBrownianCharacterHistoryProcess::clon
 }
 
 
-double PhyloBrownianCharacterHistoryProcess::computeLnProbability( void )
+LogDensity PhyloBrownianCharacterHistoryProcess::computeLnProbability( void )
 {
     
     // we need to check here if we still are listining to this tree for change events

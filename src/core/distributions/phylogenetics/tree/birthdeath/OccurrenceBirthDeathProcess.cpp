@@ -182,7 +182,7 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  */
- double OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
+ LogDensity OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  {
 
     double lnProbTimes = computeLnProbabilityTimes();
@@ -193,7 +193,7 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
 /**
  * Compute the log probability of the current value under the current parameter values.
  */
-double OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
+LogDensity OccurrenceBirthDeathProcess::computeLnProbabilityTimes( void ) const
 {
     prepareTimeline();
 

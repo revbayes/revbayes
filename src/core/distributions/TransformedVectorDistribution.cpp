@@ -111,7 +111,7 @@ TransformedVectorDistribution* TransformedVectorDistribution::clone( void ) cons
  * 
  */
 
-double TransformedVectorDistribution::computeLnProbability( void )
+LogDensity TransformedVectorDistribution::computeLnProbability( void )
 {
     // 1. Get value
     RbVector<double> y = *value;

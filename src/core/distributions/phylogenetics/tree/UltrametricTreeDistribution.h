@@ -68,7 +68,7 @@ namespace RevBayesCore {
 
         // public member functions
         UltrametricTreeDistribution*                        clone(void) const;                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
+        LogDensity                                          computeLnProbability(void);                                 //!< Compute ln prob of current value
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                redrawValue(void);                                          //!< Draw a new random value from distribution
         

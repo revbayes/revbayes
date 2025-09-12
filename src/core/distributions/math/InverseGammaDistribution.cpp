@@ -49,7 +49,7 @@ InverseGammaDistribution* InverseGammaDistribution::clone( void ) const
 }
 
 
-double InverseGammaDistribution::computeLnProbability( void )
+LogDensity InverseGammaDistribution::computeLnProbability( void )
 {
     
     double v = *value;

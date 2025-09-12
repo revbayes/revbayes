@@ -36,7 +36,7 @@ namespace RevBayesCore {
 
         // public member functions
         UniformPartitioningDistribution*                    clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         int                                                 getCurrentIndex(void) const;
         RbVector<valueType>*                                getPartition(void);
@@ -182,7 +182,7 @@ RevBayesCore::UniformPartitioningDistribution<valueType>* RevBayesCore::UniformP
 
 
 template <class valueType>
-double RevBayesCore::UniformPartitioningDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::UniformPartitioningDistribution<valueType>::computeLnProbability( void )
 {
     
     return -log( num_partitions );

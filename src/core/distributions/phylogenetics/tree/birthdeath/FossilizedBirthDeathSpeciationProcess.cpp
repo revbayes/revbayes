@@ -126,7 +126,7 @@ FossilizedBirthDeathSpeciationProcess* FossilizedBirthDeathSpeciationProcess::cl
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void )
+LogDensity FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void )
 {
     double lnProb = computeLnProbabilityRanges();
 
@@ -140,7 +140,7 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTime
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) const
+LogDensity FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) const
 {
     double lnProb = 0.0;
 

@@ -43,7 +43,7 @@ RevBayesCore::MultivariateLogDistribution* RevBayesCore::MultivariateLogDistribu
 
 
 
-double RevBayesCore::MultivariateLogDistribution::computeLnProbability( void )
+LogDensity RevBayesCore::MultivariateLogDistribution::computeLnProbability( void )
 {
     // 1. Get value
     RbVector<double> xs = *value;

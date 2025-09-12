@@ -78,7 +78,7 @@ DemographyCoalescent* DemographyCoalescent::clone( void ) const
  *
  * \return    The log-probability density.
  */
-double DemographyCoalescent::computeLnProbabilityTimes( void ) const
+LogDensity DemographyCoalescent::computeLnProbabilityTimes( void ) const
 {
     
     // variable declarations and initialization

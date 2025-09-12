@@ -411,7 +411,7 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
 
 
 /* Compute probability */
-double UltrametricTreeDistribution::computeLnProbability( void )
+LogDensity UltrametricTreeDistribution::computeLnProbability( void )
 {
 
     // create a temporary copy of the this tree

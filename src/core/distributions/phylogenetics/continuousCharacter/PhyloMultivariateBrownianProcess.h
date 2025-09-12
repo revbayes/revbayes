@@ -24,7 +24,7 @@ class Tree;
         // public member functions
         PhyloMultivariateBrownianProcess*                       clone(void) const;
         
-        double                                                  computeLnProbability(void);
+        LogDensity                                              computeLnProbability(void);
         size_t                                                  getDim() const {return sigma->getValue().getDim();}
         void                                                    redrawValue(void);        
         const Tree*                                             getTimeTree() const {return &tau->getValue();}

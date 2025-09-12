@@ -37,7 +37,7 @@ namespace RevBayesCore {
 		virtual                                             ~EmpiricalDistribution(void);
 
 		EmpiricalDistribution*                              clone(void) const;                                          //!< Create an independent clone
-		double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
+                LogDensity                                          computeLnProbability(void);                                 //!< Compute ln prob of current value
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         size_t                                              getBurnin(void) const;
         size_t                                              getCurrentIndex(void) const;
@@ -183,7 +183,7 @@ void RevBayesCore::EmpiricalDistribution<valueType>::setValue(valueType *v, bool
 
 
 template <class valueType>
-double RevBayesCore::EmpiricalDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::EmpiricalDistribution<valueType>::computeLnProbability( void )
 {
     double lnProb = -log( trace->size(true) );
 

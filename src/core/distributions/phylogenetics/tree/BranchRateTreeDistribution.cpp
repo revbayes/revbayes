@@ -240,7 +240,7 @@ RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, Rb
 }
 
 
-double BranchRateTreeDistribution::computeLnProbability( void )
+LogDensity BranchRateTreeDistribution::computeLnProbability( void )
 {
 
     double ln_prob = 0.0;

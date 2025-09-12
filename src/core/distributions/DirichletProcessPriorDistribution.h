@@ -36,7 +36,7 @@ namespace RevBayesCore {
         
         // public member functions
         DirichletProcessPriorDistribution*                  clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         int                                                 getNumberOfCategories(void) const;
         int                                                 getNumberOfElements(void) const;
         void                                                redrawValue(void);
@@ -172,7 +172,7 @@ void RevBayesCore::DirichletProcessPriorDistribution<valueType>::computeDenomina
 
 
 template <class valueType>
-double RevBayesCore::DirichletProcessPriorDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::DirichletProcessPriorDistribution<valueType>::computeLnProbability( void )
 {
     
     // the probability is given by:
