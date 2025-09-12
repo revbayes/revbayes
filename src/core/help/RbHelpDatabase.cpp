@@ -168,17 +168,34 @@ posterior.summarize())");
 	help_strings[string("Trace")][string("title")] = string(R"(Trace of numeric parameter values.)");
 	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to
 the `mnFile` monitor in an MCMC or MCMCMC run.)");
-	help_strings[string("TraceTree")][string("details")] = string(R"(Important methods include:
+	help_strings[string("TraceTree")][string("details")] = string(R"(Individual trees can be accessed as follows:
 
-- `getTree(n)`: returns the `n`th entry of the `TraceTree` object.
-- `getTrees()`: returns a vector of trees from the `TraceTree` object, after
-      excluding the burnin.
-- `getUniqueTrees(alpha)`: constructs an alpha credible set of trees, i.e.,
-      orders all trees in the trace by their posterior probability and adds
-      them to the set one by one until the included trees accumulate fraction
-      alpha of the probability mass (Huelsenbeck & Rannala 2004). By default,
-      the 95% credible set is constructed (alpha = 0.95). To extract all unique
-      trees from a given trace, set the argument to 1.)");
+- `getTree(n)`: returns the `n`th tree.
+- `getTree(n, post=TRUE)`: returns the `n`th post-burnin tree.
+- `getTrees()`: returns the entire vector of post-burnin trees.
+      
+The methods `.computeEntropy()`, `.computePairwiseRFDistances`,
+`.getUniqueTrees()`, `.isTreeCovered()`, and `.summarize()` first construct
+a credible set of trees, and then perform the corresponding operation on this
+set. A credible set is constructed by ordering all trees in the trace by their
+posterior probability, and adding them to the set one by one until the included
+trees accumulate the desired probability specified by `credibleTreeSetSize`.
+By default, this argument is set to 0.95; to perform a given operation on all
+trees in the trace, set it to 1.
+
+The credible set methods also take a `probabilistic` argument that determines
+how the credible set should be constructed when it is not possible to obtain a
+cumulative probability precisely equal to `credibleTreeSetSize`. This will be
+the case when the probability p of the first n trees falls short of it, and the
+probability (p + q) of the first n + 1 trees exceeds it (Huelsenbeck & Rannala
+2004). If `probabilistic=TRUE` (default), the (n + 1)-th tree will be included
+in the set with probability (`credibleTreeSetSize` - p) / q. It will always be
+included if `probabilistic=FALSE`. Note that when `probabilistic=TRUE`, the
+methods in question may yield different results under different random seeds,
+and they may even construct an empty credible set a certain fraction of the
+time if the trace is dominated by a particular tree whose probability exceeds
+`credibleTreeSetSize`. An exception is thrown when an empty credible set is
+encountered by a method that does not expect one.)");
 	help_strings[string("TraceTree")][string("example")] = string(R"(# read a tree trace and ignore the first 10 samples
 thinned_trees = readTreeTrace("my_filename.tree", offset = 10, thinning = 10, burnin = 0.5)
 
