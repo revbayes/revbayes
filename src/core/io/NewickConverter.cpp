@@ -95,7 +95,7 @@ std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseSubTree(const
 //
 std::optional<int> NewickConverter::parseChar(const std::string input, int start_pos, char c){
     // if reading beyond end of string return null
-    if (start_pos >= n.size()){
+    if (start_pos >= input.size()){
         return {};
     }
     else if (input[start_pos] != c) {
@@ -136,6 +136,9 @@ std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseInternal(cons
         return {}; 
 
     // construct new topology node with children children and name name
+    auto node = new TopologyNode;
+    //add name and children
+    return {{node, start_pos}}; 
 }
 
 std::optional<std::pair<std::string, int>> NewickConverter::parseName(const std::string& input, int start_pos){
@@ -195,7 +198,7 @@ std::optional<std::pair<std::string, int>> NewickConverter::parseName(const std:
         switch (c) {
             case '(': case ')': case ',': case ':': case ';':
             case '[': case ']':
-            case ' '
+            case ' ':
                 return true;
             default:
                 return false;
@@ -220,14 +223,17 @@ std::optional<std::pair<std::string, int>> NewickConverter::parseName(const std:
 // This routine has 4 copies of attribute parsing from comments -- 2 for node attributes, and 2 for branch attributes.
 // Probably "index" should only be handled in node attributes.  And perhaps only allowed there too, since its a magic attribute.
 
-TopologyNode* NewickConverter::createNode(const std::string &n, int& start_pos, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens) {
-    
-    // if reading beyond end of string return null
-    if (start_pos >= n.size()){
-        return nullptr;                                                                                                                                                                        
+TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens) {
+ // create a string-stream and throw the string into it
+ std::stringstream ss (std::stringstream::in | std::stringstream::out);
+   ss << n;
+   char c = ' ';
+   ss.get(c);
+   // the initial character has to be '('
+   //   fixme: actually, the string 'a;' is valid newick.
+    if ( c != '('){
+         throw RbException() << "Error while converting Newick tree. We expected an opening parenthesis, but didn't get one. Problematic string: " << n;
     }
-    char c = n[start_pos];
-
     TopologyNode *node = new TopologyNode();
     while ( ss.good() && ss.peek() != ')' )
     {

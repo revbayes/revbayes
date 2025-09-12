@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <iosfwd>
+#include <optional>
 
 namespace RevBayesCore {
 
@@ -36,12 +37,16 @@ namespace RevBayesCore {
         std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string input, int start_pos);
         std::optional<int> parseChar(const std::string input, int start_pos, char c);
         std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& input, int start_pos);
+        std::optional<std::pair<TopologyNode*, int>> parseLeaf(const std::string& input, int start_pos);
+        std::optional<std::pair<std::vector<TopologyNode*>, int>> parseBranchSet(const std::string& input, int start_pos);
         std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos);
+        
         
         Tree*                   convertFromNewick(const std::string &n);
 //        AdmixtureTree*          getAdmixtureTreeFromNewick(const std::string &n);
 
     private:
+        //TopologyNode* createNode(const std::string &n, int& start_pos, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens);
         TopologyNode*           createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens);
     };
 
