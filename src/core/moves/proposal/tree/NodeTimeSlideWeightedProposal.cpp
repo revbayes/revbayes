@@ -112,8 +112,9 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
         if (logMCMC >=1 or debugMCMC >=1)
         {
             std::cerr << "mvNodeTimeSlide has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
-            storedNode = nullptr;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     

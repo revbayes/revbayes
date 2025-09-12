@@ -129,8 +129,9 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
         if (logMCMC >=1 or debugMCMC >=1)
         {
             std::cerr << "mvNodeRateTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
-            storedNode = nullptr;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     
@@ -237,7 +238,7 @@ void NodeRateTimeSlideUniformProposal::undoProposal( void )
     
     // undo the proposal
     storedNode->setAge( storedAge );
-        
+    
     if( rates_node != NULL )
     {
         rates_node->getValue() = stored_rates;

@@ -130,8 +130,9 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
         if (logMCMC >=1 or debugMCMC >=1)
         {
             std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
-            storedNode = nullptr;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
 
@@ -378,7 +379,7 @@ void TreeNodeAgeUpdateProposal::undoProposal( void )
     
     // undo the proposal
     TopologyNode& parent = storedNode->getParent();
-        
+
     // we need to work with the times
     double parent_age  = parent.getAge();
     double my_new_age      = storedNode->getAge();
@@ -387,17 +388,16 @@ void TreeNodeAgeUpdateProposal::undoProposal( void )
     {
         child_Age = storedNode->getChild( 1 ).getAge();
     }
-        
+
     for ( size_t i=0; i<geneTrees.size(); ++i )
     {
         // get the i-th gene tree
         Tree& geneTree = geneTrees[i]->getValue();
-            
+
         std::vector<TopologyNode*> nodes = getNodesInPopulation(geneTree, *storedNode );
-            
+
         for (size_t j=0; j<nodes.size(); ++j)
         {
-                
             double new_a = nodes[j]->getAge();
             double a = new_a;
             if ( new_a > my_new_age )
@@ -408,13 +408,12 @@ void TreeNodeAgeUpdateProposal::undoProposal( void )
             {
                 a = child_Age + (storedAge - child_Age)/(my_new_age - child_Age) * (new_a - child_Age);
             }
-                
+
             // set the new age of this gene tree node
             geneTree.getNode( nodes[j]->getIndex() ).setAge( a );
         }
-            
     }
-        
+
     // set the age of the species tree node
     speciesTree->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
 }
