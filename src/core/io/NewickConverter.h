@@ -33,7 +33,11 @@ namespace RevBayesCore {
     public:
         NewickConverter();
         virtual                 ~NewickConverter();
-    
+        std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string input, int start_pos);
+        std::optional<int> parseChar(const std::string input, int start_pos, char c);
+        std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& input, int start_pos);
+        std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos);
+        
         Tree*                   convertFromNewick(const std::string &n);
 //        AdmixtureTree*          getAdmixtureTreeFromNewick(const std::string &n);
 

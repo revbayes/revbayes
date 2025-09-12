@@ -81,24 +81,152 @@ Tree* NewickConverter::convertFromNewick(std::string const &n)
     return t;
 }
 
+// subtree -> internal OR leaf
+std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseSubTree(const std::string input, int start_pos){
+
+    if (auto check = parseInternal(input, start_pos))
+        return check;
+    
+    else {
+        return parseLeaf(input, start_pos);
+    }
+}
+
+//
+std::optional<int> NewickConverter::parseChar(const std::string input, int start_pos, char c){
+    // if reading beyond end of string return null
+    if (start_pos >= n.size()){
+        return {};
+    }
+    else if (input[start_pos] != c) {
+        return {};
+    }
+    else return start_pos+1;
+}
+// Internal -> '(' BranchSet ')' Name
+std::optional<std::pair<TopologyNode*, int>> NewickConverter::parseInternal(const std::string& input, int start_pos){
+    // Check if we have left parenthesis
+    if (auto check = parseChar(input, start_pos, '('))
+        start_pos = check.value();
+
+    else
+        return {};
+
+    if (auto check = parseBranchSet(input, start_pos)){
+        auto [children, new_start_pos] = check.value();
+        start_pos = new_start_pos;
+    }
+
+    else
+        return {};
+
+    // Check for right parenthesis
+    if (auto check = parseChar(input, start_pos, ')'))
+        start_pos = check.value();
+
+    else
+        return {};
+    
+    if (auto check = parseName(input, start_pos)){
+        auto[name, new_start_pos] = check.value();
+        start_pos = new_start_pos;
+    }
+
+    else
+        return {}; 
+
+    // construct new topology node with children children and name name
+}
+
+std::optional<std::pair<std::string, int>> NewickConverter::parseName(const std::string& input, int start_pos){
+    //handle newick escaping hear, read newick minus parsing syntax?
+    //* skip any whitespace
+    // quoted name or non-quoted name, make two new functions for this
+    // parse quoted name: if failed, instead of {}, call parse-unquoted name
+    // return call parse unquoted
+    
+    // check if starting position is out of bounds
+    // i think static cast is important to have .size be an int
+    if (start_pos < 0 || start_pos >= static_cast<int>(input.size())) {
+        return std::nullopt;
+    }
+
+    // skip whitespace
+    int pos = start_pos;
+    while (pos < static_cast<int>(input.size())) {
+        char c = input[pos];
+        if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+            break;
+        }
+        ++pos;
+    }
+    if (pos >= static_cast<int>(input.size())) {
+        return std::nullopt;
+    }
+
+    // is name quoted?
+    if (input[pos] == '\'') {          
+        ++pos; // index past quote               
+        std::string out;
+        // need to verify this loop is working as intended
+        // idea is if we seee a single quote it may be an internal quote not the terminal one
+        while (pos < static_cast<int>(input.size())) {
+            char c = input[pos];
+            if (c == '\'') {
+                if (pos + 1 < static_cast<int>(input.size()) && input[pos + 1] == '\'') {
+                    // just learned about push_back may not work
+                    out.push_back('\'');
+                    pos += 2;
+                    continue;
+                } else {
+                    // Closing quote found
+                    ++pos;
+                    return std::make_pair(out, pos);
+                }
+            }
+            out.push_back(c);
+            ++pos;
+        }
+
+        return std::nullopt; // no closing quote found
+    }
+    //unquoted case, is character important character
+    auto isdelim = [](char c) {
+        switch (c) {
+            case '(': case ')': case ',': case ':': case ';':
+            case '[': case ']':
+            case ' '
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    std::string out;
+    while (pos < static_cast<int>(input.size())) {
+        char c = input[pos];
+        if (isdelim(c)) break;  // stop at a delimiter
+        out.push_back(c);
+        ++pos;
+    }
+
+    if (out.empty()) {
+        return std::nullopt;
+    }
+
+    return std::make_pair(out, pos);
+
+}
 // This routine has 4 copies of attribute parsing from comments -- 2 for node attributes, and 2 for branch attributes.
 // Probably "index" should only be handled in node attributes.  And perhaps only allowed there too, since its a magic attribute.
 
-TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens) {
-
-    // create a string-stream and throw the string into it
-    std::stringstream ss (std::stringstream::in | std::stringstream::out);
-    ss << n;
-
-    char c = ' ';
-    ss.get(c);
-
-    // the initial character has to be '('
-    //   fixme: actually, the string 'a;' is valid newick.
-    if ( c != '(')
-    {
-        throw RbException() << "Error while converting Newick tree. We expected an opening parenthesis, but didn't get one. Problematic string: " << n;
+TopologyNode* NewickConverter::createNode(const std::string &n, int& start_pos, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens) {
+    
+    // if reading beyond end of string return null
+    if (start_pos >= n.size()){
+        return nullptr;                                                                                                                                                                        
     }
+    char c = n[start_pos];
 
     TopologyNode *node = new TopologyNode();
     while ( ss.good() && ss.peek() != ')' )
