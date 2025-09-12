@@ -277,9 +277,7 @@ LogDensity BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTim
     prepareProbComputation();
 
     // variable declarations and initialization
-    double lnProbTimes = computeLnProbabilityTimes();
-    
-    return lnProbTimes;
+    return computeLnProbabilityTimes();
 }
 
 
@@ -1564,7 +1562,7 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
             // to be safe, we copy over the taxa
             taxa = value->getTaxa();
 
-        } while ( RbMath::isFinite( computeLnProbability() ) == false );
+        } while ( computeLnProbability().isfinite() == false );
     }
     else
     {

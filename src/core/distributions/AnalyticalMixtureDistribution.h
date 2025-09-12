@@ -56,7 +56,7 @@ namespace RevBayesCore {
         const TypedDagNode< Simplex >*                          probabilities;
         
         bool                                                    dirty;
-        std::vector<double>                                     ln_probabilities;
+        std::vector<LogDensity>                                 ln_probabilities;
     };
     
 }
@@ -86,7 +86,7 @@ RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::AnalyticalMixtureDistr
         }
     }
     
-    ln_probabilities = std::vector<double>(base_distributions.size(), 0.0);
+    ln_probabilities = std::vector<LogDensity>(base_distributions.size(), 0.0);
     dirty = true;
     
     this->redrawValue();
@@ -148,7 +148,7 @@ LogDensity RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnPr
 
     }
     
-    double max_prob = ln_probabilities[0];
+    LogDensity max_prob = ln_probabilities[0];
     for (size_t i=1; i<base_distributions.size(); ++i)
     {
         if ( ln_probabilities[i] > max_prob )
@@ -163,7 +163,7 @@ LogDensity RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnPr
     {
         sum_probs += exp( ln_probabilities[i] - max_prob );
     }
-    double ln_sum_probs = log( sum_probs ) + max_prob;
+    LogDensity ln_sum_probs = logDensity( sum_probs ) + max_prob;
     
     
     return ln_sum_probs;
@@ -184,7 +184,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
         }
         
         // first, find the maximum probability
-        double max_prob = ln_probabilities[0];
+        LogDensity max_prob = ln_probabilities[0];
         for (size_t i=1; i<base_distributions.size(); ++i)
         {
             if ( ln_probabilities[i] > max_prob )
@@ -199,7 +199,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
         {
             sum_probs += exp( ln_probabilities[i] - max_prob );
         }
-        double ln_sum_probs = log( sum_probs ) + max_prob;
+        LogDensity ln_sum_probs = log( sum_probs ) + max_prob;
         
         // finally, compute each probability
         for (size_t i=0; i<base_distributions.size(); ++i)

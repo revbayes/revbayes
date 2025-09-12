@@ -28,8 +28,8 @@ namespace RevBayesCore {
 
         // virtual functions from AbstractEventsDistribution
         void                                                resimulate(void);
-        double                                              addEvent(double time);
-        double                                              removeEvent(double time);
+        LogDensity                                          addEvent(double time);
+        LogDensity                                          removeEvent(double time);
         void                                                changeEventTime(double old_time, double new_time);
         void                                                resetEvents(void);
 
@@ -147,7 +147,7 @@ LogDensity RevBayesCore::MarkovEventsDistribution<valueType>::computeLnProbabili
 	}
 
 	// compute the probability
-	double ln_prob = 0.0;
+	LogDensity ln_prob = 0.0;
 
 	for( typename std::map<double, valueType>::const_iterator it = the_values.begin(); it != the_values.end(); ++it)
 	{
@@ -211,7 +211,7 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::resimulate(void)
 }
 
 template <class valueType>
-double RevBayesCore::MarkovEventsDistribution<valueType>::addEvent(double time)
+LogDensity RevBayesCore::MarkovEventsDistribution<valueType>::addEvent(double time)
 {
 	// NOTE: to undo this event, call removeEvent on the same time
 
@@ -236,7 +236,7 @@ double RevBayesCore::MarkovEventsDistribution<valueType>::addEvent(double time)
 }
 
 template <class valueType>
-double RevBayesCore::MarkovEventsDistribution<valueType>::removeEvent(double time)
+LogDensity RevBayesCore::MarkovEventsDistribution<valueType>::removeEvent(double time)
 {
 	// NOTE: to undo this event, we have to store the value of the event
 	// and then call resetEvents to add the value back

@@ -174,7 +174,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         // we found the corresponding member method
         found = true;
         
-        return RevPtr<RevVariable>( new RevVariable( new Real( this->getLnProbability() ), "" ) );
+        return RevPtr<RevVariable>( new RevVariable( new Real( (double)this->getLnProbability() ), "" ) );
     }
     else if (name == "probability")
     {

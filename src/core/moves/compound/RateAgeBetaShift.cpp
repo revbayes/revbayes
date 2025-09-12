@@ -208,10 +208,10 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double my_new_age = (parent_age-child_Age) * new_m + child_Age;
     
     // compute the Hastings ratio
-    double forward = RbStatistics::Beta::lnPdf(a, b, new_m);
+    LogDensity forward = RbStatistics::Beta::lnPdf(a, b, new_m);
     double new_a = delta * new_m + 1.0;
     double new_b = delta * (1.0-new_m) + 1.0;
-    double backward = RbStatistics::Beta::lnPdf(new_a, new_b, m);
+    LogDensity backward = RbStatistics::Beta::lnPdf(new_a, new_b, m);
 
     // 4. set the age
     tau.getNode(node_idx).setAge( my_new_age );
@@ -220,7 +220,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     tree->touch();
 
     // get the probability ratio of the tree
-    double tree_prob_ratio = tree->getLnProbabilityRatio();
+    LogDensity tree_prob_ratio = tree->getLnProbabilityRatio();
 
     // 5. set the rates
     double my_new_rate = (parent_age - my_age) * stored_rates[node_idx] / (parent_age - my_new_age);
@@ -258,7 +258,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     }
 
     // 6. get the jacobian and the hastings ratio
-    double jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
+    LogDensity jacobian = log((parent_age - my_age) / (parent_age - my_new_age));
 
     for (size_t i = 0; i < node->getNumberOfChildren(); i++)
     {
@@ -266,11 +266,11 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         double a = node->getChild(i).getAge();
         jacobian += log((my_age - a) / (my_new_age - a));
     }
-    double ln_hastings_ratio = backward - forward + jacobian;
+    LogDensity ln_hastings_ratio = backward - forward + jacobian;
 
     // 7. compute the heated posterior ratio
-    double ln_likelihood_ratio = 0;
-    double ln_prior_ratio = 0;
+    LogDensity ln_likelihood_ratio = 0;
+    LogDensity ln_prior_ratio = 0;
     for(auto node: views::concat(nodes, affected_nodes))
     {
         if (auto test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(node))
@@ -279,7 +279,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
             {
                 // In theory the rate*time tree and its branch lengths should be unchanged.
                 // Therefore the substitution likelihood for a data set downstream from the tree should be unchanged.
-                assert( std::abs(node->getLnProbabilityRatio()) < 1.0e-9 );
+                assert( std::abs((double)node->getLnProbabilityRatio()) < 1.0e-9 );
                 continue;
             }
         }
@@ -305,9 +305,9 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         std::cerr<<"\n";
     }
 
-    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+    LogDensity ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
-    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+    LogDensity ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
     // 8. Determine whether to accept or reject
     bool rejected = false;

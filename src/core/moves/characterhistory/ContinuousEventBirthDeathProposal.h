@@ -35,7 +35,7 @@ namespace RevBayesCore {
         
         // pure virtual methods
         CharacterEvent*                         drawNewEvent(double event_time) override;
-        double                                  computeEventProposalProbability( CharacterEvent* event ) override;
+        LogDensity                              computeEventProposalProbability( CharacterEvent* event ) override;
         
     };
     

@@ -149,14 +149,14 @@ void VariableMonitor::monitor(std::uint64_t gen)
     std::ios_base::fmtflags previousFlags = out_stream.flags();
     out_stream.precision(RbSettings::userSettings().getOutputPrecision());
 
-    double Posterior = 0;
-    double Likelihood = 0;
-    double Prior = 0;
+    LogDensity Posterior = 0;
+    LogDensity Likelihood = 0;
+    LogDensity Prior = 0;
     if (posterior or likelihood or prior)
     {
 	for (auto& node: model->getDagNodes())
 	{
-	    double Pr = node->getLnProbability();
+	    LogDensity Pr = node->getLnProbability();
 	    Posterior += Pr;
 	    if (node->isClamped())
 		Likelihood += Pr;
@@ -172,9 +172,9 @@ void VariableMonitor::monitor(std::uint64_t gen)
 
 	line["Iteration"] = gen;
         
-	if (Posterior) line["Posterior"] = Posterior;
-	if (Likelihood) line["Likelihood"] = Likelihood;
-	if (Prior) line["Prior"] = Prior;
+	if ( not (Posterior == 0 ) ) line["Posterior"] = (double)Posterior;
+	if ( not (Likelihood == 0) ) line["Likelihood"] = (double)Likelihood;
+	if ( not (Prior == 0)      ) line["Prior"] = (double)Prior;
 
 	for (auto& node: nodes)
 	{
@@ -190,22 +190,22 @@ void VariableMonitor::monitor(std::uint64_t gen)
     {
 	auto& separator = to<SeparatorFormat>(format)->separator;
 
-        if ( posterior == true )
+        if ( not (posterior == 0) )
         {
             // add a separator before every new element
-            out_stream << separator << Posterior;
+            out_stream << separator << (double)Posterior;
         }
 
-        if ( likelihood == true )
+        if ( not (likelihood == 0) )
         {
             // add a separator before every new element
-            out_stream << separator << Likelihood;
+            out_stream << separator << (double)Likelihood;
         }
 
-        if ( prior == true )
+        if ( not (prior == 0) )
         {
             // add a separator before every new element
-            out_stream << separator << Prior;
+            out_stream << separator << (double)Prior;
         }
         
         monitorVariables( gen );

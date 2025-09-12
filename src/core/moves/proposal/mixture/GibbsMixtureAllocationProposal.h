@@ -168,13 +168,13 @@ LogDensity RevBayesCore::GibbsMixtureAllocationProposal<mixtureType>::doProposal
         variable->touch();
         
         // compute the likelihood of the new value
-        double prior_ratio = variable->getLnProbability();
-        double likelihood_ratio = 0.0;
+        LogDensity prior_ratio = variable->getLnProbability();
+        LogDensity likelihood_ratio = 0.0;
         for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
         {
             likelihood_ratio += (*it)->getLnProbability();
         }
-        weights[i] = prior_ratio + likelihood_ratio;
+        weights[i] = double(prior_ratio + likelihood_ratio);
         
         if (max_weight < weights[i])
         {

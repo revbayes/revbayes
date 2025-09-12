@@ -50,8 +50,8 @@ namespace RevBayesCore {
         virtual void                                        restoreSpecialization(const DagNode *restorer);
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
         
-        double                                              computeNodeProbability(const TopologyNode &n, size_t nIdx);
-        double                                              computeRootLikelihood(void);
+        LogDensity                                          computeNodeProbability(const TopologyNode &n, size_t nIdx);
+        LogDensity                                          computeRootLikelihood(void);
         
         
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                                //!< Swap a parameter

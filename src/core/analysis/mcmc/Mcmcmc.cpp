@@ -322,7 +322,7 @@ const Model& Mcmcmc::getModel( void ) const
 }
 
 
-double Mcmcmc::getModelLnProbability( bool likelihood_only )
+LogDensity Mcmcmc::getModelLnProbability( bool likelihood_only )
 {
     // we need to make sure that the vector chain_values is propagated properly
     // usualy we store the posteriors in there
@@ -330,7 +330,7 @@ double Mcmcmc::getModelLnProbability( bool likelihood_only )
     synchronizeValues(likelihood_only);
     
     // create the return value
-    double rv = RbConstants::Double::neginf;
+    LogDensity rv = RbConstants::Double::neginf;
     
     for (size_t i=0; i<num_chains; ++i)
     {
@@ -1332,7 +1332,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
 {
     
     // synchronize chain values
-    double results[num_chains];
+    LogDensity results[num_chains];
     for (size_t j = 0; j < num_chains; ++j)
     {
         results[j] = 0.0;
@@ -1356,7 +1356,8 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         {
             if ( pid == pid_per_chain[i] )
             {
-                MPI_Send(&results[i], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD);
+                MPI_Send(&results[i].zeros(), 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD);
+                MPI_Send(&results[i].ones(), 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD);
             }
             
         }
@@ -1375,7 +1376,8 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
             if (pid != pid_per_chain[j])
             {
                 MPI_Status status;
-                MPI_Recv(&results[j], 1, MPI_DOUBLE, pid_per_chain[j], 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&results[j].zeros(), 1, MPI_DOUBLE, pid_per_chain[j], 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&results[j].ones(), 1, MPI_DOUBLE, pid_per_chain[j], 0, MPI_COMM_WORLD, &status);
             }
             
         }
@@ -1393,7 +1395,8 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         {
             for (size_t j=0; j<num_chains; ++j)
             {
-                MPI_Send(&chain_values[j], 1, MPI_DOUBLE, active_PID+i, 0, MPI_COMM_WORLD);
+                MPI_Send(&chain_values[j].zeros(), 1, MPI_DOUBLE, active_PID+i, 0, MPI_COMM_WORLD);
+                MPI_Send(&chain_values[j].ones(), 1, MPI_DOUBLE, active_PID+i, 0, MPI_COMM_WORLD);
             }
         }
     }
@@ -1402,7 +1405,8 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         for (size_t i=0; i<num_chains; ++i)
         {
             MPI_Status status;
-            MPI_Recv(&chain_values[i], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chain_values[i].zeros(), 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chain_values[i].ones(), 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD, &status);
         }
         
     }
@@ -1759,9 +1763,9 @@ void Mcmcmc::swapGivenChains(size_t j, size_t k, double lnProposalRatio)
     // compute exchange ratio
     double bj = chain_heats[j];
     double bk = chain_heats[k];
-    double lnPj = chain_values[j];
-    double lnPk = chain_values[k];
-    double lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
+    LogDensity lnPj = chain_values[j];
+    LogDensity lnPk = chain_values[k];
+    LogDensity lnR = bj * (lnPk - lnPj) + bk * (lnPj - lnPk) + lnProposalRatio;
     //        std::cout << "bj=" << bj << ", bk=" << bk << ", lnPj=" << lnPj << ", lnPk=" << lnPk << ", lnR=" << lnR << std::endl;
 
     // determine whether we accept or reject the chain swap

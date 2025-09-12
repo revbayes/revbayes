@@ -248,11 +248,11 @@ template <class valueType>
 LogDensity RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbability( void )
 {
     
-    double ln_prob = 0;
+    LogDensity ln_prob = 0;
     double prob    = 0;
     
-    std::vector<double> ln_probs = std::vector<double>(num_samples, 0.0);
-    std::vector<double> probs    = std::vector<double>(num_samples, 0.0);
+    std::vector<LogDensity> ln_probs(num_samples, 0.0);
+    std::vector<double> probs(num_samples, 0.0);
     
     // add the ln-probs for each sample
     for (size_t i = 0; i < num_samples; ++i)
@@ -276,7 +276,8 @@ LogDensity RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbabi
             if ( this->process_active == false )
             {
                 // send from the workers the log-likelihood to the master
-                MPI_Send(&ln_probs[i], 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
+                MPI_Send(&ln_probs[i].zeros(), 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
+                MPI_Send(&ln_probs[i].ones(), 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD);
             }
             
         }
@@ -284,14 +285,15 @@ LogDensity RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbabi
         else if ( this->process_active == true )
         {
             MPI_Status status;
-            MPI_Recv(&ln_probs[i], 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&ln_probs[i].zeros(), 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&ln_probs[i].ones(), 1, MPI_DOUBLE, pid_per_sample[i], 0, MPI_COMM_WORLD, &status);
         }
         
     }
 #endif
     
     
-    double max = 0;
+    LogDensity max = 0;
     // add the ln-probs for each sample
     for (size_t i = 0; i < num_samples; ++i)
     {
@@ -330,7 +332,8 @@ LogDensity RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbabi
         
         for (size_t i=this->active_PID+1; i<this->active_PID+this->num_processes; ++i)
         {
-            MPI_Send(&ln_prob, 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
+            MPI_Send(&ln_prob.zeros(), 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
+            MPI_Send(&ln_prob.ones(), 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
         }
         
     }
@@ -338,7 +341,8 @@ LogDensity RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbabi
     {
         
         MPI_Status status;
-        MPI_Recv(&ln_prob, 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&ln_prob.zeros(), 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&ln_prob.ones(), 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
         
     }
 #endif

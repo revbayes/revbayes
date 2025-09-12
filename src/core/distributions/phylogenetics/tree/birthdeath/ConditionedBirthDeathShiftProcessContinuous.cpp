@@ -239,7 +239,7 @@ LogDensity ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( vo
 {
     
     // Variable declarations and initialization
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
     double age = root_age->getValue();
     
     // we need to check that the root age matches
@@ -300,9 +300,9 @@ LogDensity ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( vo
 }
 
 
-double ConditionedBirthDeathShiftProcessContinuous::computeNodeProbability(const RevBayesCore::TopologyNode &node, size_t node_index)
+LogDensity ConditionedBirthDeathShiftProcessContinuous::computeNodeProbability(const RevBayesCore::TopologyNode &node, size_t node_index)
 {
-    double ln_prob_node = 0.0;
+    LogDensity ln_prob_node = 0.0;
     
     // check for recomputation
     if ( true )
@@ -322,10 +322,10 @@ double ConditionedBirthDeathShiftProcessContinuous::computeNodeProbability(const
             // this is an internal node
             const TopologyNode &left = node.getChild(0);
             size_t left_index = left.getIndex();
-            double ln_prob_left = computeNodeProbability( left, left_index );
+            LogDensity ln_prob_left = computeNodeProbability( left, left_index );
             const TopologyNode &right = node.getChild(1);
             size_t right_index = right.getIndex();
-            double ln_prob_right = computeNodeProbability( right, right_index );
+            LogDensity ln_prob_right = computeNodeProbability( right, right_index );
             
             if ( event_prior_only == false )
             {
@@ -491,7 +491,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeStateValue(size_t i, 
 }
 
 
-double ConditionedBirthDeathShiftProcessContinuous::computeRootLikelihood( void )
+LogDensity ConditionedBirthDeathShiftProcessContinuous::computeRootLikelihood( void )
 {
     
     const TopologyNode &root = value->getRoot();
@@ -499,14 +499,14 @@ double ConditionedBirthDeathShiftProcessContinuous::computeRootLikelihood( void 
     // fill the like
     const TopologyNode &left = root.getChild(0);
     size_t left_index = left.getIndex();
-    double ln_prob_left = computeNodeProbability( left, left_index );
+    LogDensity ln_prob_left = computeNodeProbability( left, left_index );
     const TopologyNode &right = root.getChild(1);
     size_t right_index = right.getIndex();
-    double ln_prob_right = computeNodeProbability( right, right_index );
+    LogDensity ln_prob_right = computeNodeProbability( right, right_index );
     
     
     // now compute the likelihoods of this internal node
-    double ln_prob = ln_prob_left + ln_prob_right;
+    LogDensity ln_prob = ln_prob_left + ln_prob_right;
     
     if ( condition == "survival" )
     {

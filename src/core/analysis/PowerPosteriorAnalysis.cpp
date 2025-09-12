@@ -377,7 +377,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         if ( k > burnin && k % sampleFreq == 0 )
         {
             // compute the joint likelihood
-            double likelihood = sampler->getModelLnProbability(true);
+            LogDensity likelihood = sampler->getModelLnProbability(true);
             outStream << k << "\t" << p << "\t" << likelihood << std::endl;
         }
             

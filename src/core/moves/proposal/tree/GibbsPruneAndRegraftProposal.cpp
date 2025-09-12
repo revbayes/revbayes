@@ -138,12 +138,12 @@ LogDensity GibbsPruneAndRegraftProposal::doProposal( void )
     RbOrderedSet<DagNode *> affected;
     variable->initiateGetAffectedNodes( affected );
     
-    double backwardLikelihood = variable->getLnProbability();
+    LogDensity backwardLikelihood = variable->getLnProbability();
     for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
     {
         backwardLikelihood += (*it)->getLnProbability();
     }
-    int offset = (int) -backwardLikelihood;
+    int offset = (int) (-(double)backwardLikelihood);
     double backward = exp(backwardLikelihood + offset);
     
     // pick a random node which is not the root and neithor the direct descendant of the root
@@ -188,8 +188,8 @@ LogDensity GibbsPruneAndRegraftProposal::doProposal( void )
         variable->touch();
         
         // compute the likelihood of the new value
-        double priorRatio = variable->getLnProbability();
-        double likelihoodRatio = 0.0;
+        LogDensity priorRatio = variable->getLnProbability();
+        LogDensity likelihoodRatio = 0.0;
         for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
         {
             likelihoodRatio += (*it)->getLnProbability();

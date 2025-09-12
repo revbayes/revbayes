@@ -37,7 +37,7 @@ void LnProbabilityFunction::swapParameterInternal(const DagNode *oldP, const Dag
 void LnProbabilityFunction::update( void )
 {
 //    *value = a->
-    *value = const_cast<StochasticNode<double>* >(a)->getLnProbability();
+    *value = (double) const_cast<StochasticNode<double>* >(a)->getLnProbability();
 }
 
 

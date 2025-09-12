@@ -150,7 +150,7 @@ LogDensity RevBayesCore::VectorMixtureDistribution<mixtureType>::computeLnProbab
         {
             const mixtureType &tmp_val = (*this->value)[j];
             this_base_dist->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( tmp_val ) );
-            ln_probabilities[i] += this_base_dist->computeLnProbability();
+            ln_probabilities[i] += (double)this_base_dist->computeLnProbability();
         }
     }
     

@@ -60,14 +60,14 @@ const std::string& DiscreteEventBirthDeathProposal::getProposalName( void ) cons
  *
  * \return The hastings ratio.
  */
-double DiscreteEventBirthDeathProposal::computeEventProposalProbability(CharacterEvent *event)
+LogDensity DiscreteEventBirthDeathProposal::computeEventProposalProbability(CharacterEvent *event)
 {
     
     CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
     size_t num_states         = history.getNumberStates();
     
-    return -log( num_states );
+    return -logDensity( num_states );
 }
 
 

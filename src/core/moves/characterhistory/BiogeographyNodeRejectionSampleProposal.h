@@ -94,8 +94,8 @@ namespace RevBayesCore {
         std::string                                                 storedCladogeneticEvent;
         
         TopologyNode*                                               node;
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
         
         PathRejectionSampleProposal<charType>*                      nodeProposal;
         PathRejectionSampleProposal<charType>*                      leftProposal;
@@ -538,7 +538,7 @@ LogDensity RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::doP
     storedLnProb = p_node_bwd + p_clado_bwd + p_ana_cond_bwd;
     
     // this is the hastings ratio
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
     
     // update ancestral node state
     double p_node_fwd = sampleNodeCharacters();
@@ -548,7 +548,7 @@ LogDensity RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::doP
     // NOTE: this term cancels with the node proposal density when
     //       daughter lineages identically inherit the ancestral range
     //       but not when cladogenetic events are present!
-    double p_ana_cond_fwd = computeAnagenesisConditionLnProposal();
+    LogDensity p_ana_cond_fwd = computeAnagenesisConditionLnProposal();
     
     proposedLnProb = p_node_fwd + p_clado_fwd + p_ana_cond_fwd;
 

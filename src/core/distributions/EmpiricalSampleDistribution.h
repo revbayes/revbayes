@@ -228,7 +228,7 @@ template <class valueType>
 LogDensity RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbability( void )
 {
     
-    double ln_prob = 0;
+    LogDensity ln_prob = 0;
     double prob    = 0;
     
     std::vector<double> probs = std::vector<double>(num_samples, 0.0);
@@ -238,7 +238,7 @@ LogDensity RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbab
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            ln_probs[i] = base_distribution_instances[i]->computeLnProbability();
+            ln_probs[i] = (double)base_distribution_instances[i]->computeLnProbability();
         }
         
     }
@@ -310,7 +310,8 @@ LogDensity RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbab
 
         for (size_t i=this->active_PID+1; i<this->active_PID+this->num_processes; ++i)
         {
-            MPI_Send(&ln_prob, 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
+            MPI_Send(&ln_prob.zeros(), 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
+            MPI_Send(&ln_prob.ones(), 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD);
         }
 
     }
@@ -318,7 +319,8 @@ LogDensity RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbab
     {
 
         MPI_Status status;
-        MPI_Recv(&ln_prob, 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&ln_prob.zeros(), 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&ln_prob.ones(), 1, MPI_DOUBLE, this->active_PID, 0, MPI_COMM_WORLD, &status);
 
     }
 #endif

@@ -186,7 +186,7 @@ void MaximumLikelihoodAnalysis::run( double epsilon, bool verbose )
 
     // Run the chain
     bool converged = false;
-    double previous_ln_likelihood = RbConstants::Double::neginf;
+    LogDensity previous_ln_likelihood = RbConstants::Double::neginf;
     do {
         ++gen;
 
@@ -197,7 +197,7 @@ void MaximumLikelihoodAnalysis::run( double epsilon, bool verbose )
         if ( gen % tuning_interval == 0 )
         {
 
-            double current_ln_likelihood = estimator->getModelLnProbability(false);
+            LogDensity current_ln_likelihood = estimator->getModelLnProbability(false);
             converged = (current_ln_likelihood - previous_ln_likelihood) < min_improvement;
 
 //            converged &= estimator->hasConverged( min_acceptance_ratio );

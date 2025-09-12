@@ -22,6 +22,8 @@ using boost::optional;
 
 using namespace RevBayesCore;
 
+using std::abs;
+
 const double log_0 = RbConstants::Double::neginf;
 
 /** 
@@ -127,8 +129,8 @@ namespace  {
 
         double operator()()
             {
-                double lnPrior = 0.0;
-                double lnLikelihood = 0.0;
+                LogDensity lnPrior = 0.0;
+                LogDensity lnLikelihood = 0.0;
 
                 // 1. compute the probability of the current value for each node
                 lnPrior += variable->getLnProbability();
@@ -143,9 +145,9 @@ namespace  {
                 }
 
                 // 3. exponentiate with the chain heat
-                double lnPosterior = pHeat * (lHeat * lnLikelihood + prHeat * lnPrior);
+                LogDensity lnPosterior = pHeat * (lHeat * lnLikelihood + prHeat * lnPrior);
 
-                return lnPosterior;
+                return (double)lnPosterior;
             }
 
         double operator()(double x)
@@ -174,9 +176,9 @@ namespace  {
                 return Pr_;
             }
 
-        std::map<const DagNode*, double> getNodePrs()
+        std::map<const DagNode*, LogDensity> getNodePrs()
         {
-            std::map<const DagNode*, double> Prs;
+            std::map<const DagNode*, LogDensity> Prs;
             Prs.insert({variable, variable->getLnProbability()});
             for(auto affectedNode: affectedNodes)
                 Prs.insert({affectedNode, affectedNode->getLnProbability()});
@@ -196,8 +198,8 @@ namespace  {
                 std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";
                 for(auto& [n,pr1]: Prs)
                 {
-                    double pr2 = Prsx.at(n);
-                    if (std::abs(pr1-pr2)/std::abs(pr2) > 1.0e-11)
+                    auto pr2 = Prsx.at(n);
+                    if (double(abs(pr1-pr2))/double(abs(pr2)) > 1.0e-11)
                         std::cerr<<"         cause: probability for "<<n->getName()<<" is "<<pr1<<" but should be "<<pr2<<":  delta = "<<pr1-pr2<<"\n";
                 }
                 std::abort();

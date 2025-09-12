@@ -107,8 +107,8 @@ namespace RevBayesCore {
         std::string                                                 proposedCladogeneticEvent;
         
         TopologyNode*                                               node;
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
         
         PathRejectionSampleProposal<charType>*                      nodeProposal;
         PathRejectionSampleProposal<charType>*                      leftProposal;
@@ -568,7 +568,7 @@ LogDensity RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charTy
 //        std::cout << "root!\n";
     }
     
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
 
     // compute the backwards conditional transition probabilities
     double p_ana_cond_bwd = computeAnagenesisConditionLnProposal();

@@ -37,7 +37,7 @@ namespace RevBayesCore {
         void                                                finishMonitors(void);                                                                   //!< Finish the monitors
         Model&                                              getModel(void);
         const Model&                                        getModel(void) const;
-        double                                              getModelLnProbability(bool likelihood_only);
+        LogDensity                                          getModelLnProbability(bool likelihood_only);
         RbVector<Monitor>&                                  getMonitors(void);
         RbVector<Move>&                                     getMoves(void);
         MoveSchedule&                                       getSchedule(void);

@@ -92,7 +92,7 @@ LogDensity EventBirthDeathProposal::doProposal( void )
         p_birth = 0.5;
     }
 
-    double proposal_prob = 0.0;
+    LogDensity proposal_prob = 0.0;
     if ( u < p_birth )
     {
         proposal_prob = doBirthProposal();
@@ -106,7 +106,7 @@ LogDensity EventBirthDeathProposal::doProposal( void )
 }
 
 
-double EventBirthDeathProposal::doBirthProposal( void )
+LogDensity EventBirthDeathProposal::doBirthProposal( void )
 {
     ++trie_birth;
     
@@ -138,22 +138,22 @@ double EventBirthDeathProposal::doBirthProposal( void )
     
     // draw a new state
     CharacterEvent *new_event = drawNewEvent(event_time);
-    double ln_event_value_proposal_prob = computeEventProposalProbability( new_event );
+    LogDensity ln_event_value_proposal_prob = computeEventProposalProbability( new_event );
     history.addEvent( new_event, branch_index );
     
     // store value for reversal of proposal
     stored_value = new_event;
     stored_branch_index = branch_index;
     
-    double log_birth_move_prob = log(num_events_before == 0 ? 1.0 : 0.5);
-    double log_death_move_prob = log(0.5);
-    double p_forward  = log_birth_move_prob - log(num_branches) + ln_event_value_proposal_prob - log(branch_length);
-    double p_backward = log_death_move_prob - log(num_events_before+1);
+    LogDensity log_birth_move_prob = log(num_events_before == 0 ? 1.0 : 0.5);
+    LogDensity log_death_move_prob = log(0.5);
+    LogDensity p_forward  = log_birth_move_prob - log(num_branches) + ln_event_value_proposal_prob - log(branch_length);
+    LogDensity p_backward = log_death_move_prob - log(num_events_before+1);
     
     return p_backward - p_forward;
 }
 
-double EventBirthDeathProposal::doDeathProposal( void )
+LogDensity EventBirthDeathProposal::doDeathProposal( void )
 {
     ++trie_death;
     
@@ -183,12 +183,12 @@ double EventBirthDeathProposal::doDeathProposal( void )
         branch_length = node.getAge();
     }
     
-    double ln_event_value_proposal_prob = computeEventProposalProbability( event );
+    LogDensity ln_event_value_proposal_prob = computeEventProposalProbability( event );
 
-    double log_death_move_prob = log(0.5);
-    double log_birth_move_prob = log(num_events_before == 1 ? 1.0 : 0.5);
-    double p_forward  = log_death_move_prob - log(num_events_before);
-    double p_backward = log_birth_move_prob - log(num_branches) + ln_event_value_proposal_prob - log(branch_length);
+    LogDensity log_death_move_prob = log(0.5);
+    LogDensity log_birth_move_prob = log(num_events_before == 1 ? 1.0 : 0.5);
+    LogDensity p_forward  = log_death_move_prob - log(num_events_before);
+    LogDensity p_backward = log_birth_move_prob - log(num_branches) + ln_event_value_proposal_prob - log(branch_length);
     return p_backward - p_forward;
 }
 

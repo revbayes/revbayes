@@ -121,7 +121,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
     MultiValueEvent &mve = event_var->getValue();
     std::int64_t n_events = mve.getNumberOfEvents();
     
-    double hr = 0.0;
+    LogDensity hr = 0.0;
 
     // We need to randomly pick a birth or death move
     // Otherwise we might give birth and die every time
@@ -264,7 +264,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
         
     }
 
-    return hr;
+    return (double)hr;
 }
 
 
@@ -278,7 +278,7 @@ double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValu
     MultiValueEvent &mve = event_var->getValue();
     std::int64_t n_events = mve.getNumberOfEvents();
     
-    double hr = 0.0;
+    LogDensity hr = 0.0;
 
     // We need to randomly pick a birth or death move
     // Otherwise we might give birth and die every time
@@ -349,7 +349,7 @@ double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValu
         }
     }
     
-    return hr;
+    return (double)hr;
 }
 
 

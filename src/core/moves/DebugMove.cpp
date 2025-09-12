@@ -11,11 +11,13 @@
 
 using namespace RevBayesCore;
 
+using std::abs;
+
 namespace views = ranges::views;
 
-const double* ProbOrError::is_prob() const
+const LogDensity* ProbOrError::is_prob() const
 {
-    return to<double>(*this);
+    return to<LogDensity>(*this);
 }
 
 const std::string* ProbOrError::is_error() const
@@ -23,7 +25,7 @@ const std::string* ProbOrError::is_error() const
     return to<std::string>(*this);
 }
 
-double ProbOrError::is_prob_or(double d) const
+LogDensity ProbOrError::is_prob_or(LogDensity d) const
 {
     if (auto p = is_prob())
         return *p;
@@ -75,16 +77,16 @@ void compareNodePrs(const std::string& name, const NodePrMap& pdfs1, const NodeP
     {
 	auto PE2 = pdfs2.at(node);
 
-        double pr1 = PE1.is_prob_or(RbConstants::Double::nan);
-        double pr2 = PE2.is_prob_or(RbConstants::Double::nan);
+        LogDensity pr1 = PE1.is_prob_or(RbConstants::Double::nan);
+        LogDensity pr2 = PE2.is_prob_or(RbConstants::Double::nan);
 
 	// If they are equal then there is no difference.
-	if (pr1 == pr2 or (std::isnan(pr1) and std::isnan(pr2)))
+	if (pr1 == pr2 or (pr1.isnan() and pr2.isnan()))
         {
             // But if both are NaN or -Inf then its kind of weird!
             // This could indicate that a previous move created a -Inf situation.
             // In the future it could indicate that we haven't yet moved from Pr=0 to Pr>0.
-            if (not std::isfinite(pr1))
+            if (not pr1.isfinite())
             {
                 std::cerr<<"    WEIRD: "<<node->getName()<<": "<<PE1<<"\n";
                 weird = true;
@@ -93,8 +95,8 @@ void compareNodePrs(const std::string& name, const NodePrMap& pdfs1, const NodeP
         }
 
 	// Be a bit careful about computing a relative error.
-	double abs_err = std::abs(pr1 - pr2);
-	double scale = std::min(std::abs(pr1),std::abs(pr2));
+        double abs_err = (double)abs(pr1 - pr2);
+	double scale = (double)std::min(abs(pr1),abs(pr2));
 	if (scale < 1 or not RbMath::isAComputableNumber(scale))
 	    scale = 1;
 	double rel_err = abs_err/scale;

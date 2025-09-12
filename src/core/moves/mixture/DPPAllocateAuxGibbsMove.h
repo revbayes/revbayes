@@ -38,7 +38,7 @@ namespace RevBayesCore {
         
     private:
         
-        double                                                  getLnProbabilityForMove(void);
+        LogDensity                                              getLnProbabilityForMove(void);
         int                                                     findTableIDForVal(std::vector<valueType> tvs, valueType val);
         void                                                    normalizeVector(std::vector<double> &v);
         int                                                     findElementNewTable(double u, const std::vector<double> &prob);
@@ -103,7 +103,7 @@ void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::performGibbsMove( void )
     double alpha = dist.getConcentrationParam();
     TypedDistribution<valueType>* base_distribution = dist.getBaseDistribution();
         
-    double ln_alpha_over_num_aux = log( alpha/( (double)num_aux_cat ) );
+    LogDensity ln_alpha_over_num_aux = log( alpha/( (double)num_aux_cat ) );
 
     // loop over elements
     for (size_t i=0; i < num_elements; ++i)
@@ -127,8 +127,8 @@ void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::performGibbsMove( void )
                 temp_tables.push_back(new_value);
                 element_values[i] = new_value;
                 variable->touch();
-                double table_lnL = getLnProbabilityForMove(); // get lnL after changing tables
-                ln_probs.push_back( log(num_seated) + table_lnL );
+                LogDensity table_lnL = getLnProbabilityForMove(); // get lnL after changing tables
+                ln_probs.push_back( double(logDensity(num_seated) + table_lnL) );
             }
             else
             {
@@ -145,8 +145,8 @@ void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::performGibbsMove( void )
             temp_tables.push_back(new_value);
             element_values[i] = new_value;
             variable->touch();
-            double aux_lnL = getLnProbabilityForMove(); // get lnL after changing tables
-            ln_probs.push_back( ln_alpha_over_num_aux + aux_lnL );
+            LogDensity aux_lnL = getLnProbabilityForMove(); // get lnL after changing tables
+            ln_probs.push_back( double(ln_alpha_over_num_aux + aux_lnL) );
         }
         
         // normalize ln_probs vector
@@ -199,17 +199,16 @@ void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::swapNodeInternal(DagNode 
 
 
 template <class valueType>
-double RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::getLnProbabilityForMove(void)
+LogDensity RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::getLnProbabilityForMove(void)
 {
     
     RbOrderedSet<DagNode*> affected;
     variable->initiateGetAffectedNodes( affected );
-    double ln_probs = 0.0;
+    LogDensity ln_probs = 0.0;
     for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
     {
         DagNode *the_node = *it;
-        double lp = the_node->getLnProbability();
-        ln_probs += lp;
+        ln_probs += the_node->getLnProbability();
     }
     return ln_probs;
 }

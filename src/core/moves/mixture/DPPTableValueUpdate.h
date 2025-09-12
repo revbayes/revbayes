@@ -41,7 +41,7 @@ namespace RevBayesCore {
         void                                                    swapNodeInternal(DagNode *oldN, DagNode *newN);
         
     private:
-        double													getLnProbabilityForMove(void);
+        LogDensity													getLnProbabilityForMove(void);
         int														findTableIDForVal(std::vector<valueType> tvs, valueType val);
         void													dppNormalizeVector(std::vector<double> &v);
         int														findElementNewTable(double u, std::vector<double> lnProb);
@@ -120,10 +120,10 @@ void RevBayesCore::DPPTableValueUpdate<valueType>::performGibbsMove( void )
     {
         
         // get old lnL
-        double oldLnl = getLnProbabilityForMove();
+        LogDensity oldLnl = getLnProbabilityForMove();
         
         valueType storedValue = tableVals[i];
-        double ln_hastings_ratio = proposal->propose( tableVals[i] );
+        LogDensity ln_hastings_ratio = proposal->propose( tableVals[i] );
 //        tableVals[i] = newValue;
         
         // Assign new value to elements
@@ -136,15 +136,15 @@ void RevBayesCore::DPPTableValueUpdate<valueType>::performGibbsMove( void )
         }
         
         g0->getValue() = tableVals[i]; // new
-        double priorRatio = g0->computeLnProbability();
+        LogDensity priorRatio = g0->computeLnProbability();
         g0->getValue() = storedValue; // old
         priorRatio -= g0->computeLnProbability();
         
         variable->touch();
-        double newLnl = getLnProbabilityForMove();
-        double lnProbRatio = newLnl - oldLnl;
+        LogDensity newLnl = getLnProbabilityForMove();
+        LogDensity lnProbRatio = newLnl - oldLnl;
         
-        double r = safeExponentiation(priorRatio + lnProbRatio + ln_hastings_ratio);
+        double r = safeExponentiation(double(priorRatio + lnProbRatio + ln_hastings_ratio));
         double u = rng->uniform01();
         if ( u < r ) //accept
         {
@@ -195,16 +195,15 @@ void RevBayesCore::DPPTableValueUpdate<valueType>::swapNodeInternal(DagNode *old
 
 
 template <class valueType>
-double RevBayesCore::DPPTableValueUpdate<valueType>::getLnProbabilityForMove(void)
+LogDensity RevBayesCore::DPPTableValueUpdate<valueType>::getLnProbabilityForMove(void)
 {
     
     RbOrderedSet<DagNode*> affected;
     variable->initiateGetAffectedNodes( affected );
-    double lnProb = 0.0;
+    LogDensity lnProb = 0.0;
     for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
     {
-        double lp = (*it)->getLnProbability();
-        lnProb += lp;
+        lnProb += (*it)->getLnProbability();
     }
     
     return lnProb;

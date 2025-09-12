@@ -12,6 +12,7 @@
 #include "RbVector.h"
 #include <vector>
 #include "SequentialMoveSchedule.h"
+#include "LogDensity.h"
 
 namespace RevBayesCore {
     
@@ -49,7 +50,7 @@ namespace RevBayesCore {
 //        virtual void                            run(size_t g) = 0;
         virtual void                            finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct) = 0; //!< Finish the monitors
         virtual const Model&                    getModel(void) const = 0;
-        virtual double                          getModelLnProbability(bool like_only) = 0;
+        virtual LogDensity                      getModelLnProbability(bool like_only) = 0;
         virtual RbVector<Monitor>&              getMonitors() = 0;
         virtual std::string                     getStrategyDescription(void) const = 0;                     //!< Get the discription of the strategy used for this sampler.
         virtual void                            initializeSamplerFromCheckpoint(void) = 0;                  //!< Initialize the values from the checkpoint file

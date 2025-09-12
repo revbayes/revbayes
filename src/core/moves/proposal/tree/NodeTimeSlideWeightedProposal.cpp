@@ -134,12 +134,12 @@ LogDensity NodeTimeSlideWeightedProposal::doProposal( void )
     storedAge = my_age;
     
     // approximate the likelihood curve for this node
-    std::vector<double> lnl(1,0.0);
+    std::vector<double> lnl(1, 0.0);
     // get the affected dag nodes for the posterior computation
     RbOrderedSet<DagNode*> affected;
     variable->initiateGetAffectedNodes( affected );
     double f = (parent_age - child_Age);
-    double marginal = 0.0;
+    LogDensity marginal = 0.0;
     double prev_x = 0.0;
     double pre_lnl = 0.0;
     for (size_t i = 0; i < blocks; ++i)
@@ -147,24 +147,24 @@ LogDensity NodeTimeSlideWeightedProposal::doProposal( void )
         double newAge = interval[i] * f + child_Age;
         tau.getNode(node->getIndex()).setAge( newAge );
         
-        double lnLikelihood = variable->getLnProbability();
+        LogDensity lnLikelihood = variable->getLnProbability();
         for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
         {
             lnLikelihood += (*it)->getLnProbability();
         }
-        lnl.push_back( lnLikelihood );
+        lnl.push_back( (double)lnLikelihood );
         
         // compute the integral (marginal likelihood)
         marginal += (pre_lnl+lnLikelihood)/2.0 * (interval[i] - prev_x);
         prev_x = interval[i];
-        pre_lnl = lnLikelihood;
+        pre_lnl = (double)lnLikelihood;
     }
     // add the final piece of the marginal likelihood
     lnl.push_back( 0.0 );
     marginal += pre_lnl/2.0 * (1.0 - prev_x);
     // normalize the likelihoods
     for (size_t i = 0; i < (blocks+2); ++i) {
-        lnl[i] /= marginal;
+        lnl[i] /= (double)marginal;  /// ?BUG: Should this be -= marginal?
     }
     
     // randomly draw a new age (using the cdf of the weight function)

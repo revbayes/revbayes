@@ -289,7 +289,7 @@ template<class valueType>
 LogDensity RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& integrated_parents, size_t index)
 {
 
-    double ln_prob = 0;
+    LogDensity ln_prob = 0;
     
     if ( integrated_parents.size() <= index )
     {
@@ -299,8 +299,8 @@ LogDensity RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLn
     {
         DagNode* this_parent = integrated_parents[index];
         size_t num_mixture_elements = this_parent->getNumberOfMixtureElements();
-        std::vector<double> ln_probs = std::vector<double>(num_mixture_elements, 0.0);
-        double max_ln_probs = RbConstants::Double::neginf;
+        std::vector<LogDensity> ln_probs = std::vector<LogDensity>(num_mixture_elements, 0.0);
+        LogDensity max_ln_probs = RbConstants::Double::neginf;
         for (size_t i=0; i<num_mixture_elements; ++i)
         {
             this_parent->setIntegrationIndex( i );
@@ -316,7 +316,7 @@ LogDensity RevBayesCore::StochasticNode<valueType>::computeRecursiveIntegratedLn
         {
             prob += exp(ln_probs[i] - max_ln_probs) * mixture_probs[i];
         }
-        ln_prob = log( prob ) + max_ln_probs;
+        ln_prob = logDensity( prob ) + max_ln_probs;
     }
     
     return ln_prob;
@@ -413,22 +413,24 @@ template<class valueType>
 std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureLikelihoods( bool use_log ) const
 {
       
-    std::vector<double> ln_probs;
-    
     if ( isIntegratedOut() == false )
     {
+        std::vector<double> ln_probs;
         // TODO: This is only for safety. We should actually never get in here!
-        ln_probs.push_back( distribution->computeLnProbability() );
+        ln_probs.push_back( (double)distribution->computeLnProbability() );
+        return ln_probs;
     }
     else
     {
+        std::vector<LogDensity> ln_probs;
+    
         // temporarily disable integration
         integrated_out = false;
         
         size_t num_mixture_elements = this->getNumberOfMixtureElements();
-        ln_probs = std::vector<double>(num_mixture_elements, 0.0);
+        ln_probs = std::vector<LogDensity>(num_mixture_elements, 0.0);
         std::vector<double> probs = std::vector<double>(num_mixture_elements, 0.0);
-        double max_ln_probs = RbConstants::Double::neginf;
+        LogDensity max_ln_probs = RbConstants::Double::neginf;
         RbOrderedSet<DagNode *> affected;
         this->getAffectedNodes( affected );
         for (size_t i=0; i<num_mixture_elements; ++i)
@@ -438,7 +440,7 @@ std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureLikelihoo
             {
                 ln_probs[i] += affected[j]->getLnProbability();
             }
-            if ( RbMath::isNan(ln_probs[i]) == true )
+            if ( ln_probs[i].isnan() == true )
             {
                 ln_probs[i] = RbConstants::Double::neginf;
             }
@@ -454,23 +456,24 @@ std::vector<double> RevBayesCore::StochasticNode<valueType>::getMixtureLikelihoo
             prob += exp(ln_probs[i] - max_ln_probs) * mixture_probs[i];
         }
         
-        double ln_prob = log( prob ) + max_ln_probs;
+        LogDensity ln_prob = logDensity( prob ) + max_ln_probs;
         for (size_t i=0; i<num_mixture_elements; ++i)
         {
             probs[i] = exp(ln_probs[i] - max_ln_probs) * mixture_probs[i] / prob;
             ln_probs[i] += log(mixture_probs[i]) - ln_prob;
         }
         
-        if ( use_log == false )
+        if ( use_log )
         {
-            ln_probs = probs;
+            for(int i=0;i<probs.size();i++)
+                probs[i] = (double)ln_probs[i];
         }
         
         // switch back integration flag
         integrated_out = true;
+
+        return probs;
     }
-    
-    return ln_probs;
 }
 
 

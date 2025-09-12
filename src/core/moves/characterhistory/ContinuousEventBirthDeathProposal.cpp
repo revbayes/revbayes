@@ -58,12 +58,12 @@ const std::string& ContinuousEventBirthDeathProposal::getProposalName( void ) co
  *
  * \return The hastings ratio.
  */
-double ContinuousEventBirthDeathProposal::computeEventProposalProbability(CharacterEvent *event)
+LogDensity ContinuousEventBirthDeathProposal::computeEventProposalProbability(CharacterEvent *event)
 {
     
     ConditionedBirthDeathShiftProcessContinuous *process = static_cast<ConditionedBirthDeathShiftProcessContinuous*>(distribution);
     
-    double ln_proposal_prob = 0;
+    LogDensity ln_proposal_prob = 0;
 
     CharacterEventContinuous *cont_event = static_cast<CharacterEventContinuous*>( event );
     double rate_lambda  = cont_event->getState(0);

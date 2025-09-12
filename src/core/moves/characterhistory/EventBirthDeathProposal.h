@@ -44,10 +44,10 @@ namespace RevBayesCore {
 
         // pure virtual methods
         virtual CharacterEvent*                 drawNewEvent(double event_time) = 0;
-        virtual double                          computeEventProposalProbability( CharacterEvent* event ) = 0;
+        virtual LogDensity                      computeEventProposalProbability( CharacterEvent* event ) = 0;
 
-        double                                  doBirthProposal(void);
-        double                                  doDeathProposal(void);
+        LogDensity                              doBirthProposal(void);
+        LogDensity                              doDeathProposal(void);
         void                                    swapNodeInternal(DagNode *oldN, DagNode *newN) override;                            //!< Swap the DAG nodes on which the Proposal is working on
         
         // parameters
