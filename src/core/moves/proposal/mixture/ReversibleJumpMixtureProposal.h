@@ -215,7 +215,7 @@ LogDensity RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::doProposal(
     stored_value = Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( v );
     stored_index = d.getCurrentIndex();
     
-    double lnHastingsratio = 0.0;
+    LogDensity lnHastingsratio = 0.0;
     
     if ( stored_index == 0 )
     {

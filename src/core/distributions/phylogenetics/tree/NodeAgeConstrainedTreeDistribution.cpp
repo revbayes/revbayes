@@ -102,9 +102,7 @@ LogDensity NodeAgeConstrainedTreeDistribution::computeLnProbability( void )
         return RbConstants::Double::neginf;
     }
     
-    double ln_prob = base_distribution->computeLnProbability();
-    
-    return ln_prob;
+    return base_distribution->computeLnProbability();
 }
 
 

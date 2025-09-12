@@ -213,7 +213,7 @@ LogDensity UniformTopologyBranchLengthDistribution::computeLnProbability( void )
     const std::vector<TopologyNode*> &nodes = this->value->getNodes();
     size_t num_nodes = nodes.size();
 
-    double ln_branch_length_prob = 0.0;
+    LogDensity ln_branch_length_prob = 0.0;
     for (size_t i=0; i<num_nodes; ++i)
     {
         const TopologyNode *node = nodes[i];

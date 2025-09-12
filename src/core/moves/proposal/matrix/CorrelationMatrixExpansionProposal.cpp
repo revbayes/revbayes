@@ -180,7 +180,7 @@ LogDensity CorrelationMatrixExpansionProposal::doProposal( void )
     new_correlation_matrix.setCholesky(true);
     
     // compute the hastings ratio
-    double ln_hastings_ratio = ((num_traits + 1.0) / 2.0) * (new_correlation_matrix.getLogDet() - stored_matrix.getLogDet());
+    LogDensity ln_hastings_ratio = ((num_traits + 1.0) / 2.0) * (new_correlation_matrix.getLogDet() - stored_matrix.getLogDet());
     
     // update the parameters and compute the prior ratio
 //    double ln_likelihood_before = mvbm->getLnProbability();
@@ -195,7 +195,7 @@ LogDensity CorrelationMatrixExpansionProposal::doProposal( void )
     correlation_matrix->touch(true);
     
     // we need to subtract the likelihood ratio
-    double ln_likelihood_ratio = mvbm->getLnProbabilityRatio();
+    LogDensity ln_likelihood_ratio = mvbm->getLnProbabilityRatio();
 //    double ln_likelihood_after = mvbm->getLnProbability();
     
     // subtract the likelihood ratio because this is supposed to be a Gibbs move

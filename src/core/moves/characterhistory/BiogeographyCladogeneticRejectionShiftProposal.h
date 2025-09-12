@@ -846,7 +846,7 @@ LogDensity RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charTyp
 //    std::cout << "BEFORE\n";
 //    printCladogeneticState();
     
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
     
     // compute expand-contract move probability
     // (carried over from prepareProposal()

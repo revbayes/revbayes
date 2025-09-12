@@ -105,7 +105,7 @@ LogDensity OrderedEventBirthDeathProposal::doProposal( void )
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
 	// create the hastings ratio
-	double ln_hastings_ratio = 0.0;
+        LogDensity ln_hastings_ratio = 0.0;
 
 	// randomly choose birth or death
 	double u = rng->uniform01();

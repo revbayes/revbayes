@@ -99,7 +99,7 @@ LogDensity IndependentTopologyProposal::doProposal( void )
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    double hr = 0.0;
+    LogDensity hr = 0.0;
 
     stored_tree = variable->getValue();
 

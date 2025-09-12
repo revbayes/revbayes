@@ -187,7 +187,7 @@ LogDensity RevBayesCore::DirichletProcessPriorDistribution<valueType>::computeLn
     
     int nt = numTables;
     int ne = numElements;
-    double lnProb = log( concentration->getValue() ) * nt;
+    LogDensity lnProb = log( concentration->getValue() ) * nt;
     
     if ( concentrationHasChanged == true )
     {

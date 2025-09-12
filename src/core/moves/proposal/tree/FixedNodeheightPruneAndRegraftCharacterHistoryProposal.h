@@ -425,7 +425,7 @@ LogDensity RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<
 
     // step 5: sample new branch histories
 //    std::cout << "Proposing paths." << std::endl;
-    double ln_proposal_probability = 0.0;
+    LogDensity ln_proposal_probability = 0.0;
     ln_proposal_probability += node_proposal_one->doProposal();
     ln_proposal_probability += left_proposal_one->doProposal();
     ln_proposal_probability += right_proposal_one->doProposal();

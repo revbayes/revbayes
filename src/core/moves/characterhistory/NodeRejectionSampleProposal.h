@@ -205,7 +205,7 @@ LogDensity RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void
 {
     proposedLnProb = 0.0;
 
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
 
     // backward proposal probability
 //    proposedLnProbRatio += computeLnProposal();

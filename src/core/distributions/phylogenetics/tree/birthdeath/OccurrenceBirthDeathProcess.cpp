@@ -185,8 +185,7 @@ OccurrenceBirthDeathProcess* OccurrenceBirthDeathProcess::clone( void ) const
  LogDensity OccurrenceBirthDeathProcess::computeLnProbabilityDivergenceTimes( void )
  {
 
-    double lnProbTimes = computeLnProbabilityTimes();
-    return lnProbTimes;
+     return computeLnProbabilityTimes();
  }
 
 

@@ -240,7 +240,7 @@ LogDensity AbstractCoalescent::computeLnProbability( void )
 {
     
     // variable declarations and initialization
-    double lnProbTimes = 0;
+    LogDensity lnProbTimes = 0;
     
     // first check if the current tree matches the clade constraints
     if ( !matchesConstraints() )

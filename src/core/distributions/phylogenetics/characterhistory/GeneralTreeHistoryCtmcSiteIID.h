@@ -323,7 +323,7 @@ bool RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::drawInitValue( void 
         //        this->histories[i]->print();
     }
 
-    double lnL = this->computeLnProbability();
+    LogDensity lnL = this->computeLnProbability();
 
     if (lnL == RbConstants::Double::neginf)
     {

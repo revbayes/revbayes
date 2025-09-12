@@ -108,7 +108,7 @@ template <class valueType>
 LogDensity RevBayesCore::IidDistribution<valueType>::computeLnProbability( void )
 {
     
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
     
     for (int i = 0; i < n_samples; ++i)
     {

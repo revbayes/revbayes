@@ -258,7 +258,7 @@ LogDensity RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<charType>:
     sampleNodeCharacters( node );
 
     // sample new branch histories
-    double ln_proposal_probability = 0.0;
+    LogDensity ln_proposal_probability = 0.0;
     ln_proposal_probability += node_proposal->doProposal();
     ln_proposal_probability += left_proposal->doProposal();
     ln_proposal_probability += right_proposal->doProposal();

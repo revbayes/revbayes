@@ -82,9 +82,7 @@ LogDensity BirthDeathBurstProcess::computeLnProbabilityDivergenceTimes( void ) c
     prepareProbComputation();
     
     // variable declarations and initialization
-    double lnProbTimes = computeLnProbabilityTimes();
-    
-    return lnProbTimes;
+    return computeLnProbabilityTimes();
 }
 
 

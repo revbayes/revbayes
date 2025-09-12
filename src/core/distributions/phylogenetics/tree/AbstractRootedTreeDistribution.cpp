@@ -260,12 +260,12 @@ LogDensity AbstractRootedTreeDistribution::computeLnProbability( void )
     }
     
     // variable declarations and initialization
-    double lnProbTimes = 0;
+    LogDensity lnProbTimes = 0;
 
     // multiply the probability of a descendant of the initial species
     lnProbTimes += computeLnProbabilityDivergenceTimes();
-    double ln_prob_tree_shape = lnProbTreeShape();
-    double ln_total_prob = lnProbTimes + ln_prob_tree_shape;
+    LogDensity ln_prob_tree_shape = lnProbTreeShape();
+    LogDensity ln_total_prob = lnProbTimes + ln_prob_tree_shape;
         
     return ln_total_prob;
 }

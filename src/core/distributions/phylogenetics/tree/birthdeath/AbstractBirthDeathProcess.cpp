@@ -52,7 +52,7 @@ LogDensity AbstractBirthDeathProcess::computeLnProbabilityDivergenceTimes( void 
     prepareProbComputation();
     
     // variable declarations and initialization
-    double lnProbTimes = 0;
+    LogDensity lnProbTimes = 0;
     
     // present time
     double present_time = value->getRoot().getAge();

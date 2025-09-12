@@ -111,13 +111,13 @@ LogDensity RevBayesCore::IndependentPriorProposal<valueType>::doProposal( void )
 
     stored_value = variable->getValue();
     
-    double ln_back_prob = variable->getLnProbability();
+    LogDensity ln_back_prob = variable->getLnProbability();
 
     variable->getDistribution().redrawValue();
 
     variable->touch( true );
     
-    double ln_forw_prob = variable->getLnProbability();
+    LogDensity ln_forw_prob = variable->getLnProbability();
 
     return ln_back_prob - ln_forw_prob;
 }

@@ -88,7 +88,7 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
  */
 LogDensity FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 {
-    double lnProb = 0.0;
+    LogDensity lnProb = 0.0;
 
     // prepare the probability computation
     if ( bds == true )

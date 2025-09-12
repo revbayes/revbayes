@@ -128,7 +128,7 @@ FossilizedBirthDeathSpeciationProcess* FossilizedBirthDeathSpeciationProcess::cl
  */
 LogDensity FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void )
 {
-    double lnProb = computeLnProbabilityRanges();
+    LogDensity lnProb = computeLnProbabilityRanges();
 
     lnProb += computeLnProbabilityTimes();
 

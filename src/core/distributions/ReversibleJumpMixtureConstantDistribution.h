@@ -169,8 +169,7 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>* RevBayesCo
 template <class mixtureType>
 LogDensity RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::computeLnProbability( void )
 {
-    
-    double ln_prob;
+    LogDensity ln_prob;
     if ( index == 0 )
     {
         if ( *this->value != const_value->getValue() )

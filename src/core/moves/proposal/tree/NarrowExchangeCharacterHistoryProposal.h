@@ -534,7 +534,7 @@ LogDensity RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doPro
         sampleNodeCharactersJoint( &parent );
 
         // step 6: sample new branch histories
-        double ln_proposal_probability = 0.0;
+        LogDensity ln_proposal_probability = 0.0;
         ln_proposal_probability += node_proposal->doProposal();
         ln_proposal_probability += parent_proposal->doProposal();
         ln_proposal_probability += brother_proposal->doProposal();

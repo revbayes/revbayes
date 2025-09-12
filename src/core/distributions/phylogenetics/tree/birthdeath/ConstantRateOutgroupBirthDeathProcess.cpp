@@ -118,7 +118,7 @@ LogDensity ConstantRateOutgroupBirthDeathProcess::computeLnProbabilityTimes( voi
 
     // proceed with probabilities
     
-    double lnProbTimes = 0.0;
+    LogDensity lnProbTimes = 0.0;
 
     // the process starts at the root age with one lineage
     TopologyNode* root = &value->getRoot();

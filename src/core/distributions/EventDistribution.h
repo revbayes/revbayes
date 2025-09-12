@@ -124,7 +124,7 @@ LogDensity RevBayesCore::EventDistribution<valueType>::computeLnProbability( voi
     size_t num_events = this->value->size();
     event_prior->setValue( new std::int64_t(num_events) );
     
-    double ln_prob = event_prior->computeLnProbability();
+    LogDensity ln_prob = event_prior->computeLnProbability();
     
     for (int i = 0; i < num_events; ++i)
     {

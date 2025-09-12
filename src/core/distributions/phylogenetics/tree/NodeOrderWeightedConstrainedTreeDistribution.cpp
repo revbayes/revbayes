@@ -140,9 +140,7 @@ LogDensity NodeOrderWeightedConstrainedTreeDistribution::computeLnProbability( v
         base_distribution->setValue( value->clone() );
     }
 
-    double lnProb = base_distribution->computeLnProbability() + computeConstraintScore();
-
-    return lnProb;
+    return base_distribution->computeLnProbability() + computeConstraintScore();
 }
 
 

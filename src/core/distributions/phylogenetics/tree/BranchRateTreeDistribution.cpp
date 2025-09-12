@@ -243,7 +243,7 @@ RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, Rb
 LogDensity BranchRateTreeDistribution::computeLnProbability( void )
 {
 
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
 
     // make the time tree unrooted
     const Tree &time_tree_copy = time_tree->getValue();

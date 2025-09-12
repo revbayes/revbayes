@@ -448,7 +448,7 @@ bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::drawInitValue( void )
 //    
 //    std::cout << "----\n";
     
-    double lnL = this->computeLnProbability();
+    LogDensity lnL = this->computeLnProbability();
     
     if (lnL == RbConstants::Double::neginf)
     {
