@@ -33,7 +33,7 @@ class TopologyNode;
         
         // helper functions
         void                                                simulateTree(void);
-        bool                                                matchesConstraints(void);
+        LogDensity                                          constraintLikelihood(void);
         void                                                simulateClade(std::vector<TopologyNode*> &n);                                           //!< Simulate n speciation events.
 
         // members
