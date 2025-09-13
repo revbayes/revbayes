@@ -79,14 +79,14 @@ generation = 0    proposal = 6/102    NNI(topology)
     BEFORE:   topology:  -57.83565171
     BEFORE:   seq:  -25210.791929
 
-    PROPOSED: topology:  -inf
+    PROPOSED: topology:  -inf + -57.83565171
     PROPOSED: seq:  -25206.540822
 
     FINAL:    topology:  -57.83565171
     FINAL:    seq:  -25210.791929
 
-    log(posterior_ratio) = -inf + 62.086758827  log(likelihood_ratio) = 4.251107118   log(prior_ratio) = -inf + 57.83565171
-    log(acceptance_ratio) = -inf + 62.086758827  log(hastings_ratio) = 0
+    log(posterior_ratio) = -inf + 4.251107118  log(likelihood_ratio) = 4.251107118   log(prior_ratio) = -inf
+    log(acceptance_ratio) = -inf + 4.251107118  log(hastings_ratio) = 0
   The move was REJECTED.
 
 generation = 0    proposal = 7/102    NNI(topology)
@@ -191,14 +191,14 @@ generation = 0    proposal = 14/102    NNI(topology)
     BEFORE:   topology:  -57.83565171
     BEFORE:   seq:  -25103.479297
 
-    PROPOSED: topology:  -inf
+    PROPOSED: topology:  -inf + -57.83565171
     PROPOSED: seq:  -25111.540028
 
     FINAL:    topology:  -57.83565171
     FINAL:    seq:  -25103.479297
 
-    log(posterior_ratio) = -inf + 49.774920517  log(likelihood_ratio) = -8.0607311927   log(prior_ratio) = -inf + 57.83565171
-    log(acceptance_ratio) = -inf + 49.774920517  log(hastings_ratio) = 0
+    log(posterior_ratio) = -inf + -8.0607311927  log(likelihood_ratio) = -8.0607311927   log(prior_ratio) = -inf
+    log(acceptance_ratio) = -inf + -8.0607311927  log(hastings_ratio) = 0
   The move was REJECTED.
 
 generation = 0    proposal = 15/102    Scaling(br_lens[15])
@@ -2781,14 +2781,14 @@ generation = 1    proposal = 97/102    NNI(topology)
     BEFORE:   topology:  -57.83565171
     BEFORE:   seq:  -19474.470319
 
-    PROPOSED: topology:  -inf
+    PROPOSED: topology:  -inf + -57.83565171
     PROPOSED: seq:  -19531.530589
 
     FINAL:    topology:  -57.83565171
     FINAL:    seq:  -19474.470319
 
-    log(posterior_ratio) = -inf + 0.77538198994  log(likelihood_ratio) = -57.06026972   log(prior_ratio) = -inf + 57.83565171
-    log(acceptance_ratio) = -inf + 0.77538198994  log(hastings_ratio) = 0
+    log(posterior_ratio) = -inf + -57.06026972  log(likelihood_ratio) = -57.06026972   log(prior_ratio) = -inf
+    log(acceptance_ratio) = -inf + -57.06026972  log(hastings_ratio) = 0
   The move was REJECTED.
 
 generation = 1    proposal = 98/102    Scaling(br_lens[10])
@@ -3929,14 +3929,14 @@ generation = 2    proposal = 77/102    NNI(topology)
     BEFORE:   topology:  -57.83565171
     BEFORE:   seq:  -19276.03775
 
-    PROPOSED: topology:  -inf
+    PROPOSED: topology:  -inf + -57.83565171
     PROPOSED: seq:  -19346.721254
 
     FINAL:    topology:  -57.83565171
     FINAL:    seq:  -19276.03775
 
-    log(posterior_ratio) = -inf + -12.847852514  log(likelihood_ratio) = -70.683504224   log(prior_ratio) = -inf + 57.83565171
-    log(acceptance_ratio) = -inf + -12.847852514  log(hastings_ratio) = 0
+    log(posterior_ratio) = -inf + -70.683504224  log(likelihood_ratio) = -70.683504224   log(prior_ratio) = -inf
+    log(acceptance_ratio) = -inf + -70.683504224  log(hastings_ratio) = 0
   The move was REJECTED.
 
 generation = 2    proposal = 78/102    Scaling(br_lens[42])
