@@ -50,12 +50,11 @@ BetaDistribution* BetaDistribution::clone( void ) const
 
 LogDensity BetaDistribution::computeLnProbability( void )
 {
-    
     // check that the value is inside the boundaries
-    if ( *value > 1 || *value < 0 )
-    {
-        return RbConstants::Double::neginf;
-    }
+    if (*value < 0)
+        return LogDensity(1, *value);
+    else if (*value > 1)
+        return LogDensity(1, 1 - *value);
     
     return RbStatistics::Beta::lnPdf(alpha->getValue(), beta->getValue(), *value);
 }
