@@ -27,13 +27,13 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        virtual double                                      computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f) = 0;
+        virtual LogDensity                                  computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f) = 0;
         virtual double                                      drawNe(size_t index);
 
         // helper functions
         void                                                attachTimes(Tree *psi, std::vector<TopologyNode *> &tips, size_t index, const std::vector<double> &times);
         void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
-        double                                              recursivelyComputeLnProbability(const TopologyNode &n);
+        LogDensity                                          recursivelyComputeLnProbability(const TopologyNode &n);
         void                                                resetTipAllocations(void);
         void                                                simulateTree(void);
         

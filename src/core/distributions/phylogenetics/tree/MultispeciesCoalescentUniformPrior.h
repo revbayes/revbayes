@@ -20,7 +20,7 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        double                                              computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f);
+        LogDensity                                          computeLnCoalescentProbability(size_t k, const std::vector<double> &t, double a, double b, size_t index, bool f);
         double                                              drawNe(size_t index);
 
         double                                              recursiveIncompleteGamma(double a, double x);
