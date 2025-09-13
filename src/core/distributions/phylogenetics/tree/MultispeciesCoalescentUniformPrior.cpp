@@ -41,7 +41,7 @@ MultispeciesCoalescentUniformPrior* MultispeciesCoalescentUniformPrior::clone( v
 }
 
 
-double MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
+LogDensity MultispeciesCoalescentUniformPrior::computeLnCoalescentProbability(size_t k, const std::vector<double> &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
 
     if ( k == 1 ) return 0.0;
