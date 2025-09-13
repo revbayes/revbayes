@@ -243,20 +243,16 @@ LogDensity AbstractCoalescent::computeLnProbability( void )
     LogDensity lnProbTimes = 0;
     
     // first check if the current tree matches the clade constraints
-    if ( !matchesConstraints() )
-    {
-        return RbConstants::Double::neginf;
-    }
+    lnProbTimes += constraintLikelihood();
     
-    // check that all children are younger than there parents
-    const std::vector<TopologyNode*>& nodes = value->getNodes();
-    for (std::vector<TopologyNode*>::const_iterator it = nodes.begin(); it != nodes.end(); it++)
+    // check that all children are younger than their parents
+    for (auto& node: value->getNodes())
     {
-        if ( !(*it)->isRoot() )
+        if ( !node->isRoot() )
         {
-            if ( (*it)->getAge() >= (*it)->getParent().getAge() )
+            if ( node->getAge() >= node->getParent().getAge() )
             {
-                return RbConstants::Double::neginf;
+                lnProbTimes += LogDensity(1, node->getParent().getAge() - node->getAge());
             }
         }
     }
@@ -265,7 +261,6 @@ LogDensity AbstractCoalescent::computeLnProbability( void )
     lnProbTimes += computeLnProbabilityTimes();
     
     return lnProbTimes + logTreeTopologyProb;
-    
 }
 
 
@@ -276,20 +271,21 @@ LogDensity AbstractCoalescent::computeLnProbability( void )
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool AbstractCoalescent::matchesConstraints( void )
+LogDensity AbstractCoalescent::constraintLikelihood( void )
 {
-    
+    LogDensity Lk = 0;
+
     const TopologyNode &root = value->getRoot();
     
-    for (std::vector<Clade>::iterator it = constraints.begin(); it != constraints.end(); ++it)
+    for (auto& constraint: constraints)
     {
-        if ( !root.containsClade( *it, true ) )
+        if ( !root.containsClade( constraint, true ) )
         {
-            return false;
+            Lk += LogDensity(1,0);
         }
     }
     
-    return true;
+    return Lk;
 }
 
 
