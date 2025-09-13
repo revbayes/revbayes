@@ -113,37 +113,32 @@ UniformTopologyDistribution* UniformTopologyDistribution::clone( void ) const
 
 LogDensity UniformTopologyDistribution::computeLnProbability( void )
 {
-    
-	// first check if the current tree matches the clade constraints
-    if ( matchesConstraints() == false )
-    {
-        return RbConstants::Double::neginf;
-    }
-    
+    LogDensity Pr = constraintLikelihood() + logTreeTopologyProb;
+
     if ( outgroup.size() > 0 )
     {
-		// now we check that the outgroup is correct
-		const TopologyNode &root = value->getRoot();
-		const std::vector<TopologyNode*> &children = root.getChildren();
-		bool contains_outgroup = false;
-		for (size_t i=0; i<children.size(); ++i)
-		{
-			const TopologyNode &child = *(children[i]);
-			Clade c = child.getClade();
-			if ( c == outgroup )
-			{
-				contains_outgroup = true;
-				break;
-			}
-		}
+        // now we check that the outgroup is correct
+        const TopologyNode &root = value->getRoot();
+        const std::vector<TopologyNode*> &children = root.getChildren();
+        bool contains_outgroup = false;
+        for (size_t i=0; i<children.size(); ++i)
+        {
+            const TopologyNode &child = *(children[i]);
+            Clade c = child.getClade();
+            if ( c == outgroup )
+            {
+                contains_outgroup = true;
+                break;
+            }
+        }
         
-		if ( contains_outgroup == false )
-		{
-			return RbConstants::Double::neginf;
-		}
-	}
+        if ( not contains_outgroup )
+        {
+            Pr += logZero();
+        }
+    }
     
-    return logTreeTopologyProb;
+    return Pr;
 }
 
 
@@ -481,30 +476,22 @@ void UniformTopologyDistribution::swapParameterInternal( const DagNode *oldP, co
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool UniformTopologyDistribution::matchesConstraints( void ) 
+LogDensity UniformTopologyDistribution::constraintLikelihood( void ) 
 {
-    
-    if ( constraints.empty() == true )
-    {
-		return true;
-	}
-    else
-    {
+    LogDensity Lk = 0;
 		
-		const TopologyNode &root = value->getRoot();
-		for (std::vector<Clade>::iterator it = constraints.begin(); it != constraints.end(); ++it) 
-		{
-            if ( root.containsClade( *it, true ) == false && it->isNegativeConstraint() == false ) //LYR changed
-			{
-				return false;
-			}
-            else if ( root.containsClade( *it, true ) == true && it->isNegativeConstraint() == true ) //LYR changed
-            {
-                return false;
-            }
-		}
-        
-		return true;
-	}
-    
+    const TopologyNode &root = value->getRoot();
+    for (auto& constraint: constraints)
+    {
+        if ( root.containsClade( constraint, true ) == false && constraint.isNegativeConstraint() == false ) //LYR changed
+        {
+            Lk += logZero();
+        }
+        else if ( root.containsClade( constraint, true ) == true && constraint.isNegativeConstraint() == true ) //LYR changed
+        {
+            Lk += logZero();
+        }
+    }
+
+    return Lk;
 }
