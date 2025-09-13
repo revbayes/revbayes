@@ -104,7 +104,7 @@ bool ConstantRateOutgroupBirthDeathProcess::isLnProbabilityNonZero( void )
     // first check if the current tree matches the clade constraints
     return true;
     //recursivelyUpdateClades( value->getRoot() );
-    //return( matchesConstraints() );
+    //return( (double)constraintLikelihood() > 0 );
     
 }
 
@@ -265,18 +265,17 @@ void ConstantRateOutgroupBirthDeathProcess::fireTreeChangeEvent(const TopologyNo
 }
 
 
-bool ConstantRateOutgroupBirthDeathProcess::matchesConstraints( void )
+LogDensity ConstantRateOutgroupBirthDeathProcess::constraintLikelihood( void )
 {
    
-    bool constraint_satisfied = false;
     std::vector<RbBitSet>::iterator it = std::find(active_clades.begin(), active_clades.end(), clade_ingroup.getBitRepresentation() );
     
+    // We found the ingroup
     if (it != active_clades.end())
-    {
-        constraint_satisfied = true;
-    }
-    
-    return constraint_satisfied;
+        return 0;
+    // We did not find the ingroup
+    else
+        return LogDensity(1,0);
 }
 
 /**

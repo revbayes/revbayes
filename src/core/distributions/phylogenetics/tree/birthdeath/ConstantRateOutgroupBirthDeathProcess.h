@@ -45,7 +45,7 @@ template <class valueType> class TypedDagNode;
     private:
         TopologyNode*                                       findMrcaNode( Clade c ) const;
         void                                                initializeBitSets(void);
-        bool                                                matchesConstraints(void);
+        LogDensity                                          constraintLikelihood(void);
         void                                                recursivelyCollectCladeAges( TopologyNode* node, std::vector<double>& ages, TopologyNode* barrier_node=NULL ) const;
 //        void                                                recursivelyCollectIngroupAges( TopologyNode* node, std::vector<double>& ages ) const;
         // helper functions
