@@ -3,5 +3,5 @@
    
    Running MCMC simulation
    This simulation runs 1 independent replicate.
-   The simulator uses 48 different moves in a random move schedule with 134 moves per iteration
+   The simulator uses 68 different moves in a random move schedule with 234 moves per iteration
    

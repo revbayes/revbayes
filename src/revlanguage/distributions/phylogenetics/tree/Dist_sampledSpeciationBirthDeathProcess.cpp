@@ -122,7 +122,7 @@ const TypeSpec& Dist_sampledSpeciationBirthDeathProcess::getClassTypeSpec(void)
 std::string Dist_sampledSpeciationBirthDeathProcess::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "SBBDP";
+    std::string d_name = "SSBDP";
     
     return d_name;
 }

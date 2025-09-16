@@ -7,6 +7,8 @@
 //
 
 #include <cmath>
+#include <cstdint>
+#include <optional>
 #include <sstream> // IWYU pragma: keep
 
 #include "DistributionNormal.h"
@@ -105,6 +107,148 @@ double RbStatistics::Helper::dppExpectNumTableFromConcParam(double conp, double 
 	return expectedNum;
 }
 
+
+/**
+ * This function is used to calculate the auto-correlation time for MCMC
+ * samples, represented here as an arbitrary vector of numeric values.
+ *
+ * @param values Vector of numeric parameter values
+ * @param begin Pointer to start index
+ * @param end Pointer to end index
+ * @return The effective sample size
+ */
+double RbStatistics::Helper::getACT(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
+{
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
+    
+    size_t samples = *end - *begin;
+    double mean = getRangeMean(values, begin, end);
+    double varStat = getVarStat(values, begin, end);
+    double gammaStat = 0.0;
+    
+    for (size_t i = 0; i < samples; i++) {
+        double del = values.at( *begin + i ) - mean;
+        gammaStat += (del * del);
+    }
+    
+    gammaStat /= ( (double)samples );
+    
+    double act = varStat / gammaStat;
+    return act;
+}
+    
+
+/**
+ * This function is equivalent to the one used in Tracer, and also (except for
+ * the choice of the maximum lag value) to convenience:::essTracer().
+ *
+ * @param values Vector of numeric parameter values
+ * @param begin Pointer to start index
+ * @param end Pointer to end index
+ * @return The effective sample size
+ */
+double RbStatistics::Helper::getESS(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
+{
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
+    
+    size_t samples = *end - *begin;
+    double act = getACT(values, begin, end);
+    double ess = samples / act;
+    
+    return ess;
+}
+
+
+/**
+ * This function is used to calculate the mean of an arbitrary contiguous
+ * subset of a vector of numeric values: usually, these would represent the
+ * samples of numeric parameters from an MCMC simulation.
+ *
+ * @param values Vector of numeric parameter values
+ * @param begin Pointer to start index
+ * @param end Pointer to end index
+ * @return The effective sample size
+ */
+double RbStatistics::Helper::getRangeMean(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
+{
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
+    
+    size_t samples = *end - *begin;
+    double mean = 0.0;
+    
+    for (size_t i = 0; i < samples; ++i)
+    {
+        mean += values.at( *begin + i );
+    }
+    mean /= samples;
+    
+    return mean;
+}
+
+
+/**
+ * This function is used to calculate the standard error of the mean of an
+ * arbitrary contiguous subset of a vector of numeric values: usually, these would
+ * represent the samples of numeric parameters from an MCMC simulation.
+ *
+ * @param values Vector of numeric parameter values
+ * @param begin Pointer to start index
+ * @param end Pointer to end index
+ * @return The effective sample size
+ */
+double RbStatistics::Helper::getSEM(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
+{
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
+    
+    size_t samples = *end - *begin;
+    double varStat = getVarStat(values, begin, end);
+    double sem = sqrt(varStat / samples);
+    
+    return sem;
+}
+    
+
+double RbStatistics::Helper::getVarStat(const std::vector<double> values, std::optional<std::int64_t> begin, std::optional<std::int64_t> end)
+{
+    if (not begin) begin = 0;
+    if (not end) end = values.size();
+    
+    size_t MAX_LAG = 1000;
+    size_t samples = *end - *begin;
+    size_t maxLag = (samples - 1 < MAX_LAG ? samples - 1 : MAX_LAG);
+    
+    // get the mean
+    double mean = getRangeMean(values, begin, end);
+    
+    std::vector<double> gammaStat(maxLag, 0.0);
+    double varStat = 0.0;
+    
+    for (size_t lag = 0; lag < maxLag; lag++) {
+        for (size_t j = 0; j < samples - lag; j++) {
+            double del1 = values.at( *begin + j ) - mean;
+            double del2 = values.at( *begin + j + lag ) - mean;
+            gammaStat[lag] += (del1 * del2);
+        }
+
+        gammaStat[lag] /= ((double) (samples - lag));
+
+        if (lag == 0) {
+            varStat = gammaStat[0];
+        } else if (lag % 2 == 0) {
+            if (gammaStat[lag - 1] + gammaStat[lag] > 0) {
+                varStat += 2.0 * (gammaStat[lag - 1] + gammaStat[lag]);
+            } else {
+                maxLag = lag;
+            }
+        }
+    }
+    
+    return varStat;
+}
 
 
 double RbStatistics::Helper::pointChi2(double prob, double v) {
