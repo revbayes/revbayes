@@ -120,6 +120,16 @@ void SSE_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         
         if ( extinction_only == false )
         {
+            if (allow_rate_shifts_extinction == false){
+                for (size_t j = 0; j < num_states; ++j)
+                {
+                    if ( i != j )
+                    {
+                        no_event_rate += Q->getRate(i, j, age, rate);
+                    }
+                }
+            }
+                
             /**** Observation ****/
             /**** equation A1 ****/
         
