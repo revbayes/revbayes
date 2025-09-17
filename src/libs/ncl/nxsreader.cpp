@@ -963,14 +963,14 @@ void NxsReader::BlockReadHook(const NxsString &currBlockName, NxsBlock *currentB
 		if (storeBlock)
 			{
 			NxsString m;
-			m << "storing implied block: " << impID;
-			this->statusMessage(m);
+			// m << "storing implied block: " << impID;
+			// this->statusMessage(m);
 			this->AddBlockToUsedBlockList(impID, nb, token);
 			}
 		}
 	NxsString s;
-	s << "storing read block: " << currentBlock->GetID();
-	this->statusMessage(s);
+	// s << "storing read block: " << currentBlock->GetID();
+	// this->statusMessage(s);
 	this->AddBlockToUsedBlockList(currBlockName, currentBlock, token);
 	}
 
