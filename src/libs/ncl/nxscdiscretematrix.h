@@ -32,8 +32,6 @@
 #	define HAVE_COMPILE_TIME_DISPATCH
 #endif
 
-#define HAVE_STDINT_H 1
-
 /* For typedefs like uint8_t */
 #if HAVE_INTTYPES_H
 #	include <inttypes.h>

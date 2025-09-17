@@ -96,7 +96,7 @@ class NxsString
 
 		static std::string	GetEscaped(const std::string &s);
 		static std::string	GetEscapedInt(const int &v);
-		static std::string	GetEscapedDouble(double v);
+		static std::string	GetEscapedDouble(const double &v);
 		//	Accessors
 		//
 		bool				Abbreviates(const NxsString &s, NxsString::CmpEnum mode = NxsString::no_respect_case) const;
@@ -198,7 +198,7 @@ inline NxsString &NxsString::AddQuotes()
 	return *this;
 	}
 
-inline std::string	NxsString::GetEscapedDouble(double v)
+inline std::string	NxsString::GetEscapedDouble(const double &v)
 	{
 	NxsString s;
 	s << v;
@@ -457,14 +457,14 @@ inline NxsString &NxsString::operator=(
 	}
 
 /*!
-	Uses the standard C sprintf function to append the character representation of the supplied integer i' to the stored
+	Uses the standard C snprintf function to append the character representation of the supplied integer i' to the stored
 	string (format code %d). For example, if the stored string is "taxon" and `i' is 9, the result is "taxon9".
 */
 inline NxsString &NxsString::operator+=(
   const int i)	/* the int to append */
 	{
 	char tmp[81];
-	snprintf(tmp, 81, "%d", i);
+	std::snprintf(tmp, 81, "%d", i);
 	append(tmp);
 	return *this;
 	}
@@ -493,37 +493,37 @@ inline bool NxsString::Abbreviates(
 	}
 
 /*!
-	Uses standard C function sprintf to append the unsigned integer `i' to the stored string (format code %u).
+	Uses standard C function std::snprintf to append the unsigned integer `i' to the stored string (format code %u).
 */
 inline NxsString& NxsString::operator+=(
   unsigned i)	/* the integer to be appended */
 	{
 	char tmp[81];
-	snprintf(tmp, 81, "%u", i);
+	std::snprintf(tmp, 81, "%u", i);
 	append(tmp);
 	return *this;
 	}
 
 /*!
-	Uses standard C function sprintf to append the long integer `l' to the stored string (format code %ld).
+	Uses standard C function std::snprintf to append the long integer `l' to the stored string (format code %ld).
 */
 inline NxsString& NxsString::operator+=(
   const long l)	/* the long integer to be appended */
 	{
 	char tmp[81];
-	snprintf(tmp, 81, "%ld", l);
+	std::snprintf(tmp, 81, "%ld", l);
 	append(tmp);
 	return *this;
 	}
 
 /*!
-	Uses standard C function sprintf to append the unsigned long integer `l' to the stored string (format code %lu).
+	Uses standard C function std::snprintf to append the unsigned long integer `l' to the stored string (format code %lu).
 */
 inline NxsString& NxsString::operator+=(
   const unsigned long l)	/* the unsigned long integer to be appended */
 	{
 	char tmp[81];
-	snprintf(tmp, 81, "%lu", l);
+	std::snprintf(tmp, 81, "%lu", l);
 	append(tmp);
 	return *this;
 	}

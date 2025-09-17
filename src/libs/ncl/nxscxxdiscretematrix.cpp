@@ -234,16 +234,16 @@ unsigned NxsCompressDiscreteMatrix(
 	    toPatternMapPtr = &toPatternMap;
 
 	NxsCompressDiscreteMatrix(mat, patternSet, toPatternMapPtr, taxaToInclude, charactersToInclude);
-    const unsigned num_patternsAdded = (unsigned const)patternSet.size();
+    const unsigned numPatternsAdded = (unsigned const)patternSet.size();
 	
 	NxsConsumePatternSetToPatternVector(patternSet, compressedTransposedMatrix, toPatternMapPtr, originalIndexToCompressed, compressedIndexToOriginal);
-	return num_patternsAdded;
+	return numPatternsAdded;
 	}
 
 void NxsTransposeCompressedMatrix(
   const std::vector<NxsCharacterPattern> & compressedTransposedMatrix, 
   ScopedTwoDMatrix<NxsCDiscreteStateSet> & destination,
-  std::vector<unsigned> * pattern_counts,
+  std::vector<unsigned> * patternCounts,
   std::vector<double> * patternWeights)
 {
 	const unsigned npatterns = (unsigned const)compressedTransposedMatrix.size();
@@ -254,22 +254,22 @@ void NxsTransposeCompressedMatrix(
 	    }
 	const unsigned ntaxa = (unsigned const)compressedTransposedMatrix[0].stateCodes.size();
 	destination.Initialize(ntaxa, npatterns);
-    NxsCDiscreteStateSet ** matrix = destination.GetAlias();			/** taxa x characters matrix of indices of state sets */
-    if (pattern_counts)
-        pattern_counts->resize(npatterns);
-    if (patternWeights)
-        patternWeights->resize(npatterns);
-    for (unsigned p = 0; p < npatterns; ++p)
-    {
-	const NxsCharacterPattern & pattern = compressedTransposedMatrix[p];
-	const std::vector<NxsCDiscreteState_t> & states = pattern.stateCodes;
-	for (unsigned t = 0; t < ntaxa; ++t)
-	    matrix[t][p] = states[t];
-        if (pattern_counts)
-            (*pattern_counts)[p] = pattern.count;
-        if (patternWeights)
-            (*patternWeights)[p] = pattern.sumOfPatternWeights;
-    }
+	NxsCDiscreteStateSet ** matrix = destination.GetAlias();			/** taxa x characters matrix of indices of state sets */
+	if (patternCounts)
+	    patternCounts->resize(npatterns);
+	if (patternWeights)
+	    patternWeights->resize(npatterns);
+	for (unsigned p = 0; p < npatterns; ++p)
+		{
+		const NxsCharacterPattern & pattern = compressedTransposedMatrix[p];
+		const std::vector<NxsCDiscreteState_t> & states = pattern.stateCodes;
+		for (unsigned t = 0; t < ntaxa; ++t)
+		    matrix[t][p] = states[t];
+		if (patternCounts)
+		    (*patternCounts)[p] = pattern.count;
+		if (patternWeights)
+		    (*patternWeights)[p] = pattern.sumOfPatternWeights;
+		}
 }
 
 NxsCXXDiscreteMatrix::NxsCXXDiscreteMatrix(const NxsCharactersBlock & cb, bool gapsToMissing, const NxsUnsignedSet * toInclude, bool standardizeCoding)
@@ -429,7 +429,7 @@ void NxsCXXDiscreteMatrix::Initialize(const NxsCharactersBlock * cb, bool gapsTo
 	this->nativeCMatrix.nObservedStateSets = nextStateCode;
 
 	this->nativeCMatrix.nTax = (unsigned)rawMatrix.size();
-	this->nativeCMatrix.nChar = (this->nativeCMatrix.nTax == 0 ? 0 : (unsigned)rawMatrix[0].size());
+	this->nativeCMatrix.nChar = (this->nativeCMatrix.nTax == 0 ? 0 : toInclude->size());
 	this->matrixAlias.Initialize(this->nativeCMatrix.nTax, this->nativeCMatrix.nChar);
 	nativeCMatrix.matrix = matrixAlias.GetAlias();
 	const unsigned nt = this->nativeCMatrix.nTax;
@@ -446,11 +446,13 @@ void NxsCXXDiscreteMatrix::Initialize(const NxsCharactersBlock * cb, bool gapsTo
 			}
 		else
 			{
-			NCL_ASSERT(rawRowVec.size() == nc);
+			NCL_ASSERT(rawRowVec.size() >= nc);
 			const NxsDiscreteStateCell * rawRow = &rawRowVec[0];
+		    NxsUnsignedSet::const_iterator includedIt = toInclude->begin();
 			for (unsigned c = 0; c < nc; ++c)
 				{
-				const NxsDiscreteStateCell rawC = *rawRow++;
+				unsigned charIndex = *includedIt++;
+				const NxsDiscreteStateCell rawC = rawRow[charIndex];
 				if ((unsigned)(rawC +  negSCLOffset) >= recodeVecLen)
 					{
 					NCL_ASSERT((unsigned)(rawC +  negSCLOffset) < recodeVecLen);

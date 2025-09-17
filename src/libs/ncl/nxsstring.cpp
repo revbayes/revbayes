@@ -213,7 +213,7 @@ NxsString &NxsString::operator+=(
 	// Create a C-string representing the supplied double value.
 	// The # causes a decimal point to always be output.
 	//
-	snprintf(tmp, 81, "%#3.6f", d);
+	std::snprintf(tmp, 81, "%#3.6f", d);
 	unsigned tmplen = (unsigned)strlen(tmp);
 
 	// If the C-string has a lot of trailing zeros, lop them off
@@ -552,30 +552,30 @@ void NxsString::add_nxs_quotes(std::string &s)
 NxsString::NxsQuotingRequirements NxsString::determine_quoting_requirements(const std::string & s)
 	{
 	NxsQuotingRequirements nrq = kNoQuotesNeededForNexus;
-//	for (std::string::const_iterator sIt = s.begin(); sIt != s.end(); ++sIt)
-//		{
-//		if (!isgraph(*sIt))
-//			{
-//			if (*sIt != ' ')
-//				return kSingleQuotesNeededForNexus;
-//			nrq  = kUnderscoresSufficeForNexus;
-//			}
-//		else if (strchr("(){}\"-]/\\,;:=*`+<>", *sIt) != NULL)
-//			{
-//			// Get here if c is any NEXUS punctuation mark except left square bracket ([) or apostrophe (').
-//			// [ and ' never get returned as punctuation by NxsToken,
-//			// so we should never encounter them here.
-//			//
-//			return (s.length() > 1 ? kSingleQuotesNeededForNexus : kNoQuotesNeededForNexus);
-//			}
-//		else if (strchr("\'[_", *sIt) != NULL)
-//			{
-//			// Get here if c is either an apostrophe or left square bracket. Quotes are needed if one of these
-//			// characters is all there is to this string
-//			//
-//			return kSingleQuotesNeededForNexus;
-//			}
-//		}
+	for (std::string::const_iterator sIt = s.begin(); sIt != s.end(); ++sIt)
+		{
+		if (!isgraph(*sIt))
+			{
+			if (*sIt != ' ')
+				return kSingleQuotesNeededForNexus;
+			nrq  = kUnderscoresSufficeForNexus;
+			}
+		else if (strchr("(){}\"-]/\\,;:=*`+<>", *sIt) != NULL)
+			{
+			// Get here if c is any NEXUS punctuation mark except left square bracket ([) or apostrophe (').
+			// [ and ' never get returned as punctuation by NxsToken,
+			// so we should never encounter them here.
+			//
+			return (s.length() > 1 ? kSingleQuotesNeededForNexus : kNoQuotesNeededForNexus);
+			}
+		else if (strchr("\'[_", *sIt) != NULL)
+			{
+			// Get here if c is either an apostrophe or left square bracket. Quotes are needed if one of these
+			// characters is all there is to this string
+			//
+			return kSingleQuotesNeededForNexus;
+			}
+		}
 	return nrq;
 	}
 
