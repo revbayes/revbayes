@@ -218,6 +218,10 @@ LogDensity FossilTipTimeSlideUniformProposal::doProposal( void )
         max_age = fmin(max_age, parent_age);
     }
     
+    // Abort the move if we don't have a valid interval
+    if (not (min_age < max_age))
+        throw RbException(RbException::SKIP_PROPOSAL);
+
     // now we store all necessary values
     stored_age = my_age;
     

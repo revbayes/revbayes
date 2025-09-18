@@ -279,7 +279,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     catch (const RbException &e)
     {
-        if ( e.getExceptionType() != RbException::MATH_ERROR and e.getExceptionType() != RbException::SKIP_PROPOSAL)
+        if ( e.getExceptionType() == RbException::SKIP_PROPOSAL )
+        {
+            return;
+        }
+        else if ( e.getExceptionType() != RbException::MATH_ERROR )
         {
             throw e;
         }
