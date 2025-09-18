@@ -50,7 +50,7 @@ namespace RevBayesCore {
 
 
         // helper functions
-        bool                                                    matchesConstraints(void);
+        LogDensity                                              constraintLikelihood(void);
         void                                                    updateMapOfNodeAges();
         void                                                    updateSetOfConstrainedNodes();
 
