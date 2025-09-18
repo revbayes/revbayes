@@ -18,6 +18,8 @@
 #ifndef DistributionNormal_H
 #define DistributionNormal_H
 
+#include "LogDensity.h"
+
 namespace RevBayesCore {
     
     class RandomNumberGenerator;
@@ -31,7 +33,7 @@ namespace RevBayesCore {
             double                      pdf(double mu, double sigma, double x, double min, double max);         /*!< Truncated Normal probability density */
             double                      lnPdf(double x);                                                        /*!< Log of the Normal(0,1) probability density */
             double                      lnPdf(double mu, double sigma, double x);                               /*!< Log of the Normal(mu,sigma) probability density */
-            double                      lnPdf(double mu, double sigma, double x, double min, double max);       /*!< Log of the truncated normal probability density */
+            LogDensity                  lnPdf(double mu, double sigma, double x, double min, double max);       /*!< Log of the truncated normal probability density */
             double                      cdf(double x);                                                          /*!< Normal(0,1) cumulative probability */
             double                      cdf(double mu, double sigma, double x);                                 /*!< Normal(mu,sigma) cumulative probability */
             double                      cdf(double mu, double sigma, double x, double min, double max);         /*!< Truncated normal cumulative probability */
