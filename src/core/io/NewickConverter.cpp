@@ -90,6 +90,43 @@ Tree* NewickConverter::convertFromNewick(std::string const &n)
     return t;
 }
 
+/* We are currently using this Newick grammar:
+  
+    Tree → Subtree ";"
+    Subtree → Leaf | Internal
+    Leaf → Name
+    Internal → "(" BranchSet ")" Name
+    BranchSet → Branch | Branch "," BranchSet
+    Branch → Subtree Length
+    Name -> QuotedName | UnquotedName | empty
+    Length → ":" number | empty
+
+Comments:
+
+    - We could simplify by doing `Subtree -> [ "(" BranchSet ")" ] Name`, where [..] means optional.
+    - ???
+
+*/
+
+// Tree -> Subtree ";"
+std::optional<std::pair<TopologyNode*, int>> parseTree(const std::string& input, int start_pos)
+{
+    // 1. Get the Subtree
+    auto check_subtree = parseSubTree(input,start_pos);
+    if (not check_subtree)
+        return {};
+
+    auto& [subtree, new_start_pos] = *check_subtree;
+
+    auto check_semi = checkChar(input, new_start_pos, ';');
+    if (not check_semi)
+        return {};
+
+    int new_start_pos2 = *check_semi;
+
+    return {{subtree, new_start_pos2}};
+}
+
 // subtree -> internal OR leaf
 std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string& input, int start_pos){
 
@@ -247,6 +284,8 @@ std::optional<std::pair<std::string, int>> parseQuotedName(const std::string& in
 std::optional<std::pair<std::string, int>> parseUnquotedName(const std::string& input, int start_pos){
     return {};
 }
+
+// Name -> QuotedName | UnquotedName | empty
 std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos){
     //handle newick escaping hear, read newick minus parsing syntax?
     //* skip any whitespace
