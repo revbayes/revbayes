@@ -227,6 +227,17 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new AbstractHomologousDiscreteCharacterData(trans_data) );
     }
+    else if ( name == "expandStandard" )
+    {
+        found = true;
+
+        const RevObject& argument = args[0].getVariable()->getRevObject();
+        std::int64_t n = static_cast<const Natural&>( argument ).getValue();
+
+        RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().expandStandard( n );
+
+        return new RevVariable( new AbstractHomologousDiscreteCharacterData(trans_data) );
+    }
     else if (name == "getEmpiricalBaseFrequencies")
     {
         found = true;
@@ -805,6 +816,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* compMultiLikeArgRules                    = new ArgumentRules();
     ArgumentRules* empiricalBaseArgRules                    = new ArgumentRules();
     ArgumentRules* expandCharactersArgRules                 = new ArgumentRules();
+    ArgumentRules* expandStandardArgRules                   = new ArgumentRules();
     ArgumentRules* getNumStatesVectorArgRules               = new ArgumentRules();
     ArgumentRules* getPairwiseDifferenceArgRules            = new ArgumentRules();
     ArgumentRules* getStateDescriptionsArgRules             = new ArgumentRules();
@@ -853,6 +865,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     comp_site_freq_spec_arg_rules->push_back(           new OptionRule( "ambiguityTreatment", new RlString("ancestral"), sfs_ambig_options, "How should we treat ambiguous characters as derived?" ) );
 //    comp_site_freq_spec_arg_rules->push_back(           new ArgumentRule( "ambigAreDerived"  , RlBoolean::getClassTypeSpec()          , "Should we treat ambiguous characters as derived?",    ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     expandCharactersArgRules->push_back(                new ArgumentRule( "factor"           , Natural::getClassTypeSpec()            , "The factor by which the state space is expanded.",    ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
+    expandStandardArgRules->push_back(                  new ArgumentRule( "factor"           , Natural::getClassTypeSpec()            , "The factor by which the state space is expanded.",    ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     invSitesArgRules->push_back(                        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     invSiteIndicesArgRules->push_back(                  new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     mask_missing_arg_rules->push_back(       new ArgumentRule("ref",        AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The reference dataset/alignment which we use for applying the mask of missing sites.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -882,6 +895,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "computeMultinomialProfileLikelihood",    Real::getClassTypeSpec(),           compMultiLikeArgRules           ) );
     methods.addFunction( new MemberProcedure( "excludeMissingSites",                     RlUtils::Void,                      exclude_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
+    methods.addFunction( new MemberProcedure( "expandStandard",                         AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandStandardArgRules          ) );
     methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
     methods.addFunction( new MemberProcedure( "getInvariantSiteIndices",                ModelVector<Natural>::getClassTypeSpec(), invSiteIndicesArgRules           ) );
