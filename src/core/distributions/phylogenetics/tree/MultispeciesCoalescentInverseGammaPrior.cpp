@@ -42,7 +42,7 @@ MultispeciesCoalescentInverseGammaPrior* MultispeciesCoalescentInverseGammaPrior
 }
 
 
-double MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &times, double begin_age, double end_age, size_t index, bool add_final_interval)
+LogDensity MultispeciesCoalescentInverseGammaPrior::computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &times, double begin_age, double end_age, size_t index, bool add_final_interval)
 {
     // Index is the index of the species node
 

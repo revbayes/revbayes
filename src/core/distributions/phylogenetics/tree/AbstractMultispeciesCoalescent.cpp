@@ -215,7 +215,7 @@ LogDensity AbstractMultispeciesCoalescent::recursivelyComputeLnProbability( cons
             if ( remaining_individuals.find( left ) == remaining_individuals.end() || remaining_individuals.find( right ) == remaining_individuals.end() )
             {
                 // one of the children does not belong to this species tree branch
-                return RbConstants::Double::neginf;
+                return ln_prob_coal + RbConstants::Double::neginf;
             }
 
             //We remove the coalescent event and the coalesced lineages
