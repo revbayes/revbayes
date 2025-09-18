@@ -38,8 +38,8 @@ namespace RevBayesCore {
         void                                                buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
         double                                              computeD(double dt, double e);
         double                                              computeE(double dt, double e);
-        double                                              computeLnDuplicationLossProbability(size_t k, const std::vector<double> &t, double a, double b, const TopologyNode &n, bool f);
-        double                                              recursivelyComputeLnProbability(const TopologyNode &n);
+        LogDensity                                          computeLnDuplicationLossProbability(size_t k, const std::vector<double> &t, double a, double b, const TopologyNode &n, bool f);
+        LogDensity                                          recursivelyComputeLnProbability(const TopologyNode &n);
         void                                                resetTipAllocations(void);
         void                                                simulateTree(void);
         
