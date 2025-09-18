@@ -17,6 +17,7 @@
 #include "RlString.h"
 #include "RlTree.h"
 #include "StandardState.h"
+#include "ExpandedStandardState.h"
 #include "RlSimplex.h"
 #include "PoMoState.h"
 #include "NaturalNumbersState.h"
@@ -265,9 +266,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
     bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
 
-    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
+    if (!(dt == "Binary" || dt == "Restriction" || dt == "Standard" || dt == "ExpandedStandard") && code != "all")
     {
-        throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
+        throw RbException( "Ascertainment bias correction only supported with Standard, Expanded Standard and Binary/Restriction datatypes" );
     }
 
     if ( dt == "DNA" )
@@ -344,6 +345,42 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
 
         return setDistParameters(dist);
+    }
+    else if (dt == "ExpandedStandard")
+    {
+      // we get the number of states from the rates matrix
+      int nChars = computeNumberOfStates();
+
+      int cd = RevBayesCore::AscertainmentBias::ALL;
+      // split the coding option on "|"
+      if (code == "informative")
+      {
+        cd = RevBayesCore::AscertainmentBias::INFORMATIVE;
+      }
+      else if (code == "variable")
+      {
+        cd = RevBayesCore::AscertainmentBias::VARIABLE;
+      }
+      else if (code != "all")
+      {
+        std::stringstream ss;
+        ss << "Invalid coding option \"" << code << "\"\n";
+        ss << "\tAvailable Standard state codings: all, informative, variable\n";
+        ss << "\tDefault: all.\n";
+        throw RbException(ss.str());
+      }
+
+      RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::ExpandedStandardState> *dist;
+      if (cd == RevBayesCore::AscertainmentBias::ALL)
+      {
+        dist = new RevBayesCore::PhyloCTMCSiteHomogeneous<RevBayesCore::ExpandedStandardState>(tau, nChars, true, n, ambig, internal, gapmatch);
+      }
+      else
+      {
+        dist = new RevBayesCore::PhyloCTMCSiteHomogeneousConditional<RevBayesCore::ExpandedStandardState>(tau, nChars, true, n, ambig, RevBayesCore::AscertainmentBias::Coding(cd), internal, gapmatch);
+      }
+
+      return setDistParameters(dist);
     }
     else if ( dt == "NaturalNumbers" )
     {
@@ -540,6 +577,7 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         options.push_back( "PoMo" );
         options.push_back( "Protein" );
         options.push_back( "Standard" );
+        options.push_back( "ExpandedStandard" );
         options.push_back( "NaturalNumbers" );
         options.push_back( "Binary" );
         options.push_back( "Restriction" );
