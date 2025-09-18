@@ -170,7 +170,7 @@ LogDensity AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
     resetTipAllocations();
 
     // variable declarations and initialization
-    double ln_prob_coal = 0;
+    LogDensity ln_prob_coal = 0;
 
     const Tree &sp = species_tree->getValue();
 
@@ -192,9 +192,9 @@ double AbstractMultispeciesCoalescentGenewise::drawNe( size_t index )
 
 
 
-double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &species_node )
+LogDensity AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &species_node )
 {
-    double ln_prob_coal = 0;
+    LogDensity ln_prob_coal = 0;
 
     if ( species_node.isTip() == false )
     {
@@ -263,7 +263,7 @@ double AbstractMultispeciesCoalescentGenewise::recursivelyComputeLnProbability( 
                 if ( current_remaining_individuals.find( left ) == current_remaining_individuals.end() || current_remaining_individuals.find( right ) == current_remaining_individuals.end() )
                 {
                     // one of the children does not belong to this species tree branch
-                    return RbConstants::Double::neginf;
+                    return ln_prob_coal + RbConstants::Double::neginf;
                 }
 
                 //We remove the coalescent event and the coalesced lineages
