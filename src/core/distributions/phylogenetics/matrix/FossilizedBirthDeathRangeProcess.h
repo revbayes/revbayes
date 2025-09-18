@@ -46,10 +46,10 @@ namespace RevBayesCore {
         FossilizedBirthDeathRangeProcess*               clone(void) const override;                                         //!< Create an independent clone
 
     protected:
-        void                                            updateStartEndTimes();
+        void                                            updateStartEndTimes() override;
 
         // Parameter management functions
-        double                                          computeLnProbability(void);                                         //!< Compute the log-transformed probability of the current value.
+        double                                          computeLnProbability(void) override;                                //!< Compute the log-transformed probability of the current value.
         double                                          computeLnProbabilityBDS(void);                                      //!< Compute the log probability assuming complete lineage sampling.
 
         // Parameter management functions
@@ -63,7 +63,7 @@ namespace RevBayesCore {
         
         // helper functions
         void                                            updateGamma(bool force = false);                                    //!< Number of species alive at time t.
-        void                                            redrawValue(void);
+        void                                            redrawValue(void) override;
 
         bool                                            bds;                //!< Indicates whether to assume complete lineage sampling (BDS model)
         std::vector<size_t>                             gamma_i;            //!< The number of coexisting lineages at each taxon birth time
