@@ -343,7 +343,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     LogDensity ln_prior_ratio = 0.0;
     LogDensity ln_likelihood_ratio = 0.0;
 
-    bool zero_or_nan_to_finite = false;
+    bool nan_to_finite = false;
 
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
@@ -357,11 +357,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             // Compute the current lnProbability.
             LogDensity current = node->getLnProbability();
 
-            if (isfinite(current) and (isnan(prev) or prev <= RbConstants::Double::neginf))
+            if (isfinite(current) and isnan(prev))
             {
                 // If the log-probability changes from NaN or -Inf to something finite,
                 // the ratio would be NaN or +Inf, and the move would be rejected.
-                zero_or_nan_to_finite = true;
+                nan_to_finite = true;
             }
             else
                 ratio = current - prev;
@@ -379,7 +379,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         else
             ln_prior_ratio += ratio;
 
-        if ( not isfinite(ratio)) fail_probability = true;
+        if ( isnan(ratio)) fail_probability = true;
     }
 
     if (logMCMC >= 3)
@@ -406,7 +406,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         // (Terms where the previous log-pdf is NaN or -Inf and the current log-pdf is finite are not included.)
         rejected = true;
     }
-    else if (zero_or_nan_to_finite)
+    else if (nan_to_finite)
     {
         // If we get here and any term changed from NaN or -Inf -> finite then accept the move.
     }
