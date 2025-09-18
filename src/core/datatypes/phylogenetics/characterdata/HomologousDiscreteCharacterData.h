@@ -87,6 +87,7 @@ namespace RevBayesCore {
         HomologousDiscreteCharacterData<NaturalNumbersState>*       combineCharacters(const HomologousDiscreteCharacterData &d) const;        //!< Combine/expand data matrices
         AbstractHomologousDiscreteCharacterData*            combineCharacters(const AbstractHomologousDiscreteCharacterData &d) const;        //!< Combine/expand data matrices
         AbstractHomologousDiscreteCharacterData*            expandCharacters(size_t n) const;
+        AbstractHomologousDiscreteCharacterData*            expandStandard(size_t n) const;
         void                                                includeCharacter(size_t i);                                                 //!< Include character
         bool                                                isCharacterExcluded(size_t i) const;                                        //!< Is the character excluded
         bool                                                isCharacterResolved(size_t txIdx, size_t chIdx) const;                      //!< Returns whether the character is fully resolved (e.g., "A" or "1.32") or not (e.g., "AC" or "?")
@@ -112,6 +113,7 @@ namespace RevBayesCore {
 #include "CharacterTranslator.h"
 #include "DnaState.h"
 #include "NaturalNumbersState.h"
+#include "ExpandedStandardState.h"
 #include "NclReader.h"
 #include "RbConstants.h"
 #include "RbException.h"
@@ -802,7 +804,81 @@ RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousD
     return trans_char_data;
 }
 
+/**
+ * Expand standard characters.
+ *
+ * \return       expanded character data matrix
+ */
+template<class charType>
+RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousDiscreteCharacterData<charType>::expandStandard( size_t n ) const
+{
+    
+    size_t num_sequences = this->taxa.size();
+    HomologousDiscreteCharacterData<ExpandedStandardState> *trans_char_data = new HomologousDiscreteCharacterData<ExpandedStandardState>();
+    
+    for (size_t i = 0; i < num_sequences; ++i)
+    {
+        const DiscreteTaxonData<charType>& seq = this->getTaxonData(i);
+        DiscreteTaxonData<ExpandedStandardState> expanded_seq = DiscreteTaxonData<ExpandedStandardState>( seq.getTaxon() );
+        
+        size_t seq_length = seq.getNumberOfCharacters();
+        for ( size_t j = 0; j < seq_length; ++j )
+        {
+            const charType& org_char = seq[j];
+            
+            size_t num_states = org_char.getNumberOfStates();
+            ExpandedStandardState number_state = ExpandedStandardState(0,int(num_states*n));
+           
+            if ( org_char.isMissingState() == true )
+            {
+                number_state.setMissingState( true );
+            }
+            else if ( org_char.isGapState() == true )
+            {
+                number_state.setGapState( true );
+            }
+            else
+            {
 
+                bool first = true;
+                for (size_t k=0; k < num_states; ++k)
+                {
+                    
+                    if ( org_char.isStateSet( k ) == true )
+                    {
+                        
+                        // set the initial state
+                        if ( first == true )
+                        {
+                            first = false;
+                            number_state.setStateByIndex( k );
+                        }
+                        else
+                        {
+                            number_state.addState( int(k) );
+                        }
+                        
+                        // now we set also the expanded states
+                        for (size_t l=1; l<n; ++l)
+                        {
+                            number_state.addState( int(k)+int(num_states*l) );
+                        }
+                        
+                    }
+                    
+                }
+            }
+            
+            expanded_seq.addCharacter( number_state );
+            
+        }
+
+        trans_char_data->addTaxonData( expanded_seq );
+        
+    }
+    
+    return trans_char_data;
+}
 
 /** 
  * Get the cn-th character of the tn-th taxon.
@@ -2205,4 +2281,3 @@ double RevBayesCore::HomologousDiscreteCharacterData<charType>::varGcContentByCo
 
 
 #endif
-

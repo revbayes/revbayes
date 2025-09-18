@@ -97,6 +97,7 @@ class DiscreteCharacterState;
         virtual void                                            restoreCharacter(size_t i) = 0;                                                             //!< Restore character
         
         virtual AbstractHomologousDiscreteCharacterData*        expandCharacters(size_t n) const = 0;
+        virtual AbstractHomologousDiscreteCharacterData*        expandStandard(size_t n) const = 0;
         virtual AbstractHomologousDiscreteCharacterData*        translateCharacters(const std::string &type) const = 0;
 
     protected:
