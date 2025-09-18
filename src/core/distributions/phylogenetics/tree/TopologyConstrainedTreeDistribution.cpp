@@ -241,17 +241,13 @@ LogDensity TopologyConstrainedTreeDistribution::computeLnProbability( void )
     recursivelyUpdateClades( value->getRoot() );
     
     // first check if the current tree matches the clade constraints
-    if ( matchesConstraints() == false )
-    {
-        return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
-    }
+    auto constraint_pr = LogDensity(constraintMismatches(), 0);
+    // return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
+
+    auto backbone_pr = LogDensity(backboneMismatches(), 0);
+    // return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
     
-    if ( matchesBackbone() == false )
-    {
-        return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
-    }
-    
-    return base_distribution->computeLnProbability();
+    return constraint_pr + backbone_pr + base_distribution->computeLnProbability();
 }
 
 
@@ -358,9 +354,10 @@ void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &a
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
+int TopologyConstrainedTreeDistribution::backboneMismatches( void )
 {
-    
+    int mismatches = 0;
+
     // ensure that each backbone constraint is found in the corresponding active_backbone_clades
     for (size_t i = 0; i < num_backbones; i++)
     {
@@ -383,7 +380,7 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
             if (it == active_backbone_clades[i].end() && !is_negative_constraint )
             {
                 // match fails if positive constraint is not found
-                return false;
+                mismatches++;
             }
             else if (it != active_backbone_clades[i].end() && is_negative_constraint )
             {
@@ -403,12 +400,12 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
         }
         if (negative_constraint_failure)
         {
-            return false;
+            mismatches++;
         }
     }
     
     // if no search has failed, then the match succeeds
-    return true;
+    return mismatches;
 }
 
 
@@ -417,8 +414,9 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
+int TopologyConstrainedTreeDistribution::constraintMismatches( void )
 {
+    int mismatches = 0;
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         
@@ -461,11 +459,11 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
         
         if ( any_satisfied == false )
         {
-            return false;
+            mismatches++;
         }
     }
     
-    return true;
+    return mismatches;
 }
 
 

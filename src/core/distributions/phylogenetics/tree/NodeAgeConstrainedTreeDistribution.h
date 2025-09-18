@@ -56,7 +56,7 @@ template <class variableType> class StochasticNode;
         
         
         // helper functions
-        bool                                                    matchesConstraints(void);
+        LogDensity                                              ConstraintLikelihood(void);
 //        void                                                    updateMapOfNodeAges();
 //        void                                                    updateSetOfConstrainedNodes();
         

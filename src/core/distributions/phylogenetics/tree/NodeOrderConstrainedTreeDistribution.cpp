@@ -133,13 +133,6 @@ NodeOrderConstrainedTreeDistribution* NodeOrderConstrainedTreeDistribution::clon
  */
 LogDensity NodeOrderConstrainedTreeDistribution::computeLnProbability( void )
 {
-
-    // first check if the current tree matches the clade constraints
-    if ( !matchesConstraints() )
-    {
-        return RbConstants::Double::neginf;
-    }
-
     // since we and the base distribution own the same value,
     // we do not need to set the value of the base distribution
     if ( owns_tree == true )
@@ -147,7 +140,7 @@ LogDensity NodeOrderConstrainedTreeDistribution::computeLnProbability( void )
         base_distribution->setValue( value->clone() );
     }
 
-    return base_distribution->computeLnProbability();
+    return constraintLikelihood() + base_distribution->computeLnProbability();
 }
 
 
@@ -169,9 +162,9 @@ void NodeOrderConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool NodeOrderConstrainedTreeDistribution::matchesConstraints( void )
+LogDensity NodeOrderConstrainedTreeDistribution::constraintLikelihood( void )
 {
-
+    LogDensity Pr = 0;
 
     updateMapOfNodeAges();
 
@@ -193,18 +186,19 @@ bool NodeOrderConstrainedTreeDistribution::matchesConstraints( void )
       //std::cout << "FIRST: "<<    node_ages.at(constra[i].first)<<" and SECOND: " << node_ages.at(constra[i].second) << std::endl;
 
       //std::cout << value->getPlainNewickRepresentation() << std::endl;
-
-        if ( node_ages.at(constra[i].first) <  node_ages.at(constra[i].second) )
+        auto& [older, younger] = constra[i];
+        double error = node_ages.at(younger)  - node_ages.at(older);
+        if ( error > 0)
         {
 
           //std::cout << "NodeOrderConstrainedTreeDistribution::matchesConstraints: FALSE" <<std::endl;
 
-            return false;
+            Pr += LogDensity(1, -error);
         }
     }
     //std::cout << "NodeOrderConstrainedTreeDistribution::matchesConstraints: TRUE; "<< constra.size() <<std::endl;
 
-    return true;
+    return Pr;
 
 }
 

@@ -50,8 +50,8 @@ namespace RevBayesCore {
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         
         // helper functions
-        bool                                                matchesBackbone(void);
-        bool                                                matchesConstraints(void);
+        int                                                 backboneMismatches(void);
+        int                                                 constraintMismatches(void);
         RbBitSet                                            recursivelyAddBackboneConstraints(const TopologyNode& node, size_t backbone_idx);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
