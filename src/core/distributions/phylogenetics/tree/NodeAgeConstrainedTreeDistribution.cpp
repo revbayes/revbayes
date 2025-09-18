@@ -95,14 +95,7 @@ NodeAgeConstrainedTreeDistribution* NodeAgeConstrainedTreeDistribution::clone( v
  */
 LogDensity NodeAgeConstrainedTreeDistribution::computeLnProbability( void )
 {
-    
-    // first check if the current tree matches the clade constraints
-    if ( matchesConstraints() == false )
-    {
-        return RbConstants::Double::neginf;
-    }
-    
-    return base_distribution->computeLnProbability();
+    return ConstraintLikelihood() + base_distribution->computeLnProbability();
 }
 
 
@@ -124,9 +117,9 @@ void NodeAgeConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &af
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool NodeAgeConstrainedTreeDistribution::matchesConstraints( void )
+LogDensity NodeAgeConstrainedTreeDistribution::ConstraintLikelihood( void )
 {
-    
+    LogDensity Pr = 0;
     for (size_t j=0; j<constraints.size(); ++j)
     {
 
@@ -143,14 +136,14 @@ bool NodeAgeConstrainedTreeDistribution::matchesConstraints( void )
         
             if ( fabs(constrain_age-node_age) > 1E-10 )
             {
-                return false;
+                Pr += logZeroWithError(std::abs(constrain_age-node_age));
             }
 
         }
 
     }
     
-    return true;
+    return Pr;
 }
 
 
