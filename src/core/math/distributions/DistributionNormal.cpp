@@ -125,7 +125,7 @@ double RbStatistics::Normal::lnPdf(double mu, double sigma, double x)
  * \throws Does not throw an error.
  */
 
-double RbStatistics::Normal::lnPdf(double mu, double sigma, double x, double min, double max) {
+LogDensity RbStatistics::Normal::lnPdf(double mu, double sigma, double x, double min, double max) {
     double alpha, beta;
     
     if (min == RbConstants::Double::neginf)
@@ -138,8 +138,10 @@ double RbStatistics::Normal::lnPdf(double mu, double sigma, double x, double min
     else
         beta = Normal::cdf((max - mu) / sigma);
 
-    if ( x < min || x > max)
-        return RbConstants::Double::neginf;
+    if (x < min)
+        return LogDensity(1,x - min);
+    else if (x > max)
+        return LogDensity(1,max - x);
     else
         return - RbConstants::LN_SQRT_2PI - 0.5 * (x - mu) * (x - mu) / (sigma * sigma) - (std::log(sigma) + std::log(beta - alpha));
 }
