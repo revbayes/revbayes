@@ -23,7 +23,7 @@ namespace RevBayesCore {
     class Mcmc : public MonteCarloSampler {
     
     public:
-        Mcmc(const Model &m, const RbVector<Move> &moves, const RbVector<Monitor> &mons, size_t ntries=1000);
+        Mcmc(const Model &m, const RbVector<Move> &moves, const RbVector<Monitor> &mons, size_t ntries=1000, size_t nsearch=0);
         Mcmc(const Mcmc &m);
         virtual                                            ~Mcmc(void);                                                                             //!< Virtual destructor
         
@@ -101,6 +101,7 @@ namespace RevBayesCore {
         RbVector<Move>                                      moves;
         std::vector<tuningInfo>                             moves_tuningInfo;
         size_t                                              num_init_attempts;
+        size_t                                              num_search_gens;
         MoveSchedule*                                       schedule;
         std::string                                         schedule_type;                                                                           //!< Type of move schedule to be used
         std::vector<DagNode*>                               variable_nodes;
