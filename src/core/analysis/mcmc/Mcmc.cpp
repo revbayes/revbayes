@@ -55,7 +55,8 @@ using namespace RevBayesCore;
  * \param[in]    mvs  The vector of moves.
  * \param[in]    mons The vector of monitors.
  */
-Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &mons, size_t ntries) : MonteCarloSampler(),
+Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &mons, size_t ntries, size_t nsearch)
+  : MonteCarloSampler(),
     chain_active( true ),
     chain_likelihood_heat( 1.0 ),
     chain_posterior_heat( 1.0 ),
@@ -65,6 +66,7 @@ Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &m
     monitors( mons ),
     moves( mvs ),
     num_init_attempts(ntries),
+    num_search_gens(nsearch),
     schedule(NULL),
     schedule_type("random")
 {
@@ -99,7 +101,8 @@ Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &m
   *
   * \param[in]    m    The MonteCarloSampler object to copy.
   */
-Mcmc::Mcmc(const Mcmc &m) : MonteCarloSampler(m),
+Mcmc::Mcmc(const Mcmc &m)
+  : MonteCarloSampler(m),
     chain_active( m.chain_active ),
     chain_likelihood_heat( m.chain_likelihood_heat ),
     chain_posterior_heat( m.chain_posterior_heat ),
@@ -109,6 +112,7 @@ Mcmc::Mcmc(const Mcmc &m) : MonteCarloSampler(m),
     monitors( m.monitors ),
     moves( m.moves ),
     num_init_attempts( m.num_init_attempts ),
+    num_search_gens( m.num_search_gens ),
     schedule( NULL ),
     schedule_type( m.schedule_type )
 {
@@ -585,7 +589,19 @@ void Mcmc::initializeSampler()
     {
         delete schedule;
     }
-    schedule = NULL;
+    // Create the move scheduler
+    if ( schedule_type == "sequential" )
+    {
+        schedule = new SequentialMoveSchedule( &moves );
+    }
+    else if ( schedule_type == "single" )
+    {
+        schedule = new SingleRandomMoveSchedule( &moves );
+    }
+    else
+    {
+        schedule = new RandomMoveSchedule( &moves );
+    }
 
     // Get initial ln_probability of model
 
@@ -618,46 +634,60 @@ void Mcmc::initializeSampler()
         
     }
 
+    auto Pr = [&]()
+        {
+            LogDensity ln_probability = 0;
 
+            for (auto the_node: dag_nodes)
+            {
+            auto ln_prob = the_node->getLnProbability();
+
+                if ( not ln_prob.isfinite() )
+                {
+                    if (ln_prob > 0)
+                    {
+                        the_node->touch();
+                        ln_prob = the_node->getLnProbability();
+                    }
+                    std::stringstream ss;
+                    ss << "   '" << the_node->getName() << "': lnProb = "<< ln_prob << "    value = ";
+                    std::ostringstream o1;
+                    the_node->printValue( o1, "," );
+                    ss << StringUtilities::oneLiner( o1.str(), 54 );
+                    RBOUT( ss.str() );
+                }
+                ln_probability += ln_prob;
+            }
+
+            return ln_probability;
+        };
+                      
+    
+    auto TouchedPr = [&]()
+        {
+            for (auto the_node: dag_nodes)
+                the_node->touch();
+
+            LogDensity ln_probability = Pr();
+
+            // now we keep all nodes so that the likelihood is stored
+            for (auto the_node: dag_nodes)
+            {
+                the_node->keep();
+            }
+
+            return ln_probability;
+        };
+                      
+    
     int num_tries     = 0;
     LogDensity ln_probability = 0.0;
     for ( ; num_tries < num_init_attempts; ++num_tries )
     {
         // a flag if we failed to find a valid starting value
-        bool failed = false;
-
-        ln_probability = 0.0;
-        for (auto the_node: dag_nodes)
-            the_node->touch();
-
-        for (auto the_node: dag_nodes)
-        {
-            auto ln_prob = the_node->getLnProbability();
-
-            if ( not ln_prob.isfinite() )
-            {
-                std::stringstream ss;
-                ss << "Could not compute lnProb for node '" << the_node->getName() << "': lnProb = "<< ln_prob << std::endl;
-                std::ostringstream o1;
-                the_node->printValue( o1, "," );
-                ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
-
-                ss << std::endl;
-                RBOUT( ss.str() );
-
-                // set the flag
-                failed = true;
-            }
-            ln_probability += ln_prob;
-        }
-
-        // now we keep all nodes so that the likelihood is stored
-        for (auto the_node: dag_nodes)
-        {
-            the_node->keep();
-        }
-
-        if ( failed == true )
+        ln_probability = TouchedPr();
+        
+        if ( not isfinite(ln_probability) )
         {
             RBOUT( "Drawing new initial states ... " );
             for (auto the_node: ordered_stoch_nodes)
@@ -687,31 +717,68 @@ void Mcmc::initializeSampler()
 
     }
     
-    if ( num_tries == num_init_attempts )
+    if ( not isfinite(ln_probability) )
     {
         std::stringstream msg;
         msg << "Unable to find a starting state with computable probability";
         if ( num_tries > 1 )
         {
-            msg << " after " << num_tries << " tries";
+            msg << " after resampling " << num_tries << " times";
         }
-        throw RbException( msg.str() );
-        
+
+        if (num_search_gens <= 0)
+            throw RbException(msg.str());
+        else
+            RBOUT(msg.str());
+    }
+
+    if ( not isfinite(ln_probability) and num_search_gens > 0)
+    {
+        RBOUT("Searching for non-zero probability via MCMC moves.");
+        RBOUT("Search will stop if no improvment seen for " + std::to_string(num_search_gens) + " generations");
+
+        LogDensity last_improved_pr = ln_probability;
+        int last_improved_iter = 0;
+        std::cerr<<"    SEARCH: iter = 0    Pr = "<<ln_probability<<"\n";
+        for(int search_iter=1; not isfinite(ln_probability) and (search_iter - last_improved_iter < num_search_gens); search_iter++)
+        {
+            nextCycle(false);
+
+            auto next_pr = TouchedPr();
+            std::cerr<<"    SEARCH: iter = "<<search_iter<<"    Pr = "<<next_pr<<"\n";
+
+            if (next_pr.nans() < ln_probability.nans())
+            {
+                last_improved_pr = next_pr;
+                last_improved_iter = search_iter;
+            }
+            else if (next_pr.nans() > ln_probability.nans())
+            {
+            }
+            else if (next_pr.infs() < ln_probability.infs())
+            {
+                last_improved_pr = next_pr;
+                last_improved_iter = search_iter;
+            }
+            else if (next_pr.infs() > ln_probability.infs())
+            {
+            }
+            else if (next_pr.neginfs() < ln_probability.infs())
+            {
+                last_improved_pr = next_pr;
+                last_improved_iter = search_iter;
+            }
+
+            ln_probability = next_pr;
+        }
+    }
+
+    if ( not isfinite(ln_probability) )
+    {
+        throw RbException()<< "Unable to find a starting state with computable probability";
+
     }
     
-    // Create the move scheduler
-    if ( schedule_type == "sequential" )
-    {
-        schedule = new SequentialMoveSchedule( &moves );
-    }
-    else if ( schedule_type == "single" )
-    {
-        schedule = new SingleRandomMoveSchedule( &moves );
-    }
-    else
-    {
-        schedule = new RandomMoveSchedule( &moves );
-    }
     
     generation = 0;
     
