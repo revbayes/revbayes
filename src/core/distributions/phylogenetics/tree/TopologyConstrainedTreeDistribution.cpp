@@ -348,6 +348,23 @@ void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &a
 }
 
 
+int closest_distance(const RbBitSet& target, const std::vector<RbBitSet>& candidates)
+{
+    int min_distance = target.size();
+
+    for (const auto& c : candidates) {
+        // assume all bitsets are same size
+        int d = (target ^ c).count();
+        if (not min_distance or d < min_distance) {
+            min_distance = d;
+        }
+    }
+
+    return min_distance;
+}
+
+
+
 /**
  * We check here if all the constraints are satisfied.
  * These are hard constraints, that is, the clades must be monophyletic.
@@ -356,6 +373,8 @@ void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &a
  */
 int TopologyConstrainedTreeDistribution::backboneMismatches( void )
 {
+    int N = base_distribution->getValue().getNumberOfNodes();
+
     int mismatches = 0;
 
     // ensure that each backbone constraint is found in the corresponding active_backbone_clades
@@ -370,7 +389,7 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
         {
             is_negative_constraint = ( backbone_topologies->getValue() )[i].isNegativeConstraint();
         }
-        
+
         std::vector<bool> negative_constraint_found( backbone_constraints[i].size(), false );
         for (size_t j = 0; j < backbone_constraints[i].size(); j++)
         {
@@ -380,7 +399,7 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
             if (it == active_backbone_clades[i].end() && !is_negative_constraint )
             {
                 // match fails if positive constraint is not found
-                mismatches++;
+                mismatches += N + closest_distance(backbone_constraints[i][j], active_backbone_clades[i]);
             }
             else if (it != active_backbone_clades[i].end() && is_negative_constraint )
             {
@@ -400,7 +419,7 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
         }
         if (negative_constraint_failure)
         {
-            mismatches++;
+            mismatches += 2*N;
         }
     }
     
@@ -416,6 +435,8 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
  */
 int TopologyConstrainedTreeDistribution::constraintMismatches( void )
 {
+    int N = base_distribution->getValue().getNumberOfNodes();
+
     int mismatches = 0;
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
@@ -430,37 +451,40 @@ int TopologyConstrainedTreeDistribution::constraintMismatches( void )
             constraints.push_back(monophyly_constraints[i]);
         }
         
-        std::vector<bool> constraint_satisfied( constraints.size(), false );
+        std::vector<int> constraint_distance( constraints.size(), 2*N );
         for (size_t j = 0; j < constraints.size(); j++)
         {
-            
+
             std::vector<RbBitSet>::iterator it = std::find(active_clades.begin(), active_clades.end(), constraints[j].getBitRepresentation() );
+            bool found = it != active_clades.end();
             
-            if (it != active_clades.end() && constraints[j].isNegativeConstraint() == false )
+            if (constraints[j].isNegativeConstraint())
             {
-                constraint_satisfied[j] = true;
+                if (found)
+                    constraint_distance[j] = 2*N;  // negative constraint UNsatisfied
+                else
+                    constraint_distance[j] = 0;    // negative constraint satisfied
             }
-            else if (it == active_clades.end() && constraints[j].isNegativeConstraint() )
+            else
             {
-                constraint_satisfied[j] = true;
+                if (found)
+                    constraint_distance[j] = 0;     // constraint satisfied
+                else
+                {
+                    constraint_distance[j] = N + closest_distance(constraints[j].getBitRepresentation(), active_clades);
+                }// constraint UNsatisfied.
             }
         }
-        
+
         // match fails if no optional positive or negative constraints satisfied
-        bool any_satisfied = false;
-        for (size_t j = 0; j < constraint_satisfied.size(); j++)
+        // (a constraint is satisfied if the minimum distance is 0.)
+        int min_distance = 2*N;
+        for (size_t j = 0; j < constraint_distance.size(); j++)
         {
-            if ( constraint_satisfied[j] == true )
-            {
-                any_satisfied = true;
-                break;
-            }
+            min_distance = std::min(min_distance, constraint_distance[j]);
         }
         
-        if ( any_satisfied == false )
-        {
-            mismatches++;
-        }
+        mismatches += min_distance;
     }
     
     return mismatches;
@@ -685,7 +709,7 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
         // redraw the current value
         if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
         {
-            this->redrawValue();
+            this->redrawValue( SimulationCondition::MCMC );
         }
         
     }
