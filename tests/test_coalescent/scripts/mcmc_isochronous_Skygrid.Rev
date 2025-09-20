@@ -155,7 +155,7 @@ monitors.append( mnFile(filename="output/horses_iso_Skygrid.trees",psi,printgen=
 monitors.append( mnFile(filename="output/horses_iso_Skygrid_NEs.log",population_size,printgen=THINNING) )
 monitors.append( mnFile(filename="output/horses_iso_Skygrid_times.log",interval_times,printgen=THINNING) )
 
-mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPLICATES, combine="mixed")
+mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPLICATES, combine="mixed", ntries=1, nsearch=10)
 mymcmc.run(NUM_MCMC_ITERATIONS, tuning = 100)
 
 

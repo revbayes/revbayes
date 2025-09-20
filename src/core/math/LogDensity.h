@@ -10,21 +10,60 @@
 
 class LogDensity
 {
+    // Should be finite
     double zeros_ = 0;
 
-    // Cannot be -Inf.  Can be +Inf.
+    // Should be finite
     double ones_ = 0;
+
+    // Should be finite
+    double infs_ = 0;
+
+    // Negative NaNs means that one density had fewer nans than another one.
+    int nans_ = 0;
+
 public:
 
     double zeros() const {return zeros_;}
     double& zeros() {return zeros_;}
-    
+
     double ones() const {return ones_;}
     double& ones() {return ones_;}
-    
+
+    double infs() const {return infs_;}
+    double& infs() {return infs_;}
+
+    int nans() const {return nans_;}
+    int& nans() {return nans_;}
+
+    // This is kind of a super-nan.  If in valid, we would treat this as a nan.
+    bool isvalid() const
+    {
+        return std::isfinite(zeros_) and std::isfinite(ones_) and std::isfinite(infs_);
+    }
+
     void check() const {
-	assert(not std::isinf(ones_) or ones_ > 0); // ones_ != -Inf
-	assert(not std::isinf(zeros_));             // only a finite number of zeros.
+        assert(isvalid());
+    }
+
+    bool isnan() const
+    {
+        // This is kind of a super-nan.
+        if (not isvalid()) return true;
+
+        // If nans_ < 0, then we did x-y and x had fewer nans.
+        if (nans_ > 0) return true;
+
+        // We are a nan if we have either form of Inf - Inf.
+        if (zeros_ > 0 and infs_ > 0) return true;
+        if (zeros_ < 0 and infs_ < 0) return true;
+
+        return false;
+    }
+
+    bool isfinite() const
+    {
+        return zeros_ == 0 and infs_ == 0 and nans_ == 0 and std::isfinite(ones_);
     }
 
     LogDensity& operator *=(double y)
@@ -35,6 +74,7 @@ public:
 	// 0^0 == 1
 	zeros_ *= y; // fractional zeros
 	ones_ *= y;
+        infs_ *= y;
 
 	return *this;
     }
@@ -46,6 +86,7 @@ public:
 
 	zeros_ /= y;  // fractional zeros
 	ones_ /= y;
+        infs_ /= y;
 
 	return *this;
     }
@@ -54,6 +95,8 @@ public:
     {
 	zeros_ += y.zeros_;
 	ones_ += y.ones_;
+        infs_ += y.infs_;
+        nans_ += y.nans_;
 
 	return *this;
     }
@@ -62,6 +105,8 @@ public:
     {
 	zeros_ -= y.zeros_;
 	ones_ -= y.ones_;
+        infs_ -= y.infs_;
+        nans_ -= y.nans_;
 
 	return *this;
     }
@@ -71,6 +116,8 @@ public:
         LogDensity ld = *this;
 	ld.zeros_  = -ld.zeros_;
         ld.ones_   = -ld.ones_;
+        ld.infs_   = -ld.infs_;
+        ld.nans_   = -ld.nans_;
 
 	return ld;
     }
@@ -79,31 +126,31 @@ public:
     {
 	if (isnan() or y.isnan()) return false;
 
-        if (zeros_ == y.zeros_)
+        if (zeros_ == y.zeros_ and infs_ == y.infs_)
             return (ones_ < y.ones_);
-        else if (zeros_ > y.zeros_)
+        else if (zeros_ >= y.zeros_ and infs_ <= y.infs_)
             return true;
         else
-            return false; // handles NANs.
+            return false; // handles NANs from +Inf + -Inf
     }
 
     bool operator>(const LogDensity& y) const
     {
 	if (isnan() or y.isnan()) return false;
 
-        if (zeros_ == y.zeros_)
+        if (zeros_ == y.zeros_ and infs_ == y.infs_)
             return (ones_ > y.ones_);
-        else if (zeros_ < y.zeros_)
+        else if (zeros_ <= y.zeros_ and infs_ >= y.infs_)
             return true;
         else
-            return false; // handles NANs.
+            return false; // handles NANs from +Inf + -Inf
     }
 
     bool operator==(const LogDensity& y) const
     {
 	if (isnan() or y.isnan()) return false;
 
-	return zeros_ == y.zeros_ and ones_ == y.ones_;
+	return zeros_ == y.zeros_ and ones_ == y.ones_ and infs_ == y.infs_;
     }
 
     bool operator!=(const LogDensity& y) const
@@ -125,58 +172,53 @@ public:
     
     explicit operator double() const
     {
-        check();
-
-        if (zeros_ == 0)
+        if (not isvalid() or nans_ > 0) return std::nan("1"); // NAN
+        
+        // OK, here we can assume that the state is valid and nans_ <= 0.
+        if (zeros_ == 0 and infs_ == 0)
             return ones_;
-        else if (zeros_ > 0)
-        {
-            if (std::isfinite(ones_))
-                return -std::numeric_limits<double>::infinity();
-            else
-                return std::nan("1"); // NAN
-        }
-        else
+        else if (zeros_ >= 0 and infs_ <= 0)
+            return -std::numeric_limits<double>::infinity();
+        else if (zeros_ <= 0 and infs_ >= 0)
             return std::numeric_limits<double>::infinity();
+        else
+            return std::nan("1"); // handles NANs from +Inf + -Inf
     }
 
     double exp() const
     {
-        if (zeros_ == 0)
-            return ::exp(ones_);
-        else if (zeros_ > 0)
-        {
-            if (std::isfinite(ones_))
-                return 0;
-            else
-                return std::nan("1"); // NAN
-        }
+        if (not isvalid() or nans_ > 0) return std::nan("1"); // NAN
+        
+        // OK, here we can assume that the state is valid and nans_ <= 0.
+        if (zeros_ == 0 and infs_ == 0)
+            return std::exp(ones_);
+        else if (zeros_ >= 0 and infs_ <= 0)
+            return 0; // exp(-inf) == 0
+        else if (zeros_ <= 0 and infs_ >= 0)
+            return std::numeric_limits<double>::infinity(); // exp(+inf) = +inf
         else
-            return std::numeric_limits<double>::infinity();
-    }
-
-    bool isnan() const
-    {
-        return std::isnan(ones_) or std::isnan(zeros_) or (zeros_ > 0 and std::isinf(ones_));
-    }
-
-    bool isfinite() const
-    {
-        return zeros_ == 0 and std::isfinite(ones_);
+            return std::nan("1"); // handles NANs from +Inf + -Inf
     }
 
     LogDensity() = default;
 
     /*explicit*/ LogDensity(double y)
     {
-	if (std::isinf(y) and y<0)
-	    zeros_ = 1;
+        if (std::isnan(y))
+            nans_ = 1;
+	else if (std::isinf(y))
+        {
+            if (y < 0)
+                zeros_ = 1;
+            else
+                infs_ = 1;
+        }
 	else
 	    ones_ = y;
     }
 
-    explicit LogDensity(double z, double y)
-	:zeros_(z), ones_(y)
+    explicit LogDensity(double x, double y, double z=0, int n =0)
+	:zeros_(x), ones_(y), infs_(z), nans_(n)
     { }
 };
 
@@ -212,16 +254,48 @@ inline LogDensity operator/(LogDensity x, double p)
 
 inline std::ostream& operator<<(std::ostream& o, const LogDensity& x)
 {
-    if (x.zeros() == 0)
-        o<<x.ones();
-    else
+    // nan
+    // inf
+    // -inf
+    // -1234
+    // nan + inf + -inf + -1234
+    // nan*1 + inf*2 + -inf*3 + -1234
+
+    bool show_plus = false;
+    if (x.nans() != 0)
     {
+        o<<"nan";
+        if (x.nans() != 1)
+            o<<"*"<<x.nans();
+        show_plus = true;
+    }
+
+    if (x.infs() != 0)
+    {
+        if (show_plus)
+            o<<" + ";
+        o<<"inf";
+        if (x.infs() != 1)
+            o<<"*"<<x.infs();
+        show_plus = true;
+    }
+
+    if (x.zeros() != 0)
+    {
+        if (show_plus)
+            o<<" + ";
         o<<"-inf";
         if (x.zeros() != 1)
             o<<"*"<<x.zeros();
-        if (x.ones() != 0)
-            o<<" + "<<x.ones();
+        show_plus = true;
     }
+
+    // If we have emitted nothing, we should emit something even if its a zero.
+    if (show_plus == false)
+        o<<x.ones();
+    // If we have emitted something, then only emit the ones if they are not zero.
+    else if (x.ones() != 0)
+        o<<" + "<<x.ones();
 
     return o;
 }
