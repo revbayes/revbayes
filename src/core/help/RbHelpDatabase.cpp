@@ -3157,7 +3157,11 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
+	help_strings[string("mvFNPR")][string("description")] = string(R"(A subtree is pruned and re-attached without changing the node heights.)");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
+	help_references[string("mvFNPR")].push_back(RbHelpReference(R"(Höhna, S., Defoin-Platel, M., & Drummond, A. J. (2008, October). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. In 2008 8th IEEE International Conference on BioInformatics and BioEngineering (pp. 1-7).)",R"(10.1109/BIBE.2008.4696663)",R"(https://ieeexplore.ieee.org/abstract/document/4696663 )"));
+	help_arrays[string("mvFNPR")][string("see_also")].push_back(string(R"(mvSPR)"));
+	help_strings[string("mvFNPR")][string("title")] = string(R"(Fixed Nodeheight Prune and Regraft Proposal move.)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("details")] = string(R"(This sliding move uses the possible minimum and maximum ages as reflection boundaries.
