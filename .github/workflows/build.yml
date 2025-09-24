@@ -356,23 +356,34 @@ jobs:
         path: '~/testiphy'
 
   notify:
-    name: Notify Slack
     needs: build
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - uses: technote-space/workflow-conclusion-action@v3
-    - uses: 8398a7/action-slack@v3
-      with:
-        status: custom
-        fields: workflow,commit,repo,ref,author
-        custom_payload: |
-          {
-            username: 'action-slack',
-            attachments: [{
-              color: '${{ env.WORKFLOW_CONCLUSION }}' === 'success' ? 'good' : '${{ env.WORKFLOW_CONCLUSION }}' === 'failure' ? 'danger' : 'warning',
-              text: `${process.env.AS_WORKFLOW} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR}: ${{ env.WORKFLOW_CONCLUSION }}`,
-            }]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - uses: technote-space/workflow-conclusion-action@v3
+    
+      - name: Check if Slack secret exists
+        id: check_secret
+        run: |
+          if [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "slack_webhook_exists=false" >> $GITHUB_ENV
+          else
+            echo "slack_webhook_exists=true" >> $GITHUB_ENV
+          fi
+    
+      - name: Notify Slack
+        if: env.slack_webhook_exists == 'true'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: workflow,commit,repo,ref,author
+          custom_payload: |
+            {
+              username: 'action-slack',
+              attachments: [{
+                color: '${{ env.WORKFLOW_CONCLUSION }}' === 'success' ? 'good' : '${{ env.WORKFLOW_CONCLUSION }}' === 'failure' ? 'danger' : 'warning',
+                text: `${process.env.AS_WORKFLOW} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR}: ${{ env.WORKFLOW_CONCLUSION }}`,
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
