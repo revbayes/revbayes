@@ -55,6 +55,7 @@ namespace RevBayesCore {
     std::optional<std::pair<TopologyNode*, int>> parseBranch(const std::string& input, int start_pos);
     std::optional<std::pair<std::vector<TopologyNode*>, int>> parseBranchSet(const std::string& input, int start_pos);
     std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos);
+    std::optional<std::pair<char, int>> parseUnquotedChar(const std::string& input, int start_pos);
 }
 
 #endif

@@ -261,13 +261,14 @@ std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string& inp
 
 // Internal -> '(' BranchSet ')' Name
 std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& input, int start_pos){
+    auto node = new TopologyNode;
     // Check if we have left parenthesis
     if (auto check = checkChar(input, start_pos, '('))
         start_pos = check.value();
 
     else
         return {};
-
+    //add children to node: TODO
     if (auto check = parseBranchSet(input, start_pos)){
         auto [children, new_start_pos] = check.value();
         start_pos = new_start_pos;
@@ -286,13 +287,14 @@ std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& in
     if (auto check = parseName(input, start_pos)){
         auto[name, new_start_pos] = check.value();
         start_pos = new_start_pos;
+        node -> setName(name);
     }
 
     else
         return {}; 
 
     // construct new topology node with children `children` and name `name`
-    auto node = new TopologyNode;
+    
     //add name and children
     return {{node, start_pos}}; 
 }
@@ -318,11 +320,18 @@ std::optional<std::pair<std::vector<TopologyNode*>, int>> parseBranchSet(const s
     return {};
 }
 
-
-// Leaf -> Name
+// Leaf -> name or empty
 std::optional<std::pair<TopologyNode*, int>> parseLeaf(const std::string& input, int start_pos)
 {
-    return {};
+    //adding new node
+    auto node = new TopologyNode;
+    if (auto check = parseName(input, start_pos)){
+        auto [name, new_start_pos] = check.value();
+        start_pos = new_start_pos;
+        node->setName(name);
+    }
+    //add name and children
+    return {{node, start_pos}}; 
 }
 
 // this function is matching (not a quote) or (two quotes)
@@ -345,6 +354,29 @@ std::optional<std::pair<char, int>> parseQuotedChar(const std::string& input, in
         else {
             //new_start_pos will ALWAYS be start_pos+1
             return optional<pair<char,int>>(pair<char,int>(c,new_start_pos));
+        }
+    }
+
+    else{
+        return {};
+    }
+}
+
+//no quotes 
+std::optional<std::pair<char, int>> parseUnquotedChar(const std::string& input, int start_pos){
+    assert(start_pos>=0);
+    if (auto check = parseChar(input, start_pos)){
+        auto [c, new_start_pos] = check.value();
+        //check if c is _
+        if (c == '_'){
+            return optional<pair<char,int>>(pair<char,int>(' ',new_start_pos));
+        }
+        //is c an illegal character (punctuation)
+        if (!strchr("()[]':;, ", c)) {
+            return optional<pair<char,int>>(pair<char,int>(c,new_start_pos));
+        }
+        else {
+            return {};
         }
     }
 
@@ -376,62 +408,34 @@ std::optional<std::pair<std::string, int>> parseQuotedName(const std::string& in
 }
 
 std::optional<std::pair<std::string, int>> parseUnquotedName(const std::string& input, int start_pos){
-    return {};
+    std::string name; 
+    //checks for unquoted character
+    if (auto check = parseUnquotedChar(input, start_pos)){
+        auto [c, new_start_pos] = check.value();
+        name += c;
+        start_pos = new_start_pos;
+    }
+    //if non return null
+    else{
+        return {};
+    }
+    //continue check
+    while (auto check = parseUnquotedChar(input, start_pos)){
+        auto [c, new_start_pos] = check.value();
+        name += c;
+        start_pos = new_start_pos;
+    }
+    return optional<pair<std::string, int>>(pair<std::string,int>(name, start_pos));
 }
 
 // Name -> QuotedName | UnquotedName | empty
 std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos){
-    //handle newick escaping hear, read newick minus parsing syntax?
-    //* skip any whitespace
-    // quoted name or non-quoted name, make two new functions for this
-    // parse quoted name: if failed, instead of {}, call parse-unquoted name
-    // return call parse unquoted
+    if (auto check = parseQuotedName(input, start_pos))
+        return check;
     
-    // check if starting position is out of bounds
-    // i think static cast is important to have .size be an int
-    if (start_pos < 0 || start_pos >= static_cast<int>(input.size())) {
-        return std::nullopt;
+    else {
+        return parseUnquotedName(input, start_pos);
     }
-
-    // skip whitespace
-    int pos = start_pos;
-    while (pos < static_cast<int>(input.size())) {
-        char c = input[pos];
-        if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
-            break;
-        }
-        ++pos;
-    }
-    if (pos >= static_cast<int>(input.size())) {
-        return std::nullopt;
-    }
-
-
-    //unquoted case, is character important character
-    auto isdelim = [](char c) {
-        switch (c) {
-            case '(': case ')': case ',': case ':': case ';':
-            case '[': case ']':
-            case ' ':
-                return true;
-            default:
-                return false;
-        }
-    };
-
-    std::string out;
-    while (pos < static_cast<int>(input.size())) {
-        char c = input[pos];
-        if (isdelim(c)) break;  // stop at a delimiter
-        out.push_back(c);
-        ++pos;
-    }
-
-    if (out.empty()) {
-        return std::nullopt;
-    }
-
-    return std::make_pair(out, pos);
 
 }
 // This routine has 4 copies of attribute parsing from comments -- 2 for node attributes, and 2 for branch attributes.
