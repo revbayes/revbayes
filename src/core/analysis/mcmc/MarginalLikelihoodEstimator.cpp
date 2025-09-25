@@ -253,9 +253,10 @@ std::vector< std::vector< std::vector<double> > > MarginalLikelihoodEstimator::b
                 std::vector<std::int64_t> temp1( repnum );
                 bool cond = false;
                 
+                double block_length = std::max<double>(1, n*prop);
                 for (size_t k = 0; k < repnum; k++)
                 {
-                    temp0[k] = 1 + RbStatistics::Geometric::rv( 1/(n * prop), *rng );
+                    temp0[k] = 1 + RbStatistics::Geometric::rv( 1/block_length, *rng );
                     temp1[k] = std::min( temp0[k], n_sim - len_tot[k] );
                     len_tot[k] = len_tot[k] + temp1[k];
                     cond |= len_tot[k] < n_sim;
