@@ -175,6 +175,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         {
             std::cerr << "mvRateAgeBetaShift has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        stored_node = nullptr;
         return;
     }
     size_t node_idx = node->getIndex();
@@ -502,6 +504,7 @@ void RateAgeBetaShift::printSummary(std::ostream &o, bool current_period) const
 
 void RateAgeBetaShift::reject( void )
 {
+    if (stored_node == nullptr) return;
     
     // undo the proposal
     tree->getValue().getNode( stored_node->getIndex() ).setAge( stored_age );
@@ -530,8 +533,7 @@ void RateAgeBetaShift::reject( void )
             rates->touch();
         }
     }
-
-    
+        
 #ifdef ASSERTIONS_TREE
     if ( fabs(storedAge - storedNode->getAge()) > 1E-8 )
     {
