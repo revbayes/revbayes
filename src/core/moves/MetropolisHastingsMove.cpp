@@ -314,12 +314,13 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     // Propose a new value
     proposal->prepareProposal();
-    LogDensity ln_hastings_ratio = RbConstants::Double::neginf;
+    LogDensity ln_hastings_ratio = 0;
     try {
         ln_hastings_ratio = proposal->doProposal();
     }
     catch (const RbException &e)
     {
+        ln_hastings_ratio = logZero(); // maybe this should be nan
         if ( e.getExceptionType() == RbException::SKIP_PROPOSAL )
         {
             return;
