@@ -29,7 +29,10 @@ namespace RevBayesCore {
     class Tree;
     class TopologyNode;
 
-    class NewickConverter {
+    // Why keep this class at all?
+    // Hypothetically, in the future we could us it to store options to the Newick conversion process.
+    class NewickConverter
+    {
 
     public:
         NewickConverter();
@@ -37,13 +40,9 @@ namespace RevBayesCore {
         
         
         Tree*                   convertFromNewick(const std::string &n);
-//        AdmixtureTree*          getAdmixtureTreeFromNewick(const std::string &n);
-
-    private:
-        //TopologyNode* createNode(const std::string &n, int& start_pos, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens);
-        TopologyNode*           createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens);
     };
 
+    std::optional<std::pair<TopologyNode*, int>> parseTree(const std::string& input, int start_pos);
     std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string& input, int start_pos);
     std::optional<int> checkChar(const std::string& input, int start_pos, char c);
     std::optional<std::pair<char, int>> parseChar(const std::string& input, int start_pos);
