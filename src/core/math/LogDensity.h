@@ -328,7 +328,21 @@ inline LogDensity logDensity(double y)
 	return LogDensity(log(y));
 }
 
+inline LogDensity logNan()
+{
+    return LogDensity(0,0,0,1);
+}
 
+inline LogDensity logZero()
+{
+    return LogDensity(1,0,0,0);
+}
+
+inline LogDensity logZeroWithError(double error)
+{
+    assert(error >= 0);
+    return LogDensity(1,-error,0,0);
+}
 
 
 #endif
