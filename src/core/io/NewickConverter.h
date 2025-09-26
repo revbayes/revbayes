@@ -52,19 +52,19 @@ namespace RevBayesCore {
         Tree*                   convertFromNewick(const std::string &n);
     };
 
-    std::optional<std::pair<TopologyNode*, int>> parseTree(const std::string& input, int start_pos);
-    std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string& input, int start_pos);
-    std::optional<int> checkChar(const std::string& input, int start_pos, char c);
-    std::optional<std::pair<char, int>> parseChar(const std::string& input, int start_pos);
-    std::optional<std::pair<char, int>> parseQuotedChar(const std::string& input, int start_pos);
-    std::optional<std::pair<std::string, int>> parseQuotedName(const std::string& input, int start_pos);
-    std::optional<std::pair<std::string, int>> parseUnquotedName(const std::string& input, int start_pos);
-    std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& input, int start_pos);
-    std::optional<std::pair<TopologyNode*, int>> parseLeaf(const std::string& input, int start_pos);
-    std::optional<std::pair<TopologyNode*, int>> parseBranch(const std::string& input, int start_pos);
-    std::optional<std::pair<std::vector<TopologyNode*>, int>> parseBranchSet(const std::string& input, int start_pos);
-    std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos);
-    std::optional<std::pair<char, int>> parseUnquotedChar(const std::string& input, int start_pos);
+    ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos);
+    ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos);
+    ParseResult<char> checkChar(const std::string& input, int start_pos, char c);
+    ParseResult<char> parseChar(const std::string& input, int start_pos);
+    ParseResult<char> parseQuotedChar(const std::string& input, int start_pos);
+    ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos);
+    ParseResult<std::string> parseUnquotedName(const std::string& input, int start_pos);
+    ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos);
+    ParseResult<TopologyNode*> parseLeaf(const std::string& input, int start_pos);
+    ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos);
+    ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input, int start_pos);
+    ParseResult<std::string> parseName(const std::string& input, int start_pos);
+    ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos);
 }
 
 #endif

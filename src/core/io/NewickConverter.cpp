@@ -90,34 +90,34 @@ Comments:
 */
 
 // succeeds if there is another character in the input, otherwise fails
-std::optional<std::pair<char, int>> parseChar(const std::string& input, int start_pos){
+ParseResult<char> parseChar(const std::string& input, int start_pos){
     // if reading beyond end of string return null
     if (start_pos >= input.size()){
         return {};
     }
     char c = input[start_pos];
-    return optional<pair<char, int>>(pair<char,int>(c,start_pos+1));
+    return ParseResult<char>(pair<char,int>(c,start_pos+1));
 }
 
 // returns a new start_pos if the input contains another character, and it is "c"
-std::optional<int> checkChar(const std::string& input, int start_pos, char c){
+ParseResult<char> checkChar(const std::string& input, int start_pos, char c){
     // if reading beyond end of string return null
     if (auto check=parseChar(input, start_pos)){
         auto [c2, new_start_pos] = *check;
         if (c2 == c){
-            return new_start_pos;
+            return check;
         }
         else{
             return {};
         }
     }
     else{
-        return {};
+        return check;
     }
 }
 
 
-optional<pair<string,int>> parseNewickComment(const std::string& input, int start_pos)
+ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
 {
     // 1. First check for an open bracket
     auto check_open_bracket = checkChar(input, start_pos, '[');
@@ -145,7 +145,7 @@ optional<pair<string,int>> parseNewickComment(const std::string& input, int star
     return {};
 }
 
-optional<pair<char,int>> parseWhiteChar(const std::string& input, int start_pos)
+ParseResult<char> parseWhiteChar(const std::string& input, int start_pos)
 {
     // 1. Try to read a character
     auto check_char = parseChar(input, start_pos);
@@ -163,7 +163,7 @@ optional<pair<char,int>> parseWhiteChar(const std::string& input, int start_pos)
 }
     
 // OneWhitespace -> NewickComment OR WhiteChar    
-optional<pair<optional<string>,int>> parseOneWhitespace(const std::string& input, int start_pos)
+ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int start_pos)
 {
     // 1. First try to read a newick comment
     if (auto check_comment = parseNewickComment(input, start_pos))
@@ -184,7 +184,7 @@ optional<pair<optional<string>,int>> parseOneWhitespace(const std::string& input
 }
 
 // Whitespace -> OneWhitespace*
-optional<pair<vector<string>,int>> parseWhitespace(const std::string& input, int start_pos)
+ParseResult<vector<string>> parseWhitespace(const std::string& input, int start_pos)
 {
     vector<string> newick_comments;
     while(auto check = parseOneWhitespace(input, start_pos))
@@ -199,7 +199,7 @@ optional<pair<vector<string>,int>> parseWhitespace(const std::string& input, int
 
 
 // Tree -> Subtree ";"
-std::optional<std::pair<TopologyNode*, int>> parseTree(const std::string& input, int start_pos)
+ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 {
     // 1. Get the Subtree
     auto check_subtree = parseSubTree(input,start_pos);
@@ -212,13 +212,13 @@ std::optional<std::pair<TopologyNode*, int>> parseTree(const std::string& input,
     if (not check_semi)
         return {};
 
-    int new_start_pos2 = *check_semi;
+    auto& [c, new_start_pos2] = *check_semi;
 
     return {{subtree, new_start_pos2}};
 }
 
 // subtree -> internal OR leaf
-std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string& input, int start_pos){
+ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos){
 
     if (auto check = parseInternal(input, start_pos))
         return check;
@@ -229,14 +229,17 @@ std::optional<std::pair<TopologyNode*, int>> parseSubTree(const std::string& inp
 }
 
 // Internal -> '(' BranchSet ')' Name
-std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& input, int start_pos){
+ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos){
     auto node = new TopologyNode;
     // Check if we have left parenthesis
     if (auto check = checkChar(input, start_pos, '('))
-        start_pos = check.value();
-
+    {
+        auto& [c,new_start_pos] = *check;
+        start_pos = new_start_pos;
+    }
     else
         return {};
+
     //add children to node: TODO
     if (auto check = parseBranchSet(input, start_pos)){
         auto [children, new_start_pos] = check.value();
@@ -248,8 +251,10 @@ std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& in
 
     // Check for right parenthesis
     if (auto check = checkChar(input, start_pos, ')'))
-        start_pos = check.value();
-
+    {
+        auto& [c,new_start_pos] = *check;
+        start_pos = new_start_pos;
+    }
     else
         return {};
     
@@ -269,7 +274,7 @@ std::optional<std::pair<TopologyNode*, int>> parseInternal(const std::string& in
 }
 
 // Length -> ":" number | empty
-std::optional<std::pair<optional<double>, int>> parseLength(const std::string& input, int start_pos)
+ParseResult<optional<double>> parseLength(const std::string& input, int start_pos)
 {
     // This parser should always succeed, but might return an empty value.
     return {};
@@ -277,20 +282,20 @@ std::optional<std::pair<optional<double>, int>> parseLength(const std::string& i
 
 
 // Branch -> Subtree Length
-std::optional<std::pair<TopologyNode*, int>> parseBranch(const std::string& input, int start_pos)
+ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos)
 {
     return {};
 }
 
 // BranchSet -> Branch (, Branch)*
-std::optional<std::pair<std::vector<TopologyNode*>, int>> parseBranchSet(const std::string& input, int start_pos)
+ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input, int start_pos)
 {
     std::vector<TopologyNode*> branches;
     return {};
 }
 
 // Leaf -> name or empty
-std::optional<std::pair<TopologyNode*, int>> parseLeaf(const std::string& input, int start_pos)
+ParseResult<TopologyNode*> parseLeaf(const std::string& input, int start_pos)
 {
     //adding new node
     auto node = new TopologyNode;
@@ -305,15 +310,16 @@ std::optional<std::pair<TopologyNode*, int>> parseLeaf(const std::string& input,
 
 // this function is matching (not a quote) or (two quotes)
 // 
-std::optional<std::pair<char, int>> parseQuotedChar(const std::string& input, int start_pos){
+ParseResult<char> parseQuotedChar(const std::string& input, int start_pos){
     assert(start_pos>=0);
     if (auto check = parseChar(input, start_pos)){
         auto [c, new_start_pos] = check.value();
         if (c == '\'') {
             // two quotes returns quote
-            if (auto new_start_pos2 = checkChar(input, new_start_pos, '\'')){
+            if (auto check2 = checkChar(input, new_start_pos, '\'')){
+                auto& [c2, new_start_pos2] = *check2;
                 // new_start_pos2 will ALWAYS be start_pos + 2
-                return optional<pair<char,int>>(pair<char,int>(c,*new_start_pos2));
+                return ParseResult<char>(pair<char,int>(c, new_start_pos2));
             }
             // one quote fails
             else{
@@ -322,7 +328,7 @@ std::optional<std::pair<char, int>> parseQuotedChar(const std::string& input, in
         }
         else {
             //new_start_pos will ALWAYS be start_pos+1
-            return optional<pair<char,int>>(pair<char,int>(c,new_start_pos));
+            return ParseResult<char>(pair<char,int>(c,new_start_pos));
         }
     }
 
@@ -332,17 +338,17 @@ std::optional<std::pair<char, int>> parseQuotedChar(const std::string& input, in
 }
 
 //no quotes 
-std::optional<std::pair<char, int>> parseUnquotedChar(const std::string& input, int start_pos){
+ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos){
     assert(start_pos>=0);
     if (auto check = parseChar(input, start_pos)){
         auto [c, new_start_pos] = check.value();
         //check if c is _
         if (c == '_'){
-            return optional<pair<char,int>>(pair<char,int>(' ',new_start_pos));
+            return ParseResult<char>(pair<char,int>(' ',new_start_pos));
         }
         //is c an illegal character (punctuation)
         if (!strchr("()[]':;, ", c)) {
-            return optional<pair<char,int>>(pair<char,int>(c,new_start_pos));
+            return ParseResult<char>(pair<char,int>(c,new_start_pos));
         }
         else {
             return {};
@@ -354,7 +360,7 @@ std::optional<std::pair<char, int>> parseUnquotedChar(const std::string& input, 
     }
 }
 
-std::optional<std::pair<std::string, int>> parseQuotedName(const std::string& input, int start_pos){
+ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos){
     if (!checkChar(input, start_pos, '\'')){
         return {};
     }
@@ -373,10 +379,10 @@ std::optional<std::pair<std::string, int>> parseQuotedName(const std::string& in
     else{
         start_pos++;
     }
-    return optional<pair<std::string, int>>(pair<std::string,int>(name, start_pos));
+    return ParseResult<string>(pair<std::string,int>(name, start_pos));
 }
 
-std::optional<std::pair<std::string, int>> parseUnquotedName(const std::string& input, int start_pos){
+ParseResult<std::string> parseUnquotedName(const std::string& input, int start_pos){
     std::string name; 
     //checks for unquoted character
     if (auto check = parseUnquotedChar(input, start_pos)){
@@ -394,11 +400,11 @@ std::optional<std::pair<std::string, int>> parseUnquotedName(const std::string& 
         name += c;
         start_pos = new_start_pos;
     }
-    return optional<pair<std::string, int>>(pair<std::string,int>(name, start_pos));
+    return ParseResult<std::string>(pair<std::string,int>(name, start_pos));
 }
 
 // Name -> QuotedName | UnquotedName | empty
-std::optional<std::pair<std::string, int>> parseName(const std::string& input, int start_pos){
+ParseResult<std::string> parseName(const std::string& input, int start_pos){
     if (auto check = parseQuotedName(input, start_pos))
         return check;
     
