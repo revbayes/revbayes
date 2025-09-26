@@ -53,11 +53,11 @@ FixedNodeheightPruneAndRegraftProposal* FixedNodeheightPruneAndRegraftProposal::
 }
 
 
-
+// Recursively walk the tree to find a node n that is younger than p and whose parent is older than p.
 void FixedNodeheightPruneAndRegraftProposal::findNewBrothers(std::vector<TopologyNode *> &b, TopologyNode &p, TopologyNode *n)
 {
     // security check that I'm not a tip
-    if ( (n->isTip() == false) && (&p != n) )
+    if ( (n->isTip() == false) && (&p != n) and n->getAge() > p.getAge())
     {
         // check the first child
         std::vector<TopologyNode*> children = n->getChildren();
@@ -133,7 +133,7 @@ LogDensity FixedNodeheightPruneAndRegraftProposal::doProposal( void )
     if ( tau.getNumberOfTips() < 3 )
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero(); // fail proposal
     }
     
     // pick a random node which is neither the root nor the direct descendant of the root
@@ -158,10 +158,23 @@ LogDensity FixedNodeheightPruneAndRegraftProposal::doProposal( void )
     findNewBrothers(new_brothers, *parent, &tau.getRoot());
 
     // we only need to propose a new tree if there are any other re-attachement points
-    if ( new_brothers.size() < 1 )
+    if ( new_brothers.size() < 1)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero(); // fail proposal
+    }
+
+    if (brother->isSampledAncestorTip())
+    {
+        // If the brother is a sampled-ancestor, then we are moving its descendant away.
+        // It would no longer be a sampled-ancestor.
+
+        // However, the real problem is that the reverse move would be to find a bifurcating
+        // parent which at the exact height of a tip, and then merge the two nodes.
+        // Since we don't do this, the reverse move is impossible, so we can't do the forward move.
+
+        failed = true;
+        return logZero(); // fail proposal
     }
     
     size_t index = size_t(rng->uniform01() * new_brothers.size());

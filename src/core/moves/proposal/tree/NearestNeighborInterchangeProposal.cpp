@@ -99,7 +99,7 @@ LogDensity NearestNeighborInterchangeProposal::doProposal( void )
     if ( tau.getNumberOfTips() < 3)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero(); // fail proposal
     }
     
     // pick a random node which is not the root nor a direct descendant of the root
@@ -118,6 +118,13 @@ LogDensity NearestNeighborInterchangeProposal::doProposal( void )
         uncle = &grandparent.getChild( 1 );
     }
     
+    if (node->isSampledAncestorTip() or uncle->isSampledAncestorTip())
+    {
+        // Just bail on sampled-ancestor tips for now
+        failed = true;
+        return logZero(); // fail proposal
+    }
+
     // we need to work with the times
     double gparent_age  = grandparent.getAge();
     double parent_age   = parent.getAge();
