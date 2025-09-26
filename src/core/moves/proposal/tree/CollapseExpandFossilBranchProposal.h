@@ -43,8 +43,8 @@ namespace RevBayesCore {
         
         void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
         
-        double                                  collapseBranch(TopologyNode &n);
-        double                                  expandBranch(TopologyNode &n);
+        LogDensity                              collapseBranch(TopologyNode &n);
+        LogDensity                              expandBranch(TopologyNode &n);
         
     private:
         
