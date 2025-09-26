@@ -123,7 +123,7 @@ LogDensity CollapseExpandFossilBranchProposal::doProposal( void )
     double u = rng->uniform01();
     storedNode = fossils[ size_t(u*fossils.size()) ];
     
-    double hr = 0;
+    LogDensity hr = 0;
     if ( storedNode->isSampledAncestorTip() == true )
     {
         hr += expandBranch( *storedNode );
@@ -151,7 +151,7 @@ LogDensity CollapseExpandFossilBranchProposal::doProposal( void )
  1. Pick a fossil among those with brl > 0 (prob = 1/m)
  2. Set brl = 0
  */
-double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
+LogDensity CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
 {
     
     // Get the parent and sibling of the chosen node
@@ -181,7 +181,7 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
     if ( max_age <= min_age || n.getAge() < sibling->getAge() )
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero(); // fail proposal
     }
     
     // store the old age of the parent
@@ -192,7 +192,7 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
     n.setSampledAncestor( true );
     
     // compute the Jacobian term
-    double lnJacobian = - log(max_age - min_age);
+    auto lnJacobian = - logDensity(max_age - min_age);
     
     return lnJacobian;
 }
@@ -211,7 +211,7 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
  1. Pich a fossil among those with brl = 0 (prob = 1/k)
  2. Propose brl from a uniform(0, ?) distribution
  */
-double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
+LogDensity CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
 {
     
     // Get random number generator
@@ -244,7 +244,7 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
     if ( max_age <= min_age )
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero(); // fail proposal
     }
 
     // store the old age of the parent
@@ -258,7 +258,7 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
     parent.setAge( new_age );
     
     // compute the Jacobian term
-    double lnJacobian = log(max_age - min_age);
+    auto lnJacobian = logDensity(max_age - min_age);
     
     return lnJacobian;
 }
