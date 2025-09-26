@@ -29,6 +29,16 @@ namespace RevBayesCore {
     class Tree;
     class TopologyNode;
 
+    // A ParseResult<T> is either
+    // (i) Success -> a value and a new offset (non-empty optional).
+    // (i) Failure -> no information (empty optional)
+    template <typename T>
+    using ParseResult = std::optional<std::pair<T,int>>;
+
+    // A parser is a function that takes a string and an offset and returns a ParseResult<T>
+    template <typename T>
+    using Parser = ParseResult<T>(const std::string&,int);
+
     // Why keep this class at all?
     // Hypothetically, in the future we could us it to store options to the Newick conversion process.
     class NewickConverter

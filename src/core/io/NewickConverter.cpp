@@ -29,12 +29,6 @@ NewickConverter::~NewickConverter()
 
 }
 
-// A parser is a function that takes a string and an offset, and returns either
-// (i) failure (empty optional)
-// (ii) a value and a new offset (non-empty optional).
-template <typename T>
-using Parser = std::optional<std::pair<T,int>>(const std::string&,int);
-
 Tree* NewickConverter::convertFromNewick(std::string const &newick)
 {
 
