@@ -268,10 +268,8 @@ LogDensity BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTim
     prepareTimeline();
 
     // Assign nodes to sets
-    if ( countAllNodes() )
-    {
-        return RbConstants::Double::neginf;
-    }
+    // This throws an exception if a node has two sampled-ancestor tips.
+    countAllNodes();
 
     // precompute A_i, B_i, C_i, E_i(t_i)
     prepareProbComputation();
@@ -554,7 +552,7 @@ LogDensity BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void )
  * Non-burst trackers (1,3,4) are vectors of times of the samples.
  * All burst trackers (2,5,6) are vectors of vectors of samples, each vector corresponding to an event
  */
-bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
+void BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 {
   // get node/time variables
   size_t num_nodes = value->getNumberOfNodes();
@@ -645,11 +643,9 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
       }
       else if ( n.isInternal() && n.getChild(0).isSampledAncestorTip() && n.getChild(1).isSampledAncestorTip() )
       {
-          return true;
+          throw RbException()<<"BDSTP: Node with two sampled-ancestor tips!\n";
       }
   }
-
-  return false;
 }
 
 
