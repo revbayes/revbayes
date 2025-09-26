@@ -240,10 +240,15 @@ ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos
     else
         return {};
 
-    //add children to node: TODO
+    //add children to node
     if (auto check = parseBranchSet(input, start_pos)){
         auto [children, new_start_pos] = check.value();
         start_pos = new_start_pos;
+        for(auto& child: children)
+        {
+            node->addChild(child);
+            child->setParent(node);
+        }
     }
 
     else
