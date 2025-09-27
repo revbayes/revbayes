@@ -171,7 +171,20 @@ LogDensity GibbsPruneAndRegraftProposal::doProposal( void )
     if ( new_brothers.size() < 1)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return RbConstants::Double::neginf;  // fail proposal
+    }
+
+    if (brother.isSampledAncestorTip())
+    {
+        // If the brother is a sampled-ancestor, then we are moving its descendant away.
+        // It would no longer be a sampled-ancestor.
+
+        // However, the real problem is that the reverse move would be to find a bifurcating
+        // parent which at the exact height of a tip, and then merge the two nodes.
+        // Since we don't do this, the reverse move is impossible, so we can't do the forward move.
+
+        failed = true;
+        return RbConstants::Double::neginf;  // fail proposal
     }
     
     std::vector<double> weights = std::vector<double>(new_brothers.size(), 0.0);
