@@ -240,12 +240,18 @@ LogDensity TopologyConstrainedTreeDistribution::computeLnProbability( void )
 
     recursivelyUpdateClades( value->getRoot() );
     
-    // first check if the current tree matches the clade constraints
-    auto constraint_pr = LogDensity(constraintMismatches(), 0);
-    // return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
+    int N = base_distribution->getValue().getNumberOfNodes();
 
-    auto backbone_pr = LogDensity(backboneMismatches(), 0);
-    // return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
+    // first check if the current tree matches the clade constraints
+    auto [n_fail_constraint, constraint_error] = constraintMismatches();
+    auto constraint_pr = LogDensity(N*n_fail_constraint + constraint_error, 0);
+    if (n_fail_constraint)
+        constraint_pr = withReason(constraint_pr)<<"Pr(tree)=0: clade constraints do not match";
+
+    auto [n_fail_backbone, backbone_error] = backboneMismatches();
+    auto backbone_pr = LogDensity(N*n_fail_backbone + backbone_error, 0);
+    if (n_fail_backbone)
+        backbone_pr = withReason(backbone_pr)<<"Pr(tree)=0: backbone constraints do not match";
     
     return constraint_pr + backbone_pr + base_distribution->computeLnProbability();
 }
@@ -363,6 +369,91 @@ int closest_distance(const RbBitSet& target, const std::vector<RbBitSet>& candid
     return min_distance;
 }
 
+using std::pair;
+using std::vector;
+using std::max;
+using std::abs;
+vector<int> hamming_distances(const RbBitSet& target, const std::vector<RbBitSet>& candidates)
+{
+    vector<int> D(candidates.size());
+
+    for (int i=0;i<D.size();i++)
+        D[i] = (target ^ candidates[i]).count();
+
+    return D;
+}
+
+
+// ----------------------- Hungarian (min-cost) -----------------------
+pair<int, vector<int>> hungarian_min_cost(const vector<vector<int>>& C) {
+
+    int m = C.size();
+    int n = (m ? C[0].size() : 0);
+    int k = max(m, n);
+    if (k == 0) return {0, {}};
+
+    int maxCost = 0;
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            maxCost = max(maxCost, abs(C[i][j]));
+    int padCost = (maxCost + 1) * k + 1;
+
+    vector<vector<int>> a(k+1, vector<int>(k+1, 0));
+    for (int i = 1; i <= k; ++i) {
+        for (int j = 1; j <= k; ++j) {
+            if (i <= m && j <= n) a[i][j] = C[i-1][j-1];
+            else a[i][j] = padCost;
+        }
+    }
+
+    vector<int> u(k+1, 0), v(k+1, 0);
+    vector<int> p(k+1, 0), way(k+1, 0);
+
+    for (int i = 1; i <= k; ++i) {
+        p[0] = i;
+        int j0 = 0;
+        vector<int> minv(k+1, INT_MAX);
+        vector<char> used(k+1, false);
+        do {
+            used[j0] = true;
+            int i0 = p[j0];
+            int delta = INT_MAX;
+            int j1 = 0;
+            for (int j = 1; j <= k; ++j) {
+                if (used[j]) continue;
+                int cur = a[i0][j] - u[i0] - v[j];
+                if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+                if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+            }
+            for (int j = 0; j <= k; ++j) {
+                if (used[j]) { u[p[j]] += delta; v[j] -= delta; }
+                else minv[j] -= delta;
+            }
+            j0 = j1;
+        } while (p[j0] != 0);
+        do {
+            int j1 = way[j0];
+            p[j0] = p[j1];
+            j0 = j1;
+        } while (j0 != 0);
+    }
+
+    vector<int> matchL(m, -1);
+    for (int j = 1; j <= k; ++j) {
+        if (p[j] <= m && j <= n) {
+            int i = p[j] - 1;
+            int col = j - 1;
+            matchL[i] = col;
+        }
+    }
+
+    int totalCost = 0;
+    for (int i = 0; i < m; ++i) {
+        if (matchL[i] >= 0) totalCost += C[i][matchL[i]];
+        else totalCost += padCost;
+    }
+    return {totalCost, matchL};
+}
 
 
 /**
@@ -371,11 +462,11 @@ int closest_distance(const RbBitSet& target, const std::vector<RbBitSet>& candid
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-int TopologyConstrainedTreeDistribution::backboneMismatches( void )
+std::pair<int,int> TopologyConstrainedTreeDistribution::backboneMismatches( void )
 {
     int N = base_distribution->getValue().getNumberOfNodes();
 
-    int mismatches = 0;
+    std::pair<int,int> mismatches = {0,0};
 
     // ensure that each backbone constraint is found in the corresponding active_backbone_clades
     for (size_t i = 0; i < num_backbones; i++)
@@ -390,6 +481,7 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
             is_negative_constraint = ( backbone_topologies->getValue() )[i].isNegativeConstraint();
         }
 
+        vector<vector<int>> all_distances;
         std::vector<bool> negative_constraint_found( backbone_constraints[i].size(), false );
         for (size_t j = 0; j < backbone_constraints[i].size(); j++)
         {
@@ -399,7 +491,7 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
             if (it == active_backbone_clades[i].end() && !is_negative_constraint )
             {
                 // match fails if positive constraint is not found
-                mismatches += N + closest_distance(backbone_constraints[i][j], active_backbone_clades[i]);
+                all_distances.push_back( hamming_distances(backbone_constraints[i][j], active_backbone_clades[i]) );
             }
             else if (it != active_backbone_clades[i].end() && is_negative_constraint )
             {
@@ -408,6 +500,9 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
             }
         }
         
+        mismatches.first += all_distances.size();
+        mismatches.second += hungarian_min_cost(all_distances).first;
+
         // match fails if all negative backbone clades are found
         bool negative_constraint_failure = true;
         for (size_t j = 0; j < negative_constraint_found.size(); j++)
@@ -419,7 +514,8 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
         }
         if (negative_constraint_failure)
         {
-            mismatches += 2*N;
+            mismatches.first += 1;
+            mismatches.second += N;
         }
     }
     
@@ -433,11 +529,12 @@ int TopologyConstrainedTreeDistribution::backboneMismatches( void )
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-int TopologyConstrainedTreeDistribution::constraintMismatches( void )
+std::pair<int,int> TopologyConstrainedTreeDistribution::constraintMismatches( void )
 {
     int N = base_distribution->getValue().getNumberOfNodes();
 
-    int mismatches = 0;
+    int n_mismatches = 0;
+    int mismatch_distance = 0;
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         
@@ -461,7 +558,10 @@ int TopologyConstrainedTreeDistribution::constraintMismatches( void )
             if (constraints[j].isNegativeConstraint())
             {
                 if (found)
-                    constraint_distance[j] = 2*N;  // negative constraint UNsatisfied
+                {
+                    constraint_distance[j] = N;  // negative constraint UNsatisfied
+                    n_mismatches += 1;
+                }
                 else
                     constraint_distance[j] = 0;    // negative constraint satisfied
             }
@@ -471,7 +571,8 @@ int TopologyConstrainedTreeDistribution::constraintMismatches( void )
                     constraint_distance[j] = 0;     // constraint satisfied
                 else
                 {
-                    constraint_distance[j] = N + closest_distance(constraints[j].getBitRepresentation(), active_clades);
+                    constraint_distance[j] = closest_distance(constraints[j].getBitRepresentation(), active_clades);
+                    n_mismatches += 1;
                 }// constraint UNsatisfied.
             }
         }
@@ -484,10 +585,10 @@ int TopologyConstrainedTreeDistribution::constraintMismatches( void )
             min_distance = std::min(min_distance, constraint_distance[j]);
         }
         
-        mismatches += min_distance;
+        mismatch_distance += min_distance;
     }
     
-    return mismatches;
+    return {n_mismatches, mismatch_distance};
 }
 
 
