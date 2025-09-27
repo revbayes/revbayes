@@ -108,7 +108,7 @@ LogDensity NarrowExchangeProposal::doProposal( void )
     if ( tau.getNumberOfTips() < 3)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero();
     }
     
     // pick a random node which is not the root and neithor a direct descendant of the root
@@ -128,34 +128,51 @@ LogDensity NarrowExchangeProposal::doProposal( void )
         uncle = &grandparent.getChild( 1 );
     }
     
+    if (uncle->isSampledAncestorTip())
+    {
+        TopologyNode* brother = &parent.getChild(0);
+        if (node == brother)
+            brother = &parent.getChild(1);
+
+        if (brother->isSampledAncestorTip())
+        {
+            // Swapping uncle and node, will mean that parent has two sampled-ancestor children.
+            failed = true;
+            return logZero(); // fail proposal
+        }
+    }
+
     // we need to work with the times
     double parent_age   = parent.getAge();
     double uncles_age   = uncle->getAge();
-    
-    if ( uncles_age < parent_age )
-    {
-        failed = false;
-        
-        // now we store all necessary values
-        storedChosenNode    = node;
-        storedUncle         = uncle;
-        
-        // now exchange the two nodes
-        grandparent.removeChild( uncle );
-        parent.removeChild( node );
-        grandparent.addChild( node );
-        parent.addChild( uncle );
-        node->setParent( &grandparent );
-        uncle->setParent( &parent );
-        
-        return 0.0;
-    }
-    else
+
+    if (uncles_age >= parent_age)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero();
     }
-    
+
+    failed = false;
+
+    // now we store all necessary values
+    storedChosenNode    = node;
+    storedUncle         = uncle;
+
+    // now exchange the two nodes
+    grandparent.removeChild( uncle );
+    parent.removeChild( node );
+    grandparent.addChild( node );
+    parent.addChild( uncle );
+    node->setParent( &grandparent );
+    uncle->setParent( &parent );
+        
+    if (node->isSampledAncestorTip())
+        node->setAge( node->getParent().getAge());
+
+    if (uncle->isSampledAncestorTip())
+        uncle->setAge( uncle->getParent().getAge());
+
+    return 0.0;
 }
 
 
@@ -209,6 +226,11 @@ void NarrowExchangeProposal::undoProposal( void )
         storedUncle->setParent( &grandparent );
         storedChosenNode->setParent( &parent );
         
+        if (storedChosenNode->isSampledAncestorTip())
+            storedChosenNode->setAge( storedChosenNode->getParent().getAge());
+
+        if (storedUncle->isSampledAncestorTip())
+            storedUncle->setAge( storedUncle->getParent().getAge());
     }
     
 }
