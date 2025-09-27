@@ -6,7 +6,7 @@
 
 #include <set>
 #include <vector>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace RevBayesCore {
     
@@ -29,7 +29,7 @@ namespace RevBayesCore {
     public:
         enum BoundarySearchMethod { search_stepping_out, search_doubling };
 
-        SliceSamplingMove(StochasticNode<double> *p, boost::optional<double>, boost::optional<double>, double window_, double weight_, BoundarySearchMethod, bool autoTune = false);        //!< Constructor
+        SliceSamplingMove(StochasticNode<double> *p, std::optional<double>, std::optional<double>, double window_, double weight_, BoundarySearchMethod, bool autoTune = false);        //!< Constructor
         virtual                                                 ~SliceSamplingMove(void);                           //!< Destructor
 
         // public methods
@@ -50,8 +50,8 @@ namespace RevBayesCore {
 
         // parameters
         StochasticNode<double>*                                 variable;                                           //!< The variable the Proposal is working on
-        boost::optional<double>                                 lower_bound;                                        //!< Optional lower bound for variable
-        boost::optional<double>                                 upper_bound;                                        //!< Optional upper bound for variable
+        std::optional<double>                                 lower_bound;                                        //!< Optional lower bound for variable
+        std::optional<double>                                 upper_bound;                                        //!< Optional upper bound for variable
         double                                                  window;                                             //!< Window width for slice sampling
         double                                                  total_movement;                                     //!< total distance moved under auto-tuning
         int                                                     numPr;                                              //!< Number of probability evaluations
