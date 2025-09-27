@@ -49,15 +49,13 @@ double RbStatistics::Uniform::pdf(double a, double b, double x) {
  * \return Returns the natural log of the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Uniform::lnPdf(double a, double b, double x)
+LogDensity RbStatistics::Uniform::lnPdf(double a, double b, double x)
 {
     
-	if ( x < a || x > b)
-    {
-		return RbConstants::Double::neginf;
-    }
+    if ( x < a ) return logZeroWithError(a - x);
+    if ( x > b ) return logZeroWithError(x - b);
     
-    return ( -std::log(b-a) );
+    return -logDensity(b-a);
 }
 
 /*!
@@ -126,11 +124,12 @@ double RbStatistics::Uniform::pdf(double x) {
  * \return Returns the natural log of the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Uniform::lnPdf(double x) {
+LogDensity RbStatistics::Uniform::lnPdf(double x) {
     
-	if ( x < 0.0 || x > 1.0)
-		return RbConstants::Double::neginf;
-	return 0.0;
+    if ( x < 0 ) return logZeroWithError( 0-x );
+    if ( x > 1 ) return logZeroWithError( x-1 );
+    
+    return 0.0;
 }
 
 /*!

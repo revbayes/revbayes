@@ -18,6 +18,8 @@
 #ifndef DistributionUniform_H
 #define DistributionUniform_H
 
+#include "LogDensity.h"
+
 namespace RevBayesCore {
 
     class RandomNumberGenerator;
@@ -28,8 +30,8 @@ namespace RevBayesCore {
         
             double                      pdf(double x);                                                        /*!< Uniform(0,1) probability density */
             double                      pdf(double a, double b, double x);                                    /*!< Uniform(a,b) probability density */
-            double                      lnPdf(double x);                                                      /*!< Log of the Uniform(0,1) probability density */
-            double                      lnPdf(double a, double b, double x);                                  /*!< Log of the Uniform(a,b) probability density */
+            LogDensity                  lnPdf(double x);                                                      /*!< Log of the Uniform(0,1) probability density */
+            LogDensity                  lnPdf(double a, double b, double x);                                  /*!< Log of the Uniform(a,b) probability density */
             double                      cdf(double x);                                                        /*!< Uniform(0,1) cumulative probability */
             double                      cdf(double a, double b, double x);                                    /*!< Uniform(a,b) cumulative probability */
             inline                      double quantile(double p);                                            /*!< Uniform(0,1) quantile */
