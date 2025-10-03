@@ -489,7 +489,7 @@ void startInterpreter()
 
         if (result == 2)
         {
-            std::exit(1);
+            commandLine.clear();
         }
 
 /* The typed string is returned as a malloc() allocated string by
