@@ -931,30 +931,27 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         // skip this node if we've already found a clade compatible with it
         if ( children.size() == parentNode->getNumberOfChildren() ) continue;
 
-        std::vector<TopologyNode*> mrca;
 
-        // find the mrca child if it exists
+        // find the mrca child(ren) if they exist
+        std::vector<TopologyNode*> mrca;
         if ( not clade.second.empty() )
         {
-            for (size_t i = 0; i < children.size(); i++)
+            for (auto& child: children)
             {
-                if ( children[i]->isTip() && std::find(clade.second.begin(), clade.second.end(), children[i]->getTaxon() ) != clade.second.end() )
-                {
-                    mrca.push_back(children[i]);
-                }
+                // Add the child to the mrca if its a tip and its taxon is in clade.second
+                if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
+                    mrca.push_back(child);
             }
 
-            // if we couldn't find the mrca, then this clade is not compatible
+            // if we couldn't find all the the mrca, then this clade is not compatible
             if ( mrca.size() != clade.second.size() )
             {
                 continue;
             }
             else
             {
-                for (size_t i = 0; i < mrca.size(); i++)
-                {
-                    mrca[i]->setSampledAncestor(true);
-                }
+                for (auto& mrca_node: mrca)
+                    mrca_node->setSampledAncestor(true);
             }
         }
 
