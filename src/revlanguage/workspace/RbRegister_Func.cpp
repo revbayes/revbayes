@@ -241,6 +241,7 @@
 
 /* Math functions (in folder "functions/math") */
 #include "Func_abs.h"
+#include "Func_absInt.h"
 #include "Func_absVector.h"
 #include "Func_ceil.h"
 #include "Func_choose.h"
@@ -492,6 +493,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 		// absolute function
         addFunction( new Func_abs()                  );
         addFunction( new Func_absVector()            );
+        addFunction( new Func_absInt()               );
 
 		// ceil function
         addFunction( new Func_ceil<Real,Integer>()  );
