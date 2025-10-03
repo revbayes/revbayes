@@ -2082,7 +2082,6 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         ret = &(reverseParentChild(p));
 
         // swap indices, branch lengths, and branch comments
-        // std::swap(p.index, n.index);
         std::swap(p.branch_length, n.branch_length);
         std::swap(p.branch_comments, n.branch_comments);
 
