@@ -928,10 +928,6 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         //skip this clade if it is not compatible
         if (not parentNode) continue;
 
-        // skip this node if we've already found a clade compatible with it
-        if ( children.size() == parentNode->getNumberOfChildren() ) continue;
-
-
         // find the mrca child(ren) if they exist
         std::vector<TopologyNode*> mrca;
         if ( not clade.second.empty() )
@@ -954,6 +950,9 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
                     mrca_node->setSampledAncestor(true);
             }
         }
+
+        // avoid creating a new child if we've already found a clade compatible with it
+        if ( children.size() == parentNode->getNumberOfChildren() ) continue;
 
         nIndex++;   //increment node index
         TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
