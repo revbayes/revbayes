@@ -1,11 +1,11 @@
 ## name
 srGelmanRubin
 ## title
-Gelman–Rubin (PSRF) stopping rule
+Gelman-Rubin (PSRF) stopping rule
 
 ## description
 Allow an MCMC run to terminate once the specified criterion has been met.
-The Gelman–Rubin rule compares the variance between runs with the variance within runs; its value tends to unity (1) as runs converge.  It is widely referred to as the "potential scale reduction factor" (PSRF).
+The Gelman-Rubin rule compares the variance between runs with the variance within runs; its value tends to unity (1) as runs converge. It is widely referred to as the "potential scale reduction factor" (PSRF).
 
 ## details
 Because the statistic is defined by comparing the variation between different runs to the variance within each run, it can only be calculated when multiple independent runs are performed, by setting the `nruns` argument to `mcmc` or `mcmcmc` to a value greater than one.
@@ -44,9 +44,8 @@ mymcmc.run(rules = stopping_rules)
 ```
 
 ## references
-- citation: Gelman, A; Rubin, D.B. (1992). Inference from Iterative Simulation Using Multiple Sequences. Statistical Science. 7 (4): 457–472
+- citation: Gelman A, Rubin DB (1992). Inference from iterative simulation using multiple sequences. Statistical Science, 7(4):457--472.
   doi: 10.1214/ss/1177011136
-  url: null
-- citation: Vats, D.; Knudson, C. Revisiting the Gelman–Rubin Diagnostic. Statist. Sci. 36 (4) 518 - 529, 2021.
+- citation: Vats D, Knudson C (2021). Revisiting the Gelman--Rubin diagnostic. Statistical Science, 36(4):518--529.
   doi: 10.1214/20-STS812
   

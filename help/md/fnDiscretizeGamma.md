@@ -24,6 +24,6 @@ fnDiscretizeBeta
 
 
 ## references
-- citation: Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306–314.
+- citation: Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306--314.
   doi: 10.1007/BF00160154
   usl: https://doi.org/10.1007/BF00160154

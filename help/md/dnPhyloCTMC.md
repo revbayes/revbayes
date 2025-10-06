@@ -2,7 +2,7 @@
 `dnPhyloCTMC`: Distribution of a phylogenetic continuous-time Markov chain
 
 ## title
-The parameters of a phylogenetic model – a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. – collectively form a distribution called the _phylogenetic continuous-time Markov chain_.
+The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time Markov chain_.
 
 ## description
 dnPhyloCTMC gives the probability distribution of tip labels on a phylogenetic tree given an phylogenetic continuous-time Markov chain model.
@@ -41,13 +41,11 @@ x.lnProbability()
 ```
 
 ## references
-- citation: Felsenstein J., 1973. Maximum Likelihood and Minimum-Steps Methods for Estimating Evolutionary Trees from Data on Discrete Characters. Systematic Biology 22:3, 240--249
-  doi = 10.1093/sysbio/22.3.240
-- citation: Felsenstein, J. (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution. 17 (6): 368–376.
-  doi : 10.1007/BF01734359
-- citation: Höhna, S., Landis, M.J. and Heath, T.A. 2017. Phylogenetic inference using `RevBayes`. Curr. Protoc. Bioinform.
-57:6.16.1-6.16.34.
+- citation: Felsenstein J (1973). Maximum likelihood and minimum-steps methods for estimating evolutionary trees from data on discrete characters. Systematic Biology, 22(3):240--249.
+  doi: 10.1093/sysbio/22.3.240
+- citation: Felsenstein J (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution, 17(6):368--376.
+  doi: 10.1007/BF01734359
+- citation: Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.
   doi: 10.1002/cpbi.22
-  url: null
 
 

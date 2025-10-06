@@ -328,7 +328,7 @@ clade_67_or_68 = clade( clade_67, clade_68, optional_match=true ))");
 	help_arrays[string("clade")][string("see_also")].push_back(string(R"(mrcaIndex)"));
 	help_strings[string("clade")][string("title")] = string(R"(Clade)");
 	help_strings[string("clamp")][string("description")] = string(R"(`x.clamp(data)` fixes the value of the stochastic variable `x` to the observation `data`, and marks the variable as corresponding to an observation.)");
-	help_strings[string("clamp")][string("details")] = string(R"(Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped – either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
+	help_strings[string("clamp")][string("details")] = string(R"(Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped -- either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
 
 `x.setValue()` evaluates probabilities at a specific value of `x` without fixing the value.)");
 	help_strings[string("clamp")][string("example")] = string(R"(x ~ dnNormal(1, 1)
@@ -673,7 +673,7 @@ timetree ~ dnCDBDP(rootAge   = root_age,
                    rho       = rho,
                    condition = "time"))");
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
-	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth–death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973–986.)",R"(10.1093/sysbio/syaa016)",R"(https://academic.oup.com/sysbio/article/69/5/973/5762626 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth--death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973-986.)",R"(10.1093/sysbio/syaa016)",R"(https://academic.oup.com/sysbio/article/69/5/973/5762626 )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.)",R"(10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg EE, Igić B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.)",R"(10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
@@ -1400,13 +1400,13 @@ x.clamp(chars)
 x.lnProbability()
 ```)");
 	help_strings[string("dnPhyloCTMC")][string("name")] = string(R"(`dnPhyloCTMC`: Distribution of a phylogenetic continuous-time Markov chain)");
-	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Felsenstein J., 1973. Maximum Likelihood and Minimum-Steps Methods for Estimating Evolutionary Trees from Data on Discrete Characters. Systematic Biology 22:3, 240--249)",R"()",R"()"));
-	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Felsenstein, J. (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution. 17 (6): 368–376.)",R"()",R"()"));
-	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Höhna, S., Landis, M.J. and Heath, T.A. 2017. Phylogenetic inference using `RevBayes`. Curr. Protoc. Bioinform. 57:6.16.1-6.16.34.)",R"(10.1002/cpbi.22)",R"()"));
+	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Felsenstein J (1973). Maximum likelihood and minimum-steps methods for estimating evolutionary trees from data on discrete characters. Systematic Biology, 22(3):240--249.)",R"(10.1093/sysbio/22.3.240 )",R"()"));
+	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Felsenstein J (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution, 17(6):368--376.)",R"(10.1007/BF01734359 )",R"()"));
+	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.)",R"(10.1002/cpbi.22 )",R"()"));
 	help_arrays[string("dnPhyloCTMC")][string("see_also")].push_back(string(R"(- Tutorial on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models))"));
 	help_arrays[string("dnPhyloCTMC")][string("see_also")].push_back(string(R"()"));
 	help_arrays[string("dnPhyloCTMC")][string("see_also")].push_back(string(R"(- Tutorial on [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model)"));
-	help_strings[string("dnPhyloCTMC")][string("title")] = string(R"(The parameters of a phylogenetic model – a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. – collectively form a distribution called the _phylogenetic continuous-time Markov chain_.)");
+	help_strings[string("dnPhyloCTMC")][string("title")] = string(R"(The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time Markov chain_.)");
 	help_strings[string("dnPhyloCTMCClado")][string("name")] = string(R"(dnPhyloCTMCClado)");
 	help_strings[string("dnPhyloCTMCDASequence")][string("name")] = string(R"(dnPhyloCTMCDASequence)");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("name")] = string(R"(dnPhyloCTMCDASiteIID)");
@@ -1766,15 +1766,15 @@ Let _n_ be the number of categories.
 If `median = TRUE`, the quantile function is performed at the midpoint of each category.  Call this vector _q_.
 _q_ is then normalized by dividing against its sum, so its elements sum to one; then multiplied by a factor _n_ * _alpha) / (_alpha_ + _beta_).
 
-The computation to obtain the mean for each category, when `median = FALSE`, is more complex, making use of the incomplete beta function ( Majumder & Bhattacharjee 1973).
+The computation to obtain the mean for each category, when `median = FALSE`, is more complex, making use of the incomplete beta function (Majumder & Bhattacharjee 1973).
 
 A real-world use case is available in Wright et al. (2016), with discussion of the properties of the beta distribution. Corresponding tutorials are available at https://www.palass.org/sites/default/files/media/publications/newsletters/number_106/number_106_0.pdf and https://revbayes.github.io/tutorials/morph_tree/V2.html.)");
 	help_strings[string("fnDiscretizeBeta")][string("example")] = string(R"(# Values to represent four quadrants of a symmetric beta distribution
 categories := fnDiscretizeBeta(0.2, 0.2, 4)
 print(categories))");
 	help_strings[string("fnDiscretizeBeta")][string("name")] = string(R"(fnDiscretizeBeta)");
-	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(Majumder & Bhattacharjee. 1973. Algorithm AS63. Applied Statistics, 22.)",R"(NULL)",R"(NULL )"));
-	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(WRIGHT, A. M., LLOYD, G. T. and HILLIS, D. H. 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. _Systematic Biology_, 65, 602–11.)",R"(10.1093/sysbio/syv122)",R"(https://doi.org/10.1093/sysbio/syv122 )"));
+	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(Majumder KL, Bhattacharjee GP (1973). Algorithm AS 63: The incomplete beta integral. Applied Statistics, 22(3):409--411.)",R"(10.2307/2346797)",R"(https://www.jstor.org/stable/2346797 )"));
+	help_references[string("fnDiscretizeBeta")].push_back(RbHelpReference(R"(Wright AM, Lloyd GT, Hillis DM (2016). Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. Systematic Biology, 65(4):602--611.)",R"(10.1093/sysbio/syv122)",R"(https://doi.org/10.1093/sysbio/syv122 )"));
 	help_arrays[string("fnDiscretizeBeta")][string("see_also")].push_back(string(R"(A translation of `fnDiscretizeBeta` into R is available at https://gist.github.com/ms609/883632d10d4d80ea5391cee9c47071fc.)"));
 	help_strings[string("fnDiscretizeBeta")][string("title")] = string(R"(Disctetize a beta distribution)");
 	help_strings[string("fnDiscretizeBetaQuadrature")][string("name")] = string(R"(fnDiscretizeBetaQuadrature)");
@@ -1800,7 +1800,7 @@ alpha = 0.5
 
 discrete_values := fnDiscretizeGamma( shape = alpha, rate = alpha, numCats = 4, median = FALSE ))");
 	help_strings[string("fnDiscretizeGamma")][string("name")] = string(R"(fnDiscretizeGamma)");
-	help_references[string("fnDiscretizeGamma")].push_back(RbHelpReference(R"(Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306–314.)",R"(10.1007/BF00160154 usl: https://doi.org/10.1007/BF00160154 )",R"()"));
+	help_references[string("fnDiscretizeGamma")].push_back(RbHelpReference(R"(Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306--314.)",R"(10.1007/BF00160154 usl: https://doi.org/10.1007/BF00160154 )",R"()"));
 	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeDistribution)"));
 	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"()"));
 	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeBeta)"));
@@ -1862,7 +1862,7 @@ baseFrequencies ~ dnDirichlet(v(1,1,1,1))
 # create an F81 rate matrix
 Q := fnF81(baseFrequencies))");
 	help_strings[string("fnF81")][string("name")] = string(R"(fnF81)");
-	help_references[string("fnF81")].push_back(RbHelpReference(R"(Felsenstein J (1981). "Evolutionary trees from DNA sequences: a maximum likelihood approach". Journal of Molecular Evolution. 17:368–76.)",R"(https://doi.org/10.1007/BF01734359)",R"(https://link.springer.com/article/10.1007/BF01734359 )"));
+	help_references[string("fnF81")].push_back(RbHelpReference(R"(Felsenstein J (1981). Evolutionary trees from DNA sequences: a maximum likelihood approach. Journal of Molecular Evolution, 17:368--376.)",R"(10.1007/BF01734359)",R"(https://link.springer.com/article/10.1007/BF01734359 )"));
 	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnJC)"));
 	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnK80)"));
 	help_arrays[string("fnF81")][string("see_also")].push_back(string(R"(fnK81)"));
@@ -2146,7 +2146,7 @@ q := fnJC(20)
 # Binary Character Matrix
 q := fnJC(2))");
 	help_strings[string("fnJC")][string("name")] = string(R"(fnJC)");
-	help_references[string("fnJC")].push_back(RbHelpReference(R"(Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132. )",R"()",R"()"));
+	help_references[string("fnJC")].push_back(RbHelpReference(R"(Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21--132. )",R"()",R"()"));
 	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnGTR)"));
 	help_arrays[string("fnJC")][string("see_also")].push_back(string(R"(fnF81)"));
 	help_strings[string("fnJC")][string("title")] = string(R"(fnJC)");
@@ -2165,7 +2165,7 @@ kappa ~ dnExp(0.5)
 # create a K80 rate matrix
 Q := fnK80(kappa))");
 	help_strings[string("fnK80")][string("name")] = string(R"(fnK80)");
-	help_references[string("fnK80")].push_back(RbHelpReference(R"(Kimura M (1980). "A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences". Journal of Molecular Evolution. 16:111–20.)",R"(https://doi.org/10.1007/BF01731581)",R"(https://link.springer.com/article/10.1007/BF01731581 )"));
+	help_references[string("fnK80")].push_back(RbHelpReference(R"(Kimura M (1980). A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. Journal of Molecular Evolution, 16:111--20.)",R"(10.1007/BF01731581)",R"(https://link.springer.com/article/10.1007/BF01731581 )"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnJC)"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnF81)"));
 	help_arrays[string("fnK80")][string("see_also")].push_back(string(R"(fnK81)"));
@@ -2200,7 +2200,7 @@ Q := fnK81(kappa1, kappa2, baseFrequencies))");
 
 # title
 The Kimura (1981) nucleotide rate matrix)");
-	help_references[string("fnK81")].push_back(RbHelpReference(R"(Kimura M (1981). "Estimation of evolutionary distances between homologous nucleotide sequences". Proceedings of the National Academy of Sciences of the United States of America. 78:454–8.)",R"(https://doi.org/10.1073/pnas.78.1.454)",R"(https://www.pnas.org/doi/abs/10.1073/pnas.78.1.454 )"));
+	help_references[string("fnK81")].push_back(RbHelpReference(R"(Kimura M (1981). Estimation of evolutionary distances between homologous nucleotide sequences. Proceedings of the National Academy of Sciences of the United States of America, 78(1):454--458.)",R"(10.1073/pnas.78.1.454)",R"(https://www.pnas.org/doi/abs/10.1073/pnas.78.1.454 )"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnJC)"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnK80)"));
 	help_arrays[string("fnK81")][string("see_also")].push_back(string(R"(fnF80)"));
@@ -2434,7 +2434,7 @@ gc ~ dnUnif(0, 1)
 # create a T92 rate matrix
 Q := fnT92(kappa, gc))");
 	help_strings[string("fnT92")][string("name")] = string(R"(fnT92)");
-	help_references[string("fnT92")].push_back(RbHelpReference(R"(Tamura K (1992). "Estimation of the number of nucleotide substitutions when there are strong transition-transversion and G+C-content biases". Molecular Biology and Evolution. 9:678–87.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040752)",R"(https://academic.oup.com/mbe/article/9/4/678/1254082 )"));
+	help_references[string("fnT92")].push_back(RbHelpReference(R"(Tamura K (1992). "Estimation of the number of nucleotide substitutions when there are strong transition-transversion and G+C-content biases". Molecular Biology and Evolution. 9:678--87.)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040752)",R"(https://academic.oup.com/mbe/article/9/4/678/1254082 )"));
 	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnJC)"));
 	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnF81)"));
 	help_arrays[string("fnT92")][string("see_also")].push_back(string(R"(fnK80)"));
@@ -2559,7 +2559,7 @@ Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)          # HKY + X3 + dNdS, or H
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
 Q3 := fnX3(fnGTR(er, nuc_pi))      # GTR + X3, or GTR*3)");
 	help_strings[string("fnX3")][string("name")] = string(R"(fnX3)");
-	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
+	help_references[string("fnX3")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny. Bioinformatics (2021) 37(10):3032--3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
 	help_arrays[string("fnX3")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fndNdS)"));
 	help_strings[string("fnX3")][string("title")] = string(R"(Construct a codon rate matrix from a nucleotide rate matrix.)");
 	help_strings[string("fnassembleContinuousMRF")][string("name")] = string(R"(fnassembleContinuousMRF)");
@@ -2587,7 +2587,7 @@ Q2 := fndNdS(fnX3(fnHKY(kappa, nuc_pi)), omega)        # HKY + X3 + dNdS,
 er ~ dnDirichlet( v(1,1,1,1,1,1) )
 Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("name")] = string(R"(fndNdS)");
-	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129)",R"()"));
+	help_references[string("fndNdS")].push_back(RbHelpReference(R"(Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment and Phylogeny. Bioinformatics (2021) 37(10):3032--3034.)",R"(https://doi.org/10.1093/bioinformatics/btab129 )",R"()"));
 	help_arrays[string("fndNdS")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel)"));
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
@@ -3482,7 +3482,7 @@ topology ~ dnUniformTopology(taxa)
 moves.append( mvSPR(topology, weight=taxa.size()) ))");
 	help_strings[string("mvSPR")][string("name")] = string(R"(mvSPR)");
 	help_references[string("mvSPR")].push_back(RbHelpReference(R"(Allen BL, Steel M (2001). Subtree transfer operations and their induced metrics on evolutionary trees. Annals of Combinatorics, 5:1-15.)",R"(10.1007/s00026-001-8006-8)",R"(https://link.springer.com/article/10.1007/s00026-001-8006-8 )"));
-	help_references[string("mvSPR")].push_back(RbHelpReference(R"(Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411–501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates. )",R"()",R"()"));
+	help_references[string("mvSPR")].push_back(RbHelpReference(R"(Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411--501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates. )",R"()",R"()"));
 	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mvFNPR)"));
 	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mvNNI)"));
 	help_arrays[string("mvSPR")][string("see_also")].push_back(string(R"(mvSubtreeSwap)"));
@@ -4076,7 +4076,7 @@ ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 repl
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(dos Reis M, Gunnell GF, Barba-Montoya J, Wilkins A, Yang Z, Yoder AD (2018). Using phylogenomic data to explore the effects of relaxed clocks and calibration strategies on divergence time estimation: primates as a test case. Systematic Biology, 67(4):594-615.)",R"(10.1093/sysbio/syy001)",R"(https://academic.oup.com/sysbio/article/67/4/594/4802240 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.)",R"(10.1214/ss/1028905934)",R"(https://www.jstor.org/stable/2676756 )"));
-	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195–207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195-207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Ogata Y (1989). A Monte Carlo method for high dimensional integration. Numerische Mathematik, 55:137-157.)",R"(10.1007/BF01406511)",R"(https://link.springer.com/article/10.1007/BF01406511 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Politis DN, Romano JP (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428):1303-1313.)",R"(10.1080/01621459.1994.10476870)",R"(https://www.tandfonline.com/doi/abs/10.1080/01621459.1994.10476870 )"));
 	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(powerPosterior)"));
@@ -4184,7 +4184,7 @@ ss.marginal())");
 	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Friel N, Pettitt AN (2008). Marginal likelihood estimation via power posteriors. Journal of the Royal Statistical Society Series B: Statistical Methodology, 70(3):589-607.)",R"(10.1111/j.1467-9868.2007.00650.x)",R"(https://academic.oup.com/jrsssb/article-abstract/70/3/589/7109555 )"));
 	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.)",R"(10.1214/ss/1028905934)",R"(https://www.jstor.org/stable/2676756 )"));
 	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Hoehna S, Landis MJ, Huelsenbeck JP (2021). Parallel power posterior analyses for fast computation of marginal likelihoods in phylogenetics. PeerJ, 9:e12438.)",R"(10.7717/peerj.12438)",R"(https://peerj.com/articles/12438/ )"));
-	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195–207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
+	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195-207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
 	help_references[string("powerPosterior")].push_back(RbHelpReference(R"(Xie W, Lewis PO, Fan Y, Kuo L, Chen M-H (2010). Improving marginal likelihood estimation for Bayesian phylogenetic model selection. Systematic Biology, 60(2):150-160.)",R"(10.1093/sysbio/syq085)",R"(https://academic.oup.com/sysbio/article-abstract/60/2/150/2461669 )"));
 	help_arrays[string("powerPosterior")][string("see_also")].push_back(string(R"(pathSampler)"));
 	help_arrays[string("powerPosterior")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
@@ -4487,7 +4487,7 @@ if ( abs(root*root - x) > 1.0e-15) {
 	help_arrays[string("sqrt")][string("see_also")].push_back(string(R"(`power`)"));
 	help_strings[string("sqrt")][string("title")] = string(R"(Square root of a number)");
 	help_strings[string("srGelmanRubin")][string("description")] = string(R"(Allow an MCMC run to terminate once the specified criterion has been met.
-The Gelman–Rubin rule compares the variance between runs with the variance within runs; its value tends to unity (1) as runs converge.  It is widely referred to as the "potential scale reduction factor" (PSRF).)");
+The Gelman-Rubin rule compares the variance between runs with the variance within runs; its value tends to unity (1) as runs converge. It is widely referred to as the "potential scale reduction factor" (PSRF).)");
 	help_strings[string("srGelmanRubin")][string("details")] = string(R"(Because the statistic is defined by comparing the variation between different runs to the variance within each run, it can only be calculated when multiple independent runs are performed, by setting the `nruns` argument to `mcmc` or `mcmcmc` to a value greater than one.)");
 	help_strings[string("srGelmanRubin")][string("example")] = string(R"(```
 # Binomial example: estimate success probability given 7 successes out of 20 trials
@@ -4516,12 +4516,11 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns = 2)
 mymcmc.run(rules = stopping_rules)
 ```)");
 	help_strings[string("srGelmanRubin")][string("name")] = string(R"(srGelmanRubin)");
-	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Gelman, A; Rubin, D.B. (1992). Inference from Iterative Simulation Using Multiple Sequences. Statistical Science. 7 (4): 457–472)",R"(10.1214/ss/1177011136)",R"()"));
-	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Vats, D.; Knudson, C. Revisiting the Gelman–Rubin Diagnostic. Statist. Sci. 36 (4) 518 )",R"()",R"()"));
-	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"()",R"(10.1214/20-STS812 )",R"()"));
+	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Gelman A, Rubin DB (1992). Inference from iterative simulation using multiple sequences. Statistical Science, 7(4):457--472.)",R"(10.1214/ss/1177011136 )",R"()"));
+	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Vats D, Knudson C (2021). Revisiting the Gelman--Rubin diagnostic. Statistical Science, 36(4):518--529.)",R"(10.1214/20-STS812 )",R"()"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"()"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
-	help_strings[string("srGelmanRubin")][string("title")] = string(R"(Gelman–Rubin (PSRF) stopping rule)");
+	help_strings[string("srGelmanRubin")][string("title")] = string(R"(Gelman-Rubin (PSRF) stopping rule)");
 	help_arrays[string("srGeweke")][string("authors")].push_back(string(R"(Incorporates text by Martyn Plummer)"));
 	help_strings[string("srGeweke")][string("description")] = string(R"(Allow an MCMC run to terminate once the specified criterion has been met.
 
@@ -4630,7 +4629,7 @@ If the autocorrelation is higher, then the uncertainty in our estimates is also 
 
 The MCMC run will terminate once all parameters in every log file meet the ESS
 threshold.  As such, performing additional runs will not decrease the number
-of generations required to meet the ESS threshold – even though it will increase
+of generations required to meet the ESS threshold -- even though it will increase
 the number of indepedent samples in the final, pooled posterior sample.)");
 	help_strings[string("srMinESS")][string("example")] = string(R"(```
 # Binomial example: estimate success probability given 7 successes out of 20 trials
@@ -5105,7 +5104,7 @@ full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
 # to the working directory
 writeNexus(filename="test.nex", full_model))");
 	help_strings[string("writeNexus")][string("name")] = string(R"(writeNexus)");
-	help_references[string("writeNexus")].push_back(RbHelpReference(R"(David R. Maddison, David L. Swofford, Wayne P. Maddison, Nexus: An Extensible File Format for Systematic Information, Systematic Biology, Volume 46, Issue 4, December 1997, Pages 590–621,)",R"(https://doi.org/10.1093/sysbio/46.4.590)",R"(https://academic.oup.com/sysbio/article/46/4/590/1629695)"));
+	help_references[string("writeNexus")].push_back(RbHelpReference(R"(Maddison DR, Swofford DL, Maddison WP (1997). Nexus: An extensible file format for systematic information. Systematic Biology, 46(4):590--621.)",R"(10.1093/sysbio/46.4.590)",R"(https://academic.oup.com/sysbio/article/46/4/590/1629695 )"));
 	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(`writeFasta`, `writeCharacterDataDelimited`, `write`)"));
 	help_strings[string("writeNexus")][string("title")] = string(R"(Nexus file writer)");
 }
