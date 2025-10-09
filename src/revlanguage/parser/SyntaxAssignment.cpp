@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <set>
 
@@ -66,7 +66,7 @@ SyntaxAssignment& SyntaxAssignment::operator=( const SyntaxAssignment& x )
  * contexts. For instance, it might be used in a chain assignment or in passing a
  * variable to a function.
  */
-RevPtr<RevVariable> SyntaxAssignment::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxAssignment::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Get the rhs expression wrapped and executed into a variable.
@@ -96,7 +96,7 @@ RevPtr<RevVariable> SyntaxAssignment::evaluateContent( Environment& env, bool dy
     catch (RbException &e)
     {
         // we need to remove the variable
-        env.eraseVariable( the_slot->getName() );
+        env->eraseVariable( the_slot->getName() );
         throw e;
     }
     
@@ -158,7 +158,7 @@ bool SyntaxAssignment::isFunctionSafe( const Environment& env, std::set<std::str
 //        const std::set<int>& indices = the_var->getElementIndices();
 //        if ( indices.empty() )
 //        {
-//            throw RbException("Cannot remove a vector variable with name '" + the_var->getName() + "' because it doesn't have elements.");
+//            throw RbException() << "Cannot remove a vector variable with name '" << the_var->getName() << "' because it doesn't have elements.";
 //        }
 //        // iterate over all elements
 //        for (std::set<int>::const_iterator it = indices.begin(); it != indices.end(); ++it)

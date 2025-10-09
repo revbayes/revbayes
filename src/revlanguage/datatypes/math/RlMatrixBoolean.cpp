@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -121,7 +121,7 @@ RevPtr<RevVariable> MatrixBoolean::executeMethod(std::string const &name, const 
         const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
         size_t i = index.getValue() - 1;
         
-        boost::dynamic_bitset<> m = this->dag_node->getValue().getColumn( i );
+        RevBayesCore::RbVector<RevBayesCore::Boolean> m = this->dag_node->getValue().getColumn( i );
         ModelVector< RlBoolean > *bl_vect = new ModelVector< RlBoolean >;
         for(size_t j = 0; j < m.size(); ++j)
         {

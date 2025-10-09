@@ -1,7 +1,7 @@
 #ifndef Model_H
 #define Model_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <vector>
 #include <iosfwd>

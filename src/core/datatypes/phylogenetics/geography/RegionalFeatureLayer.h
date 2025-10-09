@@ -31,9 +31,9 @@ namespace RevBayesCore {
         bool                                operator>(const RegionalFeatureLayer &t) const;            //!< Less-than operators
         bool                                operator>=(const RegionalFeatureLayer &t) const;           //!< Less-than operators
         
-//        std::vector<long>                   getWithinCategoricalFeatures(void) const;
+//        std::vector<std::int64_t>                   getWithinCategoricalFeatures(void) const;
 //        std::vector<double>                 getWithinQuantitativeFeatures(void) const;
-//        std::vector<std::vector<long> >     getBetweenCategoricalFeatures(void) const;
+//        std::vector<std::vector<std::int64_t> >     getBetweenCategoricalFeatures(void) const;
 //        std::vector<std::vector<double> >   getBetweenQuantitativeFeatures(void) const;
         size_t                              getTimeIndex(void) const;
         size_t                              getFeatureIndex(void) const;
@@ -41,9 +41,9 @@ namespace RevBayesCore {
         std::string                         getFeatureRelationship(void) const;
         std::vector<std::vector<double> >   getFeatureValues(void) const;
         
-//        void                                setFeatures(std::vector<long> f);
+//        void                                setFeatures(std::vector<std::int64_t> f);
 //        void                                setFeatures(std::vector<double> f);
-//        void                                setFeatures(std::vector<std::vector<long> > f);
+//        void                                setFeatures(std::vector<std::vector<std::int64_t> > f);
         void                                setFeatures(std::vector<std::vector<double> > f);
         
     private:
@@ -54,9 +54,9 @@ namespace RevBayesCore {
         std::vector<std::vector<double> >   feature_values;
         
         // this could be a template
-//        std::vector<long>                   within_categorical;
+//        std::vector<std::int64_t>                   within_categorical;
 //        std::vector<double>                 within_quantitative;
-//        std::vector<std::vector<long> >     between_categorical;
+//        std::vector<std::vector<std::int64_t> >     between_categorical;
 //        std::vector<std::vector<double> >   between_quantitative;
         
     };

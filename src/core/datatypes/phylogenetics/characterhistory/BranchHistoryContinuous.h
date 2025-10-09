@@ -1,7 +1,7 @@
 #ifndef BranchHistoryContinuous_H
 #define BranchHistoryContinuous_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 
 #include "BranchHistory.h"

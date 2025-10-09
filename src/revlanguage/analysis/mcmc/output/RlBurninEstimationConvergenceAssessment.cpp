@@ -1,6 +1,6 @@
 #include "RlBurninEstimationConvergenceAssessment.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -16,7 +16,6 @@
 #include "EssTest.h"
 #include "GelmanRubinTest.h"
 #include "GewekeTest.h"
-#include "HeidelbergerWelchTest.h"
 #include "OptionRule.h"
 #include "RbException.h"
 #include "RbFileManager.h"
@@ -120,7 +119,6 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
         RevBayesCore::ConvergenceDiagnosticContinuous *essTest = new RevBayesCore::EssTest();
         RevBayesCore::ConvergenceDiagnosticContinuous *gewekeTest = new RevBayesCore::GewekeTest();
         RevBayesCore::ConvergenceDiagnosticContinuous *gelmanRubinTest = new RevBayesCore::GelmanRubinTest();
-        RevBayesCore::ConvergenceDiagnosticContinuous *heidelbergerTest = new RevBayesCore::HeidelbergerWelchTest();
         RevBayesCore::ConvergenceDiagnosticContinuous *stationarityTest = new RevBayesCore::StationarityTest();
         
         // read the traces
@@ -191,8 +189,7 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
                 bool essStat = essTest->assessConvergence( data[i] );
 //                bool gelmanStat = gelmanRubinTest->assessConvergence( data[i] );
                 bool stationarityStat = stationarityTest->assessConvergence( data[i] );
-                bool heidelbergerStat = heidelbergerTest->assessConvergence( data[i] );
-                bool failedParam = !gewekeStat || !stationarityStat || !heidelbergerStat || !essStat;
+                bool failedParam = !gewekeStat || !stationarityStat || !essStat;
                 
                 if ( failedParam == true )
                 {
@@ -215,8 +212,6 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
 //                    RBOUT("\t\t\tPassed Gelman-Rubin test:\t\t\t" + p);
                     p = (stationarityStat ? "TRUE" : "FALSE");
                     RBOUT("\t\t\tPassed Stationarity test:\t\t\t" + p);
-                    p = (heidelbergerStat ? "TRUE" : "FALSE");
-                    RBOUT("\t\t\tPassed Heideberger-Welch test:\t\t" + p);
                 }
                 
             }
@@ -284,7 +279,6 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
 //                bool essStat = essTest->assessConvergence( v );
                 bool gelmanStat = gelmanRubinTest->assessConvergence( v );
                 bool stationarityStat = stationarityTest->assessConvergence( v );
-//                bool heidelbergerStat = heidelbergerTest->assessConvergence( v );
                 bool failedParam =  !gelmanStat || !stationarityStat;
                 
                 if ( failedParam == true )

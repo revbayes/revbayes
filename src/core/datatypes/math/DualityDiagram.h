@@ -41,7 +41,7 @@
 #ifndef _DUALITYDIAGRAM_H_
 #define _DUALITYDIAGRAM_H_
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Cloneable.h"

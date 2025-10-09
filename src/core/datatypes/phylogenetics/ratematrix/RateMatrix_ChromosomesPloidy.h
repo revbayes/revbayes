@@ -15,7 +15,7 @@
 #ifndef __RateMatrix_ChromosomesPloidy__
 #define __RateMatrix_ChromosomesPloidy__
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"

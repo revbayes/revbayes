@@ -1,7 +1,7 @@
 #ifndef SingleElementScaleMove_H
 #define SingleElementScaleMove_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

@@ -1,7 +1,7 @@
 #ifndef AVMVNProposal_H
 #define AVMVNProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 
@@ -71,8 +71,8 @@ template <class valueType> class StochasticNode;
         MatrixReal                                          C_emp;                                                   //!< The empirical covariance matrix of the samples
         MatrixReal                                          AVMVN_cholesky_L;                                       //!< Lower diagonal of Cholesky decomposition of
 
-        size_t                                              waitBeforeLearning;                                      //!< How long to wait before tracking empirical covariances
-        size_t                                              waitBeforeUsing;                                         //!< How long to wait before using the empirical covariances
+        size_t                                              waitBeforeLearning;                                      //!< How std::int64_t to wait before tracking empirical covariances
+        size_t                                              waitBeforeUsing;                                         //!< How std::int64_t to wait before using the empirical covariances
         size_t                                              nTried;                                                  //!< How many times has this move been used?
         size_t                                              updates;                                                 //!< How many updates have been tried?
         size_t                                              maxUpdates;                                              //!< How many updates until we stop monitoring the covariances?

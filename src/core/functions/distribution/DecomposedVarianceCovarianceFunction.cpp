@@ -1,6 +1,6 @@
 #include "DecomposedVarianceCovarianceFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVector.h"

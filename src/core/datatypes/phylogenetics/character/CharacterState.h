@@ -1,7 +1,7 @@
 #ifndef Character_H
 #define Character_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "Cloneable.h"

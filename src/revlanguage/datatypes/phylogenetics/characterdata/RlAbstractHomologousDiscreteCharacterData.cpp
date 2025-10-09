@@ -1,6 +1,6 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "RlAbstractDiscreteTaxonData.h"
@@ -18,6 +18,7 @@
 #include "RlUserInterface.h"
 #include "RbBitSet.h"
 #include "AbstractDiscreteTaxonData.h"
+#include "HomologousDiscreteCharacterData.h"
 #include "Argument.h"
 #include "ArgumentRules.h"
 #include "DiscreteCharacterState.h"
@@ -83,7 +84,7 @@ void AbstractHomologousDiscreteCharacterData::concatenate(const RevObject &d, st
     }
     else
     {
-        throw RbException("Cannot add an object of type '" + d.getType() + "' to a character data object.");
+        throw RbException() << "Cannot add an object of type '" << d.getType() << "' to a character data object.";
     }
 
 }
@@ -203,7 +204,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             ambig_treat = RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT::RESCALE;
         }
 
-        std::vector<long> sfs = this->dag_node->getValue().computeSiteFrequencySpectrum(folded, ambig_treat);
+        std::vector<std::int64_t> sfs = this->dag_node->getValue().computeSiteFrequencySpectrum(folded, ambig_treat);
 
         return new RevVariable( new ModelVector<Natural>(sfs) );
     }
@@ -220,7 +221,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        long n = static_cast<const Natural&>( argument ).getValue();
+        std::int64_t n = static_cast<const Natural&>( argument ).getValue();
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().expandCharacters( n );
 
@@ -233,6 +234,18 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         std::vector<double> ebf = this->dag_node->getValue().getEmpiricalBaseFrequencies();
 
         return new RevVariable( new Simplex(ebf) );
+    }
+    else if (name == "getInvariantSiteIndices")
+    {
+        found = true;
+
+        const RevObject& argument = args[0].getVariable()->getRevObject();
+        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+
+        std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
+        std::vector<std::int64_t> inv_vect(begin(tmp), end(tmp));
+
+        return new RevVariable( new ModelVector<Natural>(inv_vect) );
     }
     else if (name == "getNumInvariantSites")
     {
@@ -425,13 +438,29 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
 
         return new RevVariable( new Natural(num_taxa) );
     }
-    else if (name == "removeRandomSites")
+    else if (name == "removeExcludedCharacters")
+    {
+        found = true;
+        
+        this->dag_node->getValue().removeExcludedCharacters();
+        
+        return NULL;
+    }
+    else if (name == "excludeMissingSites")
+    {
+        found = true;
+        
+        this->dag_node->getValue().excludeMissingSites();
+        
+        return NULL;
+    }
+    else if (name == "replaceRandomSitesByMissingData")
     {
         found = true;
         
         double missing = static_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
 
-        this->dag_node->getValue().removeRandomSites(missing);
+        this->dag_node->getValue().replaceRandomSitesByMissingData(missing);
 
         
         return NULL;
@@ -567,6 +596,13 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 if (max + 1 == n)
                 {
                     v.includeCharacter(i);
+                    for (size_t j = 0; j < nTaxa; j++)
+                    {
+                        RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                        std::string labels = td.getCharacter(i).getStateLabels();
+                        labels = labels.substr(0,n);
+                        td.getCharacter(i).setStateLabels(labels);
+                    }
                 }
                 else
                 {
@@ -774,6 +810,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* getStateDescriptionsArgRules             = new ArgumentRules();
     ArgumentRules* ishomologousArgRules                     = new ArgumentRules();
     ArgumentRules* invSitesArgRules                         = new ArgumentRules();
+    ArgumentRules* invSiteIndicesArgRules                   = new ArgumentRules();
     ArgumentRules* mask_missing_arg_rules                   = new ArgumentRules();
     ArgumentRules* maxGcContentArgRules                     = new ArgumentRules();
     ArgumentRules* maxInvariableBlockLengthArgRules         = new ArgumentRules();
@@ -786,7 +823,9 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     ArgumentRules* minPairwiseDifferenceArgRules            = new ArgumentRules();
     ArgumentRules* numInvariableBlocksArgRules              = new ArgumentRules();
     ArgumentRules* num_taxaMissingSequenceArgRules          = new ArgumentRules();
-    ArgumentRules* remove_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* remove_excluded_characters_arg_rules     = new ArgumentRules();
+    ArgumentRules* replace_random_sites_arg_rules            = new ArgumentRules();
+    ArgumentRules* exclude_missing_sites_arg_rules           = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules                = new ArgumentRules();
     ArgumentRules* setCodonPartitionArgRules2               = new ArgumentRules();
     ArgumentRules* setNumStatesPartitionArgRules            = new ArgumentRules();
@@ -815,6 +854,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
 //    comp_site_freq_spec_arg_rules->push_back(           new ArgumentRule( "ambigAreDerived"  , RlBoolean::getClassTypeSpec()          , "Should we treat ambiguous characters as derived?",    ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     expandCharactersArgRules->push_back(                new ArgumentRule( "factor"           , Natural::getClassTypeSpec()            , "The factor by which the state space is expanded.",    ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     invSitesArgRules->push_back(                        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
+    invSiteIndicesArgRules->push_back(                  new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     mask_missing_arg_rules->push_back(       new ArgumentRule("ref",        AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The reference dataset/alignment which we use for applying the mask of missing sites.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     maxGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     maxInvariableBlockLengthArgRules->push_back(        new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
@@ -828,7 +868,7 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     meanGcContentByCodonPositionArgRules->push_back(    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     numInvariableBlocksArgRules->push_back(             new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     num_taxaMissingSequenceArgRules->push_back(         new ArgumentRule( "x" ,     Probability::getClassTypeSpec()          , "The percentage/threshold for the missing sequence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
-    remove_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    replace_random_sites_arg_rules->push_back(       new ArgumentRule("fraction",        Probability::getClassTypeSpec(), "The fraction of sites to remove.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     translateCharactersArgRules->push_back(             new ArgumentRule( "type" ,     RlString::getClassTypeSpec()          , "The character type into which we want to translate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     varGcContentArgRules->push_back(                    new ArgumentRule( "excludeAmbiguous" , RlBoolean::getClassTypeSpec()          , "Should we exclude ambiguous and missing characters?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false )  ) );
     varGcContentByCodonPositionArgRules->push_back(     new ArgumentRule( "index" , Natural::getClassTypeSpec()          , "The index of the codon position.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
@@ -840,9 +880,11 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "computeSiteFrequencySpectrum",           ModelVector<Natural>::getClassTypeSpec(), comp_site_freq_spec_arg_rules     ) );
     methods.addFunction( new MemberProcedure( "computeStateFrequencies",                MatrixReal::getClassTypeSpec(),     compStateFreqArgRules           ) );
     methods.addFunction( new MemberProcedure( "computeMultinomialProfileLikelihood",    Real::getClassTypeSpec(),           compMultiLikeArgRules           ) );
+    methods.addFunction( new MemberProcedure( "excludeMissingSites",                     RlUtils::Void,                      exclude_missing_sites_arg_rules  ) );
     methods.addFunction( new MemberProcedure( "expandCharacters",                       AbstractHomologousDiscreteCharacterData::getClassTypeSpec(),        expandCharactersArgRules         ) );
     methods.addFunction( new MemberProcedure( "getNumStatesVector"  ,                   ModelVector<AbstractHomologousDiscreteCharacterData>::getClassTypeSpec(), getNumStatesVectorArgRules      ) );
     methods.addFunction( new MemberProcedure( "getEmpiricalBaseFrequencies",            Simplex::getClassTypeSpec(),        empiricalBaseArgRules           ) );
+    methods.addFunction( new MemberProcedure( "getInvariantSiteIndices",                ModelVector<Natural>::getClassTypeSpec(), invSiteIndicesArgRules           ) );
     methods.addFunction( new MemberProcedure( "getNumInvariantSites",                   Natural::getClassTypeSpec(),        invSitesArgRules                ) );
     methods.addFunction( new MemberProcedure( "getPairwiseDifference",                  DistanceMatrix::getClassTypeSpec(), getPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "getStateDescriptions",                   ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules ) );
@@ -856,9 +898,10 @@ void AbstractHomologousDiscreteCharacterData::initMethods( void )
     methods.addFunction( new MemberProcedure( "minPairwiseDifference",                  Natural::getClassTypeSpec(),        minPairwiseDifferenceArgRules       ) );
     methods.addFunction( new MemberProcedure( "meanGcContent",                          Probability::getClassTypeSpec(),    meanGcContentArgRules                ) );
     methods.addFunction( new MemberProcedure( "meanGcContentByCodonPosition",           Probability::getClassTypeSpec(),    meanGcContentByCodonPositionArgRules                ) );
-    methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules         ) );
-    methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules         ) );
-    methods.addFunction( new MemberProcedure( "removeRandomSites",                      RlUtils::Void,                      remove_random_sites_arg_rules   ) );
+    methods.addFunction( new MemberProcedure( "numInvariableBlocks",                    Natural::getClassTypeSpec(),        numInvariableBlocksArgRules     ) );
+    methods.addFunction( new MemberProcedure( "numTaxaMissingSequence",                 Natural::getClassTypeSpec(),        num_taxaMissingSequenceArgRules ) );
+    methods.addFunction( new MemberProcedure( "removeExcludedCharacters",               RlUtils::Void,                    remove_excluded_characters_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "replaceRandomSitesByMissingData",        RlUtils::Void,                      replace_random_sites_arg_rules   ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules       ) );
     methods.addFunction( new MemberProcedure( "setCodonPartition",                      RlUtils::Void,                      setCodonPartitionArgRules2      ) );
     methods.addFunction( new MemberProcedure( "setNumStatesPartition",                  RlUtils::Void,                      setNumStatesPartitionArgRules   ) );

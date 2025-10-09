@@ -3,7 +3,6 @@
 #include "MatrixReal.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -57,25 +56,6 @@ RateMatrix_PoMo4::~RateMatrix_PoMo4(void)
     
 }
 
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_PoMo4& RateMatrix_PoMo4::assign(const Assignable &m)
-{
-    
-    const RateMatrix_PoMo4 *rm = dynamic_cast<const RateMatrix_PoMo4*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
 
 double RateMatrix_PoMo4::averageRate(void) const
 {

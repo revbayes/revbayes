@@ -1,7 +1,7 @@
 #ifndef HSRFIntervalSwapProposal_H
 #define HSRFIntervalSwapProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

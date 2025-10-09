@@ -1,6 +1,6 @@
 #define MAXK 20
 
-#include <float.h>
+#include <cfloat>
 #include <cmath>
 #include <sstream> // IWYU pragma: keep
 

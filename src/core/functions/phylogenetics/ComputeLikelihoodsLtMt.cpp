@@ -78,13 +78,13 @@ std::vector<Event> RevBayesCore::PoolEvents(    const double &start_age,
          2. Set brl = 0
          */
 
-        if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
+        if ( n.isFossil() && n.isSampledAncestorTip() )  //isFossil is optional (all sampled ancestors are fossils)
         {
             // node is sampled ancestor
             events.push_back(Event(n.getAge(), "sampled ancestor")) ;
 
         }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
+        else if ( n.isFossil() && !n.isSampledAncestorTip() )
         {
             // node is fossil leaf
             // @todo add fossil-removed/non-removed (we assume there is no information/labels on removal)
@@ -95,7 +95,7 @@ std::vector<Event> RevBayesCore::PoolEvents(    const double &start_age,
             // node is extant leaf : only their number is necessary to compute Lt and Mt
             nb_extant++;
         }
-        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+        else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
         {
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;
@@ -157,7 +157,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
                                                              const std::vector<double> &omega,
                                                              const TypedDagNode<double> *rho,
                                                              const std::vector<double> &removalPr,
-                                                             const TypedDagNode<long> *maxHiddenLin,
+                                                             const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                              const std::string &cond,
                                                              const std::vector<double> &time_points,
                                                              bool useMt,
@@ -215,7 +215,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
                                                  const std::vector<double> &omega,
                                                  const TypedDagNode<double> *rho,
                                                  const std::vector<double> &removalPr,
-                                                 const TypedDagNode<long> *maxHiddenLin,
+                                                 const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                  const std::string &cond,
                                                  bool useMt,
                                                  bool verbose,
@@ -313,7 +313,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                                                 const std::vector<double> &omega,
                                                 const TypedDagNode<double> *rho,
                                                 const std::vector<double> &removalPr,
-                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                 const std::string& cond,
                                                 const std::vector<double> &time_points,
                                                 bool returnLogLikelihood,
@@ -341,7 +341,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     const std::vector<double> om    = omega;
     const std::vector<double> rp    = removalPr;
     const double rh                 = rho->getValue();
-    const long N                    = maxHiddenLin->getValue();
+    const std::int64_t N                    = maxHiddenLin->getValue();
     const RbVector<double> tau      = time_points;
     const size_t S                  = tau.size();
     const std::vector<double> gamma = birth + death + ps + om;
@@ -567,7 +567,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                                                 const std::vector<double> &omega,
                                                 const TypedDagNode<double> *rho,
                                                 const std::vector<double> &removalPr,
-                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                 const std::string& cond,
                                                 const std::vector<double> &time_points,
                                                 bool verbose,
@@ -594,7 +594,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     const std::vector<double> rp    = removalPr;
     const double rh                 = rho->getValue();
     const RbVector<double> tau      = time_points;
-    const long N                    = maxHiddenLin->getValue();
+    const std::int64_t N                    = maxHiddenLin->getValue();
     const size_t S                  = tau.size();
 
     const std::vector<double> gamma = birth + death + ps + om;
@@ -986,7 +986,7 @@ unsigned RevBayesCore::nChoosek( unsigned n, unsigned k )
 
 unsigned RevBayesCore::factorial( unsigned n )
 {
-    unsigned long long res = 1;
+    std::uint64_t res = 1;
     for(int i = 1; i<=n ; i++){
         res *= i;
     }

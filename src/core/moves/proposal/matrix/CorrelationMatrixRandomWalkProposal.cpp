@@ -1,6 +1,6 @@
 #include "CorrelationMatrixRandomWalkProposal.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 
 #include "DistributionNormal.h"

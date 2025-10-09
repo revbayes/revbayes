@@ -2,7 +2,7 @@
 
 #include "InverseWishartDistribution.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RandomNumberFactory.h"
 #include "DistributionInverseWishart.h"
@@ -19,10 +19,10 @@ using namespace RevBayesCore;
 /**
  * Default Constructor for the Inverse Wishart Distribution
  * @param insigma0 A scale matrix of positive real numbers
- * @param indf a positive long number for the degrees of freedom
+ * @param indf a positive std::int64_t number for the degrees of freedom
  *
  */
-InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf)  :
+InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(insigma0->getValue().getDim())),
 sigma0(insigma0),
 kappaVector(NULL),
@@ -43,14 +43,14 @@ dim( NULL )  {
 /**
  * Constructor for the Inverse Wishart Distribution
  * @param inkappaVector A vector for the diagonal of the scaling matrix
- * @param indf a positive long number for the degrees of freedom
+ * @param indf a positive std::int64_t number for the degrees of freedom
  *
  *@note For this parameterization the scaling matrix is calculated as:
  *@note sigma0 = Diagonal(kappaVector)
  *
  *
  */
-InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf)  :
+InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getValue().size()) ),
     sigma0(NULL),
     kappaVector(inkappaVector),
@@ -72,7 +72,7 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getVa
  * Constructor for the Inverse Wishart Distribution
  * @param inkappa A value for the diagonal of the scaling matrix
  * @param indim The number of dimensions on the scaling matrix
- * @param indf a positive long number for the degrees of freedom
+ * @param indf a positive std::int64_t number for the degrees of freedom
  *
  *
  *@note For this parameterization the scaling matrix is calculated as:
@@ -81,7 +81,7 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getVa
  *
  *
  */
-InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf)  :
+InverseWishartDistribution::InverseWishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( size_t(indim->getValue()) )),
     sigma0(NULL),
     kappaVector(NULL),
@@ -125,12 +125,12 @@ void InverseWishartDistribution::swapParameterInternal(const DagNode *oldP, cons
     
     if (oldP == dim)
     {
-        dim = static_cast<const TypedDagNode<long>* >(newP);
+        dim = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
     
     if (oldP == df)
     {
-        df = static_cast<const TypedDagNode<long>* >(newP);
+        df = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
     
 }

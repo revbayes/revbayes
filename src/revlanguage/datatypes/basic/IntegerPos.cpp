@@ -18,29 +18,28 @@
 using namespace RevLanguage;
 
 /** Default constructor */
-IntegerPos::IntegerPos( void ) : Natural( 0L )
+IntegerPos::IntegerPos( void ) : Natural( 0 )
 {
 
 }
 
 
-IntegerPos::IntegerPos( RevBayesCore::TypedDagNode<long> *v ) : Natural( v )
+IntegerPos::IntegerPos( RevBayesCore::TypedDagNode<std::int64_t> *v ) : Natural( v )
 {
     
 }
 
 
 /** Construct from Natural */
-IntegerPos::IntegerPos( long x ) : Natural( x )
+IntegerPos::IntegerPos( std::int64_t x ) : Natural( x )
 {
 
     if ( x < 1 )
     {
-        throw RbException( "Negative or zero value for " + getClassType() );
+        throw RbException() << "Negative or zero value for " << getClassType() ; 
     }
     
 }
-
 
 /**
  * Generic addition operator.
@@ -117,38 +116,22 @@ IntegerPos* IntegerPos::clone( void ) const
 /** Convert to type. The caller manages the returned object. */
 RevObject* IntegerPos::convertTo( const TypeSpec& type ) const
 {
-
-    if ( type == RlBoolean::getClassTypeSpec() )
-    {
-        return new RlBoolean( dag_node->getValue() == 0 );
-    }
+    if ( type == RlBoolean::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<IntegerPos,RlBoolean>(this);
     
-    if ( type == Real::getClassTypeSpec() )
-    {
-        return new Real( dag_node->getValue() );
-    }
+    if ( type == Real::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<IntegerPos,Real>(this);   
+    if ( type == RealPos::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<IntegerPos,RealPos>(this);
     
-    if ( type == RealPos::getClassTypeSpec() )
-    {
-        return new RealPos( dag_node->getValue() );
-    }
-    
-    if ( type == Probability::getClassTypeSpec() )
-    {
-        return new Probability( dag_node->getValue() );
-    }
+    if ( type == Probability::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<IntegerPos,Probability>(this);
 
     if ( type == RlString::getClassTypeSpec() )
     {
-
         std::ostringstream o;
         printValue( o, true );
         return new RlString( o.str() );
     }
     
     if ( type == DiscreteCharacterState::getClassTypeSpec() )
-    {
-        
+    {        
         std::ostringstream o;
         printValue( o, true );
         return new DiscreteCharacterState( RevBayesCore::StandardState( o.str() ) );
@@ -247,7 +230,7 @@ const TypeSpec& IntegerPos::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double IntegerPos::isConvertibleTo( const TypeSpec& type, bool once ) const
+double IntegerPos::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
 
     if ( type == RlBoolean::getClassTypeSpec() )
@@ -265,7 +248,7 @@ double IntegerPos::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.2;
     }
     
-    if ( once == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 )
+    if ( convert_by_value == true && type == Probability::getClassTypeSpec() && dag_node->getValue() <= 1 )
     {
         return 0.1;
     }
@@ -280,7 +263,7 @@ double IntegerPos::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.7;
     }
     
-    return Integer::isConvertibleTo( type, once );
+    return Integer::isConvertibleTo( type, convert_by_value );
 }
 
 

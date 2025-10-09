@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <string>
 
@@ -41,7 +41,7 @@ SyntaxFormal::SyntaxFormal( const std::string& label, SyntaxElement* defaultVal 
     }
     else
     {
-        RevObject* defaultObj = defaultVal->evaluateContent( Workspace::userWorkspace() )->getRevObject().clone();
+        RevObject* defaultObj = defaultVal->evaluateContent( Workspace::userWorkspacePtr() )->getRevObject().clone();
         argRule = new ArgumentRule( label, typeSpec, "", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, defaultObj );
     }
 }
@@ -78,7 +78,7 @@ SyntaxFormal::SyntaxFormal( const std::string& type, const std::string& label, S
         
     // Check that we have a supported modifier
     if ( modifier != "" && modifier != "const" && modifier != "dynamic" )
-        throw RbException( "Formal type modifier '" + modifier + "' not supported (yet)" );
+        throw RbException() << "Formal type modifier '" << modifier << "' not supported (yet)" ; 
     
     // Find the type specification
     const TypeSpec& typeSpec = Workspace::userWorkspace().getClassTypeSpecOfType( typeName );
@@ -86,7 +86,7 @@ SyntaxFormal::SyntaxFormal( const std::string& type, const std::string& label, S
     // Generate the default object
     RevObject* defaultObj = NULL;
     if ( defaultVal != NULL )
-        defaultObj = defaultVal->evaluateContent( Workspace::userWorkspace() )->getRevObject().clone();
+        defaultObj = defaultVal->evaluateContent( Workspace::userWorkspacePtr() )->getRevObject().clone();
     
     // Now generate argument rule
     if ( modifier == "const" )
@@ -174,7 +174,7 @@ const ArgumentRule* SyntaxFormal::getArgumentRule(void ) const
 
 
 /** Get semantic value (not applicable so return NULL) */
-RevPtr<RevVariable> SyntaxFormal::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxFormal::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     return NULL;
 }

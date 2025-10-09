@@ -5,7 +5,7 @@ Get a global RevBayes option
 ## description
 Get a global option for RevBayes.
 ## details
-Options are used to personalize RevBayes and are stored on the local machine. Currently this is rather experimental.
+Runtime options are used to personalize RevBayes and are stored on the local machine. See `setOption` for the list of available keys and their associated values.
 ## authors
 Sebastian Hoehna
 ## see_also

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -15,7 +15,7 @@ using namespace RevBayesCore;
 
 Proposal::Proposal(double p) :
     nodes(),
-    move( NULL ),
+    move( nullptr ),
     targetAcceptanceRate(p)
 {
     
@@ -24,7 +24,7 @@ Proposal::Proposal(double p) :
 
 Proposal::Proposal(const Proposal &p)  :
     nodes( p.nodes ),
-    move( NULL ),
+    move( nullptr ),
     targetAcceptanceRate( p.targetAcceptanceRate )
 {
     
@@ -102,8 +102,14 @@ void Proposal::addNode( DagNode *n )
     }
     
     // only add the node if it doesn't exist already
-    if ( n != NULL && exists == false )
+    if ( n != nullptr && exists == false )
     {
+        if (n->isClamped() && this->allowClamped() == false)
+        {
+            std::cout << "! In class defined as: " << typeid(*this).name() << std::endl;
+            throw RbException("Cannot add the clamped node '" + n->getName() + "' to proposal" + 
+            (this->getProposalName() == "" ? "." : (" " + this->getLongProposalName())));
+        }
         nodes.push_back( n );
     
         // increment reference count
@@ -111,7 +117,7 @@ void Proposal::addNode( DagNode *n )
     }
     
     // delegate to the move
-    if ( move != NULL )
+    if ( move != nullptr )
     {
         move->addNode( n );
     }
@@ -216,7 +222,16 @@ void Proposal::swapNode(DagNode *oldP, DagNode *newP)
     }
     else
     {
-        throw RbException("Could not find the Proposal parameter to be swapped: " + oldP->getName());
+        throw RbException() << "Could not find the Proposal parameter to be swapped: " << oldP->getName();
     }
     
+}
+
+std::string Proposal::getLongProposalName() const
+{
+    std::vector<std::string> node_names;
+    for(auto node: nodes)
+	node_names.push_back(node->getName());
+
+    return getProposalName() + "(" + StringUtilities::join(node_names,",") +")";
 }

@@ -1,5 +1,5 @@
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -24,21 +24,32 @@
 #include "RevVariable.h"
 #include "RlBoolean.h"
 #include "RlUtils.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "Workspace.h"
 #include "WorkspaceToCoreWrapperObject.h"
 
 using namespace RevLanguage;
 
+using std::vector;
+using std::set;
+using std::string;
+
 Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
 {
  
-    ArgumentRules* dotArgRules = new ArgumentRules();
+    auto* dotArgRules = new ArgumentRules();
     dotArgRules->push_back( new ArgumentRule("file", RlString::getClassTypeSpec(), "The name of the file where to save the model graph.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     dotArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Verbose output?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     dotArgRules->push_back( new ArgumentRule("bg", RlString::getClassTypeSpec(), "The background color.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("lavenderblush2") ) );
     methods.addFunction( new MemberProcedure("graph", RlUtils::Void, dotArgRules) );
 
+    auto* ignoreDataRules = new ArgumentRules();
+    ignoreDataRules->push_back( new Ellipsis( "Clamped variables to ignore.", RevObject::getClassTypeSpec() ) );
+    methods.addFunction( new MemberProcedure("ignoreData", RlUtils::Void, ignoreDataRules) );
+
+    auto ignoreAllDataRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure("ignoreAllData", RlUtils::Void, ignoreAllDataRules) );
 }
 
 
@@ -74,6 +85,22 @@ void Model::constructInternalObject( void )
 //    printModelDotGraph();
 }
 
+vector<RevPtr<const RevVariable>> getElementVariables(RevPtr<const RevVariable> var)
+{
+    if (not var->isVectorVariable())
+        return {var};
+
+    vector<RevPtr<const RevVariable>> elems;
+    for(int i=0;i<var->getMaxElementIndex();i++)
+    {
+        auto elem = var->getElementVariable(i);
+        auto sub_elems = getElementVariables(elem);
+        elems.insert(elems.end(), sub_elems.begin(), sub_elems.end());
+    }
+
+    return elems;
+}
+
 /* Map calls to member methods */
 RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
@@ -87,7 +114,30 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
         const std::string&   bg      = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
         printModelDotGraph(fn, vb, bg);
         
-        return NULL;
+        return nullptr;
+    }
+    else if (name == "ignoreData")
+    {
+        found = true;
+
+        set<string> names;
+        for(auto& arg: args)
+        {
+            for(auto& var: getElementVariables( arg.getVariable() ) )
+                names.insert( var->getName() );
+        }
+
+        ignoreDataAtNodes( names );
+
+        return nullptr;
+    }
+    else if (name == "ignoreAllData")
+    {
+        found = true;
+
+        ignoreAllData();
+
+        return nullptr;
     }
     
     return RevObject::executeMethod( name, args, found );
@@ -338,7 +388,11 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                 o << "   n_" << stname;
                 o << " [shape=";
                 o << "oval, ";
-                if ((*it)->isClamped()){
+                if ((*it)->isIgnoredData()){
+                    o << "style=filled, fillcolor=white, color=gray, fontcolor=gray,";
+                    nrank += "; n_" + stname;
+                }
+                else if ((*it)->isClamped()){
                     o << "style=filled, fillcolor=gray, ";
                     nrank += "; n_" + stname;
                 }
@@ -437,6 +491,32 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     o << "   graph [bgcolor=" << bgc << ", pad=0.25]\n";
     o << "}";
     o.close();
-    
-    
+}
+
+void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
+{
+    auto& graphNodes = value->getDagNodes();
+
+    std::map<string,RevBayesCore::DagNode*> nodeForName;
+    for(auto& node: graphNodes)
+        nodeForName.insert({node->getName(), node});
+
+    for(auto& name: namesToIgnore)
+    {
+        if (not nodeForName.count(name))
+            RBOUT("Warning: can't ignore data at node '" + name + "' because it is not in the model.");
+        else
+            nodeForName.at(name)->setIgnoreData(true);
+    }
+}
+
+void Model::ignoreAllData()
+{
+    auto& graphNodes = value->getDagNodes();
+
+    for(auto& node: graphNodes)
+    {
+        if (node->isClamped())
+            node->setIgnoreData(true);
+    }
 }

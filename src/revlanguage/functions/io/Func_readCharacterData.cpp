@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <sstream>
 #include <string>
@@ -194,7 +194,7 @@ RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
                     else
                         {
                         numMatricesReadForThisFile--;
-                        throw RbException("Unknown data type \"" + dType + "\".");
+                        throw RbException() << "Unknown data type \"" << dType << "\".";
                         }
                     }
                 else
@@ -228,7 +228,7 @@ RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
                     else
                         {
                         numMatricesReadForThisFile--;
-                        throw RbException("Unknown data type \"" + dType + "\".");
+                        throw RbException() << "Unknown data type \"" << dType << "\".";
                         }
                     }
                 }
@@ -350,11 +350,11 @@ const ArgumentRules& Func_readCharacterData::getArgumentRules( void ) const {
     static ArgumentRules argumentRules = ArgumentRules();
     static bool rules_set = false;
     if (!rules_set)
-        {
+    {
         argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "File or directory names where to find the character data.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "alwaysReturnAsVector", RlBoolean::getClassTypeSpec(), "Should the value be returned as a vector even it is only a single matrix?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         rules_set = true;
-        }
+    }
     return argumentRules;
 }
 

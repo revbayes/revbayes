@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <ostream>
 #include <string>
@@ -220,7 +220,7 @@ void Function::swapParameter(const DagNode *oldP, const DagNode *newP)
     else
     {
         
-        throw RbException("Could not find the function parameter to be swapped: " + oldP->getName());
+        throw RbException() << "Could not find the function parameter to be swapped: " << oldP->getName();
     
     }
     

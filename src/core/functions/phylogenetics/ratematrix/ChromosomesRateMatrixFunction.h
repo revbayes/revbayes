@@ -26,7 +26,7 @@ template <class valueType> class TypedDagNode;
     class ChromosomesRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        ChromosomesRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *g, const TypedDagNode<double> *d, const TypedDagNode<double> *r, const TypedDagNode<double> *e, const TypedDagNode<double> *g_l, const TypedDagNode<double> *d_l);
+        ChromosomesRateMatrixFunction(const TypedDagNode<std::int64_t> *n, const TypedDagNode<double> *g, const TypedDagNode<double> *d, const TypedDagNode<double> *r, const TypedDagNode<double> *e, const TypedDagNode<double> *g_l, const TypedDagNode<double> *d_l);
         
         virtual                                     ~ChromosomesRateMatrixFunction(void);                                                    //!< Virtual destructor
         
@@ -41,7 +41,7 @@ template <class valueType> class TypedDagNode;
         
         // members
 
-        const TypedDagNode<long>*                    n;
+        const TypedDagNode<std::int64_t>*                    n;
         const TypedDagNode<double>*                 gamma;
         const TypedDagNode<double>*                 delta;
         const TypedDagNode<double>*                 rho;

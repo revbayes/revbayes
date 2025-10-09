@@ -1,7 +1,7 @@
 #ifndef ConstantRateOutgroupBirthDeathProcess_h
 #define ConstantRateOutgroupBirthDeathProcess_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

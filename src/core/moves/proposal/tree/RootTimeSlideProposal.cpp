@@ -89,6 +89,8 @@ double RootTimeSlideProposal::doProposal( void )
     
     // get the root node
     TopologyNode* node = &tau.getRoot();
+    // cannot move the root if it's a SA
+    if(node->isSampledAncestorParent()) return RbConstants::Double::neginf;
     
     // we need to work with the times
     double my_age      = node->getAge();

@@ -1,5 +1,5 @@
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <ostream>
 #include <string>

@@ -1,7 +1,7 @@
 #ifndef BiogeographyRateGeneratorSequenceFunction_H
 #define BiogeographyRateGeneratorSequenceFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedFunction.h"
 #include "RateGeneratorSequence.h"

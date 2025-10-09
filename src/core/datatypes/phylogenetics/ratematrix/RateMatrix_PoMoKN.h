@@ -21,7 +21,7 @@
 #ifndef RateMatrix_PoMoKN_H
 #define RateMatrix_PoMoKN_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "AbstractRateMatrix.h"
@@ -41,22 +41,21 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
 
         //RateMatrix_PoMoKN(size_t num_states) ;
-        RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr)  ;
+        RateMatrix_PoMoKN(std::int64_t num_states, std::int64_t in_k, std::int64_t in_n, std::int64_t in_nmr)  ;
         RateMatrix_PoMoKN(const RateMatrix_PoMoKN& m) ;
 
         RateMatrix_PoMoKN&                         operator=(const RateMatrix_PoMoKN &r) ;
         virtual                                    ~RateMatrix_PoMoKN(void);                     //!< Destructor
 
         // RateMatrix functions
-        virtual RateMatrix_PoMoKN&                  assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         double                                      averageRate(void) const;
         void                                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_PoMoKN*                          clone(void) const;
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setK( long &na );
-        void                                        setN( long &ni );
+        void                                        setK( std::int64_t &na );
+        void                                        setN( std::int64_t &ni );
         void                                        setMu(  const std::vector<double> &m );
         void                                        setPhi( const std::vector<double> &f );
 
@@ -65,8 +64,8 @@ namespace RevBayesCore {
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
         
-        long                                        K;
-        long                                        N;
+        std::int64_t                                        K;
+        std::int64_t                                        N;
         std::vector<double>                         mu;   
         std::vector<double>                         phi;    
         std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies

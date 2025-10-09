@@ -18,7 +18,7 @@
 #ifndef NodeAgeByID_H
 #define NodeAgeByID_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedFunction.h"
 

@@ -8,7 +8,7 @@
 
 #include "Func_stateCountRateModifier.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "StateCountRateModifierFunction.h"
 #include "CharacterHistoryRateModifier.h"

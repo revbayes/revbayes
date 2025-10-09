@@ -1,0 +1,20 @@
+#NEXUS
+BEGIN DATA;
+  DIMENSIONS NTAX=12 NCHAR=6;
+  FORMAT DATATYPE=STANDARD MISSING=? GAP=- INTERLEAVE=NO symbols="0123456789";
+  MATRIX
+    Asterias_asteriformis             100010
+    Anemonia_sulcata_acanthoneme      ?11110
+    Aiptasia_sp.                      000001
+    Cereus_pedunculatus               001101
+    Diadumene_leucolena               101101
+    Haliplanella_lineata_pB2d         000001
+    Urticina_felina                   001101
+    Metridium_senile_pB1              011101
+    Palythoa_sp                       1102-?
+    Rhodactis_sp.                     1102-0
+    Stomphia_sp.                      010010
+    Actinostola_sp.                   000001
+  ;
+END;
+

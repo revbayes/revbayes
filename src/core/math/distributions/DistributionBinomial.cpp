@@ -118,25 +118,33 @@ double RbStatistics::Binomial::pdf(double n, double p, double q, double x, bool 
 
     double lf, lc;
     
-    if (p == 0) 
+    if (p == 0)
+    {
         return((x == 0) ? (asLog ? 0.0 : 1.0) : (asLog ? RbConstants::Double::neginf : 0.0) );
-    if (q == 0) 
+    }
+    if (q == 0)
+    {
         return((x == n) ? (asLog ? 0.0 : 1.0) : (asLog ? RbConstants::Double::neginf : 0.0) );
+    }
     
     if (x == 0) 
+    {
+        if (n == 0)
         {
-        if (n == 0) 
             return ( asLog ? 0.0 : 1.0);
+        }
         lc = (p < 0.1) ? -RbMath::binomialDeviance(n,n*q) - n*p : n*log(q);
         return( (asLog ? lc : exp(lc)) );
-        }
+    }
     if (x == n) 
-        {
+    {
         lc = (q < 0.1) ? -RbMath::binomialDeviance(n,n*p) - n*q : n*log(p);
         return ( (asLog ? lc : exp(lc) ) );
-        }
-    if (x < 0 || x > n) 
+    }
+    if (x < 0 || x > n)
+    {
         return ( asLog ? RbConstants::Double::neginf : 0.0 );
+    }
     
     /* n*p or n*q can underflow to zero if n and p or q are small.  This
      used to occur in dbeta, and gives NaN as from R 2.3.0.  */
@@ -282,9 +290,9 @@ double RbStatistics::Binomial::quantile(double quantile_prob, double n, double p
  * \throws Does not throw an error.
  */
 
-#include <stdlib.h>
-#include <limits.h>
-#include <float.h>
+#include <cstdlib>
+#include <climits>
+#include <cfloat>
 
 #include "RandomNumberGenerator.h"
 

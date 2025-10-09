@@ -9,7 +9,7 @@
 //#include "BiogeographyRateGeneratorSequenceFunction.h"
 #include "Func_generalRateGeneratorSequence.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "GeneralRateGeneratorSequenceFunction.h"
 #include "ModelVector.h"
@@ -57,7 +57,7 @@ RevBayesCore::TypedFunction<RevBayesCore::RateGeneratorSequence>* Func_generalRa
     
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     size_t ns = rm->getValue().getNumberOfStates();
-    unsigned long nc = static_cast<const Natural&>( this->args[1].getVariable()->getRevObject() ).getValue();
+    std::uint64_t nc = static_cast<const Natural&>( this->args[1].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::CharacterHistoryRateModifier> >* rm_vec = NULL;
     if ( this->args[2].getVariable()->getRevObject().isType( ModelVector<CharacterHistoryRateModifier>::getClassTypeSpec() ) )

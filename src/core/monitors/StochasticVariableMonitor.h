@@ -29,7 +29,7 @@ class Model;
         
     public:
         // Constructors and Destructors
-        StochasticVariableMonitor(unsigned long g, const path &fname, const std::string &del);           //!< Constructor
+        StochasticVariableMonitor(std::uint64_t g, const path &fname, const std::string &del);           //!< Constructor
         virtual ~StochasticVariableMonitor(void);
         
         

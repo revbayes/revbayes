@@ -64,7 +64,7 @@ double RbStatistics::ChiSquare::pdf(double df, double x)
  * \return Returns the natural log of the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::ChiSquare::lnPdf(long df, double x)
+double RbStatistics::ChiSquare::lnPdf(std::int64_t df, double x)
 {
     
     double b = df / 2.0;
@@ -186,7 +186,7 @@ double RbStatistics::ChiSquare::quantile(double prob, double df)
 		return (ch);
 }
 
-double RbStatistics::ChiSquare::rv(long df, RandomNumberGenerator& rng)
+double RbStatistics::ChiSquare::rv(std::int64_t df, RandomNumberGenerator& rng)
 {
         
     double x2;
@@ -197,7 +197,7 @@ double RbStatistics::ChiSquare::rv(long df, RandomNumberGenerator& rng)
          standard normal random variables, squaring each, and taking the
          sum of the squared random variables. */
         x2 = 0.0;
-        for (long i=0; i<df; i++)
+        for (std::int64_t i=0; i<df; i++)
         {
             double x = RbStatistics::Normal::rv(0.0, 1.0, rng);
             x2 += x * x;

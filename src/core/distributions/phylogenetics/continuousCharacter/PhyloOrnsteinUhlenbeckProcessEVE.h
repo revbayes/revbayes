@@ -1,7 +1,7 @@
 #ifndef PhyloOrnsteinUhlenbeckProcessEVE_H
 #define PhyloOrnsteinUhlenbeckProcessEVE_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <set>
 

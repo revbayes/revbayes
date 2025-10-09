@@ -1,6 +1,6 @@
 #include "RateMatrix_Blosum62.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbVectorUtilities.h"

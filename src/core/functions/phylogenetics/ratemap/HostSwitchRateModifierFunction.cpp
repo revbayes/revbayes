@@ -13,7 +13,6 @@
 #include "HostSwitchRateModifier.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
-#include "Assignable.h"
 #include "Tree.h"
 
 namespace RevBayesCore { class DagNode; }

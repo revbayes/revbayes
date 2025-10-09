@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 
@@ -51,8 +51,8 @@ void Move_DPPGibbsConcentration::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( cp->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< double > *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
-    RevBayesCore::TypedDagNode<long>* tmpNC = static_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
-    RevBayesCore::DeterministicNode<long> *nc = static_cast<RevBayesCore::DeterministicNode<long> *>( tmpNC );
+    RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = static_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
+    RevBayesCore::DeterministicNode<std::int64_t> *nc = static_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
     RevBayesCore::TypedDagNode<double>* gS = static_cast<const RealPos &>( gammaShape->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* gR = static_cast<const RealPos &>( gammaRate->getRevObject() ).getDagNode();
 

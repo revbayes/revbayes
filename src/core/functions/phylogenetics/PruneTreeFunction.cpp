@@ -1,6 +1,6 @@
 #include "PruneTreeFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 
 #include "RbBoolean.h"

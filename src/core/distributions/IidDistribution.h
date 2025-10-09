@@ -26,7 +26,7 @@ namespace RevBayesCore {
         
     public:
         // constructor(s)
-        IidDistribution(long n, TypedDistribution<valueType> *vp);
+        IidDistribution(std::int64_t n, TypedDistribution<valueType> *vp);
         IidDistribution(const IidDistribution<valueType> &d);
 
         // public member functions
@@ -45,22 +45,20 @@ namespace RevBayesCore {
         void                                                simulate();
         
         // private members
-        long                                                n_samples;
+        std::int64_t                                                n_samples;
         TypedDistribution<valueType>*                       value_prior;
         
     };
     
 }
 
-#include "Assign.h"
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
 #include <cmath>
 
 template <class valueType>
-RevBayesCore::IidDistribution<valueType>::IidDistribution(long n, TypedDistribution<valueType> *vp) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
+RevBayesCore::IidDistribution<valueType>::IidDistribution(std::int64_t n, TypedDistribution<valueType> *vp) : TypedDistribution< RbVector<valueType> >( new RbVector<valueType>() ),
     n_samples( n ),
     value_prior( vp )
 {

@@ -1,7 +1,7 @@
 #ifndef TaxonMap_H
 #define TaxonMap_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <map>
 #include <iosfwd>

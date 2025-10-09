@@ -1,6 +1,6 @@
 #include "WishartDistribution.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 
 #include "RandomNumberFactory.h"
@@ -15,10 +15,10 @@ using namespace RevBayesCore;
 /**
  * Default Constructor for the Wishart Distribution
  * @param inomega0 A scale matrix of positive real numbers
- * @param indf a positive long number for the degrees of freedom
+ * @param indf a positive std::int64_t number for the degrees of freedom
  *
  */
-WishartDistribution::WishartDistribution(const TypedDagNode<MatrixReal> *inomega0, const TypedDagNode<long>* indf)  :
+WishartDistribution::WishartDistribution(const TypedDagNode<MatrixReal> *inomega0, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(inomega0->getValue().getDim())),
     omega0(inomega0),
     kappa(NULL),
@@ -39,10 +39,10 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(inomega0->getValue().
  * Constructor for the Wishart Distribution
  * @param inkappa a value for all diagonal elements of the scaling matrix
  * @param indim the number of dimensions for the scaling matrix
- * @param indf a positive long number for the degrees of freedom
+ * @param indf a positive std::int64_t number for the degrees of freedom
  *
  */
-WishartDistribution::WishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf)  :
+WishartDistribution::WishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( size_t(indim->getValue()) )),
     omega0(NULL),
     kappa(inkappa),
@@ -82,11 +82,11 @@ void WishartDistribution::swapParameterInternal(const DagNode *oldP, const DagNo
     }
     if (oldP == dim)
     {
-        dim = static_cast<const TypedDagNode<long>* >(newP);
+        dim = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
     if (oldP == df)
     {
-        df = static_cast<const TypedDagNode<long>* >(newP);
+        df = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
 }
 

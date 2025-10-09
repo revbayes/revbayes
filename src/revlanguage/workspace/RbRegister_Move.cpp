@@ -25,7 +25,7 @@
 
 #include <sstream>
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 /* Files including helper classes */
@@ -98,6 +98,7 @@
 /* Moves on integer values */
 #include "Move_RandomGeometricWalk.h"
 #include "Move_RandomIntegerWalk.h"
+#include "Move_RandomNaturalWalk.h"
 #include "Move_BinarySwitch.h"
 
 
@@ -121,6 +122,7 @@
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
 #include "Move_VectorSingleElementSlide.h"
+#include "Move_VectorElementSwap.h"
 #include "Move_VectorFixedSingleElementSlide.h"
 #include "Move_VectorScale.h"
 #include "Move_VectorSlide.h"
@@ -209,7 +211,8 @@
 #include "Move_IndependentTopology.h"
 #include "Move_EmpiricalTree.h"
 #include "Move_FNPR.h"
-#include "Move_TipTimeSlideUniform.h"
+#include "Move_FossilTipTimeUniform.h"
+#include "Move_FossilTipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
@@ -240,6 +243,8 @@
 
 
 #include "Move_NarrowExchangeRateMatrix.h"
+
+#include "Move_IndependentPriorSampler.h"
 
 /** Initialize global workspace */
 void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
@@ -276,12 +281,13 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_UpDownSlide() );
         addType( new Move_UpDownSlideBactrian() );
 
-		// compound moves on real values
+        // compound moves on real values
         addType( new Move_LevyJumpSum() );
         addType( new Move_LevyJump() );
 
         /* Moves on integer values */
         addType( new Move_RandomIntegerWalk() );
+        addType( new Move_RandomNaturalWalk() );
         addType( new Move_RandomGeometricWalk() );
         addType( new Move_BinarySwitch() );
 
@@ -307,6 +313,16 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_ElementSlide() );
         addType( new Move_VectorSingleElementScale() );
         addType( new Move_VectorSingleElementSlide() );
+        addType( new Move_VectorElementSwap<Real>( ) );
+        addType( new Move_VectorElementSwap<RealPos>( ) );
+        addType( new Move_VectorElementSwap<Natural>( ) );
+        addType( new Move_VectorElementSwap<Integer>( ) );
+        addType( new Move_VectorElementSwap<Probability>( ) );
+        addType( new Move_VectorElementSwap<Simplex>( ) );
+        addType( new Move_VectorElementSwap<ModelVector<RealPos> >( ) );
+        addType( new Move_VectorElementSwap<ModelVector<Real> >( ) );
+        addType( new Move_VectorElementSwap<RateGenerator>( ) );
+        addType( new Move_VectorElementSwap<Tree>( ) );
         addType( new Move_VectorFixedSingleElementSlide() );
         addType( new Move_EllipticalSliceSamplingSimple() );
 
@@ -345,9 +361,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HomeologPhase() );
 
         /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
-        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );
-        addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );
-        addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) );
+        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );        // mvDPPValueSliding
+        addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );        // mvDPPValueScaling
+        addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) ); // mvDPPValueBetaSimplex
 
 //        addType("mvDPPScaleCatVals",                new Move_DPPScaleCatValsMove() );
 //        addType("mvDPPScaleCatAllocateAux",         new Move_DPPScaleCatAllocateAux() );
@@ -418,8 +434,10 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );
         addType( new Move_IndependentTopology()              );
-		addType( new Move_EmpiricalTree()                    );
+        addType( new Move_EmpiricalTree()                    );
         addType( new Move_FNPR()                             );
+        addType( new Move_FossilTipTimeUniform()             );
+        addType( new Move_FossilTipTimeSlideUniform()        );
         addType( new Move_GibbsPruneAndRegraft()             );
         addType( new Move_LayeredScaleProposal()             );
         addType( new Move_NarrowExchange()                   );
@@ -444,7 +462,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesNodeTimeSlideUniform()      );
         addType( new Move_SpeciesSubtreeScale()              );
         addType( new Move_SpeciesSubtreeScaleBeta()          );
-        addType( new Move_TipTimeSlideUniform()              );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
         addType( new Move_NarrowExchangeRateMatrix()         );
@@ -453,6 +470,19 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_CharacterHistory() );
         // addType( new Move_NodeCharacterHistoryRejectionSample() );
         // addType( new Move_PathCharacterHistoryRejectionSample() );
+
+        
+        addType( new Move_IndependentPriorSampler<Real>( ) );
+        addType( new Move_IndependentPriorSampler<RealPos>( ) );
+        addType( new Move_IndependentPriorSampler<Natural>( ) );
+        addType( new Move_IndependentPriorSampler<Integer>( ) );
+        addType( new Move_IndependentPriorSampler<Probability>( ) );
+        addType( new Move_IndependentPriorSampler<Simplex>( ) );
+        addType( new Move_IndependentPriorSampler<ModelVector<RealPos> >( ) );
+        addType( new Move_IndependentPriorSampler<ModelVector<Real> >( ) );
+        addType( new Move_IndependentPriorSampler<ModelVector<Natural> >( ) );
+//        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
+        addType( new Move_IndependentPriorSampler<Tree>( ) );
 
         addType( new Move_ResampleFBD()                      );
     }

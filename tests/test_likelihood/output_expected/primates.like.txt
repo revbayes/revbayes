@@ -1,0 +1,3 @@
+likelihood for JC+Gamma+INV (SiteMixtureModel) =	-22563.026146951	
+likelihood for JC+INV+Gamma (SiteMixtureModel) =	-22563.026146951	
+likelihood for JC+Gamma+INV (phyloCTMC args)   =	-22563.026146951	

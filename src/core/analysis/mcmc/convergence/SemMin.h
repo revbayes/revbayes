@@ -8,7 +8,7 @@
 #ifndef SemMin_H
 #define SemMin_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "BurninEstimatorContinuous.h"
 

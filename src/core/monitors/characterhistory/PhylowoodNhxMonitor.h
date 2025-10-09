@@ -1,7 +1,7 @@
 #ifndef PhylowoodNhxMonitor_H
 #define PhylowoodNhxMonitor_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <fstream>
 #include <vector>
 #include <set>
@@ -21,7 +21,7 @@ template <class variableType> class StochasticNode;
         
     public:
         // Constructors and Destructors
-        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        PhylowoodNhxMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::vector<std::vector<double> > gc, std::uint64_t g, std::uint64_t mg, int burn, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         // new PhylowoodNhxMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
         
@@ -31,7 +31,7 @@ template <class variableType> class StochasticNode;
         PhylowoodNhxMonitor*          clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                monitor(unsigned long gen);                                                  //!< Monitor at generation gen
+        void                                monitor(std::uint64_t gen);                                                  //!< Monitor at generation gen
         void                                swapNode(DagNode *oldN, DagNode *newN);
         
         // FileMonitor functions
@@ -40,7 +40,7 @@ template <class variableType> class StochasticNode;
         void                                printHeader(void);                                                  //!< Print header
         std::vector<unsigned int>           getChildCharacterCounts(size_t idx);
         std::vector<unsigned int>           getParentCharacterCounts(size_t idx);
-        long                                getNumSamples(void);
+        std::int64_t                                getNumSamples(void);
         
     private:
         std::string                         buildExtendedNewick();
@@ -72,9 +72,9 @@ template <class variableType> class StochasticNode;
         bool                                append;
         bool                                showMetadata;
         bool                                showRates;
-        long                                numSamples;
-        unsigned long                       maxGen;
-        long                                burn;
+        std::int64_t                                numSamples;
+        std::uint64_t                       maxGen;
+        std::int64_t                                burn;
         
     };
     

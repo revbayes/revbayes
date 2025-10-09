@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 
@@ -78,7 +78,7 @@ void Move_FNPR::constructInternalObject( void )
     }
     else
     {
-        throw RbException("Wrong tree type '" + tree->getRevObject().getType() + "'.");
+        throw RbException() << "Wrong tree type '" << tree->getRevObject().getType() << "'.";
     }
     
     RevBayesCore::Proposal *p = new RevBayesCore::FixedNodeheightPruneAndRegraftProposal(t, vec_t);

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <set>
 
@@ -60,7 +60,7 @@ SyntaxLabeledExpr* SyntaxLabeledExpr::clone( void ) const
 
 
 /** Get semantic value (not applicable so return NULL) */
-RevPtr<RevVariable> SyntaxLabeledExpr::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxLabeledExpr::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     return NULL;
 }

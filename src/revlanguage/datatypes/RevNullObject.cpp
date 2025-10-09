@@ -1,6 +1,6 @@
 #include "RevNullObject.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypeSpec.h"
 #include "RevVariable.h"

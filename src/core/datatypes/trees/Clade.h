@@ -1,7 +1,7 @@
 #ifndef Clade_H
 #define Clade_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <set>
 #include <vector>

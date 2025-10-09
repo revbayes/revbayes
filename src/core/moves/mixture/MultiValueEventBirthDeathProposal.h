@@ -1,15 +1,17 @@
 #ifndef MultiValueEventBirthDeathProposal_H
 #define MultiValueEventBirthDeathProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 
 #include "Proposal.h"
 
 namespace RevBayesCore {
+class AutocorrelatedEventDistribution;
 class DagNode;
 class MultiValueEvent;
+class MultiValueEventDistribution;
 template <class variableType> class StochasticNode;
     
     /**
@@ -28,7 +30,7 @@ template <class variableType> class StochasticNode;
     class MultiValueEventBirthDeathProposal : public Proposal {
         
     public:
-        MultiValueEventBirthDeathProposal( StochasticNode<MultiValueEvent> *n);                                                       //!<  constructor
+        MultiValueEventBirthDeathProposal( StochasticNode<MultiValueEvent> *n, bool use_ac);                                                       //!<  constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                        //!< Clean up proposal
@@ -48,20 +50,23 @@ template <class variableType> class StochasticNode;
         
     private:
         
+        double                                  doUncorrelatedProposal(const MultiValueEventDistribution* d);   //!< Perform proposal
+        double                                  doAutocorrelatedProposal(const AutocorrelatedEventDistribution* d);
+        
         // parameters
         StochasticNode<MultiValueEvent>*        event_var;                                                   //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
-//        TopologyNode*                           stored_node;
-//        double                                  stored_age;
 //        bool                                    failed;
+        bool                                    use_autocorrelated_proposal;
+        std::vector<double>                     ac_proposal_sd;
         bool                                    was_birth;
         std::vector<double>                     stored_values;
         size_t                                  stored_index;
+        int                                     stored_sorting_index;
 
     };
     
 }
 
 #endif
-

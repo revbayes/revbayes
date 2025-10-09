@@ -1,6 +1,6 @@
 #include "PhyloWhiteNoiseProcess.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 
 #include "DistributionGamma.h"

@@ -1,7 +1,7 @@
 #ifndef LKJDistribution_H
 #define LKJDistribution_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "TypedDistribution.h"
 #include "MatrixReal.h"

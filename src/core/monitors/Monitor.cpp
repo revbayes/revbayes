@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <map>
 #include <ostream>
@@ -18,13 +18,13 @@ namespace RevBayesCore { class Model; }
 using namespace RevBayesCore;
 
 
-Monitor::Monitor(unsigned long g) :
+Monitor::Monitor(std::uint64_t g) :
     enabled( true ),
     printgen( g ),
     model( nullptr )
 {}
 
-Monitor::Monitor(unsigned long g, DagNode *n) :
+Monitor::Monitor(std::uint64_t g, DagNode *n) :
     enabled( true ),
     printgen( g ),
     model( nullptr )
@@ -40,7 +40,7 @@ Monitor::Monitor(unsigned long g, DagNode *n) :
 }
 
 
-Monitor::Monitor(unsigned long g, const std::vector<DagNode *> &n) :
+Monitor::Monitor(std::uint64_t g, const std::vector<DagNode *> &n) :
     enabled( true ),
     printgen( g ),
     nodes( n ),
@@ -402,7 +402,7 @@ void Monitor::swapNode(DagNode *oldN, DagNode *newN)
 
     if (it == nodes.end())
     {
-        throw RbException("Cannot replace DAG node with name\"" + oldN->getName() + "\" in this monitor because the monitor doesn't hold this DAG node.");
+        throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this monitor because the monitor doesn't hold this DAG node.";
     }
     
     // remove myself from the old node and add myself to the new node

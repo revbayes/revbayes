@@ -1,6 +1,6 @@
 #include "DiscretizeGammaQuadratureFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <map>
 #include <utility>
@@ -15,7 +15,7 @@ namespace RevBayesCore { class DagNode; }
 
 
 
-RevBayesCore::DiscretizeGammaQuadratureFunction::DiscretizeGammaQuadratureFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<long> *nc) : TypedFunction< MatrixReal >( new MatrixReal(2, nc->getValue(), 1.0) ),
+RevBayesCore::DiscretizeGammaQuadratureFunction::DiscretizeGammaQuadratureFunction(const TypedDagNode<double> *s, const TypedDagNode<double> *r, const TypedDagNode<std::int64_t> *nc) : TypedFunction< MatrixReal >( new MatrixReal(2, nc->getValue(), 1.0) ),
     shape( s ),
     rate( r ),
     numCats(nc)
@@ -50,7 +50,7 @@ void RevBayesCore::DiscretizeGammaQuadratureFunction::swapParameterInternal(cons
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }
