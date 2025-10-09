@@ -123,7 +123,6 @@ namespace RevBayesCore {
 
     protected:
 
-        SplitWithMRCAs                                 collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<SplitWithMRCAs, std::int64_t>&);
         void                                           enforceNonnegativeBranchLengths(TopologyNode& tree) const;
         TopologyNode*                                  findParentNode(TopologyNode&, const SplitWithMRCAs &, std::vector<TopologyNode*>&, RbBitSet& ) const;
         void                                           mapContinuous(Tree &inputTree, const std::string &n, size_t paramIndex, double hpd, bool np, bool verbose ) const;
@@ -131,7 +130,9 @@ namespace RevBayesCore {
         void                                           mapParameters(Tree &inputTree, bool verbose) const;
         std::int64_t                                   splitCount(const SplitWithMRCAs &n) const;
         double                                         splitFrequency(const SplitWithMRCAs &n) const;
+
         void                                           summarize_with_mrcas(bool verbose);
+        SplitWithMRCAs                                 collectTreeSampleWithMRCAs(const TopologyNode&, RbBitSet&, std::string, std::map<SplitWithMRCAs, std::int64_t>&);
 
         std::vector<TraceTree* >                       traces;
 
