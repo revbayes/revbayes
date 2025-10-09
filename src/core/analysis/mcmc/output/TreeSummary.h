@@ -131,7 +131,7 @@ namespace RevBayesCore {
         void                                           mapParameters(Tree &inputTree, bool verbose) const;
         std::int64_t                                   splitCount(const SplitWithMRCAs &n) const;
         double                                         splitFrequency(const SplitWithMRCAs &n) const;
-        void                                           summarize(bool verbose);
+        void                                           summarize_with_mrcas(bool verbose);
 
         std::vector<TraceTree* >                       traces;
 

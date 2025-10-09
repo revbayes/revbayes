@@ -94,7 +94,7 @@ TreeSummary* TreeSummary::clone(void) const
 
 void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose )
 {
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     RBOUT("Annotating tree ...");
 
@@ -314,7 +314,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
 double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 {
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
@@ -446,7 +446,7 @@ std::vector<double> TreeSummary::computeTreeLengths( void )
  */
 std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees( double credible_interval_size, bool stochastic, bool verbose )
 {
-    summarize( false );
+    summarize_with_mrcas( false );
 
     std::vector< std::pair<Tree, std::int64_t> > unique_trees;
     NewickConverter converter;
@@ -499,7 +499,7 @@ std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees(
 
 std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool verbose)
 {
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     Tree t = tree;
 
@@ -536,7 +536,7 @@ double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool ve
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, bool non_trivial_only, bool verbose )
 {
-    summarize( false );
+    summarize_with_mrcas( false );
 
     std::vector<Clade> unique_clades;
     double total_samples = sampleSize(true);
@@ -632,7 +632,7 @@ bool TreeSummary::isCoveredInInterval(const std::string &v, double credible_inte
 
 bool TreeSummary::isCoveredInInterval(const Tree &tree, double credible_interval_size, bool stochastic, bool verbose)
 {
-    summarize( false );
+    summarize_with_mrcas( false );
     
     std::vector<Tree> unique_trees = getUniqueTrees(credible_interval_size, stochastic, verbose);
     bool out = false;
@@ -662,7 +662,7 @@ bool TreeSummary::isDirty(void) const
 
 double TreeSummary::jointCladeProbability(const RbVector<Clade> &c, bool verbose )
 {
-    summarize( false );
+    summarize_with_mrcas( false );
     
     RbVector<Clade> ref_clades = c;
 
@@ -751,7 +751,7 @@ double TreeSummary::maxdiff( bool verbose )
 
     for (auto& trace: traces)
     {
-        trace->summarize(verbose);
+        trace->summarize_with_mrcas(verbose);
 
         splits_union.insert(trace->mrca_clade_samples.begin(), trace->mrca_clade_samples.end());
     }
@@ -794,7 +794,7 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
     ss << "Compiling maximum a posteriori tree from " << sampleSize(true) << " trees.\n";
     RBOUT(ss.str());
 
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     // get the tree with the highest posterior probability
     std::string bestNewick = tree_samples.rbegin()->first;
@@ -832,7 +832,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     ss << "Compiling maximum clade credibility tree from " << sampleSize(true) << " trees.\n";
     RBOUT(ss.str());
 
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     Tree* best_tree = NULL;
     std::optional<double> max_cc;
@@ -886,7 +886,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
     RBOUT(ss.str());
 
     //fill in clades, use all above 50% to resolve the bush with the consensus partitions
-    summarize( verbose );        //fills std::vector<Sample<std::string> > cladeSamples, sorts them by descending freq
+    summarize_with_mrcas( verbose );        //fills std::vector<Sample<std::string> > cladeSamples, sorts them by descending freq
 
     //set up variables for consensus tree assembly
     std::vector<std::string> tipNames = traces.front()->objectAt(0).getTipNames();
@@ -1010,7 +1010,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
 void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probability, bool verbose)
 {
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     std::stringstream ss;
     ss << std::fixed;
@@ -1098,7 +1098,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probabilit
 
 void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_size, bool stochastic, bool verbose)
 {
-    summarize( verbose );
+    summarize_with_mrcas( verbose );
 
     std::stringstream ss;
     ss << std::fixed;
@@ -1921,7 +1921,7 @@ double TreeSummary::splitFrequency(const SplitWithMRCAs &n) const
 }
 
 
-void TreeSummary::summarize( bool verbose )
+void TreeSummary::summarize_with_mrcas( bool verbose )
 {
     if ( not isDirty() )
     {
