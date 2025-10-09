@@ -32,14 +32,20 @@ namespace RevBayesCore {
         /*
          * This struct represents a tree bipartition (split) that can be rooted or unrooted
          */
-        struct SplitWithMRCAs : public std::pair<RbBitSet, std::set<Taxon> >
+        struct SplitWithMRCAs
         {
-            SplitWithMRCAs( RbBitSet b, std::set<Taxon> m, bool r) : std::pair<RbBitSet, std::set<Taxon> >( !r && b[0] ? ~b : b, m) {}
+            RbBitSet include;
+            std::set<Taxon> mrcas;
 
-            inline bool operator()(const Sample<SplitWithMRCAs>& s)
+            inline bool operator<(const SplitWithMRCAs& s) const
             {
-                return (*this) == s.first;
+                if (include < s.include) return true;
+                if (include > s.include) return false;
+
+                return mrcas < s.mrcas;
             }
+
+            SplitWithMRCAs( const RbBitSet& b, const std::set<Taxon>& m, bool rooted) : include( !rooted && b[0] ? ~b : b), mrcas(m) {}
         };
 
     public:
