@@ -138,16 +138,18 @@ namespace RevBayesCore {
         bool                                           clock;
         bool                                           rooted;
 
-        bool                                           computed = false;
-        std::map<SplitWithMRCAs, std::int64_t>         clade_counts;
-        std::set<Sample<SplitWithMRCAs> >              clade_samples;
+        bool                                           computed_mrca = false;
+
+        std::map<SplitWithMRCAs, std::int64_t>         mrca_clade_counts;
+        std::set<Sample<SplitWithMRCAs> >              mrca_clade_samples;
+
+        std::map<SplitWithMRCAs, std::vector<double> >                           mrca_clade_ages;
+        std::map<SplitWithMRCAs, std::map<SplitWithMRCAs, std::vector<double> > >         conditional_mrca_clade_ages;
+        std::map<std::string, std::map<SplitWithMRCAs, std::vector<double> > >   tree_mrca_clade_ages;
+
         std::map<Taxon, std::int64_t >                 sampled_ancestor_counts;
         std::map<std::string, std::int64_t>            tree_counts;
         std::set<Sample<std::string> >                 tree_samples;
-
-        std::map<SplitWithMRCAs, std::vector<double> >                           clade_ages;
-        std::map<SplitWithMRCAs, std::map<SplitWithMRCAs, std::vector<double> > >         conditional_clade_ages;
-        std::map<std::string, std::map<SplitWithMRCAs, std::vector<double> > >   tree_clade_ages;
 
         boost::optional<Clade>                         outgroup;
     };
