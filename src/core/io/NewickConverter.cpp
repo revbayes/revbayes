@@ -36,14 +36,16 @@ Tree* NewickConverter::convertFromNewick(std::string const &newick)
     Tree *t = new Tree();
 
     // construct the tree starting from the root
-    auto check = parseTree(newick, 0);
-    if (not check)
-        throw RbException()<<"Can't parse newick string!";
-    auto [root, end_pos] = *check;
-    if (end_pos != newick.size())
+    auto result = parseTree(newick, 0);
+    if (not result){
+        throw RbException()<<result.err_message()<< " at location " << result.err_pos();
+    }
+    if (result.next_pos() != newick.size())
         throw RbException()<<"Junk at end of newick string: '"<<newick.substr(end_pos)<<"'";
 
     // set up the tree
+    auto root = result.value();
+
     t->setRoot( root, true );
 
     // try to set node indices from attributes
@@ -168,19 +170,17 @@ ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int s
     // 1. First try to read a newick comment
     if (auto check_comment = parseNewickComment(input, start_pos))
     {
-        auto& [comment, new_start_pos] = *check_comment;
-        return {{{comment}, new_start_pos}};
+        return ParseSuccess({check_comment.value()}, check_comment.next_pos());
     }
     // 2. Then try to read a whitespace character
     else if (auto check_char = parseWhiteChar(input, start_pos))
     {
-        auto& [c, new_start_pos] = *check_char;
         // If we found a whitespace char, return success with no comment
-        return {{{},new_start_pos}};
+        return ParseSuccess({}, check_comment.next_pos());
     }
     // 3. If no comment and no whitespace character, return null
     else
-        return {};
+        return ParseFail("Expected white space ", start_pos);
 }
 
 // Whitespace -> OneWhitespace*
@@ -203,13 +203,14 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 {
     // 1. Get the Subtree
     auto check_subtree = parseSubTree(input,start_pos);
-    if (not check_subtree)
-        return {};
+    if (auto check_subtree = parseSubTree(input, start_pos)){
+        return check_subtree;
+    }
     auto& [subtree, new_start_pos] = *check_subtree;
 
     // 2. Check the semicolon
     auto check_semi = checkChar(input, new_start_pos, ';');
-    if (not check_semi)
+    if (!check_semi)
         return {};
 
     auto& [c, new_start_pos2] = *check_semi;
@@ -220,11 +221,19 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 // subtree -> internal OR leaf
 ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos){
 
-    if (auto check = parseInternal(input, start_pos))
-        return check;
+    if (auto checkInternal = parseInternal(input, start_pos))
+        return checkInternal;
     
-    else {
-        return parseLeaf(input, start_pos);
+    else if (auto checkLeaf = parseLeaf(input, start_pos)){
+        return checkLeaf;
+    }
+    else{
+        if(checkInternal.err_pos()<checkLeaf.err_pos()){
+            return checkLeaf;
+        }
+        else{
+            return checkInternal;
+        }
     }
 }
 
