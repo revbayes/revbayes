@@ -150,7 +150,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         TopologyNode* n = nodes[i];
 
         Clade clade = n->getClade();
-        Split split( clade.getBitRepresentation(), clade.getMrca(), rooted);
+        SplitWithMRCAs split( clade.getBitRepresentation(), clade.getMrca(), rooted);
 
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
@@ -177,9 +177,9 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( !n->isRoot() )
         {
             Clade parent_clade = n->getParent().getClade();
-            Split parent_split = Split( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
+            SplitWithMRCAs parent_split = SplitWithMRCAs( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
 
-            std::map<Split, std::vector<double> >& condCladeAges = conditional_clade_ages[parent_split];
+            std::map<SplitWithMRCAs, std::vector<double> >& condCladeAges = conditional_clade_ages[parent_split];
             node_ages = report.conditional_clade_ages ? condCladeAges[split] : clade_ages[split];
 
             // annotate CCPs
@@ -319,7 +319,7 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
 
-    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+    return splitFrequency( SplitWithMRCAs( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
 }
 
 
@@ -747,7 +747,7 @@ double TreeSummary::maxdiff( bool verbose )
         throw RbException("At least 2 traces are required to compute maxdiff");
     }
 
-    std::set<Sample<Split> > splits_union;
+    std::set<Sample<SplitWithMRCAs> > splits_union;
 
     for (auto& trace: traces)
     {
@@ -1201,11 +1201,11 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
+TreeSummary::SplitWithMRCAs TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<SplitWithMRCAs, std::int64_t>& cladeCountMap)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
-    std::vector<Split> child_splits;
+    std::vector<SplitWithMRCAs> child_splits;
 
     RbBitSet taxa(intaxa.size());
     std::set<Taxon> mrca;
@@ -1238,7 +1238,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
     intaxa |= taxa;
 
-    Split parent_split(taxa, mrca, rooted);
+    SplitWithMRCAs parent_split(taxa, mrca, rooted);
 
     if ( taxa.size() > 0 )
     {
@@ -1279,7 +1279,7 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
+TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCAs& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
 
@@ -1293,7 +1293,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
     bool compatible = (mask == node);
     bool ischild      = (mask == clade);
 
-    Split c = split;
+    SplitWithMRCAs c = split;
     // check if the flipped unrooted split is compatible
     if ( !rooted && !compatible && !ischild)
     {
@@ -1904,7 +1904,7 @@ void TreeSummary::mapParameters( Tree &tree, bool verbose ) const
 }
 
 
-std::int64_t TreeSummary::splitCount(const Split &n) const
+std::int64_t TreeSummary::splitCount(const SplitWithMRCAs &n) const
 {
     auto iter = clade_counts.find(n);
 
@@ -1915,7 +1915,7 @@ std::int64_t TreeSummary::splitCount(const Split &n) const
 }
 
 
-double TreeSummary::splitFrequency(const Split &n) const
+double TreeSummary::splitFrequency(const SplitWithMRCAs &n) const
 {
     return double(splitCount(n))/sampleSize(true);
 }
@@ -2004,7 +2004,7 @@ void TreeSummary::summarize( bool verbose )
 //        if ( it->first.first.count() > 0 )
 //        if ( it->first.first.count() > 0 && it->first.first.count() < (num_taxa-1) )
         {
-            clade_samples.insert( Sample<Split>(clade, count) );
+            clade_samples.insert( Sample<SplitWithMRCAs>(clade, count) );
         }
 
     }

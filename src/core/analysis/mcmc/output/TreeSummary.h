@@ -32,11 +32,11 @@ namespace RevBayesCore {
         /*
          * This struct represents a tree bipartition (split) that can be rooted or unrooted
          */
-        struct Split : public std::pair<RbBitSet, std::set<Taxon> >
+        struct SplitWithMRCAs : public std::pair<RbBitSet, std::set<Taxon> >
         {
-            Split( RbBitSet b, std::set<Taxon> m, bool r) : std::pair<RbBitSet, std::set<Taxon> >( !r && b[0] ? ~b : b, m) {}
+            SplitWithMRCAs( RbBitSet b, std::set<Taxon> m, bool r) : std::pair<RbBitSet, std::set<Taxon> >( !r && b[0] ? ~b : b, m) {}
 
-            inline bool operator()(const Sample<Split>& s)
+            inline bool operator()(const Sample<SplitWithMRCAs>& s)
             {
                 return (*this) == s.first;
             }
@@ -97,14 +97,14 @@ namespace RevBayesCore {
 
     protected:
 
-        Split                                          collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<Split, std::int64_t>&);
+        SplitWithMRCAs                                 collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<SplitWithMRCAs, std::int64_t>&);
         void                                           enforceNonnegativeBranchLengths(TopologyNode& tree) const;
-        TopologyNode*                                  findParentNode(TopologyNode&, const Split &, std::vector<TopologyNode*>&, RbBitSet& ) const;
+        TopologyNode*                                  findParentNode(TopologyNode&, const SplitWithMRCAs &, std::vector<TopologyNode*>&, RbBitSet& ) const;
         void                                           mapContinuous(Tree &inputTree, const std::string &n, size_t paramIndex, double hpd, bool np, bool verbose ) const;
         void                                           mapDiscrete(Tree &inputTree, const std::string &n, size_t paramIndex, size_t num, bool np, bool verbose ) const;
         void                                           mapParameters(Tree &inputTree, bool verbose) const;
-        std::int64_t                                   splitCount(const Split &n) const;
-        double                                         splitFrequency(const Split &n) const;
+        std::int64_t                                   splitCount(const SplitWithMRCAs &n) const;
+        double                                         splitFrequency(const SplitWithMRCAs &n) const;
         void                                           summarize(bool verbose);
 
         std::vector<TraceTree* >                       traces;
@@ -113,15 +113,15 @@ namespace RevBayesCore {
         bool                                           rooted;
 
         bool                                           computed = false;
-        std::map<Split, std::int64_t>                  clade_counts;
-        std::set<Sample<Split> >                       clade_samples;
+        std::map<SplitWithMRCAs, std::int64_t>         clade_counts;
+        std::set<Sample<SplitWithMRCAs> >              clade_samples;
         std::map<Taxon, std::int64_t >                 sampled_ancestor_counts;
         std::map<std::string, std::int64_t>            tree_counts;
         std::set<Sample<std::string> >                 tree_samples;
 
-        std::map<Split, std::vector<double> >                           clade_ages;
-        std::map<Split, std::map<Split, std::vector<double> > >         conditional_clade_ages;
-        std::map<std::string, std::map<Split, std::vector<double> > >   tree_clade_ages;
+        std::map<SplitWithMRCAs, std::vector<double> >                           clade_ages;
+        std::map<SplitWithMRCAs, std::map<SplitWithMRCAs, std::vector<double> > >         conditional_clade_ages;
+        std::map<std::string, std::map<SplitWithMRCAs, std::vector<double> > >   tree_clade_ages;
 
         boost::optional<Clade>                         outgroup;
     };
