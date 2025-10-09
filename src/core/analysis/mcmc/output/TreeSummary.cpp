@@ -569,7 +569,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
         }
 
         // now let's actually construct the clade
-        Clade current_clade(clade.include, ordered_taxa);
+        Clade current_clade(clade.split.include, ordered_taxa);
         current_clade.setMrca(clade.mrcas);
         
         if (non_trivial_only)
@@ -917,7 +917,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         if (cladeFreq < cutoff)  break;
 
         //make sure we have an internal node
-        size_t clade_size = clade.include.count();
+        size_t clade_size = clade.split.include.count();
         if (clade_size == 1 || clade_size == tipNames.size())  continue;
 
         //find parent node
@@ -1045,7 +1045,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probabilit
 
     for (auto& [clade, count]: clade_samples | views::reverse)
     {
-        Clade c(clade.include, ordered_taxa);
+        Clade c(clade.split.include, ordered_taxa);
         c.setMrca(clade.mrcas);
 
         if ( c.size() == 1 ) continue;
@@ -1286,7 +1286,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCAs&
     RbBitSet node( num_taxa );
     n.getTaxa(node);
 
-    RbBitSet clade = split.include;
+    RbBitSet clade = split.split.include;
 
     RbBitSet mask  = node | clade;
 
@@ -1304,7 +1304,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCAs&
 
         if ( compatible )
         {
-            c.include = clade_flip;
+            c.split.include = clade_flip;
         }
     }
 
@@ -1339,7 +1339,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCAs&
         children = std::move(new_children);
 
         // check that we found all the children
-        if ( parent == &n && child_mask != c.include && !n.isTip())
+        if ( parent == &n && child_mask != c.split.include && !n.isTip())
         {
             parent = NULL;
         }

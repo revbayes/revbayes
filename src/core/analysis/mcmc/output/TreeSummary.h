@@ -29,23 +29,43 @@ namespace RevBayesCore {
             }
         };
 
+
+        struct Split
+        {
+            RbBitSet include;
+            Split( const RbBitSet& b, bool rooted ): include( !rooted && b[0] ? ~b : b) {}
+
+            bool operator<(const Split& s) const
+            {
+                return include < s.include;
+            }
+                    
+            bool operator>(const Split& s) const
+            {
+                return include > s.include;
+            }
+                    
+        };
+
         /*
          * This struct represents a tree bipartition (split) that can be rooted or unrooted
          */
         struct SplitWithMRCAs
         {
-            RbBitSet include;
+            Split split;
             std::set<Taxon> mrcas;
 
             inline bool operator<(const SplitWithMRCAs& s) const
             {
-                if (include < s.include) return true;
-                if (include > s.include) return false;
+                if (split < s.split) return true;
+                if (split > s.split) return false;
 
                 return mrcas < s.mrcas;
             }
 
-            SplitWithMRCAs( const RbBitSet& b, const std::set<Taxon>& m, bool rooted) : include( !rooted && b[0] ? ~b : b), mrcas(m) {}
+            // Eventually rooted should always be true for this, since MRCAs only make sense on rooted trees.
+            SplitWithMRCAs( const RbBitSet& b, const std::set<Taxon>& m, bool rooted) : split(b, rooted), mrcas(m) {}
+            SplitWithMRCAs( const Split& s, const std::set<Taxon>& m) : split(s), mrcas(m) {}
         };
 
     public:
