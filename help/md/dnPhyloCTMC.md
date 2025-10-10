@@ -38,6 +38,10 @@ x.clamp(chars)
 
 # Calculate the probability of the observed characters under the given distribution
 x.lnProbability()
+
+# Simulate characters
+sim ~ dnPhyloCTMC(tree = tree, Q = q_matrix, nSites = 24)
+sim.show()
 ```
 
 ## references
