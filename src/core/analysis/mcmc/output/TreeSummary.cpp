@@ -934,12 +934,12 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         {
             for (auto& child: children)
             {
-                // Add the child to the mrca if its a tip and its taxon is in clade.second
+                // Add the child to the mrca if it's a tip and its taxon is in clade.second
                 if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
                     mrca.push_back(child);
             }
 
-            // if we couldn't find all the the mrca, then this clade is not compatible
+            // if we couldn't find all the mrcas, then this clade is not compatible
             if ( mrca.size() != clade.second.size() )
             {
                 continue;
