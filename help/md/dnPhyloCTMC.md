@@ -19,25 +19,34 @@ The likelihood of observed tip labels (specified via a clamped `AbstractHomologo
 
 ## example
 
-```rb
-# Read character data from a file
-chars <- readDiscreteCharacterData("myData.nex")
-taxa = chars.taxa()
+    # Read character data from a file
+    chars <- readDiscreteCharacterData("myData.nex")
+    taxa = chars.taxa()
+    
+    # Draw a tree with branch lengths
+    tree ~ dnUniformTopologyBranchLength( taxa, branchLengthDistribution=dnExp(10.0) )
+    
+    # Define a rate matrix
+    q_matrix <- fnJC(4)
+    
+    # Create stochastic node with the tip distribution given by `tree` and `q_matrix`
+    x ~ dnPhyloCTMC(tree = tree, Q = q_matrix)
+    
+    # Clamp observed characters to the node
+    x.clamp(chars)
+    
+    # Calculate the probability of the observed characters under the given distribution
+    x.lnProbability()
 
-# Draw a tree with branch lengths
-tree ~ dnUniformTopologyBranchLength( taxa, branchLengthDistribution=dnExp(10.0) )
-
-# Define a rate matrix
-q_matrix <- fnJC(4)
-
-# Create stochastic node with the tip distribution given by `tree` and `q_matrix`
-x ~ dnPhyloCTMC(tree = tree, Q = q_matrix)
-
-# Clamp observed characters to the node
-x.clamp(chars)
-
-# Calculate the probability of the observed characters under the given distribution
-x.lnProbability()
+    
+    # Simulate characters
+    sim ~ dnPhyloCTMC(tree = tree, Q = q_matrix, nSites = 24)
+    
+    # Print simulated characters to screen
+    sim.show()
+    
+    # Write dataset to file
+    writeNexus("simulatedData.nex", sim)
 ```
 
 ## references
