@@ -40,6 +40,15 @@ The likelihood of observed tip labels (specified via a clamped `AbstractHomologo
     # Calculate the probability of the observed characters under the given distribution
     x.lnProbability()
 
+    # Simulate characters
+    sim ~ dnPhyloCTMC(tree = tree, Q = q_matrix, nSites = 24)
+    
+    # Print simulated characters to screen
+    sim.show()
+    
+    # Write dataset to file
+    writeNexus("simulatedData.nex", sim)
+
 ## references
 - citation: Felsenstein J., 1973. Maximum Likelihood and Minimum-Steps Methods for Estimating Evolutionary Trees from Data on Discrete Characters. Systematic Biology 22:3, 240--249
   doi = 10.1093/sysbio/22.3.240
