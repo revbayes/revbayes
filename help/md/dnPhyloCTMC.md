@@ -7,7 +7,7 @@ Distribution of a phylogenetic continuous-time Markov chain
 ## description
 The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time Markov chain_.
 
-dnPhyloCTMC gives the probability distribution of the character state vectors at the leaves of a phylogenetic tree, given an phylogenetic continuous-time Markov chain model.
+dnPhyloCTMC gives the probability distribution of the character state vectors at the leaves of a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.
 
 ## details
 
