@@ -3024,7 +3024,6 @@ Non-simplex-valued vector random variables are untransformed.
 
 Add random variables to the move directly (e.g. branch_rates[1], not branch_rates).WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical covariance matrix.)");
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
-	help_strings[string("mvAddRemoveTip")][string("name")] = string(R"(mvAddRemoveTip)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
 	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution.)");
 	help_strings[string("mvBetaSimplex")][string("example")] = string(R"(A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
