@@ -103,17 +103,13 @@ c = a + b
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
 	help_strings[string("Simplex")][string("description")] = string(R"(A simplex is a vector of elements that sum to 1.)");
-	help_strings[string("Simplex")][string("example")] = string(R"(```rb
-x <- simplex([2, 2, 6])
+	help_strings[string("Simplex")][string("example")] = string(R"(x <- simplex([2, 2, 6])
 x # = [ 0.2, 0.2, 0.6]
-sum(x) # 1, by definition
-```)");
+sum(x) # 1, by definition)");
 	help_strings[string("Simplex")][string("name")] = string(R"(Simplex)");
-	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"()"));
-	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(Moves that operate on Simplexes:)"));
-	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
-	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
-	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(mvBetaSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(mvDirichletSimplex)"));
+	help_arrays[string("Simplex")][string("see_also")].push_back(string(R"(mvElementSwapSimplex)"));
 	help_strings[string("Simplex")][string("title")] = string(R"(Simplex)");
 	help_arrays[string("SiteMixtureModel")][string("authors")].push_back(string(R"(Ben Redelings)"));
 	help_strings[string("SiteMixtureModel")][string("description")] = string(R"(A weighted collection of discrete character evolution models.)");
@@ -4637,10 +4633,9 @@ mymcmc.run( rules = stopping_rules ))");
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srMinESS)"));
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srStationarity)"));
 	help_strings[string("srGeweke")][string("title")] = string(R"(Geweke stopping rule)");
-	help_strings[string("srMaxIteration")][string("description")] = string(R"(Cause an MCMC run to terminate once the specified number of iterations have been performed.
-This function would typically be used alongside other stopping rules)");
-	help_strings[string("srMaxIteration")][string("example")] = string(R"(```
-# Binomial example: estimate success probability given 7 successes out of 20 trials
+	help_strings[string("srMaxIteration")][string("description")] = string(R"(Terminates an MCMC run once the specified number of iterations have been
+performed. This rule would typically be used alongside other stopping criteria.)");
+	help_strings[string("srMaxIteration")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
 n <- 20
@@ -4663,14 +4658,11 @@ stopping_rules[1] = srMaxIteration(1000)
 mymcmc = mcmc(mymodel, monitors, moves)
 
 # Begin the MCMC run
-mymcmc.run(rules = stopping_rules)
-```)");
+mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMaxIteration")][string("name")] = string(R"(srMaxIteration)");
 	help_strings[string("srMaxIteration")][string("title")] = string(R"(Maximum iteration stopping rule)");
-	help_strings[string("srMaxTime")][string("description")] = string(R"(Cause an MCMC run to terminate once the specified time has elapsed.)");
-	help_strings[string("srMaxTime")][string("example")] = string(R"(```
-
-# Binomial example: estimate success probability given 7 successes out of 20 trials
+	help_strings[string("srMaxTime")][string("description")] = string(R"(Terminates an MCMC run once the specified time has elapsed.)");
+	help_strings[string("srMaxTime")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
 n <- 20
@@ -4693,8 +4685,7 @@ stopping_rules[1] = srMaxTime(5, "seconds")
 mymcmc = mcmc(mymodel, monitors, moves)
 
 # Begin the MCMC run
-mymcmc.run(rules = stopping_rules)
-```)");
+mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMaxTime")][string("name")] = string(R"(srMaxTime)");
 	help_strings[string("srMaxTime")][string("title")] = string(R"(Maximum time stopping rule)");
 	help_strings[string("srMinESS")][string("description")] = string(R"(Terminates an MCMC run when the effective sample sizes (ESS) of all parameters
