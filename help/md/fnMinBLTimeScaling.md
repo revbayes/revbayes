@@ -24,7 +24,7 @@ The algorithm is not stochastic (i.e., it always returns the same time-scaled
 tree for a given input), and is primarily intended to generate a plausible
 starting tree for MCMC analyses.
 ## authors
-David Černý
+David Cerny
 Laura Mulvey
 ## see_also
 simStartingTree

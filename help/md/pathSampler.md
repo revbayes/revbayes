@@ -42,11 +42,11 @@ can also be derived using the stationary bootstrap method (Politis & Romano
 1994), which divides the log likelihood values from each power posterior into
 consecutive blocks of random size (drawn from a geometric distribution) and
 resamples them with replacement. The RevBayes implementation of the stationary
-block bootstrap method is based on the mcmc3r R package (Álvarez-Carretero et
+block bootstrap method is based on the mcmc3r R package (Alvarez-Carretero et
 al. 2022), and can be accessed by calling `.stdError(bootstrap=TRUE)`.
 ## authors
-Sebastian Höhna
-David Černý
+Sebastian Hoehna
+David Cerny
 ## see_also
 powerPosterior
 steppingStoneSampler
@@ -77,7 +77,7 @@ steppingStoneSampler
     ps.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
     ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output)
 ## references
-- citation: Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.
+- citation: Alvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.
   doi: 10.1038/s41586-021-04341-1
   url: https://www.nature.com/articles/s41586-021-04341-1
 - citation: dos Reis M, Gunnell GF, Barba-Montoya J, Wilkins A, Yang Z, Yoder AD (2018). Using phylogenomic data to explore the effects of relaxed clocks and calibration strategies on divergence time estimation: primates as a test case. Systematic Biology, 67(4):594-615.

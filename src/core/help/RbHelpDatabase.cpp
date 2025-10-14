@@ -546,9 +546,9 @@ of Macroevolutionary Mixtures (BAMM; Rabosky 2014), particularly in making
 a strong and potentially problematic assumption that all rate-shift events
 have been observed (Moore et al. 2016) -- i.e., that no rate shifts are mapped
 onto unobserved (extinct) branches. For an alternative birth-death-shift model
-that relaxes this assumption, see `dnCDBDP` (Höhna et al. 2019), which employs
-a finite number of rate categories instead of drawing rates directly from
-a continuous distribution.)");
+that relaxes this assumption, see `dnCDBDP` (Hoehna et al. 2019), which
+employs a finite number of rate categories instead of drawing rates directly
+from a continuous distribution.)");
 	help_strings[string("dnCBDSP")][string("example")] = string(R"(# draw basic process parameters
 taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 root_age ~ dnUniform(0, 2)
@@ -565,8 +565,8 @@ tree ~ dnCBDSP(rootAge    = root_age,
                condition  = "survival",
                taxa       = taxa))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
-	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
-	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Moore BR, Höhna S, May MR, Rannala B, Huelsenbeck JP (2016). Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary mixtures. Proceedings of the National Academy of Sciences of the USA, 113(34):9569-9574.)",R"(10.1073/pnas.1518659113)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1518659113 )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Hoehna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Moore BR, Hoehna S, May MR, Rannala B, Huelsenbeck JP (2016). Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary mixtures. Proceedings of the National Academy of Sciences of the USA, 113(34):9569-9574.)",R"(10.1073/pnas.1518659113)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1518659113 )"));
 	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Rabosky DL (2014). Automatic detection of key innovations, rate shifts, and diversity-dependence on phylogenetic trees. PLoS ONE, 9(2):e89543.)",R"(10.1371/journal.pone.0089543)",R"(https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543 )"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvBirthDeathEventContinuous)"));
@@ -604,7 +604,7 @@ inferred tree (using `.clamp()`), and to a matrix recording which state is
 observed at a given tip (using `.clampCharData()`).
 
 2. Cladogenetic State-dependent Speciation Extinction (ClaSSE) (Goldberg &
-   Igić 2012)
+   Igic 2012)
 
 This model additionally allows for cladogenetic state changes, i.e., changes
 that take place at nodes, corresponding to the assumption that state change
@@ -619,7 +619,7 @@ rate specified in the `mu` vector. A draw from the distribution again has to
 be clamped both to a tree and to a character matrix. See the example below
 for implementation.
 
-3. Branch-specific Diversification Rate Estimation (Höhna et al. 2019)
+3. Branch-specific Diversification Rate Estimation (Hoehna et al. 2019)
 
 `dnCDBDP` can also be used to estimate the number and placement of events 
 at which the rates of speciation and extinction shift from one category
@@ -675,8 +675,8 @@ timetree ~ dnCDBDP(rootAge   = root_age,
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth--death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973-986.)",R"(10.1093/sysbio/syaa016)",R"(https://academic.oup.com/sysbio/article/69/5/973/5762626 )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.)",R"(10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
-	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg EE, Igić B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.)",R"(10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
-	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg EE, Igic B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.)",R"(10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Hoehna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Maddison WP, Midford PE, Otto SP (2007). Estimating a binary character's effect on speciation and extinction. Systematic Biology, 56(5):701-710.)",R"(10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticProbabilityMatrix)"));
@@ -741,10 +741,10 @@ a)");
 	help_arrays[string("dnCoalescent")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_arrays[string("dnCoalescent")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnCoalescent")][string("description")] = string(R"(The constant population size coalescent process specifies a probability density on genealogies, both node ages and the topology.)");
-	help_strings[string("dnCoalescent")][string("details")] = string(R"(The underlying theory of the constant population size Coalescent implemented here is Kingman's Coalescent. The implementation here assumes haploid individuals, so for diploid study systems one needs to multiply the effective population size by 2 and the true effective population size in units of individuals needs to be divided by 2 afterwards.
-The Coalescent process is parameterized with theta, which here stands for the effective population size (not 4 * Ne * mu). For detailed examples see https://revbayes.github.io/tutorials/coalescent/)");
-	help_strings[string("dnCoalescent")][string("example")] = string(R"(
-# specify a prior distribution on the constant population size
+	help_strings[string("dnCoalescent")][string("details")] = string(R"(The underlying theory of the constant population size coalescent implemented here is Kingman's coalescent. The implementation here assumes haploid individuals, so for diploid study systems one needs to multiply the effective population size by 2 and the true effective population size in units of individuals needs to be divided by 2 afterwards.
+
+The coalescent process is parameterized with `theta`, which here stands for the effective population size (not 4 * Ne * mu). For detailed examples see https://revbayes.github.io/tutorials/coalescent/)");
+	help_strings[string("dnCoalescent")][string("example")] = string(R"(# specify a prior distribution on the constant population size
 pop_size ~ dnUniform(0,1E6)
 moves.append( mvScale(pop_size, lambda=0.1, tune=true, weight=2.0) )
 
@@ -757,26 +757,19 @@ root_height := psi.rootAge()
 
 # continue as usual to either clamp the genealogy or infer the genealogy based on sequence data)");
 	help_strings[string("dnCoalescent")][string("name")] = string(R"(dnCoalescent)");
-	help_references[string("dnCoalescent")].push_back(RbHelpReference(R"(Comparison of Bayesian Coalescent Skyline Plot Models for Inferring Demographic Histories. Billenstein, Ronja and Höhna, Sebastian (2024) Molecular Biology and Evolution, 41(5):msae073.)",R"(https://doi.org/10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_references[string("dnCoalescent")].push_back(RbHelpReference(R"(Billenstein R, Hoehna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
 	help_arrays[string("dnCoalescent")][string("see_also")].push_back(string(R"(dnCoalescentSkyline)"));
 	help_arrays[string("dnCoalescent")][string("see_also")].push_back(string(R"(dnCoalescentDemography)"));
-	help_strings[string("dnCoalescent")][string("title")] = string(R"(Constant population size Coalescent process)");
+	help_strings[string("dnCoalescent")][string("title")] = string(R"(Constant population size coalescent process)");
 	help_strings[string("dnCoalescentDemography")][string("name")] = string(R"(dnCoalescentDemography)");
 	help_arrays[string("dnCoalescentSkyline")][string("authors")].push_back(string(R"(Ronja Billenstein)"));
 	help_arrays[string("dnCoalescentSkyline")][string("authors")].push_back(string(R"(Andrew Magee)"));
 	help_arrays[string("dnCoalescentSkyline")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnCoalescentSkyline")][string("description")] = string(R"(The skyline coalescent process specifies a probability density on genealogies, both node ages and the topology. It is used for both heterochronous samples and homochronous samples.)");
-	help_strings[string("dnCoalescentSkyline")][string("details")] = string(R"(The underlying theory of the skyline Coalescent implemented here is Kingman's Coalescent. The implementation here assumes haploid individuals, so for diploid study systems one needs to multiply the effective population size by 2 and the true effective population size in units of individuals needs to be divided by 2 afterwards.
-The Coalescent process is parameterized with the following parameters:
-theta: a vector of effective population sizes (not 4 * Ne * mu).
-times: A vector of times for the intervals, if applicable.
-events_per_interval: A vector of number of coalescent events for the intervals, if applicable.
-method: The method how intervals are defined, either 'specified' or 'events'
-model: The shape of the demographic function within the intervals (constant or linear)
-taxa: The taxa used when drawing a random tree.
-For detailed examples see https://revbayes.github.io/tutorials/coalescent/)");
-	help_strings[string("dnCoalescentSkyline")][string("example")] = string(R"(
-NUM_INTERVALS = ceil(n_taxa / 5)
+	help_strings[string("dnCoalescentSkyline")][string("details")] = string(R"(The underlying theory of the skyline coalescent implemented here is Kingman's coalescent. The implementation here assumes haploid individuals, so for diploid study systems one needs to multiply the effective population size by 2 and the true effective population size in units of individuals needs to be divided by 2 afterwards.
+
+The coalescent process is parameterized with `theta`, which here stands for the effective population size (not 4 * Ne * mu). For detailed examples see https://revbayes.github.io/tutorials/coalescent/)");
+	help_strings[string("dnCoalescentSkyline")][string("example")] = string(R"(NUM_INTERVALS = ceil(n_taxa / 5)
 for (i in 1:NUM_INTERVALS) {
 
     pop_size[i] ~ dnUniform(0,1E6)
@@ -805,22 +798,19 @@ final_number_events_pi := num_events_pi + number_events_pi
 
 moves.append( mvIidPrior(x=number_events_pi) )
 
-
-
-### the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
+# the time tree is a stochastic node modeled by the constant-rate coalescent process (dnCoalescent)
 psi ~ dnCoalescentSkyline(theta=pop_size, events_per_interval=final_number_events_pi, method="events", taxa=taxa)
 
 interval_times := psi.getIntervalAges()
 
 root_height := psi.rootAge()
 
-
 # continue as usual to either clamp the genealogy or infer the genealogy based on sequence data)");
 	help_strings[string("dnCoalescentSkyline")][string("name")] = string(R"(dnCoalescentSkyline)");
-	help_references[string("dnCoalescentSkyline")].push_back(RbHelpReference(R"(Comparison of Bayesian Coalescent Skyline Plot Models for Inferring Demographic Histories. Billenstein, Ronja and Höhna, Sebastian (2024) Molecular Biology and Evolution, 41(5):msae073.)",R"(https://doi.org/10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_references[string("dnCoalescentSkyline")].push_back(RbHelpReference(R"(Billenstein R, Hoehna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
 	help_arrays[string("dnCoalescentSkyline")][string("see_also")].push_back(string(R"(dnCoalescent)"));
 	help_arrays[string("dnCoalescentSkyline")][string("see_also")].push_back(string(R"(dnCoalescentDemography)"));
-	help_strings[string("dnCoalescentSkyline")][string("title")] = string(R"(Heterochonous and homochronous skyline Coalescent process)");
+	help_strings[string("dnCoalescentSkyline")][string("title")] = string(R"(Heterochronous and homochronous skyline coalescent process)");
 	help_strings[string("dnCompleteBirthDeath")][string("name")] = string(R"(dnCompleteBirthDeath)");
 	help_strings[string("dnConstrainedNodeAge")][string("name")] = string(R"(dnConstrainedNodeAge)");
 	help_strings[string("dnConstrainedNodeOrder")][string("name")] = string(R"(dnConstrainedNodeOrder)");
@@ -848,7 +838,7 @@ sum(b))");
 The effective population size is constant across the species tree.)");
 	help_strings[string("dnDuplicationLoss")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
@@ -879,7 +869,7 @@ for (i in 1:(n_genes)) {
   write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnDuplicationLoss")][string("name")] = string(R"(dnDuplicationLoss)");
-	help_references[string("dnDuplicationLoss")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
+	help_references[string("dnDuplicationLoss")].push_back(RbHelpReference(R"(Rannala B, Yang Z (2003). Bayes estimation of species divergence times and ancestral population sizes using DNA sequences from multiple loci. Genetics, 164(4):1645-1656.)",R"(10.1093/genetics/164.4.1645)",R"(https://academic.oup.com/genetics/article-abstract/164/4/1645/6050371 )"));
 	help_arrays[string("dnDuplicationLoss")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentUniformPrior)"));
 	help_arrays[string("dnDuplicationLoss")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentInverseGamma)"));
 	help_strings[string("dnDuplicationLoss")][string("title")] = string(R"(Multispecies coalescent Distribution)");
@@ -992,13 +982,13 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnGilbertGraph")][string("name")] = string(R"(dnGilbertGraph)");
 	help_strings[string("dnHBDP")][string("name")] = string(R"(dnHBDP)");
 	help_arrays[string("dnHalfCauchy")][string("authors")].push_back(string(R"(Andrew Magee)"));
-	help_strings[string("dnHalfCauchy")][string("description")] = string(R"(Half-Cauchy distribution with location equal to ‘location’ and scale equal to ‘scale’.)");
+	help_strings[string("dnHalfCauchy")][string("description")] = string(R"(Half-Cauchy distribution with location equal to `location` and scale equal to `scale`.)");
 	help_strings[string("dnHalfCauchy")][string("details")] = string(R"(The half-Cauchy distribution has density:
 
 f(x) = 2/(pi * sigma) * 1/(1 + x-(location/scale)^2))");
 	help_strings[string("dnHalfCauchy")][string("example")] = string(R"(# we simulate some obversations
 x <- rHalfCauchy(n=10,location=0,scale=1)
-# let's see what the minimum is (you could do the max too). If this is not ‘location’, we're in trouble!
+# let's see what the minimum is (you could do the max too). If this is not `location`, we're in trouble!
 min(x)
 # let's also see what the mean and the variance are.
 The mean will not converge with more samples, the Cauchy family has no moments.
@@ -1008,7 +998,7 @@ sd(x))");
 	help_strings[string("dnHalfCauchy")][string("name")] = string(R"(dnHalfCauchy)");
 	help_strings[string("dnHalfCauchy")][string("title")] = string(R"(half-Cauchy Distribution)");
 	help_arrays[string("dnHalfNormal")][string("authors")].push_back(string(R"(Andrew Magee)"));
-	help_strings[string("dnHalfNormal")][string("description")] = string(R"(half-normal (gaussian) distribution with offset equal to ‘offset’ and standard deviation equal to ‘sd’.)");
+	help_strings[string("dnHalfNormal")][string("description")] = string(R"(half-normal (gaussian) distribution with offset equal to `offset` and standard deviation equal to `sd`.)");
 	help_strings[string("dnHalfNormal")][string("details")] = string(R"(The half-normal distribution has density:
 
  f(x) = 2/(sqrt(2 pi) sigma) e^-((x - offset)^2/(2 sigma^2)) where offset is the offset of the distribution and sigma the standard deviation.
@@ -1076,7 +1066,7 @@ P)");
 	help_arrays[string("dnLKJPartial")][string("see_also")].push_back(string(R"(dnLKJ)"));
 	help_strings[string("dnLKJPartial")][string("title")] = string(R"(LKJ Distribution (for partial correlation matrices))");
 	help_arrays[string("dnLaplace")][string("authors")].push_back(string(R"(Will Freyman)"));
-	help_strings[string("dnLaplace")][string("description")] = string(R"(Laplace distribution with mean equal to ‘mean’ and scale equal to ‘scale’.)");
+	help_strings[string("dnLaplace")][string("description")] = string(R"(Laplace distribution with mean equal to `mean` and scale equal to `scale`.)");
 	help_strings[string("dnLaplace")][string("details")] = string(R"(The Laplace distribution has density:
 
 f(x) = 1/(2 b) e^-(abs(x-mu)/b)
@@ -1149,135 +1139,155 @@ X ~ dnBrownian(trueTree,sigma)
 	help_strings[string("dnLoguniform")][string("title")] = string(R"(Log-Uniform Distribution)");
 	help_strings[string("dnMixture")][string("name")] = string(R"(dnMixture)");
 	help_strings[string("dnMixtureVector")][string("name")] = string(R"(dnMixtureVector)");
-	help_arrays[string("dnMultiSpeciesCoalescent")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
+	help_arrays[string("dnMultiSpeciesCoalescent")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("dnMultiSpeciesCoalescent")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("dnMultiSpeciesCoalescent")][string("description")] = string(R"(Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given a constant effective population size. Requires an ultrametric species tree, a single effective population size (a single real positive), and taxa with species and individual names.)");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("details")] = string(R"(The species tree must be ultrametric.
 The effective population size is constant across the species tree.)");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
+
+# We can save the species tree:
 write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
+
+# Saving the gene trees:
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+    write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescent")][string("name")] = string(R"(dnMultiSpeciesCoalescent)");
-	help_references[string("dnMultiSpeciesCoalescent")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
-	help_arrays[string("dnMultiSpeciesCoalescent")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentUniformPrior)"));
+	help_references[string("dnMultiSpeciesCoalescent")].push_back(RbHelpReference(R"(Rannala B, Yang Z (2003). Bayes estimation of species divergence times and ancestral population sizes using DNA sequences from multiple loci. Genetics, 164(4):1645-1656.)",R"(10.1093/genetics/164.4.1645)",R"(https://academic.oup.com/genetics/article-abstract/164/4/1645/6050371 )"));
 	help_arrays[string("dnMultiSpeciesCoalescent")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentInverseGamma)"));
-	help_strings[string("dnMultiSpeciesCoalescent")][string("title")] = string(R"(Multispecies coalescent Distribution)");
-	help_arrays[string("dnMultiSpeciesCoalescentInverseGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
+	help_arrays[string("dnMultiSpeciesCoalescent")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentUniformPrior)"));
+	help_strings[string("dnMultiSpeciesCoalescent")][string("title")] = string(R"(Multispecies coalescent distribution)");
+	help_arrays[string("dnMultiSpeciesCoalescentInverseGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("dnMultiSpeciesCoalescentInverseGamma")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("description")] = string(R"(Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given effective population sizes. Requires an ultrametric species tree, parameters of an inverse gamma prior on effective population sizes, and taxa with species and individual names.)");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("details")] = string(R"(The species tree must be ultrametric.
 Parameters of an inverse gamma prior on effective population sizes must be provided.
-This distribution uses a conjugate prior on effective population sizes. As a consequence, effective population sizes are integrated out and treated as nuisance parameters.
+This distribution uses a conjugate prior on effective population sizes. As a consequence, effective population sizes are analytically integrated out and treated as nuisance parameters (Jones 2016).
 
 If you are interested in reconstructing ancestral effective population sizes, use dnMultiSpeciesCoalescent.)");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick constant parameters for the inverse gamma distribution:
+
+# Let's pick constant parameters for the inverse gamma distribution:
 alpha <- 3
 beta <- 0.003
-# let's simulate gene trees now:
-# taxa names:
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, scale=beta, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescentInverseGamma(speciesTree=spTree, shape=alpha, scale=beta, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
+
+# We can save the species tree:
 write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
+
+# Saving the gene trees:
 for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+    write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
 })");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("name")] = string(R"(dnMultiSpeciesCoalescentInverseGamma)");
-	help_references[string("dnMultiSpeciesCoalescentInverseGamma")].push_back(RbHelpReference(R"(' Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Jones G.  Journal of Mathematical Biology. 2016.')",R"('DOI: 10.1007/s00285-016-1034-0')",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
+	help_references[string("dnMultiSpeciesCoalescentInverseGamma")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
 	help_arrays[string("dnMultiSpeciesCoalescentInverseGamma")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescent)"));
 	help_arrays[string("dnMultiSpeciesCoalescentInverseGamma")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentUniformPrior)"));
-	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("title")] = string(R"(Multispecies coalescent Distribution with inverse gamma prior on effective population sizes)");
-	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
-	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("description")] = string(R"(Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given effective population sizes. Requires an ultrametric species tree, effective population size(s) (a single real positive or a vector of real positives), and taxa with species and individual names.)");
+	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("title")] = string(R"(Multispecies coalescent distribution with inverse gamma prior on effective population sizes)");
+	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("authors")].push_back(string(R"(Bastien Boussau)"));
+	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("description")] = string(R"(Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given effective population sizes. Requires an ultrametric species tree, an upper bound for the uniform prior on effective population sizes (a single real positive), and taxa with species and individual names.)");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("details")] = string(R"(The species tree must be ultrametric.
-Effective population sizes can be constant across the species tree, if a single real positive is provided, or branchwise, if a vector is provided.)");
-	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
-n_species <- 10
-n_genes <- 2
-n_alleles <- 3
-# we simulate an ultrametric species tree:
-# Species names:
-for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
-}
-spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
-print(spTree)
-# let's pick a constant effective population size of 50:
-popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
-for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+This distribution uses a uniform prior on effective population sizes. As a consequence, effective population sizes are analytically integrated out and treated as nuisance parameters (Hey & Nielsen 2007).)");
+	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("example")] = string(R"(    # We are going to save the trees we simulate in the folder simulatedTrees:
+    dataFolder = "simulatedTrees/"
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+    n_species <- 10
+    n_genes <- 2
+    n_alleles <- 3
+
+    # We simulate an ultrametric species tree.
+    # Species names:
+    for (i in 1:n_species) {
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxons[g])
-  print(geneTrees[g])
-}
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-})");
+    spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
+    print(spTree)
+
+    # Let's pick a maximum effective population size of 50:
+    popSize <- 50
+
+    # Let's simulate gene trees now.
+    # Taxon names:
+    for (g in 1:n_genes) {
+        for (i in 1:n_species) {
+            for (j in 1:n_alleles) {
+                taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+            }
+        }
+        geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxa[g])
+        print(geneTrees[g])
+    }
+
+    # We can save the species tree:
+    write(spTree, filename=dataFolder+"speciesTree")
+
+    # Saving the gene trees:
+    for (i in 1:(n_genes)) {
+        write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+    })");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("name")] = string(R"(dnMultiSpeciesCoalescentUniformPrior)");
-	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Bayes Estimation of Species Divergence Times and Ancestral Population Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS August 1, 2003 vol. 164 no. 4 1645-1656.)",R"()",R"(http://www.genetics.org/content/164/4/1645.short )"));
-	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"('Bayesian Inference of Species Trees from Multilocus Data. Heled and Drummond Mol. Biol Evol. 27 (3): 570-580, 2010.')",R"('DOI: https://doi.org/10.1093/molbev/msp274')",R"(https://academic.oup.com/mbe/article/27/3/570/999753/Bayesian-Inference-of-Species-Trees-from )"));
-	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Integration within the Felsenstein equation for improved Markov chain Monte Carlo methods in population genetics. Jody Hey and Rasmus Nielsen. PNAS. 104 (8): 2785-2790, 2007.)",R"('DOI: https://doi.org/10.1073/pnas.0611164104')",R"(https://www.pnas.org/content/104/8/2785 )"));
+	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Rannala B, Yang Z (2003). Bayes estimation of species divergence times and ancestral population sizes using DNA sequences from multiple loci. Genetics, 164(4):1645-1656.)",R"(10.1093/genetics/164.4.1645)",R"(https://academic.oup.com/genetics/article-abstract/164/4/1645/6050371 )"));
+	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Heled J, Drummond AJ (2010). Bayesian inference of species trees from multilocus data. Molecular Biology and Evolution, 27(3):570-580.)",R"(10.1093/molbev/msp274)",R"(https://academic.oup.com/mbe/article/27/3/570/999753 )"));
+	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Hey J, Nielsen R (2007). Integration within the Felsenstein equation for improved Markov chain Monte Carlo methods in population genetics. Proceedings of the National Academy of Sciences of the USA, 104(8):2785-2790.)",R"(10.1073/pnas.0611164104)",R"(https://www.pnas.org/content/104/8/2785 )"));
 	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescent)"));
 	help_arrays[string("dnMultiSpeciesCoalescentUniformPrior")][string("see_also")].push_back(string(R"(dnMultiSpeciesCoalescentInverseGamma)"));
-	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("title")] = string(R"(Multispecies coalescent Distribution)");
+	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("title")] = string(R"(Multispecies coalescent distribution with uniform prior on effective population sizes)");
 	help_arrays[string("dnMultiValueEvent")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnMultiValueEvent")][string("description")] = string(R"(A MultiValueEvent distribution.)");
 	help_strings[string("dnMultiValueEvent")][string("name")] = string(R"(dnMultiValueEvent)");
@@ -1338,7 +1348,7 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnNbinomial")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnNbinomial")][string("title")] = string(R"(Negative Binomial Distribution)");
 	help_arrays[string("dnNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnNormal")][string("description")] = string(R"(Normal (gaussian) distribution with mean equal to ‘mean’ and standard deviation equal to ‘sd’.)");
+	help_strings[string("dnNormal")][string("description")] = string(R"(Normal (gaussian) distribution with mean equal to `mean` and standard deviation equal to `sd`.)");
 	help_strings[string("dnNormal")][string("details")] = string(R"(The normal distribution has density:
 
 f(x) = 1/(sqrt(2 pi) sigma) e^-((x - mu)^2/(2 sigma^2))
@@ -1550,7 +1560,7 @@ x ~ dnUniformInteger(1, 10))");
 	help_strings[string("dnUniformTopology")][string("name")] = string(R"(dnUniformTopology)");
 	help_strings[string("dnUniformTopologyBranchLength")][string("name")] = string(R"(dnUniformTopologyBranchLength)");
 	help_arrays[string("dnVarianceGamma")][string("authors")].push_back(string(R"(Michael Landis)"));
-	help_strings[string("dnVarianceGamma")][string("description")] = string(R"(Variance-gamma distribution with location ‘mu’.)");
+	help_strings[string("dnVarianceGamma")][string("description")] = string(R"(Variance-gamma distribution with location `mu`.)");
 	help_strings[string("dnVarianceGamma")][string("details")] = string(R"(The variance-gamma distribution has density:
 
 f(x) = 1/(sqrt(2 pi) sigma) e^-((x - mu)^2/(2 sigma^2))
@@ -1609,9 +1619,12 @@ if (ln_of_ex != 1) {
 	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
 	help_strings[string("floor")][string("description")] = string(R"(Rounds a number down to the nearest integer.)");
 	help_strings[string("floor")][string("details")] = string(R"(The floor function takes as input a real number x, and gives as output the
-greatest integer less than or equal to x. For example: ⌊2.4⌋ = 2, ⌊−2.4⌋ = −3.)");
-	help_strings[string("floor")][string("example")] = string(R"(x <- 3.7
-y <- floor(x))");
+greatest integer less than or equal to x.)");
+	help_strings[string("floor")][string("example")] = string(R"(x <- 2.4
+floor(x) # returns 2
+
+y <- -2.4
+floor(y) # returns -3)");
 	help_strings[string("floor")][string("name")] = string(R"(floor)");
 	help_arrays[string("floor")][string("see_also")].push_back(string(R"(trunc)"));
 	help_strings[string("floor")][string("title")] = string(R"(The floor function.)");
@@ -2223,7 +2236,7 @@ Q2 <- fnLG())");
 	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnWAG)"));
 	help_strings[string("fnLG")][string("title")] = string(R"(LG (Le and Gascuel) Amino Acid Substitution Rate Matrix)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
-	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Cerny)"));
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
 	help_strings[string("fnMinBLTimeScaling")][string("description")] = string(R"(Time-scales an undated tree based on a vector of tip ages using the minimum
 branch length ("MBL") approach (Laurin 2004; Bapst 2014).)");
@@ -2735,35 +2748,39 @@ maxdiff = maxdiff(traces=tree_trace))");
 	help_strings[string("maximumTree")][string("description")] = string(R"(Builds the maximum species tree given several ultrametric gene trees.)");
 	help_strings[string("maximumTree")][string("details")] = string(R"(The maximum species tree is a consistent estimate of the species tree under the multispecies coalescent model, if the gene trees are correct and the effective population size constant along the species tree.)");
 	help_strings[string("maximumTree")][string("example")] = string(R"(# We simulate a species tree and gene trees and reconstruct a species tree using maximum tree:
-# Let’s simulate a species tree with 10 taxa, 5 gene trees, 1 alleles per species:
+# Let's simulate a species tree with 10 taxa, 5 gene trees, 1 alleles per species:
 n_species <- 10
 n_genes <- 5
 n_alleles <- 2
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
 }
+
 # Let's compute the maximum tree:
 recTree <- maximumTree(geneTrees)
 print(recTree))");
 	help_strings[string("maximumTree")][string("name")] = string(R"(maximumTree)");
-	help_references[string("maximumTree")].push_back(RbHelpReference(R"(High-resolution species trees without concatenation. Scott V. Edwards, Liang Liu, and Dennis K. Pearl . PNAS April 3, 2007 vol. 104 no. 14 .)",R"()",R"(http://www.pnas.org/content/104/14/5936.full )"));
-	help_references[string("maximumTree")].push_back(RbHelpReference(R"('Maximum tree: a consistent estimator of the species tree. Liu L, Yu L, Pearl DK.  Journal of Mathematical Biology, 2010. Jan;60(1):95-106.')",R"(https://doi.org/10.1007/s00285-009-0260-0)",R"(https://link.springer.com/article/10.1007%2Fs00285-009-0260-0 )"));
+	help_references[string("maximumTree")].push_back(RbHelpReference(R"(Edwards SV, Liu L, Pearl DK (2007). High-resolution species trees without concatenation. Proceedings of the National Academy of Sciences of the USA, 104(14):5936-5941.)",R"(10.1073/pnas.0607004104)",R"(http://www.pnas.org/content/104/14/5936.full )"));
+	help_references[string("maximumTree")].push_back(RbHelpReference(R"(Liu L, Yu L, Pearl DK (2010). Maximum tree: a consistent estimator of the species tree. Journal of Mathematical Biology, 60(1):95-106.)",R"(10.1007/s00285-009-0260-0)",R"(https://link.springer.com/article/10.1007%2Fs00285-009-0260-0 )"));
 	help_strings[string("maximumTree")][string("title")] = string(R"(Maximum tree function to build a species tree.)");
 	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Will Pett)"));
 	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -2784,7 +2801,7 @@ map_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 
 The `mcmc.run()` method begins or continues an MCMC analysis. 
 
-During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Höhna et al. (2017) for details.
+During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Hoehna et al. (2017) for details.
 
 The run will continue for `generations` iterations, or until a stopping rule is triggered: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) in its `StoppingRule[]` argument have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
 
@@ -2819,9 +2836,9 @@ mymcmcObject.run( generations = 400 )
 # This command will have no effect, as 400 generations have already been performed.
 mymcmcObject.run( rules = [ srMaxIteration(400) ] ))");
 	help_strings[string("mcmc")][string("name")] = string(R"(mcmc)");
-	help_references[string("mcmc")].push_back(RbHelpReference(R"(Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953). Equation of state calculations by fast computing machines. Journal of Chemical Physics, 21:1087-1092.)",R"(10.1063/1.1699114)",R"()"));
-	help_references[string("mcmc")].push_back(RbHelpReference(R"(Hastings WK (1970) Monte Carlo sampling methods using Markov chains and their applications. Biometrika, 57:97-109.)",R"(10.2307/2334940)",R"()"));
-	help_references[string("mcmc")].push_back(RbHelpReference(R"(Höhna S, Landis MJ, Heath TA (2017).  Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics.)",R"(10.1002/cpbi.22)",R"()"));
+	help_references[string("mcmc")].push_back(RbHelpReference(R"(Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953). Equation of state calculations by fast computing machines. Journal of Chemical Physics, 21:1087-1092.)",R"(10.1063/1.1699114 )",R"()"));
+	help_references[string("mcmc")].push_back(RbHelpReference(R"(Hastings WK (1970) Monte Carlo sampling methods using Markov chains and their applications. Biometrika, 57:97-109.)",R"(10.2307/2334940 )",R"()"));
+	help_references[string("mcmc")].push_back(RbHelpReference(R"(Hoehna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.)",R"(10.1002/cpbi.22 )",R"()"));
 	help_arrays[string("mcmc")][string("see_also")].push_back(string(R"(mcmcmc)"));
 	help_strings[string("mcmc")][string("title")] = string(R"(MCMC analysis object)");
 	help_arrays[string("mcmcmc")][string("authors")].push_back(string(R"(Michael Landis)"));
@@ -3275,50 +3292,51 @@ mymcmc.run(generations=200000))");
 An age is randomly drawn between the root age and the age of the oldest tip. Then all subtrees below this age are scaled up or down depending on a scaler drawn from an exponential distribution.)");
 	help_strings[string("mvLayeredScaleProposal")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-}
-# set my move index
+
+# Set my move index:
 mi = 0
 move_species_subtree_scale = mvLayeredScaleProposal( speciesTree=spTree, weight=5 )
 for (i in 1:n_genes) {
-   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+    move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
 }
 moves[++mi] = move_species_subtree_scale
+
 # We get a handle on our model.
-# We can use any node of our model as a handle, here we choose to use the topology.
+# We can use any node of our model as a handle; here we choose to use the topology.
 mymodel = model(spTree)
-# Monitors to check the progression of the program
+
+# Monitors to check the progression of the program:
 monitors[1] = mnScreen(printgen=10, spTree)
-# Here we use a plain MCMC. You could also set nruns=2 for a replicated analysis
-# or use mcmcmc with heated chains.
+
+# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
 mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
 mymcmc.run(generations=1000)
 mymcmc.operatorSummary())");
@@ -3509,7 +3527,7 @@ kernel -- a bimodal distribution centered at zero, obtained as a mixture of two
 unimodal component distributions. Specifically, `mvScaleBactrian` scales
 parameter values by a random factor of exp(lambda * delta), where lambda is a
 tuning parameter and delta is drawn from a mixture of two normal distributions
-following Yang & Rodríguez (2013: Supplementary Information, Eq. 19): 
+following Yang & Rodriguez (2013: Supplementary Information, Eq. 19): 
 
     u ~ Unif(0, 1)
     x ~ N(0, 1)
@@ -3525,7 +3543,7 @@ be positive.)");
 speciation_rate ~ dnGamma(2, 4)
 moves.append( mvScaleBactrian(speciation_rate, weight=5) ))");
 	help_strings[string("mvScaleBactrian")][string("name")] = string(R"(mvScaleBactrian)");
-	help_references[string("mvScaleBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
+	help_references[string("mvScaleBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodriguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
 	help_arrays[string("mvScaleBactrian")][string("see_also")].push_back(string(R"(mvScale)"));
 	help_arrays[string("mvScaleBactrian")][string("see_also")].push_back(string(R"(mvScaleBactrianCauchy)"));
 	help_strings[string("mvScaleBactrian")][string("title")] = string(R"(Scaling Move Employing Bactrian Distribution)");
@@ -3559,7 +3577,7 @@ moves.append(mvSlide(p, delta=0.05, weight=1)))");
 unimodal component distributions. Specifically, `mvSlideBactrian` updates
 the current value by adding a random increment of (lambda * delta), where
 lambda is a tuning parameter and delta is drawn from a mixture of two normal
-distributions following Yang & Rodríguez (2013: Supplementary Information,
+distributions following Yang & Rodriguez (2013: Supplementary Information,
 Eq. 19): 
 
     u ~ Unif(0, 1)
@@ -3574,7 +3592,7 @@ reduces autocorrelation.)");
 x ~ dnNormal(0, 2)
 moves.append( mvSlideBactrian(x, tune=TRUE, weight=1) ))");
 	help_strings[string("mvSlideBactrian")][string("name")] = string(R"(mvSlideBactrian)");
-	help_references[string("mvSlideBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
+	help_references[string("mvSlideBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodriguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
 	help_arrays[string("mvSlideBactrian")][string("see_also")].push_back(string(R"(mvSlide)"));
 	help_strings[string("mvSlideBactrian")][string("title")] = string(R"(Sliding-Window Mode Employing Bactrian Distribution)");
 	help_arrays[string("mvSpeciesNarrow")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
@@ -3586,56 +3604,57 @@ All the gene trees that evolved along the species tree according to some form of
 This move jointly performs narrow exchange moves (Nearest-Neighbor Interchanges without branch length alterations) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesNarrow")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-}
-# set my move index
-mi = 0
-move_species_narrow_exchange = mvSpeciesNarrow( speciesTree=spTree, weight=5 )
-for (i in 1:n_genes) {
-   move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
-}
-moves[++mi] = move_species_narrow_exchange
-# We get a handle on our model.
-# We can use any node of our model as a handle, here we choose to use the topology.
-mymodel = model(spTree)
-# Monitors to check the progression of the program
-monitors[1] = mnScreen(printgen=10, spTree)
-# Here we use a plain MCMC. You could also set nruns=2 for a replicated analysis
-# or use mcmcmc with heated chains.
-mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-mymcmc.run(generations=1000)
-mymcmc.operatorSummary())");
+
+# Set my move index:
+    mi = 0
+    move_species_narrow_exchange = mvSpeciesNarrow( speciesTree=spTree, weight=5 )
+    for (i in 1:n_genes) {
+        move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
+    }
+    moves[++mi] = move_species_narrow_exchange
+
+    # We get a handle on our model.
+    # We can use any node of our model as a handle; here we choose to use the topology.
+    mymodel = model(spTree)
+
+    # Monitors to check the progression of the program:
+    monitors[1] = mnScreen(printgen=10, spTree)
+
+    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+    mymcmc.run(generations=1000)
+    mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesNarrow")][string("name")] = string(R"(mvSpeciesNarrow)");
-	help_references[string("mvSpeciesNarrow")].push_back(RbHelpReference(R"("Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Sebastian  H\xF6hna, Alexei J. Drummond. Syst Biol (2012) 61 (1): 1-11.")",R"(https://doi.org/10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
-	help_references[string("mvSpeciesNarrow")].push_back(RbHelpReference(R"(Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Graham Jones.  Journal of Mathematical Biology, 2016.)",R"(https://doi.org/10.1007/s00285-016-1034-0)",R"(http://link.springer.com/article/10.1007/s00285-016-1034-0 )"));
+	help_references[string("mvSpeciesNarrow")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
+	help_references[string("mvSpeciesNarrow")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
 	help_arrays[string("mvSpeciesNarrow")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScale)"));
 	help_arrays[string("mvSpeciesNarrow")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScaleBeta)"));
 	help_arrays[string("mvSpeciesNarrow")][string("see_also")].push_back(string(R"(mvSpeciesNodeTimeSlideUniform)"));
@@ -3649,57 +3668,58 @@ All the gene trees that evolved along the species tree according to some form of
 
 This move jointly performs node time slides (branch length alterations, keeping the topologies fixed) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesNodeTimeSlideUniform")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
-dataFolder = "simulatedTrees"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+dataFolder = "simulatedTrees/"
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-}
-# set my move index
-mi = 0
-move_species_node_time_slide = mvSpeciesNodeTimeSlideUniform( speciesTree=spTree, weight=5 )
-for (i in 1:n_genes) {
-   move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
-}
-moves[++mi] = move_species_node_time_slide
-# We get a handle on our model.
-# We can use any node of our model as a handle, here we choose to use the topology.
-mymodel = model(spTree)
-# Monitors to check the progression of the program
-monitors[1] = mnScreen(printgen=10, spTree)
-# Here we use a plain MCMC. You could also set nruns=2 for a replicated analysis
-# or use mcmcmc with heated chains.
-mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-mymcmc.run(generations=1000)
-mymcmc.operatorSummary())");
+
+# Set my move index:
+    mi = 0
+    move_species_node_time_slide = mvSpeciesNodeTimeSlideUniform( speciesTree=spTree, weight=5 )
+    for (i in 1:n_genes) {
+        move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
+    }
+    moves[++mi] = move_species_node_time_slide
+
+    # We get a handle on our model.
+    # We can use any node of our model as a handle; here we choose to use the topology.
+    mymodel = model(spTree)
+
+    # Monitors to check the progression of the program:
+    monitors[1] = mnScreen(printgen=10, spTree)
+
+    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+    mymcmc.run(generations=1000)
+    mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesNodeTimeSlideUniform")][string("name")] = string(R"(mvSpeciesNodeTimeSlideUniform)");
-	help_references[string("mvSpeciesNodeTimeSlideUniform")].push_back(RbHelpReference(R"("Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Sebastian  H\xF6hna, Alexei J. Drummond. Syst Biol (2012) 61 (1): 1-11.")",R"(https://doi.org/10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
-	help_references[string("mvSpeciesNodeTimeSlideUniform")].push_back(RbHelpReference(R"(Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Graham Jones.  Journal of Mathematical Biology, 2016.)",R"(https://doi.org/10.1007/s00285-016-1034-0)",R"(http://link.springer.com/article/10.1007/s00285-016-1034-0 )"));
+	help_references[string("mvSpeciesNodeTimeSlideUniform")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
+	help_references[string("mvSpeciesNodeTimeSlideUniform")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
 	help_arrays[string("mvSpeciesNodeTimeSlideUniform")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScale)"));
 	help_arrays[string("mvSpeciesNodeTimeSlideUniform")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScaleBeta)"));
 	help_arrays[string("mvSpeciesNodeTimeSlideUniform")][string("see_also")].push_back(string(R"(mvSpeciesNarrow)"));
@@ -3719,56 +3739,57 @@ The picked subtree is then scaled to this new age.
 All gene-trees that are present in the population will be scaled accordingly.)");
 	help_strings[string("mvSpeciesSubtreeScale")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-}
-# set my move index
-mi = 0
-move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
-for (i in 1:n_genes) {
-   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
-}
-moves[++mi] = move_species_subtree_scale
-# We get a handle on our model.
-# We can use any node of our model as a handle, here we choose to use the topology.
-mymodel = model(spTree)
-# Monitors to check the progression of the program
-monitors[1] = mnScreen(printgen=10, spTree)
-# Here we use a plain MCMC. You could also set nruns=2 for a replicated analysis
-# or use mcmcmc with heated chains.
-mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-mymcmc.run(generations=1000)
-mymcmc.operatorSummary())");
+
+# Set my move index:
+    mi = 0
+    move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
+    for (i in 1:n_genes) {
+       move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+    }
+    moves[++mi] = move_species_subtree_scale
+
+    # We get a handle on our model.
+    # We can use any node of our model as a handle; here we choose to use the topology.
+    mymodel = model(spTree)
+
+    # Monitors to check the progression of the program:
+    monitors[1] = mnScreen(printgen=10, spTree)
+
+    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+    mymcmc.run(generations=1000)
+    mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesSubtreeScale")][string("name")] = string(R"(mvSpeciesSubtreeScale)");
-	help_references[string("mvSpeciesSubtreeScale")].push_back(RbHelpReference(R"("Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Sebastian  H\xF6hna, Alexei J. Drummond. Syst Biol (2012) 61 (1): 1-11.")",R"(https://doi.org/10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
-	help_references[string("mvSpeciesSubtreeScale")].push_back(RbHelpReference(R"(Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Graham Jones.  Journal of Mathematical Biology, 2016.)",R"(https://doi.org/10.1007/s00285-016-1034-0)",R"(http://link.springer.com/article/10.1007/s00285-016-1034-0 )"));
+	help_references[string("mvSpeciesSubtreeScale")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
+	help_references[string("mvSpeciesSubtreeScale")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
 	help_arrays[string("mvSpeciesSubtreeScale")][string("see_also")].push_back(string(R"(mvSpeciesNodeTimeSlideUniform)"));
 	help_arrays[string("mvSpeciesSubtreeScale")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScaleBeta)"));
 	help_arrays[string("mvSpeciesSubtreeScale")][string("see_also")].push_back(string(R"(mvSpeciesNarrow)"));
@@ -3788,56 +3809,57 @@ The picked subtree is then scaled to this new age.
 All gene-trees that are present in the population will be scaled accordingly.)");
 	help_strings[string("mvSpeciesSubtreeScaleBeta")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-}
-# set my move index
-mi = 0
-move_species_subtree_scale_beta = mvSpeciesSubtreeScaleBeta( speciesTree=spTree, weight=5 )
-for (i in 1:n_genes) {
-   move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
-}
-moves[++mi] = move_species_subtree_scale_beta
-# We get a handle on our model.
-# We can use any node of our model as a handle, here we choose to use the topology.
-mymodel = model(spTree)
-# Monitors to check the progression of the program
-monitors[1] = mnScreen(printgen=10, spTree)
-# Here we use a plain MCMC. You could also set nruns=2 for a replicated analysis
-# or use mcmcmc with heated chains.
-mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-mymcmc.run(generations=1000)
-mymcmc.operatorSummary())");
+
+# Set my move index:
+    mi = 0
+    move_species_subtree_scale_beta = mvSpeciesSubtreeScaleBeta( speciesTree=spTree, weight=5 )
+    for (i in 1:n_genes) {
+        move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
+    }
+    moves[++mi] = move_species_subtree_scale_beta
+
+    # We get a handle on our model.
+    # We can use any node of our model as a handle; here we choose to use the topology.
+    mymodel = model(spTree)
+
+    # Monitors to check the progression of the program:
+    monitors[1] = mnScreen(printgen=10, spTree)
+
+    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+    mymcmc.run(generations=1000)
+    mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesSubtreeScaleBeta")][string("name")] = string(R"(mvSpeciesSubtreeScaleBeta)");
-	help_references[string("mvSpeciesSubtreeScaleBeta")].push_back(RbHelpReference(R"("Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Sebastian  H\xF6hna, Alexei J. Drummond. Syst Biol (2012) 61 (1): 1-11.")",R"(https://doi.org/10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
-	help_references[string("mvSpeciesSubtreeScaleBeta")].push_back(RbHelpReference(R"(Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Graham Jones.  Journal of Mathematical Biology, 2016.)",R"(https://doi.org/10.1007/s00285-016-1034-0)",R"(http://link.springer.com/article/10.1007/s00285-016-1034-0 )"));
+	help_references[string("mvSpeciesSubtreeScaleBeta")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
+	help_references[string("mvSpeciesSubtreeScaleBeta")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
 	help_arrays[string("mvSpeciesSubtreeScaleBeta")][string("see_also")].push_back(string(R"(mvSpeciesNodeTimeSlideUniform)"));
 	help_arrays[string("mvSpeciesSubtreeScaleBeta")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScale)"));
 	help_arrays[string("mvSpeciesSubtreeScaleBeta")][string("see_also")].push_back(string(R"(mvSpeciesNarrow)"));
@@ -3852,57 +3874,57 @@ All the gene trees that evolved along the species tree according to some form of
 This move jointly performs a tree scale move (the entire tree is scaled up or down, keeping the topology fixed) on the species tree and on gene trees, all of which must be ultrametric.)");
 	help_strings[string("mvSpeciesTreeScale")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
-# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+
+# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 n_species <- 10
 n_genes <- 2
 n_alleles <- 3
-# we simulate an ultrametric species tree:
+
+# We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-        species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
-root ~  dnNormal(mean=75,sd=2.5,min=0.0, max=Inf)
-spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=root, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
+spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
-# let's pick a constant effective population size of 50:
+
+# Let's pick a constant effective population size of 50:
 popSize <- 50
-# let's simulate gene trees now:
-# taxa names:
+
+# Let's simulate gene trees now.
+# Taxon names:
 for (g in 1:n_genes) {
-  for (i in 1:n_species) {
-    for (j in 1:n_alleles) {
-        taxons[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
+        }
     }
-  }
-  geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxons[g])
-  print(geneTrees[g])
+    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    print(geneTrees[g])
 }
-# We can save the species tree and the gene trees:
-write(spTree, filename=dataFolder+"speciesTree")
-# Saving the gene trees
-for (i in 1:(n_genes)) {
-  write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-}
-# set my move index
-mi = 0
-move_species_tree_scale = mvSpeciesTreeScale( speciesTree=spTree, root=root, weight=5 )
-for (i in 1:n_genes) {
-   move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
-}
-moves[++mi] = move_species_tree_scale
-# We get a handle on our model.
-# We can use any node of our model as a handle, here we choose to use the topology.
-mymodel = model(spTree)
-# Monitors to check the progression of the program
-monitors[1] = mnScreen(printgen=10, spTree)
-# Here we use a plain MCMC. You could also set nruns=2 for a replicated analysis
-# or use mcmcmc with heated chains.
-mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-mymcmc.run(generations=1000)
-mymcmc.operatorSummary())");
+
+# Set my move index:
+    mi = 0
+    move_species_tree_scale = mvSpeciesTreeScale( speciesTree=spTree, root=root, weight=5 )
+    for (i in 1:n_genes) {
+        move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
+    }
+    moves[++mi] = move_species_tree_scale
+
+    # We get a handle on our model.
+    # We can use any node of our model as a handle; here we choose to use the topology.
+    mymodel = model(spTree)
+
+    # Monitors to check the progression of the program:
+    monitors[1] = mnScreen(printgen=10, spTree)
+
+    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+    mymcmc.run(generations=1000)
+    mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesTreeScale")][string("name")] = string(R"(mvSpeciesTreeScale)");
-	help_references[string("mvSpeciesTreeScale")].push_back(RbHelpReference(R"("Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Sebastian  H\xF6hna, Alexei J. Drummond. Syst Biol (2012) 61 (1): 1-11.")",R"(https://doi.org/10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
-	help_references[string("mvSpeciesTreeScale")].push_back(RbHelpReference(R"(Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Graham Jones.  Journal of Mathematical Biology, 2016.)",R"(https://doi.org/10.1007/s00285-016-1034-0)",R"(http://link.springer.com/article/10.1007/s00285-016-1034-0 )"));
+	help_references[string("mvSpeciesTreeScale")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
+	help_references[string("mvSpeciesTreeScale")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
 	help_arrays[string("mvSpeciesTreeScale")][string("see_also")].push_back(string(R"(mvSpeciesNodeTimeSlideUniform)"));
 	help_arrays[string("mvSpeciesTreeScale")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScaleBeta)"));
 	help_arrays[string("mvSpeciesTreeScale")][string("see_also")].push_back(string(R"(mvSpeciesNarrow)"));
@@ -4005,8 +4027,8 @@ moves.append( delta_up_down_move ))");
 	help_strings[string("mvVectorSlideRecenter")][string("name")] = string(R"(mvVectorSlideRecenter)");
 	help_strings[string("nodeAgeByID")][string("name")] = string(R"(nodeAgeByID)");
 	help_strings[string("normalize")][string("name")] = string(R"(normalize)");
-	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(David Černý)"));
+	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(David Cerny)"));
 	help_strings[string("pathSampler")][string("description")] = string(R"(Applies the path-sampling technique (Gelman & Meng 1998), also known as
 thermodynamic integration (Ogata 1989; Lartillot & Philippe 2006), to estimate
 the marginal likelihood of a model from a series of unnormalized "power
@@ -4045,7 +4067,7 @@ can also be derived using the stationary bootstrap method (Politis & Romano
 1994), which divides the log likelihood values from each power posterior into
 consecutive blocks of random size (drawn from a geometric distribution) and
 resamples them with replacement. The RevBayes implementation of the stationary
-block bootstrap method is based on the mcmc3r R package (Álvarez-Carretero et
+block bootstrap method is based on the mcmc3r R package (Alvarez-Carretero et
 al. 2022), and can be accessed by calling `.stdError(bootstrap=TRUE)`.)");
 	help_strings[string("pathSampler")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
@@ -4073,7 +4095,7 @@ ps.stdError()                                               # default formula
 ps.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
 ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("pathSampler")][string("name")] = string(R"(pathSampler)");
-	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Alvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(dos Reis M, Gunnell GF, Barba-Montoya J, Wilkins A, Yang Z, Yoder AD (2018). Using phylogenomic data to explore the effects of relaxed clocks and calibration strategies on divergence time estimation: primates as a test case. Systematic Biology, 67(4):594-615.)",R"(10.1093/sysbio/syy001)",R"(https://academic.oup.com/sysbio/article/67/4/594/4802240 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.)",R"(10.1214/ss/1028905934)",R"(https://www.jstor.org/stable/2676756 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195-207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
@@ -4488,7 +4510,7 @@ if ( abs(root*root - x) > 1.0e-15) {
 	help_strings[string("sqrt")][string("title")] = string(R"(Square root of a number)");
 	help_strings[string("srGelmanRubin")][string("description")] = string(R"(Terminates an MCMC run when the Gelman-Rubin statistic drops below the
 specified value.)");
-	help_strings[string("srGelmanRubin")][string("details")] = string(R"(The Gelman–Rubin statistic, also referred to as the potential scale reduction
+	help_strings[string("srGelmanRubin")][string("details")] = string(R"(The Gelman-Rubin statistic, also referred to as the potential scale reduction
 factor (PSRF), compares the variance of the sample pooled from multiple runs to
 the sum of variances calculated from individual runs. Accordingly, it can only
 be calculated when two or more independent runs are performed, and its value
@@ -4538,7 +4560,7 @@ mymcmc.run(rules = stopping_rules))");
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srGeweke)"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srMinESS)"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srStationarity)"));
-	help_strings[string("srGelmanRubin")][string("title")] = string(R"(Gelman–Rubin (PSRF) stopping rule)");
+	help_strings[string("srGelmanRubin")][string("title")] = string(R"(Gelman-Rubin (PSRF) stopping rule)");
 	help_strings[string("srGeweke")][string("description")] = string(R"(Terminates an MCMC run when the Geweke test statistic ceases to be significant
 at the specified level.)");
 	help_strings[string("srGeweke")][string("details")] = string(R"(Geweke (1992) proposed a convergence diagnostic for Markov chains based on
@@ -4711,7 +4733,7 @@ mymcmc = mcmc(mymodel, monitors, moves)
 # Begin the MCMC run
 mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMinESS")][string("name")] = string(R"(srMinESS)");
-	help_references[string("srMinESS")].push_back(RbHelpReference(R"(Guimarães Fabreti L, Höhna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.)",R"(10.1111/2041-210X.13727)",R"(https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727 )"));
+	help_references[string("srMinESS")].push_back(RbHelpReference(R"(Guimaraes Fabreti L, Hoehna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.)",R"(10.1111/2041-210X.13727)",R"(https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727 )"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGeweke)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srStationarity)"));
@@ -4778,8 +4800,8 @@ s := stdev(x))");
 	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(Real)"));
 	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(mean)"));
 	help_strings[string("stdev")][string("title")] = string(R"(Standard Deviation)");
-	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(David Černý)"));
+	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(David Cerny)"));
 	help_strings[string("steppingStoneSampler")][string("description")] = string(R"(Applies the stepping-stone technique (Fan et al. 2011; Xie et al. 2011) to
 estimate the marginal likelihood of a model from a series of unnormalized
 "power posterior" densities in which the likelihood term is raised to a power
@@ -4820,7 +4842,7 @@ the stationary bootstrap method (Politis & Romano 1994), which divides the log
 likelihood values from each power posterior into consecutive blocks of random
 size (drawn from a geometric distribution) and resamples them with replacement.
 The RevBayes implementation of the stationary block bootstrap method is based
-on the mcmc3r R package (Álvarez-Carretero et al. 2022), and can be accessed by
+on the mcmc3r R package (Alvarez-Carretero et al. 2022), and can be accessed by
 calling `.stdError(bootstrap=TRUE)`.)");
 	help_strings[string("steppingStoneSampler")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
@@ -4848,7 +4870,7 @@ ss.stdError()                                               # delta approximatio
 ss.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
 ss.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
-	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
+	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Alvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Fan Y, Wu R, Chen M-H, Kuo L, Lewis PO (2011). Choosing among partition models in Bayesian phylogenetics. Molecular Biology and Evolution, 28(1):523-532.)",R"(10.1093/molbev/msq224)",R"(https://academic.oup.com/mbe/article/28/1/523/983866 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Politis DN, Romano JP (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428):1303-1313.)",R"(10.1080/01621459.1994.10476870)",R"(https://www.tandfonline.com/doi/abs/10.1080/01621459.1994.10476870 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Xie W, Lewis PO, Fan Y, Kuo L, Chen M-H (2010). Improving marginal likelihood estimation for Bayesian phylogenetic model selection. Systematic Biology, 60(2):150-160.)",R"(10.1093/sysbio/syq085)",R"(https://academic.oup.com/sysbio/article-abstract/60/2/150/2461669 )"));
@@ -5093,7 +5115,7 @@ z[0])");
 This a measure of how the data points deviate from the mean which is calculated
 as follows:
 
-s² = (1 / (n - 1)) * Σ (x[i] - x̄)² 
+s^2 = (1 / (n - 1)) * \sum (x[i] - \bar{x})^2
 
 which is essentially:
 (sum of squared differences from the mean) / (n - 1))");

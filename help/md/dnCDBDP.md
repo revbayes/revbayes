@@ -33,7 +33,7 @@ inferred tree (using `.clamp()`), and to a matrix recording which state is
 observed at a given tip (using `.clampCharData()`).
 
 2. Cladogenetic State-dependent Speciation Extinction (ClaSSE) (Goldberg &
-   Igić 2012)
+   Igic 2012)
 
 This model additionally allows for cladogenetic state changes, i.e., changes
 that take place at nodes, corresponding to the assumption that state change
@@ -48,7 +48,7 @@ rate specified in the `mu` vector. A draw from the distribution again has to
 be clamped both to a tree and to a character matrix. See the example below
 for implementation.
 
-3. Branch-specific Diversification Rate Estimation (Höhna et al. 2019)
+3. Branch-specific Diversification Rate Estimation (Hoehna et al. 2019)
 
 `dnCDBDP` can also be used to estimate the number and placement of events 
 at which the rates of speciation and extinction shift from one category
@@ -116,10 +116,10 @@ fnCladogeneticSpeciationRateMatrix
 - citation: FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.
   doi: 10.1111/j.2041-210X.2012.00234.x
   url: https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x
-- citation: Goldberg EE, Igić B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.
+- citation: Goldberg EE, Igic B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.
   doi: 10.1111/j.1558-5646.2012.01730.x
   url: https://academic.oup.com/evolut/article/66/12/3701/6851227
-- citation: Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.
+- citation: Hoehna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.
   doi: 10.1101/555805
   url: https://www.biorxiv.org/content/10.1101/555805v1.full
 - citation: Maddison WP, Midford PE, Otto SP (2007). Estimating a binary character's effect on speciation and extinction. Systematic Biology, 56(5):701-710.

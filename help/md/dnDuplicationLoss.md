@@ -16,7 +16,7 @@ dnMultiSpeciesCoalescentInverseGamma
 ## example
 	# We are going to save the trees we simulate in the folder simulatedTrees:
 	dataFolder = "simulatedTrees/" 
-	# Let’s simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
+	# Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
 	n_species <- 10
 	n_genes <- 2
 	n_alleles <- 3
@@ -48,8 +48,6 @@ dnMultiSpeciesCoalescentInverseGamma
 	}
 	
 ## references
-- citation: Bayes Estimation of Species Divergence Times and Ancestral Population
-    Sizes Using DNA Sequences From Multiple Loci. Bruce Rannala and Ziheng Yang. GENETICS
-    August 1, 2003 vol. 164 no. 4 1645-1656.
-  doi: null
-  url: http://www.genetics.org/content/164/4/1645.short
+- citation: Rannala B, Yang Z (2003). Bayes estimation of species divergence times and ancestral population sizes using DNA sequences from multiple loci. Genetics, 164(4):1645-1656.
+  doi: 10.1093/genetics/164.4.1645
+  url: https://academic.oup.com/genetics/article-abstract/164/4/1645/6050371

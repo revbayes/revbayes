@@ -63,6 +63,6 @@ srStationarity
     mymcmc.run(rules = stopping_rules)
 
 ## references
-- citation: Guimarães Fabreti L, Höhna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.
+- citation: Guimaraes Fabreti L, Hoehna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.
   doi: 10.1111/2041-210X.13727
   url: https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727

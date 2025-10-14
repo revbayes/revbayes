@@ -1,12 +1,12 @@
 ## name
 srGelmanRubin
 ## title
-Gelman–Rubin (PSRF) stopping rule
+Gelman-Rubin (PSRF) stopping rule
 ## description
 Terminates an MCMC run when the Gelman-Rubin statistic drops below the
 specified value.
 ## details
-The Gelman–Rubin statistic, also referred to as the potential scale reduction
+The Gelman-Rubin statistic, also referred to as the potential scale reduction
 factor (PSRF), compares the variance of the sample pooled from multiple runs to
 the sum of variances calculated from individual runs. Accordingly, it can only
 be calculated when two or more independent runs are performed, and its value

@@ -10,7 +10,7 @@ kernel -- a bimodal distribution centered at zero, obtained as a mixture of two
 unimodal component distributions. Specifically, `mvScaleBactrian` scales
 parameter values by a random factor of exp(lambda * delta), where lambda is a
 tuning parameter and delta is drawn from a mixture of two normal distributions
-following Yang & Rodríguez (2013: Supplementary Information, Eq. 19): 
+following Yang & Rodriguez (2013: Supplementary Information, Eq. 19): 
 
     u ~ Unif(0, 1)
     x ~ N(0, 1)
@@ -33,6 +33,6 @@ mvScaleBactrianCauchy
     moves.append( mvScaleBactrian(speciation_rate, weight=5) )
 
 ## references
-- citation: Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.
+- citation: Yang Z, Rodriguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.
   doi: 10.1073/pnas.1311790110
   url: https://www.pnas.org/doi/full/10.1073/pnas.1311790110
