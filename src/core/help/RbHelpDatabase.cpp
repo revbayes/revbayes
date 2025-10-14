@@ -4486,11 +4486,28 @@ if ( abs(root*root - x) > 1.0e-15) {
 	help_strings[string("sqrt")][string("name")] = string(R"(sqrt)");
 	help_arrays[string("sqrt")][string("see_also")].push_back(string(R"(`power`)"));
 	help_strings[string("sqrt")][string("title")] = string(R"(Square root of a number)");
-	help_strings[string("srGelmanRubin")][string("description")] = string(R"(Allow an MCMC run to terminate once the specified criterion has been met.
-The Gelman-Rubin rule compares the variance between runs with the variance within runs; its value tends to unity (1) as runs converge. It is widely referred to as the "potential scale reduction factor" (PSRF).)");
-	help_strings[string("srGelmanRubin")][string("details")] = string(R"(Because the statistic is defined by comparing the variation between different runs to the variance within each run, it can only be calculated when multiple independent runs are performed, by setting the `nruns` argument to `mcmc` or `mcmcmc` to a value greater than one.)");
-	help_strings[string("srGelmanRubin")][string("example")] = string(R"(```
-# Binomial example: estimate success probability given 7 successes out of 20 trials
+	help_strings[string("srGelmanRubin")][string("description")] = string(R"(Terminates an MCMC run when the Gelman-Rubin statistic drops below the
+specified value.)");
+	help_strings[string("srGelmanRubin")][string("details")] = string(R"(The Gelman–Rubin statistic, also referred to as the potential scale reduction
+factor (PSRF), compares the variance of the sample pooled from multiple runs to
+the sum of variances calculated from individual runs. Accordingly, it can only
+be calculated when two or more independent runs are performed, and its value
+tends to unity (1) as the runs converge.
+
+The number of samples to be removed as burnin before calculating the test
+statistic is determined using the `burninMethod`. Different burnin lengths are
+tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
+of the trace in increments of 10 samples. If the `ESS` option is chosen
+(default), effective sample sizes (ESS) are calculated for all monitored
+parameters after removing the number of samples corresponding to each candidate
+burnin length. The best burnin length for a given parameter is the one that
+maximizes its ESS value. If the `SEM` option is chosen, the standard error of
+the mean (SEM) is calculated instead, and the best burnin length for a given
+parameter is the one that minimizes its SEM value. In both cases, the final
+burnin length is set to the maximum of the parameter-specific burnin lengths.
+
+See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).)");
+	help_strings[string("srGelmanRubin")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
 n <- 20
@@ -4509,28 +4526,50 @@ monitors.append( mnModel(filename=paramFile, printgen=100, p) )
 # Stop when the potential scale reduction factor falls below 1.01
 stopping_rules[1] = srGelmanRubin(1.01, file = paramFile, freq = 1000)
 
-# Create the MCMC object
+# Create the MCMC object.
+# Set nruns = 2 to ensure the Gelman-Rubin statistic is applicable
 mymcmc = mcmc(mymodel, monitors, moves, nruns = 2)
 
 # Begin the MCMC run
-mymcmc.run(rules = stopping_rules)
-```)");
+mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srGelmanRubin")][string("name")] = string(R"(srGelmanRubin)");
 	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Gelman A, Rubin DB (1992). Inference from iterative simulation using multiple sequences. Statistical Science, 7(4):457--472.)",R"(10.1214/ss/1177011136 )",R"()"));
 	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Vats D, Knudson C (2021). Revisiting the Gelman--Rubin diagnostic. Statistical Science, 36(4):518--529.)",R"(10.1214/20-STS812 )",R"()"));
-	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"()"));
-	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
-	help_strings[string("srGelmanRubin")][string("title")] = string(R"(Gelman-Rubin (PSRF) stopping rule)");
-	help_arrays[string("srGeweke")][string("authors")].push_back(string(R"(Incorporates text by Martyn Plummer)"));
-	help_strings[string("srGeweke")][string("description")] = string(R"(Allow an MCMC run to terminate once the specified criterion has been met.
+	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srGeweke)"));
+	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srMinESS)"));
+	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srStationarity)"));
+	help_strings[string("srGelmanRubin")][string("title")] = string(R"(Gelman–Rubin (PSRF) stopping rule)");
+	help_strings[string("srGeweke")][string("description")] = string(R"(Terminates an MCMC run when the Geweke test statistic ceases to be significant
+at the specified level.)");
+	help_strings[string("srGeweke")][string("details")] = string(R"(Geweke (1992) proposed a convergence diagnostic for Markov chains based on
+a test for equality of the means of the first and last part of a Markov chain
+(by default the first 10% and the last 50%). If the samples are drawn from the
+stationary distribution of the chain, the two means are equal and Geweke's
+statistic has an asymptotically standard normal distribution.
 
-Geweke (1992) proposed a convergence diagnostic for Markov chains based on a test for equality of the means of the first and last part of a Markov chain (by default the first 10% and the last 50%). If the samples are drawn from the stationary distribution of the chain, the two means are equal and Geweke's statistic has an asymptotically standard normal distribution.
+The test statistic is a standard Z-score: the difference between the two sample
+means divided by its estimated standard error. The standard error is estimated
+from the spectral density at zero and so accounts for any autocorrelation. The
+Z-score is calculated under the assumption that the two parts of the chain are
+asymptotically independent, which requires that the sum of `frac1` and `frac2`
+be strictly less than 1.
 
-The test statistic is a standard Z-score: the difference between the two sample means divided by its estimated standard error. The standard error is estimated from the spectral density at zero and so takes into account any autocorrelation.
+The number of samples to be removed as burnin before calculating the test
+statistic is determined using the `burninMethod`. Different burnin lengths are
+tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
+of the trace in increments of 10 samples. If the `ESS` option is chosen
+(default), effective sample sizes (ESS) are calculated for all monitored
+parameters after removing the number of samples corresponding to each candidate
+burnin length. The best burnin length for a given parameter is the one that
+maximizes its ESS value. If the `SEM` option is chosen, the standard error of
+the mean (SEM) is calculated instead, and the best burnin length for a given
+parameter is the one that minimizes its SEM value. In both cases, the final
+burnin length is set to the maximum of the parameter-specific burnin lengths.
 
-The Z-score is calculated under the assumption that the two parts of the chain are asymptotically independent, which requires that the sum of `frac1` and `frac2` be strictly less than 1.)");
-	help_strings[string("srGeweke")][string("example")] = string(R"(```
-# Binomial example: estimate success probability given 7 successes out of 20 trials
+See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).
+
+This help file incorporates text by Martyn Plummer.)");
+	help_strings[string("srGeweke")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
 n <- 20
@@ -4546,19 +4585,19 @@ paramFile = "parameters.log"
 monitors = VectorMonitors()
 monitors.append( mnModel(filename=paramFile, printgen=100, p) )
 
-# Stop when the Geweke test statistic becomes significant at alpha = 0.001
+# Stop when the Geweke test statistic is no longer significant at alpha = 0.001
 stopping_rules[1] = srGeweke( prob=0.001, file=paramFile, freq=10000 )
 
 # Create the MCMC object
 mymcmc = mcmc( mymodel, monitors, moves )
 
 # Begin the MCMC run
-mymcmc.run( rules = stopping_rules )
-```)");
+mymcmc.run( rules = stopping_rules ))");
 	help_strings[string("srGeweke")][string("name")] = string(R"(srGeweke)");
-	help_references[string("srGeweke")].push_back(RbHelpReference(R"(Geweke, J. Evaluating the accuracy of sampling-based approaches to calculating posterior moments.  In Bayesian Statistics 4 (ed JM Bernado, JO Berger, AP Dawid and AFM Smith).   Clarendon Press, Oxford, UK. )",R"()",R"()"));
-	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"()"));
-	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
+	help_references[string("srGeweke")].push_back(RbHelpReference(R"(Geweke J (1992). Evaluating the accuracy of sampling-based approaches to calculating posterior moments. Pp. 169--194 in Bernado M, Berger JO, Dawid AP, Smith AFM, eds. Bayesian Statistics 4. Clarendon Press, Oxford, UK.)",R"(10.1093/oso/9780198522669.003.0010)",R"(https://academic.oup.com/book/54041/chapter-abstract/422209572 )"));
+	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
+	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srMinESS)"));
+	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srStationarity)"));
 	help_strings[string("srGeweke")][string("title")] = string(R"(Geweke stopping rule)");
 	help_strings[string("srMaxIteration")][string("description")] = string(R"(Cause an MCMC run to terminate once the specified number of iterations have been performed.
 This function would typically be used alongside other stopping rules)");
@@ -4620,19 +4659,34 @@ mymcmc.run(rules = stopping_rules)
 ```)");
 	help_strings[string("srMaxTime")][string("name")] = string(R"(srMaxTime)");
 	help_strings[string("srMaxTime")][string("title")] = string(R"(Maximum time stopping rule)");
-	help_arrays[string("srMinESS")][string("authors")].push_back(string(R"(ESS explanation adapted from Luiza Fabreti and Sebastian Höhna's [tutorial](https://revbayes.github.io/tutorials/convergence/))"));
-	help_strings[string("srMinESS")][string("description")] = string(R"(Allow an MCMC run to terminate once the specified criterion has been met.)");
-	help_strings[string("srMinESS")][string("details")] = string(R"(The Effective Sample Size (ESS) is the number of independent samples generated by a MCMC sampler.
-The ESS takes into account the correlation between samples within a chain.
-Low ESS values represent high autocorrelation in the chain.
-If the autocorrelation is higher, then the uncertainty in our estimates is also higher.
+	help_strings[string("srMinESS")][string("description")] = string(R"(Terminates an MCMC run when the effective sample sizes (ESS) of all parameters
+exceed the specified value.)");
+	help_strings[string("srMinESS")][string("details")] = string(R"(The ESS is the number of independent samples generated by a MCMC sampler.
+It takes into account the correlation between samples within a chain. Low ESS
+values represent high autocorrelation, and consequently more uncertainty
+associated with the parameter estimate.
 
-The MCMC run will terminate once all parameters in every log file meet the ESS
-threshold.  As such, performing additional runs will not decrease the number
-of generations required to meet the ESS threshold -- even though it will increase
-the number of indepedent samples in the final, pooled posterior sample.)");
-	help_strings[string("srMinESS")][string("example")] = string(R"(```
-# Binomial example: estimate success probability given 7 successes out of 20 trials
+The MCMC analysis will terminate once all parameters in every run meet the ESS
+threshold. As such, performing additional runs will not decrease the number
+of generations required to meet the ESS threshold, even though it may increase
+the number of indepedent samples in the final, pooled posterior sample.
+
+The number of samples to be removed as burnin before calculating the test
+statistic is determined using the `burninMethod`. Different burnin lengths are
+tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
+of the trace in increments of 10 samples. If the `ESS` option is chosen
+(default), ESS is calculated for all monitored parameters after removing the
+number of samples corresponding to each candidate burnin length. The best
+burnin length for a given parameter is the one that maximizes its ESS value.
+If the `SEM` option is chosen, the standard error of the mean (SEM) is
+calculated instead, and the best burnin length for a given parameter is the one
+that minimizes its SEM value. In both cases, the final burnin length is set to
+the maximum of the parameter-specific burnin lengths.
+
+The [convergence assessment](https://revbayes.github.io/tutorials/convergence/)
+tutorial contains a discusson on the calculation and interpretation of the ESS
+diagnostic.)");
+	help_strings[string("srMinESS")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
 n <- 20
@@ -4655,17 +4709,34 @@ stopping_rules[1] = srMinESS(50, file = paramFile, freq = 1000)
 mymcmc = mcmc(mymodel, monitors, moves)
 
 # Begin the MCMC run
-mymcmc.run(rules = stopping_rules)
-```)");
+mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMinESS")][string("name")] = string(R"(srMinESS)");
-	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"()"));
-	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(- The tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/) contains a discusson on the calculation and interpretation of the ESS diagnostic.)"));
-	help_strings[string("srMinESS")][string("title")] = string(R"(Estimated sample size stopping rule)");
-	help_strings[string("srStationarity")][string("description")] = string(R"(Allow an MCMC run to terminate once the specified criterion has been met.
-An MCMC sample can be considered stationary once its mean, variance and autocorrelation structure do not change over time.)");
-	help_strings[string("srStationarity")][string("details")] = string(R"(Because the statistic is defined by comparing different runs, it can only be calculated when multiple independent runs are performed, by setting the `nruns` argument to `mcmc` or `mcmcmc` to a value greater than one.)");
-	help_strings[string("srStationarity")][string("example")] = string(R"(```
-# Binomial example: estimate success probability given 7 successes out of 20 trials
+	help_references[string("srMinESS")].push_back(RbHelpReference(R"(Guimarães Fabreti L, Höhna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.)",R"(10.1111/2041-210X.13727)",R"(https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727 )"));
+	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
+	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGeweke)"));
+	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srStationarity)"));
+	help_strings[string("srMinESS")][string("title")] = string(R"(Effective sample size stopping rule)");
+	help_strings[string("srStationarity")][string("description")] = string(R"(Terminates an MCMC run when the difference between the means of individual runs
+and the mean of the sample pooled from all runs ceases to be significant.)");
+	help_strings[string("srStationarity")][string("details")] = string(R"(This convergence criterion evaluates whether the mean of the sample pooled
+from multiple runs lies outside the confidence interval of width 1 - `prob`
+constructed for the mean of each individual run. Accordingly, it can only be
+calculated when two or more independent runs are performed.
+
+The number of samples to be removed as burnin before calculating the test
+statistic is determined using the `burninMethod`. Different burnin lengths are
+tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
+of the trace in increments of 10 samples. If the `ESS` option is chosen
+(default), effective sample sizes (ESS) are calculated for all monitored
+parameters after removing the number of samples corresponding to each candidate
+burnin length. The best burnin length for a given parameter is the one that
+maximizes its ESS value. If the `SEM` option is chosen, the standard error of
+the mean (SEM) is calculated instead, and the best burnin length for a given
+parameter is the one that minimizes its SEM value. In both cases, the final
+burnin length is set to the maximum of the parameter-specific burnin lengths.
+
+See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).)");
+	help_strings[string("srStationarity")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
 n <- 20
@@ -4685,14 +4756,16 @@ monitors.append( mnModel(filename=paramFile, printgen=100, p) )
 stopping_rules[1] = srStationarity(prob = 0.25, file = paramFile, freq = 1000)
 
 # Create the MCMC object
+# Set nruns = 2 to ensure the stationarity statistic is applicable
 mymcmc = mcmc(mymodel, monitors, moves, nruns = 2)
 
 # Begin the MCMC run
-mymcmc.run(rules = stopping_rules)
-```)");
+mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srStationarity")][string("name")] = string(R"(srStationarity)");
-	help_references[string("srStationarity")].push_back(RbHelpReference(R"(Hill, S.D. and Spall, J.C. 2011. Stationarity and Convergence of the Metropolis-Hastings Algorithm: Insights into Theoretical Aspects. IEEE Control Systems Magazine 39.)",R"(10.1109/MCS.2018.2876959)",R"()"));
-	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(- Tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/))"));
+	help_references[string("srStationarity")].push_back(RbHelpReference(R"(Hill SD, Spall JC (2011). Stationarity and convergence of the Metropolis-Hastings algorithm: insights into theoretical aspects. IEEE Control Systems Magazine 39(1):56--67.)",R"(10.1109/MCS.2018.2876959 )",R"()"));
+	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
+	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(srGeweke)"));
+	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(srMinESS)"));
 	help_strings[string("srStationarity")][string("title")] = string(R"(Stationarity stopping rule)");
 	help_arrays[string("stdev")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("stdev")][string("description")] = string(R"(Finds the standard deviation of a vector of real numbers.)");
