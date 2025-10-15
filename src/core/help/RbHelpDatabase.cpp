@@ -2996,11 +2996,10 @@ Non-simplex-valued vector random variables are untransformed.
 Add random variables to the move directly (e.g. branch_rates[1], not branch_rates).WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical covariance matrix.)");
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
-	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution.)");
-	help_strings[string("mvBetaSimplex")][string("example")] = string(R"(A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
+	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution. A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
 	help_strings[string("mvBetaSimplex")][string("name")] = string(R"(mvBetaSimplex)");
-	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvDirichletSimplex)"));
-	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(mvDirichletSimplex)"));
+	help_arrays[string("mvBetaSimplex")][string("see_also")].push_back(string(R"(mvElementSwapSimplex)"));
 	help_strings[string("mvBetaSimplex")][string("title")] = string(R"(Beta Simplex move)");
 	help_strings[string("mvBinarySwitch")][string("name")] = string(R"(mvBinarySwitch)");
 	help_strings[string("mvBirthDeathEvent")][string("name")] = string(R"(mvBirthDeathEvent)");
@@ -3059,10 +3058,10 @@ mymodel = model(x)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.run(generations=50))");
 	help_strings[string("mvDPPValueBetaSimplex")][string("name")] = string(R"(mvDPPValueBetaSimplex)");
-	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- dnDPP)"));
-	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
-	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvDPPValueScaling)"));
-	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(- mvDPPValueSliding)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(dnDPP)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(mvBetaSimplex)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(mvDPPValueScaling)"));
+	help_arrays[string("mvDPPValueBetaSimplex")][string("see_also")].push_back(string(R"(mvDPPValueSliding)"));
 	help_strings[string("mvDPPValueBetaSimplex")][string("title")] = string(R"(Beta simplex move applied to individual categories of a Dirichlet process mixture)");
 	help_arrays[string("mvDPPValueScaling")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvDPPValueScaling")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [RealPos](https://revbayes.github.io/documentation/RealPos.html) distributions, i.e., distributions defined over non-negative real numbers.)");
@@ -3082,10 +3081,10 @@ mymodel = model(x)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.run(generations=50))");
 	help_strings[string("mvDPPValueScaling")][string("name")] = string(R"(mvDPPValueScaling)");
-	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- dnDPP)"));
-	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvScale)"));
-	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvDPPValueBetaSimplex)"));
-	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(- mvDPPValueSliding)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(dnDPP)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(mvScale)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(mvDPPValueBetaSimplex)"));
+	help_arrays[string("mvDPPValueScaling")][string("see_also")].push_back(string(R"(mvDPPValueSliding)"));
 	help_strings[string("mvDPPValueScaling")][string("title")] = string(R"(Scaling move applied to individual categories of a Dirichlet process mixture)");
 	help_arrays[string("mvDPPValueSliding")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvDPPValueSliding")][string("description")] = string(R"(Operates on draws from a Dirichlet process prior (DPP) on mixtures of [Real](https://revbayes.github.io/documentation/Real.html) distributions, i.e., distributions defined over all real numbers.)");
@@ -3105,10 +3104,10 @@ mymodel = model(x)
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.run(generations=50))");
 	help_strings[string("mvDPPValueSliding")][string("name")] = string(R"(mvDPPValueSliding)");
-	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- dnDPP)"));
-	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvSlide)"));
-	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvDPPValueBetaSimplex)"));
-	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(- mvDPPValueScaling)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(dnDPP)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(mvSlide)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(mvDPPValueBetaSimplex)"));
+	help_arrays[string("mvDPPValueSliding")][string("see_also")].push_back(string(R"(mvDPPValueScaling)"));
 	help_strings[string("mvDPPValueSliding")][string("title")] = string(R"(Sliding move applied to individual categories of a Dirichlet process mixture)");
 	help_strings[string("mvDirichletSimplex")][string("description")] = string(R"(A Dirichlet-simplex proposal randomly changes some values of a [Simplex](https://revbayes.github.io/documentation/Simplex.html)
 (a vector whose elements sum to 1). The other values change too because of renormalization.
@@ -3116,11 +3115,12 @@ mymcmc.run(generations=50))");
 First, some random indices are drawn.
 Then, the proposal draws a new simplex `u ~ Dirichlet(val[index] * alpha)`, where alpha is the tuning parameter.
 The new value is set to `u`.
-The simplex is then renormalized.)");
-	help_strings[string("mvDirichletSimplex")][string("example")] = string(R"(Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html)");
+The simplex is then renormalized.
+
+Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html)");
 	help_strings[string("mvDirichletSimplex")][string("name")] = string(R"(mvDirichletSimplex)");
-	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvBetaSimplex)"));
-	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(- mvElementSwapSimplex)"));
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(mvBetaSimplex)"));
+	help_arrays[string("mvDirichletSimplex")][string("see_also")].push_back(string(R"(mvElementSwapSimplex)"));
 	help_strings[string("mvDirichletSimplex")][string("title")] = string(R"(Dirichlet Simplex move)");
 	help_strings[string("mvDiscreteEventCategoryRandomWalk")][string("name")] = string(R"(mvDiscreteEventCategoryRandomWalk)");
 	help_strings[string("mvElementSwapSimplex")][string("description")] = string(R"(An Element Swap Simplex move selects two elements of a vector and exchanges their values.)");
