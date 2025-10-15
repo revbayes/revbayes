@@ -3,10 +3,10 @@ dnMultiSpeciesCoalescent
 ## title
 Multispecies coalescent distribution
 ## description
-Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given a constant effective population size. Requires an ultrametric species tree, a single effective population size (a single real positive), and taxa with species and individual names.
+Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given a constant effective population size. Requires an ultrametric species tree, effective population size(s) (a single real positive or a vector of real positives), and taxa with species and individual names.
 ## details
 The species tree must be ultrametric.
-The effective population size is constant across the species tree.
+Effective population sizes can be constant across the species tree, if a single real positive is provided, or branchwise, if a vector is provided.
 
 ## authors
 Sebastian Hoehna
