@@ -30,6 +30,6 @@ dnCoalescentDemography
     # continue as usual to either clamp the genealogy or infer the genealogy based on sequence data
 
 ## references
-- citation: Billenstein R, Hoehna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.
+- citation: Billenstein R, Höhna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.
   doi: 10.1093/molbev/msae073
   url: https://academic.oup.com/mbe/article/41/5/msae073/7648822

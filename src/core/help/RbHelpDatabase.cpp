@@ -542,9 +542,9 @@ of Macroevolutionary Mixtures (BAMM; Rabosky 2014), particularly in making
 a strong and potentially problematic assumption that all rate-shift events
 have been observed (Moore et al. 2016) -- i.e., that no rate shifts are mapped
 onto unobserved (extinct) branches. For an alternative birth-death-shift model
-that relaxes this assumption, see `dnCDBDP` (Hoehna et al. 2019), which
-employs a finite number of rate categories instead of drawing rates directly
-from a continuous distribution.)");
+that relaxes this assumption, see `dnCDBDP` (Höhna et al. 2019), which employs
+a finite number of rate categories instead of drawing rates directly from
+a continuous distribution.)");
 	help_strings[string("dnCBDSP")][string("example")] = string(R"(# draw basic process parameters
 taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 root_age ~ dnUniform(0, 2)
@@ -561,8 +561,8 @@ tree ~ dnCBDSP(rootAge    = root_age,
                condition  = "survival",
                taxa       = taxa))");
 	help_strings[string("dnCBDSP")][string("name")] = string(R"(dnCBDSP)");
-	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Hoehna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
-	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Moore BR, Hoehna S, May MR, Rannala B, Huelsenbeck JP (2016). Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary mixtures. Proceedings of the National Academy of Sciences of the USA, 113(34):9569-9574.)",R"(10.1073/pnas.1518659113)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1518659113 )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Moore BR, Höhna S, May MR, Rannala B, Huelsenbeck JP (2016). Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary mixtures. Proceedings of the National Academy of Sciences of the USA, 113(34):9569-9574.)",R"(10.1073/pnas.1518659113)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1518659113 )"));
 	help_references[string("dnCBDSP")].push_back(RbHelpReference(R"(Rabosky DL (2014). Automatic detection of key innovations, rate shifts, and diversity-dependence on phylogenetic trees. PLoS ONE, 9(2):e89543.)",R"(10.1371/journal.pone.0089543)",R"(https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0089543 )"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(dnCDBDP)"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvBirthDeathEventContinuous)"));
@@ -570,7 +570,7 @@ tree ~ dnCBDSP(rootAge    = root_age,
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvEventTimeBeta)"));
 	help_arrays[string("dnCBDSP")][string("see_also")].push_back(string(R"(mvEventTimeSlide)"));
 	help_strings[string("dnCBDSP")][string("title")] = string(R"(Conditioned birth-death-shift process)");
-	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("dnCDBDP")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("dnCDBDP")][string("description")] = string(R"(Simulates a tree under a multi-type birth-death process.)");
 	help_strings[string("dnCDBDP")][string("details")] = string(R"(This distribution is a flexible simulator that can be used for several
 lineage-heterogeneous diversification models. Specifically, `dnCDBDP` allows
@@ -600,7 +600,7 @@ inferred tree (using `.clamp()`), and to a matrix recording which state is
 observed at a given tip (using `.clampCharData()`).
 
 2. Cladogenetic State-dependent Speciation Extinction (ClaSSE) (Goldberg &
-   Igic 2012)
+   Igić 2012)
 
 This model additionally allows for cladogenetic state changes, i.e., changes
 that take place at nodes, corresponding to the assumption that state change
@@ -615,7 +615,7 @@ rate specified in the `mu` vector. A draw from the distribution again has to
 be clamped both to a tree and to a character matrix. See the example below
 for implementation.
 
-3. Branch-specific Diversification Rate Estimation (Hoehna et al. 2019)
+3. Branch-specific Diversification Rate Estimation (Höhna et al. 2019)
 
 `dnCDBDP` can also be used to estimate the number and placement of events 
 at which the rates of speciation and extinction shift from one category
@@ -671,8 +671,8 @@ timetree ~ dnCDBDP(rootAge   = root_age,
 	help_strings[string("dnCDBDP")][string("name")] = string(R"(dnCDBDP)");
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth--death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973-986.)",R"(10.1093/sysbio/syaa016)",R"(https://academic.oup.com/sysbio/article/69/5/973/5762626 )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.)",R"(10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
-	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg EE, Igic B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.)",R"(10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
-	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Hoehna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Goldberg EE, Igić B (2012). Tempo and mode in plant breeding system evolution. Evolution, 66(12):3701-3709.)",R"(10.1111/j.1558-5646.2012.01730.x)",R"(https://academic.oup.com/evolut/article/66/12/3701/6851227 )"));
+	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Höhna S, Freyman WA, Nolen Z, Huelsenbeck JP, May MR, Moore BR (2019). A Bayesian approach for estimating branch-specific speciation and extinction rates. bioRxiv.)",R"(10.1101/555805)",R"(https://www.biorxiv.org/content/10.1101/555805v1.full )"));
 	help_references[string("dnCDBDP")].push_back(RbHelpReference(R"(Maddison WP, Midford PE, Otto SP (2007). Estimating a binary character's effect on speciation and extinction. Systematic Biology, 56(5):701-710.)",R"(10.1080/10635150701607033)",R"(https://academic.oup.com/sysbio/article/56/5/701/1694265 )"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(dnCBDSP)"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticProbabilityMatrix)"));
@@ -753,7 +753,7 @@ root_height := psi.rootAge()
 
 # continue as usual to either clamp the genealogy or infer the genealogy based on sequence data)");
 	help_strings[string("dnCoalescent")][string("name")] = string(R"(dnCoalescent)");
-	help_references[string("dnCoalescent")].push_back(RbHelpReference(R"(Billenstein R, Hoehna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_references[string("dnCoalescent")].push_back(RbHelpReference(R"(Billenstein R, Höhna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
 	help_arrays[string("dnCoalescent")][string("see_also")].push_back(string(R"(dnCoalescentSkyline)"));
 	help_arrays[string("dnCoalescent")][string("see_also")].push_back(string(R"(dnCoalescentDemography)"));
 	help_strings[string("dnCoalescent")][string("title")] = string(R"(Constant population size coalescent process)");
@@ -803,7 +803,7 @@ root_height := psi.rootAge()
 
 # continue as usual to either clamp the genealogy or infer the genealogy based on sequence data)");
 	help_strings[string("dnCoalescentSkyline")][string("name")] = string(R"(dnCoalescentSkyline)");
-	help_references[string("dnCoalescentSkyline")].push_back(RbHelpReference(R"(Billenstein R, Hoehna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_references[string("dnCoalescentSkyline")].push_back(RbHelpReference(R"(Billenstein R, Höhna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
 	help_arrays[string("dnCoalescentSkyline")][string("see_also")].push_back(string(R"(dnCoalescent)"));
 	help_arrays[string("dnCoalescentSkyline")][string("see_also")].push_back(string(R"(dnCoalescentDemography)"));
 	help_strings[string("dnCoalescentSkyline")][string("title")] = string(R"(Heterochronous and homochronous skyline coalescent process)");
@@ -1386,7 +1386,7 @@ writeNexus("simulatedData.nex", sim))");
 	help_strings[string("dnPhyloCTMC")][string("name")] = string(R"(dnPhyloCTMC)");
 	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Felsenstein J (1973). Maximum likelihood and minimum-steps methods for estimating evolutionary trees from data on discrete characters. Systematic Biology, 22(3):240--249.)",R"(10.1093/sysbio/22.3.240 )",R"()"));
 	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Felsenstein J (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution, 17(6):368--376.)",R"(10.1007/BF01734359 )",R"()"));
-	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Hoehna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.)",R"(10.1002/cpbi.22 )",R"()"));
+	help_references[string("dnPhyloCTMC")].push_back(RbHelpReference(R"(Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.)",R"(10.1002/cpbi.22 )",R"()"));
 	help_strings[string("dnPhyloCTMC")][string("title")] = string(R"(Distribution of a phylogenetic continuous-time Markov chain)");
 	help_strings[string("dnPhyloCTMCClado")][string("name")] = string(R"(dnPhyloCTMCClado)");
 	help_strings[string("dnPhyloCTMCDASequence")][string("name")] = string(R"(dnPhyloCTMCDASequence)");
@@ -1784,7 +1784,7 @@ alpha = 0.5
 
 discrete_values := fnDiscretizeGamma( shape = alpha, rate = alpha, numCats = 4, median = FALSE ))");
 	help_strings[string("fnDiscretizeGamma")][string("name")] = string(R"(fnDiscretizeGamma)");
-	help_references[string("fnDiscretizeGamma")].push_back(RbHelpReference(R"(Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. J Mol Evol 39, 306--314.)",R"(10.1007/BF00160154 usl: https://doi.org/10.1007/BF00160154 )",R"()"));
+	help_references[string("fnDiscretizeGamma")].push_back(RbHelpReference(R"(Yang, Z (1994). Maximum likelihood phylogenetic estimation from DNA sequences with variable rates over sites: Approximate methods. Journal of Molecular Evolution, 39:306--314.)",R"(10.1007/BF00160154 usl: https://doi.org/10.1007/BF00160154 )",R"()"));
 	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeDistribution)"));
 	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"()"));
 	help_arrays[string("fnDiscretizeGamma")][string("see_also")].push_back(string(R"(fnDiscretizeBeta)"));
@@ -2207,7 +2207,7 @@ Q2 <- fnLG())");
 	help_arrays[string("fnLG")][string("see_also")].push_back(string(R"(fnWAG)"));
 	help_strings[string("fnLG")][string("title")] = string(R"(LG (Le and Gascuel) Amino Acid Substitution Rate Matrix)");
 	help_strings[string("fnLnProbability")][string("name")] = string(R"(fnLnProbability)");
-	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Cerny)"));
+	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(David Černý)"));
 	help_arrays[string("fnMinBLTimeScaling")][string("authors")].push_back(string(R"(Laura Mulvey)"));
 	help_strings[string("fnMinBLTimeScaling")][string("description")] = string(R"(Time-scales an undated tree based on a vector of tip ages using the minimum
 branch length ("MBL") approach (Laurin 2004; Bapst 2014).)");
@@ -2766,13 +2766,13 @@ map_tree = mccTree(trace=tree_trace, file="mcc.tree"))");
 	help_arrays[string("mccTree")][string("see_also")].push_back(string(R"(mapTree)"));
 	help_arrays[string("mccTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("mccTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
-	help_arrays[string("mcmc")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("mcmc")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("mcmc")][string("description")] = string(R"(The MCMC analysis object keeps a model and the associated moves and monitors. The object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.)");
 	help_strings[string("mcmc")][string("details")] = string(R"(The MCMC analysis object produced by a call to this function keeps copies of the model and the associated moves and monitors. The MCMC analysis object is used to run Markov chain Monte Carlo (MCMC) simulation on the model, using the provided moves, to obtain a sample of the posterior probability distribution. During the analysis, the monitors are responsible for sampling model parameters of interest.
 
 The `mcmc.run()` method begins or continues an MCMC analysis. 
 
-During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Hoehna et al. (2017) for details.
+During each iteration of an analysis, moves are selected from those listed in the `moves` parameter.  With the default `moveschedule = "random"`, or `moveschedule = "sequential"`, moves will be attempted, on average, `weight` times per iteration.  If `moveschedule = "single"`, RevBayes will attempt exactly one move per iteration, corresponding to the behavior of software like BEAST or MrBayes. See Höhna et al. (2017) for details.
 
 The run will continue for `generations` iterations, or until a stopping rule is triggered: perhaps once the run has attained convergence, or after a certain amount of time has passed.  The run will be terminated once *all* convergence rules ([`srGelmanRubin()`], [`srGeweke()`], [`srMinESS()`], [`srStationarity()`]) in its `StoppingRule[]` argument have been fulfilled; or once *any* threshold rules ([`srMaxTime()`], [`srMaxIteration()`]) are met.
 
@@ -2809,7 +2809,7 @@ mymcmcObject.run( rules = [ srMaxIteration(400) ] ))");
 	help_strings[string("mcmc")][string("name")] = string(R"(mcmc)");
 	help_references[string("mcmc")].push_back(RbHelpReference(R"(Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953). Equation of state calculations by fast computing machines. Journal of Chemical Physics, 21:1087-1092.)",R"(10.1063/1.1699114 )",R"()"));
 	help_references[string("mcmc")].push_back(RbHelpReference(R"(Hastings WK (1970) Monte Carlo sampling methods using Markov chains and their applications. Biometrika, 57:97-109.)",R"(10.2307/2334940 )",R"()"));
-	help_references[string("mcmc")].push_back(RbHelpReference(R"(Hoehna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.)",R"(10.1002/cpbi.22 )",R"()"));
+	help_references[string("mcmc")].push_back(RbHelpReference(R"(Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.)",R"(10.1002/cpbi.22 )",R"()"));
 	help_arrays[string("mcmc")][string("see_also")].push_back(string(R"(mcmcmc)"));
 	help_strings[string("mcmc")][string("title")] = string(R"(MCMC analysis object)");
 	help_arrays[string("mcmcmc")][string("authors")].push_back(string(R"(Michael Landis)"));
@@ -3497,7 +3497,7 @@ kernel -- a bimodal distribution centered at zero, obtained as a mixture of two
 unimodal component distributions. Specifically, `mvScaleBactrian` scales
 parameter values by a random factor of exp(lambda * delta), where lambda is a
 tuning parameter and delta is drawn from a mixture of two normal distributions
-following Yang & Rodriguez (2013: Supplementary Information, Eq. 19): 
+following Yang & Rodríguez (2013: Supplementary Information, Eq. 19): 
 
     u ~ Unif(0, 1)
     x ~ N(0, 1)
@@ -3513,7 +3513,7 @@ be positive.)");
 speciation_rate ~ dnGamma(2, 4)
 moves.append( mvScaleBactrian(speciation_rate, weight=5) ))");
 	help_strings[string("mvScaleBactrian")][string("name")] = string(R"(mvScaleBactrian)");
-	help_references[string("mvScaleBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodriguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
+	help_references[string("mvScaleBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
 	help_arrays[string("mvScaleBactrian")][string("see_also")].push_back(string(R"(mvScale)"));
 	help_arrays[string("mvScaleBactrian")][string("see_also")].push_back(string(R"(mvScaleBactrianCauchy)"));
 	help_strings[string("mvScaleBactrian")][string("title")] = string(R"(Scaling Move Employing Bactrian Distribution)");
@@ -3547,7 +3547,7 @@ moves.append(mvSlide(p, delta=0.05, weight=1)))");
 unimodal component distributions. Specifically, `mvSlideBactrian` updates
 the current value by adding a random increment of (lambda * delta), where
 lambda is a tuning parameter and delta is drawn from a mixture of two normal
-distributions following Yang & Rodriguez (2013: Supplementary Information,
+distributions following Yang & Rodríguez (2013: Supplementary Information,
 Eq. 19): 
 
     u ~ Unif(0, 1)
@@ -3562,7 +3562,7 @@ reduces autocorrelation.)");
 x ~ dnNormal(0, 2)
 moves.append( mvSlideBactrian(x, tune=TRUE, weight=1) ))");
 	help_strings[string("mvSlideBactrian")][string("name")] = string(R"(mvSlideBactrian)");
-	help_references[string("mvSlideBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodriguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
+	help_references[string("mvSlideBactrian")].push_back(RbHelpReference(R"(Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.)",R"(10.1073/pnas.1311790110)",R"(https://www.pnas.org/doi/full/10.1073/pnas.1311790110 )"));
 	help_arrays[string("mvSlideBactrian")][string("see_also")].push_back(string(R"(mvSlide)"));
 	help_strings[string("mvSlideBactrian")][string("title")] = string(R"(Sliding-Window Mode Employing Bactrian Distribution)");
 	help_arrays[string("mvSpeciesNarrow")][string("authors")].push_back(string(R"(Sebastian Hoehna, Bastien Boussau)"));
@@ -3997,8 +3997,8 @@ moves.append( delta_up_down_move ))");
 	help_strings[string("mvVectorSlideRecenter")][string("name")] = string(R"(mvVectorSlideRecenter)");
 	help_strings[string("nodeAgeByID")][string("name")] = string(R"(nodeAgeByID)");
 	help_strings[string("normalize")][string("name")] = string(R"(normalize)");
-	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(David Cerny)"));
+	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(David Černý)"));
 	help_strings[string("pathSampler")][string("description")] = string(R"(Applies the path-sampling technique (Gelman & Meng 1998), also known as
 thermodynamic integration (Ogata 1989; Lartillot & Philippe 2006), to estimate
 the marginal likelihood of a model from a series of unnormalized "power
@@ -4037,7 +4037,7 @@ can also be derived using the stationary bootstrap method (Politis & Romano
 1994), which divides the log likelihood values from each power posterior into
 consecutive blocks of random size (drawn from a geometric distribution) and
 resamples them with replacement. The RevBayes implementation of the stationary
-block bootstrap method is based on the mcmc3r R package (Alvarez-Carretero et
+block bootstrap method is based on the mcmc3r R package (Álvarez-Carretero et
 al. 2022), and can be accessed by calling `.stdError(bootstrap=TRUE)`.)");
 	help_strings[string("pathSampler")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
@@ -4065,7 +4065,7 @@ ps.stdError()                                               # default formula
 ps.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
 ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("pathSampler")][string("name")] = string(R"(pathSampler)");
-	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Alvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
+	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(dos Reis M, Gunnell GF, Barba-Montoya J, Wilkins A, Yang Z, Yoder AD (2018). Using phylogenomic data to explore the effects of relaxed clocks and calibration strategies on divergence time estimation: primates as a test case. Systematic Biology, 67(4):594-615.)",R"(10.1093/sysbio/syy001)",R"(https://academic.oup.com/sysbio/article/67/4/594/4802240 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.)",R"(10.1214/ss/1028905934)",R"(https://www.jstor.org/stable/2676756 )"));
 	help_references[string("pathSampler")].push_back(RbHelpReference(R"(Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195-207.)",R"(10.1080/10635150500433722)",R"(https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800 )"));
@@ -4698,7 +4698,7 @@ mymcmc = mcmc(mymodel, monitors, moves)
 # Begin the MCMC run
 mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMinESS")][string("name")] = string(R"(srMinESS)");
-	help_references[string("srMinESS")].push_back(RbHelpReference(R"(Guimaraes Fabreti L, Hoehna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.)",R"(10.1111/2041-210X.13727)",R"(https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727 )"));
+	help_references[string("srMinESS")].push_back(RbHelpReference(R"(Guimarães Fabreti L, Höhna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.)",R"(10.1111/2041-210X.13727)",R"(https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727 )"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGeweke)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srStationarity)"));
@@ -4765,8 +4765,8 @@ s := stdev(x))");
 	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(Real)"));
 	help_arrays[string("stdev")][string("see_also")].push_back(string(R"(mean)"));
 	help_strings[string("stdev")][string("title")] = string(R"(Standard Deviation)");
-	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(David Cerny)"));
+	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_arrays[string("steppingStoneSampler")][string("authors")].push_back(string(R"(David Černý)"));
 	help_strings[string("steppingStoneSampler")][string("description")] = string(R"(Applies the stepping-stone technique (Fan et al. 2011; Xie et al. 2011) to
 estimate the marginal likelihood of a model from a series of unnormalized
 "power posterior" densities in which the likelihood term is raised to a power
@@ -4807,7 +4807,7 @@ the stationary bootstrap method (Politis & Romano 1994), which divides the log
 likelihood values from each power posterior into consecutive blocks of random
 size (drawn from a geometric distribution) and resamples them with replacement.
 The RevBayes implementation of the stationary block bootstrap method is based
-on the mcmc3r R package (Alvarez-Carretero et al. 2022), and can be accessed by
+on the mcmc3r R package (Álvarez-Carretero et al. 2022), and can be accessed by
 calling `.stdError(bootstrap=TRUE)`.)");
 	help_strings[string("steppingStoneSampler")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
@@ -4835,7 +4835,7 @@ ss.stdError()                                               # delta approximatio
 ss.stdError(bootstrap=TRUE)                                 # bootstrap (100 replicates)
 ss.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 replicates, save output))");
 	help_strings[string("steppingStoneSampler")][string("name")] = string(R"(steppingStoneSampler)");
-	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Alvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
+	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Álvarez-Carretero S, Tamuri AU, Battini M, Nascimento FF, Carlisle E, Asher RJ, Yang Z, Donoghue PCJ, dos Reis M (2022). A species-level timeline of mammal evolution integrating phylogenomic data. Nature, 602(7896):263-267.)",R"(10.1038/s41586-021-04341-1)",R"(https://www.nature.com/articles/s41586-021-04341-1 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Fan Y, Wu R, Chen M-H, Kuo L, Lewis PO (2011). Choosing among partition models in Bayesian phylogenetics. Molecular Biology and Evolution, 28(1):523-532.)",R"(10.1093/molbev/msq224)",R"(https://academic.oup.com/mbe/article/28/1/523/983866 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Politis DN, Romano JP (1994). The stationary bootstrap. Journal of the American Statistical Association, 89(428):1303-1313.)",R"(10.1080/01621459.1994.10476870)",R"(https://www.tandfonline.com/doi/abs/10.1080/01621459.1994.10476870 )"));
 	help_references[string("steppingStoneSampler")].push_back(RbHelpReference(R"(Xie W, Lewis PO, Fan Y, Kuo L, Chen M-H (2010). Improving marginal likelihood estimation for Bayesian phylogenetic model selection. Systematic Biology, 60(2):150-160.)",R"(10.1093/sysbio/syq085)",R"(https://academic.oup.com/sysbio/article-abstract/60/2/150/2461669 )"));

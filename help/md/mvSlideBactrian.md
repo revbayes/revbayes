@@ -10,7 +10,7 @@ Proposes additive changes to a real-valued parameter using a Bactrian kernel
 unimodal component distributions. Specifically, `mvSlideBactrian` updates
 the current value by adding a random increment of (lambda * delta), where
 lambda is a tuning parameter and delta is drawn from a mixture of two normal
-distributions following Yang & Rodriguez (2013: Supplementary Information,
+distributions following Yang & Rodríguez (2013: Supplementary Information,
 Eq. 19): 
 
     u ~ Unif(0, 1)
@@ -31,6 +31,6 @@ mvSlide
     moves.append( mvSlideBactrian(x, tune=TRUE, weight=1) )
 
 ## references
-- citation: Yang Z, Rodriguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.
+- citation: Yang Z, Rodríguez CE (2013). Searching for efficient Markov chain Monte Carlo proposal kernels. Proc. Natl. Acad. Sci. USA, 110(48):19307-19312.
   doi: 10.1073/pnas.1311790110
   url: https://www.pnas.org/doi/full/10.1073/pnas.1311790110
