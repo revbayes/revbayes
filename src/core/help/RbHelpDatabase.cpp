@@ -1111,7 +1111,7 @@ n_alleles <- 3
 # We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1128,7 +1128,7 @@ for (g in 1:n_genes) {
         }
     }
     geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
-print(geneTrees[g])
+    print(geneTrees[g])
 }
 
 # We can save the species tree:
@@ -1148,9 +1148,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("description")] = string(R"(Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given effective population sizes. Requires an ultrametric species tree, parameters of an inverse gamma prior on effective population sizes, and taxa with species and individual names.)");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("details")] = string(R"(The species tree must be ultrametric.
 Parameters of an inverse gamma prior on effective population sizes must be provided.
-This distribution uses a conjugate prior on effective population sizes. As a consequence, effective population sizes are analytically integrated out and treated as nuisance parameters (Jones 2016).
-
-If you are interested in reconstructing ancestral effective population sizes, use dnMultiSpeciesCoalescent.)");
+This distribution uses a conjugate prior on effective population sizes. As a consequence, effective population sizes are analytically integrated out and treated as nuisance parameters (Jones 2016). If you are interested in inferring ancestral effective population sizes, use `dnMultiSpeciesCoalescent`.)");
 	help_strings[string("dnMultiSpeciesCoalescentInverseGamma")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
 dataFolder = "simulatedTrees/"
 
@@ -1162,7 +1160,7 @@ n_alleles <- 3
 # We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -1199,44 +1197,44 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("description")] = string(R"(Multispecies coalescent distribution describing how gene trees can be generated from within a species tree given effective population sizes. Requires an ultrametric species tree, an upper bound for the uniform prior on effective population sizes (a single real positive), and taxa with species and individual names.)");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("details")] = string(R"(The species tree must be ultrametric.
 This distribution uses a uniform prior on effective population sizes. As a consequence, effective population sizes are analytically integrated out and treated as nuisance parameters (Hey & Nielsen 2007).)");
-	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("example")] = string(R"(    # We are going to save the trees we simulate in the folder simulatedTrees:
-    dataFolder = "simulatedTrees/"
+	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("example")] = string(R"(# We are going to save the trees we simulate in the folder simulatedTrees:
+dataFolder = "simulatedTrees/"
 
 # Let's simulate a species tree with 10 taxa, 2 gene trees, 3 alleles per species:
-    n_species <- 10
-    n_genes <- 2
-    n_alleles <- 3
+n_species <- 10
+n_genes <- 2
+n_alleles <- 3
 
-    # We simulate an ultrametric species tree.
-    # Species names:
-    for (i in 1:n_species) {
+# We simulate an ultrametric species tree.
+# Species names:
+for (i in 1:n_species) {
     species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
-    }
-    spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
-    print(spTree)
+}
+spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
+print(spTree)
 
-    # Let's pick a maximum effective population size of 50:
-    popSize <- 50
+# Let's pick a maximum effective population size of 50:
+popSize <- 50
 
-    # Let's simulate gene trees now.
-    # Taxon names:
-    for (g in 1:n_genes) {
-        for (i in 1:n_species) {
-            for (j in 1:n_alleles) {
-                taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
-            }
+# Let's simulate gene trees now.
+# Taxon names:
+for (g in 1:n_genes) {
+    for (i in 1:n_species) {
+        for (j in 1:n_alleles) {
+            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i+"_"+j, speciesName="Species_"+i)
         }
-        geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxa[g])
-        print(geneTrees[g])
     }
+    geneTrees[g] ~ dnMultiSpeciesCoalescentUniformPrior(speciesTree=spTree, max=popSize, taxa=taxa[g])
+    print(geneTrees[g])
+}
 
-    # We can save the species tree:
-    write(spTree, filename=dataFolder+"speciesTree")
+# We can save the species tree:
+write(spTree, filename=dataFolder+"speciesTree")
 
-    # Saving the gene trees:
-    for (i in 1:(n_genes)) {
-        write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
-    })");
+# Saving the gene trees:
+for (i in 1:(n_genes)) {
+    write(geneTrees[i], filename=dataFolder+"geneTree_"+i+".tree")
+})");
 	help_strings[string("dnMultiSpeciesCoalescentUniformPrior")][string("name")] = string(R"(dnMultiSpeciesCoalescentUniformPrior)");
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Rannala B, Yang Z (2003). Bayes estimation of species divergence times and ancestral population sizes using DNA sequences from multiple loci. Genetics, 164(4):1645-1656.)",R"(10.1093/genetics/164.4.1645)",R"(https://academic.oup.com/genetics/article-abstract/164/4/1645/6050371 )"));
 	help_references[string("dnMultiSpeciesCoalescentUniformPrior")].push_back(RbHelpReference(R"(Heled J, Drummond AJ (2010). Bayesian inference of species trees from multilocus data. Molecular Biology and Evolution, 27(3):570-580.)",R"(10.1093/molbev/msp274)",R"(https://academic.oup.com/mbe/article/27/3/570/999753 )"));
@@ -2729,7 +2727,7 @@ n_alleles <- 2
 # We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -3273,7 +3271,7 @@ n_alleles <- 3
 # We simulate an ultrametric species tree.
 # Species names:
 for (i in 1:n_species) {
-species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+    species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
 }
 spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
 print(spTree)
@@ -3606,24 +3604,24 @@ for (g in 1:n_genes) {
 }
 
 # Set my move index:
-    mi = 0
-    move_species_narrow_exchange = mvSpeciesNarrow( speciesTree=spTree, weight=5 )
-    for (i in 1:n_genes) {
-        move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
-    }
-    moves[++mi] = move_species_narrow_exchange
+mi = 0
+move_species_narrow_exchange = mvSpeciesNarrow( speciesTree=spTree, weight=5 )
+for (i in 1:n_genes) {
+    move_species_narrow_exchange.addGeneTreeVariable( geneTrees[i] )
+}
+moves[++mi] = move_species_narrow_exchange
 
-    # We get a handle on our model.
-    # We can use any node of our model as a handle; here we choose to use the topology.
-    mymodel = model(spTree)
+# We get a handle on our model.
+# We can use any node of our model as a handle; here we choose to use the topology.
+mymodel = model(spTree)
 
-    # Monitors to check the progression of the program:
-    monitors[1] = mnScreen(printgen=10, spTree)
+# Monitors to check the progression of the program:
+monitors[1] = mnScreen(printgen=10, spTree)
 
-    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
-    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-    mymcmc.run(generations=1000)
-    mymcmc.operatorSummary())");
+# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+mymcmc.run(generations=1000)
+mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesNarrow")][string("name")] = string(R"(mvSpeciesNarrow)");
 	help_references[string("mvSpeciesNarrow")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
 	help_references[string("mvSpeciesNarrow")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
@@ -3671,24 +3669,24 @@ for (g in 1:n_genes) {
 }
 
 # Set my move index:
-    mi = 0
-    move_species_node_time_slide = mvSpeciesNodeTimeSlideUniform( speciesTree=spTree, weight=5 )
-    for (i in 1:n_genes) {
-        move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
-    }
-    moves[++mi] = move_species_node_time_slide
+mi = 0
+move_species_node_time_slide = mvSpeciesNodeTimeSlideUniform( speciesTree=spTree, weight=5 )
+for (i in 1:n_genes) {
+    move_species_node_time_slide.addGeneTreeVariable( geneTrees[i] )
+}
+moves[++mi] = move_species_node_time_slide
 
-    # We get a handle on our model.
-    # We can use any node of our model as a handle; here we choose to use the topology.
-    mymodel = model(spTree)
+# We get a handle on our model.
+# We can use any node of our model as a handle; here we choose to use the topology.
+mymodel = model(spTree)
 
-    # Monitors to check the progression of the program:
-    monitors[1] = mnScreen(printgen=10, spTree)
+# Monitors to check the progression of the program:
+monitors[1] = mnScreen(printgen=10, spTree)
 
-    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
-    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-    mymcmc.run(generations=1000)
-    mymcmc.operatorSummary())");
+# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+mymcmc.run(generations=1000)
+mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesNodeTimeSlideUniform")][string("name")] = string(R"(mvSpeciesNodeTimeSlideUniform)");
 	help_references[string("mvSpeciesNodeTimeSlideUniform")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
 	help_references[string("mvSpeciesNodeTimeSlideUniform")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
@@ -3741,24 +3739,24 @@ for (g in 1:n_genes) {
 }
 
 # Set my move index:
-    mi = 0
-    move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
-    for (i in 1:n_genes) {
-       move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
-    }
-    moves[++mi] = move_species_subtree_scale
+mi = 0
+move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
+for (i in 1:n_genes) {
+   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+}
+moves[++mi] = move_species_subtree_scale
 
-    # We get a handle on our model.
-    # We can use any node of our model as a handle; here we choose to use the topology.
-    mymodel = model(spTree)
+# We get a handle on our model.
+# We can use any node of our model as a handle; here we choose to use the topology.
+mymodel = model(spTree)
 
-    # Monitors to check the progression of the program:
-    monitors[1] = mnScreen(printgen=10, spTree)
+# Monitors to check the progression of the program:
+monitors[1] = mnScreen(printgen=10, spTree)
 
-    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
-    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-    mymcmc.run(generations=1000)
-    mymcmc.operatorSummary())");
+# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+mymcmc.run(generations=1000)
+mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesSubtreeScale")][string("name")] = string(R"(mvSpeciesSubtreeScale)");
 	help_references[string("mvSpeciesSubtreeScale")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
 	help_references[string("mvSpeciesSubtreeScale")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
@@ -3811,24 +3809,24 @@ for (g in 1:n_genes) {
 }
 
 # Set my move index:
-    mi = 0
-    move_species_subtree_scale_beta = mvSpeciesSubtreeScaleBeta( speciesTree=spTree, weight=5 )
-    for (i in 1:n_genes) {
-        move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
-    }
-    moves[++mi] = move_species_subtree_scale_beta
+mi = 0
+move_species_subtree_scale_beta = mvSpeciesSubtreeScaleBeta( speciesTree=spTree, weight=5 )
+for (i in 1:n_genes) {
+    move_species_subtree_scale_beta.addGeneTreeVariable( geneTrees[i] )
+}
+moves[++mi] = move_species_subtree_scale_beta
 
-    # We get a handle on our model.
-    # We can use any node of our model as a handle; here we choose to use the topology.
-    mymodel = model(spTree)
+# We get a handle on our model.
+# We can use any node of our model as a handle; here we choose to use the topology.
+mymodel = model(spTree)
 
-    # Monitors to check the progression of the program:
-    monitors[1] = mnScreen(printgen=10, spTree)
+# Monitors to check the progression of the program:
+monitors[1] = mnScreen(printgen=10, spTree)
 
-    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
-    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-    mymcmc.run(generations=1000)
-    mymcmc.operatorSummary())");
+# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+mymcmc.run(generations=1000)
+mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesSubtreeScaleBeta")][string("name")] = string(R"(mvSpeciesSubtreeScaleBeta)");
 	help_references[string("mvSpeciesSubtreeScaleBeta")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
 	help_references[string("mvSpeciesSubtreeScaleBeta")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));
@@ -3876,24 +3874,24 @@ for (g in 1:n_genes) {
 }
 
 # Set my move index:
-    mi = 0
-    move_species_tree_scale = mvSpeciesTreeScale( speciesTree=spTree, root=root, weight=5 )
-    for (i in 1:n_genes) {
-        move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
-    }
-    moves[++mi] = move_species_tree_scale
+mi = 0
+move_species_tree_scale = mvSpeciesTreeScale( speciesTree=spTree, root=root, weight=5 )
+for (i in 1:n_genes) {
+    move_species_tree_scale.addGeneTreeVariable( geneTrees[i] )
+}
+moves[++mi] = move_species_tree_scale
 
-    # We get a handle on our model.
-    # We can use any node of our model as a handle; here we choose to use the topology.
-    mymodel = model(spTree)
+# We get a handle on our model.
+# We can use any node of our model as a handle; here we choose to use the topology.
+mymodel = model(spTree)
 
-    # Monitors to check the progression of the program:
-    monitors[1] = mnScreen(printgen=10, spTree)
+# Monitors to check the progression of the program:
+monitors[1] = mnScreen(printgen=10, spTree)
 
-    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
-    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-    mymcmc.run(generations=1000)
-    mymcmc.operatorSummary())");
+# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+mymcmc.run(generations=1000)
+mymcmc.operatorSummary())");
 	help_strings[string("mvSpeciesTreeScale")][string("name")] = string(R"(mvSpeciesTreeScale)");
 	help_references[string("mvSpeciesTreeScale")].push_back(RbHelpReference(R"(Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-lookup/doi/10.1093/sysbio/syr074 )"));
 	help_references[string("mvSpeciesTreeScale")].push_back(RbHelpReference(R"(Jones G (2016). Algorithmic improvements to species delimitation and phylogeny estimation under the multispecies coalescent. Journal of Mathematical Biology, 74:447-467.)",R"(10.1007/s00285-016-1034-0)",R"(http://www.indriid.com/2016/2016-06-01-STACEY.pdf )"));

@@ -56,25 +56,25 @@ mvSpeciesTreeScale
     }
     
     # Set my move index:
-	mi = 0
-	move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
-	for (i in 1:n_genes) {
-	   move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
-	}
-	moves[++mi] = move_species_subtree_scale
+    mi = 0
+    move_species_subtree_scale = mvSpeciesSubtreeScale( speciesTree=spTree, weight=5 )
+    for (i in 1:n_genes) {
+       move_species_subtree_scale.addGeneTreeVariable( geneTrees[i] )
+    }
+    moves[++mi] = move_species_subtree_scale
     
-	# We get a handle on our model.
-	# We can use any node of our model as a handle; here we choose to use the topology.
-	mymodel = model(spTree)
+    # We get a handle on our model.
+    # We can use any node of our model as a handle; here we choose to use the topology.
+    mymodel = model(spTree)
     
-	# Monitors to check the progression of the program:
-	monitors[1] = mnScreen(printgen=10, spTree)
+    # Monitors to check the progression of the program:
+    monitors[1] = mnScreen(printgen=10, spTree)
     
-	# Here we use a plain MCMC. You could also use mcmcmc with heated chains.
-	mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
-	mymcmc.run(generations=1000)
-	mymcmc.operatorSummary()
-	
+    # Here we use a plain MCMC. You could also use mcmcmc with heated chains.
+    mymcmc = mcmc(mymodel, monitors, moves, nruns=4)
+    mymcmc.run(generations=1000)
+    mymcmc.operatorSummary()
+    
 ## references
 - citation: Hoehna S, Drummond AJ (2012). Guided tree topology proposals for Bayesian phylogenetic inference. Systematic Biology 61(1):1-11.
   doi: 10.1093/sysbio/syr074

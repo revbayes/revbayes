@@ -10,38 +10,38 @@ The maximum species tree is a consistent estimate of the species tree under the 
 Bastien Boussau
 ## see_also
 ## example
-	# We simulate a species tree and gene trees and reconstruct a species tree using maximum tree:
-	# Let's simulate a species tree with 10 taxa, 5 gene trees, 1 alleles per species:
-	n_species <- 10
-	n_genes <- 5
-	n_alleles <- 2
+    # We simulate a species tree and gene trees and reconstruct a species tree using maximum tree:
+    # Let's simulate a species tree with 10 taxa, 5 gene trees, 1 alleles per species:
+    n_species <- 10
+    n_genes <- 5
+    n_alleles <- 2
     
-	# We simulate an ultrametric species tree.
-	# Species names:
-	for (i in 1:n_species) {
+    # We simulate an ultrametric species tree.
+    # Species names:
+    for (i in 1:n_species) {
         species[i] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
-	}
-	spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
-	print(spTree)
+    }
+    spTree ~ dnBirthDeath(lambda=0.3, mu=0.2, rootAge=10, rho=1, samplingStrategy="uniform", condition="nTaxa", taxa=species)
+    print(spTree)
     
-	# Let's pick a constant effective population size of 50:
-	popSize <- 50
+    # Let's pick a constant effective population size of 50:
+    popSize <- 50
     
-	# Let's simulate gene trees now.
-	# Taxon names:
-	for (g in 1:n_genes) {
-	    for (i in 1:n_species) {
-	        for (j in 1:n_alleles) {
-	            taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
-	        }
-	    }
-	    geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
-	}
+    # Let's simulate gene trees now.
+    # Taxon names:
+    for (g in 1:n_genes) {
+        for (i in 1:n_species) {
+            for (j in 1:n_alleles) {
+                taxa[g][(i-1)*n_alleles+j] <- taxon(taxonName="Species_"+i, speciesName="Species_"+i)
+            }
+        }
+        geneTrees[g] ~ dnMultiSpeciesCoalescent(speciesTree=spTree, Ne=popSize, taxa=taxa[g])
+    }
     
-	# Let's compute the maximum tree: 
-	recTree <- maximumTree(geneTrees)
-	print(recTree)
-	
+    # Let's compute the maximum tree: 
+    recTree <- maximumTree(geneTrees)
+    print(recTree)
+    
 ## references
 - citation: Edwards SV, Liu L, Pearl DK (2007). High-resolution species trees without concatenation. Proceedings of the National Academy of Sciences of the USA, 104(14):5936-5941.
   doi: 10.1073/pnas.0607004104
