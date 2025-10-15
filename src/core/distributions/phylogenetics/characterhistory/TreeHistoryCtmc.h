@@ -573,6 +573,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::initializeHistoriesVector( void )
 {
 
     histories.clear();
+    histories.setNumberOfCharacters( this->num_sites );
 
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
     std::vector<BranchHistory*> new_histories = std::vector<BranchHistory*>(nodes.size(), NULL);

@@ -51,7 +51,8 @@ double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, const std
     double sum = 0.0;
     for (size_t i = 0; i < num_states; ++i)
     {
-        sum += -getRate(i, i, age, rate) * counts[i];
+        sum += -getRate(i, i, age, rate) * counts[i]; // This needs checking!!!
+//        sum += -getRate(i, i, age, rate);
     }
 
     return sum;

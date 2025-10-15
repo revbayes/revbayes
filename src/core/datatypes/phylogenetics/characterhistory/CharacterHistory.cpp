@@ -286,6 +286,12 @@ void CharacterHistory::setHistories(const std::vector<BranchHistory *>& h)
 }
 
 
+void CharacterHistory::setNumberOfCharacters(size_t n)
+{
+    n_character = n;
+}
+
+
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const CharacterHistory& x)
 {
     if ( x.hasTree() )
