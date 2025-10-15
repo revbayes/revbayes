@@ -44,6 +44,7 @@ namespace RevBayesCore {
         void                                    removeEvent(CharacterEvent *e, size_t bi);
         void                                    setHistory(BranchHistory* h, size_t i);
         void                                    setHistories(const std::vector<BranchHistory*>& h);
+        void                                    setNumberOfCharacters(size_t n);
 
         
     protected:
