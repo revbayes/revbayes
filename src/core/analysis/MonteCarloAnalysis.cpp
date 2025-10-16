@@ -226,7 +226,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, int v
                 runs[i]->nextCycle(false);
                 
                 // check for autotuning
-                if ( k % tuningInterval == 0 && k != generations )
+                if ( tuningInterval != 0 && (k % tuningInterval) == 0 && k != generations )
                 {
                     runs[i]->tune();
                 }

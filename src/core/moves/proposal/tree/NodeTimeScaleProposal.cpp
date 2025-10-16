@@ -106,6 +106,8 @@ double NodeTimeScaleProposal::doProposal( void )
         {
             std::cerr << "mvNodeTimeScale has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     
@@ -181,10 +183,10 @@ void NodeTimeScaleProposal::printParameterSummary(std::ostream &o, bool name_onl
  */
 void NodeTimeScaleProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
-    
 }
 
 
