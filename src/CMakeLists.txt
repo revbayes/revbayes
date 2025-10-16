@@ -180,7 +180,6 @@ find_package(Boost
 COMPONENTS regex
 program_options
 thread
-system
 filesystem
 date_time
 serialization REQUIRED)

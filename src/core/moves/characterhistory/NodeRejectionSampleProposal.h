@@ -777,7 +777,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::setRateGenerator(const
     {
         removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
     }
-    
+
     q_map_site = d;
     numStates = q_map_site->getValue().getNumberOfStates();
 

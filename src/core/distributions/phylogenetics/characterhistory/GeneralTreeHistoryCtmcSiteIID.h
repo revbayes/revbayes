@@ -69,7 +69,7 @@ namespace RevBayesCore {
 
         virtual void                                        simulate(const TopologyNode& node, BranchHistory* bh, std::vector< DiscreteTaxonData< charType > >& taxa);
         void                                                simulateHistory(const TopologyNode& node, BranchHistory* bh);
-//        std::vector<size_t>                                 computeCounts(const std::vector<CharacterEvent*>& s);
+        std::vector<size_t>                                 computeCounts(const std::vector<CharacterEvent*>& s);
 
     };
 
@@ -120,18 +120,18 @@ RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>* RevBayesCore::GeneralTree
     return new GeneralTreeHistoryCtmcSiteIID<charType>( *this );
 }
 
-//template<class charType>
-//std::vector<size_t> RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeCounts(const std::vector<CharacterEvent*>& s)
-//{
-//    std::vector<size_t> counts(this->num_states, 0);
-//
-//    for (size_t i = 0; i < s.size(); i++)
-//    {
-//        counts[ static_cast<CharacterEventDiscrete*>(s[i])->getState() ] += 1;
-//    }
-//
-//    return counts;
-//}
+template<class charType>
+std::vector<size_t> RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeCounts(const std::vector<CharacterEvent*>& s)
+{
+    std::vector<size_t> counts(this->num_states, 0);
+
+    for (size_t i = 0; i < s.size(); i++)
+    {
+        counts[ static_cast<CharacterEventDiscrete*>(s[i])->getState() ] += 1;
+    }
+
+    return counts;
+}
 
 template<class charType>
 double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelihood(const TopologyNode &n)
@@ -147,14 +147,14 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelih
     {
         ++counts[ static_cast<CharacterEventDiscrete*>(rootState[i])->getState() ];
     }
-    
+
 
     // get log prob
     std::vector<double> rf = getRootFrequencies();
     for (size_t i = 0; i < this->num_states; i++)
     {
-        // if root branch is present
-         lnP += counts[i] * log( rf[i] );
+
+        lnP += counts[i] * log( rf[i] );
 //        lnP += log( rf[i] );
     }
 
@@ -203,7 +203,7 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
     }
 
 //    // we need the counts for faster computation
-//    std::vector<size_t> counts = computeCounts(curr_state);
+    std::vector<size_t> counts = computeCounts(curr_state);
 
     const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh.getHistory();
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
@@ -229,9 +229,9 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNod
 //        double sr = rm.getSumOfRates(curr_state, counts) * branch_rate;
         lnL += log(tr) - sr * (current_age - event_age);
 
-//        // update counts
-//        counts[static_cast<CharacterEventDiscrete*>(curr_state[idx])->getState()] -= 1;
-//        counts[s] += 1;
+        // update counts
+        counts[static_cast<CharacterEventDiscrete*>(curr_state[idx])->getState()] -= 1;
+        counts[s] += 1;
 
         // update time and state
         curr_state[idx] = char_event;
@@ -710,7 +710,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::simulateHistory(cons
     {
         currState = bh->getParentCharacters();
     }
-//    std::vector<size_t> counts = computeCounts(currState);
+    std::vector<size_t> counts = computeCounts(currState);
     std::set<CharacterEvent*,CharacterEventCompare> history;
 
     // simulate path
@@ -720,8 +720,8 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::simulateHistory(cons
     {
 
         // sample next event time
-//        double sr = rm.getSumOfRates(currState, counts) * branch_rate;
-        double sr = rm.getSumOfRates(currState) * branch_rate;
+        double sr = rm.getSumOfRates(currState, counts) * branch_rate;
+//        double sr = rm.getSumOfRates(currState) * branch_rate;
         dt = RbStatistics::Exponential::rv(sr, *GLOBAL_RNG);
         if (t - dt > end_age)
         {
@@ -755,9 +755,9 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::simulateHistory(cons
                 if (found) break;
             }
 
-//            // update counts
-//            counts[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ] -= 1;
-//            counts[s] += 1;
+            // update counts
+            counts[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ] -= 1;
+            counts[s] += 1;
 
             // update history
             t -= dt;
