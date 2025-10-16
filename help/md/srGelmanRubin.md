@@ -27,6 +27,7 @@ burnin length is set to the maximum of the parameter-specific burnin lengths.
 See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).
 ## authors
 ## see_also
+mcmc
 srGeweke
 srMinESS
 srStationarity

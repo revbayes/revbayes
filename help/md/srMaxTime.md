@@ -7,6 +7,8 @@ Terminates an MCMC run once the specified time has elapsed.
 ## details
 ## authors
 ## see_also
+mcmc
+srMaxIteration
 ## example
     # Binomial example: estimate success probability given 7 successes out of 20 trials
     r ~ dnExp(10)

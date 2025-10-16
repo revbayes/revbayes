@@ -4527,6 +4527,7 @@ mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srGelmanRubin")][string("name")] = string(R"(srGelmanRubin)");
 	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Gelman A, Rubin DB (1992). Inference from iterative simulation using multiple sequences. Statistical Science, 7(4):457--472.)",R"(10.1214/ss/1177011136 )",R"()"));
 	help_references[string("srGelmanRubin")].push_back(RbHelpReference(R"(Vats D, Knudson C (2021). Revisiting the Gelman--Rubin diagnostic. Statistical Science, 36(4):518--529.)",R"(10.1214/20-STS812 )",R"()"));
+	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(mcmc)"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srGeweke)"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srMinESS)"));
 	help_arrays[string("srGelmanRubin")][string("see_also")].push_back(string(R"(srStationarity)"));
@@ -4587,6 +4588,7 @@ mymcmc = mcmc( mymodel, monitors, moves )
 mymcmc.run( rules = stopping_rules ))");
 	help_strings[string("srGeweke")][string("name")] = string(R"(srGeweke)");
 	help_references[string("srGeweke")].push_back(RbHelpReference(R"(Geweke J (1992). Evaluating the accuracy of sampling-based approaches to calculating posterior moments. Pp. 169--194 in Bernado M, Berger JO, Dawid AP, Smith AFM, eds. Bayesian Statistics 4. Clarendon Press, Oxford, UK.)",R"(10.1093/oso/9780198522669.003.0010)",R"(https://academic.oup.com/book/54041/chapter-abstract/422209572 )"));
+	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(mcmc)"));
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srMinESS)"));
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srStationarity)"));
@@ -4618,6 +4620,8 @@ mymcmc = mcmc(mymodel, monitors, moves)
 # Begin the MCMC run
 mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMaxIteration")][string("name")] = string(R"(srMaxIteration)");
+	help_arrays[string("srMaxIteration")][string("see_also")].push_back(string(R"(mcmc)"));
+	help_arrays[string("srMaxIteration")][string("see_also")].push_back(string(R"(srMaxTime)"));
 	help_strings[string("srMaxIteration")][string("title")] = string(R"(Maximum iteration stopping rule)");
 	help_strings[string("srMaxTime")][string("description")] = string(R"(Terminates an MCMC run once the specified time has elapsed.)");
 	help_strings[string("srMaxTime")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
@@ -4645,6 +4649,8 @@ mymcmc = mcmc(mymodel, monitors, moves)
 # Begin the MCMC run
 mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMaxTime")][string("name")] = string(R"(srMaxTime)");
+	help_arrays[string("srMaxTime")][string("see_also")].push_back(string(R"(mcmc)"));
+	help_arrays[string("srMaxTime")][string("see_also")].push_back(string(R"(srMaxIteration)"));
 	help_strings[string("srMaxTime")][string("title")] = string(R"(Maximum time stopping rule)");
 	help_strings[string("srMinESS")][string("description")] = string(R"(Terminates an MCMC run when the effective sample sizes (ESS) of all parameters
 exceed the specified value.)");
@@ -4699,6 +4705,7 @@ mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srMinESS")][string("name")] = string(R"(srMinESS)");
 	help_references[string("srMinESS")].push_back(RbHelpReference(R"(Guimarães Fabreti L, Höhna S (2022). Convergence assessment for Bayesian phylogenetic analysis using MCMC simulation. Methods in Ecology and Evolution, 13(1):77--90.)",R"(10.1111/2041-210X.13727)",R"(https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13727 )"));
+	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(mcmc)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srGeweke)"));
 	help_arrays[string("srMinESS")][string("see_also")].push_back(string(R"(srStationarity)"));
@@ -4750,6 +4757,7 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns = 2)
 mymcmc.run(rules = stopping_rules))");
 	help_strings[string("srStationarity")][string("name")] = string(R"(srStationarity)");
 	help_references[string("srStationarity")].push_back(RbHelpReference(R"(Hill SD, Spall JC (2011). Stationarity and convergence of the Metropolis-Hastings algorithm: insights into theoretical aspects. IEEE Control Systems Magazine 39(1):56--67.)",R"(10.1109/MCS.2018.2876959 )",R"()"));
+	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(mcmc)"));
 	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(srGelmanRubin)"));
 	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(srGeweke)"));
 	help_arrays[string("srStationarity")][string("see_also")].push_back(string(R"(srMinESS)"));

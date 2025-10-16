@@ -36,6 +36,7 @@ See also the tutorial on [convergence assessment](https://revbayes.github.io/tut
 This help file incorporates text by Martyn Plummer.
 ## authors
 ## see_also
+mcmc
 srGelmanRubin
 srMinESS
 srStationarity

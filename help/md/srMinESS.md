@@ -33,6 +33,7 @@ tutorial contains a discusson on the calculation and interpretation of the ESS
 diagnostic.
 ## authors
 ## see_also
+mcmc
 srGelmanRubin
 srGeweke
 srStationarity
