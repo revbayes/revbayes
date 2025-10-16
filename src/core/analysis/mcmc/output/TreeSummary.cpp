@@ -156,7 +156,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
             double pp = cladeProbability( clade, false, differentiate_SAs );
-            n->addNodeParameter("posterior",pp);
+            n->addBranchParameter("posterior",pp);
         }
 
         // are we using sampled ancestors?
