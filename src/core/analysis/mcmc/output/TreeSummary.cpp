@@ -879,10 +879,48 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differen
     // find the clade credibility score for each tree
     for (const auto& [newick, count]: tree_samples)
     {
+        // get tree from newick
+        NewickConverter converter;
+        Tree* tmp_tree = converter.convertFromNewick( newick );
+
+        // get the tree
+        Tree& tree_test = *tmp_tree;
+
+        // get vector of nodes
+        const std::vector<TopologyNode*> &nodes = tmp_tree->getNodes();
+
         // find the product of the clade frequencies
         double cc = 0;
-        for (auto& [clade, age]: tree_clade_ages.at(newick))
-            cc += log( splitFrequency(clade) );
+        for (size_t i = 0; i < nodes.size(); ++i)
+        {
+            // get this node
+            TopologyNode* n = nodes[i];
+
+            // and clade
+            Clade clade = n->getClade();
+
+            // get clade probability
+            cc += log( cladeProbability(clade, verbose, differentiate_SAs) );
+
+            // if differentiate_SAs is false, need to multiply probabilities by sampled ancestor probs
+            if (!differentiate_SAs)
+            {
+                // get member taxa of clade
+                const std::vector<Taxon> taxa = clade.getTaxa();
+
+                for (size_t j = 0; j < taxa.size(); ++j)
+                {
+                    // get SA frequency
+                    double sa_freq = sampled_ancestor_counts[taxa[j]] / sampleSize(true);
+
+                    // check if it is an SA
+                    bool is_SA = tmp_tree->getTipNodeWithName(taxa[i].getName()).isSampledAncestorTip();
+                    
+                    // add to cc based on that
+                    cc += log( is_SA ? sa_freq : 1 - sa_freq );
+                }
+            }
+        }
 
         if (not max_cc or cc > *max_cc)
         {
@@ -890,8 +928,6 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differen
 
             delete best_tree;
 
-            NewickConverter converter;
-            Tree* tmp_tree = converter.convertFromNewick( newick );
             tmp_tree->suppressOutdegreeOneNodes(true);
             if ( clock == true )
             {
