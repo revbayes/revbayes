@@ -902,8 +902,9 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differen
             // get clade probability
             cc += log( cladeProbability(clade, verbose, differentiate_SAs) );
 
-            // if differentiate_SAs is false, need to multiply probabilities by sampled ancestor probs
-            if (!differentiate_SAs)
+            // if differentiate_SAs is false, and there are SAs at all,
+            // need to multiply probabilities by sampled ancestor probs
+            if (!differentiate_SAs && !sampled_ancestor_counts.empty())
             {
                 // get member taxa of clade
                 const std::vector<Taxon> taxa = clade.getTaxa();
