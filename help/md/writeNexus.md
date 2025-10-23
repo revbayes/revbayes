@@ -27,6 +27,6 @@ This data matrix could be a morphological matrix, a molecular matrix, or a tree.
     
     
 ## references
-- citation: David R. Maddison, David L. Swofford, Wayne P. Maddison, Nexus: An Extensible File Format for Systematic Information, Systematic Biology, Volume 46, Issue 4, December 1997, Pages 590–621,
-  doi: https://doi.org/10.1093/sysbio/46.4.590
+- citation: Maddison DR, Swofford DL, Maddison WP (1997). Nexus: An extensible file format for systematic information. Systematic Biology, 46(4):590--621.
+  doi: 10.1093/sysbio/46.4.590
   url: https://academic.oup.com/sysbio/article/46/4/590/1629695
