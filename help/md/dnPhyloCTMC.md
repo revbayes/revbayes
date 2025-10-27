@@ -1,26 +1,29 @@
 ## name
 dnPhyloCTMC
-
 ## title
 Distribution of a phylogenetic continuous-time Markov chain
-
 ## description
-The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time Markov chain_.
-
-dnPhyloCTMC gives the probability distribution of the character state vectors at the leaves of a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.
-
+Gives the probability distribution of the character state vectors at the leaves
+of a phylogenetic tree, given a phylogenetic continuous-time Markov chain
+model.
 ## details
+The parameters of a phylogenetic model -- a tree topology with branch lengths,
+a substitution model that describes how observations evolve over the tree, etc.
+-- collectively form a distribution called the _phylogenetic continuous-time
+Markov chain_.
 
-The likelihood of observed tip labels (specified via a clamped `AbstractHomologousDiscreteCharacterData` object) is computed using Felsenstein's pruning algorithm, with partial likelihoods stored for each branch of the tree. It is automatically outputted in the `Likelihood` column of the `mnFile()` and `mnScreen()` monitors (which can be suppressed with `likelihood = FALSE`).
+The likelihood of observed character state vectors (specified via clamping the
+distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed 
+using Felsenstein's pruning algorithm, with partial likelihoods stored for each
+branch of the tree. It is automatically outputted in the `Likelihood` column of
+the `mnFile()` and `mnScreen()` monitors (which can be suppressed with
+`likelihood = FALSE`).
 
+For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on 
+[specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model.
 ## authors
 ## see_also
-- Tutorial on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models)
-
-- Tutorial on [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model
-
 ## example
-
     # Read character data from a file
     chars <- readDiscreteCharacterData("myData.nex")
     taxa = chars.taxa()
@@ -50,11 +53,9 @@ The likelihood of observed tip labels (specified via a clamped `AbstractHomologo
     writeNexus("simulatedData.nex", sim)
 
 ## references
-- citation: Felsenstein J., 1973. Maximum Likelihood and Minimum-Steps Methods for Estimating Evolutionary Trees from Data on Discrete Characters. Systematic Biology 22:3, 240--249
-  doi = 10.1093/sysbio/22.3.240
-- citation: Felsenstein, J. (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution. 17 (6): 368–376.
-  doi : 10.1007/BF01734359
-- citation: Höhna, S., Landis, M.J. and Heath, T.A. 2017. Phylogenetic inference using `RevBayes`. Curr. Protoc. Bioinform.
-57:6.16.1-6.16.34.
+- citation: Felsenstein J (1973). Maximum likelihood and minimum-steps methods for estimating evolutionary trees from data on discrete characters. Systematic Biology, 22(3):240--249.
+  doi: 10.1093/sysbio/22.3.240
+- citation: Felsenstein J (1981). Evolutionary trees from DNA sequences: A maximum likelihood approach. Journal of Molecular Evolution, 17(6):368--376.
+  doi: 10.1007/BF01734359
+- citation: Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.
   doi: 10.1002/cpbi.22
-  url: null

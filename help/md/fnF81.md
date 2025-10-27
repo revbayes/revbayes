@@ -33,6 +33,6 @@ fnGTR
     Q := fnF81(baseFrequencies)
 
 ## references
-- citation: Felsenstein J (1981). "Evolutionary trees from DNA sequences: a maximum likelihood approach". Journal of Molecular Evolution. 17:368–76.
-  doi: https://doi.org/10.1007/BF01734359
+- citation: Felsenstein J (1981). Evolutionary trees from DNA sequences: a maximum likelihood approach. Journal of Molecular Evolution, 17:368--376.
+  doi: 10.1007/BF01734359
   url: https://link.springer.com/article/10.1007/BF01734359
