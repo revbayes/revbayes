@@ -182,7 +182,7 @@ void Simplex::writeToFile(const path &dir, const std::string &fn) const
     path filename = dir / (fn + ".out");
     create_directories(dir);
 
-    std::ofstream o( filename.string() );
+    std::ofstream o( filename );
 
     o << *this;
 
