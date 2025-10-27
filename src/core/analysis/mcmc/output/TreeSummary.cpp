@@ -883,9 +883,6 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differen
         NewickConverter converter;
         Tree* tmp_tree = converter.convertFromNewick( newick );
 
-        // get the tree
-        Tree& tree_test = *tmp_tree;
-
         // get vector of nodes
         const std::vector<TopologyNode*> &nodes = tmp_tree->getNodes();
 
