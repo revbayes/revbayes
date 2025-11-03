@@ -6,6 +6,8 @@
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "RbException.h"
+#include "Integer.h"
+#include "Real.h"
 #include "RlFunction.h"
 #include "TypeSpec.h"
 #include "Workspace.h"
@@ -275,15 +277,37 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
             // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
             RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
 
+             bool avoid_in_place_conversion = false;
+            if ( the_var->getRevObject().isModelObject() )
+            {
+                auto* dag_node = the_var->getRevObject().getDagNode();
+                if ( dag_node != nullptr && dag_node->getNumberOfChildren() > 0 )
+                {
+                    const TypeSpec& fromType = the_var->getRevObject().getTypeSpec();
+                    const bool fromIsInteger = fromType.isDerivedOf( Integer::getClassTypeSpec() );
+                    const bool fromIsReal    = fromType.isDerivedOf( Real::getClassTypeSpec() );
+                    const bool toIsInteger   = argTypeSpec.isDerivedOf( Integer::getClassTypeSpec() );
+                    const bool toIsReal      = argTypeSpec.isDerivedOf( Real::getClassTypeSpec() );
+
+                    if ( (fromIsInteger && toIsReal) || (fromIsReal && toIsInteger) )
+                    {
+                        avoid_in_place_conversion = true;
+                    }
+                }
+            }
+
             RevPtr<RevVariable> the_new_var = nullptr;
-            if ( the_var->getRevObject().isConstant() and not by_value )
+            if ( the_var->getRevObject().isConstant() and not by_value and not avoid_in_place_conversion )
             {
                 the_new_var = the_var;
                 the_new_var->replaceRevObject( convertedObject );
                 the_new_var->setRequiredTypeSpec( argTypeSpec );
             }
             else
+            {
                 the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject, the_var->getName() ) );
+                the_new_var->setRequiredTypeSpec( argTypeSpec );
+            }
                 
             return Argument( the_new_var, arg.getLabel(), false );
         }
