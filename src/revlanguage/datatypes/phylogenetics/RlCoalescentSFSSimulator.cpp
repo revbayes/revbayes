@@ -110,7 +110,7 @@ RevPtr<RevVariable> CoalescentSFSSimulator::executeMethod(std::string const &nam
         long sample_size    = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
         long reps           = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
 
-        RevBayesCore::RbVector<long>* m = value->simulateSFS(mu, sample_size, reps);
+        RevBayesCore::RbVector<std::int64_t>* m = value->simulateSFS(mu, sample_size, reps);
         
         return new RevVariable( new ModelVector<Natural>( *m ) );
     }
