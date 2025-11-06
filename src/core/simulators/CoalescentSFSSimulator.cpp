@@ -63,20 +63,8 @@ void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, co
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-#ifdef RB_MPI
-    // forward the rng for different processes
-    for ( size_t i=active_PID; i<pid; ++i)
-    {
-        // we fast forward 7 times, just to be sure
-        rng->uniform01();
-        rng->uniform01();
-        rng->uniform01();
-        rng->uniform01();
-        rng->uniform01();
-        rng->uniform01();
-        rng->uniform01();
-    }
-#endif
+    size_t process_idx = size_t( floor( double(pid-active_PID) / num_processes ) ) + active_PID;
+    if (process_idx > 0) rng->setSeed(rng->getSeed() + 2*process_idx);
     
     size_t reps_this_process = reps;
 #ifdef RB_MPI
