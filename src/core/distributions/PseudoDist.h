@@ -4,6 +4,8 @@
 #include "PseudoData.h"
 #include "PseudoObservation.h"
 
+#include <iostream>
+
 /*
  * This distribution handles situations where:
  * - we have data o that affects some parameter x
@@ -31,6 +33,8 @@ namespace RevBayesCore
     template <typename T>
     class PseudoDist : public TypedDistribution< PseudoObservation >
     {
+        // How many not-clamped warnings have we printed?
+        int nWarnings = 0;
         // the parameter the pseudodata applies to
         const TypedDagNode<T>*                              parameter = nullptr;
         // the pseudodata
@@ -75,7 +79,15 @@ namespace RevBayesCore
                 return f(x);
             }
             else
+            {
+                if (nWarnings < 10)
+                {
+                    nWarnings++;
+                    std::cerr<<"Variable sampled from dnPseudo is not clamped!  It will have no effect.\n";
+                    // Sadly, we can't find the name of the variable to clamp from here.
+                }
                 return 0;
+            }
         }
 
         void                                                redrawValue(void) override
