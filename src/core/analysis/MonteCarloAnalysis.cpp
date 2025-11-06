@@ -427,6 +427,12 @@ void MonteCarloAnalysis::resetReplicates( void )
     std::vector< size_t > replicate_indices_start = std::vector<size_t>(num_processes,0);
     std::vector< size_t > replicate_indices_end   = std::vector<size_t>(num_processes,0);
     
+    // SH: to be safe, we disable parallel computation in the initialization
+    // If we don't do this reset, then the number of cores used for the likelihood computation stays at the original value, even though
+    // not all processes will be evaluating this replicate. Thus, the internal likelihood might think there are 2 cores to compute
+    // the likelihood while only 1 is actually available.
+    m->setActivePID( pid, 1 );
+    
     for (size_t i=0; i<num_processes; ++i)
     {
         size_t this_replicate_start = size_t(floor( (double(i-active_PID) / num_processes ) * replicates ) );
