@@ -1,0 +1,127 @@
+################################################################################
+#
+# RevBayes Example: ASRV with pipes
+#
+# authors: Ben Redelings
+#
+################################################################################
+seed(1236)
+#######################
+# Reading in the Data #
+#######################
+
+# Import the molecular sequences #
+# this file contains only the taxa for which sequence data are available #
+cytb <- readDiscreteCharacterData("data/bears_cytb.nex")
+
+## helpers
+taxa = cytb.taxa()
+n_taxa <- taxa.size()
+moves = VectorMoves()
+
+##########################################################################################
+# Joint Fossilized Birth-Death Process prior on the topology and fossil occurrence times #
+##########################################################################################
+
+# Define exponential priors on the birth rate and death rate #
+speciation_rate ~ dnExponential(10)
+extinction_rate ~ dnExponential(10)
+
+# Specify a scale move on the speciation_rate parameter #
+moves.append( mvScale(speciation_rate, lambda=0.1, weight=1) )
+
+# Specify a sliding-window move on the extinction_rate parameter #
+moves.append( mvScale(extinction_rate, lambda=0.1, weight=1) )
+
+# Fix the probability of sampling parameter (rho) to 1, #
+# because all extant bears are represented in this analysis #
+rho <- 1.0
+
+extant_mrca <- 1.0
+
+
+### Define the tree-prior distribution as the birth-death process ###
+phylogeny ~ dnBDP(rootAge=extant_mrca, lambda=speciation_rate, mu=extinction_rate, rho=rho, taxa=taxa)
+
+# Specify moves on the tree and node times #
+# These moves update the tree topology
+moves.append( mvFNPR(phylogeny, weight=15.0) )
+moves.append( mvNarrow(phylogeny, weight=15.0) )
+
+# These moves update the node ages #
+moves.append( mvNodeTimeSlideUniform(phylogeny, weight=40.0) )
+
+
+################################################
+# strict clock model on molecular branch rates #
+################################################
+
+# The rate along each branch is drawn from an exponential prior
+branch_rates~ dnExponential(10.0)
+
+
+#####################################
+# GTR+G nucleotide substitution model #
+#####################################
+
+# Initialize the parameters of substitution matrix #
+# Both the stationary frequencies and exchangeability rates #
+# are drawn from uniform Dirichlet distributions #
+
+# First the stationary frequencies #
+sf_hp <- v(1,1,1,1)
+sf ~ dnDirichlet(sf_hp)
+
+# Then the exchangeability rates #
+er_hp <- v(1,1,1,1,1,1)
+er ~ dnDirichlet(er_hp)
+
+moves.append( mvSimplexElementScale(er, alpha=10.0, weight=5.0) )
+moves.append( mvSimplexElementScale(sf, alpha=10.0, weight=5.0) )
+
+# Create the matrix #
+Q_cytb := fnGTR(er,sf)
+
+# Create a discretized gamma distribution of rate categories  #
+# the shape parameter is drawn from an exponential prior #
+alpha_cytb ~ dnExponential( 1.0 )
+
+moves.append( mvScale(alpha_cytb, lambda=0.01, weight=1.0) )
+moves.append( mvScale(alpha_cytb, lambda=0.1,  weight=1.0) )
+moves.append( mvScale(alpha_cytb, lambda=1,    weight=1.0) )
+
+M_cytb := Q_cytb |> fnGammaASRV( alpha_cytb, 4)
+
+### Create the substitution model and clamp with our observed DNA data ###
+phySeq ~ dnPhyloCTMC(tree=phylogeny, Q = M_cytb, branchRates=branch_rates, type="DNA")
+phySeq.clamp(cytb)
+
+
+
+########
+# MCMC #
+########
+
+# initialize the model object #
+mymodel = model(sf)
+
+monitors = VectorMonitors()
+
+# Create a vector of monitors #
+# 1. for the full model #
+monitors.append( mnModel(filename="output/ASRV_pipe.log", printgen=10) )
+
+# 2. the tree #
+monitors.append( mnFile(filename="output/ASRV_pipe.trees", printgen=10, phylogeny) )
+
+# Initialize the MCMC object #
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# Run the MCMC #
+mymcmc.run(generations=50)
+
+# Load the tree trace
+treetrace = readTreeTrace("output/ASRV_pipe.trees", treetype="clock")
+
+# Quit RevBayes #
+q()

@@ -10,12 +10,12 @@ namespace RevBayesCore {
     /**
      * @brief SteppingStone-Sampler class.
      *
-     * The SteppingStone sampler analyzes the output of a power posterior and
-     * computes the SteppingStone-Sampler marginal likelihood.
+     * The SteppingStone sampler analyzes the output of a power posterior analysis
+     * and computes the SteppingStone-Sampler marginal likelihood.
      *
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @author The RevBayes Development Core Team (Sebastian Hoehna, David Cerny)
      * @since Version 1.0, 2012-06-17
      *
      */
@@ -26,9 +26,9 @@ namespace RevBayesCore {
         virtual                                            ~SteppingStoneSampler(void);                                                //!< Virtual destructor
         
         // public methods
-        SteppingStoneSampler*                               clone(void) const;                                                          //!< Create a deep copy
-        double                                              marginalLikelihood( void ) const;                                           //!< Compute the marginal likelihood using SteppingStone-Sampler
-        
+        SteppingStoneSampler*                               clone(void) const;                                                         //!< Create a deep copy
+        double                                              marginalLikelihoodGeneral(std::vector<double> power_vec, std::vector< std::vector<double> > lnl_vec) const; //!< Compute the stepping-stone marginal likelihood for arbitrary values
+        double                                              standardError(void) const;                                                 //!< Compute the standard error of the marginal likelihood estimate
     };
     
 }

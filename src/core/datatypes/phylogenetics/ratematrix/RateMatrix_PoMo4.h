@@ -50,7 +50,6 @@ class Assignable;
         virtual                         ~RateMatrix_PoMo4(void);                     //!< Destructor
         
         // RateMatrix functions
-        virtual RateMatrix_PoMo4&                   assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         double                                      averageRate(void) const;
         void                                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_PoMo4*                           clone(void) const;

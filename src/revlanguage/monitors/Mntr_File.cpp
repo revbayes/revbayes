@@ -48,8 +48,9 @@ void Mntr_File::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
+    const std::string& fn  = static_cast<const RlString &>( filename->getRevObject()  ).getValue();
     const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
+    const std::string& fmt = static_cast<const RlString &>( format->getRevObject()    ).getValue();
     unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
     
     // sort, remove duplicates, the create monitor vector
@@ -66,8 +67,9 @@ void Mntr_File::constructInternalObject( void )
     bool pr = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
     bool app = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool wv = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    
-    value = new RevBayesCore::VariableMonitor(n, (unsigned long)g, fn, sep, pp, l, pr, app, wv);
+
+    SampleFormat Format = (fmt == "json") ? SampleFormat(JSONFormat()) : SampleFormat(SeparatorFormat(sep));
+    value = new RevBayesCore::VariableMonitor(n, (std::uint64_t)g, fn, Format, pp, l, pr, app, wv);
 }
 
 /** Get Rev type of object */
@@ -116,6 +118,7 @@ const MemberRules& Mntr_File::getParameterRules(void) const
         memberRules.push_back( new ArgumentRule("posterior" , RlBoolean::getClassTypeSpec(), "Should we print the posterior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("likelihood", RlBoolean::getClassTypeSpec(), "Should we print the likelihood as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         memberRules.push_back( new ArgumentRule("prior"     , RlBoolean::getClassTypeSpec(), "Should we print the prior probability as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        memberRules.push_back( new ArgumentRule("format"    , RlString::getClassTypeSpec(),  "Output format", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("separator") ) );
 
         // add the rules from the base class
         const MemberRules &parentRules = FileMonitor::getParameterRules();
@@ -162,6 +165,10 @@ void Mntr_File::setConstParameter(const std::string& name, const RevPtr<const Re
     else if ( name == "likelihood" )
     {
         likelihood = var;
+    }
+    else if ( name == "format" )
+    {
+        format = var;
     }
     else
     {

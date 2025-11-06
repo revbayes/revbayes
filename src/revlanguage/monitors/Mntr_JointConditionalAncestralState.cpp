@@ -105,7 +105,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     if (character == "AA" || character == "Protein")
     {
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::AminoAcidState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::AminoAcidState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::AminoAcidState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -113,7 +113,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     else if (character == "DNA")
     {
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -123,15 +123,15 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState> *m;
         if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
         {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
         {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(cdbdp_sn, (unsigned long)g, fn, sep, wt, wss);
+            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(cdbdp_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         else
         {
-        	m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(glhbdsp_sn, (unsigned long)g, fn, sep, wt, wss);
+        	m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(glhbdsp_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         m->setAppend( ap );
         m->setPrintVersion(wv);
@@ -140,7 +140,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     else if (character == "PoMo")
     {
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::PoMoState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::PoMoState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::PoMoState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -148,7 +148,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     else if (character == "RNA")
     {
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -158,11 +158,11 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState> *m;
         if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
         {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         else
         {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState>(cdbdp_sn, (unsigned long)g, fn, sep, wt, wss);
+            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState>(cdbdp_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         m->setAppend( ap );
         m->setPrintVersion(wv);
@@ -171,7 +171,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     else if (character == "Binary" || character == "Restriction")
     {
         RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::BinaryState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::BinaryState>(t, ctmc_sn, (unsigned long)g, fn, sep, wt, wss);
+        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::BinaryState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;

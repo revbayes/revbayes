@@ -33,7 +33,6 @@ class Assignable;
         // public methods
         
         // pure virtual methods you have to overwrite
-        virtual GeneralRateMatrix&          assign(const Assignable &m);
         virtual double                      averageRate(void) const;                                                                    //!< Calculate the average rate
         virtual void                        calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const = 0;   //!< Calculate the transition matrix
         virtual GeneralRateMatrix*          clone(void) const = 0;

@@ -1,0 +1,54 @@
+   Processing file "data/trees1.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+************   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+**   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+**************   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*******   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+**   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+************   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+*   Warning: tryReadIndicesFromParameters: index 'NA' is not an integer.  Ignoring indices.
+******
+
+   (a[&index=3]:0.000000,(b[&index=2]:0.000000,c[&index=1]:0.000000)[&index=4]:0.000000)[&index=5]:0.000000;
+   (d[&index=3]:0.100000,(e[&index=2]:0.100000,f[&index=1]:0.100000)[&index=4]:0.100000)[&index=5]:0.000000;

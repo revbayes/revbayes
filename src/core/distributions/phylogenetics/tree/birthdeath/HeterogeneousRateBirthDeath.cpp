@@ -34,7 +34,7 @@ namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
 
 using namespace RevBayesCore;
 
-HeterogeneousRateBirthDeath::HeterogeneousRateBirthDeath( const TypedDagNode<double> *a, const TypedDagNode<long> *rs, const TypedDagNode<RbVector<double> > *s, const TypedDagNode<RbVector<double> > *e, const TypedDagNode<double > *ev, const TypedDagNode< double > *r, const std::string &cdt, bool allow_same, const std::vector<Taxon> &n) : AbstractCharacterHistoryBirthDeathProcess(),
+HeterogeneousRateBirthDeath::HeterogeneousRateBirthDeath( const TypedDagNode<double> *a, const TypedDagNode<std::int64_t> *rs, const TypedDagNode<RbVector<double> > *s, const TypedDagNode<RbVector<double> > *e, const TypedDagNode<double > *ev, const TypedDagNode< double > *r, const std::string &cdt, bool allow_same, const std::vector<Taxon> &n) : AbstractCharacterHistoryBirthDeathProcess(),
     root_age( a ),
     root_state( rs ),
     speciation( s ),
@@ -114,7 +114,7 @@ void HeterogeneousRateBirthDeath::attachTimes(Tree* psi, std::vector<TopologyNod
         psi->getNode( parent->getIndex() ).setAge( originTime - interiorNodeTimes[index] );
         
         // Remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(node_index));
+        nodes.erase(nodes.begin()+std::int64_t(node_index));
         
         // Add the left child if an interior node
         TopologyNode* leftChild = &parent->getChild(0);
@@ -153,7 +153,7 @@ void HeterogeneousRateBirthDeath::buildRandomBinaryHistory(std::vector<TopologyN
         TopologyNode* parent = tips.at(index);
         
         // Remove the randomly drawn node from the list
-        tips.erase(tips.begin()+long(index));
+        tips.erase(tips.begin()+std::int64_t(index));
         
         // Add a left child
         TopologyNode* leftChild = new TopologyNode();
@@ -209,11 +209,11 @@ double HeterogeneousRateBirthDeath::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -227,7 +227,7 @@ double HeterogeneousRateBirthDeath::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -475,7 +475,7 @@ double HeterogeneousRateBirthDeath::computeRootLikelihood( void )
 }
 
 
-void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
     
     if ( n == "numberEvents" )
@@ -492,7 +492,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" << n << "'.";
     }
     
 }
@@ -577,7 +577,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" << n << "'.";
     }
     
 }
@@ -649,7 +649,7 @@ void HeterogeneousRateBirthDeath::simulateTree( void )
         TopologyNode* node = nodes.at(index);
         
         // Remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(index) );
+        nodes.erase(nodes.begin()+std::int64_t(index) );
         
         // Set taxon
         node->setTaxon( taxa[i] );
@@ -744,7 +744,7 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
     }
     else if (oldP == root_state)
     {
-        root_state = static_cast<const TypedDagNode<long>* >( newP );
+        root_state = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     else if (oldP == speciation)
     {

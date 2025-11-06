@@ -51,12 +51,12 @@ namespace RevLanguage {
         SyntaxElement*              clone() const;                                                  //!< Clone object
         
         // Regular functions
-        RevPtr<RevVariable>         evaluateContent(Environment& env, bool dynamic=false);          //!< Get semantic value
+        RevPtr<RevVariable>         evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);   //!< Get semantic value
         void                        finalizeLoop(void);                                             //!< Finalize loop
         const std::string&          getIndexVarName(void) const;                                    //!< Get the name of the index variable
         void                        getNextLoopState(void);                                         //!< Get next state of loop
         bool                        isFinished() const;                                             //!< Have we iterated over the whole loop?
-        void                        initializeLoop(Environment& env);                               //!< Initialize loop
+        void                        initializeLoop(const std::shared_ptr<Environment>& env);        //!< Initialize loop
         bool                        isFunctionSafe(const Environment&       env,
                                                    std::set<std::string>&   localVars) const;       //!< Is this element safe in a function?
 

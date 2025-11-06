@@ -13,7 +13,6 @@ help2yml="false"
 boost_root=""
 boost_lib=""
 boost_include=""
-openlibm="false"
 install_dir="$HOME/Applications/RevBayes"
 
 meson_args=""
@@ -31,7 +30,6 @@ while echo $1 | grep ^- > /dev/null; do
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
 -boost_include  string          : specify directory containing Boost libraries. (e.g. `/usr/include`). Defaults to unset.
--openlibm       <true|false>    : use the open math library. Defaults to false.
 -install_dir    string          : defaults to ~/Applications/RevBayes
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to automatic.
 
@@ -167,7 +165,6 @@ if [ "$travis" = "true" ]; then
     BUILD_DIR="build"
     CC=${C_COMPILER}
     CXX=${CXX_COMPILER}
-    openlibm=true
     exec_name=rb
     help2yml=true
 fi

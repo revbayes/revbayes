@@ -1,6 +1,5 @@
 option('mpi', type : 'boolean', value : false, description: 'Compile with MPI')
 option('studio', type: 'boolean', value: false, description: 'Build gtk shell')
-option('openlibm', type: 'boolean', value: false, description: 'Require openlibm')
 option('static_boost', type: 'boolean', value: false, description: 'Require boost libraries to be static')
 option('help2yml', type : 'boolean', value : false, description: 'Build help2yml')
 option('rb-exe-name', type : 'string', value : 'default', description: 'Name for revbayes executable')

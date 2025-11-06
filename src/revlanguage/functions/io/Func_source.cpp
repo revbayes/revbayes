@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include "Argument.h"
 #include "ArgumentRule.h"
@@ -21,8 +22,11 @@
 #include "RevVariable.h"
 #include "RlBoolean.h"
 #include "RlFunction.h"
+#include "RevClient.h"
 
 using namespace RevLanguage;
+
+namespace fs = std::filesystem;
 
 /** Default constructor */
 Func_source::Func_source( void ) : Procedure()
@@ -43,75 +47,22 @@ Func_source* Func_source::clone( void ) const
     return new Func_source( *this );
 }
 
-
 /** Execute function */
 RevPtr<RevVariable> Func_source::execute( void )
 {
-    
+
     /* Open file */
-    std::string fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-
-    std::ifstream inFile(fname);
-
+    fs::path fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-    
-    if ( !inFile )
-    {
-        throw RbException( "Could not open file \"" + fname + "\"" );
-    }
-    
+    bool continue_on_error = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+
     // Initialize
-    std::string commandLine;
-    int lineNumber = 0;
-    int result = 0;     // result from processing of last command
-    RBOUT("Processing file \"" + fname + "\"");
-    
-    // Command-processing loop
-    while ( inFile.good() )
-    {
-        
-        // Read a line
-        std::string line;
-        RevBayesCore::safeGetline(inFile, line);
-        lineNumber++;
-        
-        if ( echo_on == true )
-        {
-            
-            if ( result == 1 )
-            {
-                std::cout << "+ " << line << std:: endl;
-            }
-            else
-            {
-                std::cout << "> " << line << std::endl;
-            }
-            
-        }
-        
-        // If previous result was 1 (append to command), we do this
-        if ( result == 1 )
-        {
-            commandLine += line;
-        }
-        else
-        {
-            commandLine = line;
-        }
-            
-        // Process the line and record result
-        result = Parser::getParser().processCommand( commandLine, &Workspace::userWorkspace() );
-        if ( result == 2 )
-        {
-            std::ostringstream msg;
-            msg << "Problem processing line " << lineNumber << " in file \"" << fname << "\"";
-            throw RbException( msg.str() );
-        }
-        
-    }
+    RBOUT("Processing file \"" + fname.string() + "\"");
+
+    RevClient::execute_file(fname, echo_on, continue_on_error);
     
     // Return control 
-    RBOUT("Processing of file \"" + fname + "\" completed");
+    RBOUT("Processing of file \"" + fname.string() + "\" completed");
     
     return NULL;
 }
@@ -129,8 +80,9 @@ const ArgumentRules& Func_source::getArgumentRules( void ) const
         
         argumentRules.push_back( new ArgumentRule( "file"   , RlString::getClassTypeSpec() , "The name of the file to read-in.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "echo.on", RlBoolean::getClassTypeSpec(), "Should we print the commands from the file on the screen?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argumentRules.push_back( new ArgumentRule( "continue", RlBoolean::getClassTypeSpec(), "Should we continue executing after an error?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+
         rules_set = true;
-    
     }
     
     return argumentRules;

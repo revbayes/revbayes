@@ -3,7 +3,6 @@
 #include "RateGenerator.h"
 #include "TamuraNeiRateMatrixFunction.h"
 #include "TypedFunction.h"
-#include "Assignable.h"
 #include "RateMatrix_TamuraNei.h"
 #include "Simplex.h"
 #include "TypedDagNode.h"

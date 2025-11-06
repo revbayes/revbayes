@@ -14,7 +14,7 @@ using namespace RevBayesCore;
  * @param x a value of type double
  */
 
-FloorFunction::FloorFunction(const TypedDagNode<double> *x) : TypedFunction<long>( new long(0) ),
+FloorFunction::FloorFunction(const TypedDagNode<double> *x) : TypedFunction<std::int64_t>( new std::int64_t(0) ),
     a( x )
 {
     addParameter( x );

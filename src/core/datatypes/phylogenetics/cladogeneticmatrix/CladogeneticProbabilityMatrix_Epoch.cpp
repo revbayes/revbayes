@@ -11,7 +11,6 @@
 using namespace RevBayesCore;
 
 #include "RbException.h"
-#include "Assignable.h"
 
 using namespace RevBayesCore;
 
@@ -32,21 +31,6 @@ CladogeneticProbabilityMatrix_Epoch::~CladogeneticProbabilityMatrix_Epoch(void)
 {
     ; // do nothing
 }
-
-CladogeneticProbabilityMatrix_Epoch& CladogeneticProbabilityMatrix_Epoch::assign(const Assignable &m)
-{
-    
-    const CladogeneticProbabilityMatrix_Epoch *cp = dynamic_cast<const CladogeneticProbabilityMatrix_Epoch*>(&m);
-    if ( cp != NULL )
-    {
-        return operator=(*cp);
-    }
-    else
-    {
-        throw RbException("Could not assign cladogenetic probability matrix.");
-    }
-}
-
 
 CladogeneticProbabilityMatrix_Epoch* CladogeneticProbabilityMatrix_Epoch::clone( void ) const
 {
@@ -97,6 +81,21 @@ void CladogeneticProbabilityMatrix_Epoch::printForUser( std::ostream &o, const s
         epochCladogeneticProbabilityMatrices[i].printForUser(o, sep, l, left);
         prev_time.str( curr_time.str() );
     }
+}
+
+json CladogeneticProbabilityMatrix_Epoch::toJSON() const
+{
+    json epochs;
+
+    for (size_t i = 0; i < epochTimes.size(); i++)
+    {
+	json epoch;
+	epoch["endTime"] = epochTimes[i];
+	epoch["matrix"] = epochCladogeneticProbabilityMatrices[i].toJSON();
+	epochs.push_back(epoch);
+    }
+
+    return epochs;
 }
 
 void CladogeneticProbabilityMatrix_Epoch::setEpochCladogeneticProbabilityMatrix(const RbVector<CladogeneticProbabilityMatrix>& cp)

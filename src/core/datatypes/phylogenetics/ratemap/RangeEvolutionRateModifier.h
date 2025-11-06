@@ -30,7 +30,6 @@ namespace RevBayesCore
         RangeEvolutionRateModifier(const RangeEvolutionRateModifier& g);
         
         
-        RangeEvolutionRateModifier&         assign(const Assignable &m);
 
         double                              computeSiteRateMultiplier(const TopologyNode& node, CharacterEvent* currState, CharacterEvent* newState, double age=0.0);
         double                              computeSiteRateMultiplier(const TopologyNode& node, unsigned currState, unsigned newState, unsigned charIdx=0, double age=0.0);

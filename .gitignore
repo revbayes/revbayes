@@ -3,6 +3,7 @@ src/generated_include_dirs.cmake
 src/*/CMakeLists.txt
 
 # ----------------------------------------------
+/build
 projects/cmake/*
 !projects/cmake/README.txt
 !projects/cmake/*.sh
@@ -10,6 +11,7 @@ projects/cmake/*
 
 # ----------------------------------------------
 tests/*/output/
+tests/revbayes.github.io
 
 
 # ----------------------------------------------
@@ -26,13 +28,11 @@ history.txt
 /GPATH
 /GRTAGS
 /GTAGS
-# generated files
+
+#-------- Generated files -----
 validation/output*
 src/meson.build
-src/core/meson.build
-src/libs/meson.build
-src/revlanguage/meson.build
-src/revstudio/meson.build
+src/*/meson.build
 doxygen/html/*
 doxygen/latex/*
 doxygen/DoxygenWarningLog.txt
@@ -40,4 +40,20 @@ doxygen/DoxygenWarningLog.txt
 .project
 .settings/
 .vscode
+*.tlog
+*.filters
+*.vcxproj
+*.stamp
+*.depend
+*.obj
+*.sln
+*.recipe
 revbayes.code-workspace
+
+#--------- Backups -----------
+*.orig
+*.bak
+*GitVersion_backup.cpp
+*~
+*#
+.#*

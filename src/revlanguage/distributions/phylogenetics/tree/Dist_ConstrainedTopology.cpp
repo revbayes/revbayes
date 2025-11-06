@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -93,8 +93,15 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
         init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
     
+    // number of decimal places to use when checking the initial tree against taxon ages
+    std::int64_t pr = 0; // unset
+    if ( age_check_precision != NULL )
+    {
+        pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
+    }
+    
     // create the internal distribution object
-    RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init); // , bb);
+    RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init, pr); // , bb);
     
     if (backbone == NULL && backbone->getRevObject() != RevNullObject::getInstance()) {
         ; // do nothing
@@ -192,6 +199,7 @@ const MemberRules& Dist_ConstrainedTopology::getParameterRules(void) const
         member_rules.push_back( new ArgumentRule( "treeDistribution", TypedDistribution<TimeTree>::getClassTypeSpec(), "The base distribution for the tree.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "constraints",      ModelVector<Clade>::getClassTypeSpec(),          "The topological constraints.",          ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<Clade>() ) );
         member_rules.push_back( new ArgumentRule( "initialTree" ,     TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
 
         std::vector<TypeSpec> backboneTypes;
         backboneTypes.push_back( TimeTree::getClassTypeSpec() );
@@ -249,6 +257,10 @@ void Dist_ConstrainedTopology::setConstParameter(const std::string& name, const 
     else if ( name == "initialTree" )
     {
         initial_tree = var;
+    }
+    else if ( name == "ageCheckPrecision" )
+    {
+        age_check_precision = var;
     }
     else
     {

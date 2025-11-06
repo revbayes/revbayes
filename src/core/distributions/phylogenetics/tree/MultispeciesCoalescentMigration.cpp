@@ -208,7 +208,7 @@ double MultispeciesCoalescentMigration::computeLnProbability( void )
             // we need to set the initial probability of the individual being in population j
             size_t individual_node_index = the_individual_node->getIndex();
             const std::string &species_name = the_individual_node->getSpeciesName();
-            TopologyNode *species_node = species_names_2_species_nodes[species_name];
+            TopologyNode *species_node = species_names_2_species_nodes.at(species_name);
             size_t species_node_index = species_node->getIndex();
             probabilities[num_populations*individual_node_index+species_node_index] = 1.0;
 
@@ -428,7 +428,7 @@ void MultispeciesCoalescentMigration::resetTipAllocations( void )
         //        const std::string &tip_name = it->getName();
         const TopologyNode &n = value->getNode( i );
         const std::string &species_name = n.getSpeciesName();
-        TopologyNode *species_node = species_names_2_species_nodes[species_name];
+        TopologyNode *species_node = species_names_2_species_nodes.at(species_name);
         individuals_per_branch[ species_node->getIndex() ].insert( &n );
     }
     
@@ -522,11 +522,11 @@ void MultispeciesCoalescentMigration::simulateTree( void )
             throw RbException("Cannot match a taxon without species to a tip in the species tree. The taxon map is probably wrong.");
         }
         
-        TopologyNode *species_node = species_names_2_nodes[species_name];
+        TopologyNode *species_node = species_names_2_nodes.at(species_name);
         
         if ( species_node == NULL )
         {
-            throw RbException("Could not match a taxon with name" + species_name + " to any of the tips in the species tree.");
+            throw RbException() << "Could not match a taxon with name" << species_name << " to any of the tips in the species tree.";
         }
         
         // initialize the age to be the present time

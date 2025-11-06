@@ -7,6 +7,8 @@
 #ifndef DistributionGeometric_H
 #define DistributionGeometric_H
 
+#include <cstdint>
+
 namespace RevBayesCore {
     
     class RandomNumberGenerator;
@@ -15,12 +17,12 @@ namespace RevBayesCore {
     
         namespace Geometric {
         
-            double                      pdf(int n, double p);                                   /*!< Geometric(p) probability density */
-            double                      pdf(int n, double p, bool asLog);                       /*!< Geometric(p) probability density */
-            double                      lnPdf(int n, double p);                                 /*!< Geometric(p) log_e probability density */
-            double                      cdf(int n, double p);                                   /*!< Geometric(p) cumulative probability */
-            int                         quantile(double q, double p);                           /*!< Geometric(p) quantile */
-            int                         rv(double p, RandomNumberGenerator& rng);               /*!< Geometric(p) random variable */
+            double                      pdf(std::int64_t n, double p);                                   /*!< Geometric(p) probability density */
+            double                      pdf(std::int64_t n, double p, bool asLog);                       /*!< Geometric(p) probability density */
+            double                      lnPdf(std::int64_t n, double p);                                 /*!< Geometric(p) log_e probability density */
+            double                      cdf(std::int64_t n, double p);                                   /*!< Geometric(p) cumulative probability */
+            std::int64_t                         quantile(double q, double p);                           /*!< Geometric(p) quantile */
+            std::int64_t                         rv(double p, RandomNumberGenerator& rng);               /*!< Geometric(p) random variable */
         }
     }
 }

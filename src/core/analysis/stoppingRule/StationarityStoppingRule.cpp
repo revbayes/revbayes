@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <iosfwd>
+#include <iomanip>
 #include <string>
 #include <vector>
 
@@ -56,41 +57,40 @@ void StationarityStoppingRule::setNumberOfRuns(size_t n)
     
     if ( n < 2 )
     {
-        throw RbException("You need at least two replicates for the Stationarity between runs convergence statistic.");
+        throw RbException("You need at least two replicates for the stationarity convergence statistic.");
     }
 }
 
 
 /**
- * Should we stop now?
- * Yes, if the ratio of the variance of samples between chains over the variance of samples withing chains
- * is smaller than the provided threshold.
+ * Compute the current value of the rule's test statistic:
+ * Here, this is the number of cases in which the pooled sample mean lies outside the confidence
+ * interval of a single-chain mean (with confidence level equal to 1 - prob)
  */
-bool StationarityStoppingRule::stop( size_t g )
+double StationarityStoppingRule::getStatistic( size_t g )
 {
+    // record the number of such cases
+    size_t outsideConfInt = 0;
+    
     StationarityTest sTest = StationarityTest( numReplicates, prob );
 
-    bool passed = true;
+    std::vector< std::vector<TraceNumeric> > data( numReplicates );
+    size_t num_variables_in_rep = 1; // prevent complaints about lack of initialization in the 2nd loop below
     
-    std::vector<std::vector<std::vector<double> > > values;
-    std::vector<std::vector<size_t> > burnins;
-    for ( size_t i = 1; i <= numReplicates; ++i)
+    for ( size_t i = 0; i < numReplicates; ++i)
     {
-        path fn = filename;
-        if ( numReplicates > 1 )
-            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
-        
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
         TraceContinuousReader reader = TraceContinuousReader( fn );
         
-        // get the vector of traces from the reader
-        std::vector<TraceNumeric> &data = reader.getTraces();
+        // get the vector of variable-specific traces from the reader
+        data[i] = reader.getTraces();
         
         size_t maxBurnin = 0;
         
         // find the max burnin
-        for ( size_t j = 0; j < data.size(); ++j)
+        for ( size_t j = 0; j < data[i].size(); ++j)
         {
-            size_t b = burninEst->estimateBurnin( data[j] );
+            size_t b = burninEst->estimateBurnin( data[i][j] );
 
             if ( maxBurnin < b )
             {
@@ -99,14 +99,75 @@ bool StationarityStoppingRule::stop( size_t g )
         }
         
         // set the burnins
-        for ( size_t j = 0; j < data.size(); ++j)
+        for ( size_t j = 0; j < data[i].size(); ++j)
         {
-            data[j].setBurnin( maxBurnin );
+            data[i][j].setBurnin(maxBurnin);
         }
-
-        // conduct the test
-        passed &= sTest.assessConvergence(data);
+        
+        // if we have different numbers of variables in different replicates, something has gone terribly wrong
+        if (i > 0 && data[i].size() != num_variables_in_rep)
+        {
+            throw RbException("The replicates contain different sets of parameters.");
+        }
+        
+        // get the number of variables in the current replicate
+        num_variables_in_rep = data[i].size();
     }
     
-    return passed;
+    // invert the hierarchy
+    std::vector< std::vector<TraceNumeric> > data_exp( num_variables_in_rep );
+    for (size_t i = 0; i < num_variables_in_rep; i++)
+    {
+        for ( size_t j = 0; j < numReplicates; j++)
+        {
+            data_exp[i].push_back( data[j][i] );
+        }
+
+        // get the value and increment the counter
+        outsideConfInt += (size_t)sTest.getStatistic( data_exp[i] );
+    }
+    
+    return (double)outsideConfInt;
+}
+
+
+std::string StationarityStoppingRule::printAsStatement( size_t g, bool target_only )
+{
+    // Nicely format the target value
+    std::stringstream tss;
+    tss << std::setprecision(5) << std::noshowpoint << prob;
+    std::string target = tss.str();
+    
+    std::string statement;
+    
+    if (target_only)
+    {
+        statement = "P-value used to test the inclusion of the overall mean in the CI of a single-chain mean: " + target + "\n";
+    }
+    else {
+        // Note that # of comparisons = (# of replicates) * (# of parameters)
+        // If there are multiple runs, we will grab the # of parameters from the 1st run
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(1)) : filename;
+        TraceContinuousReader reader = TraceContinuousReader( fn );
+        std::vector<TraceNumeric> &data = reader.getTraces();
+        size_t nComp = numReplicates * data.size();
+        
+        size_t val = (size_t)getStatistic(g);
+        std::string preamble = "Comparisons in which the CI of a single-chain mean excludes the overall mean at p = " + target + ": ";
+        statement = preamble + std::to_string(val) + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
+    }
+    
+    return statement;
+}
+
+
+/**
+ * Should we stop now?
+ * Yes, if the pooled sample mean is within the confidence intervals of all chain means for all
+ * monitored variables.
+ */
+bool StationarityStoppingRule::stop( size_t g )
+{
+    size_t outsideConfInt = (size_t)getStatistic(g);
+    return outsideConfInt == 0;
 }

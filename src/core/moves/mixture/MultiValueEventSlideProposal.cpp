@@ -4,10 +4,11 @@
 #include <iostream>
 #include <vector>
 
+#include "Cloneable.h"
+#include "Move.h"
+#include "MultiValueEvent.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
-#include "Cloneable.h"
-#include "MultiValueEvent.h"
 #include "RbConstants.h"
 #include "StochasticNode.h"
 
@@ -123,6 +124,8 @@ double MultiValueEventSlideProposal::doProposal( void )
     else
     {
         failed = true;
+        // we also need to decrement the counters for our tuning
+        move->decrementTriedCounter();
     }
     
     return hr;
@@ -223,4 +226,3 @@ void MultiValueEventSlideProposal::tune( double rate )
     lambda = fmin(10000, lambda);
     
 }
-

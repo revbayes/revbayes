@@ -18,6 +18,7 @@
 #include "StringUtilities.h"
 
 #include <cstdio>
+#include <cstdint>
 #include <iomanip>
 
 #include <algorithm>
@@ -32,12 +33,21 @@ using std::string;
 using std::vector;
 
 
-/** Convert the string s to a number */
+/** Convert the string s to a floating-point number */
+double StringUtilities::asDoubleNumber(const std::string& s)
+{
+    
+    return std::atof( s.c_str() );
+}
+
+
+/** Convert the string s to an integer */
 int StringUtilities::asIntegerNumber(const std::string& s)
 {
     
     return std::atoi( s.c_str() );
 }
+
 
 /**
  * Fill this string with spaces so that it has the required length.
@@ -372,7 +382,7 @@ bool StringUtilities::isNumber(const std::string& s)
 
 
 /**
- * Utility function for getting a one-line summary being max maxLen long.
+ * Utility function for getting a one-line summary being max maxLen std::int64_t.
  * We find the first non-empty line in the input. If it is longer than maxLen,
  * we truncate it at maxLen - 3 and add "..." at the end. If it is shorter, we
  * just return the complete line (without line break).
@@ -427,8 +437,11 @@ std::string StringUtilities::oneLiner( const std::string& input, size_t maxLen )
         
         if ( i < input.size() )
         {
-            if ( maxLen - oneLiner.size() < 3 )
+            if ( oneLiner.size() + 3 > maxLen)
             {
+                if (oneLiner.size() < maxLen)
+                    oneLiner += std::string(' ', maxLen - oneLiner.size());
+
                 oneLiner[ maxLen - 1 ] = '.';
                 oneLiner[ maxLen - 2 ] = '.';
                 oneLiner[ maxLen - 3 ] = '.';
@@ -492,6 +505,26 @@ string StringUtilities::join(const vector<string>& ss, const string& sep)
     std::ostringstream o;
     join(o, ss, sep);
     return o.str();
+}
+
+/*!
+ * Utility function for index sorting, inspired by the following Stack Overflow posts:
+ * Lukasz Wiklendt, https://stackoverflow.com/a/12399290 and
+ * vsoftco, https://stackoverflow.com/a/37732329
+ *
+ * \brief Index sorting.
+ * \param v is a vector that we want to sort and return the indices of sorted elements.
+ * \return Vector of indices of the sorted elements of v. We use uint32_t rather than size_t to speed up memory access.
+ * \throws Does not throw an error.
+ */
+std::vector<uint32_t> StringUtilities::stringSortIndices(const std::vector<std::string>& v)
+{
+    std::vector<uint32_t> result( v.size() );
+    std::iota(result.begin(), result.end(), 0);
+    std::sort(result.begin(), result.end(),
+              [&v](uint32_t i1, uint32_t i2) { return v[i1] < v[i2]; }
+             );
+    return result;
 }
 
 /**

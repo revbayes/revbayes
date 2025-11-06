@@ -185,7 +185,7 @@ double IndependentTopologyProposal::doProposal( void )
     {
         proposal_nodes[i]->setAge( variable->getValue().getTipNode(i).getAge() );
 
-        if( variable->getValue().getTipNode(i).isSampledAncestor() )
+        if( variable->getValue().getTipNode(i).isSampledAncestorTip() )
         {
             proposal_nodes[i]->getParent().setAge( proposal_nodes[i]->getAge() );
             proposal_nodes[i]->setSampledAncestor( true );
@@ -197,7 +197,7 @@ double IndependentTopologyProposal::doProposal( void )
     std::vector<double> ages;
     for(size_t i = 0; i < stored_nodes.size(); i++)
     {
-        if( stored_nodes[i]->isInternal() == true && stored_nodes[i]->isSampledAncestor() == false )
+        if( stored_nodes[i]->isInternal() == true && stored_nodes[i]->isSampledAncestorTip() == false )
         {
             ages.push_back( stored_nodes[i]->getAge() );
         }
@@ -322,7 +322,7 @@ std::vector<size_t> IndependentTopologyProposal::recursivelyRank( const Topology
         ln_num_rankings += RbMath::lnChoose(ranking.size(), child_ranking.size());
     }
 
-    if( n.isSampledAncestor(true) == false )
+    if( n.isSampledAncestorTipOrParent() == false )
     {
         // put the current node at the highest rank
         ranking.push_back( n.getIndex() );

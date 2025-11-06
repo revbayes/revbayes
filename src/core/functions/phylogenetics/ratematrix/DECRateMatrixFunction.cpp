@@ -1,12 +1,3 @@
-//
-//  DECRateMatrixFunction.cpp
-//  revbayes-proj
-//
-//  Created by Michael Landis on 3/16/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
-
 #include "DECRateMatrixFunction.h"
 
 #include <cmath>
@@ -70,7 +61,8 @@ size_t DECRateMatrixFunction::computeNumStates(size_t numAreas, size_t maxRangeS
     return numStates;
 }
 
-void DECRateMatrixFunction::update( void ) {
+void DECRateMatrixFunction::update( void )
+{
     // get the information from the arguments for reading the file
     const RbVector<RbVector<double> >& dr       = dispersalRates->getValue();
     const RbVector<RbVector<double> >& er       = extirpationRates->getValue();

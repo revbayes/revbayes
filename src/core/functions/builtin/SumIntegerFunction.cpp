@@ -11,9 +11,9 @@ using namespace RevBayesCore;
 
 /**
  * SumFunction of a RbVector Constructor.
- * @param v the vector of values of type long
+ * @param v the vector of values of type std::int64_t
  */
-SumIntegerFunction::SumIntegerFunction(const TypedDagNode<RbVector<long> > *v) : TypedFunction<long>( new long(0.0) ), vals( v )
+SumIntegerFunction::SumIntegerFunction(const TypedDagNode<RbVector<std::int64_t> > *v) : TypedFunction<std::int64_t>( new std::int64_t(0.0) ), vals( v )
 {
     // add the parameters as parents
     this->addParameter( vals );
@@ -39,8 +39,8 @@ void SumIntegerFunction::update( void )
 {
     
     double m = 0;
-    const RbVector<long> &v = vals->getValue();
-    for ( RbConstIterator<long> it = v.begin(); it != v.end(); ++it)
+    const RbVector<std::int64_t> &v = vals->getValue();
+    for ( RbConstIterator<std::int64_t> it = v.begin(); it != v.end(); ++it)
     {
         m += *it;
     }
@@ -56,7 +56,7 @@ void SumIntegerFunction::swapParameterInternal(const DagNode *oldP, const DagNod
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode<RbVector<long> >* >( newP );
+        vals = static_cast<const TypedDagNode<RbVector<std::int64_t> >* >( newP );
     }
     
 }

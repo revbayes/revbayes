@@ -508,7 +508,7 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleAge(size_t i)
 }
 
 
-void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode *toucher)
 {
     dirty_psi  = std::vector<bool>(taxa.size(), false);
     dirty_taxa = std::vector<bool>(taxa.size(), false);
@@ -518,7 +518,7 @@ void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(DagNode *touch
 }
 
 
-void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNode *toucher)
 {
     partial_likelihood = stored_likelihood;
     Psi = stored_Psi;
@@ -536,7 +536,7 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(DagNode *to
 }
 
 
-void AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(DagNode *toucher, bool touchAll)
+void AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *toucher, bool touchAll)
 {
     if ( touched == false )
     {

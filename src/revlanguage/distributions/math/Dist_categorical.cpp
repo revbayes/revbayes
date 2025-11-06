@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -76,8 +76,8 @@ const std::string& Dist_categorical::getClassType( void )
 /* Get Rev type spec of class (static) */
 const TypeSpec& Dist_categorical::getClassTypeSpec(void)
 {
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Distribution::getClassTypeSpec() ) );
-    
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Natural>::getClassTypeSpec() ) );
+
     return rev_type_spec;
 }
 
