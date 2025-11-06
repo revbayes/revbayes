@@ -27,13 +27,13 @@ class RandomNumberGenerator;
         
         CoalescentSFSSimulator*                         clone(void) const;
         
-        RbVector<long>*                                 simulateSFS(double mr, long s, long r) const;
+        RbVector<std::int64_t>*                         simulateSFS(double mr, long s, long r) const;
         void                                            simulateCoalescent(long s, long r, const path& f_stats, const path& f_trees) const;
 
     private:
         
         double                                          simulateCoalescentTime(double t, size_t a, RandomNumberGenerator* r) const;
-        size_t                                          simulateMutations(double mr, size_t i, long s, const std::vector<std::vector<size_t> >& c, const std::vector<double>& a, std::vector<long>& t, RandomNumberGenerator* r) const;
+        size_t                                          simulateMutations(double mr, size_t i, std::int64_t s, const std::vector<std::vector<size_t> >& c, const std::vector<double>& a, std::vector<std::int64_t>& t, RandomNumberGenerator* r) const;
 
         double                                          generation_time;
         RbVector<DemographicFunction>                   demographies;

@@ -81,7 +81,7 @@ void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, co
     std::vector<size_t> parents = std::vector<size_t>(2*sample_size-1, -1);
     std::vector<std::vector<size_t> > children = std::vector<std::vector<size_t> >(2*sample_size-1, std::vector<size_t>(2,-1));
     
-    std::vector<long> tip_state = std::vector<long>(sample_size, 0);
+    std::vector<std::int64_t> tip_state = std::vector<std::int64_t>(sample_size, 0);
         
     for (size_t r=0; r<reps_this_process; ++r)
     {
@@ -196,11 +196,11 @@ void CoalescentSFSSimulator::simulateCoalescent( long sample_size, long reps, co
 
 
 
-RbVector<long>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long sample_size, long reps ) const
+RbVector<std::int64_t>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long sample_size, long reps ) const
 {
 //    long sample_size = ploidy_factor * num_ind;
 //    long sample_size = num_ind;
-    RbVector<long>* sfs = new RbVector<long>(sample_size+1);
+    RbVector<std::int64_t>* sfs = new RbVector<std::int64_t>(sample_size+1);
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
@@ -234,7 +234,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long 
     std::vector<size_t> parents = std::vector<size_t>(2*sample_size-1, -1);
     std::vector<std::vector<size_t> > children = std::vector<std::vector<size_t> >(2*sample_size-1, std::vector<size_t>(2,-1));
     
-    std::vector<long> tip_state = std::vector<long>(sample_size, 0);
+    std::vector<std::int64_t> tip_state = std::vector<std::int64_t>(sample_size, 0);
         
     for (size_t r=0; r<reps_this_process; ++r)
     {
@@ -296,7 +296,7 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long 
         
         // now simulate the mutation
         size_t root_index = 2*sample_size-2;
-        long root_state = 0;
+        std::int64_t root_state = 0;
         size_t num_mutations = simulateMutations(mutation_rate, root_index, root_state, children, ages, tip_state, rng);
         
         size_t obs_state = 0;
@@ -316,12 +316,12 @@ RbVector<long>* CoalescentSFSSimulator::simulateSFS( double mutation_rate, long 
     MPI_Barrier( MPI_COMM_WORLD );
     
     // create a copy of the transition probability matrix
-    RbVector<long> sfs_backup = RbVector<long>( *sfs );
+    RbVector<std::int64_t> sfs_backup = RbVector<std::int64_t>( *sfs );
 
     // we only need to send message if there is more than one process
     if ( num_processes > 1 )
     {
-        std::vector< long > this_sfs = std::vector<long>(sample_size+1,0.0);
+        std::vector< std::int64_t > this_sfs = std::vector<std::int64_t>(sample_size+1,0.0);
 
         for (size_t i=active_PID; i<active_PID+num_processes; ++i)
         {
@@ -388,7 +388,7 @@ double CoalescentSFSSimulator::simulateCoalescentTime(double current_age, size_t
 
 
 
-size_t CoalescentSFSSimulator::simulateMutations(double mutation_rate, size_t current_index, long current_state, const std::vector<std::vector<size_t> > &children, const std::vector<double> &ages, std::vector<long> &tip_states, RandomNumberGenerator* rng) const
+size_t CoalescentSFSSimulator::simulateMutations(double mutation_rate, size_t current_index, std::int64_t current_state, const std::vector<std::vector<size_t> > &children, const std::vector<double> &ages, std::vector<std::int64_t> &tip_states, RandomNumberGenerator* rng) const
 {
     size_t sample_size = tip_states.size();
     size_t num_mutations = 0;
@@ -405,7 +405,7 @@ size_t CoalescentSFSSimulator::simulateMutations(double mutation_rate, size_t cu
         size_t left_num_mutations = RbStatistics::Poisson::rv( mutation_rate*left_branch_length, *rng );
 
         // initialize the left state with the current state
-        long left_state = current_state;
+        std::int64_t left_state = current_state;
         
         // only flip the state if the number of mutations is odd
         if ( left_num_mutations % 2 == 1 )
@@ -421,7 +421,7 @@ size_t CoalescentSFSSimulator::simulateMutations(double mutation_rate, size_t cu
         size_t right_num_mutations = RbStatistics::Poisson::rv( mutation_rate*right_branch_length, *rng );
 
         // initialize the right state with the current state
-        long right_state = current_state;
+        std::int64_t right_state = current_state;
         
         // only flip the state if the number of mutations is odd
         if ( right_num_mutations % 2 == 1 )
