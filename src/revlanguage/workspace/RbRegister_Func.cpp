@@ -330,6 +330,7 @@
 #include "Func_PseudoDataLogNormal.h"
 #include "Func_PseudoDataConstant.h"
 #include "Func_PseudoDataRequire.h"
+#include "Func_PseudoDataExponential.h"
 
 /* Type conversions */
 #include "Proc_StringToInt.h"
@@ -714,6 +715,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_PseudoDataLikelihoodLogNormal()       );
         addFunction( new Func_PseudoDataLikelihoodConstant()        );
         addFunction( new Func_PseudoDataLikelihoodRequire()         );
+        addFunction( new Func_PseudoDataLikelihoodExponential()     );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
