@@ -517,8 +517,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                             }
                             p_site_mixture[c1] = tmp;
                         }
-                        std::uint64_t org_val = char_node[site];
-
                         // store the likelihood
                         p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
 
