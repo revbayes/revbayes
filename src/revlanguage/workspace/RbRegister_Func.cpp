@@ -325,6 +325,7 @@
 #include "Func_PseudoDataOr.h"
 #include "Func_PseudoDataNormal.h"
 #include "Func_PseudoDataLogNormal.h"
+#include "Func_PseudoDataExponential.h"
 #include "Func_PseudoDataWeight.h"
 #include "Func_PseudoDataAdd.h"
 #include "Func_PseudoDataSub1.h"
@@ -687,6 +688,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_PseudoDataOr<Real>()                  );
         addFunction( new Func_PseudoDataNormal()                    );
         addFunction( new Func_PseudoDataLogNormal()                 );
+        addFunction( new Func_PseudoDataExponential()               );
         addFunction( new Func_PseudoDataWeight<Real>()              );
         addFunction( new Func_PseudoDataAdd()                       );
         addFunction( new Func_PseudoDataSub1()                      );
