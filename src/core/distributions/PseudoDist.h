@@ -6,6 +6,8 @@
 #include "TypedDistribution.h"
 #include "TypedDagNode.h"
 
+#include <iostream>
+
 /*
  * This distribution handles situations where:
  * - we have data o that supplies evidence about some parameter x
@@ -32,6 +34,8 @@ namespace RevBayesCore
 {
     class PseudoDist : public TypedDistribution< PseudoObservation >
     {
+        // How many not-clamped warnings have we printed?
+        int nWarnings = 0;
         // the pseudo-data likelihood
         const TypedDagNode<PseudoDataLikelihood>*                     pseudo_data_likelihood = nullptr;
 
@@ -67,7 +71,15 @@ namespace RevBayesCore
                 return L.log();
             }
             else
+            {
+                if (nWarnings < 10)
+                {
+                    nWarnings++;
+                    std::cerr<<"Variable sampled from dnPseudo is not clamped!  It will have no effect.\n";
+                    // Sadly, we can't find the name of the variable to clamp from here.
+                }
                 return 0;
+            }
         }
 
         void                                                redrawValue(void) override
