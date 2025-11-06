@@ -145,13 +145,17 @@ PowerPosteriorAnalysis* PowerPosteriorAnalysis::clone( void ) const
 }
 
 
+std::vector<double> PowerPosteriorAnalysis::getPowers( void ) const
+{
+    return powers;
+}
+
+
 void PowerPosteriorAnalysis::initMPI( void )
 {
     
-    
     size_t active_proc = size_t( floor( pid   / double(processors_per_likelihood)) ) * processors_per_likelihood;
     sampler->setActivePID( active_proc, processors_per_likelihood );
-    
     
 #ifdef RB_MPI
     // wait until all processes are complete
@@ -163,14 +167,14 @@ void PowerPosteriorAnalysis::initMPI( void )
 
 void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
 {
-
-//    initMPI();
+    
+    //    initMPI();
     
     if( gen < sampleFreq )
     {
         throw(RbException("Trying to run power posterior analysis for fewer generations than sampleFreq, no samples will be stored"));
     }
-
+    
     // disable the screen monitor(s) if any
     sampler->disableScreenMonitor(true, 0);
     
@@ -183,18 +187,23 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     }
     
     // compute which block of the data this process needs to compute
-//    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
-//    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
+    //    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
+    //    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
     
     size_t stone_block_start =  floor( ( floor( pid   /double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
     size_t stone_block_end   =  floor( ( ceil( (pid+1)/double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
+    
+#ifdef RB_MPI
+    // Wait until all processes are complete: this is to make sure we do not print step 1 before the message above
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
     
     // Run the chain
     for (size_t i = stone_block_start; i < stone_block_end; ++i)
     {
     
         // run the i-th stone
-        runStone(i, gen, burnin_fraction, pre_burnin_generations, tuning_interval);
+        runStone(i, gen, burnin_fraction, pre_burnin_generations, tuning_interval, false);
         
     }
     
@@ -217,15 +226,15 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 
 
 
-void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
+void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, bool one_only)
 {
     // create the directory if necessary
-    if (filename.filename().empty() or filename.filename_is_dot() or filename.filename_is_dot_dot())
+    if (filename.filename().empty() or filename.filename() == "." or filename.filename() == "..")
     {
         throw RbException("Please provide a filename with an extension");
     }
 
-    std::string stone_tag = "_stone_" + std::to_string(idx);
+    std::string stone_tag = "_stone_" + std::to_string(idx + 1); // number the stones from 1 to n, not from 0 to (n - 1)
 
     path stoneFileName = appendToStem(filename, stone_tag);
     createDirectoryForFile( stoneFileName );
@@ -237,27 +246,89 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     sampler->reset();
 
     size_t burnin = size_t( ceil( burnin_fraction*gen ) );
-    
     size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
-    size_t digits = size_t( ceil( log10( powers.size() ) ) );
     
-    // print output for users
-    if ( process_active ==true )
+    /* Print output for users.
+     * First, we will find the smallest PID such that the number of stones assigned to the corresponding process is equal to
+     * ceil( powers.size() / num_processes ) rather than floor( powers.size() / num_processes ). This will be the process
+     * that gets to print its status to the standard output. Note that process_active has a PID of 0, and does not always
+     * satisfy this condition.
+     */
+    std::vector<size_t> start(num_processes);
+    std::vector<size_t> end(num_processes);
+    std::vector<size_t> ceil_pids;
+    
+    for (size_t i = 0; i < num_processes; ++i)
     {
-        std::cout << "Step ";
-        for (size_t d = size_t( ceil( log10( idx+1.1 ) ) ); d < digits; d++ )
+        // see PowerPosteriorAnalysis::runAll()
+        start[i] = floor( ( floor( i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
+        end[i]   = floor( ( ceil((i+1)/double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
+        if (end[i] - start[i] == ceil((double)powers.size() / num_processes))
         {
-            std::cout << " ";
+            ceil_pids.push_back(i);
         }
-        std::cout << (idx+1) << " / " << powers.size();
-        std::cout << "\t\t";
+    }
+    
+    size_t pid_to_print = *std::min_element(ceil_pids.begin(), ceil_pids.end());
+    
+    if (pid == pid_to_print)
+    {
+        // Get the width of a given number in characters
+        auto width = [&](size_t x) { return size_t( ceil( log10(x + 0.1) ) ); };
+        
+        if (num_processes == 1 or one_only == true)
+        {
+            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
+            size_t digits = width( powers.size() );
+            
+            std::cout << "Step ";
+            for (size_t d = width(idx + 1); d < digits; d++)
+            {
+                std::cout << " ";
+            }
+            std::cout << (idx + 1);
+        }
+        else
+        {
+            // Get the values to print
+            size_t step = idx + 1 - start[pid_to_print]; // make sure step counter starts from 1
+            size_t lower_bound = (step - 1) * num_processes + 1;
+            size_t upper_bound = std::min( step * num_processes, powers.size() );
+            
+            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
+            size_t tmp = powers.size() - ceil((double)powers.size() / num_processes) + floor((double)powers.size() / num_processes);
+            size_t max_upper_bound = (powers.size() % num_processes == 1) ? end[ end.size() - 2 ] : end[ end.size() - 1 ];
+            size_t max_lower_bound = (powers.size() <= num_processes) ? 1 : ((powers.size() % num_processes > 1) ? tmp : start[ start.size() - 1 ]);
+            size_t offset = width(max_lower_bound) + width(max_upper_bound) + 2; // add 2 for the "--"
+            
+            if (lower_bound != upper_bound)
+            {
+                std::cout << "Steps ";
+                for (size_t d = width(lower_bound) + width(upper_bound) + 2; d < offset; d++)
+                {
+                    std::cout << " ";
+                }
+                std::cout << lower_bound << "--" << upper_bound;
+            }
+            else
+            {
+                std::cout << "Step ";
+                for (size_t d = width(lower_bound); d < offset + 1; d++) // add 1 to account for "Step" vs "Steps"
+                {
+                    std::cout << " ";
+                }
+                std::cout << lower_bound;
+            }
+        }
+    
+        std::cout << " / " << powers.size() << "\t\t";
         std::cout.flush();
     }
     
     // set the power of this sampler
     sampler->setLikelihoodHeat( powers[idx] );
     
-    sampler->addFileMonitorExtension( stone_tag, false);
+    sampler->addFileMonitorExtension(stone_tag, false);
     
     // let's do a pre-burnin
     for (size_t k=1; k<=pre_burnin_generations; k++)
@@ -273,18 +344,21 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         
     }
     
-    // Monitor
-    sampler->startMonitors(gen, false);
-    sampler->writeMonitorHeaders( false );
-    sampler->monitor(0);
+    // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
+    if (not one_only or (one_only and pid == pid_to_print))
+    {
+        sampler->startMonitors(gen, false);
+        sampler->writeMonitorHeaders( false );
+        sampler->monitor(0);
+    }
     
     double p = powers[idx];
-    for (size_t k=1; k<=gen; ++k)
+    for (size_t k = 1; k <= gen; ++k)
     {
         
-        if ( process_active == true )
+        if (pid == pid_to_print)
         {
-            if ( k % printInterval == 0 )
+            if (k % printInterval == 0)
             {
                 std::cout << "*";
                 std::cout.flush();
@@ -293,8 +367,11 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         
         sampler->nextCycle( true );
 
-        // Monitor
-        sampler->monitor(k);
+        // monitor
+        if (not one_only or (one_only and pid == pid_to_print))
+        {
+            sampler->monitor(k);
+        }
         
         // sample the likelihood
         if ( k > burnin && k % sampleFreq == 0 )
@@ -306,7 +383,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
             
     }
     
-    if ( process_active == true )
+    if (pid == pid_to_print)
     {
         std::cout << std::endl;
     }
@@ -330,7 +407,7 @@ void PowerPosteriorAnalysis::summarizeStones( void )
     // Append each stone
     for (size_t idx = 0; idx < powers.size(); ++idx)
     {
-        std::string stone_tag = "_stone_" + std::to_string(idx);
+        std::string stone_tag = "_stone_" + std::to_string(idx + 1); // number the stones from 1 to n, not from 0 to (n - 1)
         path stoneFileName = appendToStem( filename, stone_tag );
 
         // read the i-th stone

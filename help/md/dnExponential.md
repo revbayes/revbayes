@@ -3,13 +3,9 @@ dnExponential
 ## title
 Exponential Distribution
 ## description
-Exponential distribution with rate equal to ‘lambda’.
+The Exponential distribution describes the distribution of the times between events in a Poisson point process. 
 ## details
-The exponential distribution has density:
-
-f(x) = lambda * exp(-lambda*x)
-
-where lambda is the rate parameter.
+The exponential distribution takes one parameter, lambda, describing the rate (i.e. 1/mean). The probability density function is f(x) = lambda * exp(-lambda*x).
 
 ## authors
 Michael Landis

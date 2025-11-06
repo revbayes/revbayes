@@ -183,18 +183,6 @@ void FunctionTable::eraseFunction(const std::string& name)
 }
 
 
-///** Execute function and get its variable value (evaluate once) */
-//RevPtr<RevVariable> FunctionTable::executeFunction(const std::string& name, const std::vector<Argument>& args) {
-//
-//    const Function&   the_function = findFunction(name, args, true);
-//    RevPtr<RevVariable>  theValue    = the_function.execute();
-//
-//    the_function.clear();
-//
-//    return theValue;
-//}
-
-
 /**
  * Does a function with the given name exist? We check this
  * function table and then delegate to parent table if we cannot
@@ -290,7 +278,7 @@ std::vector<Function *> FunctionTable::findFunctions(const std::string& name) co
 
 
 /** Find function (also processes arguments) */
-const Function* FunctionTable::findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
+const Function* FunctionTable::findFunction(const std::string& name, const std::vector<Argument>& args) const
 {
     
     std::pair<std::multimap<std::string, Function *>::const_iterator,
@@ -304,7 +292,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         {
             // \TODO: We shouldn't allow const casts!!!
             FunctionTable* pt = const_cast<FunctionTable*>(parentTable);
-            return pt->findFunction(name, args, once);
+            return pt->findFunction(name, args);
         }
         else
         {
@@ -318,7 +306,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
     if (hits == 1)
     {
         std::vector<bool> arg_mapped(args.size(), false);
-        if (ret_val.first->second->checkArguments(args,NULL,arg_mapped,once) == false)
+        if (ret_val.first->second->checkArguments(args,NULL,arg_mapped) == false)
         {
             std::ostringstream msg;
 
@@ -405,7 +393,7 @@ const Function* FunctionTable::findFunction(const std::string& name, const std::
         {
             match_score->clear();
             std::vector<bool> arg_mapped(args.size(), false);
-            if ( (*it).second->checkArguments(args, match_score, arg_mapped, once) == true )
+            if ( (*it).second->checkArguments(args, match_score, arg_mapped) == true )
             {
                 std::sort(match_score->begin(), match_score->end(), std::greater<double>());
                 if ( best_match == NULL )
@@ -559,11 +547,11 @@ Function* FunctionTable::getFunction( const std::string& name ) const
 
 
 /** Get function. This function will throw an error if the name and args do not match any named function. */
-const Function& FunctionTable::getFunction(const std::string& name, const std::vector<Argument>& args, bool once) const
+const Function& FunctionTable::getFunction(const std::string& name, const std::vector<Argument>& args) const
 {
     
     // find the template function
-    const Function* the_function = findFunction(name, args, once);
+    const Function* the_function = findFunction(name, args);
 
     if ( the_function == NULL )
     {
@@ -698,10 +686,37 @@ void FunctionTable::printValue(std::ostream& o, bool env) const
         std::ostringstream s("");
 
         s << i->first << " = ";
-        
         i->second->printValue( s, true );
         
-        o << StringUtilities::oneLiner( s.str(), 70 ) << std::endl;
+        // nice printing with arguments aligned
+        size_t offset = i->first.size() + 3;
+        std::string temp = "";
+        std::string repl = "";
+        
+        // remove the whitespace *before* the left parenthesis (look backward, while constructing the string)
+        for (size_t i = 0; i < s.str().size(); ++i)
+        {
+            temp += s.str()[i];
+            
+            if (s.str()[i] == '(')
+            {
+                temp[i - 1] = *repl.c_str();
+            }
+        }
+        
+        // remove the newline and whitespace *after* a comma (look forward, after the string has been constructed)
+        for (size_t i = 0; i < s.str().size(); ++i)
+        {
+            if (s.str()[i] == ',')
+            {
+                for (size_t j = 1; j < offset; ++j)
+                {
+                    temp[i + j] = *repl.c_str();
+                }
+            }
+        }
+        
+        o << temp << std::endl;
     }
     
     // Print the parent table too

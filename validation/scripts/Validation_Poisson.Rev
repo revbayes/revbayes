@@ -25,7 +25,7 @@ monitors  = VectorMonitors()
 ####################
 
 
-NUM_VARS = 3
+NUM_VARS = 5
 NUM_OBS = 10
 
 

@@ -20,7 +20,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-DispersalExtinctionRateStructureFunction::DispersalExtinctionRateStructureFunction(const TypedDagNode<RbVector<RbVector<double> > >* dr, TypedDagNode<RbVector<double> >* er, TypedDagNode<long>* rs) : TypedFunction<RbVector<double> >( new RbVector<double>() ),
+DispersalExtinctionRateStructureFunction::DispersalExtinctionRateStructureFunction(const TypedDagNode<RbVector<RbVector<double> > >* dr, TypedDagNode<RbVector<double> >* er, TypedDagNode<std::int64_t>* rs) : TypedFunction<RbVector<double> >( new RbVector<double>() ),
     dispersalRates( dr ),
     extinctionRates( er ),
     maxRangeSize(rs)
@@ -55,13 +55,6 @@ DispersalExtinctionRateStructureFunction* DispersalExtinctionRateStructureFuncti
     return new DispersalExtinctionRateStructureFunction( *this );
 }
 
-
-void DispersalExtinctionRateStructureFunction::keep( const DagNode *affecter)
-{
-    //delegate to base class
-    TypedFunction< RbVector<double> >::keep( affecter );
-    
-}
 
 void DispersalExtinctionRateStructureFunction::makeBits(void)
 {
@@ -135,22 +128,6 @@ void DispersalExtinctionRateStructureFunction::makeTransitions(void)
 void DispersalExtinctionRateStructureFunction::reInitialized( void )
 {
     ;//    *value = tau->getValue();
-}
-
-
-void DispersalExtinctionRateStructureFunction::restore( const DagNode *restorer)
-{
-    //delegate to base class
-    TypedFunction< RbVector<double> >::restore( restorer );
-}
-
-
-void DispersalExtinctionRateStructureFunction::touch(const DagNode *toucher)
-{
-    
-    //delegate to base class
-    TypedFunction< RbVector<double> >::touch( toucher );
-    
 }
 
 
@@ -230,6 +207,6 @@ void DispersalExtinctionRateStructureFunction::swapParameterInternal(const DagNo
     }
     else if (oldP == maxRangeSize)
     {
-        maxRangeSize = static_cast<const TypedDagNode<long>* >( newP );
+        maxRangeSize = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
 }

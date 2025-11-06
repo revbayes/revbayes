@@ -65,7 +65,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
                                                                         Tree *t,
-                                                                        long age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        std::int64_t age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -228,9 +228,9 @@ void BirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::set<doubl
   if ( par_times != NULL )
   {
       const std::vector<double>& times = par_times->getValue();
-      for (std::vector<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+      for (size_t i = 0; i < times.size(); ++i)
       {
-          event_times.insert( *it );
+          event_times.insert( times[i] );
       }
   }
 
@@ -271,11 +271,6 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( 
     if ( countAllNodes() )
     {
         return RbConstants::Double::neginf;
-    }
-
-    if ( offset > DBL_EPSILON && phi_event[0] > DBL_EPSILON )
-    {
-        throw RbException("Event sampling fraction at the present is non-zero but there are no tips at the present.");
     }
 
     // precompute A_i, B_i, C_i, E_i(t_i)
@@ -1303,16 +1298,19 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 
         // now we start assembling the global timeline by finding the union of unique intervals for all parameters
         std::set<double> event_times;
-        addTimesToGlobalTimeline(event_times,interval_times_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_sampling);
-        addTimesToGlobalTimeline(event_times,interval_times_treatment);
-        addTimesToGlobalTimeline(event_times,interval_times_event_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_event_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_event_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_treatment);
+        addTimesToGlobalTimeline(event_times, interval_times_event_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_event_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_event_sampling);
+        
+        for (auto it : event_times) {
+            global_timeline.push_back( it );
+        }
 
-
-        // we are done with setting up the timeline (i.e., using the all the provided timeline) and checking all dimension of parameters
+        // we are done with setting up the timeline (i.e., using all the provided timelines) and checking all dimensions of parameters
 
     }
 

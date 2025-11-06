@@ -38,15 +38,15 @@ namespace RevLanguage {
         template<class rbTypeFrom, class rbTypeTo>
         RevObject* RlTypeConverter::convertTo(const ModelObject<typename rbTypeFrom::valueType>* input) 
         {   
+            typedef typename rbTypeTo::valueType toValueType;
             if(!input->isConstant()) {
                 typedef typename rbTypeFrom::valueType fromValueType;
-                typedef typename rbTypeTo::valueType toValueType;
                 Func__conversion<rbTypeFrom,rbTypeTo>* rlFunc = new Func__conversion<rbTypeFrom,rbTypeTo>();
                 RevBayesCore::TypeConversionFunction<fromValueType,toValueType>* func = new RevBayesCore::TypeConversionFunction<fromValueType,toValueType>(input->getDagNode());
                 DeterministicNode<toValueType>* newnode = new DeterministicNode<toValueType>(input->getDagNode()->getName() + "2" + rbTypeTo::getClassType(), func, rlFunc);
                 return new rbTypeTo(newnode);
             } else {
-                return new rbTypeTo(input->getDagNode()->getValue());
+                return new rbTypeTo(toValueType(input->getDagNode()->getValue()));
             }
         }
     }

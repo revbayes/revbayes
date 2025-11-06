@@ -26,9 +26,8 @@ namespace RevBayesCore {
         
         // public methods
         const std::vector<DagNode*>&                            getDagNodes(void) const;                                            //!< Get the nodes vector
-        const RbOrderedSet<DagNode*>&                           getAffectedNodes(void) const;                                       //!< Get the nodes vector
+        RbOrderedSet<DagNode*>                                  getAffectedNodes(void) const;                                       //!< Get the nodes vector
         void                                                    swapNode(DagNode *oldN, DagNode *newN);                             //!< Swap the pointers to the variable on which the move works on.
-        
         
         // pure virtual public methods
         virtual AbstractMove*                                   clone(void) const = 0;
@@ -46,7 +45,7 @@ namespace RevBayesCore {
         size_t                                                  getNumberTriedCurrentPeriod(void) const;                            //!< Get the number of tries for this move since the last reset
         size_t                                                  getNumberTriedTotal(void) const;                                    //!< Get the number of tries for this move since the last reset
         double                                                  getUpdateWeight(void) const;                                        //!< Get update weight of move
-        bool                                                    isActive(unsigned long gen) const;                                  //!< Is the move active at the generation 'gen'?
+        bool                                                    isActive(std::uint64_t gen) const;                                  //!< Is the move active at the generation 'gen'?
         void                                                    performMcmcStep(double prHeat, double lHeat, double pHeat);         //!< Perform the move.
         void                                                    performHillClimbingStep(double lHeat, double pHeat);                //!< Perform the move.
         void                                                    removeNode(DagNode* p);                                             //!< remove a node from the proposal
@@ -75,7 +74,6 @@ namespace RevBayesCore {
         
         // parameters
         std::vector<DagNode*>                                   nodes;
-        RbOrderedSet<DagNode*>                                  affected_nodes;                                                     //!< The affected nodes by this move.
         double                                                  weight;
         bool                                                    auto_tuning;
         size_t                                                  num_tried_current_period;                                           //!< Number of times tried

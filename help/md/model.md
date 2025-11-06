@@ -14,6 +14,17 @@ Because `model` works with copies of objects, conducting an mcmc(mc) analysis
 on a model object will not change the values of the objects in the RevBayes
 workspace.
 
+The model object can be modified to ignore specific data elements using the
+method `ignoreData`.  Thus to run without the sequence data `phySeq` you
+might specify:
+
+   mymodel.ignoreData(phySeq)
+
+Only clamped nodes can be ignored. To ignore all clamped nodes you can use
+the method `ignoreAllData`:
+
+   mymodel.ignoreAllData()
+
 ## authors
 ## see_also
 ## example

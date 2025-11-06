@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -50,8 +50,8 @@ Dist_UniformInteger* Dist_UniformInteger::clone( void ) const
 RevBayesCore::UniformIntegerDistribution* Dist_UniformInteger::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<long>* l   = static_cast<const Integer &>( lower->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* u   = static_cast<const Integer &>( upper->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* l   = static_cast<const Integer &>( lower->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* u   = static_cast<const Integer &>( upper->getRevObject() ).getDagNode();
     RevBayesCore::UniformIntegerDistribution* d    = new RevBayesCore::UniformIntegerDistribution(l, u);
     
     return d;

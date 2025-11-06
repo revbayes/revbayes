@@ -56,33 +56,9 @@ TreeScaleFunction* TreeScaleFunction::clone( void ) const
 }
 
 
-void TreeScaleFunction::keep( const DagNode *affecter)
-{
-    //delegate to base class
-    TypedFunction< Tree >::keep( affecter );
-
-}
-
-
 void TreeScaleFunction::reInitialized( void )
 {
     *value = tau->getValue();
-}
-
-
-void TreeScaleFunction::restore( const DagNode *restorer)
-{
-    //delegate to base class
-    TypedFunction< Tree >::restore( restorer );
-}
-
-
-void TreeScaleFunction::touch(const DagNode *toucher)
-{
-    
-    //delegate to base class
-    TypedFunction< Tree >::touch( toucher );
-    
 }
 
 

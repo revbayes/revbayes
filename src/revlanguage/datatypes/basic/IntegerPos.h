@@ -22,20 +22,21 @@ namespace RevLanguage {
     class IntegerPos : public Natural {
 
         public:
-        IntegerPos(void);                                                                                      //!< Default constructor (value is 0)
-        IntegerPos(RevBayesCore::TypedDagNode<long> *v);                                                       //!< Constructor with DAG node
-        IntegerPos(long x);                                                                                    //!< Constructor from int
-//        Natural(unsigned long x);                                                                           //!< Constructor from size_t
+        IntegerPos(void);                                                                                   //!< Default constructor (value is 0)
+        IntegerPos(RevBayesCore::TypedDagNode<std::int64_t> *v);                                            //!< Constructor with DAG node
+        IntegerPos(std::int64_t x);                                                                         //!< Constructor from int
+        template <typename T, typename U=std::enable_if_t<std::is_integral_v<T>,T>> IntegerPos(T v):        //!< Constructor from T
+            IntegerPos(std::int64_t(v)) {}
 
         // Basic operator functions
         RevObject*                  add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements
-        IntegerPos*                 add(const IntegerPos &rhs) const;                                          //!< Addition operator used for example in '+=' statements
+        IntegerPos*                 add(const IntegerPos &rhs) const;                                       //!< Addition operator used for example in '+=' statements
         RealPos*                    add(const RealPos &rhs) const;                                          //!< Addition operator used for example in '+=' statements
         RevObject*                  divide(const RevObject &rhs) const;                                     //!< Division operator used for example in '/=' statements
-        RealPos*                    divide(const IntegerPos &rhs) const;                                       //!< Division operator used for example in '/=' statements
+        RealPos*                    divide(const IntegerPos &rhs) const;                                    //!< Division operator used for example in '/=' statements
         RealPos*                    divide(const RealPos &rhs) const;                                       //!< Division operator used for example in '/=' statements
         RevObject*                  multiply(const RevObject &rhs) const;                                   //!< Multiplication operator used for example in '*=' statements
-        IntegerPos*                 multiply(const IntegerPos &rhs) const;                                     //!< Multiplication operator used for example in '*=' statements
+        IntegerPos*                 multiply(const IntegerPos &rhs) const;                                  //!< Multiplication operator used for example in '*=' statements
         RealPos*                    multiply(const RealPos &rhs) const;                                     //!< Multiplication operator used for example in '*=' statements
 
         // Basic utility functions
@@ -44,7 +45,7 @@ namespace RevLanguage {
         static const std::string&   getClassType(void);                                                     //!< Get Rev type
         static const TypeSpec&      getClassTypeSpec(void);                                                 //!< Get class type spec
         const TypeSpec&             getTypeSpec(void) const;                                                //!< Get language type of the object
-        double                      isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
+        double                      isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;                 //!< Is convertible to type?
         
         std::string                 getGuiName(void) { return "IntegerPos"; }
         std::string                 getGuiUnicodeSymbol(void) { return "+Z"; }

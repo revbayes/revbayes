@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>
@@ -1193,30 +1193,10 @@ void RevBayesCore::TreeUtilities::getTaxaInSubtree(TopologyNode& n, std::vector<
 
 }
 
-/**
- * Check if the two trees are connected by a single NNI move
- */
-bool RevBayesCore::TreeUtilities::isConnectedNNI(const Tree& a, const Tree& b)
-{
-    
-    size_t num_nodes = a.getNumberOfNodes();
-    
-//    // now exchange the two nodes
-//    parent.removeChild( node_B );
-//    node->removeChild( node_A );
-//    parent.addChild( node_A );
-//    node->addChild( node_B );
-//    node_A->setParent( &parent );
-//    node_B->setParent( node );
-    
-    return false;
-}
-
-
 
 /**
  * Make tree ultrametric by extending terminal branches to the present
- * @param t tree to be modified
+ * @param tree tree to be modified
  */
 void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 {
@@ -1257,6 +1237,53 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 
 }
 
+
+Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen)
+{
+    // Check that the user-supplied tree contains the same number of tips as the vector of taxa
+    size_t tip_num = treeToScale.getNumberOfTips();
+    size_t tax_num = taxa.size();
+    
+    if (tip_num != tax_num)
+    {
+        throw RbException("Number of tips in the initial tree does not match the number of taxa.");
+    }
+    
+    // Check that the tip labels of the user-supplied tree match those of the vector of taxa
+    std::vector<std::string> tip_names;
+    for (size_t i = 0; i < tip_num; ++i)
+    {
+        const TopologyNode& n = treeToScale.getTipNode( i );
+        tip_names.push_back( n.getTaxon().getName() );
+    }
+
+    std::vector<std::string> taxon_names;
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        taxon_names.push_back( taxa[i].getName() );
+    }
+    
+    std::sort(tip_names.begin(), tip_names.end());
+    std::sort(taxon_names.begin(), taxon_names.end());
+    if (tip_names != taxon_names)
+    {
+        throw RbException("Tip names of the initial tree do not match the taxon names.");
+    }
+    
+    // Alter the tip age values of treeToScale in place
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        std::string tip_name = taxa[i].getName();
+        treeToScale.setTaxonObject( tip_name, taxa[i] );
+    }
+    
+    // The algorithm starts at the root
+    TopologyNode& root_node = treeToScale.getRoot();
+    root_node.scaleAgesFromTaxonAgesMBL( minBrLen );
+    
+    RevBayesCore::Tree *p = &treeToScale;
+    return p;
+}
 
 
 /**
@@ -1587,7 +1614,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
  * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, long agePrecision)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();

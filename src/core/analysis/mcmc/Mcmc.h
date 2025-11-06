@@ -48,6 +48,7 @@ namespace RevBayesCore {
         double                                              getChainPosteriorHeat(void) const;                                                      //!< Get the heat for this chain
         double                                              getChainPriorHeat(void) const;
         size_t                                              getChainIndex(void) const;                                                              //!< Get the index of this chain
+        path                                                getCheckpointFile(void) const;
         const Model&                                        getModel(void) const;
         double                                              getModelLnProbability(bool like_only);
         RbVector<Monitor>&                                  getMonitors(void);
@@ -57,9 +58,9 @@ namespace RevBayesCore {
         const MoveSchedule&                                 getSchedule(void) const;
         const std::string&                                  getScheduleType(void) const;
         std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
-        void                                                initializeSampler(bool priorOnly=false);                                                //!< Initialize objects for mcmc sampling
+        void                                                initializeSampler();                                                                    //!< Initialize objects for mcmc sampling
         void                                                initializeSamplerFromCheckpoint( void );                                                //!< Initialize the MCMC sampler form the checkpoint file.
-        void                                                monitor(unsigned long g);
+        void                                                monitor(std::uint64_t g);
         void                                                nextCycle(bool advanceCycle);
         bool                                                isChainActive(void);
         void                                                printOperatorSummary(bool current_period);

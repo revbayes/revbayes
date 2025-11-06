@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 namespace Core = RevBayesCore;
 
@@ -25,12 +26,9 @@ Dist_MultivariateLog* RevLanguage::Dist_MultivariateLog::clone( void ) const
     return new Dist_MultivariateLog(*this);
 }
 
-std::optional<double> exp_transform(double x);
-std::optional<double> exp_inverse(double x);
-std::optional<double> log_exp_prime(double x);
-
 Core::TransformedVectorDistribution* RevLanguage::Dist_MultivariateLog::createDistribution( void ) const
 {
+    using namespace Transforms;
     using Core::RbVector;
 
     // get the parameters

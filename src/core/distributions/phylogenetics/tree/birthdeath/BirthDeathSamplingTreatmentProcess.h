@@ -54,7 +54,7 @@ namespace RevBayesCore {
                                                     const std::vector<Taxon> &tn,
                                                     bool uo,
                                                     Tree *t,
-                                                    long age_check_precision);  //!< Constructor
+                                                    std::int64_t age_check_precision);  //!< Constructor
 
         // public member functions
         BirthDeathSamplingTreatmentProcess*             clone(void) const override;                                             //!< Create an independent clone
@@ -94,7 +94,7 @@ namespace RevBayesCore {
         int                                             whichIntervalTime(double t) const;                                      //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
 
         // members
-        bool                                            using_global_timeline;
+        bool                                            using_global_timeline = false;
 
         const TypedDagNode<double >*                    homogeneous_lambda;                                    //!< The homogeneous birth rates.
         const TypedDagNode<RbVector<double> >*          heterogeneous_lambda;                                  //!< The heterogeneous birth rates.
@@ -164,7 +164,7 @@ namespace RevBayesCore {
         std::string trt = "(serial) treatment";
         std::string etrt = "(event) treatment";
 
-        long age_check_precision;
+        std::int64_t age_check_precision;
         std::vector<Taxon> taxa;
     };
 }

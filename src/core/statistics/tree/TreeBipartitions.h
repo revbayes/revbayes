@@ -39,7 +39,7 @@ template <class valueType> class TypedDagNode;
         std::vector<double> bipartitionAges;
         
         void computeBipartitions();
-        void computeBipartitions(const TopologyNode* node, std::map <const TopologyNode*, unsigned long>& nodeToBitVectorIndex, const std::map<std::string, size_t>& nameToIndex );
+        void computeBipartitions(const TopologyNode* node, std::map <const TopologyNode*, std::uint64_t>& nodeToBitVectorIndex, const std::map<std::string, size_t>& nameToIndex );
 
     };
     
