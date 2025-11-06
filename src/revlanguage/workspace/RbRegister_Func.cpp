@@ -98,6 +98,7 @@
 #include "Func_formatDiscreteCharacterData.h"
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
+#include "Func_MinBLTimeScaling.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
 #include "Func_phyloDiversity.h"
@@ -241,7 +242,9 @@
 
 /* Math functions (in folder "functions/math") */
 #include "Func_abs.h"
+#include "Func_absInt.h"
 #include "Func_absVector.h"
+#include "Func_absVectorInt.h"
 #include "Func_ceil.h"
 #include "Func_choose.h"
 #include "Func_coala.h"
@@ -254,6 +257,7 @@
 #include "Func_lnProbability.h"
 #include "Func_geographicalDistance.h"
 #include "Func_geometricMean.h"
+#include "Func_cos.h"
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
@@ -283,6 +287,7 @@
 #include "Func_sumNatural.h"
 #include "Func_standardDeviation.h"
 #include "Func_sqrt.h"
+#include "Func_sin.h"
 #include "Func_trunc.h"
 #include "Func_upperTriangle.h"
 #include "Func_variance.h"
@@ -449,6 +454,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_extantTree()                                      );
         addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
+        addFunction( new Func_MinBLTimeScaling()                                );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
         addFunction( new Func_phyloDiversity()                                  );
@@ -489,6 +495,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 		// absolute function
         addFunction( new Func_abs()                  );
         addFunction( new Func_absVector()            );
+        addFunction( new Func_absInt()               );
+        addFunction( new Func_absVectorInt()         );
 
 		// ceil function
         addFunction( new Func_ceil<Real,Integer>()  );
@@ -583,7 +591,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_geographicalDistance() );
         addFunction( new Func_shortestDistance() );
 
-                // hyperbolic tangent function
+        // trigonometric functions
+        addFunction( new Func_sin());
+        addFunction( new Func_cos()  );
+
+        // hyperbolic tangent function
         addFunction( new Func_hyperbolicTangent() );
 
         // hyperbolic sine function
@@ -635,7 +647,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // return a distcretized (by quantile) and normalized vector from a continuous distribution
         addFunction( new Func_fnNormalizedQuantile<Real>()    );
         addFunction( new Func_fnNormalizedQuantile<RealPos>()    );
-        
         addFunction( new Func_discretizeDistribution( )            );
         addFunction( new Func_discretizePositiveDistribution( )    );
         addFunction( new Func_discretizeProbabilityDistribution( ) );

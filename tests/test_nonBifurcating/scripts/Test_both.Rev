@@ -1,0 +1,95 @@
+#################################################################################
+#
+# RevBayes Test-Script: Stochastically resolving multifurcations in a tree that
+#                       also contains outdegree-1 nodes
+#
+# authors: David Cerny
+#
+#################################################################################
+
+# Here we handle a more complicated case of a tree (1) which contains multifurcations
+# as well as sampled ancestors and (2) which, when interpreted as a time tree, contains
+# a node with age 0 that has three children which also have age 0.
+
+# The tree in question was made available by Ziv Lieberman in discussion topic #776
+# (https://github.com/revbayes/revbayes/discussions/776).
+
+seed(12345)
+
+print("===================")
+print("Time tree treatment")
+print("===================\n")
+
+tt <- readTrees("data/initial_tree.newick")[1]
+tt_copy <- tt
+print( "   The tree has " + tt.ntips() + " tips and " + (tt.nnodes() - tt.ntips()) + " internal nodes." )
+print( "   Is the tree binary? " + ifelse( tt.isBinary(), "TRUE", "FALSE") + "\n" )
+
+print( "Resolve multifurcations first, suppress outdegree-1 nodes second\n" )
+
+print( "Resolving multifurcations..." )
+tt.resolveMultifurcations(resolveRoot=TRUE)
+print( "   The modified tree has " + tt.ntips() + " tips and " + (tt.nnodes() - tt.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( tt.isBinary(), "TRUE", "FALSE") + "\n" )
+
+print( "Suppressing outdegree-1 nodes..." )
+tt.suppressOutdegreeOneNodes()
+print( "   The final tree has " + tt.ntips() + " tips and " + (tt.nnodes() - tt.ntips()) + " internal nodes." )
+print( "   Is the final tree binary? " + ifelse( tt.isBinary(), "TRUE", "FALSE") + "\n" )
+
+writeNexus(filename="output/time_tree_resolve_then_suppress.nex", tt)
+
+print( "Suppress outdegree-1 nodes first, resolve multifurcations second\n" )
+
+print( "Suppressing outdegree-1 nodes..." )
+tt_copy.suppressOutdegreeOneNodes()
+print( "   The modified tree has " + tt_copy.ntips() + " tips and " + (tt_copy.nnodes() - tt_copy.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( tt_copy.isBinary(), "TRUE", "FALSE") + "\n" )
+
+print( "Resolving multifurcations..." )
+tt_copy.resolveMultifurcations(resolveRoot=TRUE)
+print( "   The final tree has " + tt_copy.ntips() + " tips and " + (tt_copy.nnodes() - tt_copy.ntips()) + " internal nodes." )
+print( "   Is the final tree binary? " + ifelse( tt_copy.isBinary(), "TRUE", "FALSE") + "\n" )
+
+writeNexus(filename="output/time_tree_suppress_then_resolve.nex", tt_copy)
+
+print("============================")
+print("Branch length tree treatment")
+print("============================\n")
+
+blt <- readTrees("data/initial_tree.newick", treetype="non-clock")[1]
+blt_copy <- blt
+print( "   The tree has " + blt.ntips() + " tips and " + (blt.nnodes() - blt.ntips()) + " internal nodes." )
+print( "   Is the tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\n" )
+
+print( "Resolve multifurcations first, suppress outdegree-1 nodes second\n" )
+
+print( "Resolving multifurcations..." )
+blt.resolveMultifurcations(resolveRoot=TRUE)
+print( "   The modified tree has " + blt.ntips() + " tips and " + (blt.nnodes() - blt.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\n" )
+
+print( "Suppressing outdegree-1 nodes..." )
+blt.suppressOutdegreeOneNodes()
+print( "   The final tree has " + blt.ntips() + " tips and " + (blt.nnodes() - blt.ntips()) + " internal nodes." )
+print( "   Is the final tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\n" )
+
+writeNexus(filename="output/branch_length_tree_resolve_then_suppress.nex", blt)
+
+print( "Suppress outdegree-1 nodes first, resolve multifurcations second\n" )
+
+print( "Suppressing outdegree-1 nodes..." )
+blt_copy.suppressOutdegreeOneNodes()
+print( "   The modified tree has " + blt_copy.ntips() + " tips and " + (blt_copy.nnodes() - blt_copy.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( blt_copy.isBinary(), "TRUE", "FALSE") + "\n" )
+
+print( "Resolving multifurcations..." )
+blt_copy.resolveMultifurcations(resolveRoot=FALSE)
+print( "   The final tree has " + blt_copy.ntips() + " tips and " + (blt_copy.nnodes() - blt_copy.ntips()) + " internal nodes." )
+print( "   Is the final tree binary? " + ifelse( blt_copy.isBinary(), "TRUE", "FALSE") )
+
+writeNexus(filename="output/branch_length_tree_suppress_then_resolve.nex", blt_copy)
+
+clear()
+
+q()

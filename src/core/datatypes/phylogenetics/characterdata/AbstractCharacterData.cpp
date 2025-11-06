@@ -433,14 +433,16 @@ size_t AbstractCharacterData::getNumberOfIncludedTaxa(void) const
  *
  * \return    The percentage of missing characters.
  */
-double AbstractCharacterData::getPercentageMissing( const std::string &n ) const {
+double AbstractCharacterData::getPercentageMissing( const std::string &n ) const 
+{
     
     const AbstractTaxonData &td = getTaxonData(n);
     return td.getPercentageMissing();
 }
 
 
-std::string AbstractCharacterData::getStateLabels(void) {
+std::string AbstractCharacterData::getStateLabels(void) 
+{
 
     if (taxonMap.size() == 0)
     {
@@ -450,7 +452,8 @@ std::string AbstractCharacterData::getStateLabels(void) {
     return i->second->getStateLabels();
 }
 
-std::string AbstractCharacterData::getStateLabels(void) const {
+std::string AbstractCharacterData::getStateLabels(void) const 
+{
 
     if (taxonMap.size() == 0)
     {
@@ -468,7 +471,8 @@ std::string AbstractCharacterData::getStateLabels(void) const {
  *
  * \return              The taxon.
  */
-const Taxon& AbstractCharacterData::getTaxon(size_t idx) const {
+const Taxon& AbstractCharacterData::getTaxon(size_t idx) const 
+{
     
     return taxa[idx];
 }

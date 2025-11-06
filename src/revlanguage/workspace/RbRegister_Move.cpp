@@ -205,7 +205,6 @@
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-#include "Move_AddRemoveTip.h"
 #include "Move_BurstEvent.h"
 #include "Move_BranchLengthScale.h"
 #include "Move_CollapseExpandFossilBranch.h"
@@ -363,9 +362,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HomeologPhase() );
 
         /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
-        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );
-        addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );
-        addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) );
+        addType( new Move_DPPTableValueUpdate<Real>(    new RevBayesCore::SlideProposal( NULL, 1.0 ) ) );        // mvDPPValueSliding
+        addType( new Move_DPPTableValueUpdate<RealPos>( new RevBayesCore::ScaleProposal( NULL, 1.0 ) ) );        // mvDPPValueScaling
+        addType( new Move_DPPTableValueUpdate<Simplex>( new RevBayesCore::BetaSimplexProposal( NULL, 10.0 ) ) ); // mvDPPValueBetaSimplex
 
 //        addType("mvDPPScaleCatVals",                new Move_DPPScaleCatValsMove() );
 //        addType("mvDPPScaleCatAllocateAux",         new Move_DPPScaleCatAllocateAux() );
@@ -433,7 +432,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsDrawCharacterHistory()                    );
 
         /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-        addType( new Move_AddRemoveTip()                     );
         addType( new Move_BurstEvent()                       );
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );

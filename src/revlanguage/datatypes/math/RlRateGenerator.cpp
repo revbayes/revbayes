@@ -32,6 +32,7 @@
 #include "RevVariable.h"
 #include "RlConstantNode.h"
 #include "RlDeterministicNode.h"
+#include "RlString.h"
 #include "RlTypedFunction.h"
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
@@ -75,7 +76,17 @@ RateGenerator* RateGenerator::clone() const
 /* Map calls to member methods */
 RevPtr<RevVariable> RateGenerator::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
 {
-    ; // do nothing for now
+
+    if (name == "getStateDescriptions") {
+        found = true;
+        RevBayesCore::RbVector<std::string> v = this->dag_node->getValue().getStateDescriptions();
+        WorkspaceVector<RlString> n;
+        for (size_t i = 0; i < v.size(); i++) {
+            n.push_back(RlString(v[i]));
+        }
+        return new RevVariable( new WorkspaceVector<RlString>(n) );
+    }
+    
     return ModelObject<RevBayesCore::RateGenerator>::executeMethod( name, args, found );
 }
 
@@ -106,6 +117,9 @@ const TypeSpec& RateGenerator::getTypeSpec(void) const {
 
 void RateGenerator::initMethods(void) {
     
+    // member procedures
+    ArgumentRules* getStateDescriptionsArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "getStateDescriptions", ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules) );
     
     // member functions
     ArgumentRules* transitionProbabilityArgRules = new ArgumentRules();

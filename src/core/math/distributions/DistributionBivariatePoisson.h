@@ -28,8 +28,8 @@ namespace RevBayesCore {
 
         namespace BivariatePoisson {
         
-          double                      lnPdf(double theta1, double theta2, double theta0, std::vector<long> x);
-          std::vector<long>            rv(double theta1, double theta2, double theta0, RandomNumberGenerator& rng);
+          double                      lnPdf(double theta1, double theta2, double theta0, std::vector<std::int64_t> x);
+          std::vector<std::int64_t>            rv(double theta1, double theta2, double theta0, RandomNumberGenerator& rng);
         }
     }
 }

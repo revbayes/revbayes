@@ -43,7 +43,7 @@ namespace RevBayesCore {
                                                             const TypedDagNode<double> *inoccurrence,
                                                             const TypedDagNode<double> *ineventsampling,
                                                             const TypedDagNode<double> *intreatment,
-                                                            const TypedDagNode<long>   *n,
+                                                            const TypedDagNode<std::int64_t>   *n,
 
                                                             const std::string& cdt,
                                                             const TypedDagNode< RevBayesCore::RbVector<double> > *O,
@@ -71,7 +71,7 @@ namespace RevBayesCore {
         const TypedDagNode< double > *                      omega;                                 //!< The occurrence sampling rate.
         const TypedDagNode< double > *                      rho;                                   //!< The sampling probability of extant taxa.
         const TypedDagNode< double > *                      removalPr;                             //!< The removal probability after sampling.
-        const TypedDagNode< long > *                        maxHiddenLin;                          //!< The maximal number of hidden lineages.
+        const TypedDagNode< std::int64_t > *                        maxHiddenLin;                          //!< The maximal number of hidden lineages.
         const std::string&                                  cond;                                  //!< Condition of the process ("survival" or "survival2")
         const std::vector<double>                           time_points;                           //!< Times at which density is computed
         const TypedDagNode< RbVector<double> > *            occurrences;                           //!< Occurrence ages of fossils not included in the tree

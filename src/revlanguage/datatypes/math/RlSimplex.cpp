@@ -292,10 +292,10 @@ void Simplex::initMethods( void )
  * because of the templating: a vector of RealPos does not inherit from a vector
  * of Real, for example.
  */
-double Simplex::isConvertibleTo( const TypeSpec& type, bool once ) const
+double Simplex::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
     
-    if ( once == true && type.getParentType() == getClassTypeSpec().getParentType() )
+    if ( convert_by_value == true && type.getParentType() == getClassTypeSpec().getParentType() )
     {
         // We want to convert to another model vector
         
@@ -311,7 +311,7 @@ double Simplex::isConvertibleTo( const TypeSpec& type, bool once ) const
             if ( type.getElementTypeSpec() != NULL && orgElement.getTypeSpec() != *type.getElementTypeSpec() )
             {
                 
-                double element_penalty = orgElement.isConvertibleTo( *type.getElementTypeSpec(), once );
+                double element_penalty = orgElement.isConvertibleTo( *type.getElementTypeSpec(), convert_by_value );
                 if ( element_penalty == -1 )
                 {
                     // we cannot convert this element
@@ -330,7 +330,7 @@ double Simplex::isConvertibleTo( const TypeSpec& type, bool once ) const
         return 0.0;
     }
     
-    return ModelObject<RevBayesCore::Simplex>::isConvertibleTo( type, once );
+    return ModelObject<RevBayesCore::Simplex>::isConvertibleTo( type, convert_by_value );
 }
 
 

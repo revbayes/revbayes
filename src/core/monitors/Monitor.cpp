@@ -18,13 +18,13 @@ namespace RevBayesCore { class Model; }
 using namespace RevBayesCore;
 
 
-Monitor::Monitor(unsigned long g) :
+Monitor::Monitor(std::uint64_t g) :
     enabled( true ),
     printgen( g ),
     model( nullptr )
 {}
 
-Monitor::Monitor(unsigned long g, DagNode *n) :
+Monitor::Monitor(std::uint64_t g, DagNode *n) :
     enabled( true ),
     printgen( g ),
     model( nullptr )
@@ -40,7 +40,7 @@ Monitor::Monitor(unsigned long g, DagNode *n) :
 }
 
 
-Monitor::Monitor(unsigned long g, const std::vector<DagNode *> &n) :
+Monitor::Monitor(std::uint64_t g, const std::vector<DagNode *> &n) :
     enabled( true ),
     printgen( g ),
     nodes( n ),

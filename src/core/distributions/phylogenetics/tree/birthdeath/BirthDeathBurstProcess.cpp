@@ -201,7 +201,7 @@ double BirthDeathBurstProcess::computeLnProbabilityTimes( void ) const
 }
 
 
-void BirthDeathBurstProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, long &rv) const
+void BirthDeathBurstProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( name == "numBurstSpeciations" )

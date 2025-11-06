@@ -50,7 +50,7 @@ namespace RevBayesCore {
                                                                 const std::vector<Taxon> &tn,
                                                                 bool uo,
                                                                 Tree *t,
-                                                                const TypedDagNode<long> *n,
+                                                                const TypedDagNode<std::int64_t> *n,
                                                                 const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                                                 bool mt,
                                                                 bool vb);                  //!< Constructor
@@ -114,7 +114,7 @@ namespace RevBayesCore {
         mutable std::vector<double>                             global_timeline;                            //!< The times of the instantaneous events and rate shifts.
 
         const TypedDagNode<double >*                            start_age;                                  //!< The start age of the process
-        const TypedDagNode<long >*                              maxHiddenLin;                               //!< The maximal number of hidden lineages.
+        const TypedDagNode<std::int64_t >*                              maxHiddenLin;                               //!< The maximal number of hidden lineages.
         const TypedDagNode< RevBayesCore::RbVector<double> >    *occurrence_ages;                           //!< Vector of occurrence times
 
         const bool                                              useMt;                                      //!< Forward traversal Mt algorithm (otherwise backward Lt)

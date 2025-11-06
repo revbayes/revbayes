@@ -35,7 +35,7 @@ Workspace::Workspace(const std::string &n) : Environment( n ),
 /**
  * Constructor of workspace 
  */
-Workspace::Workspace(Environment* parentSpace, const std::string &n) : Environment(parentSpace, n),
+Workspace::Workspace(const std::shared_ptr<Environment>& parentSpace, const std::string &n) : Environment(parentSpace, n),
     typesInitialized(false)
 {
     
@@ -181,15 +181,15 @@ const TypeSpec& Workspace::getClassTypeSpecOfType(std::string const &type) const
     std::map<std::string, RevObject*>::const_iterator it = typeTable.find( type );
     if ( it == typeTable.end() ) 
     {
-        if ( parentEnvironment != NULL )
+        if ( parentEnvironment )
         {
-            return static_cast<Workspace*>( parentEnvironment )->getClassTypeSpecOfType( type );
+            auto parentWorkspace = std::dynamic_pointer_cast<const Workspace>(getParentEnvironment());
+            return parentWorkspace->getClassTypeSpecOfType( type );
         }
         else
         {
-            throw RbException() << "Type '" << type << "' does not exist in environment" ; 
+            throw RbException() << "Type '" << type << "' does not exist in environment" ;
         }
-        
     }
     else
     {
@@ -208,9 +208,10 @@ bool Workspace::existsType( const std::string& name ) const
     std::map<std::string, RevObject *>::const_iterator it = typeTable.find( name );
     if ( it == typeTable.end() ) 
     {
-        if ( parentEnvironment != NULL )
+        if ( parentEnvironment )
         {
-            return static_cast<Workspace*>( parentEnvironment )->existsType( name );
+            auto parentWorkspace = std::dynamic_pointer_cast<const Workspace>(getParentEnvironment());
+            return parentWorkspace->existsType( name );
         }
         else
         {
@@ -277,9 +278,10 @@ RevObject* Workspace::makeNewDefaultObject(const std::string& type) const
     
     if ( it == typeTable.end() )
     {
-        if ( parentEnvironment != NULL )
+        if ( parentEnvironment )
         {
-            return static_cast<Workspace*>( parentEnvironment )->makeNewDefaultObject( type );
+            auto parentWorkspace = std::dynamic_pointer_cast<const Workspace>(getParentEnvironment());
+            return parentWorkspace->makeNewDefaultObject( type );
         }
         else
         {

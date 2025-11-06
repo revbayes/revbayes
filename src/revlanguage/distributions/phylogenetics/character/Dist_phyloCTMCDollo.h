@@ -1,7 +1,7 @@
 #ifndef Dist_phyloCTMCDollo_H
 #define Dist_phyloCTMCDollo_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

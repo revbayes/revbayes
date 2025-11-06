@@ -66,7 +66,7 @@ std::string Func_readDelimitedDataFile::bitToState(const std::string &s)
     
     std::stringstream ss;
     char* ptr;
-    long parsed = strtol(s.c_str(), &ptr, 2);
+    std::int64_t parsed = strtol(s.c_str(), &ptr, 2);
     
     if (parsed > RbConstants::Integer::max)
     {

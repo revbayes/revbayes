@@ -2,6 +2,7 @@
 #define StochasticNode_H
 
 #include "DynamicNode.h"
+#include "RbException.h"
 
 namespace RevBayesCore {
     
@@ -9,8 +10,38 @@ namespace RevBayesCore {
     template <class valueType>
     class TypedDistribution;
     
+    // Put StochasticNode-specific stuff that doesn't depend on valueType here.
+    // Ideally this would inherit from DagNode
+    class StochasticNodeBase
+    {
+    protected:
+        bool clamped = false;
+    public:
+        /**
+         * Set directly the flag whether this node is clamped.
+         * The caller needs to be responsible enough to know that we will assume
+         * that the current value is the observed value.
+         * We could use instead as well a call: clamp( getValue() );
+        */
+        void setClamped(bool tf)
+        {
+            clamped = tf;
+        }        
+
+        /**
+         * Unclamp this node. If I understand this correctly, we
+         * can just set the clamped flag to false if we keep the
+         * current value. We do not need to tell anyone that we
+         * have changed value because we really haven't.
+         */
+        void unclamp(void)
+        {
+            clamped = false;
+        }
+    };
+
     template <class valueType>
-    class StochasticNode : public DynamicNode<valueType>, public MemberObject< RbVector<double> > {
+    class StochasticNode : public DynamicNode<valueType>, public MemberObject< RbVector<double> >, public StochasticNodeBase {
         
     public:
         
@@ -42,19 +73,19 @@ namespace RevBayesCore {
         const valueType&                                    getValue(void) const;
         bool                                                isClamped(void) const;                                                      //!< Is this DAG node clamped?
         bool                                                isIntegratedOut(void) const;
+        bool                                                isIgnoredData(void) const;
         bool                                                isStochastic(void) const;                                                   //!< Is this DAG node stochastic?
         virtual void                                        printStructureInfo(std::ostream &o, bool verbose=false) const;              //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
         void                                                redraw(SimulationCondition c = SimulationCondition::MCMC);                  //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                        reInitializeMe(void);                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
-        virtual void                                        setClamped(bool tf);                                                        //!< Set directly the flag whether this node is clamped.
         void                                                setIgnoreRedraw(bool tf=true);
         void                                                setIntegratedOut(bool tf=true);
         virtual void                                        setIntegrationIndex( size_t i );
         void                                                setMcmcMode(bool tf);                                                       //!< Set the modus of the DAG node to MCMC mode.
+        virtual void                                        setIgnoreData(bool tf);                                                 //!< Set whether we want to have the probability of the prior only.
         virtual void                                        setValue(valueType *val, bool touch=true);                                  //!< Set the value of this node
         void                                                setValueFromFile(const path &dir);                                          //!< Set value from string.
         void                                                setValueFromString(const std::string &v);                                   //!< Set value from string.
-        void                                                unclamp(void);                                                              //!< Unclamp the variable
         
         // Parent DAG nodes management functions
         std::vector<const DagNode*>                         getParents(void) const;                                                     //!< Get the set of parents
@@ -70,7 +101,7 @@ namespace RevBayesCore {
         virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                             //!< Tell affected nodes value is reset
         
         // protected members
-        bool                                                clamped = false;
+        bool                                                ignore_data = false;                                                    //!< The PDF for this node is set to 1, removing the effects of the node.  Only for clamped nodes with no children.
         bool                                                ignore_redraw = false;
         mutable bool                                        integrated_out = false;
         std::optional<double>                               lnProb;                                                                     //!< Current log probability, or empty if not computed.
@@ -91,11 +122,9 @@ namespace RevBayesCore {
 
 
 template<class valueType>
-RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, TypedDistribution<valueType> *d ) : DynamicNode<valueType>( n ),
-    clamped( false ),
-    ignore_redraw( false ),
-    integrated_out( false ),
-    distribution( d )
+RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, TypedDistribution<valueType> *d )
+    : DynamicNode<valueType>( n ),
+      distribution( d )
 {
     this->type = DagNode::STOCHASTIC;
     
@@ -117,11 +146,13 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, T
 
 
 template<class valueType>
-RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<valueType> &n ) : DynamicNode<valueType>( n ),
-    clamped( n.clamped ),
-    ignore_redraw( n.ignore_redraw ),
-    integrated_out( n.integrated_out ),
-    distribution( n.distribution->clone() )
+RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<valueType> &n )
+    : DynamicNode<valueType>( n ),
+      StochasticNodeBase( n ),
+      ignore_data( n.ignore_data ),
+      ignore_redraw( n.ignore_redraw ),
+      integrated_out( n.integrated_out ),
+      distribution( n.distribution->clone() )
 {
     this->type = DagNode::STOCHASTIC;
     
@@ -173,8 +204,9 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
     
     if ( &n != this )
     {
-        // Call base class assignment operator
+        // Call base class assignment operators
         DynamicNode<valueType>::operator=( n );
+        StochasticNodeBase::operator=(n);
         
         // Remove us as the child of the distribution parameters
         const std::vector<const DagNode*>& dist_parents = distribution->getParameters();
@@ -210,7 +242,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         // Set us as the DAG node of the new distribution
         distribution->setStochasticNode( this );
         
-        clamped                             = n.clamped;
+        ignore_data                         = n.ignore_data;
         ignore_redraw                       = n.ignore_redraw;
         integrated_out                      = n.integrated_out;
         lnProb                              = {};
@@ -450,15 +482,13 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
     if ( not lnProb )
     {
         // compute and store log-probability
-        if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
+        if ( integrated_out or ignore_data )
+            lnProb = 0.0;
+        else
         {
             RbOrderedSet<DagNode *> integrated_parents;
             getIntegratedParents(integrated_parents);
             lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-        }
-        else
-        {
-            lnProb = 0.0;
         }
     }
 
@@ -566,6 +596,14 @@ bool RevBayesCore::StochasticNode<valueType>::isIntegratedOut(void) const
 
 
 template<class valueType>
+bool RevBayesCore::StochasticNode<valueType>::isIgnoredData(void) const
+{
+
+    return ignore_data;
+}
+
+
+template<class valueType>
 bool RevBayesCore::StochasticNode<valueType>::isStochastic( void ) const
 {
     
@@ -587,15 +625,13 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
 
         if ( not lnProb )
         {
-            if ( (this->prior_only == false || this->clamped == false) && integrated_out == false )
+            if (integrated_out or ignore_data)
+                lnProb = 0.0;
+            else
             {
                 RbOrderedSet<DagNode *> integrated_parents;
                 getIntegratedParents(integrated_parents);
                 lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-            }
-            else
-            {
-                lnProb = 0.0;
             }
         }
         
@@ -666,6 +702,9 @@ void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
     // draw the value
     if ( ignore_redraw == false )
     {
+        if (this->isClamped()) {
+            throw RbException("Cannot modify the value of a clamped node.");
+        }
         distribution->redrawValue( c );
     }
     
@@ -731,21 +770,6 @@ void RevBayesCore::StochasticNode<valueType>::setActivePIDSpecialized(size_t a, 
 }
 
 
-/**
- * Set directly the flag whether this node is clamped.
- * The caller needs to be responsible enough to know that we will assume
- * that the current value is the observed value.
- * We could use instead as well a call: clamp( getValue() );
- */
-template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::setClamped(bool tf)
-{
-    
-    clamped = tf;
-    
-}
-
-
 template <class valueType>
 void RevBayesCore::StochasticNode<valueType>::setIgnoreRedraw( bool tf )
 {
@@ -782,7 +806,23 @@ void RevBayesCore::StochasticNode<valueType>::setMcmcMode(bool tf)
     
 }
 
+template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::setIgnoreData(bool tf)
+{
+    if (tf and not isClamped())
+        throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it is not clamped (has no data)!";
 
+//    PROBLEM: Right now vectors are children of their elements, so this prohibits using vectors.
+//             We check for stochastic descendants?
+//    if (tf and not this->children.empty())
+//        throw RbException()<<"Error: cannot ignore data at node '"<<this->getName()<<"' because it has children! (e.g. "<<this->children[0]->getName()<<")";
+
+    ignore_data = tf;
+
+    assert(not stored_ln_prob);
+
+    lnProb = 0;
+}
 
 /**
  * Set the value.
@@ -883,20 +923,6 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
     }
     
 }
-
-
-/**
- * Unclamp this node. If I understand this correctly, we
- * can just set the clamped flag to false if we keep the
- * current value. We do not need to tell anyone that we
- * have changed value because we really haven't.
- */
-template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::unclamp( void )
-{
-    clamped = false;
-}
-
 
 #endif
 

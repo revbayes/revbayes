@@ -19,7 +19,7 @@ namespace RevLanguage {
         RealPos(void);                                                              //!< Default constructor
         RealPos(RevBayesCore::TypedDagNode<double> *x);                             //!< Construct from double
         RealPos(double x);                                                          //!< Construct from double
-        RealPos(long x);                                                             //!< Construct from int
+        RealPos(std::int64_t x);                                                             //!< Construct from int
         RealPos(bool x);                                                             //!< Construct from bool
 
         // Basic operator functions
@@ -39,7 +39,7 @@ namespace RevLanguage {
         static const std::string&       getClassType(void);                         //!< Get Rev type
         static const TypeSpec&          getClassTypeSpec(void);                     //!< Get class type spec
         virtual const TypeSpec&         getTypeSpec(void) const;                    //!< Get language type of the object
-        virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;
+        virtual double                  isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;
     
         std::string                     getGuiName(void) { return "Positive Real"; }
         std::string                     getGuiUnicodeSymbol(void) { return "+R"; }
