@@ -67,8 +67,8 @@ void Move_RandomCategoryWalk::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     // get the stochastic variable
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<long> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::RbVector<long> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<long> > *>( tmp );
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
     
     // create the internal proposal object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomCategoryWalkProposal(n);
