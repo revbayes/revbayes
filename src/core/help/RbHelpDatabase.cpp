@@ -5136,17 +5136,22 @@ for specifying how to separate values in the RevObject (default is "").)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
-Filename is specified using the `fn` argument.)");
+Filename is specified using the `filename` argument.)");
 	help_strings[string("writeFasta")][string("example")] = string(R"(# let's make up some taxa
 taxa = v("horse", "whale", "unicorn", "narwhal")
+
 # convert these to the taxon datatype
 for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+
 # simulate a tree
 tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+
 # we also need a molecular substitution model
 molecular_model := fnJC(4)
+
 # together these form a continuous time Markov chain over the tree
 full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+
 # this will print a FASTA file with a simulated molecular matrix
 # to the working directory
 writeFasta(filename="test.fasta", full_model))");
@@ -5154,25 +5159,59 @@ writeFasta(filename="test.fasta", full_model))");
 	help_references[string("writeFasta")].push_back(RbHelpReference(R"(Pearson, William R., and David J. Lipman. "Improved tools for biological sequence comparison." Proceedings of the National Academy of Sciences 85.8 (1988): 2444-2448. )",R"()",R"()"));
 	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"()",R"(https://www.pnas.org/content/85/8/2444.short )"));
 	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"(https://doi.org/10.1073/pnas.85.8.2444 )",R"()"));
-	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(`writeNexus`, `writeCharacterDataDelimited`)"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(writeCharacterDataDelimited)"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(writeNexus)"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(writePhylip)"));
 	help_strings[string("writeFasta")][string("title")] = string(R"(FASTA file writing function)");
-	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a nexus file.)");
-	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename  to write to and this must be a string.
-The second argument is a data object that must be some character matrix. 
-This data matrix could be a morphological matrix, a molecular matrix, or a tree.)");
+	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a Nexus file.)");
+	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename to write to; this must be a string.
+The second argument is a data object that could be a morphological matrix,
+a molecular alignment, or a tree.)");
 	help_strings[string("writeNexus")][string("example")] = string(R"(# let's make up some taxa
 taxa = v("horse", "whale", "unicorn", "narwhal")
+
 # simulate a tree
 tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+
 # we also need a molecular substitution model
 molecular_model := fnJC(4)
+
 # together these form a continuous time Markov chain over the tree
 full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+
 # this will print a Nexus file with a simulated molecular matrix
 # to the working directory
 writeNexus(filename="test.nex", full_model))");
 	help_strings[string("writeNexus")][string("name")] = string(R"(writeNexus)");
 	help_references[string("writeNexus")].push_back(RbHelpReference(R"(Maddison DR, Swofford DL, Maddison WP (1997). Nexus: An extensible file format for systematic information. Systematic Biology, 46(4):590--621.)",R"(10.1093/sysbio/46.4.590)",R"(https://academic.oup.com/sysbio/article/46/4/590/1629695 )"));
-	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(`writeFasta`, `writeCharacterDataDelimited`, `write`)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(writeCharacterDataDelimited)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(writeNexus)"));
 	help_strings[string("writeNexus")][string("title")] = string(R"(Nexus file writer)");
+	help_strings[string("writePhylip")][string("description")] = string(R"(This function writes out a phylip formatted file given
+data of class `AbstractHomologousDiscreteCharacterData`.
+Filename is specified using the `filename` argument.)");
+	help_strings[string("writePhylip")][string("example")] = string(R"(# let's make up some taxa
+taxa = v("horse", "whale", "unicorn", "narwhal")
+
+# convert these to the taxon datatype
+for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+
+# this will print a Phylip file with a simulated molecular matrix
+# to the working directory
+writePhylip(filename="test.phy", full_model))");
+	help_strings[string("writePhylip")][string("name")] = string(R"(writePhylip)");
+	help_arrays[string("writePhylip")][string("see_also")].push_back(string(R"(writeCharacterDataDelimited)"));
+	help_arrays[string("writePhylip")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_arrays[string("writePhylip")][string("see_also")].push_back(string(R"(writeNexus)"));
+	help_strings[string("writePhylip")][string("title")] = string(R"(Phylip file writing function)");
 }
