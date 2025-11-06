@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class RandomCategoryWalkProposal : public Proposal {
         
     public:
-        RandomCategoryWalkProposal( StochasticNode< RbVector<long> >* n);                                 //!< Constructor
+        RandomCategoryWalkProposal( StochasticNode< RbVector<std::int64_t> >* n);                                 //!< Constructor
         
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         RandomCategoryWalkProposal*                 clone(void) const;                                                                  //!< Clone object
@@ -49,7 +49,7 @@ template <class variableType> class StochasticNode;
         
     private:
         // parameters
-        StochasticNode< RbVector<long> >*           variable;
+        StochasticNode< RbVector<std::int64_t> >*   variable;
         size_t                                      chosen_index;
         size_t                                      chosen_neighbour;
         bool                                        failed;

@@ -14,7 +14,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-RandomCategoryWalkProposal::RandomCategoryWalkProposal( StochasticNode< RbVector<long> >* n) : Proposal(),
+RandomCategoryWalkProposal::RandomCategoryWalkProposal( StochasticNode< RbVector<std::int64_t> >* n) : Proposal(),
 variable( n )
 {
     // tell the base class to add the node
@@ -65,7 +65,7 @@ double RandomCategoryWalkProposal::doProposal( void )
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     // get values
-    RbVector<long> &val = variable->getValue();
+    RbVector<std::int64_t> &val = variable->getValue();
     
     // how many elements did we have in the vector
     size_t num_elements = val.size();
@@ -165,7 +165,7 @@ void RandomCategoryWalkProposal::undoProposal( void )
     if ( failed == false )
     {
         // get values
-        RbVector<long> &val = variable->getValue();
+        RbVector<std::int64_t> &val = variable->getValue();
         
         // now update the elements
         ++val[chosen_index];
@@ -186,7 +186,7 @@ void RandomCategoryWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( variable == oldN )
     {
-        variable = static_cast<StochasticNode< RbVector<long> > *>(newN);
+        variable = static_cast<StochasticNode< RbVector<std::int64_t> > *>(newN);
     }
 }
 
