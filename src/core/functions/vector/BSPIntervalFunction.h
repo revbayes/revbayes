@@ -33,8 +33,8 @@ namespace RevBayesCore {
     class BSPIntervalFunction : public TypedFunction< RbVector<valueType> > {
         
     public:
-        BSPIntervalFunction(const TypedDagNode< RbVector<valueType> > *v, const TypedDagNode< RbVector<long> > *n);
-        virtual                                            ~BSPIntervalFunction(void);                                                       //!< Virtual destructor
+        BSPIntervalFunction(const TypedDagNode< RbVector<valueType> > *v, const TypedDagNode< RbVector<std::int64_t> > *n);
+        virtual                                            ~BSPIntervalFunction(void);                                                  //!< Virtual destructor
         
         // public member functions
         BSPIntervalFunction*                                clone(void) const;                                                          //!< Create an independent clone
@@ -48,7 +48,7 @@ namespace RevBayesCore {
         
         // members
         const TypedDagNode< RbVector<valueType> >*          value_param;
-        const TypedDagNode< RbVector<long> >*               num_rep;
+        const TypedDagNode< RbVector<std::int64_t> >*       num_rep;
         
     };
     
@@ -57,7 +57,7 @@ namespace RevBayesCore {
 
 
 template <class valueType>
-RevBayesCore::BSPIntervalFunction<valueType>::BSPIntervalFunction(const TypedDagNode< RbVector<valueType> > *v, const TypedDagNode< RbVector<long> >* n) : TypedFunction< RbVector<valueType> >( new RbVector<valueType>() ),
+RevBayesCore::BSPIntervalFunction<valueType>::BSPIntervalFunction(const TypedDagNode< RbVector<valueType> > *v, const TypedDagNode< RbVector<std::int64_t> >* n) : TypedFunction< RbVector<valueType> >( new RbVector<valueType>() ),
     value_param( v ),
     num_rep( n )
 {
@@ -99,8 +99,8 @@ void RevBayesCore::BSPIntervalFunction<valueType>::update( void )
     // empty current vector
     this->value->clear();
     
-    const RbVector<long>&       reps = num_rep->getValue();
-    const RbVector<valueType>&  vals = value_param->getValue();
+    const RbVector<std::int64_t>    reps = num_rep->getValue();
+    const RbVector<valueType>&      vals = value_param->getValue();
     size_t num_cats = reps.size();
     
     for (size_t i=0; i<num_cats; ++i)
@@ -126,7 +126,7 @@ void RevBayesCore::BSPIntervalFunction<valueType>::swapParameterInternal(const D
     }
     if ( oldP == num_rep )
     {
-        num_rep = static_cast<const TypedDagNode< RbVector<long> >* >( newP );
+        num_rep = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
     }
     
 }
