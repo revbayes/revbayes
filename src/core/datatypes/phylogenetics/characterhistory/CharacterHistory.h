@@ -1,7 +1,7 @@
 #ifndef CharacterHistory_H
 #define CharacterHistory_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Cloneable.h"

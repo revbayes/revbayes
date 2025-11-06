@@ -78,7 +78,7 @@ namespace RevBayesCore {
         {
             if ( i >= std::vector<valueType>::size() )
             {
-                throw RbException("Vector index out of range. You tried to access index '" + StringUtilities::to_string(i) + "' for a vector of size '" + StringUtilities::to_string(std::vector<valueType>::size()) + "'.");
+                throw RbException() << "Vector index out of range. You tried to access index '" << StringUtilities::to_string(i) << "' for a vector of size '" << StringUtilities::to_string(std::vector<valueType>::size()) << "'.";
             }
             return std::vector<valueType>::operator [](i);
         }
@@ -90,12 +90,34 @@ namespace RevBayesCore {
             }
             return std::vector<valueType>::operator [](i);
         }
+        void                                                setElement(int i, const valueType& v) { (*this)[i] = v;}
         void                                                swap( valueType& a, valueType& b)
         {
             valueType temp = a;
             a = b;
             b = temp;
         }
+
+	json                                                toJSON() const
+	{
+	    json j;
+            for (size_t i=0; i<size(); ++i)
+	    {
+		if constexpr (std::is_base_of_v<Printable,valueType>)
+		    j.push_back(this->operator[](i).toJSON());
+		else if constexpr (std::is_convertible_v<valueType,json>)
+		    j.push_back(this->operator[](i));
+		else
+		{
+		    std::stringstream ss;
+		    ss.precision(std::numeric_limits<double>::digits10);
+		    ss << this->operator[](i);
+		    j.push_back(ss.str());
+		}
+	    }
+	    return j;
+	}
+
         void                                                printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const
         {
             o << "[";
@@ -246,6 +268,7 @@ namespace RevBayesCore {
         RbIterator<valueType>                               find(const valueType &x) { return RbIterator<valueType>( std::find(this->values.begin(), this->values.end(), &x) ); }
         RbConstIterator<valueType>                          find(const valueType &x) const { return RbConstIterator<valueType>( std::find(this->values.begin(), this->values.end(), &x) ); }
         size_t                                              size(void) const { return this->values.size(); }
+        void                                                setElement(int i, const valueType& v) { delete values[i]; values[i] = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone(v);}
 
         void                                                swap( valueType& a, valueType& b)
         {
@@ -255,6 +278,27 @@ namespace RevBayesCore {
 
             delete temp;
         }
+
+	json                                                toJSON() const
+	{
+	    json j;
+            for (size_t i=0; i<size(); ++i)
+	    {
+		if constexpr (std::is_base_of_v<Printable,valueType>)
+		    j.push_back(this->operator[](i).toJSON());
+		else if constexpr (std::is_convertible_v<valueType,json>)
+		    j.push_back(this->operator[](i));
+		else
+		{
+		    std::stringstream ss;
+		    ss.precision(std::numeric_limits<double>::digits10);
+		    ss << this->operator[](i);
+		    j.push_back(ss.str());
+		}
+	    }
+	    return j;
+	}
+
         void                                                printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const
         {
             o << "[";

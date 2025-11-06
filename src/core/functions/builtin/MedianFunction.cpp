@@ -1,6 +1,6 @@
 #include "MedianFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 
 #include "RbVector.h"

@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -127,7 +127,7 @@ void ConditionedBirthDeathShiftProcessContinuous::attachTimes(Tree* psi, std::ve
         psi->getNode( parent->getIndex() ).setAge( originTime - interiorNodeTimes[index] );
         
         // Remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(node_index));
+        nodes.erase(nodes.begin()+std::int64_t(node_index));
         
         // Add the left child if an interior node
         TopologyNode* leftChild = &parent->getChild(0);
@@ -166,7 +166,7 @@ void ConditionedBirthDeathShiftProcessContinuous::buildRandomBinaryHistory(std::
         TopologyNode* parent = tips.at(index);
         
         // Remove the randomly drawn node from the list
-        tips.erase(tips.begin()+long(index));
+        tips.erase(tips.begin()+std::int64_t(index));
         
         // Add a left child
         TopologyNode* leftChild = new TopologyNode();
@@ -259,11 +259,11 @@ double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -277,7 +277,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -517,7 +517,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeRootLikelihood( void 
 }
 
 
-void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
     
     if ( n == "numberEvents" )
@@ -534,7 +534,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
     }
     else
     {
-        throw RbException("The birth-death-shift process does not have a member method called '" + n + "'.");
+        throw RbException() << "The birth-death-shift process does not have a member method called '" << n << "'.";
     }
     
 }
@@ -697,7 +697,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" << n << "'.";
     }
     
 }
@@ -853,7 +853,7 @@ void ConditionedBirthDeathShiftProcessContinuous::simulateTree( void )
         TopologyNode* node = nodes.at(index);
         
         // Remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(index) );
+        nodes.erase(nodes.begin()+std::int64_t(index) );
         
         // Set taxon
         node->setTaxon( taxa[i] );

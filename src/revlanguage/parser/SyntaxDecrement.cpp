@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <set>
 
@@ -81,7 +81,7 @@ SyntaxDecrement* SyntaxDecrement::clone () const
  * Evaluate the content of this syntax element. This will perform
  * a decrement assignment operation.
  */
-RevPtr<RevVariable> SyntaxDecrement::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxDecrement::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     RevPtr<RevVariable> retVar;

@@ -1,7 +1,7 @@
 #ifndef ShortestDistanceFunction_h
 #define ShortestDistanceFunction_h
 
-#include <stdio.h>
+#include <cstdio>
 #include <set>
 #include <vector>
 #include "RbVector.h"
@@ -26,7 +26,7 @@ template <class valueType> class TypedDagNode;
     class ShortestDistanceFunction : public TypedFunction<RbVector<RbVector<double> > > {
         
     public:
-        ShortestDistanceFunction(const TypedDagNode<RbVector<RbVector<long> > >* adj, const TypedDagNode<RbVector<RbVector<double> > >* dist);
+        ShortestDistanceFunction(const TypedDagNode<RbVector<RbVector<std::int64_t> > >* adj, const TypedDagNode<RbVector<RbVector<double> > >* dist);
         
         ShortestDistanceFunction*                               clone(void) const;                                                  //!< Create a clone.
         void                                                    update(void);                                                       //!< Recompute the value
@@ -35,12 +35,12 @@ template <class valueType> class TypedDagNode;
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Implementation of swaping parameters
         
     private:
-        std::vector<std::set<size_t> >                          createAdjacencySets(const RbVector<RbVector<long> >& adj);
-        RbVector<RbVector<double> >                             findShortestPaths(const RbVector<RbVector<long> >& adj, const RbVector<RbVector<double> >& dist);
+        std::vector<std::set<size_t> >                          createAdjacencySets(const RbVector<RbVector<std::int64_t> >& adj);
+        RbVector<RbVector<double> >                             findShortestPaths(const RbVector<RbVector<std::int64_t> >& adj, const RbVector<RbVector<double> >& dist);
         
         size_t                                                  num_nodes; //!< The number of nodes in the graph
         
-        const TypedDagNode<RbVector<RbVector<long> > >*          adjacencies; //!< The connectivity of nodes in the graph
+        const TypedDagNode<RbVector<RbVector<std::int64_t> > >*          adjacencies; //!< The connectivity of nodes in the graph
         const TypedDagNode<RbVector<RbVector<double> > >*       distances; //!< The distances between connected nodes
     };
 }

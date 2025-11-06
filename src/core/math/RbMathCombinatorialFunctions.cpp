@@ -14,7 +14,7 @@
  * $Id$
  */
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <iostream>
 #include <sstream> // IWYU pragma: keep
@@ -236,9 +236,9 @@ double RbMath::lnFactorial(int n) {
 }
 
 
-unsigned long RbMath::stirlingFirst(int n, int k) {
+std::uint64_t RbMath::stirlingFirst(int n, int k) {
 	
-	unsigned long r = 0;
+	std::uint64_t r = 0;
 	if (n == k)
 		return 1;
 	if (k == 1)
@@ -301,7 +301,7 @@ int RbMath::signedStirlingFirst(int n, int k) {
 	int sign = 1;
 	if ((n-k) % 2 == 1)
 		sign = -1;
-	unsigned long v = stirlingFirst(n,k);
+	std::uint64_t v = stirlingFirst(n,k);
 	std::cout << v << std::endl;
 	return sign * (int)v;
 }

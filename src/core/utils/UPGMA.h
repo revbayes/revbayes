@@ -1,7 +1,7 @@
 #ifndef UPGMA_hpp
 #define UPGMA_hpp
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <set>
 

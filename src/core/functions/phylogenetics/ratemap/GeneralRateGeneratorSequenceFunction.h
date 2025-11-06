@@ -1,7 +1,7 @@
 #ifndef GeneralRateGeneratorSequenceFunction_H
 #define GeneralRateGeneratorSequenceFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RateGeneratorSequence.h"
 #include "TypedFunction.h"

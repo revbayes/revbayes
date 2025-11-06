@@ -1,6 +1,6 @@
 #include "StochasticBranchStateTimesMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "StochasticNode.h"
@@ -16,7 +16,7 @@ using namespace RevBayesCore;
 
 
 /* Constructor for state dependent birth death process */
-StochasticBranchStateTimesMonitor::StochasticBranchStateTimesMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, const std::string &del) : VariableMonitor(ch, g, fname, del, false, false, false),
+StochasticBranchStateTimesMonitor::StochasticBranchStateTimesMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, const std::string &del) : VariableMonitor(ch, g, fname, del, false, false, false),
     cdbdp( ch )
 {
     // the cdbdp is both the tree and character evolution model
@@ -64,8 +64,9 @@ StochasticBranchStateTimesMonitor* StochasticBranchStateTimesMonitor::clone(void
  *
  * \param[in]   gen    The current generation.
  */
-void StochasticBranchStateTimesMonitor::monitorVariables(unsigned long gen)
+void StochasticBranchStateTimesMonitor::monitorVariables(std::uint64_t gen)
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
     size_t num_nodes = tree->getValue().getNumberOfNodes();
@@ -93,6 +94,7 @@ void StochasticBranchStateTimesMonitor::monitorVariables(unsigned long gen)
  */
 void StochasticBranchStateTimesMonitor::printFileHeader()
 {
+    auto& separator = to<SeparatorFormat>(format)->separator;
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
     std::vector<double> time_in_states = sse->getTimeInStates(); 

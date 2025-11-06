@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 #include <complex>
 #include <vector>
@@ -9,7 +9,6 @@
 #include "RateMatrix_TIM.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "TimeReversibleRateMatrix.h"
@@ -66,23 +65,6 @@ RateMatrix_TIM& RateMatrix_TIM::operator=(const RateMatrix_TIM &r)
     
     return *this;
 }
-
-
-RateMatrix_TIM& RateMatrix_TIM::assign(const Assignable &m)
-{
-    
-    const RateMatrix_TIM *rm = dynamic_cast<const RateMatrix_TIM*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */

@@ -1,0 +1,32 @@
+test_tree <- readTrees("data/4_tip_tree.tre")[1]
+taxa <- test_tree.taxa()
+
+lambda <- 8.472
+mu     <- 4.321
+psi    <- 1.234
+r      <- 0.47
+rho    <- 0.42
+origin <- 5.123
+
+phylogeny ~ dnBDSTP(originAge=origin,lambda=lambda,mu=mu,psi=psi,r=r,Phi=rho,taxa=taxa,initialTree=test_tree,condition="time")
+phylogeny.clamp(test_tree)
+
+lnL := phylogeny.lnProbability()
+
+print(lnL,"\n",file="output/likelihood.txt",append=false)
+
+lambda <- 8.472
+mu     <- 4.321
+psi    <- 1.234
+r      <- 0.47
+rho    <- 0.0
+origin <- 5.123
+
+phylogeny ~ dnBDSTP(originAge=origin,lambda=lambda,mu=mu,psi=psi,r=r,Phi=rho,taxa=taxa,initialTree=test_tree,condition="time")
+phylogeny.clamp(test_tree)
+
+lnL := phylogeny.lnProbability()
+
+print(lnL,"\n",file="output/likelihood.txt",append=true)
+
+q()

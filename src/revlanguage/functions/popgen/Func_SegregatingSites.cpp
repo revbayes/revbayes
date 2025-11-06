@@ -46,7 +46,7 @@ Func_SegregatingSites* Func_SegregatingSites::clone( void ) const
 }
 
 
-RevBayesCore::TypedFunction< long >* Func_SegregatingSites::createFunction( void ) const
+RevBayesCore::TypedFunction< std::int64_t >* Func_SegregatingSites::createFunction( void ) const
 {
     
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = static_cast<const AbstractHomologousDiscreteCharacterData &>( this->args[0].getVariable()->getRevObject() ).getDagNode();

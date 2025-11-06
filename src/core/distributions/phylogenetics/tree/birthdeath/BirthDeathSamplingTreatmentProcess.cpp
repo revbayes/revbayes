@@ -1,5 +1,5 @@
-#include <float.h>
-#include <stddef.h>
+#include <cfloat>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -24,6 +24,7 @@
 #include "StartingTreeSimulator.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class Taxon; }
@@ -63,7 +64,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
                                                                         const std::string &cdt,
                                                                         const std::vector<Taxon> &tn,
                                                                         bool uo,
-                                                                        Tree *t) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
+                                                                        Tree *t,
+                                                                        std::int64_t age_check_precision) : AbstractBirthDeathProcess( ra, cdt, tn, uo, t ),
     interval_times_global(timeline),
     interval_times_speciation(speciation_timeline),
     interval_times_extinction(extinction_timeline),
@@ -72,7 +74,9 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     interval_times_event_speciation(event_sampling_timeline),
     interval_times_event_extinction(event_extinction_timeline),
     interval_times_event_sampling(event_sampling_timeline),
-    offset( 0.0 )
+    offset( 0.0 ),
+    taxa(tn),
+    age_check_precision(age_check_precision)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda   = NULL;
@@ -163,21 +167,41 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     // updateVectorParameters();
     prepareTimeline();
     prepareProbComputation();
-
-    delete value;
     
-    if (t != nullptr)
-    {
-        value = t;
-    }
-    else
+    delete value;
+
+    if ( starting_tree == NULL )
     {
         RbVector<Clade> constr;
+
+        double root_age = getOriginAge(); 
+        if ( use_origin) root_age -= 1e-5; //adjust so root age is slightly below the origin time
+        
+        // create a clade that contains all species
+        Clade all_species = Clade(taxa);
+        all_species.setAge(root_age);
+        constr.push_back(all_species);
+
         // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
         StartingTreeSimulator simulator;
         RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
         // store the new value
         value = my_tree;
+    }
+    else
+    {
+        try
+        {
+            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
+            value = my_tree->clone();
+        }
+        catch (RbException &e)
+        {
+            value = nullptr;
+            // The line above is to prevent a segfault when ~AbstractRootedTreeDistribution() tries to delete
+            // a nonexistent starting_tree
+            throw RbException( e.getMessage() );
+        }
     }
 
     countAllNodes();
@@ -204,9 +228,9 @@ void BirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::set<doubl
   if ( par_times != NULL )
   {
       const std::vector<double>& times = par_times->getValue();
-      for (std::vector<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+      for (size_t i = 0; i < times.size(); ++i)
       {
-          event_times.insert( *it );
+          event_times.insert( times[i] );
       }
   }
 
@@ -247,11 +271,6 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( 
     if ( countAllNodes() )
     {
         return RbConstants::Double::neginf;
-    }
-
-    if ( offset > DBL_EPSILON && phi_event[0] > DBL_EPSILON )
-    {
-        throw RbException("Event sampling fraction at the present is non-zero but there are no tips at the present.");
     }
 
     // precompute A_i, B_i, C_i, E_i(t_i)
@@ -306,7 +325,7 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
     // if conditioning on root, root node must be a "true" bifurcation event
     else
     {
-        if ( root->isSampledAncestor(true) )
+        if ( root->isSampledAncestorTipOrParent() )
         {
             return RbConstants::Double::neginf;
         }
@@ -564,7 +583,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 
       double t = n.getAge();
 
-      if ( n.isTip() && n.isFossil() && n.isSampledAncestor() )
+      if ( n.isTip() && n.isFossil() && n.isSampledAncestorTip() )
       {
         // node is sampled ancestor
           int at_event = whichIntervalTime(t);
@@ -579,7 +598,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               event_sampled_ancestor_ages[at_event].push_back(t);
           }
       }
-      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestor() )
+      else if ( n.isTip() && n.isFossil() && !n.isSampledAncestorTip() )
       {
           // node is serial leaf
           int at_event = whichIntervalTime(t);
@@ -608,7 +627,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               serial_tip_ages.push_back(0.0);
           }
       }
-      else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
       {
           if ( n.isRoot() == false || use_origin == true )
           {
@@ -626,7 +645,7 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
               }
           }
       }
-      else if ( n.isInternal() && n.getChild(0).isSampledAncestor() && n.getChild(1).isSampledAncestor() )
+      else if ( n.isInternal() && n.getChild(0).isSampledAncestorTip() && n.getChild(1).isSampledAncestorTip() )
       {
           return true;
       }
@@ -893,11 +912,12 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std:
     std::vector<double> old_par = par;
 
     // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
       // Where is this global time interval in the variable's timeline?
       size_t idx = findIndex(global_timeline[i],par_times);
-      par[i] = old_par[idx];
+      par.push_back( old_par[idx] );
     }
 
 }
@@ -1279,16 +1299,19 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 
         // now we start assembling the global timeline by finding the union of unique intervals for all parameters
         std::set<double> event_times;
-        addTimesToGlobalTimeline(event_times,interval_times_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_sampling);
-        addTimesToGlobalTimeline(event_times,interval_times_treatment);
-        addTimesToGlobalTimeline(event_times,interval_times_event_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_event_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_event_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_treatment);
+        addTimesToGlobalTimeline(event_times, interval_times_event_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_event_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_event_sampling);
+        
+        for (auto it : event_times) {
+            global_timeline.push_back( it );
+        }
 
-
-        // we are done with setting up the timeline (i.e., using the all the provided timeline) and checking all dimension of parameters
+        // we are done with setting up the timeline (i.e., using all the provided timelines) and checking all dimensions of parameters
 
     }
 
@@ -1476,12 +1499,20 @@ void BirthDeathSamplingTreatmentProcess::redrawValue( SimulationCondition condit
         if ( starting_tree == NULL )
         {
             // SH 20221212: The simulateTree functions hangs in certain situations. It's more robust to use the coalescent simulator.
-//            simulateTree();
+            // simulateTree();
             
             RbVector<Clade> constr;
-            // We employ a coalescent simulator to guarantee that the starting tree matches all time constraints
+            double root_age = getOriginAge(); 
+            if ( use_origin) root_age -= 1e-5; //adjust so root age is slightly below the origin time
+            
+            // create a clade that contains all species
+            Clade all_species = Clade(taxa);
+            all_species.setAge(root_age);
+            constr.push_back(all_species);
+
             StartingTreeSimulator simulator;
-            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );
+            RevBayesCore::Tree *my_tree = simulator.simulateTree( taxa, constr );            
+            
             // store the new value
             value = my_tree;
         }
@@ -1943,4 +1974,24 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
         // delegate the super-class
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
+}
+
+/**
+ * Checks if removal probabilities set for this distribution are compatible with sampled ancestors
+ * (i.e. removal < 1)
+ */
+bool BirthDeathSamplingTreatmentProcess::allowsSA() {
+    for(auto removal : r) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    for(auto removal : r_event) {
+        if(removal < 1.0 - DBL_EPSILON) return true;
+    }
+    return false;
+}
+
+void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
+{
+    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
+    AbstractRootedTreeDistribution::setValue(newv, f);
 }

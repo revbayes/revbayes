@@ -17,7 +17,7 @@
 #ifndef TaxaState_H
 #define TaxaState_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <vector>
 

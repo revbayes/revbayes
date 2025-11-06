@@ -1,0 +1,19 @@
+Expected probability of a 6-taxon unrooted topology:
+0.00952381
+
+Actual probability of such a topology, drawn from dnUniformTopology():
+0.00952381
+
+Expected log probability of a 6-taxon unrooted topology:
+-4.65396
+
+Actual log probability of such a topology, drawn from dnUniformTopology():
+-4.65396
+
+Expected log probability density of a 6-taxon unrooted tree with all branches of length 0.1:
+7.069305
+
+Actual log probability density of such a tree, drawn from dnUniformTopologyBranchLength():
+7.069305
+
+To confirm that the log probability density is the same when using treeAssembly(), see Test_treeProbDensity.log.

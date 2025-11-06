@@ -8,7 +8,7 @@
 
 #include "CovarionRateMatrixFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "RateMatrix_Covarion.h"
 #include "RateGenerator.h"

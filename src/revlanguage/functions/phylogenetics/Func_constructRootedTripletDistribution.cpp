@@ -8,7 +8,7 @@
 
 #include "Func_constructRootedTripletDistribution.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ModelVector.h"
 #include "RlBranchLengthTree.h"

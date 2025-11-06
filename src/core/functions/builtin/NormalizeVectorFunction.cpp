@@ -1,6 +1,6 @@
 #include "NormalizeVectorFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "Cloner.h"

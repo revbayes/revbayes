@@ -1,6 +1,6 @@
 #include "Dist_PhyloBrownianMultiSampleREML.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "PhyloBrownianProcessMultiSampleREML.h"

@@ -1,6 +1,6 @@
 #include "NexusMonitor.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "DagNode.h"
@@ -12,7 +12,7 @@
 
 namespace RevBayesCore {
 
-NexusMonitor::NexusMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode *> &n, bool np, unsigned long g,
+NexusMonitor::NexusMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode *> &n, bool np, std::uint64_t g,
                            const std::string &fname, bool ap, bool taxa) :
     AbstractFileMonitor (t, g, fname, ap),
     isNodeParameter( np ),
@@ -42,7 +42,7 @@ void NexusMonitor::swapNode(DagNode *oldN, DagNode *newN) {
     else if ( nodeVar != nullptr ) {
         std::vector<DagNode*>::iterator it = find(nodeVariables.begin(), nodeVariables.end(), nodeVar);
         if (it == nodeVariables.end()) {
-            throw RbException("Cannot replace DAG node with name\"" + oldN->getName() + "\" in this nexus monitor because the monitor doesn't hold this DAG node.");
+            throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this nexus monitor because the monitor doesn't hold this DAG node.";
         }
         *it = static_cast< TypedDagNode< RbVector<double> > *>(newN);
     }
@@ -75,7 +75,7 @@ void NexusMonitor::printHeader() {
     out_stream.flush();
 }
 
-void NexusMonitor::monitor(unsigned long gen) {
+void NexusMonitor::monitor(std::uint64_t gen) {
     if ( !enabled || gen % printgen != 0 ) return;
 
     out_stream.seekg(0, std::ios::end);

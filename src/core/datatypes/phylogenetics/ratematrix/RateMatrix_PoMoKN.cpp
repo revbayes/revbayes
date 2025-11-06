@@ -1,10 +1,9 @@
 #include "RateMatrix_PoMoKN.h"
 
-#include <assert.h>
+#include <cassert>
 #include <cstddef>
 
 #include "RbException.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "TransitionProbabilityMatrix.h"
@@ -26,7 +25,7 @@ phi( in_k, 1.0 )
 */
 
 /** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual population size */
-RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long in_k, long in_n, long in_nmr)  : 
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(std::int64_t num_states, std::int64_t in_k, std::int64_t in_n, std::int64_t in_nmr)  : 
 AbstractRateMatrix( num_states ), 
 K( in_k ),
 N( in_n ),
@@ -72,21 +71,6 @@ RateMatrix_PoMoKN::~RateMatrix_PoMoKN(void)
 
 }
 
-
-
-RateMatrix_PoMoKN& RateMatrix_PoMoKN::assign(const Assignable &m)
-{
-
-    const RateMatrix_PoMoKN *rm = dynamic_cast<const RateMatrix_PoMoKN*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
 
 
 double RateMatrix_PoMoKN::averageRate(void) const
@@ -285,7 +269,7 @@ std::vector<double> RateMatrix_PoMoKN::getStationaryFrequencies( void ) const
 
 
 
-void RateMatrix_PoMoKN::setK( long & na )
+void RateMatrix_PoMoKN::setK( std::int64_t & na )
 {   
     K = na;
     
@@ -295,7 +279,7 @@ void RateMatrix_PoMoKN::setK( long & na )
 }
 
 
-void RateMatrix_PoMoKN::setN( long & ni )
+void RateMatrix_PoMoKN::setN( std::int64_t & ni )
 {
     N = ni;
     

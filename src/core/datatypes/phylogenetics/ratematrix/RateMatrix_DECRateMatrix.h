@@ -22,7 +22,6 @@ namespace RevBayesCore {
         
         // overloaded operators
         RateMatrix_DECRateMatrix&                   operator=(const RateMatrix_DECRateMatrix& r);
-        virtual RateMatrix_DECRateMatrix&           assign(const Assignable &m);
         
         // RateMatrix functions
         double                              averageRate(void) const;

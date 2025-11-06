@@ -1,7 +1,7 @@
 #ifndef Parallelizable_H
 #define Parallelizable_H
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace RevBayesCore {
     

@@ -5,12 +5,11 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 namespace RevBayesCore {
 
-    using namespace boost::filesystem;
+    using namespace std::filesystem;
     
     std::istream&           safeGetline(std::istream& is, std::string& t); //!< Gets one line from a stream
     path                    expandUserDir(std::string path); //!< Get full path to user directory
@@ -20,6 +19,9 @@ namespace RevBayesCore {
     void                    formatError(const path& p, std::string& errorStr);  //!< Format the error string when (mis)reading files
 
     void                    createDirectoryForFile(const path& p);
+
+    std::stringstream       readFileAsStringStream(const path& fname);
+    std::string             readFileAsString(const path& fname);
 }
 
 #endif

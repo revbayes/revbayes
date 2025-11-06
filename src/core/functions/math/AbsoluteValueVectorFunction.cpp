@@ -1,6 +1,6 @@
 #include "AbsoluteValueVectorFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <cmath>
 
 #include "Cloner.h"

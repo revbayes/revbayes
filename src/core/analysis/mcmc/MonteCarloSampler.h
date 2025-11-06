@@ -53,8 +53,8 @@ namespace RevBayesCore {
         virtual RbVector<Monitor>&              getMonitors() = 0;
         virtual std::string                     getStrategyDescription(void) const = 0;                     //!< Get the discription of the strategy used for this sampler.
         virtual void                            initializeSamplerFromCheckpoint(void) = 0;                  //!< Initialize the values from the checkpoint file
-        virtual void                            initializeSampler(bool priorOnly=false) = 0;                //!< Initialize objects for mcmc sampling
-        virtual void                            monitor(unsigned long g) = 0;
+        virtual void                            initializeSampler() = 0;                                    //!< Initialize objects for mcmc sampling
+        virtual void                            monitor(std::uint64_t g) = 0;
         virtual void                            nextCycle(bool advanceCycle) = 0;
         virtual void                            printOperatorSummary(bool current_period) = 0;
         virtual void                            redrawStartingValues(void) = 0;                             //!< Redraw the starting values.
@@ -77,7 +77,7 @@ namespace RevBayesCore {
     protected:
                 
         // members
-        unsigned long                           generation;
+        std::uint64_t                           generation;
         
     };
 

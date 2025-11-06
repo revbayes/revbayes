@@ -17,7 +17,7 @@
  * $Id: Func_module.cpp 1485 2012-05-04 16:03:37Z hoehna $
  */
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -73,7 +73,7 @@ RevPtr<RevVariable> Func_module::execute( void )
     std::string moduleName = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     const Module& mod = ModuleSystem::getModuleSystem().getModule( moduleName );
     
-    Environment *execEnv = env;
+    std::shared_ptr<Environment> execEnv = env;
     
     if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
     {

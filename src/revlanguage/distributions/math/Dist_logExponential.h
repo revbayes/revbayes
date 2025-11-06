@@ -1,7 +1,6 @@
 #ifndef Dist_logExponential_H
 #define Dist_logExponential_H
 
-#include "LogExponentialDistribution.h"
 #include "RlContinuousDistribution.h"
 
 namespace RevLanguage {
@@ -39,7 +38,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::LogExponentialDistribution*       createDistribution(void) const;
+        RevBayesCore::ContinuousDistribution*           createDistribution(void) const;
         
     protected:
         

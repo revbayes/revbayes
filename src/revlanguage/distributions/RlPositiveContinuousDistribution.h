@@ -1,26 +1,7 @@
-/**
- * @file
- * This file contains the declaration of Distribution, which is
- * the interface and abstract base class for RevLanguage distribution objects.
- *
- * @brief Declaration of Distribution
- *
- * (c) Copyright 2009- under GPL version 3
- * @date Last modified: $Date: 2012-08-03 17:51:49 +0200 (Fri, 03 Aug 2012) $
- * @author The RevBayes Development Core Team
- * @license GPL version 3
- * @version 1.0
- * @interface Distribution
- * @package distributions
- * @since Version 1.0, 2012-08-06
- *
- * $Id: Function.h 1734 2012-08-03 15:51:49Z hoehna $
- */
-
 #ifndef RlPositiveContinuousDistribution_H
 #define RlPositiveContinuousDistribution_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

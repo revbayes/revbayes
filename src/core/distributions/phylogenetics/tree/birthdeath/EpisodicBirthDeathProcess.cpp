@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -57,7 +57,7 @@ EpisodicBirthDeathProcess::EpisodicBirthDeathProcess(const TypedDagNode<double> 
 
     if ( starting_tree == NULL )
     {
-        simulateTree();
+        simulateTree(true);
     }
 }
 
@@ -497,13 +497,13 @@ double EpisodicBirthDeathProcess::simulateDivergenceTime(double origin, double p
         
         t = present;
         
-        double p_0_T_low = 1.0 - pSurvival(present,age,r)  * exp( rateIntegral(present,age) ) / r;
+        double p_0_T_low = 1.0 - pSurvival(present,age,r) * exp( rateIntegral(present,age) ) / r;
         double p_0_t_low = 1.0 - pSurvival(age-t,age,r) * exp( rateIntegral(age-t,age) ) / r;
         double F_t_low   = p_0_t / p_0_T;
         
         t = age;
         
-        double p_0_T_high = 1.0 - pSurvival(present,age,r)  * exp( rateIntegral(present,age) ) / r;
+        double p_0_T_high = 1.0 - pSurvival(present,age,r) * exp( rateIntegral(present,age) ) / r;
         double p_0_t_high = 1.0 - pSurvival(age-t,age,r) * exp( rateIntegral(age-t,age) ) / r;
         double F_t_high   = p_0_t / p_0_T;
     }

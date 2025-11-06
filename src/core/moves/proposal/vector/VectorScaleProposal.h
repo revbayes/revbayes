@@ -1,7 +1,7 @@
 #ifndef VectorScaleProposal_H
 #define VectorScaleProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 
 #include "Proposal.h"

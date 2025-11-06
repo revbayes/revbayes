@@ -1,7 +1,7 @@
 #ifndef PhyloCTMCSiteHomogeneousDolloBinary_H
 #define PhyloCTMCSiteHomogeneousDolloBinary_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 

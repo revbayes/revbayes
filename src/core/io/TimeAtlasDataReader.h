@@ -9,7 +9,7 @@
 #ifndef __rb_mlandis__TimeAtlasDataReader__
 #define __rb_mlandis__TimeAtlasDataReader__
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 #include <iosfwd>
 

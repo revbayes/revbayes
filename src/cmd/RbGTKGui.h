@@ -1,7 +1,7 @@
 #ifndef RbGTKGui_H
 #define RbGTKGui_H
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <gtk/gtk.h>

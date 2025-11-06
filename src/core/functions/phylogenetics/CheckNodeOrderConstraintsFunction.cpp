@@ -1,6 +1,6 @@
 #include "CheckNodeOrderConstraintsFunction.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 
@@ -50,33 +50,9 @@ CheckNodeOrderConstraintsFunction* CheckNodeOrderConstraintsFunction::clone( voi
 }
 
 
-void CheckNodeOrderConstraintsFunction::keep( const DagNode *affecter)
-{
-    //delegate to base class
-    TypedFunction< Boolean >::keep( affecter );
-    
-}
-
-
 void CheckNodeOrderConstraintsFunction::reInitialized( void )
 {
     *value = Boolean(false);
-}
-
-
-void CheckNodeOrderConstraintsFunction::restore( const DagNode *restorer)
-{
-    //delegate to base class
-    TypedFunction< Boolean >::restore( restorer );
-}
-
-
-void CheckNodeOrderConstraintsFunction::touch(const DagNode *toucher)
-{
-    
-    //delegate to base class
-    TypedFunction< Boolean >::touch( toucher );
-    
 }
 
 

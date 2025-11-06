@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -153,6 +153,22 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         double a = this->dag_node->getValue().getAgeRange().getMax();
         return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
     }
+    if (name == "setMinAge")
+    {
+        found = true;
+        double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+
+        dag_node->getValue().setMinAge( a );
+        return NULL;
+    }
+    if (name == "setMaxAge")
+    {
+        found = true;
+        double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+
+        dag_node->getValue().setMaxAge( a );
+        return NULL;
+    }
     
     return ModelObject<RevBayesCore::Taxon>::executeMethod( name, args, found );
 }
@@ -247,6 +263,13 @@ void Taxon::initMethods( void )
     age_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getMaxAge", RlString::getClassTypeSpec(), age_arg_rules ) );
 
+    ArgumentRules* set_min_age_arg_rules = new ArgumentRules();
+    set_min_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The min age of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "setMinAge", RlUtils::Void, set_min_age_arg_rules ) );
+
+    ArgumentRules* set_max_age_arg_rules = new ArgumentRules();
+    set_max_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The max age of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "setMaxAge", RlUtils::Void, set_max_age_arg_rules ) );
 }
 
 

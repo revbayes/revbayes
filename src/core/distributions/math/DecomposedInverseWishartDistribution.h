@@ -28,14 +28,14 @@ template <class valueType> class RbVector;
     class DecomposedInverseWishartDistribution : public TypedDistribution<MatrixReal>   {
         
     public:
-                                                    DecomposedInverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf);
-                                                    DecomposedInverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf);
-                                                    DecomposedInverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf);
+                                                    DecomposedInverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<std::int64_t>* indf);
+                                                    DecomposedInverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<std::int64_t>* indf);
+                                                    DecomposedInverseWishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf);
         virtual                                    ~DecomposedInverseWishartDistribution(void) {}
         DecomposedInverseWishartDistribution*       clone(void) const;                                                          //!< Create an independent clone
         double                                      computeLnProbability(void);
         void                                        redrawValue(void);
-        long                                        getDF(void) const {return df->getValue();}
+        std::int64_t                                        getDF(void) const {return df->getValue();}
         
     protected:
         void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
@@ -44,8 +44,8 @@ template <class valueType> class RbVector;
         const TypedDagNode<MatrixReal>*             sigma0;
         const TypedDagNode<RbVector<double> >*      kappaVector;
         const TypedDagNode<double>*                 kappa;
-        const TypedDagNode<long>*                    df;
-        const TypedDagNode<long>*                    dim;
+        const TypedDagNode<std::int64_t>*                    df;
+        const TypedDagNode<std::int64_t>*                    dim;
     };
     
 }

@@ -1,7 +1,7 @@
 #ifndef StationarityTest_H
 #define StationarityTest_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "ConvergenceDiagnosticContinuous.h"
@@ -13,9 +13,10 @@ class TraceNumeric;
      * @brief Stationarity test statistic for assessing convergence.
      *
      * The stationarity test statistic computes the probability that the samples in a given
-     * interval is different from the samples of the entire chain. This is done by comparing
-     * the mean values of the two samples. The interval is slided over the entire chain.
-     *
+     * chain are different from the samples pooled together from all chains. This is done
+     * by comparing the mean values of the two samples.
+     * The convergence of a single chain is computed by splitting the chain into n blocks
+     * and applying the multiple chain statistic.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -27,7 +28,9 @@ class TraceNumeric;
     public:
         StationarityTest(std::size_t nBlocks=10, double p=0.01);
     
-        // implementen functions from convergence diagnostic
+        // implement functions from convergence diagnostic
+        double          getStatistic(const TraceNumeric& trace);
+        double          getStatistic(const std::vector<TraceNumeric>& traces);
         bool            assessConvergence(const TraceNumeric& trace);
         bool            assessConvergence(const std::vector<TraceNumeric>& traces);
     
@@ -38,7 +41,7 @@ class TraceNumeric;
     private:
     
         std::size_t     nBlocks;                                                                                            //!< number of blocks
-        double          p;                                                                                                  //!< sginificance level
+        double          p;                                                                                                  //!< significance level
     
     };
 

@@ -9,12 +9,11 @@
 #ifndef CladogeneticProbabilityMatrix_h
 #define CladogeneticProbabilityMatrix_h
 
-#include <stddef.h>
+#include <cstddef>
 #include <map>
 #include <vector>
 #include <iosfwd>
 
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "Printable.h"
 #include "Serializable.h"
@@ -23,7 +22,7 @@ namespace RevBayesCore {
     
 //    class TransitionProbabilityMatrix;
     
-    class CladogeneticProbabilityMatrix : public Cloneable, public Assignable, public Printable, public Serializable {
+    class CladogeneticProbabilityMatrix : public Cloneable, public Printable, public Serializable {
         
     public:
         CladogeneticProbabilityMatrix(void);                                                   //!< Construct rate matrix with
@@ -36,7 +35,6 @@ namespace RevBayesCore {
         bool                                operator<=(const CladogeneticProbabilityMatrix &rm) const { return operator<(rm) || operator==(rm); }
         
         // virtual methods
-        virtual CladogeneticProbabilityMatrix&              assign(const Assignable &m);
         virtual CladogeneticProbabilityMatrix*              clone(void) const;
         virtual void                                        initFromString( const std::string &s );
         
@@ -54,6 +52,7 @@ namespace RevBayesCore {
         size_t                              getNumberOfStates(void) const;                                                              //!< Return the number of states
         size_t                              size(void) const;                                                                           //!< Get the size of the rate matrix, which is the same as the number of states
         
+	json                                toJSON() const;
         virtual void                        printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;            //!< print object for user (in user-formatted way)
         virtual void                        printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;   //!< print object for user (in user-formatted way)
         virtual void                        printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;  //!< print object for user (in user-formatted way)

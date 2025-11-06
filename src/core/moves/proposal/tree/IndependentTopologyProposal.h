@@ -1,7 +1,7 @@
 #ifndef ConstrainedEmpiricalTreeProposal_H
 #define ConstrainedEmpiricalTreeProposal_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <iosfwd>
 #include <vector>
 

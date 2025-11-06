@@ -1,6 +1,6 @@
 #include "UpperTriangle.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "Cloner.h"
 #include "MatrixReal.h"

@@ -9,7 +9,7 @@
 #ifndef __rb_mlandis__GeographicArea__
 #define __rb_mlandis__GeographicArea__
 
-#include <stddef.h>
+#include <cstddef>
 #include <set>
 #include <vector>
 #include <iosfwd>

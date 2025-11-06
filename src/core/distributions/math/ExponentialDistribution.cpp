@@ -1,6 +1,6 @@
 #include "ExponentialDistribution.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
@@ -10,48 +10,52 @@
 
 namespace RevBayesCore { class DagNode; }
 
+
 using namespace RevBayesCore;
 
-/*Exponential Distribution Constructor
- * @param l This is a double that represents the rate parameter
+/* Exponential distribution constructor
+ * @param l A double for the rate parameter of the distribution
+ * @param o A double for the offset of the distribution
+ *
  */
 
-ExponentialDistribution::ExponentialDistribution(const TypedDagNode<double> *l) : ContinuousDistribution( new double( 0.0 ) ),
-    lambda( l )
+ExponentialDistribution::ExponentialDistribution(const TypedDagNode<double> *l, const TypedDagNode<double> *o) : ContinuousDistribution( new double( 0.0 ) ),
+    lambda( l ),
+    offset( o )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
     addParameter( lambda );
+    addParameter( offset );
     
-    *value = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG);
+    *value = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG) + offset->getValue();
 }
 
 
-ExponentialDistribution::~ExponentialDistribution( void ) 
+ExponentialDistribution::~ExponentialDistribution( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
-double ExponentialDistribution::cdf( void ) const 
+double ExponentialDistribution::cdf( void ) const
 {
-    return RbStatistics::Exponential::cdf(lambda->getValue(), *value );
+    return RbStatistics::Exponential::cdf(lambda->getValue(), *value - offset->getValue());
 }
 
 
-ExponentialDistribution* ExponentialDistribution::clone( void ) const 
+ExponentialDistribution* ExponentialDistribution::clone( void ) const
 {
     return new ExponentialDistribution( *this );
 }
 
 
-double ExponentialDistribution::computeLnProbability( void ) 
+double ExponentialDistribution::computeLnProbability( void )
 {
     assert( lambda->getValue() >= 0.0 );
     
-    double v = *value;
-    
+    double v = *value - offset->getValue();
     // check that the value is inside the boundaries
     if ( v < 0.0 )
     {
@@ -62,27 +66,27 @@ double ExponentialDistribution::computeLnProbability( void )
 }
 
 
-double ExponentialDistribution::getMax( void ) const 
+double ExponentialDistribution::getMax( void ) const
 {
     return RbConstants::Double::inf;
 }
 
 
-double ExponentialDistribution::getMin( void ) const 
+double ExponentialDistribution::getMin( void ) const
 {
-    return 0.0;
+    return offset->getValue();
 }
 
 
-double ExponentialDistribution::quantile(double p) const 
+double ExponentialDistribution::quantile(double p) const
 {
-    return RbStatistics::Exponential::quantile(lambda->getValue(), p);
+    return RbStatistics::Exponential::quantile(lambda->getValue(), p) + offset->getValue();
 }
 
 
-void ExponentialDistribution::redrawValue( void ) 
+void ExponentialDistribution::redrawValue( void )
 {
-    *value = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG);
+    *value = RbStatistics::Exponential::rv(lambda->getValue(), *GLOBAL_RNG) + offset->getValue();
 }
 
 
@@ -92,6 +96,10 @@ void ExponentialDistribution::swapParameterInternal(const DagNode *oldP, const D
     if (oldP == lambda)
     {
         lambda = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    if (oldP == offset)
+    {
+        offset = static_cast<const TypedDagNode<double>* >( newP );
     }
 }
 

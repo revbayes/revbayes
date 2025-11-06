@@ -1,10 +1,9 @@
 #include "RateMatrix_Kimura80.h"
 
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "RbException.h"
@@ -31,27 +30,6 @@ RateMatrix_Kimura80::~RateMatrix_Kimura80(void)
 {
     
 }
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_Kimura80& RateMatrix_Kimura80::assign(const Assignable &m)
-{
-    
-    const RateMatrix_Kimura80 *rm = dynamic_cast<const RateMatrix_Kimura80*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-}
-
 
 
 /** Calculate the transition probabilities along a branch

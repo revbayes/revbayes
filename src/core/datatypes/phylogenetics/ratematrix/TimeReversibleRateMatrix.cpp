@@ -1,10 +1,9 @@
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "RbException.h"
 #include "TimeReversibleRateMatrix.h"
 #include "AbstractRateMatrix.h"
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
@@ -24,26 +23,6 @@ TimeReversibleRateMatrix::TimeReversibleRateMatrix(size_t n) : AbstractRateMatri
 TimeReversibleRateMatrix::~TimeReversibleRateMatrix(void)
 {
     // nothing to do
-}
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-TimeReversibleRateMatrix& TimeReversibleRateMatrix::assign(const Assignable &m)
-{
-    
-    const TimeReversibleRateMatrix *rm = dynamic_cast<const TimeReversibleRateMatrix*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
 }
 
 /** Calculate the average rate for the rate matrix */

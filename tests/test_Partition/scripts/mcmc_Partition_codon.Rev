@@ -138,8 +138,8 @@ mymodel = model(psi)
 
 # add monitors
 monitors[++mni] = mnModel(filename="output/PS_codon.log",printgen=10)
+monitors[++mni] = mnModel(filename="output/PS_codon.log.json",printgen=10,format="json")
 monitors[++mni] = mnFile(psi, filename="output/PS_codon.trees", printgen=100)
-monitors[++mni] = mnScreen(TL, printgen=1000)
 
 # run the analysis
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single", nruns=2)

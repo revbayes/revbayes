@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <set>
@@ -20,7 +20,7 @@ SyntaxPipePlaceholder* SyntaxPipePlaceholder::clone () const
 }
 
 
-RevPtr<RevVariable> SyntaxPipePlaceholder::evaluateContent( Environment& /* env */, bool /* dynamic */ )
+RevPtr<RevVariable> SyntaxPipePlaceholder::evaluateContent( const std::shared_ptr<Environment>& /* env */, bool /* dynamic */ )
 {
     throw RbException()<<"Invalid use of pipe placeholder '_'";
 }

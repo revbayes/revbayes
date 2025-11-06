@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <set>
 #include <map>
@@ -52,7 +52,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
                     field_stream << ", ";
                 }
             }
-            throw RbException("Unrecognized field: \'"+tmp+"\' in the taxon definition file. Allowed fields: "+field_stream.str());
+            throw RbException() << "Unrecognized field: \'" << tmp << "\' in the taxon definition file. Allowed fields: " << field_stream.str(); 
         }
     }
     

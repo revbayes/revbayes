@@ -22,7 +22,7 @@ namespace RevLanguage {
      * @since 2012-08-08, version 1.0
      *
      */
-    class Dist_gamma :  public PositiveContinuousDistribution {
+    class Dist_gamma : public PositiveContinuousDistribution {
         
     public:
         Dist_gamma( void );

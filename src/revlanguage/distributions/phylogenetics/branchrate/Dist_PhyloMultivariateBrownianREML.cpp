@@ -1,6 +1,6 @@
 #include "Dist_PhyloMultivariateBrownianREML.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "RlMatrixRealSymmetric.h"

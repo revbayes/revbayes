@@ -47,7 +47,6 @@ my_model = model(Q)
 
 monitors[1] = mnModel(filename="output/UCLD_noncentered.log",printgen=1, separator = TAB)
 monitors[2] = mnFile(psi,filename="output/UCLD_noncentered.trees",printgen=10,separator=TAB)
-monitors[3] = mnScreen(log_clock_mean,printgen=10)
 
 my_mcmc = mcmc(my_model,monitors,moves)
 

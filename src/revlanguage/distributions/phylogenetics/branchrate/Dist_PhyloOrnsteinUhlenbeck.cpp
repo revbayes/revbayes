@@ -5,7 +5,7 @@
  * Created on 05/10/14.
  */
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>

@@ -1,7 +1,7 @@
 #ifndef DECCladogeneticStateFunction_H
 #define DECCladogeneticStateFunction_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <sstream>
 #include <vector>
 #include <map>

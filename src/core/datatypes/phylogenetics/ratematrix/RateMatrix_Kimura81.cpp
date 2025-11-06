@@ -1,12 +1,11 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <complex>
 #include <vector>
 
 #include "EigenSystem.h"
 #include "RateMatrix_Kimura81.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "MatrixComplex.h"
 #include "MatrixReal.h"
 #include "RbException.h"
@@ -70,23 +69,6 @@ RateMatrix_Kimura81& RateMatrix_Kimura81::operator=(const RateMatrix_Kimura81 &r
     
     return *this;
 }
-
-
-RateMatrix_Kimura81& RateMatrix_Kimura81::assign(const Assignable &m)
-{
-    
-    const RateMatrix_Kimura81 *rm = dynamic_cast<const RateMatrix_Kimura81*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
 
 
 /** Do precalculations on eigenvectors */

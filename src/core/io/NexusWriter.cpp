@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <cstddef>
 #include <algorithm>
 #include <ostream>
 #include <string>
@@ -238,7 +238,7 @@ void NexusWriter::writeNexusBlock(const std::vector<Tree> &trees)
     out_stream << "Begin trees;" << std::endl;
     for (size_t i = 0; i < trees.size(); ++i)
     {
-        out_stream << "tree TREE" << (i+1) << " = " << (trees[i].isRooted() ? "[&R]" : "[&U]") << trees[i] << ";" << std::endl;
+        out_stream << "tree TREE" << (i+1) << " = " << (trees[i].isRooted() ? "[&R]" : "[&U]") << trees[i] << std::endl;
     }
     out_stream << "End;" << std::endl;
 

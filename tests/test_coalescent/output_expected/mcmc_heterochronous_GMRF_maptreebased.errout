@@ -1,0 +1,28 @@
+   Processing file "output/horses_het_BSP.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 4 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+max age: 	1036693
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+Problem when computing waiting time.
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 17 different moves in a random move schedule with 100 moves per iteration
+   

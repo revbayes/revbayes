@@ -1,6 +1,6 @@
 #include "DistanceMatrixReader.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 
 #include "RbVector.h"

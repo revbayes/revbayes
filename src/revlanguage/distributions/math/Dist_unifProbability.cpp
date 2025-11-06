@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -28,7 +28,7 @@
 
 using namespace RevLanguage;
 
-Dist_unifProbability::Dist_unifProbability() : TypedDistribution<Probability>()
+Dist_unifProbability::Dist_unifProbability() : ProbabilityContinuousDistribution()
 {
     
 }
@@ -73,7 +73,7 @@ const std::string& Dist_unifProbability::getClassType(void)
 const TypeSpec& Dist_unifProbability::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Probability>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( ProbabilityContinuousDistribution::getClassTypeSpec() ) );
     
     return rev_type_spec;
 }
@@ -171,6 +171,6 @@ void Dist_unifProbability::setConstParameter(const std::string& name, const RevP
     }
     else
     {
-        TypedDistribution<Probability>::setConstParameter(name, var);
+        ProbabilityContinuousDistribution::setConstParameter(name, var);
     }
 }
