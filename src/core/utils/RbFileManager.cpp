@@ -12,8 +12,7 @@
 #include "RbSettings.h"
 #include "RbException.h"
 #include "StringUtilities.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 // TODO: remove all these includes
 #ifdef _WIN32
@@ -28,7 +27,7 @@
 
 // TODO: fix setValueFromFile
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace RevBayesCore
 {
@@ -128,7 +127,7 @@ path expandUserDir(std::string dir)
 */
 void formatError(const path& p, std::string& errorStr)
 {
-    bool file_nameProvided    = (not p.filename().empty() and not p.filename_is_dot());
+    bool file_nameProvided    = not p.filename().empty();
     bool isfile_nameGood      = is_regular_file(p);
     bool isDirectoryNameGood = is_directory( p.parent_path() );
     
@@ -164,7 +163,7 @@ void formatError(const path& p, std::string& errorStr)
 */
 bool setStringWithNamesOfFilesInDirectory(const path& dirpath, std::vector<path>& sv, bool recursive)
 {
-    // FIXME: It should be converted to use boost:filesystem.
+    // FIXME: It should be converted to use std::filesystem.
     //        This is a holdover from the days of RbFileManager
     //        We should try and remove the #ifdef _WIN32, and 
     std::string dirstring = dirpath.string();

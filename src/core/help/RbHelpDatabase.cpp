@@ -166,11 +166,36 @@ posterior.summarize())");
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(readTrace)"));
 	help_arrays[string("Trace")][string("see_also")].push_back(string(R"(TraceTree)"));
 	help_strings[string("Trace")][string("title")] = string(R"(Trace of numeric parameter values.)");
-	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to the `mnFile` monitor in an MCMC or MCMCMC run.)");
-	help_strings[string("TraceTree")][string("details")] = string(R"(Important methods include:
+	help_strings[string("TraceTree")][string("description")] = string(R"(Stores a tree trace, usually produced by passing a variable of type `Tree` to
+the `mnFile` monitor in an MCMC or MCMCMC run.)");
+	help_strings[string("TraceTree")][string("details")] = string(R"(Individual trees can be accessed as follows:
 
-- `getTree(n)`: returns the `n`th entry of the `TraceTree` object.
-- `getTrees()`: returns a vector of trees from the `TraceTree` object, after excluding the burnin.)");
+- `getTree(n)`: returns the `n`th tree.
+- `getTree(n, post=TRUE)`: returns the `n`th post-burnin tree.
+- `getTrees()`: returns the entire vector of post-burnin trees.
+      
+The methods `.computeEntropy()`, `.computePairwiseRFDistances`,
+`.getUniqueTrees()`, `.isTreeCovered()`, and `.summarize()` first construct
+a credible set of trees, and then perform the corresponding operation on this
+set. A credible set is constructed by ordering all trees in the trace by their
+posterior probability, and adding them to the set one by one until the included
+trees accumulate the desired probability specified by `credibleTreeSetSize`.
+By default, this argument is set to 0.95; to perform a given operation on all
+trees in the trace, set it to 1.
+
+The credible set methods also take a `probabilistic` argument that determines
+how the credible set should be constructed when it is not possible to obtain a
+cumulative probability precisely equal to `credibleTreeSetSize`. This will be
+the case when the probability p of the first n trees falls short of it, and the
+probability (p + q) of the first n + 1 trees exceeds it (Huelsenbeck & Rannala
+2004). If `probabilistic=TRUE` (default), the (n + 1)-th tree will be included
+in the set with probability (`credibleTreeSetSize` - p) / q. It will always be
+included if `probabilistic=FALSE`. Note that when `probabilistic=TRUE`, the
+methods in question may yield different results under different random seeds,
+and they may even construct an empty credible set a certain fraction of the
+time if the trace is dominated by a particular tree whose probability exceeds
+`credibleTreeSetSize`. An exception is thrown when an empty credible set is
+encountered by a method that does not expect one.)");
 	help_strings[string("TraceTree")][string("example")] = string(R"(# read a tree trace and ignore the first 10 samples
 thinned_trees = readTreeTrace("my_filename.tree", offset = 10, thinning = 10, burnin = 0.5)
 
@@ -179,6 +204,7 @@ thinned_trees.getTree(2) # Returns the 21st tree (offset + 1 + thinning) in the 
 
 thinned_trees.getTrees()[1] # Returns the first sampled tree after excluding the burnin fraction)");
 	help_strings[string("TraceTree")][string("name")] = string(R"(TraceTree)");
+	help_references[string("TraceTree")].push_back(RbHelpReference(R"(Huelsenbeck JP, Rannala B (2004). Frequentist properties of Bayesian posterior probabilities of phylogenetic trees under simple and complex substitution models. Systematic Biology, 53(6):904-913.)",R"(10.1080/10635150490522629)",R"(https://academic.oup.com/sysbio/article-abstract/53/6/904/1651356 )"));
 	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(mnFile)"));
 	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(readAncestralStateTreeTrace)"));
 	help_arrays[string("TraceTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
@@ -219,6 +245,37 @@ c := append(a,b))");
 	help_strings[string("append")][string("name")] = string(R"(append)");
 	help_arrays[string("append")][string("see_also")].push_back(string(R"(rep)"));
 	help_strings[string("append")][string("title")] = string(R"(Append a value)");
+	help_arrays[string("args")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
+	help_arrays[string("args")][string("authors")].push_back(string(R"(Ben Redelings)"));
+	help_strings[string("args")][string("description")] = string(R"(When RevBayes is called from the command line, any tokens following the name
+of a script file (or an `-e` expression) are treated as arguments to the script
+(or to the expression) and stored in the `args` vector.)");
+	help_strings[string("args")][string("details")] = string(R"(If no command-line arguments are supplied, `args` is initialized to an empty
+vector. Like regular RevBayes vectors, `args` uses 1-based indexing (i.e., the
+first element is accessed using `args[1]`), but unlike a regular vector, it can
+hold elements of different types.)");
+	help_strings[string("args")][string("example")] = string(R"(# args is initialized to an empty vector if no command-line arguments are supplied.
+# Assume RevBayes was called as follows: ./rb
+args                          # returns [ ]
+args.size()                   # returns 0
+
+# However, args is not a reserved keyword. We can remove it from the workspace or overwrite it:
+clear(args)
+args <- readTrees("primates.tree")[1]  # args is now a tree
+
+# To illustrate how args works, run RevBayes in interactive mode with an empty expression:
+# ./rb -i -e "" 1 5
+args[1] + args[2]             # returns 6
+
+# Unlike regular vectors, args can hold values of different types. Call RevBayes as follows:
+# ./rb -i -e "" 1 5 2 "Hello " "world"
+print(args[4] + args[5])      # prints "Hello world"
+type(args[4])                 # returns String
+
+(args[1] + args[2])^args[3]   # returns 36
+type(args[1])                 # returns Natural)");
+	help_strings[string("args")][string("name")] = string(R"(args)");
+	help_strings[string("args")][string("title")] = string(R"(Vector of command-line arguments)");
 	help_strings[string("beca")][string("name")] = string(R"(beca)");
 	help_strings[string("branchScoreDistance")][string("name")] = string(R"(branchScoreDistance)");
 	help_arrays[string("ceil")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -4289,47 +4346,47 @@ a # this will be the same as above!)");
 The currently available keys and their associated values are as follows:
 
     lineWidth=<integer>          Screen width when printing (in characters).
-        
+
         DEFAULT: 160
-    
+
     outputPrecision=<integer>    How many significant digits to print for the values of model graph nodes.
-        
+
         DEFAULT: 7
-    
-    printNodeIndex=<true,false>  Print the node indices of a tree as annotations?
-        
-        DEFAULT: true
-    
-    useScaling=<true,false>      Should the partial likelihoods in continuous-time Markov chain (CTMC) models be scaled
+
+    printNodeIndex=<TRUE,FALSE>  Print the node indices of a tree as annotations?
+
+        DEFAULT: TRUE
+
+    useScaling=<TRUE,FALSE>      Should the partial likelihoods in continuous-time Markov chain (CTMC) models be scaled
                                  to avoid underflow?
-        DEFAULT: true
-    
+        DEFAULT: TRUE
+
     scalingDensity=<integer>     If so, scale CTMC likelihoods every n-th node (min = 1).
-        
+
         DEFAULT: 1
-    
+
     tolerance=<numeric>          Tolerance for comparing doubles.
-        
+
         DEFAULT: 10e-10
-    
+
     debugMCMC=<0,1>              How much work to perform to check MCMC?
-        
+
         0: MCMC run without checks.
         1: MCMC run with additional checks at extra CPU time cost.
-        
+
         DEFAULT: 0
-    
+
     logMCMC=<0,1,2,3,4>          How much logging to perform when checking MCMC? NOTE: This option serves for debugging and
                                  should be considered experimental. The exact meaning of individual values may be subject
                                  to frequent changes.
-        
+
         0: No information on individual moves written out.
         1 or higher: Writes out the generation, within-generation position, and name for each move.
         2 or higher: Also writes out posterior, likelihood, prior, and Hastings ratios, and if log likelihood = -Inf or NaN,
                      writes out why this is the case.
         3 or higher: Writes out each changed probability density and the name of the corresponding model graph node.
         4: Writes out additional details about the mvSlice move (if present).
-        
+
         DEFAULT: 0)");
 	help_strings[string("setOption")][string("example")] = string(R"(# compute the absolute value of a real number
 getOption("linewidth")

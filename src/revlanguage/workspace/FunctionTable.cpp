@@ -686,10 +686,37 @@ void FunctionTable::printValue(std::ostream& o, bool env) const
         std::ostringstream s("");
 
         s << i->first << " = ";
-        
         i->second->printValue( s, true );
         
-        o << StringUtilities::oneLiner( s.str(), 70 ) << std::endl;
+        // nice printing with arguments aligned
+        size_t offset = i->first.size() + 3;
+        std::string temp = "";
+        std::string repl = "";
+        
+        // remove the whitespace *before* the left parenthesis (look backward, while constructing the string)
+        for (size_t i = 0; i < s.str().size(); ++i)
+        {
+            temp += s.str()[i];
+            
+            if (s.str()[i] == '(')
+            {
+                temp[i - 1] = *repl.c_str();
+            }
+        }
+        
+        // remove the newline and whitespace *after* a comma (look forward, after the string has been constructed)
+        for (size_t i = 0; i < s.str().size(); ++i)
+        {
+            if (s.str()[i] == ',')
+            {
+                for (size_t j = 1; j < offset; ++j)
+                {
+                    temp[i + j] = *repl.c_str();
+                }
+            }
+        }
+        
+        o << temp << std::endl;
     }
     
     // Print the parent table too

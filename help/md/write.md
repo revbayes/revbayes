@@ -20,5 +20,5 @@ writeFasta
 # define RevObject to write 
     x <- matrix([[1, 1],[1, 1]])
 # write to CSV file
-    write(x, "/path/to/file/filenmae.csv", false, ",")
+    write(x, "/path/to/file/filename.csv", false, ",")
 ## references
