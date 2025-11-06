@@ -100,7 +100,7 @@ RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Distrib
         }
     }
     
-    RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType> *func = new RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType>(this->funcName, o, arg_nodes);
+    RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType> *func = new RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType>(this->func_name, o, arg_nodes);
     func->setForceUpdates( force_updates );
     
     return func;
