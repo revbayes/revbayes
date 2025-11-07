@@ -363,3 +363,29 @@ Samples         Posterior       Clade
 55.0000         0.1222          {B, Hm, Hp, N}
 
 
+
+###################
+# Test .methods() #
+###################
+
+Available methods for an object of type TraceTree:
+
+cladeProbability = cladeProbability(Clade<any> clade, Bool<any> verbose)
+computeEntropy = computeEntropy(Probability<any> credibleTreeSetSize, Bool<any> probabilistic, Bool<any> verbose)
+computePairwiseRFDistances = computePairwiseRFDistances(Probability<any> credibleTreeSetSize, Bool<any> probabilistic, Bool<any> verbose)
+computeTreeLengths = computeTreeLengths()
+getBurnin = getBurnin()
+getNumberSamples = getNumberSamples(Bool<any> post)
+getTMRCA = getTMRCA(Clade<any> clade, Bool<any> strict, Bool<any> stem)
+getTopologyFrequency = getTopologyFrequency(Tree<any> tree, Bool<any> verbose)
+getTree = getTree(Natural<any> index, Bool<any> post)
+getTrees = getTrees()
+getUniqueClades = getUniqueClades(Probability<any> minCladeProbability, Bool<any> nonTrivial, Bool<any> verbose)
+getUniqueTrees = getUniqueTrees(Probability<any> credibleTreeSetSize, Bool<any> probabilistic, Bool<any> verbose)
+isTreeCovered = isTreeCovered(Tree<any> tree, Probability<any> credibleTreeSetSize, Bool<any> probabilistic, Bool<any> verbose)
+jointCladeProbability = jointCladeProbability(Clade[]<any> clades, Bool<any> verbose)
+methods = methods()
+setBurnin = setBurnin(Probability|Integer<any> burnin)
+setOutgroup = setOutgroup(Clade<any> clade)
+size = size(Bool<any> post)
+summarize = summarize(Probability<any> credibleTreeSetSize, Probability<any> minCladeProbability, Bool<any> probabilistic, Bool<any> verbose)
