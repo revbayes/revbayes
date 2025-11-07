@@ -86,7 +86,7 @@ steppingStoneSampler
 - citation: Gelman A, Meng X-L (1998). Simulating normalizing constants: from importance sampling to bridge sampling to path sampling. Statistical Science, 13(2):163-185.
   doi: 10.1214/ss/1028905934
   url: https://www.jstor.org/stable/2676756
-- citation: Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195–207.
+- citation: Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195-207.
   doi: 10.1080/10635150500433722
   url: https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800
 - citation: Ogata Y (1989). A Monte Carlo method for high dimensional integration. Numerische Mathematik, 55:137-157.

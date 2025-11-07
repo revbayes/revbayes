@@ -912,11 +912,12 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std:
     std::vector<double> old_par = par;
 
     // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
       // Where is this global time interval in the variable's timeline?
       size_t idx = findIndex(global_timeline[i],par_times);
-      par[i] = old_par[idx];
+      par.push_back( old_par[idx] );
     }
 
 }
