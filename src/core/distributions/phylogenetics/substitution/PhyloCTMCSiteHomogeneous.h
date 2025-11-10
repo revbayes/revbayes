@@ -364,7 +364,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
         site_indices = this->getIncludedSiteIndices();
     
     double obs_error_prob = 0.0;
-    Simplex obs_error_freqs = Simplex(2);
+    // Basanta: Initialize with a dummy simplex; overwritten by the model if enabled.
+    Simplex obs_error_freqs = Simplex(this->num_chars);
     if ( this->using_observation_error )
     {
         obs_error_prob  = this->observation_error_probability->getValue();
@@ -518,7 +519,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                             p_site_mixture[c1] = tmp;
                         }
                         // store the likelihood
-                        p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
+                        // p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
 
                     }
 
