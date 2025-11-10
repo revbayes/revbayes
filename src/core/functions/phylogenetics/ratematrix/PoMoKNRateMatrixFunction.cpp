@@ -9,7 +9,7 @@ PoMoKNRateMatrixFunction::PoMoKNRateMatrixFunction(   long num_all,
                                                       const TypedDagNode< double > *eff,
                                                       const TypedDagNode< RbVector<double> > *mut,
                                                       const TypedDagNode< RbVector<double> > *sel ) :
-TypedFunction<RateGenerator>( new RateMatrix_PoMoKN( computeNumStates(num_all, virt), num_all, virt, virt, computeNumMutRates( num_all ) ) ),
+TypedFunction<RateGenerator>( new RateMatrix_PoMoKN( computeNumStates(num_all, virt), num_all, virt, (eff != NULL ? eff->getValue() : virt), computeNumMutRates( num_all ) ) ),
 num_alleles( num_all ),
 virt_pop_size( virt ),
 eff_pop_size( eff ),
