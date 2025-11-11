@@ -218,8 +218,8 @@ RevBayesCore::RootRejectionSampleProposal<charType>& RevBayesCore::RootRejection
         delete rightProposal;
 
         removeNode( ctmc );
-        removeNode( q_map_site );
-        removeNode( q_map_sequence );
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
 
         ctmc                = p.ctmc;
         q_map_site          = p.q_map_site;
@@ -233,8 +233,8 @@ RevBayesCore::RootRejectionSampleProposal<charType>& RevBayesCore::RootRejection
         lambda              = p.lambda;
 
         addNode( ctmc );
-        addNode( q_map_site );
-        addNode( q_map_sequence );
+        addNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+        addNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
 
         nodeProposal  = p.nodeProposal->clone();
         leftProposal  = p.leftProposal->clone();
