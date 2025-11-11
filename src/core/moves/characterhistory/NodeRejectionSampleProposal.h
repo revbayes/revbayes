@@ -218,8 +218,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         delete rightProposal;
 
         removeNode( ctmc );
-        removeNode( q_map_site );
-        removeNode( q_map_sequence );
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
 
         ctmc                = p.ctmc;
         q_map_site          = p.q_map_site;
