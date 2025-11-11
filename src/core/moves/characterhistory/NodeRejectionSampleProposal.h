@@ -233,8 +233,8 @@ RevBayesCore::NodeRejectionSampleProposal<charType>& RevBayesCore::NodeRejection
         lambda              = p.lambda;
 
         addNode( ctmc );
-        addNode( q_map_site );
-        addNode( q_map_sequence );
+        addNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+        addNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
 
         nodeProposal  = p.nodeProposal->clone();
         leftProposal  = p.leftProposal->clone();
