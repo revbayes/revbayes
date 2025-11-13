@@ -984,36 +984,41 @@ Tree* TreeSummary::mrTree( AnnotationReport report, double cutoff, bool verbose,
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples | views::reverse)
+    for (const auto& [split, count]: clade_samples | views::reverse)
     {
-        float cladeFreq = count / totalSamples;
+        // get a clade from the split in clade_samples
+        Clade clade = Clade(traces.front()->objectAt(0).getTaxa(), split.first);
+
+        // set its MRCA
+        clade.setMrca(split.second);
+        double cladeFreq = cladeProbability(clade, false, differentiate_SAs);
         if (cladeFreq < cutoff)  break;
 
         //make sure we have an internal node
-        size_t clade_size = clade.first.count();
+        size_t clade_size = split.first.count();
         if (clade_size == 1 || clade_size == tipNames.size())  continue;
 
         //find parent node
         std::vector<TopologyNode*> children;
         RbBitSet tmp(tipNames.size());
-        TopologyNode* parentNode = findParentNode(*root, clade, children, tmp );
+        TopologyNode* parentNode = findParentNode(*root, split, children, tmp );
 
         //skip this clade if it is not compatible
         if (not parentNode) continue;
 
         // find the mrca child(ren) if they exist
         std::vector<TopologyNode*> mrca;
-        if ( not clade.second.empty() )
+        if ( not split.second.empty() && differentiate_SAs)
         {
             for (auto& child: children)
             {
                 // Add the child to the mrca if it's a tip and its taxon is in clade.second
-                if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
+                if ( child->isTip() && std::find(split.second.begin(), split.second.end(), child->getTaxon() ) != split.second.end() )
                     mrca.push_back(child);
             }
 
             // if we couldn't find all the mrcas, then this clade is not compatible
-            if ( mrca.size() != clade.second.size() )
+            if ( mrca.size() != split.second.size() )
             {
                 continue;
             }
@@ -1066,6 +1071,16 @@ Tree* TreeSummary::mrTree( AnnotationReport report, double cutoff, bool verbose,
 
     //now put the tree together
     consensusTree->setRoot(root, true);
+
+    // deal with SAs when differentiate_SAs is false
+    if (!differentiate_SAs && !sampled_ancestor_counts.empty()) {
+        for (auto& n : consensusTree->getNodes()) {
+            // if it's a tip and it's a sampled ancestor more than cutoff% of the time, make it an SA here
+            if (n->isTip() && sampled_ancestor_counts[n->getTaxon()] / sampleSize(true) >= cutoff) {
+                n->setSampledAncestor(true);
+            } 
+        }
+    }
 
     report.conditional_clade_ages  = false;
     report.conditional_clade_probs = false;
