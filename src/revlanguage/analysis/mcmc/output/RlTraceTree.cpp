@@ -504,7 +504,7 @@ void TraceTree::initMethods( void )
     
     ArgumentRules* cladeProbArgRules = new ArgumentRules();
     cladeProbArgRules->push_back( new ArgumentRule("clade", Clade::getClassTypeSpec(), "The clade whose probability is to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
-    cladeProbArgRules->push_back( new ArgumentRule("differentiateMRCAs", RlBoolean::getClassTypeSpec(), "Should we treat clades of identical composition as different if they differ in their most recent common ancestor?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
+    cladeProbArgRules->push_back( new ArgumentRule("differentiateMRCAs", RlBoolean::getClassTypeSpec(), "Should we treat clades of identical composition as different if they differ in their most recent common ancestor?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     cladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "cladeProbability", Probability::getClassTypeSpec(), cladeProbArgRules) );
     
