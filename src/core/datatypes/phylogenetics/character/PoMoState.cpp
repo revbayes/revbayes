@@ -455,7 +455,6 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             state.reset();
             state_index = index_first_allele;
             state.set(state_index);
-            std::cout << "  Index: " << state_index << "\n";
 
 
         }
@@ -486,7 +485,6 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             state.reset();
             state_index = index_first_allele;
             state.set(state_index);
-            std::cout << "  Index: " << state_index << "\n";
 
         }
         else if ( weighting == HYPERGEOMETRIC )
@@ -505,7 +503,6 @@ void PoMoState::setState(const std::vector<size_t> &counts)
             state.reset();
             state_index = index_first_allele;
             state.set(state_index);
-            std::cout << "  Index: " << state_index << "\n";
         }
         else
         {
@@ -716,7 +713,6 @@ void PoMoState::setStateNone(size_t total_count, size_t count_first_allele, size
         state_index = edge_first_state + virtual_population_size - count_first_allele - 1;
     }
     state.set(state_index);
-    std::cout << "  Index: " << state_index << "\n";
 
 }
 
@@ -763,7 +759,6 @@ void PoMoState::setStateFixed(size_t total_count, size_t count_first_allele, siz
     index_single_state = state_index;
     num_observed_states = 1;
     state.set(state_index);
-    std::cout << "  Index: " << state_index << "\n";
 
 }
 
@@ -831,7 +826,6 @@ void PoMoState::setStateSampled(size_t total_count, size_t count_first_allele, s
     num_observed_states = 1;
     state.set(state_index);
 
-    std::cout << "  Index: " << state_index << "\n";
 
 }
 

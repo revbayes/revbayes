@@ -651,7 +651,6 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
             for (auto site_index: site_indices)
             {
                 DiscreteCharacterState &c = taxon_data.getCharacter(site_index);
-                std::cout << "  Is weighted? : " << c.isWeighted() << "\n";
                 if ( c.isWeighted() ) return true;
             }
         }
@@ -986,7 +985,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             if ( ascertainment_bias_correction != AbstractAscertainmentBias::NONE )
             {
                 computeRootLikelihood( root_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset );
-                scale(root_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors);
+//                scale(root_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors);
             }
             
         }
@@ -2702,7 +2701,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
                 computeTipLikelihood(node, node_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_ambiguous_char_matrix, bias_char_matrix, bias_gap_matrix);
 
                 // rescale likelihood vector
-                scale(node_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors );
+//                scale(node_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors );
             }
         }
         else
@@ -2727,7 +2726,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
                 computeInternalNodeLikelihood(node, node_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset);
 
                 // rescale likelihood vector
-                scale(node_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors );
+//                scale(node_index, left_index, right_index, bias_partial_likelihoods, bias_active_likelihood_offset, bias_node_offset, bias_num_patterns, bias_mixture_offset, bias_per_node_site_log_scaling_factors );
             }
         }
 
@@ -3223,7 +3222,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resetAscertainmen
         charType abc_state = charType( num_chars );
         if ( template_state != NULL )
         {
-            charType abc_state = charType( *template_state );
+            abc_state = charType( *template_state );
         }
         
         // set state to the first state
