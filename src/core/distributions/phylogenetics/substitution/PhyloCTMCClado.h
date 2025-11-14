@@ -806,7 +806,7 @@ std::vector<charType> RevBayesCore::PhyloCTMCClado<charType>::drawAncestralState
 		}
 
         // create the character
-        charType c = charType( this->template_state );
+        charType c = charType( *this->template_state );
         
 		// sum the likelihoods for each character state
 		const std::vector<double> siteMarginals = (*marginals)[pattern];
@@ -967,9 +967,9 @@ void RevBayesCore::PhyloCTMCClado<charType>::drawJointConditionalAncestralStates
 
         // sample char from p
         bool stop = false;
-        charType ca = charType( this->template_state );
-        charType cl = charType( this->template_state );
-        charType cr = charType( this->template_state );
+        charType ca = charType( *this->template_state );
+        charType cl = charType( *this->template_state );
+        charType cr = charType( *this->template_state );
         
         double u = rng->uniform01() * sum;
 
@@ -1074,9 +1074,9 @@ void RevBayesCore::PhyloCTMCClado<charType>::recursivelyDrawJointConditionalAnce
         }
 
         // sample char from p
-        charType ca = charType( this->template_state );
-        charType cl = charType( this->template_state );
-        charType cr = charType( this->template_state );
+        charType ca = charType( *this->template_state );
+        charType cl = charType( *this->template_state );
+        charType cr = charType( *this->template_state );
         double u = rng->uniform01() * sum;
         for (it_s = sampleProbs.begin(); it_s != sampleProbs.end(); it_s++)
         {
@@ -1814,7 +1814,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::redrawValue( void )
         const std::vector< double > &stationary_freqs = freqs[perSiteRates[i] % freqs.size()];
         
         // create the character
-        charType c = charType( this->template_state );
+        charType c = charType( *this->template_state );
         c.setToFirstState();
 
         // draw the state

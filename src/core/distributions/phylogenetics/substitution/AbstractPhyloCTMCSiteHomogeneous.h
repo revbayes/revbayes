@@ -173,7 +173,8 @@ namespace RevBayesCore {
         virtual void                                                        computeRootLikelihoodsPerSiteRate( MatrixReal &rv ) const;
         virtual double                                                      sumRootLikelihood( void );
         virtual std::vector<size_t>                                         getIncludedSiteIndices();
-
+        virtual void                                                        resetAscertainmentBiasCorrection( void );
+        
         // members
         double                                                              ln_prob;
         double                                                              stored_ln_prob;
@@ -275,7 +276,7 @@ namespace RevBayesCore {
         bool                                                                store_internal_nodes;
         bool                                                                gap_match_clamped;
 
-        charType                                                            template_state;                                 //!< Template state used for ancestral state estimation. This makes sure that the state labels are preserved.
+        charType*                                                           template_state;                                 //!< Template state used for ancestral state estimation. This makes sure that the state labels are preserved.
 
         // containers for ancestral state/stochastic mapping functions
         bool                                                                has_ancestral_states = false;
@@ -369,7 +370,8 @@ data_pattern_block_start( 0 ),
 data_pattern_block_end( data_num_patterns ),
 data_pattern_block_size( data_num_patterns ),
 store_internal_nodes( internal ),
-gap_match_clamped( gapmatch )
+gap_match_clamped( gapmatch ),
+template_state( new charType() )
 {
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
@@ -386,61 +388,8 @@ gap_match_clamped( gapmatch )
     pmat_dirty_nodes            =  std::vector<bool>(num_nodes, true);
     pmatrices                   =  std::vector<TransitionProbabilityMatrix>(activePmatrixOffset * 2, TransitionProbabilityMatrix(num_chars));
 
-    // now fudge a dataset for the ascertainment bias correction
-    bias_num_sites = 0;
-    if ( ascertainment_bias_correction == AbstractAscertainmentBias::VARIABLE )
-    {
-        // our idea here is to build a character matrix with all possible invariant states
-        // therefore, we need to get all possible states and add one column per state to our data matrix
-        size_t num_tips = tau->getValue().getNumberOfTips();
-        bias_ambiguous_char_matrix.resize(num_tips);
-        bias_char_matrix.resize(num_tips);
-        bias_gap_matrix.resize(num_tips);
-        
-        // get a dummy character for the ascertainment bias correction
-        charType abc_state = charType( num_chars );
-//        charType abc_state = template_state;
-        
-        // set state to the first state
-        abc_state.setToFirstState();
-        size_t num_states_total = abc_state.getNumberOfStates();
-        for ( size_t i=0; i<num_states_total; ++i )
-        {
-            // check if the current set state is included in as a ascertainment bias correction state
-            if ( abc_state.isStateIncludedInAscertainmentBiasCorrection() == true )
-            {
-                // now add this state for all tips to our data matrix
-                for (size_t j=0; j<num_tips; ++j)
-                {
-                    bias_ambiguous_char_matrix[j].push_back( abc_state.getState() );
-                    bias_char_matrix[j].push_back( abc_state.getStateIndex() );
-                    bias_gap_matrix[j].push_back( false );
-                } // end-for over all tips
-                
-                ++bias_num_sites;
-            } // end-if this state was included
-            
-            // move to the next state (only if there is another one)
-            if ( i < (num_states_total-1) )
-            {
-                ++abc_state;
-            }
-        }
-
-    }
-    bias_per_node_site_log_scaling_factors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(bias_num_sites, 0.0) ) );
-    bias_num_patterns   = bias_num_sites;
-    bias_site_pattern   = std::vector<size_t>(bias_num_sites, 0);
-    bias_pattern_counts = std::vector<size_t>(bias_num_sites, 1);
-    for (size_t i=0; i<bias_num_sites; ++i)
-    {
-        bias_site_pattern[i] = i;
-    }
-    
-    bias_active_likelihood_offset   =  num_nodes * num_site_mixtures * bias_num_sites * num_chars;
-    bias_node_offset                =              num_site_mixtures * bias_num_sites * num_chars;
-    bias_mixture_offset             =                                  bias_num_sites * num_chars;
-
+    // now fudge a dataset for ascertainment bias correction
+    resetAscertainmentBiasCorrection();
 
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -516,7 +465,7 @@ data_pattern_block_end( n.data_pattern_block_end ),
 data_pattern_block_size( n.data_pattern_block_size ),
 store_internal_nodes( n.store_internal_nodes ),
 gap_match_clamped( n.gap_match_clamped ),
-template_state( n.template_state ),
+template_state( new charType(*n.template_state) ),
 has_ancestral_states( n.has_ancestral_states ),
 sampled_site_rate_component( n.sampled_site_rate_component ),
 sampled_site_matrix_component( n.sampled_site_matrix_component )
@@ -595,6 +544,8 @@ RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::~AbstractPhyloCTMCSite
     delete [] data_partial_likelihoods;
     delete [] bias_partial_likelihoods;
     delete [] marginal_likelihoods;
+    
+    delete template_state;
 }
 
 
@@ -974,12 +925,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
     
     // finally we resize the partial likelihood vectors to the new pattern counts
     resizeLikelihoodVectors();
-    
-    //std::cerr << "#Sites(data):\t\t\t" << data_num_sites << std::endl;
-    //std::cerr << "#Patterns(data):\t\t" << data_num_patterns << std::endl;
-    //std::cerr << "#Sites(bias):\t\t\t" << bias_num_sites << std::endl;
-    //std::cerr << "#Patterns(bias):\t\t" << bias_num_patterns << std::endl;
-    
 
 }
 
@@ -1815,7 +1760,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     {
 
         // create the character
-        charType c = charType( template_state );
+        charType c = charType( *template_state );
 
         // sum to sample
         double sum = 0.0;
@@ -2009,8 +1954,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawStochasticCha
     while (!success && n_draws != max_draws)
     {
         // first draw joint ancestral states
-        std::vector<std::vector<charType> > start_states(this->num_nodes, std::vector<charType>(this->data_num_sites, template_state));
-        std::vector<std::vector<charType> > end_states(this->num_nodes, std::vector<charType>(this->data_num_sites, template_state));
+        std::vector<std::vector<charType> > start_states(this->num_nodes, std::vector<charType>(this->data_num_sites, *template_state));
+        std::vector<std::vector<charType> > end_states(this->num_nodes, std::vector<charType>(this->data_num_sites, *template_state));
         this->drawJointConditionalAncestralStates( start_states, end_states );
 
         // save the character history for the root
@@ -2603,7 +2548,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
         }
 
         // sample char from p
-        charType c = charType( template_state );
+        charType c = charType( *template_state );
         double u = rng->uniform01() * sum;
         for (size_t state = 0; state < this->num_chars; state++)
         {
@@ -2707,7 +2652,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
             }
 
             // sample char from p
-            charType c = charType( template_state );
+            charType c = charType( *template_state );
             double u = GLOBAL_RNG->uniform01() * sum;
             for (size_t state = 0; state < this->num_chars; state++)
             {
@@ -3260,6 +3205,71 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
 
 
 template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resetAscertainmentBiasCorrection( void )
+{
+    
+    // now fudge a dataset for the ascertainment bias correction
+    bias_num_sites = 0;
+    if ( ascertainment_bias_correction == AbstractAscertainmentBias::VARIABLE )
+    {
+        // our idea here is to build a character matrix with all possible invariant states
+        // therefore, we need to get all possible states and add one column per state to our data matrix
+        size_t num_tips = tau->getValue().getNumberOfTips();
+        bias_ambiguous_char_matrix.resize(num_tips);
+        bias_char_matrix.resize(num_tips);
+        bias_gap_matrix.resize(num_tips);
+        
+        // get a dummy character for the ascertainment bias correction
+        charType abc_state = charType( num_chars );
+        if ( template_state != NULL )
+        {
+            charType abc_state = charType( *template_state );
+        }
+        
+        // set state to the first state
+        abc_state.setToFirstState();
+        size_t num_states_total = abc_state.getNumberOfStates();
+        for ( size_t i=0; i<num_states_total; ++i )
+        {
+            // check if the current set state is included in as a ascertainment bias correction state
+            if ( abc_state.isStateIncludedInAscertainmentBiasCorrection() == true )
+            {
+                // now add this state for all tips to our data matrix
+                for (size_t j=0; j<num_tips; ++j)
+                {
+                    bias_ambiguous_char_matrix[j].push_back( abc_state.getState() );
+                    bias_char_matrix[j].push_back( abc_state.getStateIndex() );
+                    bias_gap_matrix[j].push_back( false );
+                } // end-for over all tips
+                
+                ++bias_num_sites;
+            } // end-if this state was included
+            
+            // move to the next state (only if there is another one)
+            if ( i < (num_states_total-1) )
+            {
+                ++abc_state;
+            }
+        }
+
+    }
+    bias_per_node_site_log_scaling_factors = std::vector<std::vector< std::vector<double> > >(2, std::vector<std::vector<double> >(num_nodes, std::vector<double>(bias_num_sites, 0.0) ) );
+    bias_num_patterns   = bias_num_sites;
+    bias_site_pattern   = std::vector<size_t>(bias_num_sites, 0);
+    bias_pattern_counts = std::vector<size_t>(bias_num_sites, 1);
+    for (size_t i=0; i<bias_num_sites; ++i)
+    {
+        bias_site_pattern[i] = i;
+    }
+    
+    bias_active_likelihood_offset   =  num_nodes * num_site_mixtures * bias_num_sites * num_chars;
+    bias_node_offset                =              num_site_mixtures * bias_num_sites * num_chars;
+    bias_mixture_offset             =                                  bias_num_sites * num_chars;
+
+}
+
+
+template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::reInitialized( void )
 {
 
@@ -3622,12 +3632,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
         throw RbException(ss.str());
     }
 
-    if (v->getDataType() != this->template_state.getDataType() )
+    if ( this->template_state != NULL && v->getDataType() != this->template_state->getDataType() )
     {
-      // There is a mismatch between the data type of the data matrix and the data type of the CTMC.
-      std::stringstream ss;
-      ss << "The data type of the data matrix ("<< v->getDataType() <<") differs from that of the PhyloctMC object ("<< this->template_state.getDataType() <<")." << std::endl;
-      throw RbException(ss.str());
+        // There is a mismatch between the data type of the data matrix and the data type of the CTMC.
+        std::stringstream ss;
+        ss << "The data type of the data matrix ("<< v->getDataType() <<") differs from that of the PhyloctMC object ("<< this->template_state->getDataType() <<")." << std::endl;
+        throw RbException(ss.str());
     }
 
     // delegate to the parent class
@@ -3643,11 +3653,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
     this->compress();
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
-    template_state.setToFirstState();
-    template_state.setGapState( false );
-    template_state.setMissingState( false );
-
+    delete template_state;
+    template_state = new charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
+    template_state->setToFirstState();
+    template_state->setGapState( false );
+    template_state->setMissingState( false );
+    
+    resetAscertainmentBiasCorrection();
 }
 
 
