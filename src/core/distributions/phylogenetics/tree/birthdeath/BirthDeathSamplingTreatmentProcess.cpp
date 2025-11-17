@@ -881,9 +881,9 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParameterVect
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
         bool global_time_is_variable_time = false;
-        for (size_t j=0; i<par_times.size(); ++j)
+        for (size_t j=0; j<par_times.size(); ++j)
         {
-            if ( fabs(par_times[j] - global_timeline[j]) < DBL_EPSILON )
+            if ( fabs(par_times[j] - global_timeline[i]) < DBL_EPSILON )
             {
                 // time is in variable's timeline
                 par[i] = old_par[j];
