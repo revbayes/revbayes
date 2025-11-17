@@ -19,6 +19,7 @@
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
 
 using namespace RevBayesCore;
 
@@ -29,9 +30,6 @@ StartingTreeSimulator::StartingTreeSimulator( void )
 }
 
 
-/**
- *
- */
 Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const std::vector<Clade> &constraints ) const
 {
     std::vector<Clade> my_constraints = constraints;
@@ -231,8 +229,25 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
         simulateClade(nodes_in_clade, c.getAge());
-        TopologyNode *remaining_node = *(nodes_in_clade.begin());
-        nodes.push_back( remaining_node );
+        
+        // Get the remaining node deterministically by sorting the set
+        std::vector<TopologyNode*> remaining_nodes(nodes_in_clade.begin(), nodes_in_clade.end());
+        TopologyNode *remaining_node = nullptr;
+        
+        if (remaining_nodes.size() > 0) {
+            // Sort by smallest tip name in subtree for deterministic selection
+            std::sort(remaining_nodes.begin(), remaining_nodes.end(), [](const TopologyNode* a, const TopologyNode* b)
+                      {
+                return TreeUtilities::getSmallestTipName(a) < TreeUtilities::getSmallestTipName(b);
+            });
+            
+            remaining_node = remaining_nodes[0];
+            nodes.push_back( remaining_node );
+        }
+        
+        if (remaining_node == nullptr) {
+            throw RbException("No remaining node after simulateClade");
+        }
         
         std::vector<Taxon> v_taxa;
         remaining_node->getTaxa(v_taxa);
@@ -358,25 +373,40 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, doubl
             }
         } while ( valid == false );
         
-        size_t left_index = size_t( current_nodes.size() * rng->uniform01() );
-        std::set<TopologyNode*>::iterator left_it = current_nodes.begin();
-        std::advance(left_it, left_index);
-        TopologyNode *left = *left_it;
-        current_nodes.erase( left_it );
+        // Convert set to sorted vector to ensure node selection is deterministic
+        std::vector<TopologyNode*> sorted_nodes(current_nodes.begin(), current_nodes.end());
+        std::sort(sorted_nodes.begin(), sorted_nodes.end(), [](const TopologyNode* a, const TopologyNode* b)
+        {
+            return TreeUtilities::getSmallestTipName(a) < TreeUtilities::getSmallestTipName(b);
+        });
         
-        size_t right_index = size_t( current_nodes.size() * rng->uniform01() );
-        std::set<TopologyNode*>::iterator right_it = current_nodes.begin();
-        std::advance(right_it, right_index);
-        TopologyNode *right = *right_it;
-        current_nodes.erase( right_it );
-        
+        size_t left_index = size_t( sorted_nodes.size() * rng->uniform01() );
+        TopologyNode *left = sorted_nodes[left_index];
+        sorted_nodes.erase( sorted_nodes.begin() + left_index );
+
+        size_t right_index = size_t( sorted_nodes.size() * rng->uniform01() );
+        TopologyNode *right = sorted_nodes[right_index];
+        sorted_nodes.erase( sorted_nodes.begin() + right_index );
+
+        // Make the left/right assignment deterministic to ensure that fillNodesByPhylogeneticTraversal() will visit the
+        // children in consistent order
         TopologyNode *parent = new TopologyNode();
-        parent->addChild( left );
-        parent->addChild( right );
+        
+        if (TreeUtilities::getSmallestTipName(left) < TreeUtilities::getSmallestTipName(right)) {
+            parent->addChild( left );
+            parent->addChild( right );
+        } else {
+            parent->addChild( right );
+            parent->addChild( left );
+        }
+        
         left->setParent( parent );
         right->setParent( parent );
-        
         parent->setAge( sim_age );
+        
+        // Update current_nodes set with remaining nodes plus new parent
+        current_nodes.clear();
+        current_nodes.insert(sorted_nodes.begin(), sorted_nodes.end());
         current_nodes.insert( parent );
 
         --j;
