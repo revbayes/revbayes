@@ -29,6 +29,13 @@ if(!a)
 	help_strings[string("CharacterHistoryRateModifier")][string("name")] = string(R"(CharacterHistoryRateModifier)");
 	help_strings[string("CladogeneticProbabilityMatrix")][string("name")] = string(R"(CladogeneticProbabilityMatrix)");
 	help_strings[string("CladogeneticSpeciationRateMatrix")][string("name")] = string(R"(CladogeneticSpeciationRateMatrix)");
+	help_arrays[string("ConditionalPosteriorOrdinate")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("ConditionalPosteriorOrdinate")][string("name")] = string(R"(ConditionalPosteriorOrdinate)");
+	help_references[string("ConditionalPosteriorOrdinate")].push_back(RbHelpReference(R"(Lewis PO, Xie W, Chen M-H, Fan Y, Kuo L (2014). Posterior predictive Bayesian phylogenetic model selection. Systematic Biology, 63(3):309-321.)",R"(10.1093/sysbio/syt068)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC3985471/pdf/syt068.pdf )"));
+	help_references[string("ConditionalPosteriorOrdinate")].push_back(RbHelpReference(R"(Lartillot N (2023). Identifying the best approximating model in Bayesian phylogenetics: Bayes factors, cross-validation or wAIC? Systematic Biology, 72(3):616-638.)",R"(10.1093/sysbio/syad004)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC10276628/pdf/syad004.pdf )"));
+	help_arrays[string("ConditionalPosteriorOrdinate")][string("see_also")].push_back(string(R"(pathSampler)"));
+	help_arrays[string("ConditionalPosteriorOrdinate")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
+	help_strings[string("ConditionalPosteriorOrdinate")][string("title")] = string(R"(Conditional posterior ordinate)");
 	help_strings[string("ContinuousCharacterData")][string("name")] = string(R"(ContinuousCharacterData)");
 	help_strings[string("CorrespondenceAnalysis")][string("name")] = string(R"(CorrespondenceAnalysis)");
 	help_strings[string("DistanceMatrix")][string("name")] = string(R"(DistanceMatrix)");
@@ -1491,6 +1498,11 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnSoftBoundUniformNormal")][string("name")] = string(R"(dnSoftBoundUniformNormal)");
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnUniform)"));
 	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Softbound Uniform Distribution with Normal distributed tails.)");
+	help_arrays[string("dnStairwayPlot")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("dnStairwayPlot")][string("name")] = string(R"(dnStairwayPlot)");
+	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Liu X, Fu Y-X (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 47:555-559.)",R"(10.1038/ng.3254)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC4414822/pdf/nihms-668186.pdf )"));
+	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Höhna S, Catalán A (2025). Bayesian StairwayPlot for inferring single population demographic histories from site frequency spectra. Molecular Ecology Resources, 25(6):e14087.)",R"(10.1111/1755-0998.14087)",R"(https://onlinelibrary.wiley.com/doi/pdf/10.1111/1755-0998.14087 )"));
+	help_strings[string("dnStairwayPlot")][string("title")] = string(R"(StairwayPlot distribution)");
 	help_arrays[string("dnStudentT")][string("authors")].push_back(string(R"(Wade Dismukes and Kevin Quinteros)"));
 	help_strings[string("dnStudentT")][string("description")] = string(R"(The student's t probability distribution.)");
 	help_strings[string("dnStudentT")][string("example")] = string(R"(# The most important use of the Student T distribution
@@ -1600,6 +1612,8 @@ floor(y) # returns -3)");
 	help_arrays[string("floor")][string("see_also")].push_back(string(R"(trunc)"));
 	help_strings[string("floor")][string("title")] = string(R"(The floor function.)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
+	help_arrays[string("fnBSPInterval")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("fnBSPInterval")][string("name")] = string(R"(fnBSPInterval)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
 	help_strings[string("fnBinaryMutationCoalescentRateMatrix")][string("name")] = string(R"(fnBinaryMutationCoalescentRateMatrix)");
 	help_strings[string("fnBiogeoDE")][string("name")] = string(R"(fnBiogeoDE)");
@@ -2995,6 +3009,10 @@ Non-simplex-valued vector random variables are untransformed.
 
 Add random variables to the move directly (e.g. branch_rates[1], not branch_rates).WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical covariance matrix.)");
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
+	help_arrays[string("mvAdaptiveRJSwitch")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvAdaptiveRJSwitch")][string("name")] = string(R"(mvAdaptiveRJSwitch)");
+	help_arrays[string("mvAdaptiveRJSwitch")][string("see_also")].push_back(string(R"(mvRJSwitch)"));
+	help_strings[string("mvAdaptiveRJSwitch")][string("title")] = string(R"(Adaptive Reversible-Jump (RJ) move)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
 	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution. A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
 	help_strings[string("mvBetaSimplex")][string("name")] = string(R"(mvBetaSimplex)");
@@ -3365,6 +3383,12 @@ moves.append( mvNNI(tree=timetree, weight=taxa.size()) ))");
 	help_strings[string("mvNodeTimeSlideUniform")][string("name")] = string(R"(mvNodeTimeSlideUniform)");
 	help_strings[string("mvNodeTimeSlideUniformAgeConstrained")][string("name")] = string(R"(mvNodeTimeSlideUniformAgeConstrained)");
 	help_strings[string("mvRJSwitch")][string("name")] = string(R"(mvRJSwitch)");
+	help_arrays[string("mvRandomCategoryWalk")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvRandomCategoryWalk")][string("name")] = string(R"(mvRandomCategoryWalk)");
+	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
+	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
+	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
+	help_strings[string("mvRandomCategoryWalk")][string("title")] = string(R"(Random walk on vector elements)");
 	help_strings[string("mvRandomDive")][string("description")] = string(R"(The multiplicative proposal of Dutta 2012, allows for long-distance moves.
 
 Useful for fat-tailed distributions, possibly for bimoodal distributions.
@@ -3385,6 +3409,7 @@ mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("mvRandomGeometricWalk")][string("name")] = string(R"(mvRandomGeometricWalk)");
+	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomCategoryWalk)"));
 	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
 	help_arrays[string("mvRandomGeometricWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
 	help_strings[string("mvRandomGeometricWalk")][string("title")] = string(R"(Geometric random walk)");
@@ -3403,6 +3428,7 @@ mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("mvRandomIntegerWalk")][string("name")] = string(R"(
 mvRandomIntegerWalk)");
+	help_arrays[string("mvRandomIntegerWalk")][string("see_also")].push_back(string(R"(mvRandomCategoryWalk)"));
 	help_arrays[string("mvRandomIntegerWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
 	help_arrays[string("mvRandomIntegerWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
 	help_strings[string("mvRandomIntegerWalk")][string("title")] = string(R"(Random walk on integers)");
@@ -3421,8 +3447,9 @@ mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("mvRandomNaturalWalk")][string("name")] = string(R"(
 mvRandomNaturalWalk)");
-	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
+	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomCategoryWalk)"));
 	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
+	help_arrays[string("mvRandomNaturalWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
 	help_strings[string("mvRandomNaturalWalk")][string("title")] = string(R"(Random walk on natural numbers)");
 	help_strings[string("mvRateAgeBetaShift")][string("description")] = string(R"(Resample a single node age and adjust neighboring rates to preserve distances)");
 	help_strings[string("mvRateAgeBetaShift")][string("details")] = string(R"(This move first selects a tree node that is not a tip or the root of the tree.

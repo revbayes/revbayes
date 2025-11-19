@@ -13,6 +13,7 @@ A move that performs geometric random walk on an integer variable. The displacem
 Sebastian Hoehna
 
 ## see_also
+mvRandomCategoryWalk
 mvRandomNaturalWalk
 mvRandomIntegerWalk
 
