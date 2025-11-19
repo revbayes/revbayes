@@ -131,7 +131,7 @@ template <typename valType>
 std::string RevLanguage::Func_BSPInterval<valType>::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "BSPInterval";
+    std::string f_name = "fnBSPInterval";
     
     return f_name;
 }
