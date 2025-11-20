@@ -203,19 +203,17 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 {
     // 1. Get the Subtree
     auto check_subtree = parseSubTree(input,start_pos);
-    if (auto check_subtree = parseSubTree(input, start_pos)){
-        return check_subtree;
-    }
-    auto& [subtree, new_start_pos] = *check_subtree;
+
+    // Return error message if we failed to find a subtree.
+    if (not check_subtree) return check_subtree;  
 
     // 2. Check the semicolon
-    auto check_semi = checkChar(input, new_start_pos, ';');
-    if (!check_semi)
-        return {};
+    auto check_semi = checkChar(input, check_subtree.next_pos(), ';');
 
-    auto& [c, new_start_pos2] = *check_semi;
+    // Return error message if we failed to find a semicolon.
+    if (not check_semi) return check_semi;
 
-    return {{subtree, new_start_pos2}};
+    return ParseSuccess<TopologyNode*>(check_subtree.value(), check_semi.next_pos());
 }
 
 // subtree -> internal OR leaf

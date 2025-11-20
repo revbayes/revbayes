@@ -29,6 +29,29 @@ namespace RevBayesCore {
     class Tree;
     class TopologyNode;
 
+    /*
+    // not currently used -- but we could
+    template <typename T>
+    struct ParseSuccess
+    {
+        T value_;
+        int next_pos_;
+    };
+
+    // not currently used -- but we could
+    template <typename T>
+    struct ParseFail
+    {
+        std::string err_message;
+        int err_pos_;
+    };
+
+    // old definition:
+    template <typename T>
+    using ParseResult = std::optional<std::pair<T,int>>;
+    */
+
+    
     // A ParseResult<T> is either
     // (i) Success -> a value and a new offset (non-empty optional).
     // (i) Failure -> no information (empty optional)
