@@ -24,32 +24,29 @@
 #include <iosfwd>
 #include <optional>
 #include <cassert>
+#include <string>
+#include <variant>
+
 namespace RevBayesCore {
 
     class Tree;
     class TopologyNode;
 
-    /*
-    // not currently used -- but we could
     template <typename T>
     struct ParseSuccess
     {
-        T value_;
-        int next_pos_;
+        T value;       // holds parsed thing
+        int next_pos;  // index in the string where parsing to continue if success = true
+        ParseSuccess(const T& t, int i):value(t), next_pos(i) {}
     };
 
     // not currently used -- but we could
-    template <typename T>
     struct ParseFail
     {
-        std::string err_message;
-        int err_pos_;
+        std::string err_message; // informative error if success = false
+        int err_pos;             // where it failed
+        ParseFail(const std::string& s, int i): err_message(s), err_pos(i) {}
     };
-
-    // old definition:
-    template <typename T>
-    using ParseResult = std::optional<std::pair<T,int>>;
-    */
 
     
     // A ParseResult<T> is either
@@ -58,70 +55,77 @@ namespace RevBayesCore {
     // A parser is a function that takes a string and an offset and returns a ParseResult<T>
     //using Parser = ParseResult<T>(const std::string&,int);
     template <typename T>
-    class ParseResult {
-        bool success;      // true if parsing worked
-        T value_;           // holds parsed thing if success = true
-        int next_pos_;      // index in the string where parsing to continue if success = true
-        std::string err_message_; // informative error if success = false
-        int err_pos_;       // where it failed
+    class ParseResult: public std::variant<ParseSuccess<T>, ParseFail>
+    {
     public:
-        // define constructors
-        ParseResult(bool b, const T& t, int i):success(true), value_(t), next_pos_(i){
 
-        }
-        ParseResult(const std::string& s, int i):success(false), err_message_(s), err_pos_(i){
+        using std::variant<ParseSuccess<T>, ParseFail>::variant;
 
-        }
-        ~ParseResult(){
-
-        }
-        operator bool() const{
-            return success;
+        bool success() const
+        {
+            return std::holds_alternative<ParseSuccess<T>>(*this);
         }
 
-        T& value(){
-            assert(success);
-            return value_;
-        }
-        const T& value() const{
-            assert(success);
-            return value_;
-        }
-        int& next_pos(){
-            assert(success);
-            return next_pos_;
-        }
-        int next_pos() const{
-            assert(success);
-            return next_pos_;
+        const ParseFail& as_failure() const
+        {
+            assert(not success());
+            return std::get<ParseFail>(*this);
         }
 
-        std::string& err_message(){
-            assert(!success);
-            return err_message_;
+        operator bool() const
+        {
+            return success();
         }
-        const std::string& err_message() const{
-            assert(!success);
-            return err_message_;
+
+        T& value()
+        {
+            assert(success());
+            return std::get<ParseSuccess<T>>(*this).value;
         }
-        int& err_pos(){
-            assert(!success);
-            return err_pos_;
+
+        const T& value() const
+        {
+            assert(success());
+            return std::get<ParseSuccess<T>>(*this).value;
         }
-        int err_pos() const{
-            assert(!success);
-            return err_pos_;
+
+        int& next_pos()
+        {
+            assert(success());
+            return std::get<ParseSuccess<T>>(*this).next_pos;
+        }
+
+        int next_pos() const
+        {
+            assert(success());
+            return std::get<ParseSuccess<T>>(*this).next_pos;
+        }
+
+        std::string& err_message()
+        {
+            assert(not success());
+            return std::get<ParseFail>(*this).err_message;
+        }
+
+        const std::string& err_message() const
+        {
+            assert(not success());
+            return std::get<ParseFail>(*this).err_message;
+        }
+
+        int& err_pos()
+        {
+            assert(not success());
+            return std::get<ParseFail>(*this).err_pos;
+        }
+
+        int err_pos() const
+        {
+            assert(not success());
+            return std::get<ParseFail>(*this).err_pos;
         }
     };
 
-    template <typename T>
-    ParseResult<T> ParseSuccess(const T& t, int i){    
-        return ParseResult<T>(true, t, i);
-    }
-    template <typename T>
-    ParseResult<T> ParseFail(const std::string& s, int i){    
-        return ParseResult<T>(s, i);
-    }
     // Why keep this class at all?
     // Hypothetically, in the future we could us it to store options to the Newick conversion process.
     class NewickConverter

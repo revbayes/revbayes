@@ -41,7 +41,7 @@ Tree* NewickConverter::convertFromNewick(std::string const &newick)
         throw RbException()<<result.err_message()<< " at location " << result.err_pos();
     }
     if (result.next_pos() != newick.size())
-        throw RbException()<<"Junk at end of newick string: '"<<newick.substr(end_pos)<<"'";
+        throw RbException()<<"Junk at end of newick string: '"<<newick.substr(result.next_pos())<<"'";
 
     // set up the tree
     auto root = result.value();
@@ -92,30 +92,31 @@ Comments:
 */
 
 // succeeds if there is another character in the input, otherwise fails
-ParseResult<char> parseChar(const std::string& input, int start_pos){
+ParseResult<char> parseChar(const std::string& input, int start_pos)
+{
     // if reading beyond end of string return null
-    if (start_pos >= input.size()){
-        return {};
+    if (start_pos >= input.size())
+        return ParseFail("End of input",start_pos);
+    else
+    {
+        char c = input[start_pos];
+        return ParseSuccess(c,start_pos+1);
     }
-    char c = input[start_pos];
-    return ParseResult<char>(pair<char,int>(c,start_pos+1));
 }
 
 // returns a new start_pos if the input contains another character, and it is "c"
-ParseResult<char> checkChar(const std::string& input, int start_pos, char c){
+ParseResult<char> checkChar(const std::string& input, int start_pos, char c)
+{
     // if reading beyond end of string return null
-    if (auto check=parseChar(input, start_pos)){
-        auto [c2, new_start_pos] = *check;
-        if (c2 == c){
-            return check;
-        }
-        else{
-            return {};
-        }
+    if (auto maybe_char = parseChar(input, start_pos))
+    {
+        if (maybe_char.value() == c)
+            return maybe_char;
+        else
+            return ParseFail(std::string("Expected '") + c + "'", start_pos);
     }
-    else{
-        return check;
-    }
+    else
+        return maybe_char;
 }
 
 
@@ -124,7 +125,7 @@ ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
     // 1. First check for an open bracket
     auto check_open_bracket = checkChar(input, start_pos, '[');
     if (not check_open_bracket)
-        return {};
+        return check_open_bracket.as_failure();
 
     // FIXME: only some comments are supposed to be computer-readable.
     // Comments that start with [& should be saved.
@@ -135,33 +136,34 @@ ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
     std::string newick_comment;
     while(auto check_char = parseChar(input, start_pos))
     {
-        auto& [c, new_start_pos] = *check_char;
-        start_pos = new_start_pos;
-        if (c != ']')
-            newick_comment += 'c';
+        start_pos = check_char.next_pos();
+
+        if (check_char.value() != ']')
+            newick_comment += check_char.value();
         else
-            return {{newick_comment, start_pos}};
+            return ParseSuccess(newick_comment, start_pos);
     }
 
     // 3. If we get here, then ending bracket is missing!
-    return {};
+    return ParseFail("Newick comment is missing final ']'", start_pos);
 }
 
+// Which values should count as whitespace?
+
+// whiteChar -> [ \t\n\r]    
 ParseResult<char> parseWhiteChar(const std::string& input, int start_pos)
 {
     // 1. Try to read a character
-    auto check_char = parseChar(input, start_pos);
-    if (not check_char) return {};
-    auto& [c, new_start_pos] = *check_char;
-
-    // 2. If it is whitespace, return the character
-    if (c == ' ' or c == '\t' or c == '\n' or c == '\r')
-        return {{c, new_start_pos}};
-    // 3. If it is not whitespace, return null
+    if (auto check_char = parseChar(input, start_pos))
+    {
+        // 2. If it is whitespace, return the character
+        if (strchr(" \t\n\r", check_char.value()))
+            return check_char;
+        else
+            return ParseFail("Not whitespace", start_pos);
+    }
     else
-        return {};
-
-    // QUESTION: Which characters should count as whitespace?
+        return check_char;
 }
     
 // OneWhitespace -> NewickComment OR WhiteChar    
@@ -170,13 +172,13 @@ ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int s
     // 1. First try to read a newick comment
     if (auto check_comment = parseNewickComment(input, start_pos))
     {
-        return ParseSuccess({check_comment.value()}, check_comment.next_pos());
+        return ParseSuccess<optional<string>>({check_comment.value()}, check_comment.next_pos());
     }
     // 2. Then try to read a whitespace character
     else if (auto check_char = parseWhiteChar(input, start_pos))
     {
         // If we found a whitespace char, return success with no comment
-        return ParseSuccess({}, check_comment.next_pos());
+        return ParseSuccess<optional<string>>({}, check_comment.next_pos());
     }
     // 3. If no comment and no whitespace character, return null
     else
@@ -189,12 +191,11 @@ ParseResult<vector<string>> parseWhitespace(const std::string& input, int start_
     vector<string> newick_comments;
     while(auto check = parseOneWhitespace(input, start_pos))
     {
-        auto& [maybe_comment,new_start_pos] = *check;
-        start_pos = new_start_pos;
-        if (maybe_comment)
-            newick_comments.push_back(*maybe_comment);
+        start_pos = check.next_pos();
+        if (check.value())
+            newick_comments.push_back(*check.value());
     }
-    return {{newick_comments, start_pos}};
+    return ParseSuccess(newick_comments, start_pos);
 }
 
 
@@ -211,9 +212,9 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     auto check_semi = checkChar(input, check_subtree.next_pos(), ';');
 
     // Return error message if we failed to find a semicolon.
-    if (not check_semi) return check_semi;
+    if (not check_semi) return check_semi.as_failure();
 
-    return ParseSuccess<TopologyNode*>(check_subtree.value(), check_semi.next_pos());
+    return ParseSuccess(check_subtree.value(), check_semi.next_pos());
 }
 
 // subtree -> internal OR leaf
@@ -221,89 +222,76 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
 
     if (auto checkInternal = parseInternal(input, start_pos))
         return checkInternal;
-    
-    else if (auto checkLeaf = parseLeaf(input, start_pos)){
+    else if (auto checkLeaf = parseLeaf(input, start_pos))
         return checkLeaf;
-    }
-    else{
-        if(checkInternal.err_pos()<checkLeaf.err_pos()){
+    else {
+        if(checkInternal.err_pos()<checkLeaf.err_pos())
             return checkLeaf;
-        }
-        else{
+        else
             return checkInternal;
-        }
     }
 }
 
 // Internal -> '(' BranchSet ')' Name
 ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos){
     auto node = new TopologyNode;
-    // Check if we have left parenthesis
-    if (auto check = checkChar(input, start_pos, '('))
-    {
-        auto& [c,new_start_pos] = *check;
-        start_pos = new_start_pos;
-    }
-    else
-        return {};
 
-    //add children to node
-    if (auto check = parseBranchSet(input, start_pos)){
-        auto [children, new_start_pos] = check.value();
-        start_pos = new_start_pos;
-        for(auto& child: children)
+    // Read left parenthesis
+    if (auto maybe_lparen = checkChar(input, start_pos, '('))
+        start_pos = maybe_lparen.next_pos();
+    else
+        return maybe_lparen.as_failure();
+
+    // Parse BranchSet and add children to node
+    if (auto maybe_children = parseBranchSet(input, start_pos)) {
+        start_pos = maybe_children.next_pos();
+        for(auto& child: maybe_children.value())
         {
             node->addChild(child);
             child->setParent(node);
         }
     }
-
     else
-        return {};
+        return maybe_children.as_failure();
 
-    // Check for right parenthesis
-    if (auto check = checkChar(input, start_pos, ')'))
-    {
-        auto& [c,new_start_pos] = *check;
-        start_pos = new_start_pos;
+    // Read right parenthesis
+    if (auto maybe_rparen = checkChar(input, start_pos, ')')) {
+        start_pos = maybe_rparen.next_pos();
     }
     else
-        return {};
+        return maybe_rparen.as_failure();
     
-    if (auto check = parseName(input, start_pos)){
-        auto[name, new_start_pos] = check.value();
-        start_pos = new_start_pos;
-        node -> setName(name);
+    // Read Name
+    if (auto maybe_name = parseName(input, start_pos)) {
+        start_pos = maybe_name.next_pos();
+        node -> setName(maybe_name.value());
     }
-
     else
-        return {}; 
+        return maybe_name.as_failure();
 
-    // construct new topology node with children `children` and name `name`
-    
     //add name and children
-    return {{node, start_pos}}; 
+    return ParseSuccess(node, start_pos); 
 }
 
 // Length -> ":" number | empty
 ParseResult<optional<double>> parseLength(const std::string& input, int start_pos)
 {
     // This parser should always succeed, but might return an empty value.
-    return {};
+    return ParseFail("No branch length", start_pos);
 }
 
 
 // Branch -> Subtree Length
 ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos)
 {
-    return {};
+    return ParseFail("No branch", start_pos);
 }
 
 // BranchSet -> Branch (, Branch)*
 ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input, int start_pos)
 {
     std::vector<TopologyNode*> branches;
-    return {};
+    return ParseFail("No branch set", start_pos);
 }
 
 // Leaf -> name or empty
@@ -311,108 +299,107 @@ ParseResult<TopologyNode*> parseLeaf(const std::string& input, int start_pos)
 {
     //adding new node
     auto node = new TopologyNode;
-    if (auto check = parseName(input, start_pos)){
-        auto [name, new_start_pos] = check.value();
-        start_pos = new_start_pos;
-        node->setName(name);
+
+    if (auto name = parseName(input, start_pos)){
+        start_pos = name.next_pos();
+        node->setName(name.value());
     }
+
     //add name and children
-    return {{node, start_pos}}; 
+    return ParseSuccess(node, start_pos);
 }
 
 // this function is matching (not a quote) or (two quotes)
-// 
+// QuotedChar -> [^'] | ''
 ParseResult<char> parseQuotedChar(const std::string& input, int start_pos){
     assert(start_pos>=0);
-    if (auto check = parseChar(input, start_pos)){
-        auto [c, new_start_pos] = check.value();
-        if (c == '\'') {
-            // two quotes returns quote
-            if (auto check2 = checkChar(input, new_start_pos, '\'')){
-                auto& [c2, new_start_pos2] = *check2;
-                // new_start_pos2 will ALWAYS be start_pos + 2
-                return ParseResult<char>(pair<char,int>(c, new_start_pos2));
-            }
-            // one quote fails
-            else{
-                return {};
-            }
-        }
-        else {
-            //new_start_pos will ALWAYS be start_pos+1
-            return ParseResult<char>(pair<char,int>(c,new_start_pos));
-        }
-    }
 
-    else{
-        return {};
+    if (auto maybe_char1 = parseChar(input, start_pos)){
+        if (maybe_char1.value() == '\'') {
+            // two quotes returns quote
+            if (auto maybe_char2 = checkChar(input, maybe_char1.next_pos(), '\''))
+                // new_start_pos2 will ALWAYS be start_pos + 2
+                return ParseSuccess<char>('\'', maybe_char2.next_pos());
+            // one quote fails
+            else
+                return ParseFail("Single quote not followed by another single quote", start_pos);
+        }
+        else
+            //new_start_pos will ALWAYS be start_pos+1
+            return ParseSuccess<char>(maybe_char1.value(), maybe_char1.next_pos());
     }
+    else
+        return maybe_char1;
 }
 
 //no quotes 
-ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos){
+ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos)
+{
     assert(start_pos>=0);
-    if (auto check = parseChar(input, start_pos)){
-        auto [c, new_start_pos] = check.value();
-        //check if c is _
-        if (c == '_'){
-            return ParseResult<char>(pair<char,int>(' ',new_start_pos));
-        }
-        //is c an illegal character (punctuation)
-        if (!strchr("()[]':;, ", c)) {
-            return ParseResult<char>(pair<char,int>(c,new_start_pos));
-        }
-        else {
-            return {};
-        }
-    }
 
-    else{
-        return {};
+    if (auto maybe_char = parseChar(input, start_pos))
+    {
+        char c = maybe_char.value();
+        // c is _
+        if (c == '_')
+            return ParseSuccess(' ', maybe_char.next_pos());
+        // c is a legal character that is not _
+        else if (!strchr("()[]':;, ", c)) 
+            return ParseSuccess(c, maybe_char.next_pos());
+        // c is an illegal character (punctuation)
+        else 
+            return ParseFail("Illegal character", start_pos);
     }
+    else
+        return maybe_char;
 }
 
-ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos){
-    if (!checkChar(input, start_pos, '\'')){
-        return {};
-    }
-    else{
-        start_pos++;
-    }
+// QuotedName -> ' + QuotedChar* + '
+// quotedName -> char('\'') >> many(quotedChar) >> char('\'')
+ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos)
+{
+    auto maybe_quote1 = checkChar(input, start_pos, '\'');
+    if (not maybe_quote1)
+        return maybe_quote1.as_failure();
+    else
+        start_pos = maybe_quote1.next_pos();
+
     std::string name; 
-    while (auto check = parseQuotedChar(input, start_pos)){
-        auto [c, new_start_pos] = check.value();
-        name += c;
-        start_pos = new_start_pos;
+    while (auto check = parseQuotedChar(input, start_pos))
+    {
+        name += check.value();
+        start_pos = check.next_pos();
     }
-    if (!checkChar(input, start_pos, '\'')){
-        return {};
-    }
-    else{
-        start_pos++;
-    }
-    return ParseResult<string>(pair<std::string,int>(name, start_pos));
+
+    auto maybe_quote2 = checkChar(input, start_pos, '\'');
+    if (not maybe_quote2)
+        return maybe_quote2.as_failure();
+    else
+        start_pos = maybe_quote2.next_pos();
+
+    return ParseSuccess(name, start_pos);
 }
 
+// UnquotedName -> UnquotedChar+
+// unquotedName -> some(unquotedChar)
 ParseResult<std::string> parseUnquotedName(const std::string& input, int start_pos){
-    std::string name; 
-    //checks for unquoted character
-    if (auto check = parseUnquotedChar(input, start_pos)){
-        auto [c, new_start_pos] = check.value();
-        name += c;
-        start_pos = new_start_pos;
+    std::string name;
+    if (auto check = parseUnquotedChar(input, start_pos))
+    {
+        name += check.value();
+        start_pos = check.next_pos();
     }
-    //if non return null
-    else{
-        return {};
-    }
+    //if not return null
+    else
+        return check.as_failure();
+
     //continue check
     while (auto check = parseUnquotedChar(input, start_pos)){
-        auto [c, new_start_pos] = check.value();
-        name += c;
-        start_pos = new_start_pos;
+        name += check.value();
+        start_pos = check.next_pos();
     }
-    return ParseResult<std::string>(pair<std::string,int>(name, start_pos));
+
+    return ParseSuccess(name, start_pos);
 }
 
 // Name -> QuotedName | UnquotedName | empty
