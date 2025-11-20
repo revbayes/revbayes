@@ -70,7 +70,7 @@ void ModelMonitor::resetDagNodes( void )
             if ( the_node->isSimpleNumeric() && the_node->isClamped() == false )
             {
                 if ( (!stochastic_nodes_only && !the_node->isConstant() && the_node->getName() != "" && !the_node->isHidden() && !the_node->isElementVariable() ) ||
-                     ( the_node->isStochastic() && !the_node->isClamped() && the_node->isHidden() == false  && the_node->isElementVariable() == false ) )
+                     ( the_node->isStochastic() && !the_node->isClamped() && !the_node->isHidden() ) )
                 {
                     const std::string &name = the_node->getName();
                     if ( exclude.find(name) == exclude.end() && var_names.find( name ) == var_names.end() )
