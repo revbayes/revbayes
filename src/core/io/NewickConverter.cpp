@@ -73,22 +73,26 @@ Tree* NewickConverter::convertFromNewick(std::string const &newick)
     Name -> QuotedName | UnquotedName | empty
     Length → ":" number | empty
 
-Comments:
+But we should probably switch to this Newick grammar:
 
-    - We could simplify by doing `Subtree -> [ "(" BranchSet ")" ] Name`, where [..] means optional.
-    - Newick comments are considered whitespace.  They can go anywhere whitespace can go.
-    - If we explicitly consider whitespace, then
+    Tree → Subtree ";"
+    Subtree → [Descendants] [Name] [Length]
+    Descendants = "(" Subtree ("," Subtree)* ")"
+    Name -> QuotedName | UnquotedName
+    Length -> ":" [Double]
+    QuotedName -> "'" QuotedChar* "'"
+    UnquotedName -> UnquotedChar*
+    UnquotedChar = not punctuation
 
-          Leaf -> Name
+When we put the spacing in, we should get:
 
-      looks like
+    Tree → SPACE<tree> Subtree ";" SPACE<ignore>
+    Subtree → SPACE<node> [Descendants] SPACE<node> [Name] SPACE<node> (Length | empty<no length, no attributes>)
+    Descendants = "(" Subtree % "," ")"
+    Length -> ":" SPACE<branch> [Double] SPACE<branch>
 
-          Leaf -> Whitespace Name Whitespace
-      
-      This is a bit uglier to read.
-          
-    - ???
-
+where SPACE<x> means that we read whitepspace and newick comments, and the comments are attached to x.
+So for example SPACE<tree> means that any comments found are considered to refer to the tree.
 */
 
 // succeeds if there is another character in the input, otherwise fails
@@ -165,7 +169,7 @@ ParseResult<char> parseWhiteChar(const std::string& input, int start_pos)
     else
         return check_char;
 }
-    
+
 // OneWhitespace -> NewickComment OR WhiteChar    
 ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int start_pos)
 {
@@ -273,25 +277,70 @@ ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos
     return ParseSuccess(node, start_pos); 
 }
 
+ParseResult<double> parseDouble(const std::string& input, int start_pos)
+{
+    char* endptr;
+    double value = std::strtod(input.c_str() + start_pos, &endptr);
+
+    errno = 0;
+    start_pos = endptr - input.c_str();
+    if (errno == 0)
+        return ParseSuccess(value, start_pos);
+    else
+        return ParseFail("Failure reading floating point number", start_pos);
+}
+
 // Length -> ":" number | empty
 ParseResult<optional<double>> parseLength(const std::string& input, int start_pos)
 {
-    // This parser should always succeed, but might return an empty value.
-    return ParseFail("No branch length", start_pos);
+    auto maybe_colon = checkChar(input, start_pos, ':');
+    if (not maybe_colon)
+        return ParseSuccess<optional<double>>({}, start_pos);
+
+    auto maybe_length = parseDouble(input, maybe_colon.next_pos());
+    if (not maybe_length)
+        return ParseSuccess<optional<double>>({}, maybe_colon.next_pos());
+
+    return ParseSuccess<optional<double>>(maybe_length.value(), maybe_length.next_pos());
 }
 
 
 // Branch -> Subtree Length
 ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos)
 {
-    return ParseFail("No branch", start_pos);
+    auto maybe_subtree = parseSubTree(input, start_pos);
+    if (not maybe_subtree) return maybe_subtree.as_failure();
+
+    auto maybe_length = parseLength(input, maybe_subtree.next_pos());
+    if (not maybe_length) return maybe_length.as_failure();
+
+    auto node = maybe_subtree.value();
+    auto length = maybe_length.value();
+    if (length)
+        node->setBranchLength(*length);
+
+    return ParseSuccess(node, maybe_length.next_pos());
 }
 
 // BranchSet -> Branch (, Branch)*
 ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input, int start_pos)
 {
-    std::vector<TopologyNode*> branches;
-    return ParseFail("No branch set", start_pos);
+    vector<TopologyNode*> branches;
+    auto maybe_branch = parseBranch(input, start_pos);
+    if (not maybe_branch)
+        return maybe_branch.as_failure();
+
+    start_pos = maybe_branch.next_pos();
+    while(auto maybe_comma = checkChar(input, start_pos, ','))
+    {
+        start_pos = maybe_comma.next_pos();
+        auto maybe_branch2 = parseBranch(input, start_pos);
+        if (not maybe_branch2)
+            return maybe_branch2.as_failure();
+        branches.push_back(maybe_branch2.value());
+    }
+
+    return ParseSuccess(branches, start_pos);
 }
 
 // Leaf -> name or empty

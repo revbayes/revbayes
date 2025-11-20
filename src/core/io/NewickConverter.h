@@ -48,7 +48,7 @@ namespace RevBayesCore {
         ParseFail(const std::string& s, int i): err_message(s), err_pos(i) {}
     };
 
-    
+
     // A ParseResult<T> is either
     // (i) Success -> a value and a new offset (non-empty optional).
     // (i) Failure -> no information (empty optional)
