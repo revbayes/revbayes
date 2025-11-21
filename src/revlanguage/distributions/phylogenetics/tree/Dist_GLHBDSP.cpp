@@ -119,11 +119,18 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // number of processors
     size_t num_procs = size_t(static_cast<const Natural &>( n_proc->getRevObject() ).getValue());
 
+    // tolerances
+    double absolute_tolerance = (double)static_cast<const RealPos &>(abs_tol->getRevObject()).getValue();
+    double relative_tolerance = (double)static_cast<const RealPos &>(rel_tol->getRevObject()).getValue();
+
+    // number of sense steps
+    size_t num_steps = size_t(static_cast<const Natural &>( num_step->getRevObject() ).getValue());
+
     // indexing
     bool zi = static_cast<const RlBoolean &>( zero_index->getRevObject() ).getValue();
 
     // make the distribution
-    RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin, zi, num_procs);
+    RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin, zi, num_procs, absolute_tolerance, relative_tolerance, num_steps);
 
     // speciation rates
     if ( lambda->getRevObject() != RevNullObject::getInstance() )
@@ -482,6 +489,13 @@ const MemberRules& Dist_GLHBDSP::getParameterRules(void) const
 		// number of processors
         dist_member_rules.push_back( new ArgumentRule( "nProc", Natural::getClassTypeSpec(), "The number of processors for parallel calculations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
+        // tolerances
+        dist_member_rules.push_back( new ArgumentRule( "absTol", RealPos::getClassTypeSpec(), "The absolute tolerance of the numerical integrator.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1e-7) ) );
+        dist_member_rules.push_back( new ArgumentRule( "relTol", RealPos::getClassTypeSpec(), "The relative tolerance of the numerical integrator.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1e-7) ) );
+
+        // max number of steps
+        dist_member_rules.push_back( new ArgumentRule( "maxDenseSteps", Natural::getClassTypeSpec(), "The maximum number of steps dense approximators are allowed to try before giving up.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
+
         // zero indexing
         dist_member_rules.push_back( new ArgumentRule( "zeroIndex", RlBoolean::getClassTypeSpec(), "Does the state space include zero?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
@@ -628,6 +642,17 @@ void Dist_GLHBDSP::setConstParameter(const std::string& name, const RevPtr<const
 	else if ( name == "nProc" )
 	{
 		n_proc = var;
+	}
+	else if ( name == "absTol")
+	{
+		abs_tol = var;
+	}
+	else if ( name == "relTol")
+	{
+		rel_tol = var;
+	}
+	else if ( name == "maxDenseSteps") {
+		num_step = var;
 	}
 	else if ( name == "zeroIndex" )
 	{

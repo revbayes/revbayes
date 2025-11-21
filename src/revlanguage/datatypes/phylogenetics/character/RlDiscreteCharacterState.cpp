@@ -108,10 +108,10 @@ const TypeSpec& DiscreteCharacterState::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double DiscreteCharacterState::isConvertibleTo( const TypeSpec& type, bool once ) const
+double DiscreteCharacterState::isConvertibleTo( const TypeSpec& type, bool convert_by_value ) const
 {
     
-    if ( once == true && type == Natural::getClassTypeSpec() )
+    if ( convert_by_value == true && type == Natural::getClassTypeSpec() )
     {
         const RevBayesCore::NaturalNumbersState* ns =dynamic_cast<const RevBayesCore::NaturalNumbersState*>( &getValue() );
         if ( ns != NULL )
@@ -127,6 +127,6 @@ double DiscreteCharacterState::isConvertibleTo( const TypeSpec& type, bool once 
         
     }
     
-    return ModelObject<RevBayesCore::DiscreteCharacterState>::isConvertibleTo( type, once );
+    return ModelObject<RevBayesCore::DiscreteCharacterState>::isConvertibleTo( type, convert_by_value );
 }
 

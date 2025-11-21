@@ -68,7 +68,7 @@ gboolean command_on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer us
 
 
 RbGTKGui::RbGTKGui( void ) :
-    rl_interpreter( false ),
+    rl_interpreter( false, false, /* quiet */ false ),
     command( "" ),
     command_index( 0 ),
     command_result( 0 ),
@@ -83,7 +83,7 @@ RbGTKGui::RbGTKGui( void ) :
     /* initialize environment */
     rev_output = new StringOutputStream();
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
-    rl_interpreter.startRevLanguageEnvironment(rb_args, sourceFiles);
+    rl_interpreter.startRevLanguageEnvironment(/*expressions*/ {}, /*filename*/ {}, /*args*/ {});
 
     
 }
@@ -123,7 +123,7 @@ void RbGTKGui::executeRevCommand(const std::string &next_command, bool append)
             command += ";" + current_command;
         }
         
-        command_result = RevLanguage::Parser::getParser().processCommand(command, &RevLanguage::Workspace::userWorkspace());
+        command_result = RevLanguage::Parser::getParser().processCommand(command, RevLanguage::Workspace::userWorkspacePtr());
         
         const std::string &output = rev_output->getOutputString();
         if ( output != "" )

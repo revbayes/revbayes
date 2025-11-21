@@ -80,7 +80,7 @@ namespace RevBayesCore {
 
         // the data
         std::vector<RbBitSet>                                               ambiguous_char_vector;
-        std::vector<unsigned long>                                          char_vector;
+        std::vector<std::uint64_t>                                          char_vector;
         std::vector<bool>                                                   gap_vector;
         std::vector<size_t>                                                 pattern_counts;
         size_t                                                              num_patterns;
@@ -442,7 +442,7 @@ void RevBayesCore::CTMCProcess<charType>::computeSiteLikelihoodsPerSiteRateAndMa
 //                        }
                         else // no ambiguous characters in use
                         {
-                            unsigned long org_val = char_vector[site_index];
+                            std::uint64_t org_val = char_vector[site_index];
 
                             // store the likelihood
                             this_site_prob += tp_begin[c1*this->num_chars+org_val] * rf[matrix_index][c1];

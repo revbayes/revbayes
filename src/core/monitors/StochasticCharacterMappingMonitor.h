@@ -31,15 +31,16 @@ namespace RevBayesCore {
     public:
 
         // Constructors and Destructors
-        StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del);
-//        StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, const std::string &del);
-        StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx);
+        StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del);
+//        StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, const std::string &del);
+        StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx);
+        StochasticCharacterMappingMonitor(const StochasticCharacterMappingMonitor &m);
         virtual ~StochasticCharacterMappingMonitor(void);
 
         StochasticCharacterMappingMonitor*              clone(void) const;                                                  //!< Clone the object
 
         // Monitor functions
-        void                                            monitorVariables(unsigned long gen);                                 //!< Monitor at generation gen
+        void                                            monitorVariables(std::uint64_t gen);                                 //!< Monitor at generation gen
         void                                            printFileHeader(void);                                              //!< Print header
 
         // getters and setters
@@ -71,7 +72,7 @@ using namespace RevBayesCore;
 
 /* Constructor for state dependent birth death process */
 template<class characterType>
-StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del) : VariableMonitor(ch, g, fname, del, false, false, false),
+StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del) : VariableMonitor(ch, g, fname, del, false, false, false),
     cdbdp( ch ),
     include_simmaps( is ),
     use_simmap_default( sd ),
@@ -85,10 +86,10 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
 
 }
 
-//StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, const std::string &del) : Monitor(g),
+//StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(TypedDagNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, const std::string &del) : Monitor(g),
 /* Constructor for CTMC */
 template<class characterType>
-StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, unsigned long g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx) :
+StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* ch, std::uint64_t g, const std::string &fname, bool is, bool sd, const std::string &del, size_t idx) :
     VariableMonitor(ch, g, fname, del, false, false, false),
     ctmc( ch ),
     include_simmaps( is ),
@@ -105,6 +106,20 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
     addVariable( ctmc );
 }
 
+/**
+ * Copy constructor.
+ */
+template<class characterType>
+StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMonitor( const StochasticCharacterMappingMonitor &m) : VariableMonitor( m ),
+    tree( m.tree ),
+    cdbdp( m.cdbdp ),
+    ctmc( m.ctmc ),
+    include_simmaps( m.include_simmaps ),
+    use_simmap_default( m.use_simmap_default ),
+    index( m.index )
+{
+
+}
 
 /**
  * Destructor.
@@ -136,7 +151,7 @@ StochasticCharacterMappingMonitor<characterType>* StochasticCharacterMappingMoni
  * \param[in]   gen    The current generation.
  */
 template<class characterType>
-void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned long gen)
+void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
 
@@ -160,9 +175,9 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
         }
         num_nodes = tree->getValue().getNumberOfNodes();
     }
-        
+
     std::vector<std::string> character_histories( num_nodes );
-    
+
     // draw stochastic character map
     if ( ctmc != NULL )
     {
@@ -170,11 +185,14 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
     }
     else if ( sse_process != NULL )
     {
-        sse_process->drawStochasticCharacterMap( character_histories );
+        // sse_process->drawStochasticCharacterMap( character_histories );
+        bool set_amb_char_data = false; // this is the default value for the arg
+        sse_process->drawStochasticCharacterMap( character_histories, set_amb_char_data, use_simmap_default );
     }
     else
     {
-    	glhbdsp_process->drawStochasticCharacterMap( character_histories );
+    	// glhbdsp_process->drawStochasticCharacterMap( character_histories );
+        glhbdsp_process->drawStochasticCharacterMap( character_histories, use_simmap_default );
     }
 
     // print to monitor file
@@ -190,7 +208,7 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(unsigned
         // print out this branch's character history in the format
         // used by SIMMAP and phytools
         out_stream << character_histories[ node_index ];
-        
+
     }
 
     if ( include_simmaps == true )

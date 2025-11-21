@@ -140,7 +140,7 @@ void Func_simCompleteTree::buildRandomBinaryTree(std::vector<RevBayesCore::Topol
         RevBayesCore::TopologyNode* left_child = nodes[index];
         
         // remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(index));
+        nodes.erase(nodes.begin()+std::int64_t(index));
         
         
         
@@ -151,7 +151,7 @@ void Func_simCompleteTree::buildRandomBinaryTree(std::vector<RevBayesCore::Topol
         RevBayesCore::TopologyNode* right_child = nodes[index];
         
         // remove the randomly drawn node from the list
-        nodes.erase(nodes.begin()+long(index));
+        nodes.erase(nodes.begin()+std::int64_t(index));
         
         
         RevBayesCore::TopologyNode* parent = new RevBayesCore::TopologyNode();

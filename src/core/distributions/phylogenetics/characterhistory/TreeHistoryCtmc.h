@@ -28,7 +28,7 @@
 namespace RevBayesCore {
 
     template<class charType>
-    class TreeHistoryCtmc : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public TreeChangeEventListener, public MemberObject< Simplex >, public MemberObject< RbVector<long> >, public MemberObject< CharacterHistoryDiscrete > {
+    class TreeHistoryCtmc : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public TreeChangeEventListener, public MemberObject< Simplex >, public MemberObject< RbVector<std::int64_t> >, public MemberObject< CharacterHistoryDiscrete > {
 
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
@@ -42,7 +42,7 @@ namespace RevBayesCore {
         virtual void                                                        redrawValue(void) = 0;
         virtual bool                                                        drawInitValue(void) = 0;
         virtual void                                                        initializeTipValues(void) = 0;
-        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;             //!< Map the member methods to internal function calls
+        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;                    //!< Map the member methods to internal function calls
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, CharacterHistoryDiscrete &rv) const;   //!< Map the member methods to internal function calls
         virtual double                                                      getBranchRate(size_t idx) const;
@@ -109,7 +109,7 @@ namespace RevBayesCore {
         std::vector<std::vector<double> >                                   history_likelihoods;
 
         // the data
-        std::vector<std::vector<unsigned long> >                            char_matrix;
+        std::vector<std::vector<std::uint64_t> >                            char_matrix;
         std::vector<std::vector<bool> >                                     gap_matrix;
         CharacterHistoryDiscrete                                            histories;
         std::vector<std::vector<double> >                                   tip_probs;
@@ -297,7 +297,7 @@ double RevBayesCore::TreeHistoryCtmc<charType>::computeLnProbability( void )
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
 
     if ( n == "numCharacterChanges" )
@@ -305,7 +305,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_sites );
 
-        int index = (int)static_cast<const TypedDagNode<long>* >( args[0] )->getValue() - 1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::multiset<CharacterEvent*,CharacterEventCompare> &states = this->histories[index].getHistory();
@@ -335,7 +335,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-        long index = static_cast<const TypedDagNode<long>* >( args[0] )->getValue() - 1;
+        std::int64_t index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
 
 //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[index].getChildCharacters();
@@ -358,9 +358,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-
-        long node_index = static_cast<const TypedDagNode<long>* >( args[0] )->getValue() - 1;
-        long site_index = static_cast<const TypedDagNode<long>* >( args[1] )->getValue() - 1;
+        std::int64_t node_index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
+        std::int64_t site_index = static_cast<const TypedDagNode<std::int64_t>* >( args[1] )->getValue() - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[node_index].getParentCharacters();

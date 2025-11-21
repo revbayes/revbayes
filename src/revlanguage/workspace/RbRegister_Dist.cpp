@@ -179,6 +179,7 @@
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
+#include "Dist_ConstrainedTopologySSE.h"
 #include "Dist_ConstrainedUnrootedTopology.h"
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
@@ -395,7 +396,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
-
+        
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
 
@@ -419,6 +420,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // constrained topology distribution
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
+
+        // constrained topology distribution
+        AddDistribution< TimeTree                   >( new Dist_ConstrainedTopologySSE() );
 
         // constrained topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );

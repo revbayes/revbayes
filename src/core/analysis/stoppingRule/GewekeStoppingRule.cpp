@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <iosfwd>
+#include <iomanip>
 #include <string>
 #include <vector>
 
@@ -47,11 +48,16 @@ GewekeStoppingRule* GewekeStoppingRule::clone( void ) const
 
 
 /**
- * Should we stop now?
- * Yes, if the Geweke test statistic is significant at the provided alpha level.
+ * Compute the current value of the rule's test statistic:
+ * Here, this is the normal cumulative distribution function of the standardized difference of means
+ * between two fractions of a chain
  */
-bool GewekeStoppingRule::stop( size_t g )
+double GewekeStoppingRule::getStatistic( size_t g )
 {
+    // record the number of variables for which the Geweke statistic is significant (indicating non-convergence),
+    // across all replicates
+    size_t gSignif = 0;
+    
     for ( size_t i = 0; i < numReplicates; ++i)
     {
         path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
@@ -80,10 +86,60 @@ bool GewekeStoppingRule::stop( size_t g )
         for ( size_t j = 0; j < data.size(); ++j)
         {
             data[j].setBurnin( maxBurnin );
-            if ( !gTest.assessConvergence( data[j] ) ) return false;
+            double cdf = gTest.getStatistic( data[j] );
+            if ( cdf < alpha/2.0 || cdf > (1.0 - alpha/2.0) )
+            {
+                gSignif++;
+            }
         }
-        
     }
     
-    return true;
+    return (double)gSignif;
+}
+
+
+std::string GewekeStoppingRule::printAsStatement( size_t g, bool target_only )
+{
+    // Nicely format the confidence interval bounds
+    std::stringstream lss;
+    lss << std::setprecision(5) << std::noshowpoint << alpha/2;
+    std::string lbound = lss.str();
+    
+    std::stringstream uss;
+    uss << std::setprecision(5) << std::noshowpoint << 1 - alpha/2;
+    std::string ubound = uss.str();
+    
+    std::string statement;
+    
+    if (target_only)
+    {
+        statement = "Target value of the Geweke test statistic: > " + lbound + " and < " + ubound + "\n";
+    }
+    else
+    {
+        // Note that # of comparisons = (# of replicates) * (# of parameters)
+        // If there are multiple runs, we will grab the # of parameters from the 1st run
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(1)) : filename;
+        TraceContinuousReader reader = TraceContinuousReader( fn );
+        std::vector<TraceNumeric> &data = reader.getTraces();
+        size_t nComp = numReplicates * data.size();
+        
+        size_t val = (size_t)getStatistic(g);
+        std::string pt1 = "Comparisons in which the Geweke test statistic is < " + lbound + " or > " + ubound + ": " + std::to_string(val);
+        statement = pt1 + "/" + std::to_string(nComp) + " (target: 0/" + std::to_string(nComp) + ")\n";
+    }
+    
+    return statement;
+}
+
+
+/**
+ * Should we stop now?
+ * Yes, if there are no monitored variables for which the Geweke test statistic is significant at the provided
+ * alpha level.
+ */
+bool GewekeStoppingRule::stop( size_t g )
+{
+    size_t nSignif = (size_t)getStatistic(g);
+    return nSignif == 0;
 }

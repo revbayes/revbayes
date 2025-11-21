@@ -154,8 +154,12 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
         addType( new PowerPosteriorAnalysis()                        );
         addType( new SteppingStoneSampler()                          );
         addType( new ValidationAnalysis()                            );
+        
+        /* Add output types (in folder "analysis/mcmc/output") (alphabetic order) */
+        addType( new Trace()                                     );
+        addType( new TraceTree()                                 );
 
-        /* Add stopping rules (in folder "analysis/stoppingRules") (alphabetic order) */
+        /* Add stopping rules (in folder "analysis/stoppingRule") (alphabetic order) */
         addType( new GelmanRubinStoppingRule()                   );
         addType( new GewekeStoppingRule()                        );
         addType( new MaxIterationStoppingRule()                  );

@@ -22,7 +22,7 @@ namespace RevBayesCore {
     class RandomGeometricWalkProposal : public Proposal {
         
     public:
-        RandomGeometricWalkProposal( StochasticNode<long> *n, double a);                                                                    //!<  constructor
+        RandomGeometricWalkProposal( StochasticNode<std::int64_t> *n, double a);                                                                    //!<  constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -44,8 +44,8 @@ namespace RevBayesCore {
     private:
         // parameters
         
-        StochasticNode<long>*               variable;                                                                           //!< The variable the Proposal is working on
-        long                                stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
+        StochasticNode<std::int64_t>*               variable;                                                                           //!< The variable the Proposal is working on
+        std::int64_t                                stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
         double                              alpha;
         
     };

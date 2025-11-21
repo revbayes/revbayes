@@ -191,7 +191,7 @@ ContinuousCharacterData* ContinuousCharacterData::clone( void ) const
     return new ContinuousCharacterData(*this);
 }
 
-DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter(double error, long num_bins, double cushion_width) const
+DiscretizedContinuousCharacterData* ContinuousCharacterData::discretizeCharacter(double error, std::int64_t num_bins, double cushion_width) const
 {
 	// create the new matrix
 	size_t num_chars     = this->getNumberOfCharacters();
@@ -391,8 +391,8 @@ void ContinuousCharacterData::executeMethod(const std::string &n, const std::vec
     
     if ( n == "get" )
     {
-        long index_taxon = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
-        long index_site = static_cast<const TypedDagNode<long> *>( args[1] )->getValue()-1;
+        std::int64_t index_taxon = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        std::int64_t index_site = static_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue()-1;
         rv = getTaxonData(index_taxon)[index_site];
     }
     else

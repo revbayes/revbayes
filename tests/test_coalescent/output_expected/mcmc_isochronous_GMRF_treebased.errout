@@ -1,0 +1,12 @@
+   Processing file "output/horses_iso_Constant.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+max age: 	440857.3
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 17 different moves in a random move schedule with 100 moves per iteration
+   

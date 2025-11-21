@@ -13,7 +13,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-DecomposedInverseWishartDistribution::DecomposedInverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<long>* indf)  :
+DecomposedInverseWishartDistribution::DecomposedInverseWishartDistribution(const TypedDagNode<MatrixReal> *insigma0, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal(insigma0->getValue().getDim())),
 sigma0(insigma0),
 kappaVector(NULL),
@@ -31,7 +31,7 @@ dim( NULL )
     redrawValue();
 }
 
-DecomposedInverseWishartDistribution::DecomposedInverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<long>* indf)  :
+DecomposedInverseWishartDistribution::DecomposedInverseWishartDistribution(const TypedDagNode<RbVector<double> > *inkappaVector, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getValue().size()) ),
     sigma0(NULL),
     kappaVector(inkappaVector),
@@ -48,7 +48,7 @@ TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( inkappaVector->getVa
     redrawValue();
 }
 
-DecomposedInverseWishartDistribution::DecomposedInverseWishartDistribution(const TypedDagNode<long>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<long>* indf)  :
+DecomposedInverseWishartDistribution::DecomposedInverseWishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf)  :
 TypedDistribution<RevBayesCore::MatrixReal>(new MatrixReal( size_t(indim->getValue()) )),
     sigma0(NULL),
     kappaVector(NULL),
@@ -89,11 +89,11 @@ void DecomposedInverseWishartDistribution::swapParameterInternal(const DagNode *
     }
     if (oldP == dim)
     {
-        dim = static_cast<const TypedDagNode<long>* >(newP);
+        dim = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
     if (oldP == df)
     {
-        df = static_cast<const TypedDagNode<long>* >(newP);
+        df = static_cast<const TypedDagNode<std::int64_t>* >(newP);
     }
 }
 
