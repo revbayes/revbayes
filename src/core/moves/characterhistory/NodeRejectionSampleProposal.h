@@ -390,6 +390,8 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::getProposalTuningPar
 template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void )
 {
+    numCharacters = ctmc->getValue().getNumberOfCharacters();
+    
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     if ( p == NULL )
     {
