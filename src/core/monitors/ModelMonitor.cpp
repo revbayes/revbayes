@@ -56,35 +56,55 @@ void ModelMonitor::resetDagNodes( void )
     
     if ( model != NULL )
     {
-        // we only want to have each nodes once
-        // this should by default happen but here we check again
-        std::set<std::string> var_names;
+        // We only want to have each node once. This should happen by default, but here we check again.
+        std::set<std::string> added_var_names;
+        std::set<std::string> vector_base_names;
         
         const std::vector<DagNode*> &n = model->getDagNodes();
-        for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) 
-        {
-
-            DagNode *the_node = *it;
-
-            // only simple numeric variables can be monitored (i.e. only integer and real numbers)
-            if ( the_node->isSimpleNumeric() && the_node->isClamped() == false )
-            {
-                if ( (!stochastic_nodes_only && !the_node->isConstant() && the_node->getName() != "" && !the_node->isHidden() && !the_node->isElementVariable() ) ||
-                     ( the_node->isStochastic() && !the_node->isClamped() && !the_node->isHidden() ) )
-                {
-                    const std::string &name = the_node->getName();
-                    if ( exclude.find(name) == exclude.end() && var_names.find( name ) == var_names.end() )
-                    {
-                        addVariable( the_node );
-                        var_names.insert( name );
-                    }
-                    
-                }
-                
-            }
         
+        // Step 1: collect base names of vector variables
+        for (DagNode* the_node : n)
+        {
+            // only simple numeric variables can be monitored (i.e. only integers and real numbers)
+            if ( the_node->isSimpleNumeric() && the_node->isElementVariable() )
+            {
+                const std::string &name = the_node->getName();
+                
+                // extract vector name from the name of a vector element
+                size_t bracket_pos = name.find('[');
+                if (bracket_pos != std::string::npos)
+                {
+                    std::string base_name = name.substr(0, bracket_pos);
+                    vector_base_names.insert(base_name);
+                }
+            }
         }
         
+        // Step 2: add variables, including vector elements but not the vectors themselves
+        for (DagNode* the_node : n)
+        {
+            if ( the_node->isSimpleNumeric() && !the_node->isClamped() )
+            {
+                const std::string &name = the_node->getName();
+                
+                // skip this node if it is a vector whose elements we are already collecting
+                if ( !the_node->isElementVariable() && vector_base_names.count(name) > 0 )
+                {
+                    continue;  // skip the non-element version
+                }
+                
+                bool condition = !stochastic_nodes_only && !the_node->isConstant() && name != "";
+                
+                if ( !the_node->isHidden() && ( condition || the_node->isStochastic() ) )
+                {
+                    if ( exclude.find(name) == exclude.end() && added_var_names.find(name) == added_var_names.end() )
+                    {
+                        addVariable( the_node );
+                        added_var_names.insert( name );
+                    }
+                }
+            }
+        }
     }
     
 }
@@ -105,7 +125,7 @@ void ModelMonitor::setModel(Model *m)
     // reset the DAG nodes that should be monitored
     resetDagNodes();
     
-    sortNodesByName();
+    sortNodesByName(true);
 }
 
 
