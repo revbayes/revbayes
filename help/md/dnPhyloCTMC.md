@@ -18,11 +18,14 @@ using Felsenstein's pruning algorithm, with partial likelihoods stored for each
 branch of the tree. It is automatically outputted in the `Likelihood` column of
 the `mnFile()` and `mnScreen()` monitors (which can be suppressed with
 `likelihood = FALSE`).
-Optionally, an observation error probability can be specified
-to account for scoring ambiguity (e.g., in morphological data), which treats observed
-states as probabilistic classifications rather than absolute ground truth.
-This can be specified using `observationErrorProbability =` and `observationErrorFrequencies =`
-arguments for the observation error probabilitiy and the frequencies respectively.
+
+Optionally, an observation error model can be applied to 
+account for scoring ambiguity (e.g., in morphological datasets). 
+This distinguishes between the true biological state and the recorded score.
+When `observationErrorProbability` (epsilon) is > 0, the tip likelihoods
+are initialized as a mixture: with probability (1 - epsilon), the score 
+is accurate; with probability epsilon, the score is drawn from the 
+distribution defined by `observationErrorFrequencies`
 
 For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on
 [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model.
