@@ -243,7 +243,7 @@ namespace RevBayesCore {
         // members
         const TypedDagNode< double >*                                       homogeneous_clock_rate = nullptr;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_clock_rates = nullptr;
-        const TypedDagNode< SiteMixtureModel >*                     mixture_model = nullptr;
+        const TypedDagNode< SiteMixtureModel >*                             mixture_model = nullptr;
         const TypedDagNode< RateGenerator >*                                homogeneous_rate_matrix = nullptr;
         const TypedDagNode< RbVector< RateGenerator > >*                    heterogeneous_rate_matrices = nullptr;
         const TypedDagNode< double >*                                       observation_error_probability = nullptr;
@@ -434,7 +434,7 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     // initialize with default parameters
     homogeneous_clock_rate                  = n.homogeneous_clock_rate;
     heterogeneous_clock_rates               = n.heterogeneous_clock_rates;
-    mixture_model                = n.mixture_model;
+    mixture_model                           = n.mixture_model;
     homogeneous_rate_matrix                 = n.homogeneous_rate_matrix;
     heterogeneous_rate_matrices             = n.heterogeneous_rate_matrices;
     observation_error_probability           = n.observation_error_probability;
@@ -3233,6 +3233,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationErr
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setObservationErrorFrequencies(const TypedDagNode< Simplex > *r)
 {
+
+    if ( r != NULL )
+    {
+        if ( r->getValue().size() != this->num_chars )
+        {
+            throw RbException() << "Observation error frequency dimensions ("
+                                << r->getValue().size()
+                                << ") do not match the number of character states ("
+                                << this->num_chars << ")";
+        }
+    }
 
     // remove the old parameter first
     if ( observation_error_frequencies != NULL )
