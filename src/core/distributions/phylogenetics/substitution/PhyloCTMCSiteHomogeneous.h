@@ -499,27 +499,25 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                       if (this->using_observation_error == false)
                       {
-                        // store the likelihood
-                        p_site_mixture[c1] = tp_begin[c1 * this->num_chars + org_val];
+                          // store the likelihood
+                          p_site_mixture[c1] = tp_begin[c1 * this->num_chars + org_val];
                       }
-                        else
-                        {
-                            double tmp = 0.0;
-                            for ( size_t c2=0; c2<this->num_chars; ++c2 )
-                            {
-                                if ( c2 == org_val )
-                                {
-                                    tmp += tp_begin[c1*this->num_chars+c2] * (1.0 - obs_error_prob * (1.0-obs_error_freqs[c2]));
-                                }
-                                else
-                                {
-                                    tmp += tp_begin[c1*this->num_chars+c2] * (obs_error_prob*obs_error_freqs[org_val]);
-                                }
-                            }
-                            p_site_mixture[c1] = tmp;
+                      else
+                      {
+                          double tmp = 0.0;
+                          for ( size_t c2=0; c2<this->num_chars; ++c2 )
+                          {
+                              if ( c2 == org_val )
+                              {
+                                  tmp += tp_begin[c1*this->num_chars+c2] * (1.0 - obs_error_prob * (1.0-obs_error_freqs[c2]));
+                              }
+                              else
+                              {
+                                  tmp += tp_begin[c1*this->num_chars+c2] * (obs_error_prob*obs_error_freqs[org_val]);
+                              }
+                          }
+                          p_site_mixture[c1] = tmp;
                         }
-                        // store the likelihood
-                        // p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
 
                     }
 
