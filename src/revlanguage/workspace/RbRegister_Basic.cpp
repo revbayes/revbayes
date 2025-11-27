@@ -238,6 +238,7 @@
 #include "Func_writeDelimitedCharacterData.h"
 #include "Func_writeFasta.h"
 #include "Func_writeNexus.h"
+#include "Func_writePhylip.h"
 
 
 /* Math functions (in folder "functions/math") */
@@ -574,6 +575,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_writeDelimitedCharacterData()             );
         addFunction( new Func_writeFasta()                              );
         addFunction( new Func_writeNexus()                              );
+        addFunction( new Func_writePhylip()                             );
 
     }
     catch(RbException& rbException)
