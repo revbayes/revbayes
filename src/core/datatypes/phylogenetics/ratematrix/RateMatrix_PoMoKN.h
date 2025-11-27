@@ -55,8 +55,8 @@ namespace RevBayesCore {
 
         void                                        update(void);
         void                                        setEffectivePopulationSize( double ni );
-        void                                        setNumberOfAlleles( long na );
-        void                                        setVirtualPopulationSize( long ni );
+        void                                        setNumberOfAlleles( std::int64_t na );
+        void                                        setVirtualPopulationSize( std::int64_t ni );
         void                                        setMu(  const std::vector<double>& m );
         void                                        setPhi( const std::vector<double>& f );
 
@@ -65,8 +65,8 @@ namespace RevBayesCore {
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
         
-        std::int64_t                                        num_alleles;
-        std::int64_t                                        virtual_pop_size;
+        std::int64_t                                num_alleles;
+        std::int64_t                                virtual_pop_size;
         double                                      effective_pop_size;
         std::vector<double>                         mu;
         std::vector<double>                         phi;    
