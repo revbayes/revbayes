@@ -379,7 +379,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const path& fn, const RbVe
 
 }
 
-void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, long thinning, long skip_first )
+void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, long thinning, long skip_first, long num_entries )
 {
     
     // PoMo settings
@@ -445,6 +445,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     size_t pos_index = 0;
     
     size_t genome_index = 1;
+    size_t num_entries_read = 0;
     
     std::vector<std::string> tmpChars;
     bool has_names_been_read = false;
@@ -594,7 +595,12 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             lines_read = 0;
         }
         
-        if ( skipped_first == true && thinning == lines_read )
+        if ( skipped_first == true )
+        {
+            ++num_entries_read;
+        }
+        
+        if ( skipped_first == true && (num_entries == 0 || num_entries_read <= num_entries) )
         {
             
             const std::string& current_chrom = tmpChars[chr_index];
@@ -603,20 +609,39 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
                 // skip this side
                 continue;
             }
-                
+            
             if ( ref_genome != NULL )
             {
                 size_t current_pos = StringUtilities::asIntegerNumber( tmpChars[pos_index] );
-                for ( ; genome_index < current_pos; ++genome_index )
+                for ( ; genome_index < current_pos; ++genome_index, ++lines_read, ++num_entries)
                 {
-                    out_stream << chr << " " << genome_index;
-                    for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
+                    if ( thinning == lines_read && (num_entries == 0 || num_entries_read < num_entries) )
                     {
-                        out_stream << " " << num_samples_of_taxa_per_species[species_index] << ",0";
+                        
+                        // reset the lines read so that we can check the thinning again
+                        lines_read = 0;
+                        
+                        out_stream << chr << " " << genome_index;
+                        for (size_t species_index = 0; species_index < species_names.size(); ++species_index)
+                        {
+                            out_stream << " " << num_samples_of_taxa_per_species[species_index] << ",0";
+                        }
+                        out_stream << std::endl;
                     }
-                    out_stream << std::endl;
                 }
                 ++genome_index;
+            }
+        }
+        
+        
+        if ( skipped_first == true && thinning == lines_read && (num_entries == 0 || num_entries_read <= num_entries) )
+        {
+            
+            const std::string& current_chrom = tmpChars[chr_index];
+            if ( chr != "" && chr != current_chrom )
+            {
+                // skip this side
+                continue;
             }
             
             // reset the lines read so that we can check the thinning again
@@ -673,6 +698,11 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
             } // wrote all the species
             
             out_stream << std::endl;
+        }
+        
+        if ( num_entries_read == num_entries )
+        {
+            break;
         }
         
     };
