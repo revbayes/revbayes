@@ -24,7 +24,7 @@ template <class valueType> class TypedDagNode;
     class PoMoReversibleMutationRatesFunction : public TypedFunction<  RbVector<double> > {
         
     public:
-        PoMoReversibleMutationRatesFunction( long na, const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex);
+        PoMoReversibleMutationRatesFunction( std::int64_t na, const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex);
         
 
         virtual                                            ~PoMoReversibleMutationRatesFunction(void);                                                    //!< Virtual destructor
@@ -39,7 +39,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        long                                                K;
+        std::int64_t                                        K;
         const TypedDagNode< Simplex > *                     pi;
         const TypedDagNode< RbVector<double> > *            rho;
         

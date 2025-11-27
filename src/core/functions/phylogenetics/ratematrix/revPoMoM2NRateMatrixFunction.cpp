@@ -4,7 +4,7 @@
 
 using namespace RevBayesCore;
 
-revPoMoM2NRateMatrixFunction::revPoMoM2NRateMatrixFunction( long m,
+revPoMoM2NRateMatrixFunction::revPoMoM2NRateMatrixFunction( std::int64_t m,
                                                             const TypedDagNode< double > *n,
                                                             const TypedDagNode< RbVector<double> > *mut ,
                                                             const TypedDagNode< double > *g ) : TypedFunction<RateGenerator>( new RateMatrix_revPoMoM2N( m ) ),

@@ -14,7 +14,7 @@ using namespace RevBayesCore;
 
 /** Construct rate matrix with k alleles, a virtual population size, n states, a mutation matrix, fitnesses,
  * and balancing selection*/
-RateMatrix_PoMoBalanceKN::RateMatrix_PoMoBalanceKN( long num_states, long in_k, long in_n, long in_nmr)  :
+RateMatrix_PoMoBalanceKN::RateMatrix_PoMoBalanceKN( std::int64_t num_states, std::int64_t in_k, std::int64_t in_n, std::int64_t in_nmr)  :
 AbstractRateMatrix( num_states ),
 K( in_k ),
 N( in_n ),
@@ -228,7 +228,7 @@ std::vector<double> RateMatrix_PoMoBalanceKN::getStationaryFrequencies( void ) c
 }
 
 
-void RateMatrix_PoMoBalanceKN::setK( long & na )
+void RateMatrix_PoMoBalanceKN::setK( std::int64_t & na )
 {
     K = na;
 
@@ -237,7 +237,7 @@ void RateMatrix_PoMoBalanceKN::setK( long & na )
 
 }
 
-void RateMatrix_PoMoBalanceKN::setN( long & ni )
+void RateMatrix_PoMoBalanceKN::setN( std::int64_t & ni )
 {
     N = ni;
     
@@ -271,7 +271,7 @@ void RateMatrix_PoMoBalanceKN::setBeta( const std::vector<double> &b )
     needs_update = true;
 }
 
-void RateMatrix_PoMoBalanceKN::setB( const std::vector<long> &Bf )
+void RateMatrix_PoMoBalanceKN::setB( const std::vector<std::int64_t> &Bf )
 {
     B = Bf;
 

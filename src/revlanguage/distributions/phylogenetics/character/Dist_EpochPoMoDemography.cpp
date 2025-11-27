@@ -69,14 +69,14 @@ RevBayesCore::EpochPoMoDemography* Dist_EpochPoMoDemography::createDistribution(
 {
     
     // get the parameters
-    long                                                            n_sites = static_cast<const Natural              &>( num_sites->getRevObject() ).getValue();
-    long                                                            n_ind   = static_cast<const Natural              &>( num_individuals->getRevObject() ).getValue();
-    long                                                            f       = static_cast<const RlBoolean            &>( folded->getRevObject() ).getValue();
+    std::int64_t                                                    n_sites = static_cast<const Natural              &>( num_sites->getRevObject() ).getValue();
+    std::int64_t                                                    n_ind   = static_cast<const Natural              &>( num_individuals->getRevObject() ).getValue();
+    std::int64_t                                                    f       = static_cast<const RlBoolean            &>( folded->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   ne      = static_cast<const ModelVector<RealPos> &>( Ne->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   et      = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   m       = static_cast<const ModelVector<RealPos> &>( mu->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*            asfs    = static_cast<const Simplex              &>( ancestral_sfs->getRevObject() ).getDagNode();
-    long                                                            vps     = static_cast<const Natural              &>( virtual_pop_size->getRevObject() ).getValue();
+    std::int64_t                                                    vps     = static_cast<const Natural              &>( virtual_pop_size->getRevObject() ).getValue();
 
     const std::string&                                              c       = static_cast<const RlString             &>( coding->getRevObject() ).getValue();
     RevBayesCore::EpochPoMoDemography::CODING cd = RevBayesCore::EpochPoMoDemography::ALL;

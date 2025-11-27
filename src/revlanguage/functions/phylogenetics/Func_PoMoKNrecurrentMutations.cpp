@@ -34,8 +34,8 @@ Func_PoMoKNrecurrentMutations* Func_PoMoKNrecurrentMutations::clone( void ) cons
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_PoMoKNrecurrentMutations::createFunction( void ) const
 {
-    long n_alleles  = static_cast<const Natural                                                                                     &>( this->args[0].getVariable()->getRevObject() ).getValue();
-    long n_virtual  = static_cast<const Natural                                                                                     &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t n_alleles  = static_cast<const Natural                                                                                     &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    std::int64_t n_virtual  = static_cast<const Natural                                                                                     &>( this->args[1].getVariable()->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mutation_rates          = static_cast<const ModelVector<RealPos>   &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fitness_coefficients    = static_cast<const ModelVector<RealPos>   &>( this->args[3].getVariable()->getRevObject() ).getDagNode();

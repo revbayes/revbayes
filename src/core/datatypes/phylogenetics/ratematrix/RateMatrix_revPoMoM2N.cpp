@@ -15,7 +15,7 @@
 using namespace RevBayesCore;
 
 /** Construct rate matrix with n states */
-RateMatrix_revPoMoM2N::RateMatrix_revPoMoM2N( long m ) : AbstractRateMatrix( m+1 ),
+RateMatrix_revPoMoM2N::RateMatrix_revPoMoM2N( std::int64_t m ) : AbstractRateMatrix( m+1 ),
     N_virt( m ),
     mu( 2, 0.01 ),
     N_eff( 2 ),
@@ -205,7 +205,7 @@ void RateMatrix_revPoMoM2N::computeOffDiagonal( void )
     double harmonic_number_n = boost::math::digamma(N_eff) - boost::math::digamma(1.0);
     double harmonic_number_m = boost::math::digamma(N_virt) - boost::math::digamma(1.0);
     
-    long M = N_virt;
+    std::int64_t M = N_virt;
 
     // this matrix renormalized by the expected divergence of the N model
 

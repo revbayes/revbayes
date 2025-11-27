@@ -24,9 +24,9 @@ namespace RevBayesCore {
                             const TypedDagNode< RbVector<double> > *et,
                             const TypedDagNode< RbVector<double> > *mu,
                             const TypedDagNode< Simplex >* asfs,
-                            long vps,
-                            long n_sites,
-                            long n_ind,
+                            std::int64_t vps,
+                            std::int64_t n_sites,
+                            std::int64_t n_ind,
                             bool f=false,
                             CODING cod=ALL);
         virtual                                            ~EpochPoMoDemography(void);                                                     //!< Virtual destructor
@@ -34,12 +34,12 @@ namespace RevBayesCore {
         // public member functions
 
         // pure virtual
-        virtual EpochPoMoDemography*                       clone(void) const;                                                                      //!< Create an independent clone
+        virtual EpochPoMoDemography*                        clone(void) const;                                                                      //!< Create an independent clone
         
         // non-virtual
-        double                                             computeLnProbability(void);
+        double                                              computeLnProbability(void);
         
-        void                                               redrawValue(void);
+        void                                                redrawValue(void);
 
         
     protected:
@@ -62,10 +62,10 @@ namespace RevBayesCore {
         std::vector<RateMatrix_PoMoKN>                      rate_matrices;
 
         // members (fixed)
-        long                                                virtual_pop_size;
-        long                                                num_states;
-        long                                                num_sites;
-        long                                                num_individuals;
+        std::int64_t                                        virtual_pop_size;
+        std::int64_t                                        num_states;
+        std::int64_t                                        num_sites;
+        std::int64_t                                        num_individuals;
         bool                                                folded;
         CODING                                              coding;
 

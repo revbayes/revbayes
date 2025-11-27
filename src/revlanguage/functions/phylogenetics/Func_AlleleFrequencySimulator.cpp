@@ -52,15 +52,15 @@ RevPtr<RevVariable> Func_AlleleFrequencySimulator::execute()
     
     RevBayesCore::Tree* tree = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getValue().clone();
     
-    std::vector<long> population_sizes      = static_cast<const ModelVector<Natural> &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    double generation_time                  = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getValue();
-    bool moran_generations                  = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getValue();
-    long num_sites                          = static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
-    std::vector<double> mutation_rates      = static_cast<const ModelVector<RealPos> &>( this->args[5].getVariable()->getRevObject() ).getValue();
-    std::vector<long> samples_per_species   = static_cast<const ModelVector<Natural> &>( this->args[6].getVariable()->getRevObject() ).getValue();
-    double root_branch                      = static_cast<const RealPos &>( this->args[7].getVariable()->getRevObject() ).getValue();
-    bool variable                           = static_cast<const RlBoolean &>( this->args[8].getVariable()->getRevObject() ).getValue();
-    const std::string& fn                   = static_cast<const RlString &>( this->args[9].getVariable()->getRevObject() ).getValue();
+    std::vector<std::int64_t>   population_sizes    = static_cast<const ModelVector<Natural> &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    double                      generation_time     = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    bool                        moran_generations   = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t                num_sites           = static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+    std::vector<double>         mutation_rates      = static_cast<const ModelVector<RealPos> &>( this->args[5].getVariable()->getRevObject() ).getValue();
+    std::vector<std::int64_t>   samples_per_species = static_cast<const ModelVector<Natural> &>( this->args[6].getVariable()->getRevObject() ).getValue();
+    double                      root_branch         = static_cast<const RealPos &>( this->args[7].getVariable()->getRevObject() ).getValue();
+    bool                        variable            = static_cast<const RlBoolean &>( this->args[8].getVariable()->getRevObject() ).getValue();
+    const std::string&          fn                  = static_cast<const RlString &>( this->args[9].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator( generation_time, mutation_rates, moran_generations );

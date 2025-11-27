@@ -80,10 +80,11 @@ RevPtr<RevVariable> Func_convertVCFtoCountsFile::execute( void )
     }
 
     
-    long thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
-    long skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    std::int64_t thinning    = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    std::int64_t skip_first  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    std::int64_t num_entries  = static_cast< const Natural&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
 
-    vcf_reader.convertToCountsFile( fn_counts, taxa, type, chrom, ref_genome, thinning, skip_first );
+    vcf_reader.convertToCountsFile( fn_counts, taxa, type, chrom, ref_genome, thinning, skip_first, num_entries );
     
     return NULL;
 }
@@ -127,6 +128,7 @@ const ArgumentRules& Func_convertVCFtoCountsFile::getArgumentRules( void ) const
         
         argument_rules.push_back( new ArgumentRule( "thinning", Natural::getClassTypeSpec(), "If thinning is larger than 1, then we only take the i-th entry of the VCF.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
         argument_rules.push_back( new ArgumentRule( "skipFirst", Natural::getClassTypeSpec(), "Skip the first n entries.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        argument_rules.push_back( new ArgumentRule( "numEntries", Natural::getClassTypeSpec(), "Number of entries to read.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0l) ) );
 
         rules_set = true;
         

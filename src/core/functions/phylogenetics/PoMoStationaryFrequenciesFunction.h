@@ -23,7 +23,7 @@ template <class valueType> class TypedDagNode;
     class PoMoStationaryFrequenciesFunction : public TypedFunction< Simplex > {
         
     public:
-        PoMoStationaryFrequenciesFunction( long na, long nv, const TypedDagNode< double > *ne, const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex);
+        PoMoStationaryFrequenciesFunction( std::int64_t na, std::int64_t nv, const TypedDagNode< double > *ne, const TypedDagNode< Simplex > *bf, const TypedDagNode< RbVector<double> > *ex);
         
 
         virtual                                            ~PoMoStationaryFrequenciesFunction(void);                                                    //!< Virtual destructor
@@ -38,8 +38,8 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        long                                                K;
-        long                                                V;
+        std::int64_t                                        K;
+        std::int64_t                                        V;
         const TypedDagNode< double > *                      N;
         const TypedDagNode< Simplex > *                     pi;
         const TypedDagNode< RbVector<double> > *            rho;

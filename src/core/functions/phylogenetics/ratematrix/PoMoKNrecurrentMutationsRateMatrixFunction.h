@@ -27,8 +27,8 @@ namespace RevBayesCore {
         
     public:
 
-        PoMoKNrecurrentMutationsRateMatrixFunction( long na,
-                                                    long nv,
+        PoMoKNrecurrentMutationsRateMatrixFunction(std::int64_t na,
+                                                   std::int64_t nv,
                                                     const TypedDagNode< RbVector<double> > *mut,
                                                     const TypedDagNode< RbVector<double> > *fit, 
                                                     bool rm );  
@@ -45,12 +45,12 @@ namespace RevBayesCore {
         
     private:
         
-        long                                                    computeNumStates( long na, long ni );
-        long                                                    computeNumMutRates( long na );
+        std::int64_t                                                   computeNumStates(std::int64_t na,std::int64_t ni );
+        std::int64_t                                                   computeNumMutRates(std::int64_t na );
 
         // members
-        long                                                    K;
-        long                                                    V;
+        std::int64_t                                            K;
+        std::int64_t                                            V;
         const TypedDagNode< RbVector<double> >*                 mu;
         const TypedDagNode< RbVector<double> >*                 phi;
         bool                                                    R;

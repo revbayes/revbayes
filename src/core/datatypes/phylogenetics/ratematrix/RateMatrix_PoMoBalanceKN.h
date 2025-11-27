@@ -44,7 +44,7 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
 
         //RateMatrix_PoMoBalanceKN(size_t num_states) ;
-        RateMatrix_PoMoBalanceKN( long num_states, long in_k, long in_n, long in_nmr )  ;
+        RateMatrix_PoMoBalanceKN( std::int64_t num_states, std::int64_t in_k, std::int64_t in_n, std::int64_t in_nmr )  ;
         RateMatrix_PoMoBalanceKN(const RateMatrix_PoMoBalanceKN& m) ;
 
         RateMatrix_PoMoBalanceKN&                         operator=(const RateMatrix_PoMoBalanceKN &r) ;
@@ -57,24 +57,24 @@ namespace RevBayesCore {
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setK( long &na );
-        void                                        setN( long &ni );
+        void                                        setK( std::int64_t &na );
+        void                                        setN( std::int64_t &ni );
         void                                        setMu(  const std::vector<double> &m );
         void                                        setPhi( const std::vector<double> &f );
         void                                        setBeta( const std::vector<double> &b );
-        void                                        setB( const std::vector<long> &Bf );
+        void                                        setB( const std::vector<std::int64_t> &Bf );
 
 
     private:
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
 
-        long                                        K;
-        long                                        N;
-        std::vector<double>                         mu;   
+        std::int64_t                                K;
+        std::int64_t                                N;
+        std::vector<double>                         mu;
         std::vector<double>                         phi;
         std::vector<double>                         beta;                                                                //!< Vector of precalculated product of eigenvectors and their inverse
-        std::vector<long>                           B;
+        std::vector<std::int64_t>                   B;
         // std::vector<double>                         stationaryVector;                    //!< Holds the stationary frequencies
 
     };

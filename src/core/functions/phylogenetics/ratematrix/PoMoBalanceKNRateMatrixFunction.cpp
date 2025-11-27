@@ -4,12 +4,12 @@
 using namespace RevBayesCore;
 
 
-PoMoBalanceKNRateMatrixFunction::PoMoBalanceKNRateMatrixFunction(    const TypedDagNode< long > *na,
-                                                                     const TypedDagNode< long > *ni,
+PoMoBalanceKNRateMatrixFunction::PoMoBalanceKNRateMatrixFunction(    const TypedDagNode< std::int64_t > *na,
+                                                                     const TypedDagNode< std::int64_t > *ni,
                                                                      const TypedDagNode< RbVector<double> > *m,
                                                                      const TypedDagNode< RbVector<double> > *f,
                                                                      const TypedDagNode< RbVector<double> > *b,
-                                                                     const TypedDagNode< RbVector<long> > *Bf  ) :
+                                                                     const TypedDagNode< RbVector<std::int64_t> > *Bf  ) :
 TypedFunction<RateGenerator>( new RateMatrix_PoMoBalanceKN( computeNumStates( na->getValue(), ni->getValue() ), na->getValue(), ni->getValue(), computeNumMutRates( na->getValue() ) ) ),
 K( na ),
 N( ni ),
@@ -37,10 +37,10 @@ PoMoBalanceKNRateMatrixFunction::~PoMoBalanceKNRateMatrixFunction( void )
 }
 
 
-long PoMoBalanceKNRateMatrixFunction::computeNumStates( long na, long ni )
+std::int64_t PoMoBalanceKNRateMatrixFunction::computeNumStates( std::int64_t na, std::int64_t ni )
 {
 
-    long numStates = na + (na*na-na)*(ni-1)*0.5;
+    std::int64_t numStates = na + (na*na-na)*(ni-1)*0.5;
     
     return numStates;
 
@@ -48,10 +48,10 @@ long PoMoBalanceKNRateMatrixFunction::computeNumStates( long na, long ni )
 
 
 
-long PoMoBalanceKNRateMatrixFunction::computeNumMutRates( long na )
+std::int64_t PoMoBalanceKNRateMatrixFunction::computeNumMutRates( std::int64_t na )
 {
 
-    long numMutRates = na*na-na;
+    std::int64_t numMutRates = na*na-na;
 
     return numMutRates;
 
@@ -68,12 +68,12 @@ PoMoBalanceKNRateMatrixFunction* PoMoBalanceKNRateMatrixFunction::clone( void ) 
 void PoMoBalanceKNRateMatrixFunction::update( void )
 {
     // get the information from the arguments for reading the file
-    long na = K->getValue();
-    long ni = N->getValue();
+    std::int64_t na = K->getValue();
+    std::int64_t ni = N->getValue();
     const std::vector<double>& m = mu->getValue();
     const std::vector<double>& f = phi->getValue();
     const std::vector<double>& b  = beta->getValue();
-    const std::vector<long>&   Bf = B->getValue();
+    const std::vector<std::int64_t>&   Bf = B->getValue();
 
     // set the base frequencies
     static_cast< RateMatrix_PoMoBalanceKN* >(value)->setK( na );
@@ -93,12 +93,12 @@ void PoMoBalanceKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP,
 
     if (oldP == K)
     {
-        K = static_cast<const TypedDagNode< long >* >( newP );
+        K = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
     
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< long >* >( newP );
+        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
 
     if (oldP == mu)
@@ -118,7 +118,7 @@ void PoMoBalanceKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP,
 
     if (oldP == B)
     {
-        B = static_cast<const TypedDagNode< RbVector<long> >* >( newP );
+        B = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
     }
 
 }

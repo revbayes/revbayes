@@ -35,10 +35,10 @@ namespace RevBayesCore {
         VCFReader*                                              clone(void) const;
         HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref, const RbVector<Taxon>& in_taxa );
         HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( bool skip_missing, const std::string& chr, AbstractDiscreteTaxonData* ref, const RbVector<Taxon>& in_taxa );
-        void                                                    convertToNexusFile( const std::string& fn, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref, const RbVector<Taxon>& in_taxa, long thinning, long skip );
-        void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref, long thinning, long skip );
-        RbVector<RbVector<long>>                                convertToPSMC( const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip );
-        RbVector<long>                                          convertToSFS( const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip );
+        void                                                    convertToNexusFile( const std::string& fn, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref, const RbVector<Taxon>& in_taxa, std::int64_t thinning, std::int64_t skip );
+        void                                                    convertToCountsFile( const std::string& fn, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref, std::int64_t thinning, std::int64_t skip, std::int64_t num_entries  );
+        RbVector< RbVector<std::int64_t> >                      convertToPSMC( const RbVector<Taxon>& taxa_list, const std::string& chr, std::int64_t thinning, std::int64_t skip );
+        RbVector<std::int64_t>                                  convertToSFS( const RbVector<Taxon>& taxa_list, const std::string& chr, std::int64_t thinning, std::int64_t skip);
         void                                                    computeMonomorphicVariableStatistics( const path& fn, const RbVector<Taxon>& taxa_list);
 
     protected:

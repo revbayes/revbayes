@@ -166,7 +166,7 @@ namespace RevBayesCore {
         virtual void                                                        computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle, double* likelihoods, size_t likelihood_offset, size_t node_offset, size_t pattern_block_size, size_t mixture_offset) = 0;
-        virtual void                                                        computeTipLikelihood(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset,  size_t node_offset, size_t pattern_block_size, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<unsigned long> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix) = 0;
+        virtual void                                                        computeTipLikelihood(const TopologyNode &node, size_t node_index, double* likelihoods, size_t likelihood_offset,  size_t node_offset, size_t pattern_block_size, size_t mixture_offset, const std::vector<std::vector<RbBitSet> >& ambiguous_char_matrix, const std::vector<std::vector<std::uint64_t> >& char_matrix, const std::vector<std::vector<bool> >& gap_matrix) = 0;
 
         // virtual methods that you may want to overwrite
         virtual void                                                        compress(void);
@@ -3752,7 +3752,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
         else
         {
             // get the ancestral character for this site
-            unsigned long parentState = parent.getStateIndex();
+            std::uint64_t parentState = parent.getStateIndex();
 
             double *freqs = transition_prob_matrices[ site_mixture_index][ parentState ];
 

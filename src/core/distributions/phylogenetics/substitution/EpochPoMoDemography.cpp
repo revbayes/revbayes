@@ -16,16 +16,16 @@ using namespace RevBayesCore;
 
 /*StairwayPlot Distribution Constructor
  * @param p A simplex of the the probabilities for each category
- * @param n A long for the number of trials
+ * @param n A std::int64_t for the number of trials
  */
 
 EpochPoMoDemography::EpochPoMoDemography(const TypedDagNode< RbVector<double> > *n,
                                          const TypedDagNode< RbVector<double> > *et,
                                          const TypedDagNode< RbVector<double> > *m,
                                          const TypedDagNode< Simplex >* asfs,
-                                         long vps,
-                                         long n_sites,
-                                         long n_ind,
+                                         std::int64_t vps,
+                                         std::int64_t n_sites,
+                                         std::int64_t n_ind,
                                          bool f,
                                          CODING cod) : TypedDistribution< RbVector<double> >( new RbVector<double>( f ? (n_ind/2)+1 : n_ind, 1 ) ),
     ne( n ),

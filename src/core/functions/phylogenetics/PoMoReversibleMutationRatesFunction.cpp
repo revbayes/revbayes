@@ -19,8 +19,8 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-PoMoReversibleMutationRatesFunction::PoMoReversibleMutationRatesFunction(   long na, 
-                                                                            const TypedDagNode< Simplex > *bf, 
+PoMoReversibleMutationRatesFunction::PoMoReversibleMutationRatesFunction(   std::int64_t na,
+                                                                            const TypedDagNode< Simplex > *bf,
                                                                             const TypedDagNode< RbVector<double> > *ex) : 
     TypedFunction< RbVector<double> > ( new RbVector<double>( na*(na - 1), 0.0) ),
     K( na ),
@@ -59,7 +59,7 @@ void PoMoReversibleMutationRatesFunction::update( void )
 {
 
     // get the information from the arguments
-    long n_alleles = K;
+    std::int64_t n_alleles = K;
     const std::vector<double>& base_frequencies   = pi  -> getValue();
     const std::vector<double>& exchangeabilitites = rho -> getValue();
 

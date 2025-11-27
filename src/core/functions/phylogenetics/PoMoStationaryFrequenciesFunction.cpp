@@ -17,9 +17,9 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-PoMoStationaryFrequenciesFunction::PoMoStationaryFrequenciesFunction(   long na,
-                                                                        long nv, 
-                                                                        const TypedDagNode< double > *ne, 
+PoMoStationaryFrequenciesFunction::PoMoStationaryFrequenciesFunction(   std::int64_t na,
+                                                                        std::int64_t nv, 
+                                                                        const TypedDagNode< double > *ne,
                                                                         const TypedDagNode< Simplex > *bf, 
                                                                         const TypedDagNode< RbVector<double> > *ex) : TypedFunction< Simplex > ( new Simplex() ),
     K( na ),
@@ -29,7 +29,7 @@ PoMoStationaryFrequenciesFunction::PoMoStationaryFrequenciesFunction(   long na,
     rho( ex )
 {
 
-    long n_states  = na + na*(na-1)*(nv-1)/2;
+    std::int64_t n_states  = na + na*(na-1)*(nv-1)/2;
 
     for (size_t i = 0; i < n_states; ++i) {
         static_cast< std::vector<double>* >(value)->push_back(0.0);
@@ -61,8 +61,8 @@ void PoMoStationaryFrequenciesFunction::update( void )
 {
 
     // get the information from the arguments
-    long n_alleles = K;
-    long n_virtual = V;
+    std::int64_t n_alleles = K;
+    std::int64_t n_virtual = V;
     const double& n_effective = (double)N -> getValue();
     const std::vector<double>& base_frequencies = pi  -> getValue();
     const std::vector<double>& exchangeabilitites = rho -> getValue();

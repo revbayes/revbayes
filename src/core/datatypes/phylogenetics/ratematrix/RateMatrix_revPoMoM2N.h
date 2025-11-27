@@ -16,7 +16,7 @@ namespace RevBayesCore {
     class RateMatrix_revPoMoM2N : public AbstractRateMatrix {
         
     public:
-        RateMatrix_revPoMoM2N(long m);                                                                                                       //!< Construct rate matrix with n states
+        RateMatrix_revPoMoM2N(std::int64_t m);                                                                                                       //!< Construct rate matrix with n states
         RateMatrix_revPoMoM2N(const RateMatrix_revPoMoM2N& m);                                                                                //!< Copy constructor
         virtual                             ~RateMatrix_revPoMoM2N(void);                                                                  //!< Destructor
         

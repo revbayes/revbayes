@@ -8,6 +8,7 @@
 #include "TypedFunction.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 
@@ -28,7 +29,7 @@ namespace RevBayesCore {
         
     public:
 
-        revPoMoBalanceKNRateMatrixFunction( const TypedDagNode< long > *na, const TypedDagNode< long > *ni,const TypedDagNode< Simplex  > *p, const TypedDagNode< RbVector<double> > *r, const TypedDagNode< RbVector<double> > *s, const TypedDagNode< RbVector<double> > *b  );
+        revPoMoBalanceKNRateMatrixFunction( const TypedDagNode<std::int64_t> *na, const TypedDagNode<std::int64_t> *ni,const TypedDagNode< Simplex  > *p, const TypedDagNode< RbVector<double> > *r, const TypedDagNode< RbVector<double> > *s, const TypedDagNode< RbVector<double> > *b  );
 
         virtual                                            ~revPoMoBalanceKNRateMatrixFunction(void);                                                    //!< Virtual destructor
         
@@ -42,12 +43,12 @@ namespace RevBayesCore {
         
     private:
 
-        long                                                    computeNumStates( long na, long ni );
-        long                                                    computeNumExchangeabilities( long na );
+        std::int64_t                                                   computeNumStates(std::int64_t na,std::int64_t ni );
+        std::int64_t                                                   computeNumExchangeabilities(std::int64_t na );
         
         // members
-        const TypedDagNode<long>*                           N;
-        const TypedDagNode< long >*                         K;
+        const TypedDagNode<std::int64_t>*                   N;
+        const TypedDagNode<std::int64_t>*                   K;
         const TypedDagNode< Simplex >*                      pi;
         const TypedDagNode< RbVector<double> >*             rho;
         const TypedDagNode< RbVector<double> >*             phi;

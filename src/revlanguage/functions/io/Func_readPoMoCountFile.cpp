@@ -54,8 +54,8 @@ RevPtr<RevVariable> Func_readPoMoCountFile::execute( void )
         reader_format = RevBayesCore::PoMoCountFileReader::NaturalNumbers;
     }
     
-    const std::string& weighting_method = static_cast<const RlString&>(       args[3].getVariable()->getRevObject() ).getValue();
-    long  effective_population_size     = static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+    const std::string& weighting_method         = static_cast<const RlString&>(       args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t  effective_population_size     = static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
 
 	RevBayesCore::PoMoCountFileReader* pcfr = new RevBayesCore::PoMoCountFileReader( file_in, virtual_population_size, reader_format, weighting_method, effective_population_size );
 

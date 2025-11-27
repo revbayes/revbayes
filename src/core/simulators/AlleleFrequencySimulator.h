@@ -15,7 +15,7 @@ class MatrixReal;
     /**
      * This class provides an allele frequency simulator.
      *
-     * We simulate the allele frequencies under a Moran process along a phylogeny.
+     * We simulate the allele frequencies under a Moran process astd::int64_t a phylogeny.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -29,17 +29,17 @@ class MatrixReal;
         
         AlleleFrequencySimulator*                       clone(void) const;
         
-        void                                            simulateAlleleFrequencies(const Tree* t, const std::vector<long>& ps, size_t ns, const std::vector<long>& s, double r, const std::string& fn, bool only_Variable ) const;
-        MatrixReal*                                     simulateAlleleFrequenciesMatrix( double t, long ps, long r ) const;
-        RbVector<double>*                               simulateAlleleFrequenciesVector( double t, long ps, long r, size_t s ) const;
-        RbVector<double>*                               simulateAlleleFrequenciesVectorEpoch( const std::vector<double>& t, const std::vector<long>& ps, long r, size_t s, long f ) const;
+        void                                            simulateAlleleFrequencies(const Tree* t, const std::vector<std::int64_t>& ps, size_t ns, const std::vector<std::int64_t>& s, double r, const std::string& fn, bool only_Variable ) const;
+        MatrixReal*                                     simulateAlleleFrequenciesMatrix( double t, std::int64_t ps, std::int64_t r ) const;
+        RbVector<double>*                               simulateAlleleFrequenciesVector( double t, std::int64_t ps, std::int64_t r, size_t s ) const;
+        RbVector<double>*                               simulateAlleleFrequenciesVectorEpoch( const std::vector<double>& t, const std::vector<std::int64_t>& ps, std::int64_t r, size_t s, std::int64_t f ) const;
 
     private:
         
         bool                                            isVariable(std::vector<int>& site_pattern) const;
-        bool                                            simulateAlignment(const TopologyNode& n, long states, const std::vector<long>& ps, const std::vector<long>& s, std::vector<int>& site_pattern, bool& monomorphic ) const;
-        long                                            simulateAlongBranch(double ps, long root_start_state, double branch_length ) const;
-        void                                            writeCountsFile(const Tree* t, const path& fn, const std::vector<std::vector<int> >& taxa, const std::vector<long>& s) const;
+        bool                                            simulateAlignment(const TopologyNode& n, std::int64_t states, const std::vector<std::int64_t>& ps, const std::vector<std::int64_t>& s, std::vector<int>& site_pattern, bool& monomorphic ) const;
+        std::int64_t                                    simulateAlongBranch(double ps, std::int64_t root_start_state, double branch_length ) const;
+        void                                            writeCountsFile(const Tree* t, const path& fn, const std::vector<std::vector<int> >& taxa, const std::vector<std::int64_t>& s) const;
         
         double                                          generation_time;
         std::vector<double>                             mutation_rates;

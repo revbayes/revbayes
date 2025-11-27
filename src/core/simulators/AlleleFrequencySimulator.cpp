@@ -50,7 +50,7 @@ bool AlleleFrequencySimulator::isVariable(std::vector<int>& site_pattern) const
 
 
 
-void AlleleFrequencySimulator::simulateAlleleFrequencies( const Tree* tree, const std::vector<long>& population_sizes, size_t num_sites, const std::vector<long>& samples_per_species, double root_branch, const std::string& fn, bool only_variable ) const
+void AlleleFrequencySimulator::simulateAlleleFrequencies( const Tree* tree, const std::vector<std::int64_t>& population_sizes, size_t num_sites, const std::vector<std::int64_t>& samples_per_species, double root_branch, const std::string& fn, bool only_variable ) const
 {
     // first, get some variables/settings for the simulation
     size_t num_tips     = tree->getNumberOfTips();
@@ -99,7 +99,7 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const Tree* tree, cons
         bool success = false;
         do {
             ++num_attempts;
-            long root_start_state = 0;
+            std::int64_t root_start_state = 0;
             
             // draw the state
             double u = rng->uniform01();
@@ -113,7 +113,7 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const Tree* tree, cons
             }
             
             // simulate the root sequence
-            long root_state = simulateAlongBranch( population_sizes[root_index], root_start_state, root_branch );
+            std::int64_t root_state = simulateAlongBranch( population_sizes[root_index], root_start_state, root_branch );
 
             // recursively simulate the sequences
             mono = true;
@@ -191,7 +191,7 @@ void AlleleFrequencySimulator::simulateAlleleFrequencies( const Tree* tree, cons
 }
 
 
-MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double time, long population_size, long reps ) const
+MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double time, std::int64_t population_size, std::int64_t reps ) const
 {
     
     MatrixReal* tpm = new MatrixReal(population_size+1);
@@ -224,14 +224,14 @@ MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double ti
     // Print progress bar (68 characters wide)
     progress.start();
     
-    for ( long i=0; i<=population_size; ++i )
+    for ( std::int64_t i=0; i<=population_size; ++i )
     {
         
-        std::vector<long> counts = std::vector<long>(population_size+1, 0);
+        std::vector<std::int64_t> counts = std::vector<std::int64_t>(population_size+1, 0);
         
         for (size_t r=0; r<reps_this_process; ++r)
         {
-            long obs_state = simulateAlongBranch(population_size, i, time);
+            std::int64_t obs_state = simulateAlongBranch(population_size, i, time);
             ++counts[obs_state];
         }
         
@@ -290,7 +290,7 @@ MatrixReal* AlleleFrequencySimulator::simulateAlleleFrequenciesMatrix( double ti
 }
 
 
-RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVector( double time, long population_size, long reps, size_t start_index ) const
+RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVector( double time, std::int64_t population_size, std::int64_t reps, size_t start_index ) const
 {
     
     RbVector<double>* tpv = new RbVector<double>(population_size+1);
@@ -323,11 +323,11 @@ RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVector( dou
     // Print progress bar (68 characters wide)
     progress.start();
     
-    std::vector<long> counts = std::vector<long>(population_size+1, 0);
+    std::vector<std::int64_t> counts = std::vector<std::int64_t>(population_size+1, 0);
         
     for (size_t r=0; r<reps_this_process; ++r)
     {
-        long obs_state = simulateAlongBranch(population_size, start_index, time);
+        std::int64_t obs_state = simulateAlongBranch(population_size, start_index, time);
         ++counts[obs_state];
         
         progress.update(r);
@@ -382,7 +382,7 @@ RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVector( dou
 
 
 
-RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVectorEpoch( const std::vector<double>& time, const std::vector<long>& population_size, long reps, size_t start_index, long final_population_size ) const
+RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVectorEpoch( const std::vector<double>& time, const std::vector<std::int64_t>& population_size, std::int64_t reps, size_t start_index, std::int64_t final_population_size ) const
 {
     // get some variables for the process
     
@@ -421,27 +421,27 @@ RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVectorEpoch
     // Print progress bar (68 characters wide)
     progress.start();
     
-    std::vector<long> counts = std::vector<long>(final_population_size+1, 0);
+    std::vector<std::int64_t> counts = std::vector<std::int64_t>(final_population_size+1, 0);
     
     // iterate over the replicates
     for (size_t r=0; r<reps_this_process; ++r)
     {
         
         // set the current state to the start state
-        long current_state = start_index;
+        std::int64_t current_state = start_index;
         
         // iterate over the epochs
         for (size_t epoch_index=0; epoch_index<num_epochs; ++epoch_index)
         {
             
             // get the population size for the current epoch
-            long current_epoch_population_size = population_size[epoch_index];
+            std::int64_t current_epoch_population_size = population_size[epoch_index];
             
             // if this is not the first epoch, then we need to rescale the index
             if ( epoch_index > 0 )
             {
                 // get the population size for the current epoch
-                long previous_epoch_population_size = population_size[epoch_index-1];
+                std::int64_t previous_epoch_population_size = population_size[epoch_index-1];
                 double prev_freq = double(current_state)/previous_epoch_population_size;
                 current_state = RbStatistics::Binomial::rv(current_epoch_population_size, prev_freq, *rng);
             }
@@ -454,9 +454,9 @@ RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVectorEpoch
         }
         
         // get the population size for the current epoch
-        long previous_epoch_population_size = population_size[num_epochs-1];
+        std::int64_t previous_epoch_population_size = population_size[num_epochs-1];
         double prev_freq = double(current_state)/previous_epoch_population_size;
-        long obs_state = RbStatistics::Binomial::rv(final_population_size, prev_freq, *rng);
+        std::int64_t obs_state = RbStatistics::Binomial::rv(final_population_size, prev_freq, *rng);
         ++counts[obs_state];
         
         progress.update(r);
@@ -509,7 +509,7 @@ RbVector<double>* AlleleFrequencySimulator::simulateAlleleFrequenciesVectorEpoch
 
 
 
-bool AlleleFrequencySimulator::simulateAlignment( const TopologyNode& n, long state, const std::vector<long>& population_sizes, const std::vector<long>& samples_per_species, std::vector<int>& taxa, bool& monomorphic ) const
+bool AlleleFrequencySimulator::simulateAlignment( const TopologyNode& n, std::int64_t state, const std::vector<std::int64_t>& population_sizes, const std::vector<std::int64_t>& samples_per_species, std::vector<int>& taxa, bool& monomorphic ) const
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
@@ -533,14 +533,14 @@ bool AlleleFrequencySimulator::simulateAlignment( const TopologyNode& n, long st
         const TopologyNode& left = n.getChild(0);
         size_t left_index  = left.getIndex();
         double left_branch = left.getBranchLength();
-        long left_state = simulateAlongBranch( population_sizes[left_index], state, left_branch );
+        std::int64_t left_state = simulateAlongBranch( population_sizes[left_index], state, left_branch );
         simulateAlignment( left, left_state, population_sizes, samples_per_species, taxa, monomorphic );
         
         // the right child
         const TopologyNode& right = n.getChild(1);
         size_t right_index  = right.getIndex();
         double right_branch = right.getBranchLength();
-        long right_state = simulateAlongBranch( population_sizes[right_index], state, right_branch );
+        std::int64_t right_state = simulateAlongBranch( population_sizes[right_index], state, right_branch );
         simulateAlignment( right, right_state, population_sizes, samples_per_species, taxa, monomorphic );
     }
     
@@ -549,7 +549,7 @@ bool AlleleFrequencySimulator::simulateAlignment( const TopologyNode& n, long st
 
 
 
-long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size, long root_start_state, double branch_length ) const
+std::int64_t AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size, std::int64_t root_start_state, double branch_length ) const
 {
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -559,7 +559,7 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
     double per_generation_mutation_rate_0 = mutation_rates[0] / generation_time;
     double per_generation_mutation_rate_1 = mutation_rates[1] / generation_time;
     
-    long current_state = root_start_state;
+    std::int64_t current_state = root_start_state;
     
     while ( current_time < branch_length )
     {
@@ -642,7 +642,7 @@ long AlleleFrequencySimulator::simulateAlongBranch( double this_populuation_size
 }
 
 
-void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const path& file_name, const std::vector<std::vector<int> >& taxa, const std::vector<long>& samples_per_species) const
+void AlleleFrequencySimulator::writeCountsFile(const Tree* tree, const path& file_name, const std::vector<std::vector<int> >& taxa, const std::vector<std::int64_t>& samples_per_species) const
 {
     
     // first, get some variables/settings for the simulation

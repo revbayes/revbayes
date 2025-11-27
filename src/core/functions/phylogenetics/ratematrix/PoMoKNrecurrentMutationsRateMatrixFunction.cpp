@@ -4,8 +4,8 @@
 using namespace RevBayesCore;
 
 
-PoMoKNrecurrentMutationsRateMatrixFunction::PoMoKNrecurrentMutationsRateMatrixFunction(     long na,
-                                                                                            long nv,
+PoMoKNrecurrentMutationsRateMatrixFunction::PoMoKNrecurrentMutationsRateMatrixFunction(    std::int64_t na,
+                                                                                           std::int64_t nv,
                                                                                             const TypedDagNode< RbVector<double> > *mut,
                                                                                             const TypedDagNode< RbVector<double> > *fit,
                                                                                             bool rm ) :
@@ -30,10 +30,10 @@ PoMoKNrecurrentMutationsRateMatrixFunction::~PoMoKNrecurrentMutationsRateMatrixF
 }
 
 
-long PoMoKNrecurrentMutationsRateMatrixFunction::computeNumStates( long na, long ni )
+std::int64_t PoMoKNrecurrentMutationsRateMatrixFunction::computeNumStates(std::int64_t na,std::int64_t ni )
 {
 
-    long numStates = na + (na*na-na)*(ni-1)*0.5;
+   std::int64_t numStates = na + (na*na-na)*(ni-1)*0.5;
     
     return numStates;
 
@@ -41,10 +41,10 @@ long PoMoKNrecurrentMutationsRateMatrixFunction::computeNumStates( long na, long
 
 
 
-long PoMoKNrecurrentMutationsRateMatrixFunction::computeNumMutRates( long na )
+std::int64_t PoMoKNrecurrentMutationsRateMatrixFunction::computeNumMutRates(std::int64_t na )
 {
 
-    long numMutRates = na*na-na;
+   std::int64_t numMutRates = na*na-na;
     
     return numMutRates;
 

@@ -46,7 +46,7 @@ Func_PoMoReversibleMutationRates* Func_PoMoReversibleMutationRates::clone( void 
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_PoMoReversibleMutationRates::createFunction( void ) const
 {
     
-    long na                                                             = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    std::int64_t na                                                     = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex            >* pi   = static_cast<const Simplex              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double>   >* rho  = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 

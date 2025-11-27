@@ -52,8 +52,8 @@ RevPtr<RevVariable> Func_pomoStateConverter::execute()
     
     const RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* aln = static_cast<const AbstractHomologousDiscreteCharacterData&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    long num_states     = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    long virt_pop_size  = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    std::int64_t num_states     = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t virt_pop_size  = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::PoMoStateConverter* c = new RevBayesCore::PoMoStateConverter(  );

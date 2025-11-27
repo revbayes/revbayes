@@ -20,7 +20,6 @@
 using namespace RevBayesCore;
 
 
-
 /** Constructor that sets the observation and the other fields */
 PoMoState::PoMoState(   size_t n, 
                         size_t vps, 
@@ -28,7 +27,7 @@ PoMoState::PoMoState(   size_t n,
                         const std::string &chr, 
                         size_t pos,
                         WEIGHTING w , 
-                        const long eps ) : DiscreteCharacterState( n + size_t(RbMath::kchoose2(int(n)))*(vps-1) ),
+                        std::int64_t eps ) : DiscreteCharacterState( n + size_t(RbMath::kchoose2(int(n)))*(vps-1) ),
     is_gap( false ),
     is_missing( false ),
     index_single_state( 0 ),
@@ -839,10 +838,10 @@ void PoMoState::setStateHypergeometricForPolymorphic(size_t total_count, size_t 
     //weights.clear();
 
     // some inportant variables
-    long   N = 10000;  // this will eventually be an input parameter with 10000 as default value
+    std::int64_t   N = 10000;  // this will eventually be an input parameter with 10000 as default value
     size_t M = virtual_population_size;
-    long   C = total_count;
-    long   c = C - count_first_allele;  // this makes sence because edge states increase with aj and not ai
+    std::int64_t   C = total_count;
+    std::int64_t   c = C - count_first_allele;  // this makes sence because edge states increase with aj and not ai
 
     // normalization constant
     // p(m!c)=p(c!m)*p(m)/p(c) where p(c!m) is a hypergeometric sampling; the other are discrete uniform
@@ -856,7 +855,7 @@ void PoMoState::setStateHypergeometricForPolymorphic(size_t total_count, size_t 
     // there are V-1 ranges, where V is the virtual population size
     // ni and nf is just to guaretee that we do not sum off the reasonable ranfe of effective frequencies
     // i.e.: ni>=c and nf <= N-(C-c)
-    long ni, nf, ni0, nf0;
+    std::int64_t ni, nf, ni0, nf0;
 
     // some imporant quantities
     double hyper1, hyper2, weights_sum;
@@ -930,9 +929,9 @@ void PoMoState::setStateHypergeometricForMonomorphic(size_t total_samples, size_
     //weights.clear();
 
     // some inportant variables
-    long   N = 10000;  // this will eventually be an input parameter with 10000 as default value
+    std::int64_t   N = 10000;  // this will eventually be an input parameter with 10000 as default value
     size_t M = virtual_population_size;
-    long   C = total_samples;
+    std::int64_t   C = total_samples;
     size_t K = n_alleles;
 
     // normalizytion constant
@@ -981,7 +980,7 @@ void PoMoState::setStateHypergeometricForMonomorphic(size_t total_samples, size_
     // there are V-1 ranges, where V is the virtual population size
     // ni and nf is just to guaretee that we do not sum off the reasonable ranfe of effective frequencies
     // i.e.: ni>=c and nf <= N-(C-c)
-    long ni, nf, ni0, nf0;
+    std::int64_t ni, nf, ni0, nf0;
 
     // some imporant quantities
     double hyper1, hyper2, weights_sum;

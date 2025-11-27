@@ -35,7 +35,7 @@ Func_revPoMoM2N* Func_revPoMoM2N::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_revPoMoM2N::createFunction( void ) const
 {
-    long                                                         v  = static_cast<const Natural               &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    std::int64_t                                                 v  = static_cast<const Natural               &>( this->args[0].getVariable()->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< double >*                        n  = static_cast<const RealPos               &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m  = static_cast<const ModelVector<RealPos>  &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< double >*                        g  = static_cast<const RealPos               &>( this->args[3].getVariable()->getRevObject() ).getDagNode();

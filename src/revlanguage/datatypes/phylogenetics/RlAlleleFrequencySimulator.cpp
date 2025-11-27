@@ -75,7 +75,7 @@ AlleleFrequencySimulator::AlleleFrequencySimulator() : WorkspaceToCoreWrapperObj
     
     ArgumentRules* data_matrix_arg_rules = new ArgumentRules();
     
-    data_matrix_arg_rules->push_back( new ArgumentRule( "tree"              , TimeTree::getClassTypeSpec(), "The tree along which we want to simulate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    data_matrix_arg_rules->push_back( new ArgumentRule( "tree"              , TimeTree::getClassTypeSpec(), "The tree astd::int64_t which we want to simulate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     data_matrix_arg_rules->push_back( new ArgumentRule( "populationSizes"   , ModelVector<Natural>::getClassTypeSpec(), "The population sizes for all branches, including the root branch.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     data_matrix_arg_rules->push_back( new ArgumentRule( "numSites"          , Natural::getClassTypeSpec(), "The number of sites to simulate.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     data_matrix_arg_rules->push_back( new ArgumentRule( "samplesPerSpecies" , ModelVector<Natural>::getClassTypeSpec(), "The observed number of samples per species.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -124,13 +124,13 @@ RevPtr<RevVariable> AlleleFrequencySimulator::executeMethod(std::string const &n
     {
         found = true;
         
-        RevBayesCore::Tree* tree                        = static_cast<const TimeTree&>( args[0].getVariable()->getRevObject() ).getValue().clone();
-        const std::vector<long>& population_sizes       = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
-        long num_sites                                  = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
-        const std::vector<long>& samples_per_species    = static_cast<const ModelVector<Natural> &>( args[3].getVariable()->getRevObject() ).getValue();
-        double root_branch                              = static_cast<const RealPos &>( args[4].getVariable()->getRevObject() ).getValue();
-        bool variable                                   = static_cast<const RlBoolean &>( args[5].getVariable()->getRevObject() ).getValue();
-        const std::string& fn                           = static_cast<const RlString &>( args[6].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Tree* tree                                = static_cast<const TimeTree&>( args[0].getVariable()->getRevObject() ).getValue().clone();
+        const std::vector<std::int64_t>& population_sizes       = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::int64_t num_sites                                  = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+        const std::vector<std::int64_t>& samples_per_species    = static_cast<const ModelVector<Natural> &>( args[3].getVariable()->getRevObject() ).getValue();
+        double root_branch                                      = static_cast<const RealPos &>( args[4].getVariable()->getRevObject() ).getValue();
+        bool variable                                           = static_cast<const RlBoolean &>( args[5].getVariable()->getRevObject() ).getValue();
+        const std::string& fn                                   = static_cast<const RlString &>( args[6].getVariable()->getRevObject() ).getValue();
 
         value->simulateAlleleFrequencies(tree, population_sizes, num_sites, samples_per_species, root_branch, fn, variable);
         
@@ -141,9 +141,9 @@ RevPtr<RevVariable> AlleleFrequencySimulator::executeMethod(std::string const &n
     {
         found = true;
         
-        long population_sizes                   = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::int64_t population_sizes                   = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         double time                             = static_cast<const RealPos &>( args[1].getVariable()->getRevObject() ).getValue();
-        long reps                               = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+        std::int64_t reps                               = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
 
         RevBayesCore::MatrixReal* m = value->simulateAlleleFrequenciesMatrix(time, population_sizes, reps);
         
@@ -153,10 +153,10 @@ RevPtr<RevVariable> AlleleFrequencySimulator::executeMethod(std::string const &n
     {
         found = true;
             
-        long population_sizes                   = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        long start                              = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue() - 1;
-        double time                             = static_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
-        long reps                               = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+        std::int64_t population_sizes                   = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::int64_t start                              = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue() - 1;
+        double time                                     = static_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
+        std::int64_t reps                               = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
 
         RevBayesCore::RbVector<double>* m = value->simulateAlleleFrequenciesVector(time, population_sizes, reps, start);
         
@@ -166,11 +166,11 @@ RevPtr<RevVariable> AlleleFrequencySimulator::executeMethod(std::string const &n
     {
         found = true;
         
-        const std::vector<long>& population_sizes   = static_cast<const ModelVector<Natural> &>( args[0].getVariable()->getRevObject() ).getValue();
-        long start                                  = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue() - 1;
-        long sample_size                            = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
-        const std::vector<double>& times            = static_cast<const ModelVector<RealPos> &>( args[3].getVariable()->getRevObject() ).getValue();
-        long reps                                   = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
+        const std::vector<std::int64_t>& population_sizes   = static_cast<const ModelVector<Natural> &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::int64_t start                                  = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t sample_size                            = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+        const std::vector<double>& times                    = static_cast<const ModelVector<RealPos> &>( args[3].getVariable()->getRevObject() ).getValue();
+        std::int64_t reps                                   = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
 
         RevBayesCore::RbVector<double>* m = value->simulateAlleleFrequenciesVectorEpoch(times, population_sizes, reps, start, sample_size);
         

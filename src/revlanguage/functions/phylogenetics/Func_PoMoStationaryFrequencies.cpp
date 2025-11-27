@@ -46,8 +46,8 @@ Func_PoMoStationaryFrequencies* Func_PoMoStationaryFrequencies::clone( void ) co
 RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_PoMoStationaryFrequencies::createFunction( void ) const
 {
     
-    long na  = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
-    long nv  = static_cast<const Natural              &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t na  = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    std::int64_t nv  = static_cast<const Natural              &>( this->args[1].getVariable()->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode< double                          >* ne   = static_cast<const Real                 &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex            >* pi   = static_cast<const Simplex              &>( this->args[3].getVariable()->getRevObject() ).getDagNode();

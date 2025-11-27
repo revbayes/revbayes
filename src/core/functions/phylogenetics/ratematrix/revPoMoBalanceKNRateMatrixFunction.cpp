@@ -4,8 +4,8 @@
 using namespace RevBayesCore;
 
 
-revPoMoBalanceKNRateMatrixFunction::revPoMoBalanceKNRateMatrixFunction(    const TypedDagNode< long > *na,
-                                                                const TypedDagNode< long > *ni,
+revPoMoBalanceKNRateMatrixFunction::revPoMoBalanceKNRateMatrixFunction(    const TypedDagNode<std::int64_t> *na,
+                                                                const TypedDagNode<std::int64_t> *ni,
                                                                 const TypedDagNode< Simplex  > *p,
                                                                 const TypedDagNode< RbVector<double> > *r,
                                                                 const TypedDagNode< RbVector<double> > *s,
@@ -37,20 +37,20 @@ revPoMoBalanceKNRateMatrixFunction::~revPoMoBalanceKNRateMatrixFunction( void )
 }
 
 
-long revPoMoBalanceKNRateMatrixFunction::computeNumStates( long na, long ni )
+std::int64_t revPoMoBalanceKNRateMatrixFunction::computeNumStates(std::int64_t na,std::int64_t ni )
 {
 
-    long numStates = na + (na*na-na)*(ni-1)*0.5;
+    std::int64_t numStates = na + (na*na-na)*(ni-1)*0.5;
 
     return numStates;
 
 }
 
 
-long revPoMoBalanceKNRateMatrixFunction::computeNumExchangeabilities( long na )
+std::int64_t revPoMoBalanceKNRateMatrixFunction::computeNumExchangeabilities(std::int64_t na )
 {
 
-    long numExchangeabilities = (na*na-na)*0.5;
+    std::int64_t numExchangeabilities = (na*na-na)*0.5;
 
     return numExchangeabilities;
 
@@ -67,8 +67,8 @@ revPoMoBalanceKNRateMatrixFunction* revPoMoBalanceKNRateMatrixFunction::clone( v
 void revPoMoBalanceKNRateMatrixFunction::update( void )
 {
     // get the information from the arguments for reading the file
-    long                        na = K->getValue();
-    long                        ni = N->getValue();
+    std::int64_t                na = K->getValue();
+    std::int64_t                ni = N->getValue();
     const std::vector<double>&  p  = pi->getValue();
     const std::vector<double>&  r  = rho->getValue();
     const std::vector<double>&  s  = phi->getValue();
@@ -92,12 +92,12 @@ void revPoMoBalanceKNRateMatrixFunction::swapParameterInternal(const DagNode *ol
 
     if (oldP == K)
     {
-        K = static_cast<const TypedDagNode< long >* >( newP );
+        K = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
     if (oldP == N)
     { 
-        N = static_cast<const TypedDagNode< long >* >( newP );
+        N = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
     if (oldP == pi)

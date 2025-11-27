@@ -51,12 +51,12 @@ Func_AlleleFrequencyMatrixSimulator* Func_AlleleFrequencyMatrixSimulator::clone(
 RevPtr<RevVariable> Func_AlleleFrequencyMatrixSimulator::execute()
 {
         
-    long population_sizes                   = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    std::int64_t population_sizes           = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
     double generation_time                  = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getValue();
     bool moran_generations                  = static_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getValue();
     std::vector<double> mutation_rates      = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getValue();
     double time                             = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getValue();
-    long reps                               = static_cast<const Natural &>( this->args[5].getVariable()->getRevObject() ).getValue();
+    std::int64_t reps                       = static_cast<const Natural &>( this->args[5].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::AlleleFrequencySimulator sim = RevBayesCore::AlleleFrequencySimulator( generation_time, mutation_rates, moran_generations );

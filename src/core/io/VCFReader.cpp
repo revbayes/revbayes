@@ -56,7 +56,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const path& fn, const RbVe
 
     statistics_ready = true;
    
-    // we need to get a map of species names to all samples belonging to that species
+    // we need to get a map of species names to all samples bestd::int64_ting to that species
     std::vector<std::string> species_names;
     std::map<std::string, size_t> species_names_to_index;
     std::vector< std::vector<size_t> > indices_of_taxa_per_species;
@@ -279,7 +279,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const path& fn, const RbVe
     
     
     // write the results of monomorphic in both and equal state
-    std::string out_filename_mono_in_both_equal = fn.size() + "_mono_in_both_equal.csv";
+    std::string out_filename_mono_in_both_equal = fn.string() + "_mono_in_both_equal.csv";
     
     createDirectoryForFile( out_filename_mono_in_both_equal );
 
@@ -379,7 +379,7 @@ void VCFReader::computeMonomorphicVariableStatistics( const path& fn, const RbVe
 
 }
 
-void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, long thinning, long skip_first, long num_entries )
+void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVector<Taxon>& taxa_list, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, std::int64_t thinning, std::int64_t skip_first, std::int64_t num_entries )
 {
     
     // PoMo settings
@@ -389,7 +389,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
         NUM_ORG_STATES = 4;
     }
     
-    // we need to get a map of species names to all samples belonging to that species
+    // we need to get a map of species names to all samples bestd::int64_ting to that species
     std::vector<std::string>           species_names;
     std::map<std::string, size_t>      species_names_to_index;
     std::vector< std::vector<size_t> > indices_of_taxa_per_species;
@@ -436,7 +436,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
     std::string read_line = "";
     size_t lines_skipped = 0;
     size_t lines_to_skip = 0;
-    long   lines_read    = 0;
+    std::int64_t   lines_read    = 0;
     bool   skipped_first = false;
     
     size_t ref_index = 0;
@@ -716,7 +716,7 @@ void VCFReader::convertToCountsFile(const std::string &out_filename, const RbVec
 
 
 
-void VCFReader::convertToNexusFile(const std::string &out_filename, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, const RbVector<Taxon>& input_taxa, long thinning, long skip_first )
+void VCFReader::convertToNexusFile(const std::string &out_filename, const std::string& type, const std::string& chr, AbstractDiscreteTaxonData* ref_genome, const RbVector<Taxon>& input_taxa, std::int64_t thinning, std::int64_t skip_first )
 {
     
     
@@ -739,7 +739,7 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
     std::string read_line = "";
     size_t lines_skipped = 0;
     size_t lines_to_skip = 0;
-    long   lines_read    = 0;
+    std::int64_t   lines_read    = 0;
     bool   skipped_first = false;
     
     size_t ref_index = 0;
@@ -1150,13 +1150,13 @@ void VCFReader::convertToNexusFile(const std::string &out_filename, const std::s
 
 
 
-RbVector< RbVector<long> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip_first )
+RbVector< RbVector<std::int64_t> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_list, const std::string& chr, std::int64_t thinning, std::int64_t skip_first )
 {
     // create the SFS object
     size_t NUM_SAMPLES = taxa_list.size();
-    RbVector< RbVector<long> > mutations_list = RbVector< RbVector<long> >();
+    RbVector< RbVector<std::int64_t> > mutations_list = RbVector< RbVector<std::int64_t> >();
     
-    // we need to get a map of species names to all samples belonging to that species
+    // we need to get a map of species names to all samples bestd::int64_ting to that species
     std::vector<size_t> indices_of_taxa;
     
     // open file
@@ -1176,7 +1176,7 @@ RbVector< RbVector<long> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_
     
     size_t lines_skipped = 0;
     size_t lines_to_skip = 0;
-    long   lines_read    = 0;
+    std::int64_t   lines_read    = 0;
     bool   skipped_first = false;
     
     size_t ref_index = 0;
@@ -1188,7 +1188,7 @@ RbVector< RbVector<long> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_
     
     std::string curr_chrom = "";
     
-    RbVector<RbVector<long> > curr_mut_list = RbVector<RbVector<long> >(NUM_SAMPLES, RbVector<long>());
+    RbVector<RbVector<std::int64_t> > curr_mut_list = RbVector<RbVector<std::int64_t> >(NUM_SAMPLES, RbVector<std::int64_t>());
     
     while (safeGetline(readStream,read_line))
     {
@@ -1287,7 +1287,7 @@ RbVector< RbVector<long> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_
         
         if ( skipped_first == true && thinning == lines_read )
         {
-            long current_pos = StringUtilities::asIntegerNumber(tmpChars[pos_index]);
+            std::int64_t current_pos = StringUtilities::asIntegerNumber(tmpChars[pos_index]);
             
             const std::string& current_chrom = tmpChars[chr_index];
             if ( chr != "" && chr != current_chrom )
@@ -1347,7 +1347,7 @@ RbVector< RbVector<long> > VCFReader::convertToPSMC(const RbVector<Taxon>& taxa_
 
 
 
-RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const std::string& chr, long thinning, long skip_first )
+RbVector<std::int64_t> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const std::string& chr, std::int64_t thinning, std::int64_t skip_first )
 {
     // create the SFS object
     size_t NUM_SAMPLES = taxa_list.size();
@@ -1366,9 +1366,9 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const s
             taxa_ploidy[i] = ( taxa_list[i].getPloidy() == "diploid" ? DIPLOID : HAPLOID );
         }
     }
-    RbVector<long> sfs = RbVector<long>(NUM_SAMPLES+1, 0);
+    RbVector<std::int64_t> sfs = RbVector<std::int64_t>(NUM_SAMPLES+1, 0);
     
-    // we need to get a map of species names to all samples belonging to that species
+    // we need to get a map of species names to all samples bestd::int64_ting to that species
     std::vector<size_t> indices_of_taxa;
     
     // open file
@@ -1386,10 +1386,10 @@ RbVector<long> VCFReader::convertToSFS(const RbVector<Taxon>& taxa_list, const s
     size_t samples_start_column = 0;
     size_t NUM_SAMPLES_TOTAL = 0;
     
-    size_t lines_skipped = 0;
-    size_t lines_to_skip = 0;
-    long   lines_read    = 0;
-    bool   skipped_first = false;
+    size_t          lines_skipped = 0;
+    size_t          lines_to_skip = 0;
+    std::int64_t    lines_read    = 0;
+    bool            skipped_first = false;
     
     size_t ref_index = 0;
     size_t alt_index = 0;

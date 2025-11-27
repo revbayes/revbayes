@@ -27,7 +27,7 @@ phi( in_k, 1.0 )
 
 /** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual
  * population size */
-RateMatrix_PoMoKNrecurrentMutations::RateMatrix_PoMoKNrecurrentMutations(long ns, long na, double nv, size_t n_mr, bool rm)  :
+RateMatrix_PoMoKNrecurrentMutations::RateMatrix_PoMoKNrecurrentMutations(std::int64_t ns, std::int64_t na, double nv, size_t n_mr, bool rm)  :
 AbstractRateMatrix( ns ),
 S( ns ),
 K( na ),
@@ -205,7 +205,7 @@ std::vector<double> RateMatrix_PoMoKNrecurrentMutations::getStationaryFrequencie
 
 
 
-void RateMatrix_PoMoKNrecurrentMutations::setNumberOfAlleles( long na )
+void RateMatrix_PoMoKNrecurrentMutations::setNumberOfAlleles( std::int64_t na )
 {
     K = na;
     
@@ -215,7 +215,7 @@ void RateMatrix_PoMoKNrecurrentMutations::setNumberOfAlleles( long na )
 }
 
 
-void RateMatrix_PoMoKNrecurrentMutations::setVirtualPopulationSize( long ni )
+void RateMatrix_PoMoKNrecurrentMutations::setVirtualPopulationSize( std::int64_t ni )
 {
     V = ni;
     
