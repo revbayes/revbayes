@@ -1,0 +1,239 @@
+################################################################################
+#
+# RevBayes Test-Script: Checking that the "min" and "max" arguments of the
+#                       mvFossilTimeSlideUniform move match the right taxon in
+#                       all MCMC runs when analyzing an entirely extinct clade
+# 
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# This is a simplified and modified version of the script used to perform the tip-dating analysis of ceratosaurs
+# in Pol et al. (2024), Cladistics 40(3): 307-356. We are using it because it is a convenient example of an FBD
+# analysis of an entirely extinct clade, unlike the bear dataset used in the other tests.
+
+n_max_states = 4
+
+# Import the age data
+taxa <- readTaxonData("data/ceratosauria_tip_ages.tsv")
+
+# Import the character matrix
+morpho <- readDiscreteCharacterData("data/ceratosauria_morphology.nex")
+
+# Delete constant characters
+inv_ix = morpho.getInvariantSiteIndices(excludeAmbiguous=TRUE)
+morpho.excludeCharacter( inv_ix )
+morpho.removeExcludedCharacters()
+
+ordered_vect = [28, 29, 33, 100, 102, 123, 139, 148, 152, 160, 166, 177, 180, 192]
+
+n_taxa <- morpho.ntaxa()
+n_branches <- 2 * n_taxa - 2
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+##########################################################################################
+# Joint Fossilized Birth-Death Process prior on the topology and fossil occurrence times #
+##########################################################################################
+
+# Define priors on the net diversification rate, turnover, and the probability of fossil
+# observation prior to species extinction:
+
+diversification ~ dnExponential(10.0)
+turnover ~ dnBeta(2.0, 1.0)           # speciation and extinction approximately equal
+fossil_prob ~ dnUniform(0.0, 1.0)
+
+moves.append( mvScale(diversification, lambda=0.01, weight=5) )
+moves.append( mvScale(diversification, lambda=0.1,  weight=3) )
+moves.append( mvScale(diversification, lambda=1.0,  weight=1) )
+
+moves.append( mvSlide(turnover, delta=0.01, weight=5) )
+moves.append( mvSlide(turnover, delta=0.1,  weight=3) )
+moves.append( mvSlide(turnover, delta=1,    weight=1) )
+
+moves.append( mvSlide(fossil_prob, delta=0.01, weight=5) )
+moves.append( mvSlide(fossil_prob, delta=0.1,  weight=3) )
+moves.append( mvSlide(fossil_prob, delta=1,    weight=1) )
+
+# Create deterministic nodes for the speciation (lambda), extinction (mu), and fossil
+# recovery (psi) rates that we are going to need to specify the FBD distribution.
+
+speciation := diversification / abs(1.0 - turnover)
+extinction := (turnover * diversification) / abs(1.0 - turnover)
+recovery := (fossil_prob / abs(1.0 - fossil_prob)) * extinction
+
+# We have sampled all extant taxa, and there are none:
+rho <- 1
+
+# The FBD is conditioned on a root age, here drawn from an offset exponential hyperprior:
+origin_time ~ dnExponential(lambda=1/(212.6 - 197.5), offset=197.5)
+
+moves.append( mvSlide(origin_time, delta=0.01, weight=5) )
+moves.append( mvSlide(origin_time, delta=0.1,  weight=3) )
+moves.append( mvSlide(origin_time, delta=1,    weight=1) )
+
+# Draw a time tree from the specimen-level fossilized birth-death process
+fbd_tree ~ dnBDSTP(r=0, rootAge=origin_time, lambda=speciation, mu=extinction, psi=recovery, rho=rho, taxa=taxa)
+
+# Specify moves on the tree topology and node ages
+moves.append( mvFNPR(fbd_tree, weight=15.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
+moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
+
+# Sample fossil ages from uniform priors
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+
+    # ======================================================================================================= #
+    # This is what we are testing for: the move below should work even if we (1) explicitly specify the 'min' #
+    # and 'max' arguments, (2) perform more than 1 MCMC run, and (3) use a white-noise relaxed clock model.   #
+    # We were dealing with an obscure bug that would manifest itself only when all three of these conditions  #
+    # were met simultaneously (see https://github.com/revbayes/revbayes/issues/887).                          #
+    # ======================================================================================================= #
+
+    # Specify a move on the fossil age
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], fossils[i], weight = 1.0) )
+}
+
+# Monitor the number of sampled ancestors in the tree
+num_samp_anc := fbd_tree.numSampledAncestors()
+
+###########################
+# White-noise clock model #
+###########################
+
+# Place a diffuse lognormal prior on the base rate of the clock
+sigma_ln <- 1.17481
+clock_mean <- 0.000750
+mu := ln(clock_mean) - (0.5 * sigma_ln^2)
+global_rate_mean ~ dnLognormal(mean=mu, sd=sigma_ln)
+
+# Specify a scale move on the base clock rate parameter
+moves.append( mvScaleBactrian(global_rate_mean, lambda=0.5, weight=10) )
+
+# Place an exponential prior on the variance scaler of the clock
+sigma ~ dnExponential( 3.24339 )
+
+# Specify a scale move on the variance scaler parameter
+moves.append( mvScaleBactrian(sigma, lambda=0.5, weight=10) )
+
+# See https://boussau.github.io/tutorials/relative_time_constraints/ for how to implement
+# an uncorrelated gamma model with gamma-distributed *relative* rates in RevBayes
+
+for (i in n_branches:1) {
+    # Get branch duration in calendar time units
+    times[i] = fbd_tree.branchLength(i)
+
+    # Relative branch-wise rates: these serve as multipliers to the global_rate_mean (c).
+    # Each relative rate r_i is gamma distributed with mean = 1.0 and variance equal
+    # to sigma/(t_i * c). Since dnGamma() is parameterized using shape and rate in
+    # RevBayes, this corresponds to a shape of (t_i * c)/sigma and a rate equal to the
+    # shape.
+        
+    gamma_param[i] := (times[i] * global_rate_mean)/sigma
+    rel_branch_rates[i] ~ dnGamma(gamma_param[i], gamma_param[i])
+    moves.append( mvScale(rel_branch_rates[i], lambda=0.5, weight=35/n_branches,
+                          tune=true) )
+
+    # The actual branch rate is the product of the global_rate_mean and the relative rate.
+    branch_rates[i] := global_rate_mean * rel_branch_rates[i]
+}
+
+############################################
+# Among-character rate heterogeneity model #
+############################################
+
+# Discretized gamma distribution of rates across sites
+alpha ~ dnUniform(0.0, 1E6)
+alpha.setValue(1.0)
+moves.append( mvScale(alpha, lambda=0.01, weight=5.0) )
+moves.append( mvScale(alpha, lambda=0.1,  weight=3.0) )
+moves.append( mvScale(alpha, lambda=1,    weight=1.0) )
+char_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+#######################
+# Substitution models #
+#######################
+
+unord <- morpho
+unord.excludeCharacter( ordered_vect )
+
+ord <- morpho
+ord.excludeCharacter( 1:morpho.nchar() ) 
+ord.includeCharacter( ordered_vect )
+
+idx = 1
+
+for (i in 2:n_max_states) {
+    # Make a temporary copy of the data
+    unordered[i - 1] <- unord
+    # Only keep those characters who state space size equals i
+    unordered[i - 1].setNumStatesPartition(i)
+    # Get the number of characters with i states
+    nc = unordered[i - 1].nchar()
+    # If this number is greater than zero, create the appropriate Q matrix
+    if (nc > 0) {
+        print("There are "+nc+" unordered characters with "+i+" states in the cranial partition.")
+        Qu[idx] <- fnJC(i)
+
+        unord_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu[idx], branchRates=branch_rates,
+                                      siteRates=char_rates, type="Standard", coding="variable")
+
+        # Clamp to the data
+        unord_ctmc[idx].clamp( unordered[i - 1] )
+        
+        # Increment counter
+        idx = idx + 1
+    }
+}
+
+# Ordered characters. Credit: April Wright,
+# http://groups.google.com/g/revbayes-users/c/3izTHmnR7dE/m/5xK9tGs4CwAJ
+
+ix = 1
+
+for (i in 3:n_max_states) {
+    ordered[i - 2] <- ord
+    ordered[i - 2].setNumStatesPartition(i)
+    nco = ordered[i - 2].nchar()
+    if (nco > 0) {
+        print("There are "+nco+" ordered characters with "+i+" states in the cranial partition.")
+        Qo[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1, matrixExponentialMethod="eigen")
+        order_ctmc[ix] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qo[ix], branchRates=branch_rates,
+                                     siteRates=char_rates, type="Standard", coding="variable")
+        order_ctmc[ix].clamp( ordered[i - 2] )
+        ix = ix + 1
+    }
+}
+
+############
+# Analysis #
+############
+
+# Initialize the model object
+mymodel = model(fbd_tree)
+
+# Add monitors
+monitors.append( mnModel(filename="output/mvFossilTimeSlideUniform_multiple_runs.log", printgen=5) )
+monitors.append( mnFile(filename="output/mvFossilTimeSlideUniform_multiple_runs.trees", printgen=5, fbd_tree) )
+
+# Initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2)
+
+# Run the analysis
+mymcmc.run(generations=5)
+
+clear()
+
+q()
