@@ -74,6 +74,8 @@ class TypeSpec;
         RevPtr<const RevVariable>                       storeInternalNodes;
         RevPtr<const RevVariable>                       gapMatchClamped;
         RevPtr<const RevVariable>                       coding;
+        RevPtr<const RevVariable>                       observation_error_probability;
+        RevPtr<const RevVariable>                       observation_error_frequencies;
 
     };
 
