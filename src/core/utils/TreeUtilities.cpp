@@ -1167,6 +1167,35 @@ std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree& tree, const
     return branch_lengths;
 }
 
+
+/**
+ * Helper function to find the tip name that comes alphabetically first (or more accurately, is lexicographically smallest) in the subtree
+ * originating with a given node. This is useful for deterministically setting left vs. right child of a node.
+ * @param node node whose smallest tip we want to find
+ * @return lexicographically smallest tip name in the subtree originating with node
+ */
+std::string RevBayesCore::TreeUtilities::getSmallestTipName(const TopologyNode* node)
+{
+    if (node->isTip())
+    {
+        return node->getName();
+    }
+    
+    std::string smallest = "";
+    
+    for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
+    {
+        std::string child_name = getSmallestTipName(&node->getChild(i));
+        if (smallest.empty() || child_name < smallest)
+        {
+            smallest = child_name;
+        }
+    }
+    
+    return smallest;
+}
+
+
 /**
  * Get all tips below specified node, recursively
  * @param n current node
@@ -1193,30 +1222,10 @@ void RevBayesCore::TreeUtilities::getTaxaInSubtree(TopologyNode& n, std::vector<
 
 }
 
-/**
- * Check if the two trees are connected by a single NNI move
- */
-bool RevBayesCore::TreeUtilities::isConnectedNNI(const Tree& a, const Tree& b)
-{
-    
-    size_t num_nodes = a.getNumberOfNodes();
-    
-//    // now exchange the two nodes
-//    parent.removeChild( node_B );
-//    node->removeChild( node_A );
-//    parent.addChild( node_A );
-//    node->addChild( node_B );
-//    node_A->setParent( &parent );
-//    node_B->setParent( node );
-    
-    return false;
-}
-
-
 
 /**
  * Make tree ultrametric by extending terminal branches to the present
- * @param t tree to be modified
+ * @param tree tree to be modified
  */
 void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 {
@@ -1634,7 +1643,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
  * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, long agePrecision)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();

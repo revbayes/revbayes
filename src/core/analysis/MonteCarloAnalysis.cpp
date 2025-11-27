@@ -226,7 +226,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, int v
                 runs[i]->nextCycle(false);
                 
                 // check for autotuning
-                if ( k % tuningInterval == 0 && k != generations )
+                if ( tuningInterval != 0 && (k % tuningInterval) == 0 && k != generations )
                 {
                     runs[i]->tune();
                 }
@@ -517,8 +517,7 @@ void MonteCarloAnalysis::resetReplicates( void )
     size_t replicate_start = size_t(floor( (double(pid-active_PID) / num_processes ) * replicates ) ) + active_PID;
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
-    for (size_t j=0; j<(2*replicate_start); ++j) rng->uniform01();
-    
+    if(replicate_start > 0) rng->setSeed(rng->getSeed() + 2*replicate_start);    
     
     // redraw initial states for replicates
     for (size_t i = 0; i < replicates; ++i)
@@ -602,10 +601,10 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
     }
     
-    // Let user know what we are doing
-    std::stringstream ss;
     if ( process_active == true && runs[0] != NULL && verbose >= 1 )
     {
+        // Let user know what we are doing
+        std::stringstream ss;
         
         if ( runs[0]->getCurrentGeneration() == 0 )
         {
@@ -620,13 +619,18 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         ss << runs[0]->getStrategyDescription();
         
         // Print the target values of stopping rules only if we have more than one or if the only one we have is not MaxIteration
-        if (rules.size() > 1 || rules[0].printAsStatement(0, true) != "")
+        if (rules.size() > 1 or rules[0].printAsStatement(0, true) != "")
         {
             ss << "\n";
             ss << "Stopping rule" << (rules.size() > 1 ? "s" : "") << ":\n";
             for (size_t i=0; i<rules.size(); ++i)
             {
-                ss << "    " << rules[i].printAsStatement(0, true);
+                std::string statement = rules[i].printAsStatement(0, true);
+                if (statement == "")
+                {
+                    continue;
+                }
+                ss << "    " << statement;
             }
         }
         
@@ -661,24 +665,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
     MPI_Barrier( analysis_comm );
 #endif
     
-    // Write headers and print first line
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
-        {
-            
-            runs[i]->writeMonitorHeaders( false );
-            runs[i]->monitor(0);
-            
-        }
-        else if ( runs[i] != NULL )
-        {
-            runs[i]->writeMonitorHeaders( runs[i]->getCurrentGeneration() > 0 );
-        }
-        
-    }
-    
     // reset the counters for the move schedules
     for (size_t i=0; i<replicates; ++i)
     {
@@ -696,6 +682,41 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
         rules[i].setNumberOfRuns( replicates );
         rules[i].runStarted();
+        
+    }
+    
+    // If the conditions above are satisfied and we are resuming from a checkpoint, print the current stopping rule values too
+    if ( runs[0] != NULL and runs[0]->getCurrentGeneration() != 0 and (rules.size() > 1 or rules[0].printAsStatement(0, true) != ""))
+    {
+        std::stringstream ss;
+        ss << "Current value" << (rules.size() > 1 ? "s" : "") << ":\n";
+        
+        for (size_t i=0; i<rules.size(); ++i)
+        {
+            std::string to_parse = rules[i].printAsStatement( runs[0]->getCurrentGeneration() );
+            // Delete the target info, which is redundant with respect to what we have already printed above
+            std::string out = to_parse.substr(0, to_parse.find(" (target", 0));
+            ss << "    " << out << "\n";
+        }
+        
+        RBOUT( ss.str() );
+    }
+    
+    // Write headers and print first line
+    for (size_t i=0; i<replicates; ++i)
+    {
+        
+        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
+        {
+            
+            runs[i]->writeMonitorHeaders( false );
+            runs[i]->monitor(0);
+            
+        }
+        else if ( runs[i] != NULL )
+        {
+            runs[i]->writeMonitorHeaders( runs[i]->getCurrentGeneration() > 0 );
+        }
         
     }
     
@@ -724,7 +745,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     runs[i]->tune();                   
                 }
                 
-                // check for autotuning
+                // check for checkpointing
                 if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
                 {                    
                     runs[i]->checkpoint();                    

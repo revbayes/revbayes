@@ -101,7 +101,7 @@ const TypeSpec& RlBoolean::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double RlBoolean::isConvertibleTo(const TypeSpec& type, bool once) const
+double RlBoolean::isConvertibleTo(const TypeSpec& type, bool convert_by_value) const
 {
 
     if ( type == Natural::getClassTypeSpec() )
@@ -121,7 +121,7 @@ double RlBoolean::isConvertibleTo(const TypeSpec& type, bool once) const
         return 0.4;
     }
     
-    return RevObject::isConvertibleTo(type, once);
+    return RevObject::isConvertibleTo(type, convert_by_value);
 }
 
 

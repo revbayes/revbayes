@@ -40,12 +40,10 @@ FossilTipTimeSlideUniformProposal::FossilTipTimeSlideUniformProposal( Stochastic
     if ( tip_taxon == "" )
     {
         use_index = false;
-        node_index = -1;
     }
     else
     {
         use_index = true;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
     }
     
 }
@@ -114,7 +112,17 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    if ( use_index == false )
+    // We shouldn't have to do this -- it should be enough to, say, invalidate the node_index in the constructor, check that
+    // use_index is true AND node_index is invalidated in the prepareProposal() function, and then let that function compute
+    // the node_index if (and only if) both conditions are met. However, this is not enough to prevent mismatches between the
+    // node_index and tree->getValue().getTipIndex( tip_taxon ) later on. Recomputing the former every time we perform the
+    // proposal is the only reliable way to get rid of this problem, so we just do that and eat the extra computational cost.
+    if ( use_index )
+    {
+        // Always recompute node_index
+        node_index = tree->getValue().getTipIndex( tip_taxon );
+    }
+    else
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)

@@ -44,7 +44,7 @@ using namespace RevBayesCore;
  *@note If the interval method is 'EVENTS' then we assume that the time between each coalescent event is an interval.
  *
  */
-PiecewiseCoalescent::PiecewiseCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const TypedDagNode<RbVector<long> > *n_events_pi, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
+PiecewiseCoalescent::PiecewiseCoalescent(const TypedDagNode<RbVector<double> > *N, const TypedDagNode<RbVector<double> > *i, const TypedDagNode<RbVector<std::int64_t> > *n_events_pi, METHOD_TYPES meth, DEMOGRAPHY_FUNCTION_TYPES dem, const std::vector<Taxon> &tn, const std::vector<Clade> &c) :
     AbstractCoalescent( tn, c ),
     Nes( N ),
     interval_change_points_var( i ),
@@ -407,7 +407,6 @@ void PiecewiseCoalescent::restoreSpecialization(const DagNode *affecter)
 }
 
 
-
 /**
  * Simulate new coalescent times.
  *
@@ -625,7 +624,6 @@ void PiecewiseCoalescent::touchSpecialization(const DagNode *affecter, bool touc
 //    updateIntervals();
     
 }
-
 
 
 /**

@@ -44,7 +44,7 @@ namespace RevBayesCore {
 
         // CharacterData functions
         double                                              computeMultinomialProfileLikelihood( void ) const;
-        std::vector<long>                                   computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const;
+        std::vector<std::int64_t>                                   computeSiteFrequencySpectrum(bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat) const;
         MatrixReal                                          computeStateFrequencies(void) const;
         void                                                concatenate(const HomologousDiscreteCharacterData &d, std::string type = "");                       //!< Concatenate data matrices
         void                                                concatenate(const AbstractCharacterData &d, std::string type = "");                                 //!< Concatenate data matrices
@@ -322,21 +322,21 @@ RevBayesCore::MatrixReal RevBayesCore::HomologousDiscreteCharacterData<charType>
  * \return       A vector of occurrences for the site frequency spectrum.
  */
 template<class charType>
-std::vector<long> RevBayesCore::HomologousDiscreteCharacterData<charType>::computeSiteFrequencySpectrum( bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat ) const
+std::vector<std::int64_t> RevBayesCore::HomologousDiscreteCharacterData<charType>::computeSiteFrequencySpectrum( bool folded, SFS_AMBIGUITY_TREATMENT ambig_treat ) const
 {
     
     charType tmp = this->getTaxonData(0)[0];
     size_t num_states = tmp.getNumberOfStates();
     size_t num_sequences = this->taxa.size();
-    std::vector<long> sfs;
+    std::vector<std::int64_t> sfs;
     
     if ( folded == true )
     {
-        sfs = std::vector<long>( int(num_sequences/2)+1,0);
+        sfs = std::vector<std::int64_t>( int(num_sequences/2)+1,0);
     }
     else
     {
-        sfs = std::vector<long>(num_sequences+1,0);
+        sfs = std::vector<std::int64_t>(num_sequences+1,0);
     }
     
     const DiscreteTaxonData<charType>& tmp_seq = this->getTaxonData(0);

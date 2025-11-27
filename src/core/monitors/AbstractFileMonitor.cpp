@@ -10,7 +10,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 
-AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const path &fname, bool ap, bool wv) : Monitor(g,n),
+AbstractFileMonitor::AbstractFileMonitor(DagNode *n, std::uint64_t g, const path &fname, bool ap, bool wv) : Monitor(g,n),
     out_stream(),
     filename( fname ),
     working_file_name( fname ),
@@ -20,7 +20,7 @@ AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const path
 {}
 
 
-AbstractFileMonitor::AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, bool ap, bool wv) : Monitor(g,n),
+AbstractFileMonitor::AbstractFileMonitor(const std::vector<DagNode *> &n, std::uint64_t g, const path &fname, bool ap, bool wv) : Monitor(g,n),
     out_stream(),
     filename( fname ),
     working_file_name( fname ),

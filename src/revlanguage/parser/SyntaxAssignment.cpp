@@ -66,7 +66,7 @@ SyntaxAssignment& SyntaxAssignment::operator=( const SyntaxAssignment& x )
  * contexts. For instance, it might be used in a chain assignment or in passing a
  * variable to a function.
  */
-RevPtr<RevVariable> SyntaxAssignment::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxAssignment::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Get the rhs expression wrapped and executed into a variable.
@@ -96,7 +96,7 @@ RevPtr<RevVariable> SyntaxAssignment::evaluateContent( Environment& env, bool dy
     catch (RbException &e)
     {
         // we need to remove the variable
-        env.eraseVariable( the_slot->getName() );
+        env->eraseVariable( the_slot->getName() );
         throw e;
     }
     

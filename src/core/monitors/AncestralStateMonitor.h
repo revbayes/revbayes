@@ -36,7 +36,7 @@ namespace RevBayesCore {
 	
     public:
         // Constructors and Destructors
-		AncestralStateMonitor(TypedDagNode<Tree> *t, DagNode* &ch, unsigned long g, const std::string &fname, const std::string &del);                                  //!< Constructor
+		AncestralStateMonitor(TypedDagNode<Tree> *t, DagNode* &ch, std::uint64_t g, const std::string &fname, const std::string &del);                                  //!< Constructor
 		
         AncestralStateMonitor(const AncestralStateMonitor &m);
         virtual ~AncestralStateMonitor(void);
@@ -44,7 +44,7 @@ namespace RevBayesCore {
         AncestralStateMonitor*              clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                monitorVariables(unsigned long gen);                                //!< Monitor at generation gen
+        void                                monitorVariables(std::uint64_t gen);                                //!< Monitor at generation gen
         void                                printFileHeader(void);                                              //!< Print header
         
         // getters and setters
@@ -73,7 +73,7 @@ using namespace RevBayesCore;
 
 /* Constructor */
 template<class characterType>
-AncestralStateMonitor<characterType>::AncestralStateMonitor(TypedDagNode<Tree> *t, DagNode* &ch, unsigned long g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode*>(), g, fname, del, false, false, false),
+AncestralStateMonitor<characterType>::AncestralStateMonitor(TypedDagNode<Tree> *t, DagNode* &ch, std::uint64_t g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode*>(), g, fname, del, false, false, false),
     tree( t ),
     ctmc( ch ),
     stochastic_nodes_only( false )
@@ -137,7 +137,7 @@ AncestralStateMonitor<characterType>* AncestralStateMonitor<characterType>::clon
  * \param[in]   gen    The current generation.
  */
 template<class characterType>
-void AncestralStateMonitor<characterType>::monitorVariables(unsigned long gen)
+void AncestralStateMonitor<characterType>::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
     

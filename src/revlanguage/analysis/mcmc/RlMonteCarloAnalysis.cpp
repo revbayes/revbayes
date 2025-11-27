@@ -144,7 +144,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
 
         // the checkoint file (empty by default) and the checkoint interval (0 by default)
         const std::string checkpoint_file = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        long checkpoint_interval = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        std::int64_t checkpoint_interval = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
         if ( (checkpoint_file != "" && checkpoint_interval == 0) || (checkpoint_file == "" && checkpoint_interval != 0) )
         {
             throw RbException("For checkpointing you have to provide both the checkpoint file and the checkpoint frequency (interval).");
@@ -279,19 +279,19 @@ void MonteCarloAnalysis::initializeMethods()
 {
     
     ArgumentRules* run_arg_rules = new ArgumentRules();
-    run_arg_rules->push_back( new ArgumentRule( "generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ) );
+    run_arg_rules->push_back( new ArgumentRule( "generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
     run_arg_rules->push_back( new ArgumentRule( "rules", WorkspaceVector<StoppingRule>::getClassTypeSpec(), "The rules when to automatically stop the run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-    run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
+    run_arg_rules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0)  ) );
     run_arg_rules->push_back( new ArgumentRule( "checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("")  ) );
-    run_arg_rules->push_back( new ArgumentRule( "checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a files for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L)  ) );
-    run_arg_rules->push_back( new ArgumentRule( "verbose" , Natural::getClassTypeSpec(), "How much information to print to the screen (0: none, 1: basic information only, 2: more information at extra CPU time cost).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1L)  ) );
+    run_arg_rules->push_back( new ArgumentRule( "checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a files for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0)  ) );
+    run_arg_rules->push_back( new ArgumentRule( "verbose" , Natural::getClassTypeSpec(), "How much information to print to the screen (0: none, 1: basic information only, 2: more information at extra CPU time cost).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1)  ) );
     run_arg_rules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "DEPRECATED", ArgumentRule::BY_VALUE, ArgumentRule::ANY, nullptr ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
 
     ArgumentRules* burninArgRules = new ArgumentRules();
     burninArgRules->push_back( new ArgumentRule( "generations"   , Natural::getClassTypeSpec(), "The number of generation to run this burnin simulation.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
     burninArgRules->push_back( new ArgumentRule( "tuningInterval", Natural::getClassTypeSpec(), "The interval when to update the tuning parameters of the moves.", ArgumentRule::BY_VALUE, ArgumentRule::ANY  ) );
-    burninArgRules->push_back( new ArgumentRule( "verbose", Natural::getClassTypeSpec(), "How much information to print to the screen (0: none, 1: basic information only, 2: more information at extra CPU time cost).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1L)  ) );
+    burninArgRules->push_back( new ArgumentRule( "verbose", Natural::getClassTypeSpec(), "How much information to print to the screen (0: none, 1: basic information only, 2: more information at extra CPU time cost).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1)  ) );
     burninArgRules->push_back( new ArgumentRule( "underPrior" , RlBoolean::getClassTypeSpec(), "DEPRECATED", ArgumentRule::BY_VALUE, ArgumentRule::ANY, nullptr ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burninArgRules) );
 

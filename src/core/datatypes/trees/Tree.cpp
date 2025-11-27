@@ -1,6 +1,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstddef>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <set>
@@ -17,6 +18,8 @@
 #include "TreeUtilities.h"
 #include "Clade.h"
 #include "DagNode.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
@@ -50,7 +53,7 @@ Tree::Tree(const Tree& t) :
         // do not reorder node indices when copying (WP)
         setRoot(newRoot, false);
     }
-
+    
 }
 
 
@@ -64,7 +67,7 @@ Tree::Tree(Tree&& t)
 /* Destructor */
 Tree::~Tree(void)
 {
-
+    
     nodes.clear();
     std::set<TreeChangeEventListener*> l = changeEventHandler.getListeners();
     for ( std::set<TreeChangeEventListener*>::iterator it = l.begin(); it != l.end(); ++it )
@@ -377,12 +380,12 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "branchLength" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = getNode( index ).getBranchLength();
     }
     else if ( n == "nodeAge" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = getNode( index ).getAge();
     }
     else if ( n == "treeLength" )
@@ -447,17 +450,17 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 }
 
 
-void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
 
     if ( n == "parent" )
     {
-        long index = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        std::int64_t index = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         if (getNode( index ).isRoot() == true)
         {
             throw RbException("Root has no parent.");
         }
-        rv = long( getNode( index ).getParent().getIndex() )+1;
+        rv = std::int64_t( getNode( index ).getParent().getIndex() )+1;
     }
     else if ( n == "child" )
     {
@@ -496,6 +499,10 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     {
         rv = nodes.size();
     }
+    else if (n == "nbranches")
+    {
+        rv = nodes.size() - 1;
+    }
     else if (n == "ntips")
     {
         rv = num_tips;
@@ -518,7 +525,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 
     if ( n == "isContainedInClade" )
     {
-        int index = (int)static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         Clade clade = static_cast<const TypedDagNode<Clade> *>( args[1] )->getValue();
         clade.resetTaxonBitset( getTaxonBitSetMap() );
 
@@ -779,9 +786,9 @@ std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
 }
 
 
-std::vector<long> Tree::getNodeIndices(void) const
+std::vector<std::int64_t> Tree::getNodeIndices(void) const
 {
-    std::vector<long> indices;
+    std::vector<std::int64_t> indices;
 
     for ( size_t i=0; i<nodes.size(); ++i )
     {
@@ -944,19 +951,48 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
 {
     for (auto& node : nodes)
     {
-        if(!node->isTip()) continue;
+        if ( !node->isTip() ) continue;
         Taxon taxon = node->getTaxon();
-        if(node->getAge() < taxon.getMinAge()) {
-            if(forceAdjust) {
+        
+        if ( node->getAge() < taxon.getMinAge() )
+        {
+            if (forceAdjust)
+            {
                 node->setAge(taxon.getMinAge());
-                RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
-            } else throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+                
+                // only notify the user if we are making a non-trivial adjustment
+                if ( taxon.getMinAge() - node->getAge() > 1e-06 * node->getAge() )
+                {
+                    std::stringstream msg;
+                    msg << "Age of taxon " << taxon.getName() << " was below the specified minimum and has been adjusted from ";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMinAge() << ".";
+                    RBOUT( msg.str() );
+                }
+            }
+            else
+            {
+                throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+            }
         }
-        if(node->getAge() > taxon.getMaxAge()) {
-            if(forceAdjust) {
+        if ( node->getAge() > taxon.getMaxAge() )
+        {
+            if (forceAdjust)
+            {
                 node->setAge(taxon.getMaxAge());
-                RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
-            } else throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+                
+                // only notify the user if we are making a non-trivial adjustment
+                if ( node->getAge() - taxon.getMaxAge() > 1e-06 * node->getAge() )
+                {
+                    std::stringstream msg;
+                    msg << "Age of taxon " << taxon.getName() << " was above the specified maximum and has been adjusted from ";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMaxAge() << ".";
+                    RBOUT( msg.str() );
+                }
+            }
+            else
+            {
+                throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+            }
         }
     }
 }
@@ -1526,7 +1562,7 @@ void Tree::orderNodesByIndex( void )
 
 // Prints tree for user (rounding)
 void Tree::printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const {
-    long previousPrecision = o.precision();
+    std::int64_t previousPrecision = o.precision();
     std::ios_base::fmtflags previousFlags = o.flags();
 
     std::fixed( o );
@@ -1579,6 +1615,45 @@ void Tree::collapseSampledAncestors()
         }
     }
     setRoot(root, true);
+}
+
+// Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
+// First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
+TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
+{
+    TopologyNode* node;
+    
+    for (size_t i = 0; i < 10; i++)
+    {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(getNumberOfNodes() * u) );
+        node = (TopologyNode*)&getNode(node_idx);
+        if ( !node->isRoot() && !node->isTip() && !node->isSampledAncestorParent() ) return node;
+    }
+    
+    // check that there is at least one node which is not the root, a tip, or the parent of a SA
+    std::vector<TopologyNode*> eligible_nodes;
+        
+    for (auto& to_check: getNodes())
+    {
+        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        {
+            eligible_nodes.push_back( to_check );
+        }
+    }
+        
+    if (eligible_nodes.size() == 0)
+    {
+        node = NULL;
+    }
+    else
+    {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+        node = eligible_nodes[node_idx];
+    }
+    
+    return node;
 }
 
 void Tree::pruneTaxa(const RbBitSet& prune_map )
@@ -1927,7 +2002,9 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
     // reset parent/child relationships
     reverseParentChild( n.getParent() );
-    n.getParent().setParent( NULL );
+
+    // set the root
+    root = &n.getParent();
     
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
@@ -1938,10 +2015,7 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
         // second, we suppress any internal nodes of outdegree 1 ("knuckles" / sampled ancestors)
         suppressOutdegreeOneNodes(true);
         
-    } // end-if we do not want to make the tree bifurcating
-
-    // set the new root
-    setRoot( &n.getParent(), reindex );
+    }
 }
 
 
@@ -1975,24 +2049,21 @@ void Tree::resetTaxonBitSetMap( void )
 
 void Tree::resolveMultifurcations( bool resolve_root )
 {
-    bool does_use_ages = isTimeTree();
-    
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        if ( nodes[i]->getNumberOfChildren() > 2 )
-        {
-            // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
-            nodes[i]->setUseAges( does_use_ages, true );
-            // resolve the multifurcation
-            nodes[i]->resolveMultifurcation( resolve_root );
-            // we need to reindex nodes because we added new ones
-            reindexNodes();
-        }
-    }
-    
-    // Remove the outdegree-1 nodes ("knuckles") introduced by the above process of resolving multifurcations.
-    // NOTE: This only works if we assume that trees can contain multifurcations or knuckles, but not both.
-    suppressOutdegreeOneNodes( false );
+    // Collect the multifurcation nodes.
+    std::vector<TopologyNode*> multifurcating_nodes;
+    for (auto node: nodes)
+        if (node->getNumberOfChildren() > 2)
+            multifurcating_nodes.push_back(node);
+
+    // set the 'use_ages' attribute for all nodes
+    root->setUseAges( isTimeTree(), true );
+
+    // Resolve the multifurcations.
+    for(auto node: multifurcating_nodes)
+        node->resolveMultifurcation( resolve_root );
+
+    // We need to reindex nodes because we added new ones
+    reindexNodes();
 }
 
 
@@ -2010,10 +2081,10 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         TopologyNode &p = n.getParent();
         ret = &(reverseParentChild(p));
 
-        // we need to re-orient the branches/indices so that
-        // nodes remain associated with the same parameters
-        p.setIndex(n.getIndex());
-        p.setBranchLength(n.getBranchLength());
+        // swap node indices, branch lengths and branch comments
+        std::swap(p.index, n.index);
+        std::swap(p.branch_length, n.branch_length);
+        std::swap(p.branch_comments, n.branch_comments);
 
         p.removeChild( &n );
         n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n

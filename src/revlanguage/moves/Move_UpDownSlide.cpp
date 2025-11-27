@@ -116,7 +116,7 @@ void Move_UpDownSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new up-down-scale move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
@@ -374,8 +374,8 @@ const MemberRules& Move_UpDownSlide::getParameterRules(void) const
     if ( !rules_set )
     {
         
-        memberRules.push_back( new ArgumentRule( "lambda"      , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
-        memberRules.push_back( new ArgumentRule( "tune"        , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        memberRules.push_back( new ArgumentRule( "delta", RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "tune" , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -424,9 +424,9 @@ void Move_UpDownSlide::printValue(std::ostream &o) const
 void Move_UpDownSlide::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "lambda" )
+    if ( name == "delta" )
     {
-        lambda = var;
+        delta = var;
     }
     else if ( name == "tune" )
     {

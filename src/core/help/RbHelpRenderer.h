@@ -10,6 +10,7 @@ class RbHelpArgument;
 class RbHelpEntry;
 class RbHelpFunction;
 class RbHelpType;
+class RbHelpDatabase;
     
     /**
      * @brief Class rendering the help to the console output.
@@ -28,6 +29,7 @@ class RbHelpType;
         std::string                 renderHelp(const RbHelpEntry &entryHelp, size_t w);
         std::string                 renderHelp(const RbHelpFunction &functionHelp, size_t w);
         std::string                 renderHelp(const RbHelpType &typeHelp, size_t w);
+        std::string                 renderHelp(const RbHelpDatabase &hd, std::string entry_name, size_t w);
         
         
         

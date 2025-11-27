@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <ostream>
 #include <vector>
+#include <cstdint>
 
 #include "Cloneable.h"
 
@@ -33,7 +34,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                            autoTune(void) = 0;                                         //!< Automatic tuning of the move.
         virtual Move*                                           clone(void) const = 0;                                      //!< Create a deep copy.
         virtual void                                            decrementTriedCounter(void) = 0;                            //!< Get update weight of InferenceMove
-        virtual const RbOrderedSet<DagNode*>&                   getAffectedNodes(void) const = 0;                           //!< Get the nodes vector
+        virtual RbOrderedSet<DagNode*>                          getAffectedNodes(void) const = 0;                           //!< Get the nodes vector
         virtual const std::vector<DagNode*>&                    getDagNodes(void) const = 0;                                //!< Get the nodes vector
         virtual const std::string&                              getMoveName(void) const = 0;                                //!< Get the name of the move for summary printing
         virtual double                                          getMoveTuningParameter(void) const = 0;
@@ -42,7 +43,7 @@ template <class valueType> class RbOrderedSet;
         virtual size_t                                          getNumberTriedCurrentPeriod(void) const = 0;                //!< Get the number of tries for this move since the last reset
         virtual size_t                                          getNumberTriedTotal(void) const = 0;                        //!< Get the number of tries for this move since the last reset
         virtual double                                          getUpdateWeight(void) const = 0;                            //!< Get update weight of InferenceMove
-        virtual bool                                            isActive(unsigned long gen) const = 0;                      //!< Is this move active?
+        virtual bool                                            isActive(std::uint64_t gen) const = 0;                      //!< Is this move active?
 //        virtual void                                            perform(double lHeat, double pHeat) = 0;                  //!< Perform the move.
         virtual void                                            performMcmcStep(double prHeat, double lHeat, double pHeat) = 0;            //!< Perform the move.
         virtual void                                            performHillClimbingStep(double lHeat, double pHeat) = 0;    //!< Perform the move.

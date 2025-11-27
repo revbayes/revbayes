@@ -71,7 +71,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     if (character == "AA" || character == "Protein")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::AminoAcidState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::AminoAcidState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::AminoAcidState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -79,7 +79,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "DNA")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -87,7 +87,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "Codon")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -95,7 +95,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "NaturalNumbers")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::NaturalNumbersState> *m;
-		m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::NaturalNumbersState>(ctmc_sn, (unsigned long)g, fn, sep);
+		m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::NaturalNumbersState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -103,7 +103,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "PoMo")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::PoMoState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::PoMoState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::PoMoState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -111,7 +111,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "RNA")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -119,7 +119,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "Standard")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::StandardState> *m;
-		m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::StandardState>(ctmc_sn, (unsigned long)g, fn, sep);
+		m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::StandardState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
@@ -127,7 +127,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     else if (character == "Binary" || character == "Restriction")
     {
         RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::BinaryState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::BinaryState>(ctmc_sn, (unsigned long)g, fn, sep);
+        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::BinaryState>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;

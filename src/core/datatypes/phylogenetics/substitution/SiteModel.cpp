@@ -35,7 +35,7 @@ void SiteModel::executeMethod( const std::string &n, const std::vector<const Dag
         rv.clear();
 
         auto& tree = dynamic_cast<const TypedDagNode<Tree> *>( args[0] )->getValue();
-        int node = dynamic_cast<const TypedDagNode<long> *>( args[1] )->getValue() - 1; // Natural
+        int node = dynamic_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue() - 1; // Natural
         double rate = dynamic_cast<const TypedDagNode<double> *>( args[2] )->getValue();
 
         if (node < 0 or node >= tree.getNumberOfNodes())

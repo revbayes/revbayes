@@ -37,14 +37,14 @@ namespace RevBayesCore {
         
     public:
         // Constructors and Destructors
-        CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
+        CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree> *t, std::uint64_t g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sne=false, bool ste=true);
         CharacterHistorySummaryMonitor(const CharacterHistorySummaryMonitor& f);
         
         // basic methods
         CharacterHistorySummaryMonitor*          clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                monitor(unsigned long gen);                                         //!< Monitor at generation gen
+        void                                monitor(std::uint64_t gen);                                         //!< Monitor at generation gen
         void                                swapNode(DagNode *oldN, DagNode *newN);
         
         // FileMonitor functions
@@ -53,9 +53,9 @@ namespace RevBayesCore {
         void                                printHeader(void);                                                  //!< Print header
         
     private:
-        std::string                         buildChainSummaryString(unsigned long gen);
-        std::string                         buildIterationSummaryTable(unsigned long gen);
-        std::string                         buildIterationSummaryTable(unsigned long gen, TopologyNode* n);
+        std::string                         buildChainSummaryString(std::uint64_t gen);
+        std::string                         buildIterationSummaryTable(std::uint64_t gen);
+        std::string                         buildIterationSummaryTable(std::uint64_t gen, TopologyNode* n);
         bool                                isCladogenetic( TopologyNode* n );
         
         // the stream to print
@@ -82,7 +82,7 @@ namespace RevBayesCore {
 
 /* Constructor */
 template<class charType>
-RevBayesCore::CharacterHistorySummaryMonitor<charType>::CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, unsigned long g, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
+RevBayesCore::CharacterHistorySummaryMonitor<charType>::CharacterHistorySummaryMonitor(StochasticNode<AbstractHomologousDiscreteCharacterData>* s, TypedDagNode<Tree>* t, std::uint64_t g, const RevBayesCore::path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sne, bool ste) :
 Monitor(g,t),
 outStream(),
 variable(s),
@@ -139,7 +139,7 @@ void RevBayesCore::CharacterHistorySummaryMonitor<charType>::closeStream() {
 }
 
 template<class charType>
-std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildChainSummaryString( unsigned long gen ) {
+std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildChainSummaryString( std::uint64_t gen ) {
     // print the iteration number first
     
     std::stringstream ss;
@@ -189,7 +189,7 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildChainSu
 }
 
 template<class charType>
-std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterationSummaryTable( unsigned long gen ) {
+std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterationSummaryTable( std::uint64_t gen ) {
     //tree->getValue().getRoot().setNewickNeedsRefreshing(true);
     std::string newick = buildIterationSummaryTable( gen, &tree->getValue().getRoot() );
     return newick;
@@ -197,7 +197,7 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
 
 /* Build newick string */
 template<class charType>
-std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterationSummaryTable( unsigned long gen, TopologyNode* n ) {
+std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterationSummaryTable( std::uint64_t gen, TopologyNode* n ) {
     // create the newick string
     std::stringstream o;
     
@@ -376,10 +376,10 @@ bool RevBayesCore::CharacterHistorySummaryMonitor<charType>::isCladogenetic( Top
 
 /** Monitor value at generation gen */
 template<class charType>
-void RevBayesCore::CharacterHistorySummaryMonitor<charType>::monitor(unsigned long gen) {
+void RevBayesCore::CharacterHistorySummaryMonitor<charType>::monitor(std::uint64_t gen) {
     
     // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    std::uint64_t samplingFrequency = printgen;
     
     if (gen % samplingFrequency == 0) {
 

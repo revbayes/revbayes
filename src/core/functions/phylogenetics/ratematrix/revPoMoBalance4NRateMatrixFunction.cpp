@@ -4,12 +4,12 @@
 using namespace RevBayesCore;
 
 
-revPoMoBalance4NRateMatrixFunction::revPoMoBalance4NRateMatrixFunction(   const TypedDagNode< long > *n,
+revPoMoBalance4NRateMatrixFunction::revPoMoBalance4NRateMatrixFunction(   const TypedDagNode< std::int64_t > *n,
                                                                 const TypedDagNode< Simplex  > *p,
                                                                 const TypedDagNode< RbVector<double> > *r,
                                                                 const TypedDagNode< RbVector<double> > *s,
                                                                 const TypedDagNode< RbVector<double> > *b,
-                                                                const TypedDagNode< RbVector<long> > *Bf     ) : TypedFunction<RateGenerator>( new RateMatrix_revPoMoBalance4N( 4+6*(n->getValue()-1), n->getValue() ) ),
+                                                                const TypedDagNode< RbVector<std::int64_t> > *Bf     ) : TypedFunction<RateGenerator>( new RateMatrix_revPoMoBalance4N( 4+6*(n->getValue()-1), n->getValue() ) ),
 N( n ),
 pi( p ),
 rho( r ),
@@ -47,12 +47,12 @@ revPoMoBalance4NRateMatrixFunction* revPoMoBalance4NRateMatrixFunction::clone( v
 void revPoMoBalance4NRateMatrixFunction::update( void )
 {
     // get the information from the arguments for reading the file
-    long n = N->getValue();
+    std::int64_t n = N->getValue();
     const std::vector<double>& p  = pi->getValue();
     const std::vector<double>& r  = rho->getValue();
     const std::vector<double>& s  = phi->getValue();
     const std::vector<double>& b  = beta->getValue();
-    const std::vector<long>&   Bf = B->getValue();
+    const std::vector<std::int64_t>&   Bf = B->getValue();
 
     // set the base frequencies
     static_cast< RateMatrix_revPoMoBalance4N* >(value)->setN( n );
@@ -72,7 +72,7 @@ void revPoMoBalance4NRateMatrixFunction::swapParameterInternal(const DagNode *ol
     
     if (oldP == N)
     { 
-        N = static_cast<const TypedDagNode< long >* >( newP );
+        N = static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
     
     if (oldP == pi)
@@ -97,7 +97,7 @@ void revPoMoBalance4NRateMatrixFunction::swapParameterInternal(const DagNode *ol
 
     if (oldP == B)
     {
-        B = static_cast<const TypedDagNode< RbVector<long> >* >( newP );
+        B = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
     }
 
 

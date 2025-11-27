@@ -11,7 +11,7 @@ namespace RevBayesCore { class Simplex; }
 using namespace RevBayesCore;
 
 
-ReversiblePoMoRateMatrixFunction::ReversiblePoMoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RbVector<double> > *rho, const TypedDagNode< Simplex > *pi   ) : TypedFunction<RateGenerator>( new RateMatrix_ReversiblePoMo(4 + 6*(ps->getValue() - 1), rho->getValue(), pi->getValue(), ps->getValue() ) ),
+ReversiblePoMoRateMatrixFunction::ReversiblePoMoRateMatrixFunction(const TypedDagNode< std::int64_t > *ps, const TypedDagNode< RbVector<double> > *rho, const TypedDagNode< Simplex > *pi   ) : TypedFunction<RateGenerator>( new RateMatrix_ReversiblePoMo(4 + 6*(ps->getValue() - 1), rho->getValue(), pi->getValue(), ps->getValue() ) ),
     population_size( ps ),
     exchangeabilities( rho ),
     equilibrium_frequencies( pi )

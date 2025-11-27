@@ -16,6 +16,7 @@
  * $Id$
  */
 
+#include <sstream>
 #include "ArgumentRules.h"
 #include "ArgumentRule.h"
 
@@ -153,3 +154,23 @@ size_t ArgumentRules::size(void) const
 }
 
 
+void ArgumentRules::printValue(std::ostream& o) const
+{
+    o << " (";
+    for (size_t i=0; i<size(); i++)
+    {
+        if (i != 0)
+        {
+            o << ", ";
+        }
+        (*this)[i].printValue(o);
+    }
+    o << ")";
+}
+
+std::string ArgumentRules::show() const
+{
+    std::stringstream o;
+    printValue(o);
+    return o.str();
+}

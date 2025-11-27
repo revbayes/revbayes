@@ -18,10 +18,10 @@ template <class valueType> class TypedDagNode;
      * Instances of this class can be associated to stochastic variables.
      *
      */
-    class NegativeBinomialDistribution : public TypedDistribution<long> {
+    class NegativeBinomialDistribution : public TypedDistribution<std::int64_t> {
         
     public:
-        NegativeBinomialDistribution(const TypedDagNode<long> *r, const TypedDagNode<double> *p);
+        NegativeBinomialDistribution(const TypedDagNode<std::int64_t> *r, const TypedDagNode<double> *p);
         virtual                                            ~NegativeBinomialDistribution(void);                                             //!< Virtual destructor
         
         // public member functions
@@ -36,7 +36,7 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        const TypedDagNode<long>*                           r;
+        const TypedDagNode<std::int64_t>*                           r;
         const TypedDagNode<double>*                         p;
     };
     

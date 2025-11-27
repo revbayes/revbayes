@@ -1,13 +1,3 @@
-//
-//  RateMatrix_DECRateMatrix.cpp
-//  revbayes-proj
-//
-//  Created by Michael Landis on 3/16/15.
-//  Copyright (c) 2015 Michael Landis. All rights reserved.
-//
-
-//#define DEBUG_DEC
-
 #include <cstddef>
 #include <cmath>
 #include <list>
@@ -219,9 +209,7 @@ void RateMatrix_DECRateMatrix::fillRateMatrix( void )
             
             std::vector<unsigned> b1 = statesToBitsByNumOn[startState];
             std::vector<unsigned> b2 = statesToBitsByNumOn[endState];
-            
-//            std::cout << getRangeStr(b1) << "->" << getRangeStr(b2) << " " << (lossOrGain[i][j]==0 ? "LOSS" : "GAIN") << " :\n";
-            
+                        
             // extinction
             if (lossOrGain[i][j] == 0)
             {
@@ -237,7 +225,6 @@ void RateMatrix_DECRateMatrix::fillRateMatrix( void )
                     for (size_t k = 0; k < affecting_areas.size(); k++)
                     {
                         double vt = extirpationRates[ affecting_areas[k] ][changed_area];
-    //                        std::cout << "\t" << vt << "dr[ " <<  affecting_areas[k] << " ][ " << changed_area << "]\n";
                         v += vt;
                     }
                 }
@@ -252,11 +239,9 @@ void RateMatrix_DECRateMatrix::fillRateMatrix( void )
                 for (size_t k = 0; k < affecting_areas.size(); k++)
                 {
                     double vt = dispersalRates[ affecting_areas[k] ][changed_area];
-//                    std::cout << "\t" << vt << "dr[ " <<  affecting_areas[k] << " ][ " << changed_area << "]\n";
                     v += vt;
                 }
             }
-//            std::cout << "\tsum = " << sum << "\n";
             
             v *= p;
             
@@ -271,7 +256,6 @@ void RateMatrix_DECRateMatrix::fillRateMatrix( void )
         // set diagonal
         m[startState][startState] = -sum;
     }
-//    std::cout << m << "\n";
     
     // set flags
     needs_update = true;
@@ -561,7 +545,8 @@ void RateMatrix_DECRateMatrix::makeBits(void)
 size_t RateMatrix_DECRateMatrix::numBitsOn(std::vector<unsigned> v)
 {
     size_t n = 0;
-    for (size_t i = 0; i < v.size(); i++) {
+    for (size_t i = 0; i < v.size(); i++)
+    {
         n += v[i];
     }
     return n;
@@ -709,7 +694,8 @@ void RateMatrix_DECRateMatrix::tiProbsComplexEigens(double t, TransitionProbabil
 
 
 /** Update the eigen system */
-void RateMatrix_DECRateMatrix::updateEigenSystem(void) {
+void RateMatrix_DECRateMatrix::updateEigenSystem(void)
+{
     
     theEigenSystem->update();
     calculateCijk();
@@ -717,7 +703,8 @@ void RateMatrix_DECRateMatrix::updateEigenSystem(void) {
 }
 
 
-void RateMatrix_DECRateMatrix::update( void ) {
+void RateMatrix_DECRateMatrix::update( void )
+{
     
     if ( needs_update )
     {
