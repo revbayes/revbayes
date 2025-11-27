@@ -57,7 +57,7 @@ mat := fnTreePairwiseDistances(est_tree)
 
 # Have it follow the exponential error distribution with a rate of 0.005
 
-exp_error_dist ~ dnExponentialError(distMat=mat, lambda=0.005)
+exp_error_dist ~ dnExponentialError(distMat=mat, lambda=1.0)
 
 # Clamp to the data
 

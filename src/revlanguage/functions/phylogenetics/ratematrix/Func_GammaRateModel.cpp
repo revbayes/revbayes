@@ -113,7 +113,7 @@ Core::TypedFunction< Core::SiteMixtureModel >* Func_GammaRateModel::createFuncti
 {
     Core::TypedDagNode< Core::SiteMixtureModel >* submodel = dynamic_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     Core::TypedDagNode< double >* a = dynamic_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    Core::TypedDagNode< long >* nCats = dynamic_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< std::int64_t >* nCats = dynamic_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     Core::TypedDagNode< Core::Boolean >* median = dynamic_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
 
     return Core::generic_function_ptr< Core::SiteMixtureModel >( GammaRateModelFunc, submodel, a, nCats, median);

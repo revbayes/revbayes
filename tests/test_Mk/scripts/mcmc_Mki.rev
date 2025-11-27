@@ -45,8 +45,7 @@ mymodel = model(phylogeny)
 ############
 # run MCMC #
 
-# some minitors
-monitors.append( mnScreen(printgen=1) )
+# some monitors
 monitors.append( mnModel(filename="output/Mki.log", printgen=1) )
 monitors.append( mnFile(filename="output/Mki.trees", printgen=1, phylogeny) )
 

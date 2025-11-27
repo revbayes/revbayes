@@ -42,12 +42,42 @@ void FastaFileToNaturalNumbersConverter::faconverter( const path &fi, const std:
     if ( not readStream )
         throw RbException()<<"Could not open file "<<fi<<".";
 
-    // some important quantities to parse the fasta file
-    std::vector<std::string>    alignment;
-    std::vector<int>            ns_taxa(n_taxa,0);
-    std::vector<int>            aligment_index;
-    std::string                 line,seq_name;
-    size_t                      index;
+  // some important quantities to parse the fasta file    
+  std::vector<std::string> alignment;
+  std::vector<int>         ns_taxa(n_taxa,0);
+  std::vector<int>         aligment_index;
+  std::string              line,seq_name;
+  size_t                   index;
+
+  std::vector<size_t> length_taxa (n_taxa);
+  for (size_t i =0; i<n_taxa; ++i){
+    length_taxa[i] = taxa[i].length();
+  }
+  //for (size_t i =0; i<n_taxa; ++i){ std::cout << "lt: " <<length_taxa[i] << "\n"; }
+
+  // going through the alingment lines
+  while (safeGetline(readStream,line)) {
+
+    if (line.length() == 0) { break; }
+
+    for (size_t t =0; t<n_taxa; ++t){
+
+      seq_name = line.substr(1,length_taxa[t]);
+      index    = getIndex(seq_name,taxa);
+      //std::cout << "tname:" << seq_name << " index: " << index << "\n";
+
+      // if the element is found keep the sequence (sitting in the next line) and save the taxa index
+      if ( index < n_taxa )  {
+        safeGetline(readStream,line);
+        alignment.push_back(line);
+        aligment_index.push_back(index);
+        ns_taxa[index] += 1;
+        break;
+
+      // if the sequence indentifier does not include a taxa names throw an error 
+      } else {
+        throw RbException() << "Sequence \"" << line << "\" does not belong to any of the taxa. Make sure every sequence starts with one of the taxa names."; 
+      }
 
     std::vector<size_t> length_taxa (n_taxa);
     for (size_t i =0; i<n_taxa; ++i)
@@ -223,6 +253,21 @@ size_t FastaFileToNaturalNumbersConverter::getState(const std::vector<int>& coun
         
     }
       
+        // pointing out some typical invalid counts: null counts (e.g., 0,0,0,0) and >2-allelic counts (e.g., 0,1,1,1)
+        if (n_counts==0){
+          throw RbException() << "Unexpected allelic counts at site " << s << " and taxa " << taxa_name << ". PoMos require at least one postive count."; 
+        }
+        if (n_counts>2){
+          throw RbException() << "Unexpected allelic couts at site " << s << " and taxa " << taxa_name << ". PoMos only accept monoallelic or biallelic counts."; 
+        }
+      
+        // sampling a 0:n_individuals frequency from the weight vector 
+        size_t weight = sample_weight(M, m, n_individuals);
+      
+        // determining the pomo state
+        // three possible situations
+        // if the count is monoallelic & likely "sampled" from a fixed state
+        if (weight==n_individuals){
         
     // pointing out some typical invalid counts: null counts (e.g., 0,0,0,0) and >2-allelic counts (e.g., 0,1,1,1)
     if (n_counts==0)

@@ -26,27 +26,26 @@ namespace RevBayesCore {
     class PoMoKNRateMatrixFunction : public TypedFunction<RateGenerator> {
         
     public:
+      PoMoKNRateMatrixFunction(std::int64_t num_all, std::int64_t virt, const TypedDagNode<double> *eff, const TypedDagNode<RbVector<double>> *mut, const TypedDagNode<RbVector<double>> *sel);
 
-        PoMoKNRateMatrixFunction( long num_all, long virt, const TypedDagNode< double >* eff , const TypedDagNode< RbVector<double> > *mut, const TypedDagNode< RbVector<double> > *sel ) ;
+      virtual ~PoMoKNRateMatrixFunction(void); //!< Virtual destructor
 
-        virtual                                                ~PoMoKNRateMatrixFunction(void);                                                         //!< Virtual destructor
-        
-        // public member functions
-        PoMoKNRateMatrixFunction*      clone(void) const;                                                                                               //!< Create an independent clone
+      // public member functions
+      PoMoKNRateMatrixFunction *clone(void) const; //!< Create an independent clone
 
-        void                                                    update(void);
+      void update(void);
         
     protected:
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Implementation of swaping parameters
         
     private:
         
-        long                                                    computeNumStates( long na, long ni );
-        long                                                    computeNumMutRates( long na );
+        std::int64_t                                                    computeNumStates( std::int64_t na, std::int64_t ni );
+        std::int64_t                                                    computeNumMutRates( std::int64_t na );
 
         // members
-        long                                                    num_alleles;
-        long                                                    virt_pop_size;
+        std::int64_t                                            num_alleles;
+        std::int64_t                                            virt_pop_size;
         const TypedDagNode< double >*                           eff_pop_size;
         const TypedDagNode< RbVector<double> >*                 mu;
         const TypedDagNode< RbVector<double> >*                 phi;
@@ -56,5 +55,3 @@ namespace RevBayesCore {
 }
 
 #endif
-
-

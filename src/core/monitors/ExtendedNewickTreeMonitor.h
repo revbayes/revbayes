@@ -33,14 +33,14 @@ template <class valueType> class TypedDagNode;
         
     public:
         // Constructors and Destructors
-        ExtendedNewickTreeMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode*> &n, bool np, unsigned long g, const std::string &fname,
+        ExtendedNewickTreeMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode*> &n, bool np, std::uint64_t g, const std::string &fname,
                                   const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false);                                              //!< Constructor with set of DAG node
         
         // basic methods
         ExtendedNewickTreeMonitor*          clone(void) const;                                                      //!< Clone the object
         
         // Monitor functions
-        void                                monitorVariables(unsigned long gen);                                    //!< Monitor at generation gen
+        void                                monitorVariables(std::uint64_t gen);                                    //!< Monitor at generation gen
         void                                swapNode(DagNode *oldN, DagNode *newN);
 
         // FileMonitor functions

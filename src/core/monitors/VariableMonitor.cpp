@@ -15,7 +15,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-VariableMonitor::VariableMonitor(DagNode *n, unsigned long g, const path &fname,
+VariableMonitor::VariableMonitor(DagNode *n, std::uint64_t g, const path &fname,
                                  const SampleFormat& f, bool pp, bool l, bool pr, bool ap, bool wv) :
     AbstractFileMonitor(n,g,fname,ap,wv),
     posterior( pp ),
@@ -28,7 +28,7 @@ VariableMonitor::VariableMonitor(DagNode *n, unsigned long g, const path &fname,
 
 
 /* Constructor */
-VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, const SampleFormat &f,
+VariableMonitor::VariableMonitor(const std::vector<DagNode *> &n, std::uint64_t g, const path &fname, const SampleFormat &f,
                                  bool pp, bool l, bool pr, bool ap, bool wv) :
     AbstractFileMonitor(n,g,fname,ap,wv),
     posterior( pp ),
@@ -133,7 +133,7 @@ void VariableMonitor::printHeader( void )
 /**
  * Monitor
  */
-void VariableMonitor::monitor(unsigned long gen)
+void VariableMonitor::monitor(std::uint64_t gen)
 {
     if ( not enabled or gen % printgen != 0 ) return;
 
@@ -249,7 +249,7 @@ void VariableMonitor::printFileHeader( void )
 /**
  * Monitor value at generation gen
  */
-void VariableMonitor::monitorVariables(unsigned long gen)
+void VariableMonitor::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
 

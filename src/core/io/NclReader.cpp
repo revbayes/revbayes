@@ -204,26 +204,36 @@ std::vector<AbstractCharacterData* > NclReader::convertFromNcl(const path& file_
                 unsigned int nAssumptions = nexusReader.GetNumAssumptionsBlocks(charBlock);
                 if ( nAssumptions > 0 )
                 {
+                    std::stringstream assmpt_mssg;
+                    assmpt_mssg << "An ASSUMPTIONS block was found and will be ignored.";
+                    RBOUT( assmpt_mssg.str() );
+                    
                     for (unsigned int i = 0; i < nAssumptions; ++i)
                     {
                         NxsAssumptionsBlock *assumption = nexusReader.GetAssumptionsBlock(charBlock,i);
                         size_t nSets = assumption->GetNumCharSets();
-                        NxsStringVector names;
-                        assumption->GetCharSetNames(names);
-                        for (size_t j = 0; j < nSets; ++j)
+                        if (nSets != 0)
                         {
-                            const NxsUnsignedSet *set = assumption->GetCharSet(names[j]);
-                            HomologousCharacterData *m_tmp = dynamic_cast<HomologousCharacterData *>(m)->clone();
-                            m_tmp->excludeAllCharacters();
-                            for (std::set<unsigned>::iterator k = set->begin(); k != set->end(); k++)
+                            NxsStringVector names;
+                            assumption->GetCharSetNames(names);
+                            for (size_t j = 0; j < nSets; ++j)
                             {
-                                m_tmp->includeCharacter( *k );
+                                const NxsUnsignedSet *set = assumption->GetCharSet(names[j]);
+                                HomologousCharacterData *m_tmp = dynamic_cast<HomologousCharacterData *>(m)->clone();
+                                m_tmp->excludeAllCharacters();
+                                for (std::set<unsigned>::iterator k = set->begin(); k != set->end(); k++)
+                                {
+                                    m_tmp->includeCharacter( *k );
+                                }
+                                m_tmp->removeExcludedCharacters();
+                                cmv.push_back( m_tmp );
+                                
                             }
-                            m_tmp->removeExcludedCharacters();
-                            cmv.push_back( m_tmp );
-                            
                         }
-                        
+                        else
+                        {
+                            cmv.push_back( m );
+                        }
                     }
                 }
                 else
@@ -894,10 +904,36 @@ HomologousDiscreteCharacterData<StandardState>* NclReader::createStandardMatrix(
             }
             else
             {
-                for (unsigned int s=0; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                // If we have a partial ambiguity and one of the states involved in the ambiguity is a gap / inapplicable state,
+                // set the matrix cell to missing data and emit a warning
+                if ( charblock->GetState(origTaxIndex, *cit, 0) == charblock->GetGapSymbol() )
+                {
+                    std::stringstream ambig_inapp_mssg;
+                    ambig_inapp_mssg << "Partial ambiguity involving a gap state (" << charblock->GetGapSymbol() << ") detected for taxon ";
+                    ambig_inapp_mssg << charblock->GetTaxonLabel(origTaxIndex) << " at character " << std::distance(charset.begin(), cit) + 1;
+                    ambig_inapp_mssg << "." << std::endl << "Replacing by missing data (" << charblock->GetMissingSymbol() << ").";
+                    RBOUT( ambig_inapp_mssg.str() );
+                    
+                    stdState.setMissingState(true);
+                }
+                else
                 {
                     stdState.setState( std::string(1, charblock->GetState(origTaxIndex, *cit, 0) ) );
-                    for (unsigned int s=1; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                }
+                
+                for (unsigned int s=1; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                {
+                    if ( charblock->GetState(origTaxIndex, *cit, s) == charblock->GetGapSymbol() )
+                    {
+                        std::stringstream ambig_inapp_mssg;
+                        ambig_inapp_mssg << "Partial ambiguity involving a gap state (" << charblock->GetGapSymbol() << ") detected for taxon ";
+                        ambig_inapp_mssg << charblock->GetTaxonLabel(origTaxIndex) << " at character " << std::distance(charset.begin(), cit) + 1;
+                        ambig_inapp_mssg << "." << std::endl << "Replacing by missing data (" << charblock->GetMissingSymbol() << ").";
+                        RBOUT( ambig_inapp_mssg.str() );
+                        
+                        stdState.setMissingState(true);
+                    }
+                    else
                     {
                         stdState.addState( std::string(1, charblock->GetState(origTaxIndex, *cit, s) ) );
                     }
@@ -938,6 +974,7 @@ void NclReader::getTranslateTables(std::vector<std::map<int,std::string> >& tran
     }
     
 }
+
 
 /** Attempt to determine the type of data this is being read */
 std::string NclReader::intuitDataType(std::string& s)
@@ -1250,7 +1287,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &fn)
     
     // are we reading a single file or are we reading the contents of a directory?
     bool readingDirectory = false;
-    if ( fn.filename().empty() or fn.filename_is_dot() or fn.filename_is_dot_dot())
+    if ( fn.filename().empty() or fn.filename() == "." or fn.filename() == "..")
         readingDirectory = true;
     if (readingDirectory == true)
         RBOUT( "Recursively reading the contents of a directory\n" );
@@ -1528,7 +1565,7 @@ std::vector<AbstractCharacterData*> NclReader::readMatrices(const path &file_nam
             }
             else
             {
-                throw RbException("Unknown data type '" + data_type + "' for fasta formatted files.");
+                throw RbException() << "Unknown data type '" << data_type << "' for fasta formatted files.";
             }
         }
         else if (file_format == "phylip")
@@ -1624,7 +1661,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
     
     // are we reading a single file or are we reading the contents of a directory?
     bool readingDirectory = false;
-    if ( fn.filename().empty() or fn.filename_is_dot() or fn.filename_is_dot_dot())
+    if ( fn.filename().empty() or fn.filename() == "." or fn.filename() == "..")
     {
         readingDirectory = true;
     }
@@ -1812,7 +1849,7 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
         }
         else if (file_format == "phylip")
         {
-            // phylip file format with long taxon names
+            // phylip file format with std::int64_t taxon names
             nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
         }
         else if (file_format == "newick")

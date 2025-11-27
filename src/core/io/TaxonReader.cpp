@@ -52,7 +52,7 @@ TaxonReader::TaxonReader(const std::string &fn, const std::string& delim) : Deli
                     field_stream << ", ";
                 }
             }
-            throw RbException("Unrecognized field: \'"+tmp+"\' in the taxon definition file. Allowed fields: "+field_stream.str());
+            throw RbException() << "Unrecognized field: \'" << tmp << "\' in the taxon definition file. Allowed fields: " << field_stream.str(); 
         }
     }
     

@@ -46,7 +46,8 @@ namespace RevBayesCore {
         bool                            isMissingState(void) const;                                 //!< Get whether this is a missing character state
         void                            setGapState(bool tf);                                       //!< set whether this is a gapped character
         void                            setMissingState(bool tf);                                   //!< set whether this is a missing character
-        
+        void                            setStateLabels(const std::string& l);                       //!< set the state labels
+
     private:
         
         bool                            is_gap;
@@ -61,4 +62,3 @@ namespace RevBayesCore {
 }
 
 #endif
-

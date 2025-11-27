@@ -1,0 +1,36 @@
+################################################################################
+#
+# RevBayes Test-Script: Deterministic time-scaling of an undated tree using 
+#                       the minimum branch length (MBL) approach
+#
+# authors: David Cerny
+#
+################################################################################
+
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+# The tree file does not contain any branch lengths. We will read it in as both
+# a clock tree (TimeTree) and a non-clock tree (BranchLengthTree) to check that
+# the function (1) accepts both input types and (2) treats them the same.
+
+# Read it in as a clock tree
+to_scale0 <- readTrees("data/bears_tree.tre")[1]
+print( "   Tree type: " + type(to_scale0) + "\n")
+
+# Read it in as a non-clock tree
+to_scale1 <- readTrees("data/bears_tree.tre", treetype="non-clock", unroot_nonclock=FALSE)[1]
+print( "   Tree type: " + type(to_scale1) + "\n")
+
+scaled0 <- fnMinBLTimeScaling(to_scale0, taxa, 3.0)
+scaled1 <- fnMinBLTimeScaling(to_scale1, taxa, 3.0)
+
+print( "Checking the identity of both time-scaled trees...")
+print( "Same topology? " + ifelse(scaled0.hasSameTopology(scaled1), "TRUE", "FALSE") )
+print( "Same root age? " + ifelse(scaled0.rootAge() == scaled1.rootAge(), "TRUE", "FALSE") )
+print( "Same tree length? " + ifelse(scaled0.treeLength() == scaled1.treeLength(), "TRUE", "FALSE") )
+
+writeNexus(filename="output/bears_time_scaled.nex", scaled0)
+
+clear()
+
+q()

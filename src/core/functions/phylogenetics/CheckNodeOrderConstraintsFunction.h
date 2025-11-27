@@ -23,11 +23,8 @@ template <class valueType> class TypedDagNode;
         virtual                                            ~CheckNodeOrderConstraintsFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
-        CheckNodeOrderConstraintsFunction*                                  clone(void) const;                                                                  //!< Create an independent clone
-        void                                                keep(const DagNode* affecter);
-        void                                                restore(const DagNode *restorer);
+        CheckNodeOrderConstraintsFunction*                  clone(void) const;                                                                  //!< Create an independent clone
         void                                                reInitialized(void);                                                                //!< The arguments have been re-initialized
-        void                                                touch(const DagNode *toucher );
         void                                                update(void);
         
     protected:

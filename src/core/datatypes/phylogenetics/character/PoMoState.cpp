@@ -2,7 +2,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/math/distributions/hypergeometric.hpp>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <cstddef>
 #include <string>

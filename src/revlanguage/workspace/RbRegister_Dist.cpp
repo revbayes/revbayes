@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 #include <cstdio>
 #include <string>
 
@@ -173,6 +173,7 @@
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
+#include "Dist_ConstrainedTopologySSE.h"
 #include "Dist_ConstrainedUnrootedTopology.h"
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
@@ -279,11 +280,11 @@
 #include "Transform_Log.h"
 #include "Transform_Logit.h"
 #include "Transform_InvLogit.h"
-#include "Transform_Shift.h"
-#include "Transform_Shift_Pos.h"
-#include "Transform_Scale.h"
-#include "Transform_Scale_Pos.h"
-#include "Transform_Scale_Prob.h"
+
+#include "Transform_Add.h"
+#include "Transform_Sub1.h"
+#include "Transform_Sub2.h"
+#include "Transform_Mul.h"
 
 #include "Transform_Vector_Exp.h"
 #include "Transform_Vector_Log.h"
@@ -388,7 +389,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
-
+        
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
 
@@ -417,6 +418,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
 
         // constrained topology distribution
+        AddDistribution< TimeTree                   >( new Dist_ConstrainedTopologySSE() );
+
+        // constrained topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );
 
         // uniform time tree distribution
@@ -434,8 +438,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // uniform topology with branch lengths distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
 
-		// empirical tree distributions
-		AddDistribution< Tree                       >( new Dist_empiricalTree() );
+        // empirical tree distributions
+        AddDistribution< Tree                       >( new Dist_empiricalTree() );
 
         // ultrametric tree distributions
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
@@ -598,10 +602,10 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // dirichlet process prior distribution
         AddDistribution< ModelVector<Real>          >( new Dist_dpp<Real>()         );
-		AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
-		AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
-		AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
-		AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
+        AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
+        AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
+        AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
         AddDistribution< ModelVector<Simplex>       >( new Dist_dpp<Simplex>()      );
 
         // event distribution
@@ -626,11 +630,19 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Transform_Log()          );
         AddDistribution< Real                       >( new Transform_Logit()        );
         AddDistribution< Probability                >( new Transform_InvLogit()     );
-        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
-        AddDistribution< Real                       >( new Transform_Shift()        );
-        AddDistribution< Probability                >( new Transform_Scale_Prob()   );
-        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
-        AddDistribution< Real                       >( new Transform_Scale()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Add<Real       , false>() );
+        AddDistribution< Probability                >( new Transform_Mul<Probability, false>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Mul<Real       , false>() );
+
+        AddDistribution< Real                       >( new Transform_Sub1()        );
+        AddDistribution< Real                       >( new Transform_Sub2()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Add<Real>()        );
+        AddDistribution< Probability                >( new Transform_Mul<Probability>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Mul<Real>()        );
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
@@ -642,9 +654,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // mixture distribution
         AddDistribution< Real                       >( new Dist_mixture<Real>() );
-		AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
-		AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
-		AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
+        AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
+        AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
+        AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
         AddDistribution< Probability                >( new Dist_mixture<Probability>() );
         AddDistribution< Simplex                    >( new Dist_mixture<Simplex>() );
         AddDistribution< ModelVector<Real>          >( new Dist_mixture< ModelVector<Real> >() );

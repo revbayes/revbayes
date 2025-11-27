@@ -1,0 +1,15 @@
+   
+   Running burn-in phase of Monte Carlo sampler for 5000 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 3 different moves in a random move schedule with 3 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 3 different moves in a random move schedule with 3 moves per iteration
+   

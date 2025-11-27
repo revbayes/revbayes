@@ -46,7 +46,7 @@ RevPtr<RevVariable> Func_convertFastaFileToNaturalNumbers::execute( void )
     //std::vector<std::string> taxa     = static_cast<const ModelVector<RlString> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     //std::vector<std::string> alleles  = static_cast<const ModelVector<RlString> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::TypedDagNode<long>*                           n_individuals  = static_cast<const Integer &>(               this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*                           n_individuals  = static_cast<const Integer &>(               this->args[3].getVariable()->getRevObject() ).getDagNode();
 	const RlString& fo                                                         = static_cast<const RlString&>(                     args[4].getVariable()->getRevObject() );
    
     RevBayesCore::FastaFileToNaturalNumbersConverter nn;

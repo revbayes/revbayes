@@ -53,7 +53,7 @@ UltrametricTreeDistribution::UltrametricTreeDistribution( TypedDistribution<Tree
 {
 
     size_t burnin = tree_trace.getBurnin();
-    long n_samples = tree_trace.size();
+    std::int64_t n_samples = tree_trace.size();
     for (int i=burnin; i<n_samples; ++i)
     {
         trees.push_back( tree_trace.objectAt( i ) );
@@ -89,7 +89,7 @@ UltrametricTreeDistribution::UltrametricTreeDistribution( TypedDistribution<Tree
 
     if ( sample_prior_density != NULL && tree_trace.size() != sample_prior_density->size() && tree_trace.getBurnin() != sample_prior_density->getBurnin() )
     {
-        throw RbException("The size of the tree trace (" + StringUtilities::to_string(tree_trace.size()) + ") and the prior density trace (" + StringUtilities::to_string(sample_prior_density->size()) + ") does not match!");
+        throw RbException() << "The size of the tree trace (" << tree_trace.size() << ") and the prior density trace (" << sample_prior_density->size() << ") does not match!";
     }
 
 
@@ -613,7 +613,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("An ultrametric tree distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "An ultrametric tree distribution does not have a member method called '" << n << "'.";
     }
 
 }
@@ -695,8 +695,8 @@ void UltrametricTreeDistribution::prepareTreeSamples(const std::vector<Tree> &tr
     tree_branch_lengths = std::vector<std::map<Split, double> >(num_samples, std::map<Split, double>() );
     topology_indices.clear();
 
-    std::map<Split, long>       clade_counts;
-    std::map<std::string, long> tree_counts;
+    std::map<Split, std::int64_t>       clade_counts;
+    std::map<std::string, std::int64_t> tree_counts;
 
     size_t burnin = 0;
 

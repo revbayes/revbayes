@@ -3,7 +3,7 @@ dnVarianceGamma
 ## title
 Variance-gamma Distribution
 ## description
-Variance-gamma distribution with location ‘mu’.
+Variance-gamma distribution with location `mu`.
 ## details
 The variance-gamma distribution has density:
 

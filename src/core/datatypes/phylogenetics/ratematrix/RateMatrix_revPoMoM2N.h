@@ -28,9 +28,8 @@ namespace RevBayesCore {
         void                                            calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_revPoMoM2N*                          clone(void) const;
 
-		
-		void 										    setNEffective(double ps);
-		void 										    setMu( const std::vector<double> &r );
+        void                                            setNEffective(double ps);
+        void                                            setMu( const std::vector<double> &r );
         void                                            setGen(double g);
 
         std::vector<double>                             getStationaryFrequencies( void ) const;
@@ -51,7 +50,7 @@ namespace RevBayesCore {
         
         double                                          N_eff;
         std::vector<double>                             mu;                                                                                //!< Vector of precalculated product of eigenvectors and their inverse
-        long                                            N_virt;
+        std::uint64_t                                            N_virt;
         double                                          gen;
 
     };
@@ -59,5 +58,3 @@ namespace RevBayesCore {
 }
 
 #endif
-
-
