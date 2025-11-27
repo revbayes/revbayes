@@ -1,6 +1,6 @@
 #include "BirthDeathForwardSimulator.h"
 
-#include <math.h>
+#include <cmath>
 #include <iterator>
 #include <set>
 #include <string>

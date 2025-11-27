@@ -1,0 +1,28 @@
+# generate data
+p <- 0.1
+sample_size <- 100
+
+seed(12)
+
+data <- rbernoulli(sample_size, p)
+
+# model
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+uni_int ~ dnUniformInteger(0, 10)
+moves.append( mvRandomIntegerWalk(uni_int) )
+p_estimated := Probability(uni_int / 10)
+
+for (i in 1:sample_size) {
+    y[i] ~ dnBernoulli(p_estimated)
+    y[i].clamp(data[i])
+}
+
+monitors.append( mnModel(filename="output/UniInt.log",printgen=2, separator = TAB) )
+
+mymodel = model(uni_int)
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=10)
+
+q()

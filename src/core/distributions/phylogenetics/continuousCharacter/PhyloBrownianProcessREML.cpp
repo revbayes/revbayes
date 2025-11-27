@@ -72,7 +72,6 @@ PhyloBrownianProcessREML* PhyloBrownianProcessREML::clone( void ) const
 
 double PhyloBrownianProcessREML::computeLnProbability( void )
 {
-    
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
@@ -90,8 +89,6 @@ double PhyloBrownianProcessREML::computeLnProbability( void )
     // only necessary if the root is actually dirty
     if ( this->dirty_nodes[rootIndex] )
     {
-        
-        
         recursiveComputeLnProbability( root, rootIndex );
         
         // start by filling the likelihood vector for the children of the root
@@ -99,13 +96,15 @@ double PhyloBrownianProcessREML::computeLnProbability( void )
         {
             throw RbException("The root node has an unexpected number of children. Only 2 (for rooted trees) or 3 (for unrooted trees) are allowed.");
         }
-        
-        
-        // sum the partials up
-        this->ln_prob = sumRootLikelihood();
-        
     }
-    return this->ln_prob;
+
+    // NOTE: After restoreSpecialization( ) is called, all the nodes will be marked clean.
+    //       But we still need to update ln_prob
+
+    // sum the partials up
+    ln_prob = sumRootLikelihood();
+
+    return ln_prob;
 }
 
 

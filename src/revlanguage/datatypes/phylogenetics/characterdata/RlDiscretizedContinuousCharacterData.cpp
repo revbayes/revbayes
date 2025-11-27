@@ -85,7 +85,7 @@ void DiscretizedContinuousCharacterData::concatenate(const RevObject &d, std::st
     }
     else
     {
-        throw RbException("Cannot add an object of type '" + d.getType() + "' to a DiscretizedContinuousCharacterData object.");
+        throw RbException() << "Cannot add an object of type '" << d.getType() << "' to a DiscretizedContinuousCharacterData object.";
     }
 }
 

@@ -43,7 +43,7 @@ namespace RevBayesCore {
         using RateMatrix::getRate;
 
         //RateMatrix_PoMoKNrecurrentMutations(size_t num_states) ;
-        RateMatrix_PoMoKNrecurrentMutations(long ns, long na, double nv, size_t n_mr, bool rm)  ;
+        RateMatrix_PoMoKNrecurrentMutations(std::int64_t ns, std::int64_t na, double nv, size_t n_mr, bool rm);
 
         virtual                                    ~RateMatrix_PoMoKNrecurrentMutations(void);                     //!< Destructor
 
@@ -54,8 +54,8 @@ namespace RevBayesCore {
         std::vector<double>                         getStationaryFrequencies(void) const ;  //!< Return the stationary frequencies, which are the stationary frequencies of the Q_mut matrix
 
         void                                        update(void);
-        void                                        setNumberOfAlleles( long na );
-        void                                        setVirtualPopulationSize( long ni );
+        void                                        setNumberOfAlleles( std::int64_t na );
+        void                                        setVirtualPopulationSize( std::int64_t ni );
         void                                        setMu(  const std::vector<double>& m );
         void                                        setPhi( const std::vector<double>& f );
         void                                        setRecurrentMutations( bool &r );
@@ -65,9 +65,9 @@ namespace RevBayesCore {
         void                                        buildRateMatrix(void) ;
         void                                        computeExponentialMatrixByRepeatedSquaring(double t, TransitionProbabilityMatrix& P ) const ;
         
-        long                                        S;
-        long                                        K;
-        long                                        V;
+        std::int64_t                                        S;
+        std::int64_t                                        K;
+        std::int64_t                                        V;
         std::vector<double>                         mu;
         std::vector<double>                         phi;    
         bool                                        R;

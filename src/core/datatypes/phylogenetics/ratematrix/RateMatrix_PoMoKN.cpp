@@ -27,7 +27,7 @@ phi( in_k, 1.0 )
 
 /** Construct rate matrix with n states, an exchangeability matrix, a simplex of equilibrium frequencies, and a virtual
  * population size */
-RateMatrix_PoMoKN::RateMatrix_PoMoKN(long num_states, long num_all, double virt, double eff, size_t num_mut_rates)  :
+RateMatrix_PoMoKN::RateMatrix_PoMoKN(std::int64_t num_states, std::int64_t num_all, double virt, double eff, size_t num_mut_rates)  :
 AbstractRateMatrix( num_states ),
 num_alleles( num_all ),
 virtual_pop_size( virt ),
@@ -213,9 +213,7 @@ std::vector<double> RateMatrix_PoMoKN::getStationaryFrequencies( void ) const
     return calculateStationaryFrequencies();
 }
 
-
-
-void RateMatrix_PoMoKN::setNumberOfAlleles( long na )
+void RateMatrix_PoMoKN::setNumberOfAlleles(std::int64_t na)
 {
     num_alleles = na;
     
@@ -224,8 +222,7 @@ void RateMatrix_PoMoKN::setNumberOfAlleles( long na )
     
 }
 
-
-void RateMatrix_PoMoKN::setVirtualPopulationSize( long ni )
+void RateMatrix_PoMoKN::setVirtualPopulationSize( std::int64_t ni )
 {
     virtual_pop_size = ni;
     

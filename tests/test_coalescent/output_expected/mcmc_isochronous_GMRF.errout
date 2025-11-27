@@ -1,0 +1,86 @@
+   Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 32 different moves in a random move schedule with 255.6 moves per iteration
+   

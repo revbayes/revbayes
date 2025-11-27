@@ -358,10 +358,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
-    
-    const std::vector<bool> &gap_node           = gap_matrix[data_tip_index];
-    const std::vector<unsigned long> &char_node = char_matrix[data_tip_index];
-    const std::vector<RbBitSet> &amb_char_node  = ambiguous_char_matrix[data_tip_index];
+    const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
+    const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
+    const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
 
     size_t char_data_node_index = this->value->indexOfTaxonWithName(node.getName());
     std::vector<size_t> site_indices;
@@ -370,6 +369,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
         site_indices = this->getIncludedSiteIndices();
     }
     
+    double obs_error_prob = 0.0;
+    // Basanta: Initialize with a dummy simplex; overwritten by the model if enabled.
+    Simplex obs_error_freqs = Simplex(this->num_chars);
+    if ( this->using_observation_error )
+    {
+        obs_error_prob  = this->observation_error_probability->getValue();
+        obs_error_freqs = this->observation_error_frequencies->getValue();
+    }
     // compute the transition probabilities
 //    this->updateTransitionProbabilities( node_index );
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
@@ -424,11 +431,34 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
                         for ( size_t i=0; i<this->num_chars; ++i )
                         {
-                            // check whether we observed this state
-                            if ( val.test(i) == true )
+                            if ( this->using_observation_error == false )
                             {
-                                // add the probability
-                                tmp += *d;
+                                // check whether we observed this state
+                                if ( val.test(i) == true )
+                                {
+                                    // add the probability
+                                    tmp += *d;
+                                }
+                            }
+                            else
+                            {
+                                double tmp2 = 0;
+                                for ( size_t j=0; j<this->num_chars; ++j )
+                                {
+                                    if ( val.test(j) == true )
+                                    {
+                                        if ( i == j )
+                                        {
+                                            tmp2 += (1.0 - obs_error_prob * (1.0-obs_error_freqs[i]));
+                                        }
+                                        else
+                                        {
+//                                            tmp2 += (global_obs_error_val/this->num_chars);
+                                            tmp2 += obs_error_prob*obs_error_freqs[j];
+                                        }
+                                    }
+                                }
+                                tmp += *d * tmp2;
                             }
 
                             // increment the pointer to the next transition probability
@@ -458,7 +488,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                             if ( val.test(i) == true )
                             {
                                 // add the probability
-                                tmp += *d * weights[i] ;
+                                tmp += *d * weights[i];
                             }
 
                             // increment the pointer to the next transition probability
@@ -471,10 +501,29 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
                     }
                     else // no ambiguous characters in use
                     {
-                        unsigned long org_val = char_node[site];
+                      std::uint64_t org_val = char_node[site];
 
-                        // store the likelihood
-                        p_site_mixture[c1] = tp_begin[c1*this->num_chars+org_val];
+                      if (this->using_observation_error == false)
+                      {
+                          // store the likelihood
+                          p_site_mixture[c1] = tp_begin[c1 * this->num_chars + org_val];
+                      }
+                      else
+                      {
+                          double tmp = 0.0;
+                          for ( size_t c2=0; c2<this->num_chars; ++c2 )
+                          {
+                              if ( c2 == org_val )
+                              {
+                                  tmp += tp_begin[c1*this->num_chars+c2] * (1.0 - obs_error_prob * (1.0-obs_error_freqs[c2]));
+                              }
+                              else
+                              {
+                                  tmp += tp_begin[c1*this->num_chars+c2] * (obs_error_prob*obs_error_freqs[org_val]);
+                              }
+                          }
+                          p_site_mixture[c1] = tmp;
+                        }
 
                     }
 

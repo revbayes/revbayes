@@ -45,7 +45,7 @@ RevPtr<RevVariable> Func_readPoMoCountFile::execute( void )
 
 	// get the information from the arguments for reading the file
     const std::string& file_in      = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    long  virtual_population_size   = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t virtual_population_size = static_cast<const Natural &>(this->args[1].getVariable()->getRevObject()).getValue();
 
     const std::string& format       = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
     RevBayesCore::PoMoCountFileReader::FORMAT reader_format = RevBayesCore::PoMoCountFileReader::PoMo;

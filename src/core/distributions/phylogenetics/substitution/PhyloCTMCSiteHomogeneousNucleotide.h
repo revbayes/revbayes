@@ -45,7 +45,7 @@ namespace RevBayesCore {
 
 #include <cmath>
 #include <cstring>
-#if defined (SSE_ENABLED)
+#if defined ( SSE_ENABLED )
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <pmmintrin.h>
@@ -561,9 +561,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     double* p_node = likelihoods + this->active_likelihood[node_index]*likelihood_offset + node_index*node_offset;
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
-    const std::vector<bool> &gap_node           = gap_matrix[data_tip_index];
-    const std::vector<unsigned long> &char_node = char_matrix[data_tip_index];
-    const std::vector<RbBitSet> &amb_char_node  = ambiguous_char_matrix[data_tip_index];
+    const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
+    const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
+    const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
 //     this->updateTransitionProbabilities( node_index );
@@ -650,7 +650,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                 {
                     
                     // get the original character
-                    unsigned long org_val = char_node[site];
+                    std::uint64_t org_val = char_node[site];
                     
                     // store the likelihood
                     p_site_mixture[0] = tp_begin[org_val];

@@ -14,7 +14,7 @@ namespace RevBayesCore { class DagNode; }
  * @param med a bool of whether to use the median values to represent each category. If false then the mean values are used
  */
 
-RevBayesCore::DiscretizeBetaFunction::DiscretizeBetaFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<long> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
+RevBayesCore::DiscretizeBetaFunction::DiscretizeBetaFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<std::int64_t> *nc, bool med) : TypedFunction< RbVector<double> >( new RbVector<double>(nc->getValue(), 1.0) ),
 alpha( a ),
 beta( b ),
 numCats(nc),
@@ -50,7 +50,7 @@ void RevBayesCore::DiscretizeBetaFunction::swapParameterInternal(const DagNode *
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }
@@ -78,12 +78,12 @@ void RevBayesCore::DiscretizeBetaFunction::update( void ) {
     {
         /* the mean value for each category is used to represent all of the values
          in that category */
-        /* calculate the points in the gamma distribution */
-        for (int i=0; i<nCats-1; i++)
+        for (int i=0; i<nCats-1; i++) {
+            /* calculate the points in the gamma distribution */
             (*value)[i] = RbStatistics::Beta::quantile(a, b, (i+1)/double (nCats));
-        /* calculate the cumulative values */
-        for (int i=0; i<nCats-1; i++)
+            /* calculate the cumulative values */
             (*value)[i] = RbMath::incompleteBeta(a+1, b, (*value)[i]);
+        }
         (*value)[nCats-1] = 1.0;
         /* calculate the relative values and rescale */
         for (int i=nCats-1; i>0; i--){

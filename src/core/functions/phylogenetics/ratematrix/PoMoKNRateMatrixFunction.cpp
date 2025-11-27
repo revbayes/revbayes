@@ -4,8 +4,8 @@
 using namespace RevBayesCore;
 
 
-PoMoKNRateMatrixFunction::PoMoKNRateMatrixFunction(   long num_all,
-                                                      long virt,
+PoMoKNRateMatrixFunction::PoMoKNRateMatrixFunction(   std::int64_t num_all,
+                                                      std::int64_t virt,
                                                       const TypedDagNode< double > *eff,
                                                       const TypedDagNode< RbVector<double> > *mut,
                                                       const TypedDagNode< RbVector<double> > *sel ) :
@@ -31,10 +31,10 @@ PoMoKNRateMatrixFunction::~PoMoKNRateMatrixFunction( void )
 }
 
 
-long PoMoKNRateMatrixFunction::computeNumStates( long na, long ni )
+std::int64_t PoMoKNRateMatrixFunction::computeNumStates( std::int64_t na, std::int64_t ni )
 {
 
-    long numStates = na + (na*na-na)*(ni-1)*0.5;
+    std::int64_t numStates = na + (na*na-na)*(ni-1)*0.5;
     
     return numStates;
 
@@ -42,10 +42,10 @@ long PoMoKNRateMatrixFunction::computeNumStates( long na, long ni )
 
 
 
-long PoMoKNRateMatrixFunction::computeNumMutRates( long na )
+std::int64_t PoMoKNRateMatrixFunction::computeNumMutRates( std::int64_t na )
 {
 
-    long numMutRates = na*na-na;
+    std::int64_t numMutRates = na*na-na;
     
     return numMutRates;
 
@@ -99,7 +99,3 @@ void PoMoKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const 
     }
 
 }
-
-
-
-

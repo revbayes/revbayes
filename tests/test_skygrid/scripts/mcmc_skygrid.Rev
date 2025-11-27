@@ -58,8 +58,7 @@ timetree.clamp(psi)
 
 mymodel = model(timetree)
 
-monitors[1] = mnScreen(printgen=10)
-monitors[2] = mnModel(printgen=5,file="output/skygrid.log")
+monitors[1] = mnModel(printgen=5,file="output/skygrid.log")
 
 mymcmc = mcmc(mymodel,monitors,moves)
 

@@ -52,6 +52,7 @@ UniformSerialSampledTimeTreeDistribution* UniformSerialSampledTimeTreeDistributi
 
 void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTree(Tree *psi, std::vector<TopologyNode*> &nodes, const std::vector<double> &ages)
 {
+        // NOTE: See alternative, and possibly simpler implementation in TopologyNode::resolveMultifurcation( )
 
 	// Get the rng
 	RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -89,7 +90,7 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 			{
 				// add the extinct node to the active nodes list, remove it from the extinct nodes list
 				active_nodes.push_back( extinct_nodes.at(j) );
-				extinct_nodes.erase( extinct_nodes.begin() + long(j) );
+				extinct_nodes.erase( extinct_nodes.begin() + std::int64_t(j) );
 			}
 		}
 
@@ -98,14 +99,14 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 		TopologyNode* leftChild = active_nodes.at(left);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(left) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(left) );
 
 		// randomly draw one child (arbitrarily called left) node from the list of active nodes
 		size_t right = static_cast<size_t>( floor( rng->uniform01() * active_nodes.size() ) );
 		TopologyNode* rightChild = active_nodes.at(right);
 
 		// remove the randomly drawn node from the list
-		active_nodes.erase( active_nodes.begin() + long(right) );
+		active_nodes.erase( active_nodes.begin() + std::int64_t(right) );
 
 		// make sure ages are consistent
 
@@ -222,7 +223,7 @@ double UniformSerialSampledTimeTreeDistribution::computeLnProbability( void )
 			{
 				// add the extinct node to the current number of taxa, remove it from the serial times list
 				current_num_taxa++;
-				serial_times.erase( serial_times.begin() + long(j) );
+				serial_times.erase( serial_times.begin() + std::int64_t(j) );
 			}
 		}
 
@@ -285,10 +286,19 @@ std::vector<double> UniformSerialSampledTimeTreeDistribution::simulateCoalescent
     	num_ages = num_taxa - 1;
     }
 
+    // Its important that we sort the taxon ages, and do not use
+    // the youngest or (if has_root_age) the oldest.
+    // If we do not do this, we can get an age when only one
+    // taxon is active.  Trying to remove two active taxa then leads to a crash.
+    std::vector<double> sorted_taxon_ages;
+    for(auto& taxon: taxa)
+        sorted_taxon_ages.push_back(taxon.getAge());
+    std::sort(sorted_taxon_ages.begin(), sorted_taxon_ages.end());
+
     for(size_t i = 0; i < num_ages; ++i)
     {
     	// get the age of the tip
-    	double a = taxa[i + 1].getAge();
+    	double a = sorted_taxon_ages[i+1];
 
     	// simulate the age of a node
     	double new_age = a + rng->uniform01() * (max_age - a);

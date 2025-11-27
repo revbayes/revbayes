@@ -38,7 +38,7 @@ namespace RevBayesCore {
     class RateMatrix_revPoMoBalanceKN : public TimeReversibleRateMatrix {
 
     public:
-        RateMatrix_revPoMoBalanceKN( long num_states, long in_k, long in_n, long in_nex );                                                                                            //!< Construct rate matrix with n states
+        RateMatrix_revPoMoBalanceKN( std::int64_t num_states, std::int64_t in_k, std::int64_t in_n, std::int64_t in_nex );                                                                                            //!< Construct rate matrix with n states
         RateMatrix_revPoMoBalanceKN(const RateMatrix_revPoMoBalanceKN& m);                                                                  //!< Copy constructor
         virtual                             ~RateMatrix_revPoMoBalanceKN(void);                                                              //!< Destructor
 
@@ -49,8 +49,8 @@ namespace RevBayesCore {
         void                                                    calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_revPoMoBalanceKN*                            clone(void) const;
 
-        void                                                    setK( long &na );
-        void                                                    setN( long &ni );
+        void                                                    setK( std::int64_t &na );
+        void                                                    setN( std::int64_t &ni );
         void                                                    setPi(const std::vector<double> &p );
         void                                                    setRho( const std::vector<double> &r );
         void                                                    setPhi( const std::vector<double> &s );
@@ -71,12 +71,13 @@ namespace RevBayesCore {
         std::vector<double>                                     c_ijk;                                                                              //!< Vector of precalculated product of eigenvectors and their inverse
         std::vector<std::complex<double> >                      cc_ijk;                                                                             //!< Vector of precalculated product of eigenvectors and thier inverse for complex case
 
-        long                                                    K;
-        long                                                    N;
+        std::int64_t                                                    K;
+        std::int64_t                                                    N;
         std::vector<double>                                     pi;
         std::vector<double>                                     rho;
         std::vector<double>                                     phi;
         std::vector<double>                                     beta;                                                                //!< Vector of precalculated product of eigenvectors and their inverse
+        std::vector<std::int64_t>                                        B;
     };
 
 }

@@ -56,7 +56,7 @@ const Module& ModuleSystem::getModule(const std::string &qs) const
     }
     else
     {
-        throw RbException("Could not find module with name '" + qs + "'.");
+        throw RbException() << "Could not find module with name '" << qs << "'.";
     }
 }
 
@@ -67,7 +67,7 @@ void ModuleSystem::loadModules(const RevBayesCore::path &dir)
 {
     if (not RevBayesCore::is_directory( dir ) )
     {
-//        throw RbException("Warning: Cannot find directory containing modules. No modules are available. Path = " + dir);
+//        throw RbException() << "Cannot find directory containing modules. No modules are available. Path = " << dir;
     }
     else
     {

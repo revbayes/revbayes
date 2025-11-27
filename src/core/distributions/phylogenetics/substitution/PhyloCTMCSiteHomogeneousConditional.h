@@ -2,7 +2,7 @@
 #define PhyloCTMCSiteHomogeneousConditional_H
 
 #include <bitset>
-#include <math.h>
+#include <cmath>
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "DistributionBinomial.h"
 #include "DistributionNegativeBinomial.h"
@@ -74,7 +74,7 @@ namespace RevBayesCore {
         void                                                updateCorrections( const TopologyNode& node, size_t nodeIndex );
 
     private:
-        virtual void                                        simulate( const TopologyNode &node, std::vector<charType> &taxa, size_t rateIndex, std::map<size_t, size_t>& charCounts);
+        virtual void                                        simulateConditional( const TopologyNode &node, std::vector<charType> &taxa, size_t rateIndex, std::map<size_t, size_t>& charCounts);
     };
 
 }
@@ -1119,7 +1119,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
 
         // recursively simulate the sequences
         std::map<size_t, size_t> charCounts;
-        simulate( root, siteData, rateIndex, charCounts);
+        simulateConditional( root, siteData, rateIndex, charCounts);
 
         if ( !isSitePatternCompatible(charCounts) )
         {
@@ -1185,7 +1185,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
 }
 
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( const TopologyNode &node, std::vector<charType> &data, size_t rateIndex, std::map<size_t, size_t>& charCounts) {
+void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulateConditional( const TopologyNode &node, std::vector<charType> &data, size_t rateIndex, std::map<size_t, size_t>& charCounts) {
 
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
@@ -1203,7 +1203,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( cons
         // update the transition probability matrix
         this->updateTransitionProbabilities( child.getIndex() );
 
-        unsigned long cp = parentState.getStateIndex();
+        std::uint64_t cp = parentState.getStateIndex();
 
         double *freqs = this->transition_prob_matrices[ rateIndex ][ cp ];
 
@@ -1233,7 +1233,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulate( cons
         if (child.isTip())
             charCounts[c.getStateIndex()]++;
         else
-            simulate( child, data, rateIndex, charCounts);
+            simulateConditional( child, data, rateIndex, charCounts);
     }
 
 }

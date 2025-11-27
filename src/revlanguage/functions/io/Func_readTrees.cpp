@@ -118,9 +118,14 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
             ModelVector<TimeTree> *trees = new ModelVector<TimeTree>();
             while (RevBayesCore::safeGetline(iss, aux))
             {
+                if (aux.length() == 0)
+                {
+                    continue;
+                }
+
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
                 trees->push_back( TimeTree(*blTree) );
-                
+
                 delete blTree;
             }
             return new RevVariable( trees );
@@ -130,6 +135,11 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
             ModelVector<BranchLengthTree> *trees = new ModelVector<BranchLengthTree>();
             while (RevBayesCore::safeGetline(iss, aux))
             {
+                if (aux.length() == 0)
+                {
+                    continue;
+                }
+
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
 
                 if (unroot_nonclock)
@@ -139,15 +149,12 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                 }
 
                 trees->push_back( BranchLengthTree(*blTree) );
-                
+
                 delete blTree;
             }
             return new RevVariable( trees );
-            
         }
 
-        
-        
     }
 
 

@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <iosfwd>
+#include <iomanip>
 #include <string>
 #include <vector>
 
@@ -62,36 +63,30 @@ void GelmanRubinStoppingRule::setNumberOfRuns(size_t n)
 
 
 /**
- * Should we stop now?
- * Yes, if the ratio of the variance of samples between chains over the variance of samples withing chains
- * is smaller than the provided threshold.
+ * Compute the current value of the rule's test statistic:
+ * Here, this is the variance of samples between chains over the variance of samples within chains
  */
-bool GelmanRubinStoppingRule::stop( size_t g )
+double GelmanRubinStoppingRule::getStatistic( size_t g )
 {
-    
     GelmanRubinTest grTest = GelmanRubinTest( R );
-
-    bool passed = true;
     
-    std::vector<std::vector<std::vector<double> > > values;
-    std::vector<std::vector<size_t> > burnins;
-    for ( size_t i = 1; i <= numReplicates; ++i)
+    std::vector< std::vector<TraceNumeric> > data( numReplicates );
+    size_t num_variables_in_rep = 1; // prevent complaints about lack of initialization in the 2nd loop below
+    
+    for ( size_t i = 0; i < numReplicates; ++i)
     {
-        path fn = filename;
-        if ( numReplicates > 1 )
-            fn = appendToStem(filename, "_run_" + StringUtilities::to_string(i));
-        
+        path fn = (numReplicates > 1) ? appendToStem(filename, "_run_" + StringUtilities::to_string(i + 1)) : filename;
         TraceContinuousReader reader = TraceContinuousReader( fn );
         
-        // get the vector of traces from the reader
-        std::vector<TraceNumeric> &data = reader.getTraces();
+        // get the vector of variable-specific traces from the reader
+        data[i] = reader.getTraces();
         
         size_t maxBurnin = 0;
         
         // find the max burnin
-        for ( size_t j = 0; j < data.size(); ++j)
+        for ( size_t j = 0; j < data[i].size(); ++j)
         {
-            size_t b = burninEst->estimateBurnin( data[j] );
+            size_t b = burninEst->estimateBurnin( data[i][j] );
 
             if ( maxBurnin < b )
             {
@@ -100,14 +95,74 @@ bool GelmanRubinStoppingRule::stop( size_t g )
         }
         
         // set the burnins
-        for ( size_t j = 0; j < data.size(); ++j)
+        for ( size_t j = 0; j < data[i].size(); ++j)
         {
-            data[j].setBurnin(maxBurnin);
+            data[i][j].setBurnin(maxBurnin);
         }
         
-        // conduct the test
-        passed &= grTest.assessConvergence(data);
+        // if we have different numbers of variables in different replicates, something has gone terribly wrong
+        if (i > 0 && data[i].size() != num_variables_in_rep)
+        {
+            throw RbException("The replicates contain different sets of parameters.");
+        }
+        
+        // get the number of variables in the current replicate
+        num_variables_in_rep = data[i].size();
     }
+    
+    // record the variable-specific Gelman-Rubin statistic values
+    std::vector<double> psrf(num_variables_in_rep);
+    
+    // invert the hierarchy
+    std::vector< std::vector<TraceNumeric> > data_exp( num_variables_in_rep );
+    for (size_t i = 0; i < num_variables_in_rep; i++)
+    {
+        for ( size_t j = 0; j < numReplicates; j++)
+        {
+            data_exp[i].push_back( data[j][i] );
+        }
+        
+        // get the value
+        psrf[i] = grTest.getStatistic( data_exp[i] );
+    }
+    
+    // get the largest psrf value
+    double max_psrf = *std::max_element( psrf.begin(), psrf.end() );
+    return max_psrf;
+}
 
-    return passed;
+
+std::string GelmanRubinStoppingRule::printAsStatement( size_t g, bool target_only )
+{
+    // Nicely format the target value
+    std::stringstream tss;
+    tss << std::setprecision(5) << std::noshowpoint << R;
+    std::string target = tss.str();
+    
+    std::string statement;
+    
+    if (target_only)
+    {
+        statement = "Target value for the Gelman-Rubin statistic (PSRF): < " + target + "\n";
+    }
+    else
+    {
+        double val = getStatistic(g);
+        std::string preamble = "Maximum value of the Gelman-Rubin statistic (PSRF): ";
+        statement = preamble + std::to_string(val) + " (target: < " + target + ")\n";
+    }
+    
+    return statement;
+}
+
+
+/**
+ * Should we stop now?
+ * Yes, if the ratio of the variance of samples between chains over the variance of samples within chains
+ * is smaller than the provided threshold for all monitored variables.
+ */
+bool GelmanRubinStoppingRule::stop( size_t g )
+{
+    double max_psrf = getStatistic(g);
+    return max_psrf < R;
 }

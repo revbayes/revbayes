@@ -11,7 +11,7 @@ using namespace RevBayesCore;
 
 
 template <>
-int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool verbose, std::optional<bool> stochastic)
 {
     double sample = atof( v.c_str() );
 
@@ -42,10 +42,10 @@ int Trace<double>::isCoveredInInterval(const std::string &v, double alpha, bool 
 
 
 template <>
-int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool verbose)
+int Trace<std::int64_t>::isCoveredInInterval(const std::string &v, double alpha, bool verbose, std::optional<bool> stochastic)
 {
 
-    long sample = atof( v.c_str() );
+    std::int64_t sample = atof( v.c_str() );
 
     double smaller_values_count = 0;
     double equal_values_count   = 0;
@@ -76,7 +76,7 @@ int Trace<long>::isCoveredInInterval(const std::string &v, double alpha, bool ve
 
 
 template <>
-int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose)
+int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double i, bool verbose, std::optional<bool> stochastic)
 {
 
     RbVector<double> sample = RbVector<double>();
@@ -130,7 +130,7 @@ int Trace<RbVector<double > >::isCoveredInInterval(const std::string &v, double 
 
 
 template <>
-int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose)
+int Trace<Simplex>::isCoveredInInterval(const std::string &v, double i, bool verbose, std::optional<bool> stochastic)
 {
 
     Simplex sample = Simplex();

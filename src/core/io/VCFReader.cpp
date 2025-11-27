@@ -1819,7 +1819,25 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( bool 
                 }
                 else
                 {
-                    throw RbException("Unknown scored binary character!");
+                    throw RbException()<<"Unknown scored character '"<<allele_tokens[0]<<"'";
+                }
+                
+                // second allele
+                if ( allele_tokens[1] == "0")
+                {
+                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
+                }
+                else if ( allele_tokens[1] == "1" )
+                {
+                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
+                }
+                else if ( allele_tokens[1] == "." )
+                {
+                    taxa[j+NUM_SAMPLES].addCharacter( missing_state );
+                }
+                else
+                {
+                    throw RbException()<<"Unknown scored character '"<<allele_tokens[0]<<"'";
                 }
             }
             
@@ -2196,7 +2214,3 @@ void VCFReader::printSequencesToNexusFile(std::ofstream &out_stream, std::vector
     out_stream << std::endl;
     
 }
-
-
-
-

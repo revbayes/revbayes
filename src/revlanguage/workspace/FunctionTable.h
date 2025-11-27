@@ -42,7 +42,7 @@ namespace RevLanguage {
         void                                    printValue(std::ostream& o, bool env) const;                                                //!< Print table for user
 
         // FunctionTable functions
-        virtual void                            addFunction(Function *func);                                       //!< Add function
+        bool                                    addFunction(Function *func, bool no_except=false);                                          //!< Add function
         void                                    clear(void);                                                                                //!< Clear table
 //        RevPtr<RevVariable>                        executeFunction(const std::string&           name,
 //                                                                const std::vector<Argument>& args);                                         //!< Evaluate function (once)
@@ -53,8 +53,8 @@ namespace RevLanguage {
         void                                    getFunctionNames(std::vector<std::string>& names) const;
         Function*                               getFirstFunction(const std::string& name) const;                                            //!< Get first function with given name
         Function*                               getFunction(const std::string& name) const;                                                 //!< Get function, throw an error if overloaded
-        const Function*                         findFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;  //!< Get function
-        const Function&                         getFunction(const std::string& name, const std::vector<Argument>& args, bool once) const;   //!< Get function
+        const Function*                         findFunction(const std::string& name, const std::vector<Argument>& args) const;             //!< Get function
+        const Function&                         getFunction(const std::string& name, const std::vector<Argument>& args) const;              //!< Get function
         bool                                    isDistinctFormal(const ArgumentRules& x, const ArgumentRules& y) const;                     //!< Are formals unique?
         bool                                    isProcedure(const std::string& fxnName) const;                                              //!< Is 'fxnName' a procedure?
         void                                    replaceFunction(const std::string &name, Function* func);                                   //!< Replace existing function

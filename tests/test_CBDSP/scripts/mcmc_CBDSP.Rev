@@ -112,7 +112,6 @@ mymodel = model(timetree)
 ### set up the monitors that will output parameter values to file and screen
 monitors[++mni] = mnModel(filename="output/"+dataset+"_CBDSP.log",printgen=10, separator = TAB)
 monitors[++mni] = mnExtNewick(filename="output/"+dataset+"_CBDSP.trees", isNodeParameter=FALSE, printgen=10, separator = TAB, tree=timetree, avg_lambda, avg_mu, avg_net, avg_rel, prob_incr_lambda, prob_decr_lambda, prob_incr_mu, prob_decr_mu)
-monitors[++mni] = mnScreen(printgen=1000, shift_rate, speciation_root, extinction_root, total_num_events)
 
 
 ################

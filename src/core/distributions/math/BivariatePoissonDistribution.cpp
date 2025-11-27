@@ -13,7 +13,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-BivariatePoissonDistribution::BivariatePoissonDistribution(const TypedDagNode< double > *theta1x, const TypedDagNode< double > *theta2x, const TypedDagNode< double > *theta0x) : TypedDistribution< RbVector<long> >( new RbVector<long>() ),
+BivariatePoissonDistribution::BivariatePoissonDistribution(const TypedDagNode< double > *theta1x, const TypedDagNode< double > *theta2x, const TypedDagNode< double > *theta0x) : TypedDistribution< RbVector<std::int64_t> >( new RbVector<std::int64_t>() ),
   theta1( theta1x ),
   theta2( theta2x ),
   theta0( theta0x )
@@ -43,8 +43,8 @@ BivariatePoissonDistribution* BivariatePoissonDistribution::clone( void ) const 
 double BivariatePoissonDistribution::computeLnProbability( void )
 {
 
-  std::vector<long> v = *value;
-  long x1, x2;
+  std::vector<std::int64_t> v = *value;
+  std::int64_t x1, x2;
   x1 = v.front();
   x2 = v.front();
 

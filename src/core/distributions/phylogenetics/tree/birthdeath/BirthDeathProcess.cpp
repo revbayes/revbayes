@@ -13,6 +13,7 @@
 #include "AbstractBirthDeathProcess.h"
 #include "AbstractRootedTreeDistribution.h"
 #include "RbBitSet.h"
+#include "RbSettings.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
 
@@ -107,7 +108,7 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         double p_0_t = 1.0 - pSurvival(last_event,present_time,1.0) * exp( rateIntegral(last_event,present_time) );
         double F_t = p_0_t / p_0_T;
         
-        if ( F_t > 1.0 || F_t < 0.0 )
+        if ( F_t > (1.0+RbSettings::userSettings().getTolerance()) || F_t < -RbSettings::userSettings().getTolerance() )
         {
             throw RbException("Problem in computing the probability of missing species in BDP.");
         }
@@ -130,7 +131,7 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         double p_0_t = 1.0 - pSurvival(last_event_time,present_time,1.0) * exp( rateIntegral(last_event_time,present_time) );
         double log_F_t = log(p_0_t) - log(p_0_T);
 
-        if ( log_F_t > 0.0 )
+        if ( log_F_t > RbSettings::userSettings().getTolerance() )
         {
             throw RbException("Problem in computing the probability of missing species in BDP.");
         }
@@ -394,7 +395,7 @@ void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
             if ( incomplete_clade_ages[i] == -1 )
             {
-                throw RbException("Could not find MRCA of clade " + incomplete_clades[i].toString() + " in tree.");
+                throw RbException() << "Could not find MRCA of clade " << incomplete_clades[i].toString() << " in tree.";
             }
         }
         
@@ -445,7 +446,7 @@ void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchA
             incomplete_clade_ages[i] = this->value->getTmrca( incomplete_clades[i] );
             if ( incomplete_clade_ages[i] == -1 )
             {
-                throw RbException("Could not find MRCA of clade " + incomplete_clades[i].toString() + " in tree.");
+                throw RbException() << "Could not find MRCA of clade " << incomplete_clades[i].toString() << " in tree.";
             }
         }
 

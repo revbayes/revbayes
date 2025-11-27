@@ -68,8 +68,8 @@ void Move_RandomGeometricWalk::constructInternalObject( void )
     
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<long>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<long> *n = static_cast<RevBayesCore::StochasticNode<long> *>( tmp );
+    RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     double a = static_cast<const Probability &>( p->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 

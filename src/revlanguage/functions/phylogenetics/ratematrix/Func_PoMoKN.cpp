@@ -34,17 +34,17 @@ Func_PoMoKN* Func_PoMoKN::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_PoMoKN::createFunction( void ) const
 {
-    long num_alleles    = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getValue();
-    long virt_pop_size  = static_cast<const Natural              &>( this->args[1].getVariable()->getRevObject() ).getValue();
+  std::int64_t num_alleles = static_cast<const Natural &>(this->args[0].getVariable()->getRevObject()).getValue();
+  std::int64_t virt_pop_size = static_cast<const Natural &>(this->args[1].getVariable()->getRevObject()).getValue();
 
-    RevBayesCore::TypedDagNode< double                        >* eff    = static_cast<const RealPos              &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mu     = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sel    = static_cast<const ModelVector<RealPos> &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode<double> *eff = static_cast<const RealPos &>(this->args[2].getVariable()->getRevObject()).getDagNode();
+  RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double>> *mu = static_cast<const ModelVector<RealPos> &>(this->args[3].getVariable()->getRevObject()).getDagNode();
+  RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double>> *sel = static_cast<const ModelVector<RealPos> &>(this->args[4].getVariable()->getRevObject()).getDagNode();
 
-    if ( mu->getValue().size() != (num_alleles*num_alleles-num_alleles ) )
-    {
-        throw RbException("The number of alleles does not match the number of mutation rates given: n_mut_rates = n_alleles*n_alleles-n_alleles");
-    }
+  if (mu->getValue().size() != (num_alleles * num_alleles - num_alleles))
+  {
+    throw RbException("The number of alleles does not match the number of mutation rates given: n_mut_rates = n_alleles*n_alleles-n_alleles");
+  }
     if ( sel->getValue().size() != num_alleles )
     {
         throw RbException("The number of alleles does not match the number of fitness coefficients given: n_fit_coeff = n_alleles");
@@ -116,5 +116,3 @@ const TypeSpec& Func_PoMoKN::getTypeSpec( void ) const
     
     return type_spec;
 }
-
-

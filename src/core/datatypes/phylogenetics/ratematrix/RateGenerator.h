@@ -41,6 +41,7 @@ namespace RevBayesCore {
         // public methods
         void                                calculateTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const;           //!< Calculate the transition probabilities for the rate matrix
         size_t                              getNumberOfStates(void) const;                                                              //!< Return the number of states
+        virtual RbVector<std::string>       getStateDescriptions( void ) const;                         //!< Return state descriptions
         size_t                              size(void) const;                                                                           //!< Get the size of the rate matrix, which is the same as the number of states
 
 	json                                toJSON() const;
