@@ -33,6 +33,6 @@ mvSubtreeSwap
 - citation: Allen BL, Steel M (2001). Subtree transfer operations and their induced metrics on evolutionary trees. Annals of Combinatorics, 5:1-15.
   doi: 10.1007/s00026-001-8006-8
   url: https://link.springer.com/article/10.1007/s00026-001-8006-8
-- citation: Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411–501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates.
+- citation: Swofford DL, Olsen GJ (1990). Phylogeny reconstruction. Pp. 411--501 in Hillis DM, Moritz C, eds. Molecular Systematics, 1st ed. Sunderland, MA: Sinauer Associates.
 
 

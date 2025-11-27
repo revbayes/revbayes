@@ -176,10 +176,12 @@ void UniformTopologyDistribution::setValue(RevBayesCore::Tree *v, bool force)
  */
 void UniformTopologyDistribution::simulateClade(std::vector<TopologyNode *> &n )
 {
-    
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
+    // The children contained in vector n have no parent.
+    // Create new internal nodes to join 2 members of n together until n contains only 1 node.
+    // Then use the single remaining node as the parent.
     while ( n.size() >= 2 )
     {
         

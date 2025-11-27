@@ -1,5 +1,5 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.3.0',
+        version: '1.4.0-preview',
         default_options: [
           'buildtype=release',
           'cpp_std=c++17',
@@ -47,11 +47,7 @@ if host_machine.system() == 'windows'
   add_project_arguments(['-Wa,-mbig-obj'], language : 'cpp')
 endif
 
-boost_modules = [ 'regex',
-                  'program_options',
-                  'thread',
-                  'system',
-                  'filesystem',
+boost_modules = [ 'thread',
                   'date_time',
                   'serialization']
 

@@ -38,5 +38,5 @@ fnCodonGY94, fnCodonMG94K, fnX3, fnMutSel
 
 ## references
 - citation: Redelings, BD (2021). BAli-Phy version 3: Model-based co-estimation of Alignment
-       and Phylogeny.  Bioinformatics (2021) 37(10):3032–3034.
+       and Phylogeny. Bioinformatics (2021) 37(10):3032--3034.
   doi: https://doi.org/10.1093/bioinformatics/btab129

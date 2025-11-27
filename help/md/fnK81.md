@@ -44,6 +44,6 @@ fnGTR
     Q := fnK81(kappa1, kappa2, baseFrequencies)
 
 ## references
-- citation: Kimura M (1981). "Estimation of evolutionary distances between homologous nucleotide sequences". Proceedings of the National Academy of Sciences of the United States of America. 78:454–8.
-  doi: https://doi.org/10.1073/pnas.78.1.454
+- citation: Kimura M (1981). Estimation of evolutionary distances between homologous nucleotide sequences. Proceedings of the National Academy of Sciences of the United States of America, 78(1):454--458.
+  doi: 10.1073/pnas.78.1.454
   url: https://www.pnas.org/doi/abs/10.1073/pnas.78.1.454

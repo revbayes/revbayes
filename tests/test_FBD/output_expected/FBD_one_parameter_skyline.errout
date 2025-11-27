@@ -1,0 +1,6 @@
+   Successfully read one character matrix from file 'data/char_mat_gappy_rho1.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 32 different moves in a random move schedule with 1470 moves per iteration
+   
