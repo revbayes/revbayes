@@ -1168,6 +1168,35 @@ std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree& tree, const
     return branch_lengths;
 }
 
+
+/**
+ * Helper function to find the tip name that comes alphabetically first (or more accurately, is lexicographically smallest) in the subtree
+ * originating with a given node. This is useful for deterministically setting left vs. right child of a node.
+ * @param node node whose smallest tip we want to find
+ * @return lexicographically smallest tip name in the subtree originating with node
+ */
+std::string RevBayesCore::TreeUtilities::getSmallestTipName(const TopologyNode* node)
+{
+    if (node->isTip())
+    {
+        return node->getName();
+    }
+    
+    std::string smallest = "";
+    
+    for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
+    {
+        std::string child_name = getSmallestTipName(&node->getChild(i));
+        if (smallest.empty() || child_name < smallest)
+        {
+            smallest = child_name;
+        }
+    }
+    
+    return smallest;
+}
+
+
 /**
  * Get all tips below specified node, recursively
  * @param n current node

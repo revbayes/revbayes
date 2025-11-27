@@ -1348,13 +1348,21 @@ a substitution model that describes how observations evolve over the tree, etc.
 Markov chain_.
 
 The likelihood of observed character state vectors (specified via clamping the
-distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed 
+distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed
 using Felsenstein's pruning algorithm, with partial likelihoods stored for each
 branch of the tree. It is automatically outputted in the `Likelihood` column of
 the `mnFile()` and `mnScreen()` monitors (which can be suppressed with
 `likelihood = FALSE`).
 
-For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on 
+Optionally, an observation error model can be applied to 
+account for scoring ambiguity (e.g., in morphological datasets). 
+This distinguishes between the true biological state and the recorded score.
+When `observationErrorProbability` (epsilon) is > 0, the tip likelihoods
+are initialized as a mixture: with probability (1 - epsilon), the score 
+is accurate; with probability epsilon, the score is drawn from the 
+distribution defined by `observationErrorFrequencies`
+
+For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on
 [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model.)");
 	help_strings[string("dnPhyloCTMC")][string("example")] = string(R"(# Read character data from a file
 chars <- readDiscreteCharacterData("myData.nex")

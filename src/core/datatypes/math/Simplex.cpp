@@ -22,7 +22,7 @@ Simplex::Simplex( void ) : RbVector<double>()
 }
 
 
-Simplex::Simplex( size_t n ) : RbVector<double>( n )
+Simplex::Simplex( size_t n ) : RbVector<double>( n, 1.0/n )
 {
     normalize();
 }
