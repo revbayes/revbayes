@@ -391,7 +391,7 @@ template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void )
 {
     numCharacters = ctmc->getValue().getNumberOfCharacters();
-    
+
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     if ( p == NULL )
     {
@@ -484,7 +484,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::printParameterSummary(
 template<class charType>
 void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( void )
 {
-    // PL comments: edit this to sample root node
     if ( node->isTip()  )
     {
         return;

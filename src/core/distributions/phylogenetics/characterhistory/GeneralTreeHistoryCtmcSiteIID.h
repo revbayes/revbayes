@@ -165,7 +165,7 @@ template<class charType>
 double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeInternalNodeLikelihood(const TopologyNode &node)
 {
 
-    if ( node.isRoot() == true ) // PL comments: and root branch is 0; else...
+    if ( node.isRoot() == true )
     {
         return 0.0;
     }
@@ -315,7 +315,6 @@ bool RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::drawInitValue( void 
 template<class charType>
 std::vector<double> RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::getRootFrequencies( void ) const
 {
-    // PL comments: look at here for how to call the analytical function and root frequencies
 
     if ( branchHeterogeneousSubstitutionMatrices == true || rootFrequencies != NULL )
     {
@@ -696,15 +695,8 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::simulateHistory(cons
     std::vector<CharacterEvent*> currState = bh->getParentCharacters();
     if ( node.isRoot() )
     {
-        // PL comments: change here
         // virtual std::vector<double> rf = this->getRootFrequencies();
-        const double rbl               = this->getRootBranchLength();
-        if ( rbl == 0 )
-        {
-        }
-        else
-        {
-        }
+        const double rbl = this->getRootBranchLength();
     }
     else
     {
