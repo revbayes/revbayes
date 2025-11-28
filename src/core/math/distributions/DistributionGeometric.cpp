@@ -180,5 +180,5 @@ std::int64_t RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGen
     if (!RbMath::isFinite(p) || p <= 0 || p > 1) 
         throw RbException()<<"Sampling geometric random variable: invalid success probability p = "<<p;
     
-    return RbStatistics::Poisson::rv(exp(rng.uniform01()) * ((1 - p) / p),rng)+1;
+    return RbStatistics::Poisson::rv(rng.exponential() * ((1 - p) / p),rng);
 }
