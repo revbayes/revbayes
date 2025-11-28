@@ -478,13 +478,22 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
     
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
+    double obs_error_prob = 0.0;
+    Simplex obs_error_freq = Simplex(this->num_chars);
+
+    if ( this->using_observation_error )
+    {
+        obs_error_prob = this->observation_error_probability->getValue();
+        obs_error_freq = this->observation_error_frequencies->getValue();
+    }
+
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
         const TransitionProbabilityMatrix&    pij = this->pmatrices[pmat_offset + mixture];
 
-        // iterate over correction masks
+        // iterate over correction masks (missing data patterns)
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
         {
             bool gap = correctionMaskMatrix[mask][data_tip_index];
@@ -517,9 +526,38 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
                     else if (c == 0)
                     {
                         // iterate over initial states
+                        // calculate the probability that this tip contributes to 
+                        // a "constant state" pattern
                         for (size_t ci = 0; ci < this->num_chars; ci++)
                         {
-                            uc[ci] = pij[ci][a];
+                            if ( !this->using_observation_error )
+                            {
+                                // standard Mkv (without observation error)
+                                uc[ci] = pij[ci][a];
+                            }
+                            else
+                            {
+                                // Mkv with observation error
+                                // sum over all possible hidden states 'k'
+                                double sum_prob = 0.0;
+                                for ( size_t k = 0; k < this->num_chars; k++ )
+                                {
+                                    double trans_prob = pij[ci][k];
+                                    double error_prob = 0.0;
+                                    if ( k == a ) 
+                                    {
+                                        // true match (k == a)
+                                        error_prob = (1.0 - obs_error_prob * (1.0 - obs_error_freq[k]));
+                                    }
+                                    else
+                                    {
+                                        // mismatch (k != a), 'a' is due to error
+                                        error_prob = obs_error_prob * obs_error_freq[a];
+                                    }
+                                    sum_prob += trans_prob * error_prob;
+                                }
+                                uc[ci] = sum_prob;
+                            }
                         }
                     }
                     // if this is an autapomorphic state cj, fill with transition prob from ci to cj
@@ -531,7 +569,31 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
                         // iterate over initial states
                         for (size_t ci = 0; ci < this->num_chars; ci++)
                         {
-                            uc[ci] = pij[ci][cj];
+                            if ( !this->using_observation_error )
+                            {
+                                uc[ci] = pij[ci][cj];
+                            }
+                            else
+                            {
+                                double sum_prob = 0.0;
+                                for ( size_t k = 0; k < this->num_chars; k++ )
+                                {
+                                    double trans_prob = pij[ci][k];
+                                    double error_prob = 0.0;
+                                    if ( k == cj )
+                                    {
+                                        // true match (k == cj)
+                                        error_prob = (1.0 - obs_error_prob * (1.0 - obs_error_freq[k]));
+                                    }
+                                    else
+                                    {
+                                        // mismatch (k != cj), 'cj' is due to error
+                                        error_prob = obs_error_prob * obs_error_freq[cj];
+                                    }
+                                    sum_prob += trans_prob * error_prob;
+                                }
+                                uc[ci] = sum_prob;
+                            }
                         }
                     }
                 }
