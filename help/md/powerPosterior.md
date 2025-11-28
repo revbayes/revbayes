@@ -105,7 +105,7 @@ steppingStoneSampler
 - citation: Hoehna S, Landis MJ, Huelsenbeck JP (2021). Parallel power posterior analyses for fast computation of marginal likelihoods in phylogenetics. PeerJ, 9:e12438.
   doi: 10.7717/peerj.12438
   url: https://peerj.com/articles/12438/
-- citation: Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195–207.
+- citation: Lartillot N, Philippe H (2006). Computing Bayes factors using thermodynamic integration. Systematic Biology, 55(2):195-207.
   doi: 10.1080/10635150500433722
   url: https://academic.oup.com/sysbio/article-abstract/55/2/195/1620800
 - citation: Xie W, Lewis PO, Fan Y, Kuo L, Chen M-H (2010). Improving marginal likelihood estimation for Bayesian phylogenetic model selection. Systematic Biology, 60(2):150-160.

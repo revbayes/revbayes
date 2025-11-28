@@ -52,6 +52,7 @@ class DagNode;
         
         // utility funcions
         virtual void                            initFromString(const std::string &s);
+        virtual void                            writeToFile(const path &dir, const std::string &fn) const;
         
     protected:
         

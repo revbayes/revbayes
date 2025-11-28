@@ -881,9 +881,9 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParameterVect
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
         bool global_time_is_variable_time = false;
-        for (size_t j=0; i<par_times.size(); ++j)
+        for (size_t j=0; j<par_times.size(); ++j)
         {
-            if ( fabs(par_times[j] - global_timeline[j]) < DBL_EPSILON )
+            if ( fabs(par_times[j] - global_timeline[i]) < DBL_EPSILON )
             {
                 // time is in variable's timeline
                 par[i] = old_par[j];
@@ -912,11 +912,12 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std:
     std::vector<double> old_par = par;
 
     // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
       // Where is this global time interval in the variable's timeline?
       size_t idx = findIndex(global_timeline[i],par_times);
-      par[i] = old_par[idx];
+      par.push_back( old_par[idx] );
     }
 
 }

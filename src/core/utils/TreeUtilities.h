@@ -54,6 +54,7 @@ namespace RevBayesCore {
         DistanceMatrix*         getNodalDistanceMatrix(const Tree& tree);                                                               //!< get matrix of nodal distances between all tips
         double                  getOldestTipAge(const TopologyNode& n);                                                                 //!< get the age of the oldest tip below specified node
         std::vector<double>     getPSSP(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t state_index);           //!< calculate the Parsimoniously Same State Paths
+        std::string             getSmallestTipName(const TopologyNode* node);                                                           //!< get the lexicographically smallest tip descended from a given node
         void                    getTaxaInSubtree(TopologyNode& n, std::vector<TopologyNode*>& taxa );                                   //!< get taxa below specified node
         void                    makeUltrametric(Tree& t);                                                                               //!< make the tree ultrametric by extending terminal branches
         Tree*                   minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen);             //!< time-scale a tree using the minimum branch length method
