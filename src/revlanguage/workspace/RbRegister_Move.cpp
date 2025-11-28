@@ -206,7 +206,6 @@
 #include "Move_BranchRateNodeValueSlide.h"
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-#include "Move_AddRemoveTip.h"
 #include "Move_BurstEvent.h"
 #include "Move_BranchLengthScale.h"
 #include "Move_CollapseExpandFossilBranch.h"
@@ -431,7 +430,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsDrawCharacterHistory()                    );
 
         /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-        addType( new Move_AddRemoveTip()                     );
         addType( new Move_BurstEvent()                       );
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );

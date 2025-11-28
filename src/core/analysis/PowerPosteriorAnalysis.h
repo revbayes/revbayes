@@ -37,7 +37,7 @@ namespace RevBayesCore {
         void                                    burnin(size_t g, size_t ti);
         std::vector<double>                     getPowers(void) const;
         void                                    runAll(size_t g, double burn_frac, size_t preburn_gen, size_t tune_int);
-        void                                    runStone(size_t idx, size_t g, double burn_frac, size_t preburn_gen, size_t tune_int);
+        void                                    runStone(size_t idx, size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, bool one_only);
         void                                    summarizeStones(void);
         void                                    setPowers(const std::vector<double> &p);
         void                                    setSampleFreq(size_t sf);

@@ -90,8 +90,13 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
         assert( msss > 0 );
     }
     
+    // normalize split scores?
+    bool nss = false;
+    if (this->args[6].getVariable()->getRevObject() != RevNullObject::getInstance()) {
+        nss = (bool)static_cast<const RlBoolean &>( this->args[6].getVariable()->getRevObject() ).getValue();
+    }
     
-    RevBayesCore::BiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::BiogeographyCladogeneticBirthDeathFunction( sr, wf, bf, mrs, msss );
+    RevBayesCore::BiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::BiogeographyCladogeneticBirthDeathFunction( sr, wf, bf, mrs, msss, nss );
     f->setRateMultipliers(rm);
     
     return f;
@@ -113,6 +118,7 @@ const ArgumentRules& Func_biogeographyCladoEventsBD::getArgumentRules( void ) co
         argumentRules.push_back( new ArgumentRule( "rate_multipliers", ModelVector<RealPos>::getClassTypeSpec() , "The rate multipliers for hidden rate classes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         argumentRules.push_back( new ArgumentRule( "max_range_size",          Natural::getClassTypeSpec(), "The maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
         argumentRules.push_back( new ArgumentRule( "max_subrange_split_size", Natural::getClassTypeSpec(), "The maximum size of a daughter subrange following a between-region speciation event.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
+        argumentRules.push_back( new ArgumentRule( "normalize_split_score", RlBoolean::getClassTypeSpec(), "Normalize the split scores to have geometric mean of 1?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
         
         rules_set = true;
     }

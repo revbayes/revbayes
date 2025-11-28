@@ -922,7 +922,7 @@ void Mcmc::nextCycle(bool advance_cycle)
     
     for (size_t i=0; i<proposals; ++i)
     {
-        
+
         // Get the move
         Move& the_move = schedule->nextMove( generation );
 

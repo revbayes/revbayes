@@ -119,13 +119,10 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
         sampler->nextCycle(false);
             
         // check for autotuning
-        if ( k % tuningInterval == 0 && k != generations )
+        if ( tuningInterval != 0 && (k % tuningInterval) == 0 && k != generations )
         {
-                
             sampler->tune();
-            
         }
-        
     }
     
     
@@ -203,7 +200,7 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     {
     
         // run the i-th stone
-        runStone(i, gen, burnin_fraction, pre_burnin_generations, tuning_interval);
+        runStone(i, gen, burnin_fraction, pre_burnin_generations, tuning_interval, false);
         
     }
     
@@ -226,10 +223,10 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 
 
 
-void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
+void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, bool one_only)
 {
     // create the directory if necessary
-    if (filename.filename().empty() or filename.filename_is_dot() or filename.filename_is_dot_dot())
+    if (filename.filename().empty() or filename.filename() == "." or filename.filename() == "..")
     {
         throw RbException("Please provide a filename with an extension");
     }
@@ -276,7 +273,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         // Get the width of a given number in characters
         auto width = [&](size_t x) { return size_t( ceil( log10(x + 0.1) ) ); };
         
-        if (num_processes == 1)
+        if (num_processes == 1 or one_only == true)
         {
             // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
             size_t digits = width( powers.size() );
@@ -328,7 +325,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // set the power of this sampler
     sampler->setLikelihoodHeat( powers[idx] );
     
-    sampler->addFileMonitorExtension( stone_tag, false);
+    sampler->addFileMonitorExtension(stone_tag, false);
     
     // let's do a pre-burnin
     for (size_t k=1; k<=pre_burnin_generations; k++)
@@ -344,10 +341,13 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         
     }
     
-    // Monitor
-    sampler->startMonitors(gen, false);
-    sampler->writeMonitorHeaders( false );
-    sampler->monitor(0);
+    // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
+    if (not one_only or (one_only and pid == pid_to_print))
+    {
+        sampler->startMonitors(gen, false);
+        sampler->writeMonitorHeaders( false );
+        sampler->monitor(0);
+    }
     
     double p = powers[idx];
     for (size_t k = 1; k <= gen; ++k)
@@ -364,8 +364,11 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         
         sampler->nextCycle( true );
 
-        // Monitor
-        sampler->monitor(k);
+        // monitor
+        if (not one_only or (one_only and pid == pid_to_print))
+        {
+            sampler->monitor(k);
+        }
         
         // sample the likelihood
         if ( k > burnin && k % sampleFreq == 0 )

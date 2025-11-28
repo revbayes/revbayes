@@ -170,7 +170,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
             preburn_gen = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
         }
         size_t tune_int = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
-        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int );
+        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true );
         
         return NULL;
     }

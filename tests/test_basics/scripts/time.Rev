@@ -1,0 +1,23 @@
+################################################################################
+#
+# RevBayes Test-Script: Simple time() function
+#
+#
+# authors: Priscilla Lau
+#
+################################################################################
+
+# testing the time function with different options
+t1 <- time()
+t2 <- time("year")
+t3 <- time("day")
+t4 <- time("seconds")
+t5 <- time("milliseconds")
+t6 <- time("nanoseconds")
+t7 <- time("fromBeginning")
+
+print(filename = "output/Test_time.txt", append = TRUE, "The date right now is year", t2, ", day", t3,
+      ". Time of the day in seconds:", t4, "; in milliseconds:", t5, "; in nanoseconds:", t6, ". The duration of this test lasted for ",
+      t7 - t1, "milliseconds.")
+
+q()
