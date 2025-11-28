@@ -3157,11 +3157,29 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
-	help_strings[string("mvFNPR")][string("description")] = string(R"(A subtree is pruned and re-attached without changing the node heights.)");
+	help_strings[string("mvFNPR")][string("description")] = string(R"(Tree topology move that prunes and re-attaches a subtree without changing any
+node heights.)");
+	help_strings[string("mvFNPR")][string("details")] = string(R"(`mvFNPR` randomly picks node i which is neither a tip nor the root, and prunes
+the subtree originating with this node. It then picks another node j such that
+j is younger than i but the parent of j is older than i, and re-attaches the
+pruned subtree onto the branch above j. Because the node height of i is fixed
+rather than re-adjusted, the FNPR move represents a special case of the fully
+general time tree version of the subtree prune and regraft (SPR) move. This
+fully general version is also known as the Wilson-Balding move. `mvFNPR` often
+exhibits higher acceptance rates than the Wilson-Balding move.)");
+	help_strings[string("mvFNPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+height ~ dnUniform(0, 10)
+moves = VectorMoves()
+
+# Simulate a simple TimeTree
+tree ~ dnBDP(lambda=1.0, mu=0.2, rootAge=height, taxa=taxa)
+
+# Assign it a mvFNPR move
+moves.append( mvFNPR(tree, weight=taxa.size()) ))");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
-	help_references[string("mvFNPR")].push_back(RbHelpReference(R"(Höhna, S., Defoin-Platel, M., & Drummond, A. J. (2008, October). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. In 2008 8th IEEE International Conference on BioInformatics and BioEngineering (pp. 1-7).)",R"(10.1109/BIBE.2008.4696663)",R"(https://ieeexplore.ieee.org/abstract/document/4696663 )"));
+	help_references[string("mvFNPR")].push_back(RbHelpReference(R"(Höhna S, Defoin-Platel M, Drummond AJ (2008). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. 1--7 in 8th IEEE International Conference on BioInformatics and BioEngineering (BIBE 2008). Athens, Greece, October 2008.)",R"(10.1109/BIBE.2008.4696663)",R"(https://alexeidrummond.org/assets/publications/2008-hoehna-clock-bibe.pdf )"));
 	help_arrays[string("mvFNPR")][string("see_also")].push_back(string(R"(mvSPR)"));
-	help_strings[string("mvFNPR")][string("title")] = string(R"(Fixed Nodeheight Prune and Regraft Proposal move.)");
+	help_strings[string("mvFNPR")][string("title")] = string(R"(Fixed Node-height Prune and Regraft (FNPR) move.)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("details")] = string(R"(This sliding move uses the possible minimum and maximum ages as reflection boundaries.
@@ -3532,10 +3550,17 @@ moves.append( mvScaleBactrian(speciation_rate, weight=5) ))");
 	help_strings[string("mvScaleBactrianCauchy")][string("name")] = string(R"(mvScaleBactrianCauchy)");
 	help_strings[string("mvShrinkExpand")][string("name")] = string(R"(mvShrinkExpand)");
 	help_strings[string("mvShrinkExpandScale")][string("name")] = string(R"(mvShrinkExpandScale)");
-	help_strings[string("mvSlice")][string("description")] = string(R"(Instead of using a fixed move size, `mvSlice` determines the size of a move proposal based on the current shape of the likelihood function.
-This allows small moves to be proposed in certain parts of parameter space,
-and large moves in other parts of the space, as appropriate.)");
-	help_strings[string("mvSlice")][string("name")] = string(R"(Slice move)");
+	help_strings[string("mvSlice")][string("description")] = string(R"(`mvSlice` proposes a new value for a variable based on the current shape of its likelihood function.)");
+	help_strings[string("mvSlice")][string("details")] = string(R"(A slice proposal uses the shape of the current likelihood distribution of a variable to propose a new value.
+First, a likelihood value is drawn uniformly in order to define a horizontal 'slice' through the likelihood distribution.
+Then, a new value is drawn uniformly from those values that lie within this slice.
+
+This allows parameter space to be traversed more efficiently than a random walk.
+A practical outcome of the implementation is that small moves are proposed in certain parts of parameter space, and large moves in other parts of the space, as appropriate.
+
+A detailed explanation with figures is provided in Neal (2003).)");
+	help_strings[string("mvSlice")][string("name")] = string(R"(mvSlice)");
+	help_references[string("mvSlice")].push_back(RbHelpReference(R"(Slice sampling. Neal (2003). Ann. Statist. 31(3): 705-767    )",R"(10.1214/aos/1056562461)",R"(https://projecteuclid.org/journals/annals-of-statistics/volume-31/issue-3/Slice-sampling/10.1214/aos/1056562461.full )"));
 	help_arrays[string("mvSlice")][string("see_also")].push_back(string(R"(`mvSlide` and `mvScale` are possible alternatives where a fixed move size is desired.)"));
 	help_strings[string("mvSlice")][string("title")] = string(R"(Propose a slice move)");
 	help_strings[string("mvSlide")][string("description")] = string(R"(Proposes additive updates to continuous parameters.)");
