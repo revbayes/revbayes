@@ -70,8 +70,8 @@ void ModelMonitor::resetDagNodes( void )
             {
                 const std::string &name = the_node->getName();
                 
-                // extract vector name from the name of a vector element
-                size_t bracket_pos = name.find('[');
+                // extract vector name from the name of a vector element: everything before the last '['
+                size_t bracket_pos = name.rfind('[');
                 if (bracket_pos != std::string::npos)
                 {
                     std::string base_name = name.substr(0, bracket_pos);
@@ -88,7 +88,7 @@ void ModelMonitor::resetDagNodes( void )
                 const std::string &name = the_node->getName();
                 
                 // skip this node if it is a vector whose elements we are already collecting
-                if ( !the_node->isElementVariable() && vector_base_names.count(name) > 0 )
+                if ( vector_base_names.count(name) > 0 )
                 {
                     continue;  // skip the non-element version
                 }
