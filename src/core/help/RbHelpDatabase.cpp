@@ -3157,7 +3157,29 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
+	help_strings[string("mvFNPR")][string("description")] = string(R"(Tree topology move that prunes and re-attaches a subtree without changing any
+node heights.)");
+	help_strings[string("mvFNPR")][string("details")] = string(R"(`mvFNPR` randomly picks node i which is neither a tip nor the root, and prunes
+the subtree originating with this node. It then picks another node j such that
+j is younger than i but the parent of j is older than i, and re-attaches the
+pruned subtree onto the branch above j. Because the node height of i is fixed
+rather than re-adjusted, the FNPR move represents a special case of the fully
+general time tree version of the subtree prune and regraft (SPR) move. This
+fully general version is also known as the Wilson-Balding move. `mvFNPR` often
+exhibits higher acceptance rates than the Wilson-Balding move.)");
+	help_strings[string("mvFNPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+height ~ dnUniform(0, 10)
+moves = VectorMoves()
+
+# Simulate a simple TimeTree
+tree ~ dnBDP(lambda=1.0, mu=0.2, rootAge=height, taxa=taxa)
+
+# Assign it a mvFNPR move
+moves.append( mvFNPR(tree, weight=taxa.size()) ))");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
+	help_references[string("mvFNPR")].push_back(RbHelpReference(R"(Höhna S, Defoin-Platel M, Drummond AJ (2008). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. 1--7 in 8th IEEE International Conference on BioInformatics and BioEngineering (BIBE 2008). Athens, Greece, October 2008.)",R"(10.1109/BIBE.2008.4696663)",R"(https://alexeidrummond.org/assets/publications/2008-hoehna-clock-bibe.pdf )"));
+	help_arrays[string("mvFNPR")][string("see_also")].push_back(string(R"(mvSPR)"));
+	help_strings[string("mvFNPR")][string("title")] = string(R"(Fixed Node-height Prune and Regraft (FNPR) move.)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("details")] = string(R"(This sliding move uses the possible minimum and maximum ages as reflection boundaries.
