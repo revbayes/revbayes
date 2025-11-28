@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <ostream>
 #include <vector>
+#include <cstdint>
 
 #include "DiscreteCharacterState.h"
 #include "RbBitSet.h"
