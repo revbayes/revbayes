@@ -3528,10 +3528,17 @@ moves.append( mvScaleBactrian(speciation_rate, weight=5) ))");
 	help_strings[string("mvScaleBactrianCauchy")][string("name")] = string(R"(mvScaleBactrianCauchy)");
 	help_strings[string("mvShrinkExpand")][string("name")] = string(R"(mvShrinkExpand)");
 	help_strings[string("mvShrinkExpandScale")][string("name")] = string(R"(mvShrinkExpandScale)");
-	help_strings[string("mvSlice")][string("description")] = string(R"(Instead of using a fixed move size, `mvSlice` determines the size of a move proposal based on the current shape of the likelihood function.
-This allows small moves to be proposed in certain parts of parameter space,
-and large moves in other parts of the space, as appropriate.)");
-	help_strings[string("mvSlice")][string("name")] = string(R"(Slice move)");
+	help_strings[string("mvSlice")][string("description")] = string(R"(`mvSlice` proposes a new value for a variable based on the current shape of its likelihood function.)");
+	help_strings[string("mvSlice")][string("details")] = string(R"(A slice proposal uses the shape of the current likelihood distribution of a variable to propose a new value.
+First, a likelihood value is drawn uniformly in order to define a horizontal 'slice' through the likelihood distribution.
+Then, a new value is drawn uniformly from those values that lie within this slice.
+
+This allows parameter space to be traversed more efficiently than a random walk.
+A practical outcome of the implementation is that small moves are proposed in certain parts of parameter space, and large moves in other parts of the space, as appropriate.
+
+A detailed explanation with figures is provided in Neal (2003).)");
+	help_strings[string("mvSlice")][string("name")] = string(R"(mvSlice)");
+	help_references[string("mvSlice")].push_back(RbHelpReference(R"(Slice sampling. Neal (2003). Ann. Statist. 31(3): 705-767    )",R"(10.1214/aos/1056562461)",R"(https://projecteuclid.org/journals/annals-of-statistics/volume-31/issue-3/Slice-sampling/10.1214/aos/1056562461.full )"));
 	help_arrays[string("mvSlice")][string("see_also")].push_back(string(R"(`mvSlide` and `mvScale` are possible alternatives where a fixed move size is desired.)"));
 	help_strings[string("mvSlice")][string("title")] = string(R"(Propose a slice move)");
 	help_strings[string("mvSlide")][string("description")] = string(R"(Proposes additive updates to continuous parameters.)");
