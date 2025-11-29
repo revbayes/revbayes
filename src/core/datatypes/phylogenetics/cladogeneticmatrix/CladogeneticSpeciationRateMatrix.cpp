@@ -33,21 +33,6 @@ CladogeneticSpeciationRateMatrix::~CladogeneticSpeciationRateMatrix(void)
     ; // do nothing
 }
 
-CladogeneticSpeciationRateMatrix& CladogeneticSpeciationRateMatrix::assign(const Assignable &m)
-{
-    
-    const CladogeneticSpeciationRateMatrix *cp = dynamic_cast<const CladogeneticSpeciationRateMatrix*>(&m);
-    if ( cp != NULL )
-    {
-        return operator=(*cp);
-    }
-    else
-    {
-        throw RbException("Could not assign cladogenetic speciation rate matrix.");
-    }
-}
-
-
 CladogeneticSpeciationRateMatrix* CladogeneticSpeciationRateMatrix::clone( void ) const
 {
     

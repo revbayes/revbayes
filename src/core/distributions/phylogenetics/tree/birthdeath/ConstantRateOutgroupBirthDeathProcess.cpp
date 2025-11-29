@@ -444,7 +444,7 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         ra = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
     }
     
-    simulateClade(nodes, ra, max_age);
+    simulateClade(nodes, ra, max_age, true);
     
     TopologyNode *root = nodes[0];
     

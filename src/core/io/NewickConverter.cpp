@@ -273,11 +273,6 @@ TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<Topo
         }
     }
 
-    if (node->getNumberOfChildren() == 1)
-    {
-        node->setSampledAncestor( true );
-    }
-
     // remove closing parenthesis
     ss.ignore();
 

@@ -478,7 +478,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
         rv = 0;
         for (size_t i=0; i< num_tips; i++)
         {
-            rv += nodes[i]->isSampledAncestor();
+            rv += nodes[i]->isSampledAncestorTip();
         }
     }
     else if (n == "colless")
@@ -640,6 +640,7 @@ std::vector<Taxon> Tree::getFossilTaxa() const
         }
 
     }
+    std::sort(taxa.begin(), taxa.end());
 
     return taxa;
 }
@@ -861,7 +862,7 @@ size_t Tree::getNumberOfSampledAncestors( void ) const
     size_t num_sa = 0;
     for (size_t i = 0; i < num_tips; i++)
     {
-        num_sa += nodes[i]->isSampledAncestor();
+        num_sa += nodes[i]->isSampledAncestorTip();
     }
 
     return num_sa;
@@ -918,7 +919,7 @@ std::vector<Taxon> Tree::getTaxa() const
     std::vector< Taxon > taxa;
     for (auto& node: nodes)
     {
-        if (node->isTip() or node->isSampledAncestor())
+        if (node->isTip() or node->getNumberOfChildren() == 1)
         {
             Taxon taxon = node->getTaxon();
             taxon.setAge(node->getAge());
@@ -1561,7 +1562,7 @@ void Tree::collapseSampledAncestors()
 {
     for(auto& node: nodes)
     {
-        if (node->isTipSampledAncestor())
+        if (node->isSampledAncestorTip())
         {
             node->getParent().setTaxon(node->getTaxon());
             node->getParent().removeChild(node);
@@ -1665,8 +1666,14 @@ bool Tree::recursivelyPruneTaxa( TopologyNode* n, const RbBitSet& prune_map )
         }
 
         root = retained_children.back();
-        root->addChild(retained_children.front());
-        retained_children.front()->setParent(root);
+        if(root->isTip()) { // cannot use tip as the new root, so pick the other one
+            root = retained_children.front();
+            root->addChild(retained_children.back());
+            retained_children.back()->setParent(root);
+        } else { // otherwise, proceed normally
+            root->addChild(retained_children.front());
+            retained_children.front()->setParent(root);
+        }
     }
     // if there are still at least 2 retained children, then return
     else if( children.size() - pruned_children.size() < 2 )
@@ -2070,7 +2077,7 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
     int next_non_taxon_index = use_count.size();
     for(auto& node: nodes)
     {
-        if (node->isTip() or node->isSampledAncestor())
+        if (node->isTip() or node->getNumberOfChildren() == 1)
         {
             // 3a. If this is a tip or sampled ancester, check that we have an index for it.
             auto& taxon = node->getTaxon();
@@ -2092,10 +2099,8 @@ void Tree::setTaxonIndices(const TaxonMap &tm)
     }
 
     // 5. Check that all the taxon labels are used exactly once.
-    for(auto& taxon_count: use_count)
+    for(auto& [taxon, count]: use_count)
     {
-        auto& taxon = taxon_count.first;
-        auto& count = taxon_count.second;
         if (count < 1)
         {
             for(auto& node: nodes)
@@ -2126,13 +2131,15 @@ void Tree::setTaxonName(const std::string& current_name, const std::string& new_
     TopologyNode& node = getTipNodeWithName( current_name );
     Taxon& t = node.getTaxon();
     t.setName( new_name );
-    taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
+    
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 }
 
 
 /**
- * Change the name of a taxon
+ * Change the taxon object with specified name
  *
  * \param[in] current_name   self explanatory.
  * \param[in] new_taxon      self explanatory.
@@ -2145,8 +2152,9 @@ void Tree::setTaxonObject(const std::string& current_name, const Taxon& new_taxo
     TopologyNode& node = getTipNodeWithName( current_name );
     node.setTaxon( new_taxon );
 
-    taxon_bitset_map.erase( current_name );
-    taxon_bitset_map.insert( std::pair<std::string, size_t>( new_name, node.getIndex() ) );
+    // clear the taxon bitset map
+    // the next time someone call getTaxonBitset() it will be rebuilt
+    taxon_bitset_map.clear();
 
 }
 

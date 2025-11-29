@@ -1,5 +1,5 @@
-BootStrap: library
-From: ubuntu:20.04
+BootStrap: docker
+From: ubuntu:23.04
 
 %post
 
@@ -22,7 +22,7 @@ From: ubuntu:20.04
     # download revbayes
     git clone https://github.com/revbayes/revbayes.git /revbayes-build
     cd /revbayes-build
-    git checkout 1.1.1
+    git checkout {{ version }}
 
 %environment
     export PATH=$PATH:/revbayes

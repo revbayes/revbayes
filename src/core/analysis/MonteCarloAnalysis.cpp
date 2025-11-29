@@ -739,8 +739,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
         ++gen;
         for (size_t i=0; i<replicates; ++i)
-        {
-            
+        {            
             if ( runs[i] != NULL )
             {
                 
@@ -754,30 +753,23 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 
                 // check for autotuning
                 if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
-                {
-                    
-                    runs[i]->tune();
-                    
+                {                   
+                    runs[i]->tune();                   
                 }
                 
                 // check for autotuning
                 if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
-                {
-                    
-                    runs[i]->checkpoint();
-                    
-                }
-                
-            }
-            
+                {                    
+                    runs[i]->checkpoint();                    
+                }             
+            }           
         }
         
         converged = true;
         size_t numConvergenceRules = 0;
         // do the stopping test
-        for (size_t i=0; i<rules.size() && converged; ++i)
-        {
-            
+        for (size_t i=0; i<rules.size(); ++i)
+        {         
             if ( rules[i].isConvergenceRule() )
             {
                 converged &= rules[i].checkAtIteration(gen) && rules[i].stop( gen );
@@ -790,8 +782,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     finished = true;
                     break;
                 }
-            }
-            
+            }          
         }
         converged &= numConvergenceRules > 0;
         

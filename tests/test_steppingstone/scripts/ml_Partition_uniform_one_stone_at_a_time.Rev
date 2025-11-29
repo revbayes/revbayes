@@ -52,7 +52,6 @@ Q := fnGTR(er,pi)
 alpha_prior_mean <- ln(2.0)
 alpha_prior_sd <- 0.587405
 alpha ~ dnLognormal( alpha_prior_mean, alpha_prior_sd )
-gamma_rates := fnDiscretizeGamma( alpha, alpha, 4, false )
 
 # add moves for the stationary frequencies, exchangeability rates and the shape parameter
 moves[++mvi] = mvScale(alpha,weight=2)
@@ -93,7 +92,7 @@ psi := treeAssembly(topology, bl)
 ###################
 
 # the sequence evolution model
-phyloSeq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=gamma_rates, pInv=pinvar, type="DNA")
+phyloSeq ~ dnPhyloCTMC(tree=psi, Q=Q |> fnGammaASRV(alpha,4,false) |> fnInvASRV(pinvar), type="DNA")
 
 # attach the data
 phyloSeq.clamp(data)

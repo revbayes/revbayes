@@ -48,7 +48,12 @@ namespace RevBayesCore {
         void                                                        setCurrentIndex(size_t i);
         void                                                        setValue(mixtureType *v, bool f=false);
         
-    
+        // special handling of state changes
+        void                                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
+        void                                                        keepSpecialization(const DagNode* affecter);
+        void                                                        restoreSpecialization(const DagNode *restorer);
+        void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+
     protected:
         // Parameter management functions
         void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
@@ -60,7 +65,7 @@ namespace RevBayesCore {
         
         // private members
         const TypedDagNode< mixtureType >*                          const_value;
-        TypedDistribution<mixtureType>*						        base_distribution;
+        TypedDistribution<mixtureType>*                                base_distribution;
         const TypedDagNode< double >*                               probability;
         
         size_t                                                      index;
@@ -165,29 +170,29 @@ template <class mixtureType>
 double RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::computeLnProbability( void )
 {
     
-    double lnProb;
+    double ln_prob;
     if ( index == 0 )
     {
         if ( *this->value != const_value->getValue() )
         {
-            lnProb = RbConstants::Double::neginf;
+            ln_prob = RbConstants::Double::neginf;
         }
         else
         {
-            lnProb = log( probability->getValue() );
+            ln_prob = log( probability->getValue() );
         }
         
     }
     else
     {
         
-        lnProb = log( 1.0 - probability->getValue() );
+        ln_prob = log( 1.0 - probability->getValue() );
         base_distribution->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone(*this->value) );
-        lnProb += base_distribution->computeLnProbability();
+        ln_prob += base_distribution->computeLnProbability();
         
     }
     
-    return lnProb;
+    return ln_prob;
 }
 
 
@@ -202,6 +207,18 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::execu
     else
     {
         throw RbException("A mixture distribution does not have a member method called '" + n + "'.");
+    }
+    
+}
+
+
+template <class mixtureType>
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+{
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( affecter == const_value && index == 0 && this->dag_node != NULL )
+    {
+        this->dag_node->initiateGetAffectedNodes( affected );
     }
     
 }
@@ -249,21 +266,12 @@ size_t RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::get
 
 
 template <class mixtureType>
-mixtureType* RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::simulate()
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
-    RandomNumberGenerator *rng = GLOBAL_RNG;
-    double u = rng->uniform01();
-    
-    if ( u < probability->getValue() )
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( affecter == const_value && index == 0 && this->dag_node != NULL )
     {
-        index = 0;
-        return Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( const_value->getValue() );
-    }
-    else
-    {
-        index = 1;
-        base_distribution->redrawValue();
-        return Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( base_distribution->getValue() );
+        this->dag_node->keepAffected();
     }
     
 }
@@ -299,10 +307,55 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::redra
 
 
 template <class mixtureType>
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
+{
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( restorer == const_value && index == 0 )
+    {
+        if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
+        {
+            delete this->value;
+            this->value = const_value->getValue().clone();
+        }
+        else
+        {
+            *this->value = const_value->getValue();
+        }
+
+        if ( this->dag_node != NULL )
+        {
+            this->dag_node->restoreAffected();
+        }
+    }
+}
+
+
+template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setCurrentIndex(size_t i)
 {
     // we complete rely on the move to also change the value accordingly!!!
     index = i;
+}
+
+
+template <class mixtureType>
+mixtureType* RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::simulate()
+{
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    double u = rng->uniform01();
+    
+    if ( u < probability->getValue() )
+    {
+        index = 0;
+        return Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( const_value->getValue() );
+    }
+    else
+    {
+        index = 1;
+        base_distribution->redrawValue();
+        return Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( base_distribution->getValue() );
+    }
+    
 }
 
 
@@ -349,9 +402,33 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setVa
             base_distribution->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( *v ) );
             this->value = v;
         }
-    
+        
     }
-    //throw RbException("Cannot set the value of a reversible jump mixture distribution because we don't know which distribution the value should come from.");
+    
+}
+
+
+template <class mixtureType>
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
+{
+    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
+    if ( toucher == const_value && index == 0 )
+    {
+        if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
+        {
+            delete this->value;
+            this->value = const_value->getValue().clone();
+        }
+        else
+        {
+            *this->value = const_value->getValue();
+        }
+        
+        if ( this->dag_node != NULL )
+        {
+            this->dag_node->touchAffected();
+        }
+    }
 }
 
 #endif

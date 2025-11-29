@@ -1,0 +1,115 @@
+################################################################################
+#
+# RevBayes Test-Script: Uniform prior distribution over topologies
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+################################################################################
+# Draw a topology from the uniform prior. The probability density of any
+# 6-taxon unrooted tree should be equal to 1/105 (-4.65396035 on log scale)
+################################################################################
+
+taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+topology ~ dnUniformTopology(taxa)
+
+expected_prob <- 1/105
+
+print(filename = "output/Test_topologyProb.txt", append = FALSE,
+      "Expected probability of a 6-taxon unrooted topology:\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      expected_prob)
+print(filename = "output/Test_topologyProb.txt", append = TRUE, "\n\n")
+
+# Check that this value is identical to the probability of the topology
+# drawn above. Unfortunately, we cannot ask directly whether this is
+# the case, because RevBayes is bad at comparing floats/Reals.
+
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      "Actual probability of such a topology, drawn from dnUniformTopology():\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      topology.probability() )
+print(filename = "output/Test_topologyProb.txt", append = TRUE, "\n\n")
+
+# Repeat on log scale
+
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      "Expected log probability of a 6-taxon unrooted topology:\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      log(expected_prob, base = exp(1)) )
+print(filename = "output/Test_topologyProb.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      "Actual log probability of such a topology, drawn from dnUniformTopology():\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      topology.lnProbability() )
+print(filename = "output/Test_topologyProb.txt", append = TRUE, "\n\n")
+
+################################################################################
+# Define a prior on the branch lengths. The joint prior probability density
+# of 9 branch lengths, each of length 0.1 and drawn from an Exponential(10)
+# distribution, should be 9*log(10) - 10*0.9 = 11.72326583 on log scale.
+# Combined with the topology drawn above, the joint prior probability
+# density of the whole tree should be -4.65396035 + 11.72326583 = 7.06930548
+# on log scale.
+################################################################################
+
+for (i in 1:9) {
+   edgelens[i] ~ dnExponential(10.0)
+   edgelens[i].setValue(0.1)
+}
+tree_length := sum(edgelens)
+
+# First, combine the topology and branch lengths
+
+phylogeny1 := treeAssembly(topology, edgelens)
+
+# The output of the treeAssembly() function is of type Tree, which does not
+# have .probability() or .lnProbability() methods associated with it.
+# We can only extract the log probability density of a tree created in this
+# way using MCMC, which we do below. For now, we will use an alternative
+# solution, where the same tree is instead drawn from a joint prior over
+# topology and branch lengths. Such a draw is of type BranchLengthTree, and
+# the .probability() and .lnProbability() methods can be applied to it.
+
+phylogeny2 ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+for (i in 1:9) {
+    phylogeny2.setBranchLength( i, 0.1 )
+}
+
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      "Expected log probability density of a 6-taxon unrooted tree with all branches of length 0.1:\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      log(expected_prob, base = exp(1)) + 9*log(10, base = exp(1)) - 10*0.9 )
+print(filename = "output/Test_topologyProb.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      "Actual log probability density of such a tree, drawn from dnUniformTopologyBranchLength():\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      phylogeny2.lnProbability() )
+print(filename = "output/Test_topologyProb.txt", append = TRUE, "\n\n")
+print(filename = "output/Test_topologyProb.txt", append = TRUE,
+      "To confirm that the log probability density is the same when using treeAssembly(), see Test_treeProbDensity.log.")
+
+# Set up a simple MCMC analysis without data or moves to evaluate the joint
+# prior for phylogeny1
+
+Qmat := fnJC(4)
+seq ~ dnPhyloCTMC(tree=phylogeny1, Q=Qmat, type="DNA")
+mymodel = model(phylogeny1)
+
+# Print just the initial state of the MCMC
+
+monitors = VectorMonitors()
+monitors.append( mnModel(filename = "output/Test_treeProbDensity.log", tree_length,
+                         printgen=10) )
+
+moves = VectorMoves()
+analysis = mcmc(mymodel, monitors, moves)
+analysis.run(generations=1, underPrior=TRUE)
+clear()
+
+q()

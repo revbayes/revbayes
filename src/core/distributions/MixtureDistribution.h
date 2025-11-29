@@ -66,8 +66,6 @@ namespace RevBayesCore {
     
 }
 
-#include "Assign.h"
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
@@ -85,7 +83,7 @@ RevBayesCore::MixtureDistribution<mixtureType>::MixtureDistribution(const TypedD
     this->addParameter( parameter_values );
     this->addParameter( probabilities );
     
-    *this->value = simulate();
+    redrawValue();
 }
 
 
@@ -199,8 +197,13 @@ const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()
 template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::redrawValue( void )
 {
-
-    Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), simulate() );
+    if constexpr(std::is_base_of_v<Cloneable,mixtureType>)
+    {
+	delete this->value;
+	this->value = simulate().clone();
+    }
+    else
+	(*this->value) = simulate();
 
 }
 
@@ -208,11 +211,17 @@ void RevBayesCore::MixtureDistribution<mixtureType>::redrawValue( void )
 template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::setCurrentIndex(size_t i)
 {
-
     index = i;
+
     const mixtureType &tmp = parameter_values->getValue()[i];
-    
-    Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
+
+    if constexpr(std::is_base_of_v<Cloneable, mixtureType>)
+    {
+	delete this->value;
+	this->value = tmp.clone();
+    }
+    else
+	(*this->value) = tmp;
 }
 
 
@@ -239,15 +248,19 @@ void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( cons
     if ( restorer == parameter_values )
     {
         const mixtureType &tmp = parameter_values->getValue()[index];
-        Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
+        if constexpr(std::is_base_of_v<Cloneable, mixtureType>)
+        {
+            delete this->value;
+            this->value = tmp.clone();
+        }
+        else
+            (*this->value) = tmp;
 
         if ( this->dag_node != NULL )
         {
             this->dag_node->restoreAffected();
         }
-        
     }
-    
 }
 
 
@@ -277,13 +290,18 @@ void RevBayesCore::MixtureDistribution<mixtureType>::touchSpecialization( const 
     if ( toucher == parameter_values )
     {
         const mixtureType &tmp = parameter_values->getValue()[index];
-        Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), tmp );
-        
+        if constexpr (std::is_base_of_v<Cloneable, mixtureType>)
+        {
+            delete this->value;
+            this->value = tmp.clone();
+        }
+        else
+            (*this->value) = tmp;
+
         if ( this->dag_node != NULL )
         {
             this->dag_node->touchAffected();
         }
-        
     }
     
 }

@@ -1,0 +1,186 @@
+########################################################
+#
+# RevBayes Example: Molecular dating with FBD
+#
+# authors: Sebastian Hoehna
+#
+########################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+# Create the full list of taxa (including all fossils and extant species) #
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+for(taxon in taxa)
+{
+   print("==")
+   taxon.setMaxAge(taxon.getMinAge())
+   print(taxon.getMinAge())
+   print(taxon.getMaxAge())
+}
+
+# Import the molecular sequences #
+# this file contains only the taxa for which sequence data are available #
+cytb <- readDiscreteCharacterData("data/bears_cytb.nex")
+
+# Add the missing taxa to each data partition #
+cytb.addMissingTaxa( taxa )
+
+## helpers
+n_taxa <- cytb.size()
+
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+#################################################################################
+# The Fossilized Birth-Death Process prior on the topology and speciation times #
+#################################################################################
+
+# Define exponential priors on the birth rate and death rate #
+speciation_rate ~ dnExponential(10)
+extinction_rate ~ dnExponential(10)
+
+# Specify a scale move on the speciation_rate parameter #
+moves.append( mvScale(speciation_rate, lambda=0.5, tune=true, weight=3.0) )
+
+# Specify a scale move on the extinction_rate parameter #
+moves.append( mvScale(extinction_rate, lambda=0.5, tune=true, weight=3.0) )
+
+# Create deterministic nodes for the diversification and turnover rates to monitor these parameters #
+diversification := speciation_rate - extinction_rate
+turnover := extinction_rate/speciation_rate
+
+# Fix the probability of sampling parameter (rho) to 1 #
+# because all extant bears are represented in our analysis #
+rho <- 1.0
+
+# Assume an exponential prior on the rate of sampling fossils (psi) #
+psi ~ dnExponential(10)
+
+# Specify a scale move on the psi parameter #
+moves.append( mvScale(psi, lambda=0.5, tune=true, weight=3) )
+
+# The FBD is conditioned on a starting time for the process, which is the origin time #
+# Specify a uniform prior on the origin #
+origin_time ~ dnUnif(37.2, 49.0)
+origin_time.setValue(47.0)
+
+# Specify a sliding-window move on the origin_time parameter #
+moves.append( mvSlide(origin_time, delta=1.0, tune=true, weight=5.0) )
+
+# Define the tree-prior distribution as the birth-death process #
+tree_dist = dnFBDP(lambda=speciation_rate, mu=extinction_rate, psi=psi, rho=rho, originAge=origin_time, taxa=taxa)
+
+# Define clade constraints #
+clade_ursinae = clade("Melursus_ursinus", "Ursus_arctos", "Ursus_maritimus",
+              "Helarctos_malayanus", "Ursus_americanus", "Ursus_thibetanus", "Ursus_abstrusus")
+constraints = v(clade_ursinae)
+
+# Define a stochastic node for the constrained tree topology #
+timetree ~ dnConstrainedTopology(tree_dist, constraints=constraints)
+
+# Specify moves on the tree and node times #
+moves.append( mvNarrow(timetree, weight=n_taxa) )
+moves.append( mvFNPR(timetree, weight=n_taxa/5.0) )
+moves.append( mvCollapseExpandFossilBranch(timetree, origin_time, weight=6.0) )
+
+moves.append( mvNodeTimeSlideUniform(timetree, weight=n_taxa) )
+moves.append( mvRootTimeSlideUniform(timetree, origin_time, weight=5.0) )
+
+# Monitor the age of Ursinae #
+age_ursinae := tmrca(timetree, clade_ursinae)
+
+# Monitor the age of the MRCA of living bears #
+clade_extant = clade("Ailuropoda_melanoleuca","Tremarctos_ornatus","Melursus_ursinus",
+                "Ursus_arctos","Ursus_maritimus","Helarctos_malayanus",
+                "Ursus_americanus","Ursus_thibetanus")
+extant_mrca := tmrca(timetree, clade_extant)
+
+# Monitor the number of sampled ancestors in the FBD-tree #
+num_samp_anc := timetree.numSampledAncestors()
+
+# Monitor the tree, pruning fossil taxa for which we do not have morphological or molecular data #
+extinct_sp = v("Agriarctos_spp", "Ailurarctos_lufengensis", "Ballusia_elmensis",
+ "Indarctos_arctoides", "Indarctos_punjabiensis", "Indarctos_vireti",
+ "Kretzoiarctos_beatrix", "Parictis_montanus", "Ursavus_brevirhinus",
+ "Ursavus_primaevus", "Ursus_abstrusus", "Zaragocyon_daamsi")
+
+pruned_tree := fnPruneTree(timetree, prune=extinct_sp)
+
+
+################################
+# Global molecular clock model #
+################################
+
+# we assume a strict morphological clock rate, drawn from an exponential prior #
+branch_rates ~ dnExponential(10.0)
+
+moves.append( mvScale(branch_rates,lambda=0.5,tune=true,weight=3.0) )
+
+
+#######################################
+# GTR+G nucleotide substitution model #
+#######################################
+
+# Create the matrix #
+Q_cytb <- fnJC(4)
+
+# Create the substitution model and clamp with our observed DNA data #
+phySeq ~ dnPhyloCTMC(tree=timetree, Q=Q_cytb, branchRates=branch_rates, type="DNA")
+phySeq.clamp(cytb)
+
+
+########
+# MCMC #
+########
+
+# initialize the model object #
+mymodel = model(timetree)
+
+# Create a vector of monitors #
+# 1. for the full model #
+monitors.append( mnModel(filename="output/bears_FBD.log", printgen=10) )
+
+# 2. the tree #
+monitors.append( mnFile(filename="output/bears_FBD_all.trees", printgen=10, timetree) )
+monitors.append( mnFile(filename="output/bears_FBD_extant.trees", printgen=10, pruned_tree) )
+
+# 3. and a few select parameters to be printed to the screen #
+monitors.append( mnScreen(printgen=100, origin_time) )
+
+# Initialize the MCMC object #
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="mixed")
+
+# Run the MCMC #
+mymcmc.run(generations=1000, tuningInterval=200)
+
+
+########################
+# Summarizing the tree #
+########################
+
+# Read the trace file #
+trace_extant = readTreeTrace("output/bears_FBD_extant.trees")
+trace = readTreeTrace("output/bears_FBD_all.trees")
+
+# Maximum clade credibility tree #
+#consensusTree(trace_extant, file="output/bears_FBD_extant.con.tre" )
+#consensusTree(trace, file="output/bears_FBD_all.con.tre" )
+
+# Maximum clade credibility tree #
+mapTree(trace_extant, file="output/bears_FBD_extant.mapc.tre" )
+mapTree(trace, file="output/bears_FBD_all.map.tre" )
+
+# Maximum clade credibility tree #
+mccTree(trace_extant, file="output/bears_FBD_extant.mcc.tre" )
+mccTree(trace, file="output/bears_FBD_all.mcc.tre" )
+
+# Quit RevBayes #
+q()

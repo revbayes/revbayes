@@ -61,8 +61,6 @@ namespace RevBayesCore {
     
 }
 
-#include "Assign.h"
-#include "Assignable.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
@@ -255,10 +253,13 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void
     
     TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
     selected_base_dist->redrawValue();
-    (*this->value) = selected_base_dist->getValue();
-    
-    //    Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), simulate() );
-    
+    if constexpr (std::is_base_of_v<Cloneable, mixtureType>)
+    {
+	delete this->value;
+	this->value = selected_base_dist->getValue().clone();
+    }
+    else
+	(*this->value) = selected_base_dist->getValue();
 }
 
 

@@ -1,6 +1,5 @@
 #include "GeneralRateMatrix.h"
 
-#include "Assignable.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
 #include "RbException.h"
@@ -22,19 +21,6 @@ GeneralRateMatrix::GeneralRateMatrix(size_t n, bool rto) : AbstractRateMatrix(n)
 GeneralRateMatrix::~GeneralRateMatrix(void)
 {
     // nothing to do
-}
-
-GeneralRateMatrix& GeneralRateMatrix::assign(const Assignable &m)
-{
-    const GeneralRateMatrix *rm = dynamic_cast<const GeneralRateMatrix*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
 }
 
 double GeneralRateMatrix::averageRate(void) const

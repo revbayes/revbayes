@@ -202,7 +202,7 @@ void Mcmc::checkpoint( void ) const
 {
     // initialize variables
     std::string separator = "\t";
-    bool flatten = true;
+    bool flatten = false;
     
     createDirectoryForFile( checkpoint_file_name );
     

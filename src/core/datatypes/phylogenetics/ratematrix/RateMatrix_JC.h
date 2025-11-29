@@ -37,7 +37,6 @@ class Assignable;
         virtual                             ~RateMatrix_JC(void);                                                                                                   //!< Destructor
         
         // RateMatrix functions
-        virtual RateMatrix_JC&              assign(const Assignable &m);                                                                                            //!< Assign operation that can be called on a base class instance.
         void                                calculateStationaryFrequencies(void);                                                                                   //!< Calculate the stationary frequencies for the rate matrix
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;    //!< Calculate the transition matrix
         RateMatrix_JC*                      clone(void) const;

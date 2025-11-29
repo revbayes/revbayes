@@ -52,8 +52,13 @@ class TypeSpec;
 
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
 
-
     private:
+
+	template <typename Dist>
+	RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >*      setDistParameters(Dist*) const;
+
+	int                                             computeNumberOfStates() const;
+
 
         RevPtr<const RevVariable>                       tree;
         RevPtr<const RevVariable>                       q;
