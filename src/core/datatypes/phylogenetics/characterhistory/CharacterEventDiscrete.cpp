@@ -51,12 +51,12 @@ bool CharacterEventDiscrete::isValidState(size_t s) const
     {
         return true;
     }
-    
+
     if ( ambiguous_state.size() > s && ambiguous_state.size() > 0 )
     {
         return ambiguous_state.test( s );
     }
-    
+
     return s == state;
 }
 
@@ -71,4 +71,3 @@ void CharacterEventDiscrete::setState(size_t s)
 {
     state = s;
 }
-

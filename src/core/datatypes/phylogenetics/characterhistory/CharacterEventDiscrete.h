@@ -9,7 +9,7 @@
 #include "RbBitSet.h"
 
 namespace RevBayesCore {
-    
+
     class CharacterEventDiscrete : public CharacterEvent
     {
 
@@ -29,7 +29,6 @@ namespace RevBayesCore {
 
 
     private:
-
         size_t                              state;                                             // from statespace -- possibly make a set of state/positions...
         RbBitSet                            ambiguous_state;
 

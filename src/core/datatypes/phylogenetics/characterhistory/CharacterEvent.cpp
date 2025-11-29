@@ -5,13 +5,9 @@
 using namespace RevBayesCore;
 
 
-CharacterEvent::CharacterEvent(void) :
-    site_index(0),
-    age(0),
-    event_type( CharacterEventType::UNDEFINED ),
-    missing( false )
+CharacterEvent::CharacterEvent(void)
 {
-    
+
 }
 
 CharacterEvent::CharacterEvent(size_t ch_ind, double a, size_t t) :
@@ -20,12 +16,12 @@ CharacterEvent::CharacterEvent(size_t ch_ind, double a, size_t t) :
     event_type(t),
     missing( false )
 {
-    
+
 }
 
 CharacterEvent::~CharacterEvent(void)
 {
-    
+
 }
 
 bool CharacterEvent::operator<(const CharacterEvent& rhs) const
@@ -82,4 +78,3 @@ void CharacterEvent::print(void) const
 {
     std::cout << site_index << " " << getStateStr() << " " << age << "\n";
 }
-

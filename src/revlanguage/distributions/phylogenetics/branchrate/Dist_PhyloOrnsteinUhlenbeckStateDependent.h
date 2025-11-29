@@ -26,13 +26,13 @@
 
 namespace RevLanguage {
 class TypeSpec;
-    
+
     class Dist_PhyloOrnsteinUhlenbeckStateDependent :  public TypedDistribution< ContinuousCharacterData > {
-        
+
     public:
         Dist_PhyloOrnsteinUhlenbeckStateDependent( void );
         virtual ~Dist_PhyloOrnsteinUhlenbeckStateDependent();
-        
+
         // Basic utility functions
         Dist_PhyloOrnsteinUhlenbeckStateDependent*      clone(void) const;                                                                      //!< Clone the object
         static const std::string&                       getClassType(void);                                                                     //!< Get Rev type
@@ -42,32 +42,30 @@ class TypeSpec;
         const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
         void                                            printValue(std::ostream& o) const;                                                      //!< Print the general information on the function ('usage')
-        
-        
+
+
         // Distribution functions you have to override
         RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >*      createDistribution(void) const;
-        
+
     protected:
-        
+
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-        
-        
+
+
     private:
-        
+
         RevPtr<const RevVariable>                       alpha;
         RevPtr<const RevVariable>                       theta;
         RevPtr<const RevVariable>                       sigma;
         RevPtr<const RevVariable>                       root_state;
         RevPtr<const RevVariable>                       root_treatment;
-        RevPtr<const RevVariable>                       obs_err_treatment;
         RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
-        
-        
+
+
     };
-    
+
 }
 
 
 #endif
-
