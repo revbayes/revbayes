@@ -1,6 +1,6 @@
 #include <cmath>
 #include <sstream> // IWYU pragma: keep
-#include <boost/math/distributions/geometric.hpp>
+#include <boost/random/geometric_distribution.hpp>
 
 #include "DistributionBeta.h"
 #include "DistributionBinomial.h"
@@ -183,7 +183,6 @@ std::int64_t RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGen
         throw RbException() << "Sampling geometric random variable: invalid success probability p = " << p;
     }
     
-    boost::math::geometric_distribution<> geom(p);
-    return static_cast<std::int64_t>( boost::math::quantile( geom, rng.uniform01() ) );
+    return boost::random::geometric_distribution<std::int64_t>(p)(rng.getGenerator());
 }
 
