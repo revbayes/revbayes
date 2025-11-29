@@ -10,6 +10,7 @@
 #include "RlBoolean.h"
 #include "ContinuousStochasticNode.h"
 #include "Move_SliceSampling.h"
+#include "Natural.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -71,6 +72,7 @@ void Move_SliceSampling::constructInternalObject( void )
     // now allocate a new sliding move
     double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
     double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t delay_  = static_cast<const Natural &>( delay->getRevObject() ).getValue();
 
     boost::optional<double> lower_bound_;
     boost::optional<double> upper_bound_;
@@ -99,7 +101,7 @@ void Move_SliceSampling::constructInternalObject( void )
 
     // finally create the internal move object
 
-    value = new RevBayesCore::SliceSamplingMove(node_ , lower_bound_, upper_bound_, window_, weight_ , search_method__, tune_);
+    value = new RevBayesCore::SliceSamplingMove(node_ , lower_bound_, upper_bound_, window_, search_method__, weight_, delay_, tune_);
 }
 
 
