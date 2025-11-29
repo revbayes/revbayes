@@ -390,6 +390,8 @@ double RevBayesCore::RootRejectionSampleProposal<charType>::getProposalTuningPar
 template<class charType>
 void RevBayesCore::RootRejectionSampleProposal<charType>::prepareProposal( void )
 {
+    numCharacters = ctmc->getValue().getNumberOfCharacters();
+
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     if ( p == NULL )
     {
@@ -399,7 +401,7 @@ void RevBayesCore::RootRejectionSampleProposal<charType>::prepareProposal( void 
     storedLnProb = 0.0;
     proposedLnProb = 0.0;
 
-    // sample a node from the tree that is not a tip node
+    // sample the root node from the tree
     const Tree& tree = p->getTree();
     std::vector<TopologyNode*> nds = tree.getNodes();
     node = NULL;
@@ -483,10 +485,6 @@ template<class charType>
 void RevBayesCore::RootRejectionSampleProposal<charType>::sampleNodeCharacters( void )
 {
     if ( node->isTip()  )
-    {
-        return;
-    }
-    if ( !node->isRoot()  )
     {
         return;
     }
