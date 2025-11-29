@@ -174,9 +174,8 @@ monitors.append( mnFile(filename="output/bears_FBD_ex3_extant.trees", printgen=1
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="mixed")
 
 # Run the MCMC #
-mymcmc.run(generations=10, tuningInterval=200)
+mymcmc.run(generations=1000, tuningInterval=200)
 
-q()
 
 ########################
 # Summarizing the tree #
