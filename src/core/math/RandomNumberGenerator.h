@@ -21,7 +21,7 @@ namespace RevBayesCore {
     private:
         
         double                                      last_u;
-        boost::uniform_01<boost::mt19937>           zeroone;
+        boost::mt19937                              rng;
         unsigned int seed;
 
     };
