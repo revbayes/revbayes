@@ -1348,13 +1348,21 @@ a substitution model that describes how observations evolve over the tree, etc.
 Markov chain_.
 
 The likelihood of observed character state vectors (specified via clamping the
-distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed 
+distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed
 using Felsenstein's pruning algorithm, with partial likelihoods stored for each
 branch of the tree. It is automatically outputted in the `Likelihood` column of
 the `mnFile()` and `mnScreen()` monitors (which can be suppressed with
 `likelihood = FALSE`).
 
-For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on 
+Optionally, an observation error model can be applied to 
+account for scoring ambiguity (e.g., in morphological datasets). 
+This distinguishes between the true biological state and the recorded score.
+When `observationErrorProbability` (epsilon) is > 0, the tip likelihoods
+are initialized as a mixture: with probability (1 - epsilon), the score 
+is accurate; with probability epsilon, the score is drawn from the 
+distribution defined by `observationErrorFrequencies`
+
+For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on
 [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model.)");
 	help_strings[string("dnPhyloCTMC")][string("example")] = string(R"(# Read character data from a file
 chars <- readDiscreteCharacterData("myData.nex")
@@ -3149,7 +3157,29 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
+	help_strings[string("mvFNPR")][string("description")] = string(R"(Tree topology move that prunes and re-attaches a subtree without changing any
+node heights.)");
+	help_strings[string("mvFNPR")][string("details")] = string(R"(`mvFNPR` randomly picks node i which is neither a tip nor the root, and prunes
+the subtree originating with this node. It then picks another node j such that
+j is younger than i but the parent of j is older than i, and re-attaches the
+pruned subtree onto the branch above j. Because the node height of i is fixed
+rather than re-adjusted, the FNPR move represents a special case of the fully
+general time tree version of the subtree prune and regraft (SPR) move. This
+fully general version is also known as the Wilson-Balding move. `mvFNPR` often
+exhibits higher acceptance rates than the Wilson-Balding move.)");
+	help_strings[string("mvFNPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+height ~ dnUniform(0, 10)
+moves = VectorMoves()
+
+# Simulate a simple TimeTree
+tree ~ dnBDP(lambda=1.0, mu=0.2, rootAge=height, taxa=taxa)
+
+# Assign it a mvFNPR move
+moves.append( mvFNPR(tree, weight=taxa.size()) ))");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
+	help_references[string("mvFNPR")].push_back(RbHelpReference(R"(Höhna S, Defoin-Platel M, Drummond AJ (2008). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. 1--7 in 8th IEEE International Conference on BioInformatics and BioEngineering (BIBE 2008). Athens, Greece, October 2008.)",R"(10.1109/BIBE.2008.4696663)",R"(https://alexeidrummond.org/assets/publications/2008-hoehna-clock-bibe.pdf )"));
+	help_arrays[string("mvFNPR")][string("see_also")].push_back(string(R"(mvSPR)"));
+	help_strings[string("mvFNPR")][string("title")] = string(R"(Fixed Node-height Prune and Regraft (FNPR) move.)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("details")] = string(R"(This sliding move uses the possible minimum and maximum ages as reflection boundaries.
@@ -3520,10 +3550,17 @@ moves.append( mvScaleBactrian(speciation_rate, weight=5) ))");
 	help_strings[string("mvScaleBactrianCauchy")][string("name")] = string(R"(mvScaleBactrianCauchy)");
 	help_strings[string("mvShrinkExpand")][string("name")] = string(R"(mvShrinkExpand)");
 	help_strings[string("mvShrinkExpandScale")][string("name")] = string(R"(mvShrinkExpandScale)");
-	help_strings[string("mvSlice")][string("description")] = string(R"(Instead of using a fixed move size, `mvSlice` determines the size of a move proposal based on the current shape of the likelihood function.
-This allows small moves to be proposed in certain parts of parameter space,
-and large moves in other parts of the space, as appropriate.)");
-	help_strings[string("mvSlice")][string("name")] = string(R"(Slice move)");
+	help_strings[string("mvSlice")][string("description")] = string(R"(`mvSlice` proposes a new value for a variable based on the current shape of its likelihood function.)");
+	help_strings[string("mvSlice")][string("details")] = string(R"(A slice proposal uses the shape of the current likelihood distribution of a variable to propose a new value.
+First, a likelihood value is drawn uniformly in order to define a horizontal 'slice' through the likelihood distribution.
+Then, a new value is drawn uniformly from those values that lie within this slice.
+
+This allows parameter space to be traversed more efficiently than a random walk.
+A practical outcome of the implementation is that small moves are proposed in certain parts of parameter space, and large moves in other parts of the space, as appropriate.
+
+A detailed explanation with figures is provided in Neal (2003).)");
+	help_strings[string("mvSlice")][string("name")] = string(R"(mvSlice)");
+	help_references[string("mvSlice")].push_back(RbHelpReference(R"(Slice sampling. Neal (2003). Ann. Statist. 31(3): 705-767    )",R"(10.1214/aos/1056562461)",R"(https://projecteuclid.org/journals/annals-of-statistics/volume-31/issue-3/Slice-sampling/10.1214/aos/1056562461.full )"));
 	help_arrays[string("mvSlice")][string("see_also")].push_back(string(R"(`mvSlide` and `mvScale` are possible alternatives where a fixed move size is desired.)"));
 	help_strings[string("mvSlice")][string("title")] = string(R"(Propose a slice move)");
 	help_strings[string("mvSlide")][string("description")] = string(R"(Proposes additive updates to continuous parameters.)");
@@ -5136,17 +5173,22 @@ for specifying how to separate values in the RevObject (default is "").)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
-Filename is specified using the `fn` argument.)");
+Filename is specified using the `filename` argument.)");
 	help_strings[string("writeFasta")][string("example")] = string(R"(# let's make up some taxa
 taxa = v("horse", "whale", "unicorn", "narwhal")
+
 # convert these to the taxon datatype
 for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+
 # simulate a tree
 tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+
 # we also need a molecular substitution model
 molecular_model := fnJC(4)
+
 # together these form a continuous time Markov chain over the tree
 full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+
 # this will print a FASTA file with a simulated molecular matrix
 # to the working directory
 writeFasta(filename="test.fasta", full_model))");
@@ -5154,25 +5196,59 @@ writeFasta(filename="test.fasta", full_model))");
 	help_references[string("writeFasta")].push_back(RbHelpReference(R"(Pearson, William R., and David J. Lipman. "Improved tools for biological sequence comparison." Proceedings of the National Academy of Sciences 85.8 (1988): 2444-2448. )",R"()",R"()"));
 	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"()",R"(https://www.pnas.org/content/85/8/2444.short )"));
 	help_references[string("writeFasta")].push_back(RbHelpReference(R"()",R"(https://doi.org/10.1073/pnas.85.8.2444 )",R"()"));
-	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(`writeNexus`, `writeCharacterDataDelimited`)"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(writeCharacterDataDelimited)"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(writeNexus)"));
+	help_arrays[string("writeFasta")][string("see_also")].push_back(string(R"(writePhylip)"));
 	help_strings[string("writeFasta")][string("title")] = string(R"(FASTA file writing function)");
-	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a nexus file.)");
-	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename  to write to and this must be a string.
-The second argument is a data object that must be some character matrix. 
-This data matrix could be a morphological matrix, a molecular matrix, or a tree.)");
+	help_strings[string("writeNexus")][string("description")] = string(R"(Function for writing a Nexus file.)");
+	help_strings[string("writeNexus")][string("details")] = string(R"(The first argument is the filename to write to; this must be a string.
+The second argument is a data object that could be a morphological matrix,
+a molecular alignment, or a tree.)");
 	help_strings[string("writeNexus")][string("example")] = string(R"(# let's make up some taxa
 taxa = v("horse", "whale", "unicorn", "narwhal")
+
 # simulate a tree
 tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+
 # we also need a molecular substitution model
 molecular_model := fnJC(4)
+
 # together these form a continuous time Markov chain over the tree
 full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+
 # this will print a Nexus file with a simulated molecular matrix
 # to the working directory
 writeNexus(filename="test.nex", full_model))");
 	help_strings[string("writeNexus")][string("name")] = string(R"(writeNexus)");
 	help_references[string("writeNexus")].push_back(RbHelpReference(R"(Maddison DR, Swofford DL, Maddison WP (1997). Nexus: An extensible file format for systematic information. Systematic Biology, 46(4):590--621.)",R"(10.1093/sysbio/46.4.590)",R"(https://academic.oup.com/sysbio/article/46/4/590/1629695 )"));
-	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(`writeFasta`, `writeCharacterDataDelimited`, `write`)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(writeCharacterDataDelimited)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_arrays[string("writeNexus")][string("see_also")].push_back(string(R"(writeNexus)"));
 	help_strings[string("writeNexus")][string("title")] = string(R"(Nexus file writer)");
+	help_strings[string("writePhylip")][string("description")] = string(R"(This function writes out a phylip formatted file given
+data of class `AbstractHomologousDiscreteCharacterData`.
+Filename is specified using the `filename` argument.)");
+	help_strings[string("writePhylip")][string("example")] = string(R"(# let's make up some taxa
+taxa = v("horse", "whale", "unicorn", "narwhal")
+
+# convert these to the taxon datatype
+for(i in 1:4) { taxa[i] = taxon(taxa[i]) }
+
+# simulate a tree
+tau ~ dnUniformTimeTree(rootAge=1, taxa=taxa)
+
+# we also need a molecular substitution model
+molecular_model := fnJC(4)
+
+# together these form a continuous time Markov chain over the tree
+full_model ~ dnPhyloCTMC(tree=tau, Q=molecular_model, nSites = 100, type="DNA")
+
+# this will print a Phylip file with a simulated molecular matrix
+# to the working directory
+writePhylip(filename="test.phy", full_model))");
+	help_strings[string("writePhylip")][string("name")] = string(R"(writePhylip)");
+	help_arrays[string("writePhylip")][string("see_also")].push_back(string(R"(writeCharacterDataDelimited)"));
+	help_arrays[string("writePhylip")][string("see_also")].push_back(string(R"(writeFasta)"));
+	help_arrays[string("writePhylip")][string("see_also")].push_back(string(R"(writeNexus)"));
+	help_strings[string("writePhylip")][string("title")] = string(R"(Phylip file writing function)");
 }
