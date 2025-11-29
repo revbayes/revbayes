@@ -1,7 +1,7 @@
 #ifndef Dist_phyloCTMCDASequence_H
 #define Dist_phyloCTMCDASequence_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

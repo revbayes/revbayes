@@ -1,0 +1,8 @@
+y1 ~ dnNormal(1,2)
+y2 ~ dnNormal(0,1)*2 + 1
+y1.clamp(-1)
+y1.lnProbability()
+y2.clamp(-1)
+y2.lnProbability()
+
+q()

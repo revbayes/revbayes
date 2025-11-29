@@ -42,6 +42,7 @@ namespace RevLanguage {
         
         // Getters and setters
         RevBayesCore::TypedDagNode<rbType>*     getDagNode(void) const;                                                     //!< Get the internal DAG node
+        bool                                    hasDagNode(void) const;                                                     //!< Get the internal DAG node
         virtual const rbType&                   getValue(void) const;                                                       //!< Get the value (const)
         virtual rbType&                         getValue(void);                                                             //!< Get the value (non-const)
         void                                    setValue(rbType *x);                                                        //!< Set new constant value
@@ -247,8 +248,13 @@ const RevLanguage::TypeSpec& RevLanguage::ModelObject<rbType>::getClassTypeSpec(
 template <typename rbType>
 RevBayesCore::TypedDagNode<rbType>* RevLanguage::ModelObject<rbType>::getDagNode( void ) const
 {
-    
     return dag_node;
+}
+
+template <typename rbType>
+bool RevLanguage::ModelObject<rbType>::hasDagNode( void ) const
+{
+    return (dag_node != nullptr);
 }
 
 template <typename rbType>

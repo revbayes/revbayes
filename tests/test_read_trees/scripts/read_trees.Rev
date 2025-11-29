@@ -1,2 +1,11 @@
-trees = readTreeTrace("data/trees1.trees")
+trees_from_file = readTreeTrace("data/trees1.trees")
+print(filename = "output/Test_read_trees.txt", append = FALSE, trees_from_file.size())
+print(filename = "output/Test_read_trees.txt", append = TRUE, "\n")
+
+# See https://github.com/revbayes/revbayes/issues/734
+trees_from_text = readTrees(text="(a,(b,c));\n(d:0.1,(e:0.1,f:0.1):0.1);")
+print(filename = "output/Test_read_trees.txt", append = TRUE, trees_from_text.size())
+trees_from_text[1]
+trees_from_text[2]
+
 q()

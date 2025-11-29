@@ -17,12 +17,12 @@ namespace RevLanguage {
         DistributionMemberFunction*                                     clone(void) const;                              //!< Clone the object
         static const std::string&                                       getClassType(void);                             //!< Get class name
         static const TypeSpec&                                          getClassTypeSpec(void);                         //!< Get class type spec
-        std::string                                                     getFunctionName(void) const;                                //!< Get the primary name of the function in Rev
+        std::string                                                     getFunctionName(void) const;                    //!< Get the primary name of the function in Rev
         const TypeSpec&                                                 getTypeSpec(void) const;                        //!< Get language type of the object
         
         // Regular functions
         RevBayesCore::TypedFunction< typename retType::valueType>*      createFunction(void) const;                     //!< Execute function
-        void                                                            setMemberObject(const RevPtr<RevVariable> &obj);   //!< Set the member object to which this function belongs
+        void                                                            setMemberObject(const RevPtr<RevVariable> &obj);//!< Set the member object to which this function belongs
         const ArgumentRules&                                            getArgumentRules(void) const;                   //!< Get argument rules
         void                                                            setMethodName(const std::string& name);         //!< Set name of member method
         
@@ -30,7 +30,7 @@ namespace RevLanguage {
     private:
         
         const ArgumentRules*                                            argument_rules;                                  //!< Argument rules (different for different member functions)
-        std::string                                                     funcName;                                       //!< Name of member method
+        std::string                                                     func_name;                                       //!< Name of member method
         RevPtr<RevVariable>                                             object;
         const typename distributionType::rlValueType*                   the_member_object;
         bool                                                            force_updates;
@@ -49,7 +49,7 @@ namespace RevLanguage {
 template <typename distributionType, typename retType>
 RevLanguage::DistributionMemberFunction<distributionType, retType>::DistributionMemberFunction( const std::string &n, const typename distributionType::rlValueType *o, ArgumentRules* ar, bool f ) : TypedFunction<retType>(  ),
     argument_rules( ar ),
-    funcName( n ),
+    func_name( n ),
     object( NULL ),
     the_member_object( o ),
     force_updates( f )
@@ -76,10 +76,10 @@ template <typename distributionType, typename retType>
 RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::DistributionMemberFunction<distributionType, retType>::createFunction( void ) const
 {
     
-    std::vector<const RevBayesCore::DagNode*> argNodes;
+    std::vector<const RevBayesCore::DagNode*> arg_nodes;
     for ( size_t i=0; i<this->args.size(); ++i)
     {
-        argNodes.push_back( this->args[i].getVariable()->getRevObject().getDagNode() );
+        arg_nodes.push_back( this->args[i].getVariable()->getRevObject().getDagNode() );
     }
     
     const RevBayesCore::TypedDagNode<typename distributionType::rbValueType>* tmp = the_member_object->getDagNode();
@@ -89,7 +89,7 @@ RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Distrib
         throw RbException("Could not cast the member object.");
     }
     
-    RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType> *func = new RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType>(this->funcName, o, argNodes);
+    RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType> *func = new RevBayesCore::DistributionMemberFunction<typename distributionType::rbValueType, typename retType::valueType>(this->func_name, o, arg_nodes);
     func->setForceUpdates( force_updates );
     
     return func;
@@ -133,7 +133,7 @@ template <typename distributionType, typename retType>
 std::string RevLanguage::DistributionMemberFunction<distributionType, retType>::getFunctionName( void ) const
 {
     
-    return funcName;
+    return func_name;
 }
 
 
@@ -148,11 +148,13 @@ const RevLanguage::TypeSpec& RevLanguage::DistributionMemberFunction<distributio
 
 
 template <typename distributionType, typename retType>
-void RevLanguage::DistributionMemberFunction<distributionType, retType>::setMemberObject( const RevPtr<RevVariable> &obj) {
+void RevLanguage::DistributionMemberFunction<distributionType, retType>::setMemberObject( const RevPtr<RevVariable> &obj)
+{
     
     // we do not own the object itself because one object can have multiple member functions
     object = obj;
     the_member_object = static_cast< const typename distributionType::rlValueType *>( &(obj->getRevObject()) );
+    
 }
 
 

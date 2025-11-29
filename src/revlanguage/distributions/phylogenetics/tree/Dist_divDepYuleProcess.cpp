@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -80,7 +80,7 @@ RevBayesCore::DiversityDependentPureBirthProcess* Dist_divDepYuleProcess::create
     // speciation rate
     RevBayesCore::TypedDagNode<double>* s       = static_cast<const RealPos &>( initialLambda->getRevObject() ).getDagNode();
     // extinction rate
-    RevBayesCore::TypedDagNode<long>* k          = static_cast<const Natural &>( capacity->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* k          = static_cast<const Natural &>( capacity->getRevObject() ).getDagNode();
     // condition
     const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
     // taxon names

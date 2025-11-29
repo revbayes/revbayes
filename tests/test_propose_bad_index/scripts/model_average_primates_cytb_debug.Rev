@@ -1,0 +1,137 @@
+################################################################################
+#
+# RevBayes Example: Bayesian model averaging using reversible-jump MCMC over
+#            substitution models on a single gene.
+#
+# authors: Sebastian Hoehna and Mike May
+#
+################################################################################
+
+
+seed(0)
+
+####################
+# Read in the data #
+####################
+
+setOption("debugMCMC", 1)
+setOption("logMCMC", 3)
+        
+this_gene = "primates_and_galeopterus_cytb"
+
+data = readDiscreteCharacterData("data/" + this_gene + ".nex")
+
+# get some useful information about the data
+taxa = data.taxa()
+num_taxa = data.ntaxa()
+num_branches = 2 * num_taxa - 3
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+# name the analysis
+name = this_gene + "_" + "RJ"
+
+#########################################
+# Define the prior on the tree topology #
+#########################################
+
+# We assume a uniform prior on topology.
+topology ~ dnUniformTopology(taxa)
+moves.append( mvNNI(topology, weight=num_taxa/2.0) )
+moves.append( mvSPR(topology, weight=num_taxa/10.0) )
+
+##########################################
+# Define the prior on the branch lengths #
+##########################################
+
+for(i in 1:num_branches){
+  br_lens[i] ~ dnExponential(10.0)
+  moves.append( mvScale(br_lens[i], weight=1.0) )
+}
+TL := sum(br_lens)
+
+################################################
+# Combine the tree topology and branch lengths #
+################################################
+
+phylogeny := treeAssembly(topology, br_lens)
+
+############################################
+# Define the substitution model parameters #
+############################################
+
+kappa ~ dnExp(1)
+moves.append( mvScale(kappa, weight=5.0) )
+
+pi ~ dnDirichlet(v(1,1,1,1))
+moves.append( mvBetaSimplex(pi, weight=5.0) )
+
+er ~ dnDirichlet(v(1,1,1,1,1,1))
+moves.append( mvBetaSimplex(er, weight=5.0) )
+
+Q_JC  <- fnJC(4)
+Q_K80 := fnK80(kappa)
+Q_F81 := fnF81(pi)
+Q_HKY := fnHKY(kappa, pi)
+Q_GTR := fnGTR(er, pi)
+
+Q_vec := v(Q_JC, Q_K80, Q_F81, Q_HKY, Q_GTR)
+
+model_indicator ~ dnCategorical(simplex(1,1,1,1,1))
+moves.append( mvRandomGeometricWalk(model_indicator, weight=10.0, tune=FALSE) )
+
+Q := Q_vec[model_indicator]
+
+
+# Alternative approch
+#Q ~ dnMixture( values=Q_vec, probabilities=simplex(rep(1,Q_vec.size())) )
+#model_indicator := Q.getAllocationIndex()
+#
+#moves.append( mvGibbsMixtureAllocation(Q, weight=2.0)
+
+#################################################
+# Define the model of among-site rate variation #
+#################################################
+
+alpha ~ dnReversibleJumpMixture(1E8, dnUniform(0,1E8), 0.5)
+moves.append( mvRJSwitch(alpha, weight=10.0) )
+moves.append( mvScale(alpha, weight=10.0) )
+
+alpha_indicator := ifelse(alpha == 1E8, 0, 1)
+
+site_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+#################################
+# Define the phyloCTMC model    #
+# (AKA the likelihood function) #
+#################################
+
+seq ~ dnPhyloCTMC(tree=phylogeny, Q=Q, type="DNA", siteRates=site_rates)
+seq.clamp(data) # attach the observed data
+
+#########################
+# Make the model object #
+#########################
+
+my_model = model(phylogeny)
+
+my_model.graph("model.dot")
+
+#####################
+# Make the monitors #
+#####################
+
+monitors.append( mnModel(filename="output/" + name + "_posterior_samples_debug.log",printgen=1, separator = TAB) )
+monitors.append( mnFile(filename="output/" + name + "_tree_samples_debug.trees",printgen=1, separator = TAB, phylogeny) )
+
+################
+# Run the MCMC #
+################
+
+mymcmc = mcmc(my_model, moves, monitors)
+mymcmc.run(generations=5)
+
+# exit the program
+q()

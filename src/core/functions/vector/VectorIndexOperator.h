@@ -32,8 +32,8 @@ namespace RevBayesCore {
     class VectorIndexOperator : public TypedFunction<valueType> {
         
     public:
-        VectorIndexOperator(const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long>* idx);
-        VectorIndexOperator(const TypedDagNode< Simplex >* v, const TypedDagNode<long>* idx);
+        VectorIndexOperator(const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<std::int64_t>* idx);
+        VectorIndexOperator(const TypedDagNode< Simplex >* v, const TypedDagNode<std::int64_t>* idx);
         virtual                                            ~VectorIndexOperator(void);                                              //!< Virtual destructor
         
         // public member functions
@@ -46,38 +46,18 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode<long>*                           index;
+        const TypedDagNode<std::int64_t>*                           index;
         const TypedDagNode<RbVector<valueType> >*           value_vector;
         const TypedDagNode< Simplex >*                      value_simplex;
 
     };
-
-
-    template<>
-    inline void                                                    VectorIndexOperator<double>::update( void )
-    {
-
-        const RbVector<double> &v = (value_vector != NULL ? value_vector->getValue() : value_simplex->getValue());
-        size_t idx = size_t(index->getValue());
-
-        if ( idx < 1 || idx > v.size() )
-        {
-            std::stringstream ss_err;
-            ss_err << "Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
-            throw RbException(ss_err.str());
-        }
-
-        delete this->value;
-        this->value = new double( v[idx - 1] );
-    }
-   
 }
 
 
 #include "RbException.h"
 
 template <class valueType>
-RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ),
+RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< RbVector<valueType> >* v, const TypedDagNode<std::int64_t> *idx) : TypedFunction<valueType>( NULL ),
     index( idx ),
     value_vector( v ),
     value_simplex( NULL )
@@ -91,7 +71,7 @@ RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDa
 
 
 template <class valueType>
-RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< Simplex >* v, const TypedDagNode<long> *idx) : TypedFunction<valueType>( NULL ),
+RevBayesCore::VectorIndexOperator<valueType>::VectorIndexOperator( const TypedDagNode< Simplex >* v, const TypedDagNode<std::int64_t> *idx) : TypedFunction<valueType>( NULL ),
     index( idx ),
     value_vector( NULL ),
     value_simplex( v )
@@ -123,19 +103,25 @@ RevBayesCore::VectorIndexOperator<valueType>* RevBayesCore::VectorIndexOperator<
 template <class valueType>
 void RevBayesCore::VectorIndexOperator<valueType>::update( void )
 {
+    const RbVector<valueType> *v;
 
-    const RbVector<valueType> &v = value_vector->getValue();
-    size_t idx = size_t(index->getValue());
+    // If valueType is double, then the vector node might be `value_simplex` instead of `value_vector`.
+    if constexpr (std::is_same_v<valueType,double>)
+        v = (value_vector != NULL ? &value_vector->getValue() : &value_simplex->getValue());
+    else
+        v = &value_vector->getValue();
 
-    if ( idx < 1 || idx > v.size() )
+    auto idx = index->getValue();
+
+    if ( idx < 1 || idx > v->size() )
     {
-        std::stringstream ss_err;
-        ss_err << "Index out of bounds: The vector of size " << v.size() << " does not have an element for index " << idx << ".";
-        throw RbException(ss_err.str());
+        // This is a MATH_ERROR to avoid stopping MCMC when we propose an out-of-range index during MCMC.
+        auto err = RbException(RbException::MATH_ERROR)<<"Index out of bounds: The vector of size " << v->size() << " does not have an element for index " << idx << ".";
+        throw err;
     }
 
     delete this->value;
-    this->value = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( v[idx - 1] );
+    this->value = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is >::createClone( (*v)[idx - 1] );
 }
 
 
@@ -153,7 +139,7 @@ void RevBayesCore::VectorIndexOperator<valueType>::swapParameterInternal(const D
     }
     else if (oldP == index)
     {
-        index = static_cast<const TypedDagNode<long>* >( newP );
+        index = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }

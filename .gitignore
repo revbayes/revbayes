@@ -3,7 +3,7 @@ src/generated_include_dirs.cmake
 src/*/CMakeLists.txt
 
 # ----------------------------------------------
-build/
+/build
 projects/cmake/*
 !projects/cmake/README.txt
 !projects/cmake/*.sh
@@ -11,6 +11,7 @@ projects/cmake/*
 
 # ----------------------------------------------
 tests/*/output/
+tests/revbayes.github.io
 
 
 # ----------------------------------------------

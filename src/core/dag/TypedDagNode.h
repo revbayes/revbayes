@@ -49,7 +49,7 @@ namespace RevBayesCore {
     // createTraceObject //
     ///////////////////////
     template<>
-    AbstractTrace*                                          TypedDagNode<long>::createTraceObject(void) const;
+    AbstractTrace*                                          TypedDagNode<std::int64_t>::createTraceObject(void) const;
 
     template<>
     AbstractTrace*                                          TypedDagNode<double>::createTraceObject(void) const;
@@ -68,13 +68,13 @@ namespace RevBayesCore {
     // isSimpleNumeric //
     /////////////////////
     template<>
-    bool                                                    TypedDagNode<long>::isSimpleNumeric(void) const;
+    bool                                                    TypedDagNode<std::int64_t>::isSimpleNumeric(void) const;
     
     template<>
     bool                                                    TypedDagNode<double>::isSimpleNumeric(void) const;
 
     template<>
-    bool                                                    TypedDagNode<RbVector<long> >::isSimpleNumeric(void) const;
+    bool                                                    TypedDagNode<RbVector<std::int64_t> >::isSimpleNumeric(void) const;
     
     template<>
     bool                                                    TypedDagNode<RbVector<double> >::isSimpleNumeric(void) const;
@@ -91,7 +91,7 @@ namespace RevBayesCore {
     void TypedDagNode<double>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool simple, bool flatten) const;
 
     template<>
-    void TypedDagNode<long>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
+    void TypedDagNode<std::int64_t>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
     
     template<>
     void TypedDagNode<unsigned int>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
@@ -123,7 +123,7 @@ RevBayesCore::TypedDagNode<valueType>::~TypedDagNode( void )
 template<class valueType>
 RevBayesCore::AbstractTrace* RevBayesCore::TypedDagNode<valueType>::createTraceObject(void) const
 {
-    throw RbException("Cannot create a trace for variable '" + this->getName() + "' because there are not trace objects implemented for this value type.");
+    throw RbException() << "Cannot create a trace for variable '" << this->getName() << "' because there are not trace objects implemented for this value type.";
     
     return NULL;
 }

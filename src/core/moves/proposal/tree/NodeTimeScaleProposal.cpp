@@ -2,11 +2,13 @@
 #include <cmath>
 #include <iostream>
 
+#include "DebugMove.h"
 #include "DistributionUniform.h"
 #include "NodeTimeScaleProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
@@ -88,19 +90,26 @@ double NodeTimeScaleProposal::getProposalTuningParameter( void ) const
  */
 double NodeTimeScaleProposal::doProposal( void )
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     
-    // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    // get random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = variable->getValue();
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
-    TopologyNode* node;
-    do {
-        double u = rng->uniform01();
-        size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() );
+    // pick a random node which is not the root, a tip, or the parent of a sampled ancestor
+    TopologyNode* node = tau.pickRandomInternalNode(rng);
+    if (node == NULL)
+    {
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvNodeTimeScale has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
+        
+        storedNode = nullptr;
+        return RbConstants::Double::neginf;
+    }
     
     TopologyNode& parent = node->getParent();
     
@@ -174,10 +183,10 @@ void NodeTimeScaleProposal::printParameterSummary(std::ostream &o, bool name_onl
  */
 void NodeTimeScaleProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     variable->getValue().getNode( storedNode->getIndex() ).setAge( storedAge );
-    
 }
 
 

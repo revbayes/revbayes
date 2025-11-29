@@ -31,7 +31,7 @@ RevBayesCore::TypedFunction< double >* Func__simplexIndexOperator::createFunctio
 {
     
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* v = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* index = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* index = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::VectorIndexOperator<double> *func = new RevBayesCore::VectorIndexOperator<double>(v, index);
     
     return func;

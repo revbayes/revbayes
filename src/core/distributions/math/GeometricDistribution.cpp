@@ -16,7 +16,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-GeometricDistribution::GeometricDistribution(const TypedDagNode<double> *q) : TypedDistribution<long>( new long( 1 ) ),
+GeometricDistribution::GeometricDistribution(const TypedDagNode<double> *q) : TypedDistribution<std::int64_t>( new std::int64_t( 1 ) ),
     p( q )
 {
     // add the parameters to our set (in the base class)
@@ -45,10 +45,10 @@ GeometricDistribution* GeometricDistribution::clone( void ) const
 double GeometricDistribution::computeLnProbability( void ) 
 {
     
-    long v = *value;
+    std::int64_t v = *value;
     
     // check that the value is inside the boundaries
-    if ( v < 0.0 )
+    if ( v < 0 )
     {
         return RbConstants::Double::neginf;
     }

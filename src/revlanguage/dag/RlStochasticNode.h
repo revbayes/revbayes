@@ -286,12 +286,19 @@ void RevLanguage::StochasticNode<valueType>::printStructureInfo( std::ostream& o
     o << "_distribution = " << rlDistribution->getRevDeclaration() << std::endl;
     o << "_clamped      = " << ( this->clamped ? "TRUE" : "FALSE" ) << std::endl;
     o << "_lnProb       = " << const_cast< StochasticNode<valueType>* >( this )->getLnProbability() << std::endl;    
-    if ( this->touched == true && verbose == true)
-    {
-        o << "_stored_ln_prob = " << this->stored_ln_prob << std::endl; // const_cast< StochasticNode<valueType>* >( this )->getLnProbability() << std::endl;
-    }
 
-    
+    if ( verbose == true)
+    {
+        o << "_stored_ln_prob = ";
+        if (not this->stored_ln_prob)
+            o<< "EMPTY";
+        else if (not *this->stored_ln_prob)
+            o<< "UNCOMPUTED";
+        else
+            o<<**this->stored_ln_prob;
+
+        o<< std::endl;
+    }
     o << "_parents      = ";
     this->printParents( o, 16, 70, verbose );
     o << std::endl;

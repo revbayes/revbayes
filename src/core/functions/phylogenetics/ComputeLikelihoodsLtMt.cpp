@@ -157,7 +157,7 @@ MatrixReal RevBayesCore::ComputeLnProbabilityDensitiesOBDP(  const double &start
                                                              const std::vector<double> &omega,
                                                              const TypedDagNode<double> *rho,
                                                              const std::vector<double> &removalPr,
-                                                             const TypedDagNode<long> *maxHiddenLin,
+                                                             const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                              const std::string &cond,
                                                              const std::vector<double> &time_points,
                                                              bool useMt,
@@ -215,7 +215,7 @@ double RevBayesCore::ComputeLnLikelihoodOBDP(    const double &start_age,
                                                  const std::vector<double> &omega,
                                                  const TypedDagNode<double> *rho,
                                                  const std::vector<double> &removalPr,
-                                                 const TypedDagNode<long> *maxHiddenLin,
+                                                 const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                  const std::string &cond,
                                                  bool useMt,
                                                  bool verbose,
@@ -313,7 +313,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
                                                 const std::vector<double> &omega,
                                                 const TypedDagNode<double> *rho,
                                                 const std::vector<double> &removalPr,
-                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                 const std::string& cond,
                                                 const std::vector<double> &time_points,
                                                 bool returnLogLikelihood,
@@ -341,7 +341,7 @@ MatrixReal RevBayesCore::ForwardsTraversalMt(   const double &start_age,
     const std::vector<double> om    = omega;
     const std::vector<double> rp    = removalPr;
     const double rh                 = rho->getValue();
-    const long N                    = maxHiddenLin->getValue();
+    const std::int64_t N                    = maxHiddenLin->getValue();
     const RbVector<double> tau      = time_points;
     const size_t S                  = tau.size();
     const std::vector<double> gamma = birth + death + ps + om;
@@ -567,7 +567,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
                                                 const std::vector<double> &omega,
                                                 const TypedDagNode<double> *rho,
                                                 const std::vector<double> &removalPr,
-                                                const TypedDagNode<long> *maxHiddenLin,
+                                                const TypedDagNode<std::int64_t> *maxHiddenLin,
                                                 const std::string& cond,
                                                 const std::vector<double> &time_points,
                                                 bool verbose,
@@ -594,7 +594,7 @@ MatrixReal RevBayesCore::BackwardsTraversalLt(  const double &start_age,
     const std::vector<double> rp    = removalPr;
     const double rh                 = rho->getValue();
     const RbVector<double> tau      = time_points;
-    const long N                    = maxHiddenLin->getValue();
+    const std::int64_t N                    = maxHiddenLin->getValue();
     const size_t S                  = tau.size();
 
     const std::vector<double> gamma = birth + death + ps + om;
@@ -986,7 +986,7 @@ unsigned RevBayesCore::nChoosek( unsigned n, unsigned k )
 
 unsigned RevBayesCore::factorial( unsigned n )
 {
-    unsigned long long res = 1;
+    std::uint64_t res = 1;
     for(int i = 1; i<=n ; i++){
         res *= i;
     }

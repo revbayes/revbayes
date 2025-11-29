@@ -1,0 +1,111 @@
+################################################################################
+#
+# RevBayes Validation Test: negative clade constraints are respected
+#
+#
+# authors: Levi Raskin and David Cerny
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Read in sequence data
+seqDat <- readDiscreteCharacterData("data/strepsipteraFAM000008.faRN_cleaned")
+
+## helpers
+n_taxa <- seqDat.size()
+taxa <- seqDat.taxa()
+num_branches <- 2 * n_taxa -3
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+## phylogenetic model
+sf_hp <- rep(1, 20)
+sf ~ dnDirichlet(sf_hp)
+
+# Then the exchangeability rates #
+er_hp <- rep(1, 190)
+er ~ dnDirichlet(er_hp)
+
+moves.append( mvBetaSimplex(sf, weight=2.0) )
+moves.append( mvDirichletSimplex(sf, weight=1.0) )
+
+moves.append( mvBetaSimplex(er, weight=3.0) )
+moves.append( mvDirichletSimplex(er, weight=1.5) )
+
+# Create the matrix #
+Q := fnGTR(er,sf)
+
+# Create a discretized gamma distribution of rate categories  #
+# the shape parameter is drawn from an exponential prior #
+alpha ~ dnExponential( 1.0 )
+
+moves.append( mvScale(alpha, lambda=0.01, weight=1.0) )
+moves.append( mvScale(alpha, lambda=0.1,  weight=1.0) )
+moves.append( mvScale(alpha, lambda=1,    weight=1.0) )
+
+rates := fnDiscretizeGamma( alpha, alpha, 4 )
+
+### Set up clade constraints:
+paraneopteraList = v("Anoplura", "Aphidiformes", "Neohemiptera")
+coleopteraList = v("Archostemata", "PogonusNCBI", "Ripiphoridae")
+strepsipteraList = v("Mengenilla", "Mengenillidia", "Xenos")
+
+### Make Coleoptera+Strepsiptera monophyletic but Coleoptera non-monophyletic
+strepsipteraTaxa = clade(strepsipteraList)
+coleopteraTaxa = clade(coleopteraList)
+coleopteraTaxaN = clade(coleopteraList, negative = TRUE)
+strepColeop = clade(strepsipteraTaxa, coleopteraTaxa)
+
+c = v(coleopteraTaxaN, strepColeop)
+phylogeny ~ dnUniformTopology(taxa, outgroup=clade(paraneopteraList), constraints=c)
+
+moves.append(mvNNI(phylogeny, weight=num_branches/2.0))
+moves.append(mvSPR(phylogeny, weight=num_branches/10.0))
+moves.append(mvBranchLengthScale(phylogeny, weight=num_branches))
+
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(10.0)
+    moves.append( mvScale(bl[i]) )
+}
+
+TL := sum(bl)
+
+psi := treeAssembly(phylogeny, bl)
+
+### Create the substitution model and clamp with our observed DNA data ###
+phySeq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=rates, type="AA")
+phySeq.clamp(seqDat)
+
+
+########
+# MCMC #
+########
+
+# initialize the model object #
+mymodel = model(psi)
+
+# Create a vector of monitors #
+# 1. for the full model #
+monitors.append( mnModel(filename="output/strepColeop.log", printgen=1) )
+
+# 2. the tree #
+monitors.append( mnFile(filename= "output/strepColeop.trees", printgen=1, psi) )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=100)
+
+trace = readTreeTrace("output/strepColeop.trees",burnin=0)
+
+for (i in 1:trace.size()) {
+    if ( trace.getTree(i).containsClade(coleopteraTaxa) ) {
+        print("Something went wrong!")
+    }
+}
+
+clear()
+q()

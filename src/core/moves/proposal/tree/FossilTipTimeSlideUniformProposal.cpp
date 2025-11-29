@@ -40,12 +40,10 @@ FossilTipTimeSlideUniformProposal::FossilTipTimeSlideUniformProposal( Stochastic
     if ( tip_taxon == "" )
     {
         use_index = false;
-        node_index = -1;
     }
     else
     {
         use_index = true;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
     }
     
 }
@@ -114,7 +112,17 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    if ( use_index == false )
+    // We shouldn't have to do this -- it should be enough to, say, invalidate the node_index in the constructor, check that
+    // use_index is true AND node_index is invalidated in the prepareProposal() function, and then let that function compute
+    // the node_index if (and only if) both conditions are met. However, this is not enough to prevent mismatches between the
+    // node_index and tree->getValue().getTipIndex( tip_taxon ) later on. Recomputing the former every time we perform the
+    // proposal is the only reliable way to get rid of this problem, so we just do that and eat the extra computational cost.
+    if ( use_index )
+    {
+        // Always recompute node_index
+        node_index = tree->getValue().getTipIndex( tip_taxon );
+    }
+    else
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
@@ -138,21 +146,21 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
         node_index = tips[ size_t( std::floor(tips.size() * u) ) ];
     }
     
-    TopologyNode* node = &tau.getNode(node_index);
+    TopologyNode& node = tau.getNode(node_index);
 
-    TopologyNode& parent = node->getParent();
+    TopologyNode& parent = node.getParent();
 
     // we need to work with the times
     double parent_age   = parent.getAge();
-    double my_age       = node->getAge();    
+    double my_age       = node.getAge();    
     double min_age      = 0;
-    double max_age      = parent_age;
+    double max_age;
     
     // adjust min and max age, either given taxon data or given provided ages
     if ( min == NULL )
     {
         // adjust min age given taxon data
-        Taxon& taxon = node->getTaxon();
+        Taxon& taxon = node.getTaxon();
         min_age = taxon.getMinAge();
     }
     else
@@ -163,27 +171,21 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     if ( max == NULL )
     {
         // adjust max age given taxon data
-        Taxon& taxon = node->getTaxon();
+        Taxon& taxon = node.getTaxon();
         double taxon_max_age = taxon.getMaxAge();
-        if ( taxon_max_age < max_age )
-        {
-            max_age = taxon_max_age;
-        }
+        max_age = taxon_max_age;
     }
     else
     {
         // adjust max age given provided variable
         double provided_max_age = max->getValue();
-        if ( provided_max_age < max_age )
-        {
-            max_age = provided_max_age;
-        }
+        max_age = provided_max_age;
     }
 
-    if ( node->isSampledAncestorTip() == true )
+    if ( node.isSampledAncestorTip() == true )
     {
         TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == node )
+        if ( sibling == &node )
         {
             sibling = &parent.getChild( 1 );
         }
@@ -212,12 +214,15 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
             // set the max age either to the boundary or the parent max age
             max_age = fmin(max_age, grandparent_age);
         }
+    } else {
+        max_age = fmin(max_age, parent_age);
     }
     
     // now we store all necessary values
     stored_age = my_age;
     
     double size = max_age - min_age;
+    assert(size >= 0); //otherwise the while will hang forever
     
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );
@@ -241,7 +246,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     } while ( new_age < min_age || new_age > max_age );
     
     // set the age
-    node->setAge( new_age );
+    node.setAge( new_age );
     
     
     // this is a symmetric proposal so the hasting ratio is 0.0

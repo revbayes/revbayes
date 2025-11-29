@@ -26,7 +26,7 @@ template <class valueType> class TypedDagNode;
      *
      */
 
-    class CategoricalDistribution : public TypedDistribution<long> {
+    class CategoricalDistribution : public TypedDistribution<std::int64_t> {
         
     public:
         CategoricalDistribution(const TypedDagNode< Simplex >* p);

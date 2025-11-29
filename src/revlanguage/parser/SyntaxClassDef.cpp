@@ -75,7 +75,7 @@ SyntaxElement* SyntaxClassDef::clone() const
 
 
 /** Get semantic value: insert a user-defined class in the user workspace */
-RevPtr<RevVariable> SyntaxClassDef::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxClassDef::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     throw RbException( "Sorry, user-defined classes not implemented yet" );
 

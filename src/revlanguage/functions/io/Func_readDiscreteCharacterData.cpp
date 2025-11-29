@@ -191,7 +191,7 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
                     else
                     {
                         --num_matrices_read_for_this_file;
-                        throw RbException("Unknown data type \"" + data_type + "\".");
+                        throw RbException() << "Unknown data type \"" << data_type << "\".";
                     }
                 
                 }
@@ -219,7 +219,7 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
                     else
                     {
                         num_matrices_read_for_this_file--;
-                        throw RbException("Unknown data type \"" + data_type + "\".");
+                        throw RbException() << "Unknown data type \"" << data_type << "\".";
                     }
                     
                 }
