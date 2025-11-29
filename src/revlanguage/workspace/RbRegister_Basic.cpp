@@ -433,6 +433,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func__scalarVectorAdd<RealPos     , ModelVector<RealPos>             , ModelVector<RealPos>               >(  )   );
 
         // division
+        addFunction( new Func__div< Natural                            , RealPos               , RealPos                   >(  )  );
         addFunction( new Func__div< RealPos                            , Natural               , RealPos                   >(  )  );
         addFunction( new Func__div< Real                               , Integer               , Real                      >(  )  );
         addFunction( new Func__div< Real                               , Real                  , Real                      >(  )  );

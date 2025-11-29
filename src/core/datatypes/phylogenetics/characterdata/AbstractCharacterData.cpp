@@ -557,7 +557,8 @@ const AbstractTaxonData& AbstractCharacterData::getTaxonData( const std::string 
  *
  * \return     A non-const reference to the taxon data object with name tn.
  */
-AbstractTaxonData& AbstractCharacterData::getTaxonData( const std::string &tn ) {
+AbstractTaxonData& AbstractCharacterData::getTaxonData( const std::string &tn ) 
+{
     
     if ( tn == "" )
     {

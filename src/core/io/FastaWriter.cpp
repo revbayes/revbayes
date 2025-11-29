@@ -74,12 +74,12 @@ void FastaWriter::writeData(const path& file_name, const AbstractHomologousDiscr
  * \param[in]   fileName    The name of the file into which the objects is to be written.
  * \param[in]   data        The character data object which is written out.
  */
-void FastaWriter::writeData(const path& fileName, const AbstractNonHomologousDiscreteCharacterData& data)
+void FastaWriter::writeData(const path& file_name, const AbstractNonHomologousDiscreteCharacterData& data)
 {
-    createDirectoryForFile( fileName );
-
+    createDirectoryForFile( file_name );
+    
     // the filestream object
-    std::fstream out_stream( fileName.string() );
+    std::ofstream out_stream( file_name.string() );
     
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)

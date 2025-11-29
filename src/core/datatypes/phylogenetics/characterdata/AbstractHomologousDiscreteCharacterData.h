@@ -5,13 +5,13 @@
 #include <vector>
 #include <iosfwd>
 
+#include "AbstractDiscreteTaxonData.h"
 #include "DistanceMatrix.h"
 #include "HomologousCharacterData.h"
 #include "MatrixReal.h"
 
 namespace RevBayesCore {
 class AbstractCharacterData;
-class AbstractDiscreteTaxonData;
 class AbstractTaxonData;
 class DiscreteCharacterState;
     

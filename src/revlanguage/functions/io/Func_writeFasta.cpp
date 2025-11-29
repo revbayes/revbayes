@@ -6,6 +6,7 @@
 #include "Func_writeFasta.h"
 #include "RevNullObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "RlAbstractNonHomologousDiscreteCharacterData.h"
 #include "RlString.h"
 #include "FastaWriter.h"
 #include "Argument.h"
@@ -48,10 +49,22 @@ RevPtr<RevVariable> Func_writeFasta::execute( void )
     
     // get the information from the arguments for reading the file
     const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = static_cast< const AbstractHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
-    
-    RevBayesCore::FastaWriter fw;
-    fw.writeData(fn.getValue(), data);
+    if ( args[1].getVariable()->getRevObject().isType( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() ) ) 
+    {
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = static_cast< const AbstractHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+        
+        RevBayesCore::FastaWriter fw;
+        fw.writeData(fn.getValue(), data);
+
+    }
+    else
+    {
+        const RevBayesCore::AbstractNonHomologousDiscreteCharacterData &data = static_cast< const AbstractNonHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+        
+        RevBayesCore::FastaWriter fw;
+        fw.writeData(fn.getValue(), data);
+
+    }
     
     return NULL;
 }
@@ -74,8 +87,12 @@ const ArgumentRules& Func_writeFasta::getArgumentRules( void ) const
     
     if (!rules_set) 
     {
+        
         argumentRules.push_back( new ArgumentRule( "filename", RlString::getClassTypeSpec(), "The name of the file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "data"    , AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The character data object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        std::vector<TypeSpec> data_types;
+        data_types.push_back( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() );
+        data_types.push_back( AbstractNonHomologousDiscreteCharacterData::getClassTypeSpec() );
+        argumentRules.push_back( new ArgumentRule( "data"    , data_types , "The character data object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         rules_set = true;
     }
     

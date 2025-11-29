@@ -650,8 +650,9 @@ NonHomologousDiscreteCharacterData<DnaState>* NclReader::createUnalignedDnaMatri
         StringUtilities::stringSplit(tName, "|", tokens);
         
         // allocate a vector of DNA states
-        DiscreteTaxonData<DnaState> dataVec = DiscreteTaxonData<DnaState>(tokens[0]);
-        
+//        DiscreteTaxonData<DnaState> dataVec = DiscreteTaxonData<DnaState>(tokens[0]);
+        DiscreteTaxonData<DnaState> dataVec = DiscreteTaxonData<DnaState>(tName);
+
         // add the sequence information for the sequence associated with the taxon
         std::string rowDataAsString = charblock->GetMatrixRowAsStr(origTaxIndex);
         for (size_t i=0; i<rowDataAsString.size(); i++)
