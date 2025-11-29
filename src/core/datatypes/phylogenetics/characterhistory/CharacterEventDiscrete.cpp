@@ -13,8 +13,7 @@ CharacterEventDiscrete::CharacterEventDiscrete(void) : CharacterEvent()
 }
 
 CharacterEventDiscrete::CharacterEventDiscrete(size_t i, size_t s, double a, size_t t) : CharacterEvent(i,a,t),
-    state(s),
-    ambiguous_state()
+    state(s)
 {
 
 }
